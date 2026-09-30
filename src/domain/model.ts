@@ -1,3 +1,10 @@
+import {
+  occurrences,
+  defaultSchedule,
+  type Schedule,
+  type Frequency,
+} from "./schedule";
+import { stopClock, type TimeSession, type Absence } from "./workforce";
 export type Role = "jefe" | "encargado" | "empleado";
 export type Status = "Pendiente" | "En curso" | "Completada";
 export type Kind = "resultado" | "operativa";
@@ -39,6 +46,7 @@ export interface Template {
   description: string;
 }
 export interface Assignment {
+  retired?: boolean;
   id: string;
   templateId: string | null;
   title: string;
@@ -50,12 +58,16 @@ export interface Assignment {
   unit: string;
   target: number;
   day: number;
-  frequency: "mensual" | "única";
+  frequency: Frequency;
+  schedule?: Schedule;
   steps: string[];
   startMonth: string;
   priority: "Alta" | "Media" | "Baja";
 }
 export interface Task {
+  scheduledOn?: string;
+  sessions?: TimeSession[];
+  reopenCount?: number;
   id: string;
   assignmentId: string | null;
   title: string;
@@ -117,13 +129,23 @@ export interface Closure {
   note: string;
 }
 export interface Onboarding {
+  schedules?: Record<string, Schedule>;
+  customTasks?: {
+    id: string;
+    title: string;
+    steps: string;
+    kind: Kind;
+    unit: string;
+    target: number;
+  }[];
   version: number;
   step: number;
   completedAt: string | null;
   selectedCompanyIds: string[];
   selectedTemplateIds: string[];
   day: number;
-  frequency: "mensual" | "única";
+  frequency: Frequency;
+  schedule?: Schedule;
   home: "day" | "tasks";
   reminders: boolean;
   name: string;
@@ -133,6 +155,7 @@ export interface Onboarding {
 }
 export interface State {
   version: 3;
+  absences?: Absence[];
   companies: Company[];
   teams: Team[];
   profiles: Profile[];
@@ -190,7 +213,10 @@ export function transition(
       throw Error("Completá todos los pasos del checklist.");
   }
   return {
-    ...t,
+    ...(next !== "En curso" ? stopClock(t, at) : t),
+    reopenCount:
+      (t.reopenCount || 0) +
+      (t.status === "Completada" && next !== "Completada" ? 1 : 0),
     status: next,
     startedAt: next === "En curso" ? t.startedAt || at : t.startedAt,
     completedAt: next === "Completada" ? at : null,
@@ -228,7 +254,7 @@ export function metrics(
   const results = tasks.filter((t) => t.kind === "resultado");
   const done = results.filter((t) => t.status === "Completada");
   const ontime = done.filter(
-    (t) => t.completedAt && dateART(t.completedAt) <= t.due,
+    (t) => t.due && t.completedAt && dateART(t.completedAt) <= t.due,
   );
   const points = tasks.reduce((n, t) => n + t.weight, 0);
   const earned = tasks.reduce(
@@ -250,11 +276,12 @@ export function metrics(
     points,
     earned: Math.round(earned * 100) / 100,
     weighted: points ? Math.round((earned / points) * 100) : null,
-    onTime: done.length
-      ? Math.round((ontime.length / done.length) * 100)
+    onTime: done.filter((t) => t.due).length
+      ? Math.round((ontime.length / done.filter((t) => t.due).length) * 100)
       : null,
-    late: results.filter((t) => t.due < today && t.status !== "Completada")
-      .length,
+    late: results.filter(
+      (t) => t.due && t.due < today && t.status !== "Completada",
+    ).length,
     blocked: tasks.filter((t) => t.blockedBy).length,
     operational: tasks.filter((t) => t.kind === "operativa").length,
     operationalTarget: tasks.filter(
@@ -265,38 +292,57 @@ export function metrics(
 export function materialize(s: State, month: string): State {
   const tasks = [...s.tasks];
   for (const a of s.assignments) {
-    if (
-      month < a.startMonth ||
-      (a.frequency === "única" && month !== a.startMonth) ||
-      s.closures.some((c) => c.ownerId === a.ownerId && c.month === month)
-    )
-      continue;
-    if (tasks.some((t) => t.assignmentId === a.id && t.month === month))
+    if (a.retired) continue;
+    if (s.closures.some((c) => c.ownerId === a.ownerId && c.month === month))
       continue;
     const p = s.profiles.find((p) => p.id === a.ownerId);
     if (!p?.active) continue;
-    tasks.push({
-      id: id(),
-      assignmentId: a.id,
-      title: a.title,
-      ownerId: a.ownerId,
-      companyId: a.companyId,
-      teamId: p.teamId,
-      sector: a.sector,
-      month,
-      due: dueDate(month, a.day),
-      kind: a.kind,
-      weight: a.weight,
-      unit: a.unit,
-      target: a.target,
-      status: "Pendiente",
-      checklist: a.steps.map((text) => ({ id: id(), text, done: false })),
-      completedAt: null,
-      startedAt: null,
-      priority: a.priority,
-      blockedBy: "",
-      blockedSince: null,
-    });
+    const schedule = a.schedule || {
+      ...defaultSchedule(a.startMonth + "-01", a.frequency),
+      monthDay: a.day,
+      startDate:
+        a.frequency === "única"
+          ? dueDate(a.startMonth, a.day)
+          : a.startMonth + "-01",
+    };
+    for (const occurrence of occurrences(schedule, month)) {
+      if (
+        tasks.some(
+          (t) =>
+            t.assignmentId === a.id &&
+            (t.scheduledOn === occurrence.date ||
+              (!t.scheduledOn &&
+                t.month === month &&
+                ["mensual", "única"].includes(schedule.frequency))),
+        )
+      )
+        continue;
+      tasks.push({
+        id: id(),
+        assignmentId: a.id,
+        title: a.title,
+        ownerId: a.ownerId,
+        companyId: a.companyId,
+        teamId: p.teamId,
+        sector: a.sector,
+        month,
+        scheduledOn: occurrence.date,
+        due: occurrence.due,
+        kind: a.kind,
+        weight: a.weight,
+        unit: a.unit,
+        target: a.target,
+        status: "Pendiente",
+        checklist: a.steps.map((text) => ({ id: id(), text, done: false })),
+        completedAt: null,
+        startedAt: null,
+        priority: a.priority,
+        blockedBy: "",
+        blockedSince: null,
+        sessions: [],
+        reopenCount: 0,
+      });
+    }
   }
   return { ...s, tasks };
 }
@@ -323,6 +369,10 @@ export function closeMonth(
     (t) => t.ownerId === ownerId && t.month === month,
   );
   if (!tasks.length) throw Error("No hay tareas para cerrar.");
+  if (tasks.some((t) => t.sessions?.some((e) => !e.end)))
+    throw Error(
+      "Pausá los cronómetros activos de este empleado antes de cerrar.",
+    );
   const logs = s.activity.filter(
     (a) => tasks.some((t) => t.id === a.taskId) && a.date.startsWith(month),
   );

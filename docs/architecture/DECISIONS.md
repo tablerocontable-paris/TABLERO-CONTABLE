@@ -1,7 +1,7 @@
 # Decisiones de la nueva generación
 
-1. **Empresa obligatoria.** La identidad es la asignación + período, nunca el título ni el banco. Dos conciliaciones del mismo banco en distintas empresas son dos trabajos. Quitar el filtro sólo cambia la vista.
-2. **Definición e instancia separadas.** Una asignación define recurrencia y condiciones. Cada mes recibe una instancia con peso, meta, vencimiento y checklist propios; no se recicla una tarjeta completada ni se sobrescribe la historia.
+1. **Empresa obligatoria.** La identidad es la asignación + fecha de ocurrencia, nunca el título ni el banco. Dos conciliaciones del mismo banco en distintas empresas son dos trabajos. Quitar el filtro sólo cambia la vista.
+2. **Definición e instancia separadas.** Una asignación define recurrencia y condiciones. Cada ocurrencia diaria/semanal/mensual recibe una instancia con peso, meta, vencimiento y checklist propios; no se recicla una tarjeta completada ni se sobrescribe la historia.
 3. **Resultado y actividad son modelos distintos.** El entregable tiene estado y checklist. La operativa tiene registros fechados de cantidades y referencias. El cierre consolida el mes y no simula haber completado pendientes.
 4. **KPI explicable.** Resultado = peso si está completado; operativa = peso × mínimo(cantidad/meta, 1). Cumplimiento = puntos logrados / asignados. Sin datos se muestra ausencia de indicador. No se suman facturas y pagos como una sola cantidad. Puntualidad usa Argentina y sólo resultados completados.
 5. **Jerarquía y aislamiento en servidor.** Organización, membresías de empresa/equipo y perfil responsable definen acceso. RLS protege SELECT; RPC autorizadas realizan escrituras. El selector de perfiles publicado es sólo una simulación y nunca será el mecanismo de autenticación productivo.
@@ -14,3 +14,7 @@
 ## Límite de esta entrega
 
 El sitio publicado ejecuta React/TypeScript y persiste una demostración en el navegador. El SQL se verifica con PostgreSQL PGlite y roles emulados; no está conectado a la interfaz. Auth, invitaciones, MFA real, recuperación de cuenta, Storage y el adaptador de datos remoto aún deben integrarse y verificarse en un Supabase nuevo antes de incorporar empleados.
+
+## Ampliación 0.4
+
+La política vigente está en docs/PRODUCT-ROADMAP.md. Se reemplaza la recurrencia mensual única por programación explícita por fecha, con vencimiento opcional. Se agregan sesiones de cronómetro, ausencias/coberturas, cuenta técnica futura y laboratorio aislado. El contrato SQL 0.3 requiere actualización antes de conectar; no se aplicaron cambios a servicios remotos.

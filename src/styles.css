@@ -6,9 +6,13 @@
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
-  color: #25272b;
-  background: #f5f6f8;
+  color: var(--ink);
+  background: var(--background);
   font-synthesis: none;
+  --background: #f5f6f8;
+  --surface: #fff;
+  --surface-soft: #f0f2f5;
+  --chart-ink: #373a40;
   --ink: #202226;
   --muted: #737982;
   --line: #e4e6eb;
@@ -39,7 +43,7 @@ button {
   gap: 7px;
   cursor: pointer;
   border: 1px solid var(--line);
-  background: white;
+  background: var(--surface);
   border-radius: 7px;
   padding: 9px 12px;
   transition:
@@ -71,7 +75,7 @@ input,
 select,
 textarea {
   border: 1px solid #dcdfe5;
-  background: white;
+  background: var(--surface);
   border-radius: 7px;
   padding: 10px 12px;
   min-width: 0;
@@ -242,7 +246,7 @@ nav button.active:before {
   left: 0;
   height: 17px;
   width: 2px;
-  background: #fff;
+  background: var(--surface);
   border-radius: 2px;
 }
 nav button span {
@@ -366,7 +370,7 @@ header span {
   align-items: center;
   gap: 12px;
   padding: 14px 17px;
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 9px;
   margin-bottom: 25px;
@@ -413,7 +417,7 @@ header span {
 .stat,
 .panel {
   border: 1px solid var(--line);
-  background: white;
+  background: var(--surface);
   border-radius: 10px;
   box-shadow:
     0 3px 8px #1a233206,
@@ -552,7 +556,7 @@ header span {
 }
 .task-card {
   border: 1px solid #e0e4eb;
-  background: #fff;
+  background: var(--surface);
   border-radius: 9px;
   padding: 16px;
   box-shadow: 0 3px 7px #1b243208;
@@ -688,7 +692,7 @@ header span {
   align-items: center;
   gap: 10px;
   border: 1px solid var(--line);
-  background: white;
+  background: var(--surface);
   border-radius: 7px;
   padding: 0 12px;
   flex: 1;
@@ -717,7 +721,7 @@ header span {
   color: #7c8490;
 }
 .segmented button.selected {
-  background: white;
+  background: var(--surface);
   color: #333b48;
   box-shadow: 0 1px 4px #14213715;
 }
@@ -1187,7 +1191,7 @@ summary {
   bottom: 25px;
   left: 270px;
   width: 340px;
-  background: #fff;
+  background: var(--surface);
   padding: 23px;
   border: 1px solid #d1dae7;
   border-radius: 12px;
@@ -1380,7 +1384,7 @@ summary {
   padding: 18px;
   border: 1px solid #dfe5ed;
   border-radius: 8px;
-  background: white;
+  background: var(--surface);
   margin: 0;
   cursor: pointer;
 }
@@ -1404,7 +1408,7 @@ summary {
   flex-direction: row;
   gap: 13px;
   align-items: flex-start;
-  background: white;
+  background: var(--surface);
   border: 1px solid #e2e7ee;
   padding: 16px;
   border-radius: 8px;
@@ -1426,7 +1430,7 @@ summary {
   font-size: 10px;
 }
 .preview-list section {
-  background: white;
+  background: var(--surface);
   border: 1px solid #e2e7ef;
   border-radius: 9px;
   margin: 15px 0;
@@ -1772,4 +1776,273 @@ summary {
 }
 .induction-pause select {
   color: #111;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #111419;
+  --surface: #1b2028;
+  --surface-soft: #252c36;
+  --ink: #edf0f5;
+  --muted: #a9b2c0;
+  --line: #363e4b;
+  --chart-ink: #b8c5d9;
+  --green: #91d9b6;
+  --red: #eea39a;
+}
+[data-theme="dark"] header {
+  background: #171c24ed;
+}
+[data-theme="dark"] .stat {
+  background: linear-gradient(140deg, #1e252f, #191f28);
+}
+[data-theme="dark"]
+  :is(
+    .badge,
+    .note,
+    .notice-banner,
+    .reminder,
+    .track,
+    .segmented,
+    .context-facts,
+    .choice,
+    .catalog-option,
+    .detail-stats,
+    .table-wrap th,
+    .card-bottom .quick,
+    .company-chip,
+    .filter-summary
+  ) {
+  background: var(--surface-soft);
+  color: var(--ink);
+  border-color: var(--line);
+}
+[data-theme="dark"]
+  :is(
+    input,
+    textarea,
+    select,
+    dialog,
+    .filters,
+    .task-card,
+    .panel,
+    .tour-coach
+  ) {
+  color: var(--ink);
+  border-color: var(--line);
+  background: var(--surface);
+}
+[data-theme="dark"]
+  :is(
+    label,
+    .eyebrow,
+    .stat span,
+    header b,
+    .panel-head p,
+    .heading p,
+    .card-top b,
+    th
+  ) {
+  color: var(--muted);
+}
+[data-theme="dark"]
+  :is(
+    button:hover:not(:disabled),
+    .segmented .selected,
+    .choice.selected,
+    .catalog-option.selected
+  ) {
+  background: #303c4c;
+  color: #fff;
+}
+[data-theme="dark"] .primary {
+  background: #dce5f3;
+  color: #18202a;
+  border-color: #dce5f3;
+}
+[data-theme="dark"] .wait {
+  background: #3d3223;
+  color: #f2c57b;
+}
+[data-theme="dark"] .success {
+  background: #203b31;
+  color: #9dddba;
+}
+[data-theme="dark"] .induction-body {
+  background: var(--background);
+}
+[data-theme="dark"] .recharts-default-tooltip {
+  background: #202832 !important;
+  border-color: #536075 !important;
+  color: #fff;
+}
+[data-theme="dark"] .recharts-cartesian-axis-tick-value {
+  fill: #bec8d6;
+}
+[data-theme="dark"] .recharts-cartesian-grid line {
+  stroke: #414b58;
+}
+[data-theme="dark"] .recharts-legend-item-text {
+  color: #c9d0dc !important;
+}
+.theme-control {
+  font-size: 11px;
+  max-width: 122px;
+  padding: 6px 9px;
+}
+.weekday-picker {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.weekday-picker .selected {
+  background: var(--ink);
+  color: var(--surface);
+}
+.schedule-editor {
+  padding: 14px 0;
+}
+.occurrence-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 8px;
+}
+.occurrence-preview span {
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  font-size: 11px;
+}
+.schedule-task {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+  margin: 12px 0;
+}
+.schedule-task summary {
+  cursor: pointer;
+}
+.schedule-task summary small {
+  display: block;
+  margin-top: 5px;
+}
+.custom-task-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  padding: 10px;
+}
+.timer-mini {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+}
+.timer-mini button {
+  padding: 4px 7px;
+  font-size: 10px;
+}
+.timer-panel {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  padding: 18px;
+  border-radius: 10px;
+  margin: 18px 0;
+}
+.timer-panel strong {
+  display: block;
+  font-size: 32px;
+  letter-spacing: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.lab-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  background: #e9e2ff;
+  color: #3e2865;
+  border: 1px solid #b7a1e3;
+  padding: 14px 18px;
+  border-radius: 9px;
+  margin-bottom: 20px;
+}
+.lab-banner span {
+  flex: 1;
+  min-width: 180px;
+  font-size: 12px;
+}
+.lab-banner button {
+  background: #fff;
+  color: #3e2865;
+}
+.active-clock {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--surface-soft);
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin: 0 0 15px;
+  border: 1px solid var(--line);
+}
+@media (max-width: 600px) {
+  .timer-panel {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .theme-control {
+    max-width: 100px;
+  }
+  .header-right .version {
+    display: none;
+  }
+  .induction-top {
+    flex-wrap: wrap;
+  }
+  .panel-head {
+    flex-wrap: wrap;
+  }
+}
+
+[data-theme="dark"]
+  :is(
+    .insight,
+    .company-tag,
+    .quick,
+    .activity-history > div,
+    .preview-list section,
+    .reminder,
+    .catalog-option,
+    .context-facts,
+    .form-note
+  ) {
+  background: var(--surface-soft);
+  color: var(--muted);
+  border-color: var(--line);
+}
+[data-theme="dark"]
+  :is(
+    .panel-head,
+    td,
+    th,
+    .modal-head,
+    .org-person,
+    .preview-list section > div
+  ) {
+  border-color: var(--line);
+}
+[data-theme="dark"] .avatar {
+  background: #354152;
+  color: #e4ecf8;
 }

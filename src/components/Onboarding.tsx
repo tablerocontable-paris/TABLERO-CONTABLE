@@ -1,3 +1,11 @@
+import ScheduleEditor from "./ScheduleEditor";
+import ThemeControl from "./ThemeControl";
+import {
+  defaultSchedule,
+  occurrences,
+  describeSchedule,
+} from "../domain/schedule";
+import { id } from "../domain/model";
 import {
   ArrowRight,
   ArrowLeft,
@@ -10,6 +18,7 @@ import {
 import type { State, Profile, Onboarding as Draft } from "../domain/model";
 export default function Onboarding({
   state,
+  month,
   profile,
   draft,
   update,
@@ -17,6 +26,7 @@ export default function Onboarding({
   pause,
 }: {
   state: State;
+  month: string;
   profile: Profile;
   draft: Draft;
   update: (d: Draft) => void;
@@ -34,18 +44,44 @@ export default function Onboarding({
   const chosen = state.templates.filter((t) =>
     draft.selectedTemplateIds.includes(t.id),
   );
-  const count =
-    (chosen.length + (draft.customTitle.trim() ? 1 : 0)) *
-    draft.selectedCompanyIds.length;
+  const custom = [
+    ...(draft.customTasks || []),
+    ...(draft.customTitle.trim()
+      ? [
+          {
+            id: "custom",
+            title: draft.customTitle,
+            steps: draft.customSteps,
+            kind: "resultado" as const,
+            unit: "",
+            target: 0,
+          },
+        ]
+      : []),
+  ];
+  const all = [...chosen, ...custom];
+  const scheduleFor = (tid: string) =>
+    draft.schedules?.[tid] || defaultSchedule(month + "-25");
+  let validSchedules = true;
+  let count = 0;
+  for (const t of all) {
+    try {
+      count +=
+        occurrences(scheduleFor(t.id), month).length *
+        draft.selectedCompanyIds.length;
+    } catch {
+      validSchedules = false;
+    }
+  }
   const valid =
     draft.step === 0
       ? draft.name.trim().length > 1
       : draft.step === 1
         ? draft.selectedCompanyIds.length > 0
         : draft.step === 2
-          ? chosen.length > 0 || !!draft.customTitle.trim()
+          ? all.length > 0
           : draft.step === 3
-            ? draft.day >= 1 && draft.day <= 31
+            ? validSchedules
             : true;
   const patch = (v: Partial<Draft>) => update({ ...draft, ...v });
   return (
@@ -79,6 +115,7 @@ export default function Onboarding({
       <section className="induction-body">
         <div className="induction-top">
           <span>PASO {draft.step + 1} DE 6</span>
+          <ThemeControl />
           <button onClick={pause}>Guardar y continuar después</button>
         </div>
         <div className="induction-step" key={draft.step}>
@@ -231,42 +268,81 @@ export default function Onboarding({
                     onChange={(e) => patch({ customSteps: e.target.value })}
                   />
                 </label>
-                <p>Se propone con peso 1 para revisión del jefe.</p>
+                <p>Se propone con peso 1 para revisión de Juan Pablo.</p>
+                <button
+                  type="button"
+                  disabled={!draft.customTitle.trim()}
+                  onClick={() =>
+                    patch({
+                      customTasks: [
+                        ...(draft.customTasks || []),
+                        {
+                          id: id(),
+                          title: draft.customTitle.trim(),
+                          steps: draft.customSteps,
+                          kind: "resultado",
+                          unit: "",
+                          target: 0,
+                        },
+                      ],
+                      customTitle: "",
+                      customSteps: "",
+                    })
+                  }
+                >
+                  Agregar esta tarea y escribir otra
+                </button>
               </details>
+              {(draft.customTasks || []).map((t) => (
+                <div className="custom-task-row" key={t.id}>
+                  <b>{t.title}</b>
+                  <button
+                    onClick={() =>
+                      patch({
+                        customTasks: draft.customTasks!.filter(
+                          (x) => x.id !== t.id,
+                        ),
+                      })
+                    }
+                  >
+                    Quitar
+                  </button>
+                </div>
+              ))}
             </>
           ) : draft.step === 3 ? (
             <>
               <CalendarDays className="intro-icon" />
-              <h2>Dale un lugar en tu mes.</h2>
+              <h2>Cada tarea tiene su propio ritmo.</h2>
               <p>
-                Esta configuración inicial se aplica a las tareas seleccionadas.
-                Cada tarea conserva su propio checklist.
+                Indicá cuándo la hacés, si se repite y si tiene vencimiento. Una
+                tarea puntual no vuelve el mes siguiente.
               </p>
-              <label>
-                Frecuencia
-                <select
-                  value={draft.frequency}
-                  onChange={(e) =>
-                    patch({ frequency: e.target.value as Draft["frequency"] })
-                  }
+              {all.map((t) => (
+                <details
+                  className="schedule-task"
+                  key={t.id}
+                  open={all.length === 1 || undefined}
                 >
-                  <option value="mensual">Todos los meses</option>
-                  <option value="única">Sólo este mes</option>
-                </select>
-              </label>
-              <label>
-                Día de vencimiento
-                <input
-                  type="number"
-                  min="1"
-                  max="31"
-                  value={draft.day}
-                  onChange={(e) => patch({ day: Number(e.target.value) })}
-                />
-              </label>
+                  <summary>
+                    <b>{t.title}</b>
+                    <small>{describeSchedule(scheduleFor(t.id))}</small>
+                  </summary>
+                  <ScheduleEditor
+                    value={scheduleFor(t.id)}
+                    onChange={(schedule) =>
+                      patch({
+                        schedules: { ...draft.schedules, [t.id]: schedule },
+                      })
+                    }
+                    month={month}
+                  />
+                </details>
+              ))}
               <div className="note">
-                En meses más cortos, un vencimiento 31 se ajusta al último día.
-                Las operativas acumulan registros fechados dentro de cada mes.
+                El vencimiento se calcula desde cada nueva ocurrencia. El día 31
+                se ajusta al último día del mes. Un plazo de 2 días genera un
+                vencimiento dos días después de cada realización.
               </div>
             </>
           ) : draft.step === 4 ? (
@@ -316,31 +392,21 @@ export default function Onboarding({
                 {draft.selectedCompanyIds.map((cid) => (
                   <section key={cid}>
                     <h3>{state.companies.find((c) => c.id === cid)?.name}</h3>
-                    {chosen.map((t) => (
+                    {all.map((t) => (
                       <div key={t.id}>
                         <span>
                           {t.title}
-                          <small>
-                            {t.kind === "operativa"
-                              ? `${t.target} ${t.unit}`
-                              : t.steps.join(" → ")}
-                          </small>
+                          <small>{describeSchedule(scheduleFor(t.id))}</small>
                         </span>
-                        <b>{t.weight} pts</b>
+                        <b>{"weight" in t ? t.weight : 1} pts</b>
                       </div>
                     ))}
-                    {draft.customTitle && (
-                      <div>
-                        {draft.customTitle}
-                        <b>1 pt</b>
-                      </div>
-                    )}
                   </section>
                 ))}
               </div>
               <div className="note">
-                Frecuencia: {draft.frequency} · día {draft.day}. Al confirmar,
-                el tablero tendrá estas tareas y empezará el recorrido guiado.
+                Cada tarea conserva la frecuencia que elegiste. Al confirmar, el
+                tablero tendrá estas tareas y empezará el recorrido guiado.
               </div>
             </>
           )}

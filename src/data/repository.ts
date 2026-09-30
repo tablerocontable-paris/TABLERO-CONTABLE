@@ -14,7 +14,9 @@ export const blankOnboarding = (name = ""): Onboarding => ({
   selectedCompanyIds: ["c1"],
   selectedTemplateIds: [],
   day: 25,
-  frequency: "mensual",
+  frequency: "única",
+  schedules: {},
+  customTasks: [],
   home: "day",
   reminders: true,
   name,
@@ -34,13 +36,13 @@ export function seed(): State {
     profiles: [
       {
         id: "boss",
-        name: "Juan · Jefe de ejemplo",
+        name: "Juan Pablo",
         role: "jefe",
         managerId: null,
         teamId: "",
         sector: "Dirección contable",
         branch: "San Luis Capital",
-        position: "Jefe contable",
+        position: "Gerente contable",
         companyIds: ["c1", "c2", "c3", "c4"],
         active: true,
       },
@@ -272,8 +274,22 @@ const schema = z.object({
   activeId: z.string(),
   tour: z.record(z.string(), z.number()),
 });
-export function load(): State {
-  const raw = localStorage.getItem(KEY);
+export const isLab = () => localStorage.getItem("paris-environment") === "lab";
+export function enterLab(state: State) {
+  persist(state);
+  localStorage.setItem(
+    "paris-state-lab",
+    JSON.stringify({ ...structuredClone(state), activeId: "boss" }),
+  );
+  localStorage.setItem("paris-environment", "lab");
+  location.reload();
+}
+export function exitLab() {
+  localStorage.removeItem("paris-environment");
+  location.reload();
+}
+export function load(laboratory = isLab()): State {
+  const raw = localStorage.getItem(laboratory ? "paris-state-lab" : KEY);
   if (!raw) {
     const s = seed();
     const legacy = localStorage.getItem("paris-tasks-v1");
@@ -333,8 +349,15 @@ export function load(): State {
   }
   const parsed = JSON.parse(raw);
   schema.parse(parsed);
-  return parsed as State;
+  const state = parsed as State;
+  state.profiles = state.profiles.map((p) =>
+    p.id === "boss" && p.name === "Juan · Jefe de ejemplo"
+      ? { ...p, name: "Juan Pablo", position: "Gerente contable" }
+      : p,
+  );
+  state.absences ||= [];
+  return state;
 }
-export function persist(s: State) {
-  localStorage.setItem(KEY, JSON.stringify(s));
+export function persist(s: State, laboratory = false) {
+  localStorage.setItem(laboratory ? "paris-state-lab" : KEY, JSON.stringify(s));
 }

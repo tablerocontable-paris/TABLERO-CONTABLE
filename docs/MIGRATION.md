@@ -22,3 +22,7 @@
 7. Continuar por equipos y registrar fecha de corte. Conservar el histórico legacy como consulta; no importarlo automáticamente al período nuevo.
 
 No mover contraseñas manualmente ni reutilizar service_role en el navegador. La clave pública del proyecto es publicable; las claves administrativas quedan en el servidor.
+
+## Aclaración posterior del usuario — 30/09/2026
+
+La infraestructura se creará **cuando el producto esté validado**, no durante esta fase. Todo continúa en Sites. Cuenta dedicada propuesta: tablerocontable@gmail.com (sin crear/verificar). Nuevos GitHub, Supabase y hosting independiente del anterior. Juan Pablo administrará usuarios y parámetros; Valentino conservará su perfil de empleado y un acceso técnico separado para diagnóstico/pruebas. Ver PRODUCT-ROADMAP.md.

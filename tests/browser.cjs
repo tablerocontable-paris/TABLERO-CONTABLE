@@ -49,6 +49,33 @@ fs.mkdirSync(output, { recursive: true });
     await page.locator("h1").waitFor();
     await page.screenshot({ path: output + "/overview.png", fullPage: true });
     console.log("overview", await page.locator("h1").innerText());
+    await page.getByLabel("Apariencia").selectOption("dark");
+    if (
+      (await page.evaluate(() => document.documentElement.dataset.theme)) !==
+      "dark"
+    )
+      throw Error("dark theme");
+    await page.waitForFunction(
+      () =>
+        getComputedStyle(document.querySelector(".heading .primary"))
+          .backgroundColor === "rgb(220, 229, 243)",
+    );
+    await page.screenshot({
+      animations: "disabled",
+      path: output + "/dark-overview.png",
+      fullPage: false,
+    });
+    await page.getByLabel("Apariencia").selectOption("system");
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.waitForFunction(
+      () => document.documentElement.dataset.theme === "light",
+    );
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.waitForFunction(
+      () => document.documentElement.dataset.theme === "dark",
+    );
+    await page.getByLabel("Apariencia").selectOption("light");
+
     await page.locator('[data-nav="team"]').click();
     await page.getByRole("button", { name: "Alta de demostración" }).click();
     await page.locator('input[name="name"]').fill("Empleado QA");
@@ -174,6 +201,124 @@ fs.mkdirSync(output, { recursive: true });
     await page.getByRole("button", { name: "Limpiar filtros" }).click();
     await page.locator('[data-nav="analytics"]').click();
     await page.screenshot({ path: output + "/analytics.png", fullPage: true });
+
+    await page.getByLabel("Período", { exact: true }).fill("2026-10");
+    await page
+      .getByRole("button", { name: "Nueva tarea", exact: true })
+      .click();
+    await page.locator('input[name="title"]').fill("E2E semanal");
+    await page.locator('select[name="company"]').selectOption("c1");
+    await page.locator('select[name="owner"]').selectOption("e0");
+    await page.getByLabel("Frecuencia de la tarea").selectOption("semanal");
+    await page
+      .getByLabel("Fecha de realización", { exact: true })
+      .fill("2026-10-05");
+    await page.getByLabel(/Plazo desde cada/).fill("2");
+    await page
+      .getByRole("button", { name: "Crear tarea", exact: true })
+      .click();
+    let recurring = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem("paris-state-v3")).tasks.filter(
+        (t) => t.title === "E2E semanal",
+      ),
+    );
+    if (recurring.length !== 4 || recurring[0].due !== "2026-10-07")
+      throw Error("weekly actual dates");
+    await page
+      .getByRole("button", { name: "Nueva tarea", exact: true })
+      .click();
+    await page.locator('input[name="title"]').fill("E2E puntual");
+    await page.locator('select[name="company"]').selectOption("c1");
+    await page.locator('select[name="owner"]').selectOption("e0");
+    await page.getByLabel("Tiene vencimiento").uncheck();
+    await page
+      .getByRole("button", { name: "Crear tarea", exact: true })
+      .click();
+    await page.getByLabel("Período", { exact: true }).fill("2026-11");
+    await page.waitForFunction(() =>
+      JSON.parse(localStorage.getItem("paris-state-v3")).tasks.some(
+        (t) => t.title === "E2E semanal" && t.month === "2026-11",
+      ),
+    );
+    stored = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem("paris-state-v3")),
+    );
+    if (
+      stored.tasks.some(
+        (t) => t.title === "E2E puntual" && t.month === "2026-11",
+      )
+    )
+      throw Error("one-off repeated");
+    if (
+      stored.tasks.filter(
+        (t) => t.title === "E2E semanal" && t.month === "2026-11",
+      ).length !== 5
+    )
+      throw Error("november weekly instances");
+    await page.getByLabel("Período", { exact: true }).fill("2026-10");
+    await page.locator('[data-nav="tasks"]').click();
+    const timedCard = page
+      .locator(".task-card")
+      .filter({ hasText: "E2E semanal" })
+      .first();
+    await timedCard.getByRole("button", { name: /Iniciar E2E/ }).click();
+    await page.reload();
+    stored = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem("paris-state-v3")),
+    );
+    let timing = stored.tasks.find(
+      (t) => t.title === "E2E semanal" && t.sessions?.some((e) => !e.end),
+    );
+    if (!timing) throw Error("timer persistence");
+    await page
+      .locator(".active-clock")
+      .getByRole("button", { name: "Pausar cronómetro" })
+      .click();
+    stored = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem("paris-state-v3")),
+    );
+    if (stored.tasks.some((t) => t.sessions?.some((e) => !e.end)))
+      throw Error("pause did not stop timer");
+    await page.locator('[data-nav="absences"]').click();
+    await page.getByRole("button", { name: "Registrar ausencia" }).click();
+    await page.getByLabel("Persona ausente").selectOption("e0");
+    await page.getByLabel("Quién cubre").selectOption("e1");
+    await page.getByLabel("Traspaso operativo").fill("Cobertura E2E");
+    await page
+      .getByRole("button", { name: "Guardar ausencia", exact: true })
+      .click();
+    await page.getByRole("row").filter({ hasText: "Cobertura E2E" }).waitFor();
+    await page.screenshot({ path: output + "/absence.png", fullPage: false });
+    const mainBefore = await page.evaluate(() =>
+      localStorage.getItem("paris-state-v3"),
+    );
+    await page
+      .getByRole("button", { name: "Laboratorio de pruebas", exact: true })
+      .click();
+    await page.locator(".lab-banner").waitFor();
+    await page
+      .getByRole("button", { name: "Nueva tarea", exact: true })
+      .click();
+    await page.locator('input[name="title"]').fill("SOLAMENTE LABORATORIO");
+    await page.locator('select[name="company"]').selectOption("c1");
+    await page
+      .getByRole("button", { name: "Crear tarea", exact: true })
+      .click();
+    if (
+      (await page.evaluate(() => localStorage.getItem("paris-state-v3"))) !==
+      mainBefore
+    )
+      throw Error("lab changed main data");
+    await page.screenshot({ path: output + "/lab.png", fullPage: false });
+    await page
+      .getByRole("button", { name: "Volver al tablero", exact: true })
+      .click();
+    await page.locator("h1").waitFor();
+    if (await page.locator(".lab-banner").count())
+      throw Error("lab exit failed");
+    await page.getByLabel("Apariencia").selectOption("dark");
+    await page.locator('[data-nav="analytics"]').click();
+
     await page.setViewportSize({ width: 390, height: 844 });
     await page.screenshot({ path: output + "/mobile.png", fullPage: true });
     const overflow = await page.evaluate(
@@ -182,7 +327,7 @@ fs.mkdirSync(output, { recursive: true });
     if (overflow) throw Error("mobile viewport overflow");
     if (errors.length) throw Error(errors.join("\n"));
     console.log(
-      "PASS induction, resume, company isolation, auto-checklist, activity, analysis grouping, complete monthly closure, write lock, mobile. No JS errors.",
+      "PASS induction, resume, company isolation, auto-checklist, activity, analysis grouping, complete monthly closure, write lock, recurrence dates, timers, absences, isolated lab, system/light/dark themes, mobile. No JS errors.",
     );
   } finally {
     if (browser) await browser.close();

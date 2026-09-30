@@ -1,3 +1,23 @@
+import Planning from "./components/Planning";
+import ThemeControl from "./components/ThemeControl";
+import ScheduleEditor from "./components/ScheduleEditor";
+import { Absences, Workforce } from "./components/Workforce";
+import {
+  defaultSchedule,
+  validateSchedule,
+  describeSchedule,
+  type Schedule,
+} from "./domain/schedule";
+import {
+  startClock,
+  stopClock,
+  elapsedSeconds,
+  duration,
+  applyClock,
+  canWork,
+  coverageFor,
+} from "./domain/workforce";
+import { enterLab, exitLab, isLab } from "./data/repository";
 import { useState, useEffect, type FormEvent } from "react";
 import {
   LayoutDashboard,
@@ -72,7 +92,9 @@ type Page =
   | "team"
   | "catalog"
   | "closing"
-  | "calendar";
+  | "calendar"
+  | "absences"
+  | "planning";
 const pages: { id: Page; name: string; icon: typeof Users }[] = [
   { id: "overview", name: "Resumen", icon: LayoutDashboard },
   { id: "day", name: "Mi día", icon: Flag },
@@ -83,12 +105,16 @@ const pages: { id: Page; name: string; icon: typeof Users }[] = [
   { id: "closing", name: "Cierre del mes", icon: LockKeyhole },
   { id: "team", name: "Equipo y estructura", icon: Users },
   { id: "catalog", name: "Catálogo y pesos", icon: BookOpen },
+  { id: "planning", name: "Planificación", icon: CalendarDays },
+  { id: "absences", name: "Ausencias y cobertura", icon: CalendarDays },
 ];
 const fmt = (date: string) =>
-  new Date(date + "T12:00:00").toLocaleDateString("es-AR", {
-    day: "2-digit",
-    month: "short",
-  });
+  !date
+    ? "Sin vencimiento"
+    : new Date(date + "T12:00:00").toLocaleDateString("es-AR", {
+        day: "2-digit",
+        month: "short",
+      });
 const monthLabel = (m: string) =>
   new Date(m + "-15T12:00:00").toLocaleDateString("es-AR", {
     month: "long",
@@ -102,7 +128,17 @@ const ini = (s: string) =>
     .join("");
 const pct = (n: number | null) => (n === null ? "—" : n + "%");
 export default function App() {
-  const [state, setState] = useState<State>(load);
+  const [laboratory] = useState(isLab);
+  const [state, setState] = useState<State>(() => load(laboratory));
+  const [tick, setTick] = useState(Date.now());
+  const hasRunningClock = state.tasks.some((t) =>
+    t.sessions?.some((e) => !e.end),
+  );
+  useEffect(() => {
+    if (!hasRunningClock) return;
+    const timer = setInterval(() => setTick(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, [hasRunningClock]);
   const [page, setPage] = useState<Page>(() =>
     state.activeId === "boss"
       ? "overview"
@@ -169,7 +205,7 @@ export default function App() {
         }
       : next;
     try {
-      persist(s);
+      persist(s, laboratory);
       setState(s);
       return true;
     } catch {
@@ -184,7 +220,7 @@ export default function App() {
     if (next.tasks.length !== state.tasks.length) commit(next);
   }, [month]);
   const monthTasks = state.tasks.filter(
-    (t) => t.month === month && canSee(active, t.ownerId, state.profiles),
+    (t) => t.month === month && canWork(state, active, t),
   );
   const filtered = monthTasks.filter(
     (t) =>
@@ -213,14 +249,45 @@ export default function App() {
   }
   function mutateTask(t: Task, fn: (t: Task) => Task, action: string) {
     try {
-      if (!canSee(active, t.ownerId, state.profiles))
+      if (!canWork(state, active, t))
         throw Error("Esta tarea está fuera de tu ámbito.");
       if (isClosed(state, t))
         throw Error("El mes está cerrado y conserva su historial.");
-      const next = fn(t);
+      let next = fn(t);
+      if (
+        next.status === "En curso" &&
+        t.status !== "En curso" &&
+        !next.blockedBy
+      )
+        next = startClock(next, active.id);
+      if (next.blockedBy) next = stopClock(next);
+      const running = next.sessions?.some(
+        (e) => !e.end && e.actorId === active.id,
+      );
       commit(
-        { ...state, tasks: state.tasks.map((x) => (x.id === t.id ? next : x)) },
+        {
+          ...state,
+          tasks: state.tasks.map((x) =>
+            x.id === t.id
+              ? next
+              : running &&
+                  x.sessions?.some((e) => !e.end && e.actorId === active.id)
+                ? stopClock(x)
+                : x,
+          ),
+        },
         action,
+        t.id,
+      );
+    } catch (e) {
+      notify((e as Error).message);
+    }
+  }
+  function clock(t: Task, running: boolean) {
+    try {
+      commit(
+        applyClock(state, t.id, active.id, running),
+        running ? "Inició cronómetro" : "Pausó cronómetro",
         t.id,
       );
     } catch (e) {
@@ -256,6 +323,13 @@ export default function App() {
   }
   const draft = state.onboarding[active.id] || blankOnboarding(active.name);
   function finishOnboarding() {
+    try {
+      for (const schedule of Object.values(draft.schedules || {}))
+        validateSchedule(schedule);
+    } catch (e) {
+      notify((e as Error).message);
+      return;
+    }
     const assignments: Assignment[] = [];
     for (const cid of draft.selectedCompanyIds) {
       for (const tid of draft.selectedTemplateIds) {
@@ -275,28 +349,45 @@ export default function App() {
           frequency: draft.frequency,
           steps: t.steps,
           startMonth: month,
+          schedule: draft.schedules?.[tid] || defaultSchedule(month + "-25"),
           priority: "Media",
         });
       }
-      if (draft.customTitle.trim())
+      const custom = [
+        ...(draft.customTasks || []),
+        ...(draft.customTitle.trim()
+          ? [
+              {
+                id: "custom",
+                title: draft.customTitle,
+                steps: draft.customSteps,
+                kind: "resultado" as const,
+                unit: "",
+                target: 0,
+              },
+            ]
+          : []),
+      ];
+      for (const c of custom)
         assignments.push({
-          id: `onboard-${active.id}-${cid}-custom`,
+          id: `onboard-${active.id}-${cid}-${c.id}`,
           templateId: null,
-          title: draft.customTitle.trim(),
+          title: c.title.trim(),
           ownerId: active.id,
           companyId: cid,
           sector: active.sector,
-          kind: "resultado",
+          kind: c.kind,
           weight: 1,
-          unit: "",
-          target: 0,
+          unit: c.unit,
+          target: c.target,
           day: draft.day,
           frequency: draft.frequency,
-          steps: draft.customSteps
+          steps: c.steps
             .split("\n")
             .map((s) => s.trim())
             .filter(Boolean),
           startMonth: month,
+          schedule: draft.schedules?.[c.id] || defaultSchedule(month + "-25"),
           priority: "Media",
         });
     }
@@ -356,6 +447,7 @@ export default function App() {
   if ((!draft.completedAt && !paused) || induct)
     return (
       <Onboarding
+        month={month}
         state={state}
         profile={active}
         draft={draft}
@@ -482,7 +574,37 @@ export default function App() {
         <button className="card-title" onClick={() => setDetail(t.id)}>
           {t.title}
         </button>
-        <p>{nameOf(t.ownerId)}</p>
+        <p>
+          {nameOf(t.ownerId)}
+          {coverageFor(state, t)?.replacementId && (
+            <small>
+              {" "}
+              · cubre {nameOf(coverageFor(state, t)!.replacementId)}
+            </small>
+          )}
+        </p>
+        {t.scheduledOn && <small>Realización: {fmt(t.scheduledOn)}</small>}
+        <div className="timer-mini">
+          {t.sessions?.length ? (
+            <span>
+              ◷ {duration(elapsedSeconds(t, new Date(tick).toISOString()))}
+            </span>
+          ) : (
+            <span>Sin tiempo registrado</span>
+          )}
+          {t.status === "En curso" && !closed && !t.blockedBy && (
+            <button
+              aria-label={
+                t.sessions?.some((e) => !e.end)
+                  ? "Pausar cronómetro"
+                  : "Reanudar cronómetro"
+              }
+              onClick={() => clock(t, !t.sessions?.some((e) => !e.end))}
+            >
+              {t.sessions?.some((e) => !e.end) ? "Pausar" : "Cronometrar"}
+            </button>
+          )}
+        </div>
         {t.blockedBy && <span className="wait">Espera a {t.blockedBy}</span>}
         <div className="card-progress">
           <Meter
@@ -504,7 +626,9 @@ export default function App() {
         <div className="card-bottom">
           <span
             className={
-              t.due < dateART() && t.status !== "Completada" ? "danger" : ""
+              t.due && t.due < dateART() && t.status !== "Completada"
+                ? "danger"
+                : ""
             }
           >
             <CalendarDays size={12} />
@@ -727,6 +851,9 @@ export default function App() {
             ))}
         </nav>
         <div className="sidebar-bottom">
+          <button onClick={() => (laboratory ? exitLab() : enterLab(state))}>
+            {laboratory ? "Salir del laboratorio" : "Laboratorio de pruebas"}
+          </button>
           <button
             onClick={() => {
               commit({ ...state, tour: { ...state.tour, [active.id]: 0 } });
@@ -772,11 +899,37 @@ export default function App() {
             <b>{pages.find((p) => p.id === page)?.name}</b>
           </div>
           <div className="header-right">
-            <span className="version">Nueva generación · 0.3</span>
+            <ThemeControl />
+            <span className="version">Nueva generación · 0.4</span>
             <span className="avatar">{ini(active.name)}</span>
           </div>
         </header>
         <div className="content">
+          {laboratory && (
+            <div className="lab-banner">
+              <b>LABORATORIO TÉCNICO · copia aislada</b>
+              <span>
+                Podés probar todos los perfiles. Los cambios y KPI de este
+                entorno no afectan el tablero principal.
+              </span>
+              <button onClick={exitLab}>Volver al tablero</button>
+            </div>
+          )}
+          {state.tasks
+            .filter((t) =>
+              t.sessions?.some((e) => !e.end && e.actorId === active.id),
+            )
+            .map((t) => (
+              <div className="active-clock" key={t.id}>
+                <span>
+                  ◷ {t.title} ·{" "}
+                  {duration(elapsedSeconds(t, new Date(tick).toISOString()))}
+                </span>
+                <button onClick={() => clock(t, false)}>
+                  Pausar cronómetro
+                </button>
+              </div>
+            ))}
           {offline && (
             <div role="status" className="notice-banner">
               Estás sin conexión. Esta demostración guarda en el navegador; no
@@ -817,7 +970,11 @@ export default function App() {
                               ? "El mismo criterio para todos."
                               : page === "closing"
                                 ? "Un cierre con evidencia."
-                                : "Lo próximo, a la vista."}
+                                : page === "absences"
+                                  ? "El equipo se cubre, el trabajo sigue."
+                                  : page === "planning"
+                                    ? "Cada tarea, en su momento."
+                                    : "Lo próximo, a la vista."}
               </h1>
               <p>
                 {page === "operations"
@@ -930,6 +1087,7 @@ export default function App() {
                             t.ownerId === active.id &&
                             t.status !== "Completada" &&
                             t.kind === "resultado" &&
+                            t.due &&
                             t.due <= dateART(),
                         ).length
                       }{" "}
@@ -980,7 +1138,7 @@ export default function App() {
                             dataKey="earned"
                             name="Puntos logrados"
                             stackId="a"
-                            fill="#36383d"
+                            fill="var(--chart-ink)"
                           />
                           <Bar
                             dataKey="pendingPoints"
@@ -1015,7 +1173,9 @@ export default function App() {
                         t.status !== "Completada" &&
                         (page !== "day" || t.ownerId === active.id),
                     )
-                    .sort((a, b) => a.due.localeCompare(b.due))
+                    .sort((a, b) =>
+                      (a.due || "9999").localeCompare(b.due || "9999"),
+                    )
                     .slice(0, 4)
                     .map(taskCard)}
                 </div>
@@ -1120,7 +1280,49 @@ export default function App() {
                           <b>{t.weight} pts</b>
                         </div>
                         <h2>{t.title}</h2>
-                        <p>{nameOf(t.ownerId)}</p>
+                        <p>
+                          {nameOf(t.ownerId)}
+                          {coverageFor(state, t)?.replacementId && (
+                            <small>
+                              {" "}
+                              · cubre{" "}
+                              {nameOf(coverageFor(state, t)!.replacementId)}
+                            </small>
+                          )}
+                        </p>
+                        {t.scheduledOn && (
+                          <small>Realización: {fmt(t.scheduledOn)}</small>
+                        )}
+                        <div className="timer-mini">
+                          {t.sessions?.length ? (
+                            <span>
+                              ◷{" "}
+                              {duration(
+                                elapsedSeconds(t, new Date(tick).toISOString()),
+                              )}
+                            </span>
+                          ) : (
+                            <span>Sin tiempo registrado</span>
+                          )}
+                          {t.status === "En curso" &&
+                            !closed &&
+                            !t.blockedBy && (
+                              <button
+                                aria-label={
+                                  t.sessions?.some((e) => !e.end)
+                                    ? "Pausar cronómetro"
+                                    : "Reanudar cronómetro"
+                                }
+                                onClick={() =>
+                                  clock(t, !t.sessions?.some((e) => !e.end))
+                                }
+                              >
+                                {t.sessions?.some((e) => !e.end)
+                                  ? "Pausar"
+                                  : "Cronometrar"}
+                              </button>
+                            )}
+                        </div>
                         <div className="quantity">
                           <strong>{qty}</strong>
                           <span>
@@ -1290,7 +1492,7 @@ export default function App() {
                           <Bar
                             dataKey="weighted"
                             name="Cumplimiento"
-                            fill="#373a40"
+                            fill="var(--chart-ink)"
                             radius={[0, 5, 5, 0]}
                             onClick={(d) => {
                               if (group === "individual")
@@ -1329,6 +1531,75 @@ export default function App() {
                   </Panel>
                 </div>
                 <Panel
+                  title="Tiempo registrado y reaperturas"
+                  sub="Trabajo cronometrado por quien lo realizó. No equivale a presencia ni se usa como penalización automática."
+                >
+                  <div className="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Persona</th>
+                          <th>Tiempo registrado</th>
+                          <th>Sesiones</th>
+                          <th>Entregables medidos</th>
+                          <th>Reaperturas de sus tareas</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {people.map((p) => {
+                          const sessions = filtered
+                            .flatMap((t) => t.sessions || [])
+                            .filter((e) => e.actorId === p.id);
+                          const secs = sessions.reduce(
+                            (n, e) =>
+                              n +
+                              Math.max(
+                                0,
+                                (Date.parse(
+                                  e.end || new Date(tick).toISOString(),
+                                ) -
+                                  Date.parse(e.start)) /
+                                  1000,
+                              ),
+                            0,
+                          );
+                          const measured = filtered.filter(
+                            (t) =>
+                              t.kind === "resultado" &&
+                              t.status === "Completada" &&
+                              t.sessions?.some((e) => e.actorId === p.id),
+                          );
+                          return (
+                            <tr key={p.id}>
+                              <td>{p.name}</td>
+                              <td>
+                                {sessions.length
+                                  ? duration(secs)
+                                  : "Sin medición"}
+                              </td>
+                              <td>{sessions.length}</td>
+                              <td>{measured.length}</td>
+                              <td>
+                                {filtered
+                                  .filter((t) => t.ownerId === p.id)
+                                  .reduce(
+                                    (n, t) => n + (t.reopenCount || 0),
+                                    0,
+                                  )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  <p>
+                    Un nuevo ciclo programado no es una reapertura. En las
+                    coberturas se conserva el titular y se identifica al
+                    ejecutor en cada sesión.
+                  </p>
+                </Panel>
+                <Panel
                   title="Evolución mensual"
                   sub="Últimos seis períodos con trabajo registrado · se respetan los filtros"
                 >
@@ -1356,7 +1627,7 @@ export default function App() {
                           <Line
                             dataKey="weighted"
                             name="Cumplimiento ponderado"
-                            stroke="#34373e"
+                            stroke="var(--chart-ink)"
                             strokeWidth={3}
                             dot={{ r: 4 }}
                             connectNulls={false}
@@ -1441,6 +1712,20 @@ export default function App() {
                 </div>
               </>
             )}
+            {page === "planning" && (
+              <Planning
+                state={state}
+                month={month}
+                commit={commit}
+                notify={notify}
+              />
+            )}
+            {page === "absences" && (
+              <Absences state={state} commit={commit} notify={notify} />
+            )}
+            {page === "team" && active.role === "jefe" && (
+              <Workforce state={state} commit={commit} notify={notify} />
+            )}
             {page === "calendar" && (
               <Panel
                 title="Agenda del mes"
@@ -1449,7 +1734,9 @@ export default function App() {
                 {table(
                   resultTasks
                     .filter((t) => t.status !== "Completada")
-                    .sort((a, b) => a.due.localeCompare(b.due)),
+                    .sort((a, b) =>
+                      (a.due || "9999").localeCompare(b.due || "9999"),
+                    ),
                 )}
               </Panel>
             )}
@@ -1477,7 +1764,11 @@ export default function App() {
                 <div className="org-teams">
                   {state.teams
                     .filter(
-                      (t) => active.role === "jefe" || t.id === active.teamId,
+                      (t) =>
+                        state.profiles.some(
+                          (p) => p.id === t.managerId && p.role === "encargado",
+                        ) &&
+                        (active.role === "jefe" || t.id === active.teamId),
                     )
                     .map((t) => (
                       <section className="panel" key={t.id}>
@@ -1600,7 +1891,7 @@ export default function App() {
                         </label>
                         {t.kind === "operativa" && (
                           <label>
-                            Meta mensual
+                            Meta por ocurrencia
                             <input
                               type="number"
                               min="1"
@@ -1808,6 +2099,15 @@ export default function App() {
           people={people}
           close={() => setModal(null)}
           create={(a) => {
+            const responsible = state.profiles.find((p) => p.id === a.ownerId);
+            if (
+              !responsible?.active ||
+              !responsible.companyIds.includes(a.companyId) ||
+              !canSee(active, a.ownerId, state.profiles)
+            ) {
+              notify("Empresa o responsable fuera del ámbito autorizado.");
+              return;
+            }
             if (
               state.closures.some(
                 (c) => c.ownerId === a.ownerId && c.month === month,
@@ -1855,6 +2155,52 @@ export default function App() {
               Estado
             </span>
           </div>
+          <div className="timer-panel">
+            <div>
+              <small>TIEMPO REGISTRADO</small>
+              <strong>
+                {duration(
+                  elapsedSeconds(tasksForDetail, new Date(tick).toISOString()),
+                )}
+              </strong>
+              <p>
+                {tasksForDetail.sessions?.some((e) => !e.end)
+                  ? "En marcha · se conserva si recargás. Pausalo al interrumpir el trabajo."
+                  : "Pausado · las esperas no se suman si el cronómetro está detenido."}
+              </p>
+            </div>
+            <button
+              disabled={
+                isClosed(state, tasksForDetail) ||
+                !!tasksForDetail.blockedBy ||
+                tasksForDetail.status === "Completada"
+              }
+              onClick={() =>
+                clock(
+                  tasksForDetail,
+                  !tasksForDetail.sessions?.some((e) => !e.end),
+                )
+              }
+            >
+              {tasksForDetail.sessions?.some((e) => !e.end)
+                ? "Pausar cronómetro"
+                : "Iniciar cronómetro"}
+            </button>
+          </div>
+          {(tasksForDetail.sessions || []).length > 0 && (
+            <details>
+              <summary>Sesiones y responsables</summary>
+              {tasksForDetail.sessions!.map((e) => (
+                <p key={e.id}>
+                  {nameOf(e.actorId)} ·{" "}
+                  {new Date(e.start).toLocaleString("es-AR")} ·{" "}
+                  {e.end
+                    ? duration((Date.parse(e.end) - Date.parse(e.start)) / 1000)
+                    : "En marcha"}
+                </p>
+              ))}
+            </details>
+          )}
           {tasksForDetail.kind === "resultado" ? (
             <>
               <h3>Checklist</h3>
@@ -2276,6 +2622,10 @@ function NewTask({
   create: (a: Assignment) => void;
 }) {
   const [template, setTemplate] = useState("");
+  const [schedule, setSchedule] = useState<Schedule>(() =>
+    defaultSchedule(month + "-25"),
+  );
+  const [scheduleError, setScheduleError] = useState("");
   const [kind, setKind] = useState<"resultado" | "operativa">("resultado");
   const t = state.templates.find((t) => t.id === template);
   function submit(e: FormEvent<HTMLFormElement>) {
@@ -2283,7 +2633,14 @@ function NewTask({
     const f = new FormData(e.currentTarget);
     const title = String(f.get("title")).trim();
     if (!title) return;
+    try {
+      validateSchedule(schedule);
+    } catch (e) {
+      setScheduleError((e as Error).message);
+      return;
+    }
     create({
+      schedule,
       id: id(),
       templateId: template || null,
       title,
@@ -2294,8 +2651,8 @@ function NewTask({
       weight: active.role === "jefe" ? Number(f.get("weight")) : t?.weight || 1,
       unit: kind === "operativa" ? String(f.get("unit")).trim() : "",
       target: kind === "operativa" ? Number(f.get("target")) : 0,
-      day: Number(f.get("day")),
-      frequency: String(f.get("frequency")) as Assignment["frequency"],
+      day: schedule.monthDay,
+      frequency: schedule.frequency,
       steps:
         kind === "resultado"
           ? String(f.get("steps"))
@@ -2389,24 +2746,6 @@ function NewTask({
             </select>
           </label>
           <label>
-            Frecuencia
-            <select name="frequency">
-              <option value="única">Sólo este mes</option>
-              <option value="mensual">Mensual</option>
-            </select>
-          </label>
-          <label>
-            Día de vencimiento
-            <input
-              name="day"
-              type="number"
-              min="1"
-              max="31"
-              required
-              defaultValue="25"
-            />
-          </label>
-          <label>
             Peso · definido por jefe
             <select
               name="weight"
@@ -2441,7 +2780,7 @@ function NewTask({
                 />
               </label>
               <label>
-                Meta mensual
+                Meta por ocurrencia
                 <input
                   name="target"
                   type="number"
@@ -2454,6 +2793,8 @@ function NewTask({
             </>
           )}
         </div>
+        <ScheduleEditor value={schedule} onChange={setSchedule} month={month} />
+        {scheduleError && <p role="alert">{scheduleError}</p>}
         {kind === "resultado" && (
           <label>
             Checklist · un paso por línea
