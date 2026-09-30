@@ -98,6 +98,6 @@ GitHub se usó exclusivamente para lectura del commit indicado. Vitest y Testing
 - Definición de cumplimiento, demora externa, complejidad y cierres fuera de término.
 - Regla de cierre con checklist pendiente y manejo de excepciones.
 
-## Lo que cambió ahora y lo que no está implementado
+## Implementación actual (0.3)
 
-Se incorporó el logo oficial y la paleta monocroma al prototipo existente. Sus filtros por empresa, empleado y sector conservan tareas independientes. Los nombres de empresa y equipos siguen siendo ejemplos. El prototipo guarda localmente y no implementa RLS, usuarios reales, recurrencias ni auditoría. No se migraron datos ni se tocó infraestructura legacy.
+La reconstrucción React/TypeScript incorpora inducción persistente, asignaciones e instancias mensuales, checklist automático, operativas con cantidades, KPI ponderado, estructura y cierres. El esquema nuevo y las RPC se verifican con PostgreSQL PGlite. La interfaz publicada todavía usa almacenamiento local y roles simulados; esas pruebas no significan conexión Supabase ni usuarios reales. Los nombres de empresas y equipos son ejemplos. No se migraron empleados ni se modificó infraestructura legacy.
