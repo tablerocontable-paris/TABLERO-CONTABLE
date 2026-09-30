@@ -5,4 +5,4 @@ Los datos de demostración se guardan en localStorage por navegador. No existen 
 
 Las empresas y personas son ejemplos editables en public/app.js. Cada tarea posee ID y empresa independientes. No se deduplica por título o banco. Los porcentajes usan solamente tareas filtradas. Los equipos de ejemplo agrupan cuatro empleados. El período inicial es septiembre 2026.
 
-El repositorio legacy no fue modificado; esta entrega no constituye la reconstrucción integral ni una auditoría del legacy. Se priorizó el pedido actual de crear un sitio revisable.
+Se realizó una revisión inicial del legacy en modo lectura; ver docs/architecture/LEGACY-REVIEW.md. No constituye una auditoría completa ni la reconstrucción integral. Se incorporaron el SVG oficial y la identidad monocroma.
