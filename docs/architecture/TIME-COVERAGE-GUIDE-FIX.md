@@ -1,5 +1,9 @@
 # Corrección cerrada de guía 008 — R008-F01
 
+Estado al 01/10/2026: **ejecutada localmente y publicada en v28**, sujeta a
+revisión acotada Sol 6.1 medio. Los gates secuenciales no representan concurrencia
+ni validación contra PostgreSQL/Supabase.
+
 Modelo de ejecución: **GPT-6 Luna, medio, Standard**. Fuente revisada:
 `bdb87e235e3871d1f6f3d712834812fb78b3a48c`, Sites v26.
 Revisión: `REVIEW-008-FINAL-20261001.md`. Sólo guía/aceptación; SQL 001–008,
@@ -28,20 +32,20 @@ frontend, firmas y permisos productivos permanecen sin cambios.
 5. Resultado del checker: **23 casos secuenciales** — 22 existentes y una rama
    previa al corte. Concurrencia PostgreSQL y límite ART real: NO EJECUTADO.
    Emitir SQL AB y BA con --emit-only y verificar que ambos usan jefe/aal2.
-6. Actualizar guía: B es jefe MFA, no empleado; diferenciar 23 verificaciones
+6. Guía actualizada: B es jefe MFA, no empleado; se diferencian 23 verificaciones
    secuenciales de 24 pares PostgreSQL preparados. No cambiar la protección del
    ejecutor ni publicar el procedimiento como ya ejecutado.
 
-## Entrega y siguiente modelo
+## Entrega ejecutada
 
 Preservar los bytes de SQL 001–008 y todos los probes/evidencias anteriores,
 incluidos el diagnóstico original y su salida de esta revisión. Guardar evidencia
 nueva con otro nombre; no sobrescribir completion-validation ni final-review.
 
-Ejecutar checker, emisión AB/BA, npm test, npm run build y diff-check. Comparar
-archivos preservados con HEAD revisado. Registrar cambios, número real de casos
-y límites; commit/push y Sites privado del mismo SHA. Después revisión
-**GPT-6.1 Sol medio**, con cambio manual; basta «continuá».
+Checker (23 secuenciales), emisión AB/BA (`--emit-only`), npm test (151/13),
+npm run build y diff-check completados. SQL 001–008 y frontend sin cambios frente
+al HEAD revisado. Commit/push y Sites privado del mismo SHA completados. Próximo:
+revisión **GPT-6.1 Sol medio**, con cambio manual.
 
 No instalar motor, ejecutar --run, aplicar SQL remoto, crear servicios, migrar
 empleados, conectar frontend ni enviar correo. Integración se prepara después

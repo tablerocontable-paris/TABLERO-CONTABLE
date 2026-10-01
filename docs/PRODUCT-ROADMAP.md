@@ -1,12 +1,11 @@
 # Decisiones vigentes — 30/09/2026
 
-**Estado actual tras revisión de v26 del 01/10:** defensa de inicio recalculado
-aceptada localmente; evidencia de 151 pruebas/13 archivos y 32 casos críticos
-verificada. Reportes, upgrades/abortos y aceptación frontend conservados.
-Se detectó actor incorrecto en una rama de la guía PostgreSQL, no una falla de
-permisos SQL. Revisión: `architecture/REVIEW-008-FINAL-20261001.md`.
-Próximo paso: **Luna medio**, ajuste puntual según `docs/EXECUTION-NEXT.md`.
-Grado de avance y pendientes actuales: `docs/PROJECT-STATUS.md`.
+**Estado actual tras v27:** corrección R008-F01 de la guía implementada; 151
+pruebas/13 archivos, build y 23 verificaciones secuenciales pasan. Persisten
+concurrencia PostgreSQL, Supabase real e integración. Revisión:
+`architecture/REVIEW-008-FINAL-20261001.md`.
+Próximo paso: **Sol 6.1 medio**, revisión acotada según `docs/EXECUTION-NEXT.md`.
+Grado de avance estimado y pendientes: `docs/PROJECT-STATUS.md`.
 Concurrencia PostgreSQL y Supabase/Auth/MFA/correo reales siguen pendientes.
 La demo sigue privada, sin SQL remoto ni cuentas reales; no está lista para
 migración. Los apartados siguientes conservan historia del avance.
@@ -100,7 +99,7 @@ persistencia. Evidencia y correcciones aprobadas en
 
 ## Revisión 004 cerrada — 01/10/2026
 
-Contrato ejecutable: `docs/architecture/TIME-COVERAGE-004.md`. Incluye empresas explícitas para cobertura, autorización temporal limitada a tareas, relojes únicos y pausa atómica, reapertura con motivo y cierre coordinado. Corrige bypass de inducción en create_catalog_assignment. Todavía no implementado: siguiente fase Luna medio. La continuidad entre pasos del mismo modelo queda en AGENTS.md.
+Contrato ejecutable: `docs/architecture/TIME-COVERAGE-004.md`. Incluye empresas explícitas para cobertura, autorización temporal limitada a tareas, relojes únicos y pausa atómica, reapertura con motivo y cierre coordinado. Corrige bypass de inducción en create_catalog_assignment. Las migraciones 004–008 y sus RPC están implementadas en el laboratorio local; integración frontend/Supabase y validación real permanecen pendientes. La continuidad entre pasos del mismo modelo queda en AGENTS.md.
 
 ## Endurecimiento 005 ejecutado localmente — 01/10/2026
 

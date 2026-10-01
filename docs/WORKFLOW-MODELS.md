@@ -55,8 +55,8 @@ sin pedir otro «continuá».
 
 ## Próximo bloque
 
-**GPT-6 Luna medio, Standard:** ajuste cerrado del actor/aceptación de guía según
-EXECUTION-NEXT.md y architecture/TIME-COVERAGE-GUIDE-FIX.md. Después revisión
-acotada **GPT-6.1 Sol medio**; alto si aparecen decisiones nuevas de arquitectura.
-El cambio es manual; no simularlo con subagentes. Infraestructura dedicada y
+**GPT-6.1 Sol medio:** revisar la corrección de guía R008-F01 ya ejecutada y
+publicada. Después, si se acepta, preparar el plan de integración local
+frontend/SQL; alto si aparece una decisión nueva de arquitectura. El cambio de
+modelo es manual; no simularlo con subagentes. Infraestructura dedicada y
 migración de empleados siguen pendientes de integración, concurrencia y piloto.

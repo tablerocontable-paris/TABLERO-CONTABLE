@@ -1,0 +1,18 @@
+{
+  "based_on_commit": "3f496fd930d1ab2f7f689429b787cc81a1e3e033",
+  "scope": "R008-F01 guide and sequential acceptance correction",
+  "actor_b": "permanent boss, aal2, authenticated",
+  "expiry_wait_ba_before_art_cutoff": "PASS",
+  "same_operation_replay_revision": 2,
+  "same_operation_replay_state_audit_receipt_unchanged": true,
+  "sequential_pglite_cases": 23,
+  "postgresql_prepared_pairs": 24,
+  "postgresql_concurrency_executed": false,
+  "real_art_cutoff_executed": false,
+  "npm_test": "151 passed across 13 files",
+  "npm_build": "PASS",
+  "git_diff_check": "PASS",
+  "frontend_changed": false,
+  "migrations_001_008_changed": false,
+  "supabase_or_production_connected": false
+}

@@ -276,8 +276,10 @@ export function scenario(name, order) {
       a = admin + "\nbegin;\n" + ownerLock + (ab ? "" : expirySleep);
       if (ab) afterFirst = expirySleep;
       b = step(
-        owner,
+        boss,
         `perform public.set_task_wait('${t1}','Synthetic wait',1,'${op(1)}');`,
+        null,
+        true,
       );
       checks = [
         check(sessions(t1) + "=0", "expired/wait clock closed"),

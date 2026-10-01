@@ -1,30 +1,35 @@
 # Estado del proyecto — 01/10/2026
 
-**Avance alto en la demostración; avance intermedio hacia el producto final.**
-No está listo para migrar empleados. Se registra el progreso por entregables,
-porque aún no existe una estimación ponderada que justifique un porcentaje total.
+**Avance estimado: 40% del producto final (rango razonable: 35–45%).** Es una
+estimación por etapas, no una medición automática: la demo y los contratos locales
+están avanzados, pero autenticación, datos compartidos, integración, validación
+operativa e infraestructura final siguen pendientes. No está listo para migrar.
 
-| Etapa | Estado actual |
+| Etapa (peso estimado) | Estado y avance estimado de esa etapa |
 | --- | --- |
-| Experiencia y reglas de trabajo | Demo avanzada: cuatro empresas, tablero independiente y filtros, recurrencias, KPI/pesos, cronómetros, inducción, anotaciones, temas, ausencias y laboratorio local |
-| Contrato de datos/servidor | SQL 001–008 preparado y probado localmente; defensa R008-01 aceptada. Reportes/outbox, aprobación y jerarquía presentes en SQL. Ajuste pequeño pendiente en una prueba de la guía PostgreSQL |
-| Integración y producto restante | Pendientes adaptador frontend/SQL, cuentas reales y permisos, anotaciones privadas en servidor, administración completa, Kaizen/5S orientados a procesos y controles restantes de producto |
-| Validación y operación | Pendientes dos conexiones PostgreSQL, Supabase Auth/invitaciones/MFA/RLS, correo, respaldo/restauración, QA visual/accesibilidad/volumen y piloto con Juan Pablo |
-| Infraestructura y migración | Futuras cuentas dedicadas Gmail/GitHub/Supabase dev/prod/hosting, automatización de entregas y migración manual por equipos; no creadas aún |
+| Demo, experiencia y reglas (25%) | 75%: tablero y funciones demostrables avanzadas; faltan cerrar parte de experiencia y funciones de administración/proceso |
+| Contrato de datos y reglas SQL (25%) | 65%: migraciones 001–008 revisadas y pruebas locales; concurrencia y Supabase real pendientes |
+| Integración, cuentas y permisos (25%) | 0%: frontend aún usa persistencia/selector de demostración; no están conectados Auth, RLS ni datos compartidos |
+| Funcionalidad final y operación (15%) | 25%: reportes/reglas están delineados; faltan integración de reportes, áreas de administración y procesos Kaizen/5S aplicados |
+| Validación, infraestructura y migración (10%) | 0%: faltan QA real, piloto de Juan Pablo y servicios definitivos |
+
+El 40% se obtiene ponderando esas etapas (aprox. 39%, redondeado); el rango
+35–45% refleja que los porcentajes por etapa todavía son estimaciones. No significa
+que 40% de los empleados puedan migrarse: hoy no hay base de producción conectada.
 
 ## Evidencia actual
 
-151 pruebas en 13 archivos, 32 casos críticos individualizados, build y 30 archivos
-congelados verificados para v26. La revisión confirma esa evidencia y detecta una
-llamada de empleado incorrecta en la rama previa al corte de la guía; el SQL la
-rechaza correctamente. No hay evidencia de ese problema en datos reales.
+151 pruebas en 13 archivos y compilación correctas. El laboratorio PGlite verifica
+23 casos secuenciales; 24 pares preparados para PostgreSQL siguen sin ejecutarse.
+La rama BA previa al corte usa jefe con aal2 y confirma replay idempotente. No se
+modificaron SQL 001–008 ni el frontend durante este ajuste.
 
 La demo usa localStorage y selector simulado. Que haya pruebas SQL verdes no
 significa que esos permisos ya gobiernen la página ni que se envíe correo.
 
 ## Siguiente camino
 
-1. Corregir actor y aceptación de guía (Luna medio), revisión acotada Sol medio.
+1. Revisión acotada de la corrección de guía por Sol medio.
 2. Preparar integración del frontend con el contrato actual, sin crear servicios
    antes de la decisión prevista; construir adaptadores y aceptación local.
 3. Completar producto y validaciones reales/piloto antes de migrar a compañeros.

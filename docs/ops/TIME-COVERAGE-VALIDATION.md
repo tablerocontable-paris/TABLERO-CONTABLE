@@ -127,7 +127,7 @@ Cobertura sólo habilita A, hasta medianoche ART posterior al día de fixture.
 | `close-switch` | Cierra mes / switch desde tarea del mes anterior | Cierre primero preserva origen anterior abierto; switch primero rechaza cierre y sólo destino queda abierto |
 | `cancel-start` | Jefe cancela / reemplazante inicia A | Cancelación primero deniega inicio; inicio primero luego termina al corte efectivo; revisiones/receipts/audits exactos |
 | `permission-start` | Retira membresía de encargado bajo owner guard / encargado inicia A | Retiro primero exige revalidación y rechazo íntegro; inicio primero conserva historia; no existe RPC productiva de retiro |
-| `expiry-wait` | Sostiene owner guard hasta corte ART real / titular pone en espera | Corte primero: expiración y espera usan fin exacto; espera primero: fin previo y sin expiración redundante; revisión única |
+| `expiry-wait` | Sostiene owner guard hasta corte ART real / jefe aal2 pone en espera | Corte primero: expiración y espera usan fin exacto; espera primero: fin previo y sin expiración redundante; revisión única |
 | `company-seal` | Sella ausencia / inserta empresa B | Sello primero deniega INSERT; INSERT primero integra B antes del sello; acceso A y B sólo en segundo caso |
 | `replay-exact` | Misma operación/argumentos / replay | Dos retornos iguales al UUID original; una sesión, revisión y receipt; sin eventos extra |
 | `replay-different` | Mismo UUID con destino A / con destino B | Sólo primera válida; segunda error específico; retorno ganador y ningún efecto de perdedora |
@@ -163,13 +163,19 @@ node tests/postgres-008/run-case.mjs --emit-only /tmp/008-expiry-AB expiry-wait 
 node tests/postgres-008/run-case.mjs --emit-only /tmp/008-expiry-BA expiry-wait BA
 ```
 
-AB sostiene owner guard, verifica B esperando y recién entonces espera al corte
-antes de COMMIT. BA ejecuta espera antes del corte, libera A y A cruza el corte
-sin reescribir la sesión finalizada. Una inyección local no equivale a este caso.
+AB usa al jefe aal2 como actor B, sostiene owner guard, verifica B esperando y
+recién entonces espera al corte antes de COMMIT. BA ejecuta espera como jefe aal2
+antes del corte, libera A y A cruza el corte sin reescribir la sesión finalizada.
+Una inyección local no equivale a este caso.
+
+La aceptación local secuencial ejecuta setup y B de BA sin `pg_sleep`; verifica
+sesión, revisión, actor, MFA, receipt, audit y replay idempotente. Son 23 casos
+secuenciales PGlite. Este caso no prueba la espera ni la carrera.
 
 ## Registro requerido
 
-**24 combinaciones preparadas; ninguna ejecutada en PostgreSQL.** Para cambiar
+**23 verificaciones locales secuenciales; 24 combinaciones preparadas y ninguna
+ejecutada en PostgreSQL.** Para cambiar
 estado conservar por combinación: SHA, versión PostgreSQL, servidor de laboratorio,
 orden, SQL emitido, evidencia de espera, logs A/B/observador, RESULT.json, asserts
 y repetición desde base limpia. Revisar con Sol alto antes de aprobar. Integración
