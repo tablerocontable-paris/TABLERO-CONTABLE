@@ -28,5 +28,5 @@
 
 - Continuar autónomamente entre pasos/revisiones que usan el mismo modelo; no terminar cada bloque para pedir «continuar».
 - Detenerse al llegar a un cambio de modelo necesario y comunicar modelo, esfuerzo y contrato concreto preparado. El usuario hará el cambio manual. No delegar ni simular un cambio de modelo para sortear esta preferencia.
-- Próxima fase vigente: **GPT-6.1 Sol, esfuerzo medio**, revisión acotada de la corrección R008-F01 ya ejecutada por Luna. Seguir `docs/EXECUTION-NEXT.md`; después preparar el plan local de integración frontend/SQL.
+- Próxima fase vigente: **GPT-6 Luna, esfuerzo medio, Standard**. Ejecutar `docs/architecture/DATA-ADAPTER-FOUNDATION.md`: completar assertions de guía y crear contratos/gateway de seis RPC con aceptación local. Revisión del actor cerrada en `docs/architecture/REVIEW-GUIDE-FIX-20261001.md`. Después revisión acotada Sol 6.1 medio; Auth/administración nueva requiere Sol alto.
 - En la corrección se preservaron SQL 001–008 y evidencia histórica; no se alteraron permisos ni se creó 009. Concurrencia PostgreSQL, integración y Supabase Auth/invitaciones/MFA/RLS/correo reales siguen pendientes; no aplicar SQL remoto, migrar empleados ni declarar producción. Grado de avance: `docs/PROJECT-STATUS.md`.

@@ -55,8 +55,8 @@ sin pedir otro «continuá».
 
 ## Próximo bloque
 
-**GPT-6.1 Sol medio:** revisar la corrección de guía R008-F01 ya ejecutada y
-publicada. Después, si se acepta, preparar el plan de integración local
-frontend/SQL; alto si aparece una decisión nueva de arquitectura. El cambio de
-modelo es manual; no simularlo con subagentes. Infraestructura dedicada y
+**GPT-6 Luna medio, Standard:** ejecutar DATA-ADAPTER-FOUNDATION.md, incluidas
+las assertions restantes de guía, contratos y gateway de seis RPC. Después
+revisión **Sol 6.1 medio**; nuevas decisiones de Auth/administración requieren
+Sol alto. El cambio es manual; no simularlo con subagentes. Infraestructura dedicada y
 migración de empleados siguen pendientes de integración, concurrencia y piloto.

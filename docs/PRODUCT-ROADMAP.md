@@ -1,10 +1,9 @@
 # Decisiones vigentes — 30/09/2026
 
-**Estado actual tras v27:** corrección R008-F01 de la guía implementada; 151
-pruebas/13 archivos, build y 23 verificaciones secuenciales pasan. Persisten
-concurrencia PostgreSQL, Supabase real e integración. Revisión:
-`architecture/REVIEW-008-FINAL-20261001.md`.
-Próximo paso: **Sol 6.1 medio**, revisión acotada según `docs/EXECUTION-NEXT.md`.
+**Estado tras revisión de v28:** actor R008-F01 corregido y aceptado; 23 checks
+secuenciales pasan. Las assertions adicionales de motivo/sesión/seed acompañan
+la fundación del adaptador. Revisión: `architecture/REVIEW-GUIDE-FIX-20261001.md`.
+Próximo paso: **Luna medio**, contrato DATA-ADAPTER-FOUNDATION.md y EXECUTION-NEXT.md.
 Grado de avance estimado y pendientes: `docs/PROJECT-STATUS.md`.
 Concurrencia PostgreSQL y Supabase/Auth/MFA/correo reales siguen pendientes.
 La demo sigue privada, sin SQL remoto ni cuentas reales; no está lista para

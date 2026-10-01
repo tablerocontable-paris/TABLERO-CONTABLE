@@ -24,14 +24,19 @@ que 40% de los empleados puedan migrarse: hoy no hay base de producción conecta
 La rama BA previa al corte usa jefe con aal2 y confirma replay idempotente. No se
 modificaron SQL 001–008 ni el frontend durante este ajuste.
 
+La revisión de v28 acepta la corrección del actor. Faltan assertions explícitas
+de motivo, conteo total de sesiones y receipt de seed; se incluyen con el primer
+adaptador de seis RPC en DATA-ADAPTER-FOUNDATION.md. Preparar estas instrucciones
+no incrementa el porcentaje: integración todavía sin implementar.
+
 La demo usa localStorage y selector simulado. Que haya pruebas SQL verdes no
 significa que esos permisos ya gobiernen la página ni que se envíe correo.
 
 ## Siguiente camino
 
-1. Revisión acotada de la corrección de guía por Sol medio.
-2. Preparar integración del frontend con el contrato actual, sin crear servicios
-   antes de la decisión prevista; construir adaptadores y aceptación local.
+1. Ejecutar fundación del adaptador y completar assertions de guía (Luna medio).
+2. Revisar el adaptador (Sol medio); después cerrar lecturas y coordinación del
+   frontend con el contrato actual, sin crear servicios antes de lo previsto.
 3. Completar producto y validaciones reales/piloto antes de migrar a compañeros.
 4. Al aprobar la versión definitiva, registrar esa decisión y activar los nuevos
    servicios dedicados y flujo dev/prod según AUTOMATED-DELIVERY.md.

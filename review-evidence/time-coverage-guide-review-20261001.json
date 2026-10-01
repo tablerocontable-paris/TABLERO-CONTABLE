@@ -1,0 +1,28 @@
+{
+  "reviewed_source": "f916d1b2bb567f133a7c51d4559b3cfaffee1c07",
+  "actor_fix": "ACCEPTED_LOCALLY",
+  "sequential_cases": 23,
+  "postgresql_pairs_prepared": 24,
+  "postgresql_executed": false,
+  "full_suite": {
+    "tests": 151,
+    "files": 13,
+    "exit": 0
+  },
+  "build_exit": 0,
+  "product_and_existing_acceptance_changed": false,
+  "explicit_assertions_carried_forward": [
+    "identity within rendered B",
+    "Synthetic wait reason",
+    "exactly one total session",
+    "peer seed receipt and original session"
+  ],
+  "input_hashes": {
+    "tests/postgres-008/check-sql.mjs": "f96834160bf278a27d6b0ac98def18a9ec16e06da342b795d70412061719c0d3",
+    "tests/postgres-008/scenarios.mjs": "4e149ad6efa9a9c1d2bf8c5d874ce25a364ef0a0d5183fd1bb90c59c404422c5"
+  },
+  "next_contract": "docs/architecture/DATA-ADAPTER-FOUNDATION.md",
+  "next_model": "GPT-6 Luna medium Standard",
+  "progress_estimate_percent": 40,
+  "live_remote_integration": false
+}

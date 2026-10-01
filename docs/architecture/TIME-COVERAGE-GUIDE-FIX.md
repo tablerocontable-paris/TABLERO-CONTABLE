@@ -1,7 +1,8 @@
 # Corrección cerrada de guía 008 — R008-F01
 
-Estado al 01/10/2026: **ejecutada localmente y publicada en v28**, sujeta a
-revisión acotada Sol 6.1 medio. Los gates secuenciales no representan concurrencia
+Estado al 01/10/2026: **ejecutada localmente y publicada en v28**; actor aceptado
+en REVIEW-GUIDE-FIX-20261001.md. Assertions restantes se completan con
+DATA-ADAPTER-FOUNDATION.md. Los gates secuenciales no representan concurrencia
 ni validación contra PostgreSQL/Supabase.
 
 Modelo de ejecución: **GPT-6 Luna, medio, Standard**. Fuente revisada:
