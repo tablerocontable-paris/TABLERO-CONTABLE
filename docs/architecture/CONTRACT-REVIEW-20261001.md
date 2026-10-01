@@ -70,16 +70,19 @@ Evidencia de esta ejecución: 40 tests aprobaron, incluyendo PGlite desde cero, 
 
 Pendientes confirmados de esta etapa: el nuevo contrato no tiene aún un adaptador frontend, bootstrap/alta inicial de jefatura, ni RPC completo que reciba toda la regla semanal (la RPC compatible conserva la firma 0.3). Cronómetro/cobertura tienen tablas y lectura RLS, pero les faltan RPC de escritura autorizadas. No conectar hasta resolver estas superficies; no conceder DML directo.
 
-## Instrucciones ejecutables para GPT 6 Luna — esfuerzo medio: siguiente ejecución
+## Ejecución 003 — reportes y entrega local
 
-Implementación de aprobación completada. El siguiente paso es sólo reportes/cierre/outbox en `202610010003_report_delivery.sql`, localmente y sin conectar la interfaz, crear cuentas/infraestructura ni enviar correos reales. No editar migraciones anteriores.
+Completada `202610010003_report_delivery.sql`: destinatario gerente activo/verificado por organización; cierre idempotente bajo lock empleado/mes; snapshot versión 2 con sesiones, tiempo registrado y reaperturas explícitas por transición; puntualidad excluye tareas sin vencimiento. Cierre + reporte inmutable + entrega + outbox se crean en una transacción. No cambiar reportes/cierres anteriores ni enviar sus correos de forma retroactiva.
 
-1. Leer AGENTS.md, esta revisión y migraciones 001/002. El cierre inserta reporte inmutable y evento outbox dentro de una transacción idempotente.
-2. Añadir tablas/RLS/RPCs con organización obtenida del perfil del actor, control de revisión obsoleta, idempotencia y auditoría. Aprobar en una transacción: validar catálogo vigente, perfil, membresías y calendarios; sellar solicitud; generar asignaciones para cada línea; materializar sólo períodos abiertos. Error en una línea revierte todo. Evitar que un borrador o paso “terminado” genere trabajo.
-3. Probar cierre/repetición, evento único, reintento, lease y destinatario inválido; probar base vacía y upgrade fixture.
-4. Ejecutar `npm test` y `npm run build`; documentar límites (sin proveedor real ni Auth remoto).
+Cola de servidor: lease de dos minutos con token por intento, SKIP LOCKED, cinco intentos y esperas de 1/5/15/60 minutos. ACK viejo se rechaza; reintento manual de jefatura con MFA conserva ID y total histórico de intentos. Si el destinatario dejó de estar activo/verificado o cambió su correo, la entrega falla sin redirigirla. El consumidor sólo tiene RPC concedidas a `service_role`; usuario autenticado no puede reclamarlas. El proveedor simulado usa delivery_id para deduplicar aceptación ambigua y ACK tardío. Errores persistidos son códigos limitados, sin texto de excepciones.
 
-**No empezar correo en esta ejecución.** Entrega de reportes sigue en `202610010003_report_delivery.sql`, con cierre/report/outbox atómico y consumidor falso, según los apartados anteriores. Cualquier decisión no definida aquí vuelve a Sol 6.1 alto.
+Evidencia: 48 pruebas + build aprobados; base nueva y upgrade fixture 0.3 + 001/002/003; MFA/privacidad, repetición del cierre, lease/reclamación/ACK obsoleto, agotamiento y reintento, falta de correo verificado, cronómetro activo, tiempo del snapshot, puntualidad sin denominador y deduplicación del consumidor falso.
+
+Límites: no SQL remoto, proveedor real, correo ni cron ejecutándose; no frontend/URL `/reportes/:id` conectados. Las funciones de escritura de sesiones/coberturas aún faltan. El snapshot de reaperturas contiene las transiciones explícitas ya auditadas; la RPC de checklist antigua no guarda from/to y requiere una migración posterior, sin inferir historia anterior. El cierre actual genera la entrega cuando lo invoca un responsable; la programación del cierre/revisión mensual debe definirse y probarse antes de automatizar por calendario. Ver `docs/ops/REPORT-DELIVERY.md`.
+
+## Próximo paso — Sol 6.1, esfuerzo alto
+
+Revisar el contrato de sesiones, reaperturas y coberturas antes de dar una nueva ejecución a Luna. Resolver la inclusión por empresa de una ausencia, autorización temporal, inicio/pausa/reanudación, cronómetro único por ejecutor, lock de cierre compartido y registro explícito de reapertura al usar checklist. La tabla de ausencias actual no contiene la selección de empresas del contrato. No conectar el frontend hasta cerrar ese hueco. La revisión debe entregar instrucciones para `202610010004` y pruebas de permisos/concurrencia concretas. Ejecución posterior: GPT 6 Luna, esfuerzo medio.
 
 ### Aceptación y límites
 

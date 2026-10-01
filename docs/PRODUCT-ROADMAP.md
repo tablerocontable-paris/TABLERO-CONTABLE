@@ -61,3 +61,9 @@ La vista de tablero permite plegar/desplegar cada columna por separado y ordenar
 - Pruebas nuevas verifican guardado/pausa, que el envío no active tareas, MFA, encargado restringido, revisión obsoleta, el mismo estándar en dos empresas con reglas distintas, rollback ante membresía retirada e idempotencia. PGlite no simula Auth/MFA real.
 - El deseo de commits/push/deploy automatizados, pre-commit, Supabase dev/prod y rama `dev` está en `docs/ops/AUTOMATED-DELIVERY.md`. Es diseño pendiente; no crear servicios/cuentas hasta aprobar infraestructura.
 - Próxima ejecución de código: cierre + reporte + outbox en `202610010003_report_delivery.sql`, con proveedor falso. No enviar correo real.
+
+## Reportes de cierre — 01/10/2026
+
+Contrato local 003 implementado: cierre idempotente, reporte inmutable, entrega/outbox atómicos, destinatario gerente con correo Auth verificado, snapshot con sesiones y tiempo registrado. Cola con lease, intentos limitados, reintento manual auditado y RPC de consumo reservadas a servidor. Consumidor TypeScript y proveedor falso prueban deduplicación ante aceptación ambigua/ACK fallido. 48 pruebas y build pasan.
+
+Todavía no están conectados al frontend ni a Supabase real, y no existe correo/cron productivo. Hace falta revisar coberturas por empresa y las escrituras de cronómetros/reaperturas; después integrar Auth/MFA, adaptadores y el reporte privado. El documento operativo está en `docs/ops/REPORT-DELIVERY.md`. No migrar empleados todavía.

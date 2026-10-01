@@ -25,7 +25,7 @@ async function actor(uid: string) {
 beforeAll(async () => {
   db = new PGlite();
   await db.exec(
-    `create role anon;create role authenticated;create schema auth;create table auth.users(id uuid primary key);create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;create function auth.jwt() returns jsonb language sql stable as $$select coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb$$;grant usage on schema auth to authenticated;grant execute on function auth.uid() to authenticated;`,
+    `create role anon;create role authenticated;create role service_role;create schema auth;create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz);create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;create function auth.jwt() returns jsonb language sql stable as $$select coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb$$;grant usage on schema auth to authenticated;grant execute on function auth.uid() to authenticated;`,
   );
   for (const f of readdirSync(
     new URL("../supabase/migrations/", import.meta.url),
@@ -37,8 +37,9 @@ beforeAll(async () => {
       ),
     );
   await db.exec(
-    `insert into organizations values('${ids.org}','Test'),('${ids.other}','Other');insert into auth.users values('${ids.boss}'),('${ids.manager}'),('${ids.employee}'),('${ids.outsider}');insert into profiles(id,organization_id,name,role,manager_id,sector,branch,position) values('${ids.boss}','${ids.org}','Boss','jefe',null,'A','B','C'),('${ids.manager}','${ids.org}','Manager','encargado','${ids.boss}','A','B','C'),('${ids.employee}','${ids.org}','Employee','empleado','${ids.manager}','A','B','C'),('${ids.outsider}','${ids.other}','Other','jefe',null,'A','B','C');insert into companies values('${ids.c}','${ids.org}','Empresa');insert into teams values('${ids.team}','${ids.org}','Team','${ids.manager}');insert into team_members values('${ids.org}','${ids.team}','${ids.employee}');insert into company_memberships values('${ids.org}','${ids.c}','${ids.employee}'),('${ids.org}','${ids.c}','${ids.manager}');insert into task_assignments(id,organization_id,company_id,owner_id,team_id,title,kind,weight,frequency,start_month,due_day) values('${ids.a}','${ids.org}','${ids.c}','${ids.employee}','${ids.team}','Conciliación','resultado',5,'mensual','2026-09-01',30);insert into task_instances(id,organization_id,assignment_id,company_id,owner_id,team_id,period,scheduled_on,title,kind,weight,due_date) values('${ids.t}','${ids.org}','${ids.a}','${ids.c}','${ids.employee}','${ids.team}','2026-09-01','2026-09-30','Conciliación','resultado',5,'2026-09-30');`,
+    `insert into organizations values('${ids.org}','Test'),('${ids.other}','Other');insert into auth.users(id) values('${ids.boss}'),('${ids.manager}'),('${ids.employee}'),('${ids.outsider}');insert into profiles(id,organization_id,name,role,manager_id,sector,branch,position) values('${ids.boss}','${ids.org}','Boss','jefe',null,'A','B','C'),('${ids.manager}','${ids.org}','Manager','encargado','${ids.boss}','A','B','C'),('${ids.employee}','${ids.org}','Employee','empleado','${ids.manager}','A','B','C'),('${ids.outsider}','${ids.other}','Other','jefe',null,'A','B','C');insert into companies values('${ids.c}','${ids.org}','Empresa');insert into teams values('${ids.team}','${ids.org}','Team','${ids.manager}');insert into team_members values('${ids.org}','${ids.team}','${ids.employee}');insert into company_memberships values('${ids.org}','${ids.c}','${ids.employee}'),('${ids.org}','${ids.c}','${ids.manager}');insert into task_assignments(id,organization_id,company_id,owner_id,team_id,title,kind,weight,frequency,start_month,due_day) values('${ids.a}','${ids.org}','${ids.c}','${ids.employee}','${ids.team}','Conciliación','resultado',5,'mensual','2026-09-01',30);insert into task_instances(id,organization_id,assignment_id,company_id,owner_id,team_id,period,scheduled_on,title,kind,weight,due_date) values('${ids.t}','${ids.org}','${ids.a}','${ids.c}','${ids.employee}','${ids.team}','2026-09-01','2026-09-30','Conciliación','resultado',5,'2026-09-30');`,
   );
+  await db.exec(`update auth.users set email='boss@example.test',email_confirmed_at=now() where id='${ids.boss}';insert into report_settings(organization_id,recipient_id,updated_by) values('${ids.org}','${ids.boss}','${ids.boss}');`);
 }, 20000);
 afterAll(async () => db?.close());
 describe("base nueva desde cero y RLS", () => {
@@ -154,11 +155,9 @@ describe("base nueva desde cero y RLS", () => {
     ).rows[0].snapshot;
     expect(snapshot.tasks).toHaveLength(1);
     expect(snapshot.metrics.points).toBe(5);
-    await expect(
-      db.query("select close_employee_month($1,'2026-09-01','Revisado')", [
-        ids.employee,
-      ]),
-    ).rejects.toThrow("El mes está cerrado");
+    const repeated = await db.query("select close_employee_month($1,'2026-09-01','Revisado')", [ids.employee]);
+    expect(repeated.rows).toHaveLength(1);
+    expect((await db.query("select * from period_reports")).rows).toHaveLength(1);
   });
   it("cierre impide cambios posteriores", async () => {
     await db.exec("reset role");
@@ -231,7 +230,7 @@ describe("base nueva desde cero y RLS", () => {
     const legacy = new PGlite();
     try {
       await legacy.exec(
-        `create role anon;create role authenticated;create schema auth;create table auth.users(id uuid primary key);create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;create function auth.jwt() returns jsonb language sql stable as $$select coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb$$;grant usage on schema auth to authenticated;grant execute on function auth.uid() to authenticated;`,
+        `create role anon;create role authenticated;create role service_role;create schema auth;create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz);create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;create function auth.jwt() returns jsonb language sql stable as $$select coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb$$;grant usage on schema auth to authenticated;grant execute on function auth.uid() to authenticated;`,
       );
       for (const f of readdirSync(
         new URL("../supabase/migrations/", import.meta.url),
@@ -245,7 +244,7 @@ describe("base nueva desde cero y RLS", () => {
           ),
         );
       await legacy.exec(
-        `insert into organizations(id,name) values('${ids.org}','Legacy');insert into auth.users values('${ids.boss}'),('${ids.employee}');insert into profiles(id,organization_id,name,role,manager_id,sector,branch,position) values('${ids.boss}','${ids.org}','Boss','jefe',null,'A','B','C'),('${ids.employee}','${ids.org}','Employee','empleado','${ids.boss}','A','B','C');insert into companies values('${ids.c}','${ids.org}','Empresa');insert into teams values('${ids.team}','${ids.org}','Team','${ids.boss}');insert into team_members values('${ids.org}','${ids.team}','${ids.employee}');insert into company_memberships values('${ids.org}','${ids.c}','${ids.employee}');insert into task_templates(id,organization_id,title,kind,weight,checklist) values('${ids.t}','${ids.org}','Conciliación','resultado',5,'[{"text":"Control"}]');insert into task_assignments(id,organization_id,template_id,company_id,owner_id,team_id,title,kind,weight,frequency,start_month,due_day,checklist) values('${ids.a}','${ids.org}','${ids.t}','${ids.c}','${ids.employee}','${ids.team}','Conciliación','resultado',5,'mensual','2026-09-01',30,'["Control"]');insert into task_instances(id,organization_id,assignment_id,company_id,owner_id,team_id,period,title,kind,weight,due_date,checklist) values('${ids.t.replace("500", "600")}','${ids.org}','${ids.a}','${ids.c}','${ids.employee}','${ids.team}','2026-09-01','Conciliación','resultado',5,'2026-09-30','[{"id":"kept","text":"Control","done":false}]');insert into monthly_closures(organization_id,owner_id,period,snapshot,closed_by,note) values('${ids.org}','${ids.employee}','2026-09-01','{"immutable":true}','${ids.boss}','Revisado');`,
+        `insert into organizations(id,name) values('${ids.org}','Legacy');insert into auth.users(id) values('${ids.boss}'),('${ids.employee}');insert into profiles(id,organization_id,name,role,manager_id,sector,branch,position) values('${ids.boss}','${ids.org}','Boss','jefe',null,'A','B','C'),('${ids.employee}','${ids.org}','Employee','empleado','${ids.boss}','A','B','C');insert into companies values('${ids.c}','${ids.org}','Empresa');insert into teams values('${ids.team}','${ids.org}','Team','${ids.boss}');insert into team_members values('${ids.org}','${ids.team}','${ids.employee}');insert into company_memberships values('${ids.org}','${ids.c}','${ids.employee}');insert into task_templates(id,organization_id,title,kind,weight,checklist) values('${ids.t}','${ids.org}','Conciliación','resultado',5,'[{"text":"Control"}]');insert into task_assignments(id,organization_id,template_id,company_id,owner_id,team_id,title,kind,weight,frequency,start_month,due_day,checklist) values('${ids.a}','${ids.org}','${ids.t}','${ids.c}','${ids.employee}','${ids.team}','Conciliación','resultado',5,'mensual','2026-09-01',30,'["Control"]');insert into task_instances(id,organization_id,assignment_id,company_id,owner_id,team_id,period,title,kind,weight,due_date,checklist) values('${ids.t.replace("500", "600")}','${ids.org}','${ids.a}','${ids.c}','${ids.employee}','${ids.team}','2026-09-01','Conciliación','resultado',5,'2026-09-30','[{"id":"kept","text":"Control","done":false}]');insert into monthly_closures(organization_id,owner_id,period,snapshot,closed_by,note) values('${ids.org}','${ids.employee}','2026-09-01','{"immutable":true}','${ids.boss}','Revisado');`,
       );
       await legacy.exec(
         readFileSync(
@@ -265,6 +264,7 @@ describe("base nueva desde cero y RLS", () => {
           "utf8",
         ),
       );
+      await legacy.exec(readFileSync(new URL("../supabase/migrations/202610010003_report_delivery.sql", import.meta.url), "utf8"));
       const instance = (
         await legacy.query<{
           scheduled_on: string;
@@ -467,4 +467,91 @@ describe("base nueva desde cero y RLS", () => {
     expect((await db.query("select * from onboarding_activations where request_id=$1", [request])).rows).toHaveLength(2);
     expect((await db.query<{ approve_onboarding: number }>("select approve_onboarding($1,2)", [request])).rows[0].approve_onboarding).toBe(2);
   });
+  it("reportes privados, destinatario verificado y consumidor reservado al servidor", async () => {
+    await actor(ids.employee);
+    expect((await db.query("select * from period_reports")).rows).toHaveLength(1);
+    expect((await db.query("select * from report_deliveries")).rows).toHaveLength(0);
+    await expect(db.query("select claim_report_deliveries(1)")).rejects.toThrow();
+    await actor(ids.outsider);
+    expect((await db.query("select * from period_reports")).rows).toHaveLength(0);
+    await actor(ids.boss);
+    await expect(db.query("select set_report_recipient($1)", [ids.manager])).rejects.toThrow("correo verificado");
+    await expect(db.query("select set_report_recipient($1)", [ids.outsider])).rejects.toThrow("correo verificado");
+    await db.query("select set_report_recipient($1)", [ids.boss]);
+  });
+  it("la entrega respeta lease, reintenta y no regenera cierre ni eventos", async () => {
+    await db.exec("reset role;set role service_role");
+    const first = (await db.query<{id:string;lease_token:string}>("select * from claim_report_deliveries(1)")).rows[0];
+    expect(first).toBeDefined();
+    expect((await db.query("select * from claim_report_deliveries(1)")).rows).toHaveLength(0);
+    await db.query("select fail_report_delivery($1,$2,'provider_unavailable',true)", [first.id,first.lease_token]);
+    await db.exec("reset role");
+    const wait = (await db.query<{status:string;seconds:number}>("select status,extract(epoch from(next_attempt_at-now())) as seconds from report_deliveries where id=$1",[first.id])).rows[0];
+    expect(wait.status).toBe("retry_wait");
+    expect(Number(wait.seconds)).toBeGreaterThan(55);
+    await db.query("update report_deliveries set next_attempt_at=now()-interval '1 second' where id=$1",[first.id]);
+    await db.exec("set role service_role");
+    const second = (await db.query<{id:string;lease_token:string;attempts:number}>("select * from claim_report_deliveries(1)")).rows[0];
+    expect(second.id).toBe(first.id);
+    expect(second.attempts).toBe(2);
+    await expect(db.query("select complete_report_delivery($1,$2,'fake-accepted')",[first.id,first.lease_token])).rejects.toThrow("Lease");
+    await db.query("select complete_report_delivery($1,$2,'fake-accepted')",[second.id,second.lease_token]);
+    expect((await db.query("select * from claim_report_deliveries(1)")).rows).toHaveLength(0);
+    await db.exec("reset role");
+    expect((await db.query("select * from report_outbox_events")).rows).toHaveLength(1);
+    expect((await db.query("select * from monthly_closures")).rows).toHaveLength(1);
+    await expect(db.exec("update period_reports set snapshot='{}'")).rejects.toThrow("inmutables");
+  });
+  it("un destinatario inválido o cronómetro activo revierte el cierre; sin vencimiento no inventa puntualidad", async () => {
+    const task = "50000000-0000-0000-0000-000000000099";
+    await db.exec("reset role");
+    await db.query("insert into task_instances(id,organization_id,assignment_id,company_id,owner_id,team_id,period,scheduled_on,title,kind,weight,due_date,status,completed_at) values($1,$2,$3,$4,$5,$6,'2026-10-01','2026-10-01','Sin vencimiento','resultado',5,null,'Completada',now())",[task,ids.org,ids.a,ids.c,ids.employee,ids.team]);
+    await db.query("update auth.users set email_confirmed_at=null where id=$1",[ids.boss]);
+    await actor(ids.boss);
+    await expect(db.query("select close_employee_month($1,'2026-10-01','Controlado')",[ids.employee])).rejects.toThrow("correo verificado");
+    await db.exec("reset role");
+    expect((await db.query("select * from monthly_closures where period='2026-10-01'")).rows).toHaveLength(0);
+    await db.query("update auth.users set email_confirmed_at=now() where id=$1",[ids.boss]);
+    await db.query("insert into task_time_sessions(organization_id,instance_id,actor_id,started_at) values($1,$2,$3,now()-interval '1 hour')",[ids.org,task,ids.employee]);
+    await actor(ids.boss);
+    await expect(db.query("select close_employee_month($1,'2026-10-01','Controlado')",[ids.employee])).rejects.toThrow("cronómetros activos");
+    await db.exec("reset role");
+    await db.query("update task_time_sessions set ended_at=started_at+interval '30 minutes' where instance_id=$1",[task]);
+    await actor(ids.boss);
+    await db.query("select close_employee_month($1,'2026-10-01','Controlado')",[ids.employee]);
+    const snap = (await db.query<{snapshot:{version:number;metrics:{onTime:number|null;recordedSeconds:number};sessions:unknown[]}}>("select snapshot from period_reports where period='2026-10-01'")).rows[0].snapshot;
+    expect(snap.version).toBe(2);
+    expect(snap.metrics.onTime).toBeNull();
+    expect(Number(snap.metrics.recordedSeconds)).toBe(1800);
+    expect(snap.sessions).toHaveLength(1);
+  });
+  it("cinco fallos agotan reintentos; el reintento manual conserva identidad y contador histórico", async () => {
+    let id="";
+    for(let attempt=1;attempt<=5;attempt++) {
+      await db.exec("reset role;set role service_role");
+      const d=(await db.query<{id:string;lease_token:string;attempts:number}>("select * from claim_report_deliveries(1)")).rows[0];
+      id=d.id;
+      expect(d.attempts).toBe(attempt);
+      await db.query("select fail_report_delivery($1,$2,'provider_unavailable',true)",[d.id,d.lease_token]);
+      await db.exec("reset role");
+      const state=(await db.query<{status:string}>("select status from report_deliveries where id=$1",[id])).rows[0];
+      expect(state.status).toBe(attempt===5?"failed":"retry_wait");
+      await db.query("update report_deliveries set next_attempt_at=now()-interval '1 second' where id=$1",[id]);
+    }
+    await actor(ids.boss);
+    await db.query("select retry_report_delivery($1)",[id]);
+    await db.exec("reset role;set role service_role");
+    const next=(await db.query<{id:string;lease_token:string;total_attempts:number}>("select * from claim_report_deliveries(1)")).rows[0];
+    expect(next.id).toBe(id);
+    expect(next.total_attempts).toBe(6);
+    await db.exec("reset role");
+    await db.query("update report_deliveries set lease_until=now()-interval '1 second' where id=$1",[id]);
+    await db.exec("set role service_role");
+    const reclaimed=(await db.query<{id:string;lease_token:string}>("select * from claim_report_deliveries(1)")).rows[0];
+    expect(reclaimed.id).toBe(id);
+    expect(reclaimed.lease_token).not.toBe(next.lease_token);
+    await expect(db.query("select complete_report_delivery($1,$2,'late-ack')",[id,next.lease_token])).rejects.toThrow("Lease");
+    await db.query("select complete_report_delivery($1,$2,'accepted')",[id,reclaimed.lease_token]);
+  });
+
 });
