@@ -1,5 +1,9 @@
 # Ejecución local de 007 — 01/10/2026
 
+Actualización posterior: la revisión terminó con hallazgos reproducidos y
+aceptación pendiente. Ver `REVIEW-007-20261001.md` y contrato 008. Este documento
+conserva la evidencia y los límites de la ejecución original.
+
 ## Resultado
 
 Implementada la migración nueva `202610010007_time_coverage_completion.sql`,
