@@ -1,6 +1,6 @@
 # Revisión del contrato y ejecución siguiente — 01/10/2026
 
-Estado revisado: fuente `9828e23`, frontend 0.4 y las dos migraciones SQL existentes. Esta revisión define la implementación siguiente; no es un backend ya implementado ni autorización para crear infraestructura o enviar correos reales. Ver reglas de modelos en AGENTS.md.
+Estado revisado: frontend 0.4, migraciones SQL 0.3 y ejecución del contrato local `202610010001`. La migración está implementada y probada con PGlite, pero no se aplicó remotamente ni se conectó al frontend. No es autorización para crear infraestructura o enviar correos reales. Ver reglas de modelos en AGENTS.md.
 
 ## Resultado de la revisión
 
@@ -62,13 +62,22 @@ La separación catálogo/asignación/instancia y el cierre transaccional son una
 
 ## Instrucciones ejecutables para GPT 6 Luna — esfuerzo medio
 
-Ejecución siguiente acotada: **contrato SQL y pruebas locales**, sin conectar la interfaz, crear cuentas/infraestructura o enviar correos. No editar las dos migraciones existentes.
+Ejecución completada: **`202610010001_occurrence_contract.sql` y pruebas locales**. Agrega revisiones inmutables del catálogo y alta de procesos de jefatura con MFA; reglas por fecha; ocurrencias con fecha propia y vencimiento opcional; materialización idempotente diaria/semanal/mensual/única; cronómetro y rangos de ausencias. Conserva instancia/lista y cierre existentes durante el upgrade. El día de trabajo histórico se infiere de la fecha de vencimiento disponible en 0.3; las fotos de cierre anteriores quedan intactas.
 
-1. Leer AGENTS.md, este contrato y las dos migraciones. Agregar migración `202610010001_occurrence_contract.sql`: versiones de catálogo/asignación, reglas por fecha, scheduled_on, vencimiento opcional, unicidad de ocurrencia, sesiones y coberturas. Inventariar nombres reales de constraints antes de retirarlas; preservar filas y snapshots 0.3. Actualizar documentación y DTOs tipados del contrato, sin activar adaptador remoto.
-2. Agregar pruebas PGlite desde vacío y actualización con fixture 0.3: dos empresas mismo banco, varias ocurrencias semanales/diarias, noviembre sin fecha de octubre, febrero/31, sin vencimiento, plazo que cruza de mes, peso histórico, aislamiento entre organizaciones y sesiones por actor. Comparar SQL con fixtures de schedule.ts y metrics(); corregir discrepancias dentro de estas decisiones.
-3. Terminar esta ejecución y devolver revisión + resultados. **No empezar aprobación ni correo en la misma ejecución.** Si un requisito no tiene solución compatible con preservación de datos o aparecen decisiones nuevas, documentar el bloqueo para Sol 6.1.
+Evidencia de esta ejecución: 40 tests aprobaron, incluyendo PGlite desde cero, upgrade real de fixture 0.3 que conserva snapshot/checklist/catálogo, recurrencia semanal/diaria, semana de intervalo, vencimiento posterior a febrero, ausencia de vencimiento, día 31, identidad/versionado y nueva asignación al último estándar. Build TypeScript/Vite aprobado.
 
-Ejecución posterior, después de revisar la primera: migración `202610010002_onboarding_approval.sql`, RPC de envío/revisión/aprobación idempotente, líneas por empresa y tests de permisos/MFA, revisión obsoleta, doble envío y rollback completo. En otra ejecución: `202610010003_report_delivery.sql`, cierre/snapshot v2, reporte/outbox y consumidor con proveedor falso, tests de doble cierre, fallos y reintentos.
+Pendientes confirmados de esta etapa: el nuevo contrato no tiene aún un adaptador frontend, bootstrap/alta inicial de jefatura, ni RPC completo que reciba toda la regla semanal (la RPC compatible conserva la firma 0.3). Cronómetro/cobertura tienen tablas y lectura RLS, pero les faltan RPC de escritura autorizadas. No conectar hasta resolver estas superficies; no conceder DML directo.
+
+## Instrucciones ejecutables para GPT 6 Luna — esfuerzo medio: siguiente ejecución
+
+Implementar sólo la aprobación de inducción en `202610010002_onboarding_approval.sql`, localmente y sin conectar la interfaz, crear cuentas/infraestructura ni enviar correos reales. No editar migraciones anteriores.
+
+1. Leer AGENTS.md, esta revisión y las tres migraciones. Definir snapshot por revisión de inducción y líneas por proceso/empresa, cada una con regla completa y meta. Estados `draft`, `submitted`, `changes_requested`, `approved`. Un empleado sólo edita/envía su borrador. Encargado recomienda cambios sin aprobar. Jefatura con MFA aprueba.
+2. Añadir tablas/RLS/RPCs con organización obtenida del perfil del actor, control de revisión obsoleta, idempotencia y auditoría. Aprobar en una transacción: validar catálogo vigente, perfil, membresías y calendarios; sellar solicitud; generar asignaciones para cada línea; materializar sólo períodos abiertos. Error en una línea revierte todo. Evitar que un borrador o paso “terminado” genere trabajo.
+3. Casos PGlite: pausa/continuación; otro usuario no lee ni altera borrador; encargado sólo revisa su equipo; MFA/rol; rechazo/solicitud de cambios; dos empresas mismo estándar con reglas propias; intento de doble envío/aprobación; revisión desactualizada; membresía cambiada; un período cerrado y rollback; catálogo/versiones preservados.
+4. Mantener 40 pruebas previas y añadir los casos anteriores; npm test + npm run build. Revisar migración desde cero y fixture 0.3 + 001. Ajustar materialize_month para recibir reglas completas desde una futura RPC, sin abrir escritor directo. Documentar límites.
+
+**No empezar correo en esta ejecución.** Entrega de reportes sigue en `202610010003_report_delivery.sql`, con cierre/report/outbox atómico y consumidor falso, según los apartados anteriores. Cualquier decisión no definida aquí vuelve a Sol 6.1 alto.
 
 ### Aceptación y límites
 

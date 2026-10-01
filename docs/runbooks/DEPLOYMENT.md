@@ -38,6 +38,8 @@ Las nuevas tareas del catálogo conservan identidad y controles; las particulare
 
 34 pruebas de dominio/SQL aprobadas y build TypeScript/Vite. Cuatro pruebas adicionales verifican consistencia entre empresas, restricción de recurrencia libre, generación única de reportes y conservación del snapshot. Esta actualización no añade una verificación de navegador: el Chromium de este entorno falla al iniciar, antes de cargar la aplicación.
 
-## Tablero plegable y revisión de contrato — 01/10/2026
+## Tablero plegable y contrato de ocurrencias — 01/10/2026
 
-Columnas Pendiente/En curso/Completada independientes: Pendiente inicia abierta; las otras plegadas. Abrir una conserva el estado de las demás. Orden A-Z/Z-A aplica al tablero y lista después de filtrar; no altera las tareas guardadas. Dos pruebas adicionales verifican expansión independiente y orden con acentos/números. La revisión contractual y el siguiente trabajo acotado están en docs/architecture/CONTRACT-REVIEW-20261001.md; no se modificó ni aplicó SQL en esta entrega.
+Columnas Pendiente/En curso/Completada independientes: Pendiente inicia abierta; las otras plegadas. Abrir una conserva el estado de las demás. Orden A-Z/Z-A aplica al tablero y lista después de filtrar; no altera las tareas guardadas. 40 pruebas aprobaron: además de las verificaciones de tablero/estándar/reporte, PGlite valida upgrade 0.3, versiones de catálogo, recurrencias y vencimientos. La revisión y las instrucciones de próxima ejecución están en docs/architecture/CONTRACT-REVIEW-20261001.md. Se agregó localmente la migración de ocurrencias; no se aplicó en un Supabase remoto ni se conectó la interfaz.
+
+Ajuste de tema — 01/10/2026: las superficies, bordes, contadores y foco de las columnas plegables siguen las variables del tema claro/oscuro. La corrección se localizó al revisar la captura enviada. Build aprobado; la verificación de navegador permanece pendiente por fallo de arranque de Chromium del entorno.

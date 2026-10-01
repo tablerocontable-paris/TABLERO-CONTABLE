@@ -27,7 +27,7 @@ Durante el desarrollo: código, commits, versiones y deploy privado en Sites. Al
 
 Implementado en demostración local: criterios anteriores de recurrencia, cronómetro, cobertura, laboratorio aislado, temas, administración de perfiles y planificación, además de KPI/cierre de 0.3. Las vistas de usuarios siguen siendo simulación; aún no hay cuentas reales.
 
-El esquema SQL 0.3 NO constituye todavía el backend definitivo de 0.4. Se requiere adaptar ocurrencias por fecha, sesiones/ausencias y sus RLS/RPC antes de conectar. No conectar directamente el nuevo frontend a las RPC mensuales antiguas.
+El SQL 0.3 no se puede conectar directamente al frontend. La migración local 202610010001 adapta ocurrencias fechadas, versiones de catálogo, vencimientos opcionales, tablas de sesiones y ausencias, con políticas de lectura. Falta RPC de escritura para sesiones/coberturas, la aprobación de inducción, entrega de reportes y el adaptador frontend. No se aplicó en Supabase.
 
 ## Próximas etapas para llegar a versión definitiva
 
@@ -50,6 +50,6 @@ No prometer ausencia total de errores: se reducen con reglas separadas, pruebas 
 
 ## Revisión y próxima ejecución — 01/10/2026
 
-El contrato revisado y las instrucciones para Luna están en `docs/architecture/CONTRACT-REVIEW-20261001.md`. Se confirmó que SQL 0.3 no representa ocurrencias diarias/semanales, vencimientos opcionales, sesiones, coberturas, aprobación ni entrega automática de reportes. La siguiente ejecución implementará sólo contrato SQL por ocurrencia y pruebas locales; luego se revisará antes de abordar aprobación y correo. No crear infraestructura todavía.
+El contrato revisado y las instrucciones para Luna están en `docs/architecture/CONTRACT-REVIEW-20261001.md`. Se confirmó que SQL 0.3 no representa ocurrencias diarias/semanales, vencimientos opcionales, sesiones, coberturas, aprobación ni entrega automática de reportes. La siguiente ejecución implementará sólo aprobación transaccional de inducción `202610010002`; entrega de reportes irá después como `202610010003`. No crear infraestructura todavía.
 
 La vista de tablero permite plegar/desplegar cada columna por separado y ordenar tareas de A a Z o Z a A, tanto en tarjetas como en lista. Son preferencias de vista: no cambian estados, datos o KPI.
