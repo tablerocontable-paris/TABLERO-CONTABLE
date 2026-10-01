@@ -273,3 +273,30 @@ Código 005 + tests + guía; resumen de lo corregido y de la matriz probada; can
 real de pruebas; build/diff; commit/push/deploy confirmados. Enumerar cualquier
 aceptación no alcanzada sin afirmar que el backend está aprobado. Próximo modelo
 Sol 6.1 alto para revisar el resultado antes de crear adaptador/API de frontend.
+
+## Registro de ejecución — 01/10/2026
+
+Implementación local agregada en `supabase/migrations/202610010005_time_coverage_hardening.sql`.
+Se conservaron 001–004. El fixture de actualización ahora ejecuta 001–005 sobre
+el esquema heredado y comprueba que sobrevivan snapshot/cierre, reporte/outbox y
+evento de reapertura con su referencia original.
+
+005 corrige receipts/autenticación, pausa propia suspendida con protección de mes,
+revisión obligatoria, limpieza de sesiones vencidas, corte mínimo ART/cancelación,
+revalidación de acceso tras los guards, cierre mensual con revisión y auditoría de
+relojes expirados, espera/checklist/transición, interrupción con responsable MFA y
+motivo, no-superposición incluso sin reemplazante, cancelación congelada/idempotente,
+ámbito de reemplazo, actividad y límites de inmutabilidad/FK del historial.
+
+Evidencia local más reciente: `npm test` **53/53**, `npm run build` aprobado,
+`git diff --check` sin errores. La suite aplica 001–005 desde cero y actualiza una
+fixture 0.3 hasta 005. Incluye las once regresiones corregidas, prueba de roles/MFA,
+replay no-op, suspensión, mes cerrado, espera/checklist, fin ART tras cancelación,
+overlap sin reemplazo, cancelación repetida y preservación histórica.
+
+Límite vigente: PGlite ejecuta una sola conexión y no verifica carreras, RLS/Auth
+ni MFA reales de Supabase. No hay `psql`/`postgres` instalado ni base de integración;
+las pruebas de carreras de `docs/ops/TIME-COVERAGE-VALIDATION.md` siguen **NO
+EJECUTADAS**. 005 no se aplicó remotamente; frontend no está conectado a este SQL.
+Estado: lista para revisión Sol 6.1 alto, todavía no aprobada para Supabase ni para
+migrar empleados. No ampliar arquitectura hasta cerrar cualquier hallazgo de Sol.

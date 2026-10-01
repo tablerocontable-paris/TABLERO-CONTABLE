@@ -95,16 +95,18 @@ Antes de aplicar 004 o conectarla al frontend, revisión Sol 6.1 alto: confirmar
 - No aplicar SQL remoto, importar empleados, subir secretos, crear cuentas nuevas ni enviar mensajes. Sites conserva audiencia privada. El despliegue de documentación o frontend no implica que el nuevo backend esté conectado.
 - Al devolver: qué cambió, evidencia, pendientes y siguiente modelo recomendado. Para volver a evaluar decisiones o validar el contrato: Sol 6.1 alto. Para ejecutar la siguiente lista aprobada: GPT 6 Luna medio.
 
-## Revisión posterior a 004 — contrato 005 preparado
+## Revisión posterior a 004 — ejecución local 005 completada, revisión pendiente
 
 La revisión de `f547d00` reprodujo **11 violaciones funcionales** en PGlite con datos
-sintéticos, además de hallar diferencias en el orden de locks y la historia. El
-upgrade del fixture anterior termina en 003; la afirmación de validación completa
-de 004 por upgrade queda corregida. 49 pruebas que pasan no equivalen a aceptación
-del contrato 004. No aplicar SQL remoto ni conectar frontend.
+sintéticos, además de hallar diferencias en el orden de locks y la historia. La
+implementación local 005 ya corrige esos casos. El fixture anterior ahora ejecuta
+001–005 y comprueba conservación de snapshot/cierre/reporte/outbox/reapertura. Suite
+actual **53/53**, build y diff check aprobados. Sigue pendiente revisión Sol 6.1 y
+concurrencia entre conexiones PostgreSQL reales. No aplicar SQL remoto ni conectar
+frontend.
 
 Evidencia reproducible y hallazgos: `REVIEW-004-20261001.md` y
-`tests/review/time-coverage-004-probes.mjs`. Decisiones e instrucciones cerradas
-para Luna medio: `TIME-COVERAGE-005-HARDENING.md`. La corrección propuesta preserva
-001–004 y agrega 005, unifica locks/permisos/límites e incorpora la matriz de
-regresiones. Las carreras PostgreSQL entre conexiones siguen NO EJECUTADAS.
+`tests/review/time-coverage-004-probes.mjs`. Código en
+`supabase/migrations/202610010005_time_coverage_hardening.sql`; decisiones,
+resultados y límites en `TIME-COVERAGE-005-HARDENING.md`. Las carreras PostgreSQL
+entre conexiones siguen NO EJECUTADAS.

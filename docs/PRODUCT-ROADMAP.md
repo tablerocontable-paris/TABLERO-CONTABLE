@@ -71,3 +71,14 @@ Todavía no están conectados al frontend ni a Supabase real, y no existe correo
 ## Revisión 004 cerrada — 01/10/2026
 
 Contrato ejecutable: `docs/architecture/TIME-COVERAGE-004.md`. Incluye empresas explícitas para cobertura, autorización temporal limitada a tareas, relojes únicos y pausa atómica, reapertura con motivo y cierre coordinado. Corrige bypass de inducción en create_catalog_assignment. Todavía no implementado: siguiente fase Luna medio. La continuidad entre pasos del mismo modelo queda en AGENTS.md.
+
+## Endurecimiento 005 ejecutado localmente — 01/10/2026
+
+La revisión encontró once fallas en 004; se implementaron sus correcciones en
+`202610010005_time_coverage_hardening.sql` y se amplió el fixture de upgrade desde
+la base heredada hasta 005. Preserva datos cerrados, reportes/outbox y eventos de
+reapertura. Suite local: **53 pruebas**, build y `git diff --check` aprobados.
+PGlite no reemplaza la verificación de carreras PostgreSQL ni Supabase Auth/MFA.
+Siguiente paso: revisión GPT Sol 6.1 alto del código 005; mantener backend sin
+aplicar remotamente y no migrar empleados hasta aprobar revisión, carreras e
+integración real. Detalle: `docs/architecture/TIME-COVERAGE-005-HARDENING.md`.

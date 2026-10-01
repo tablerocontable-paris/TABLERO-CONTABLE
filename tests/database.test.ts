@@ -17,9 +17,10 @@ const ids = {
   t: "50000000-0000-0000-0000-000000000001",
   tpl: "70000000-0000-0000-0000-000000000001",
 };
-async function actor(uid: string) {
+async function actor(uid: string, aal = "aal1") {
   await db.exec("reset role");
   await db.query("select set_config('request.jwt.claim.sub',$1,false)", [uid]);
+  await db.query("select set_config('request.jwt.claims',$1,false)", [JSON.stringify({ aal })]);
   await db.exec("set role authenticated");
 }
 beforeAll(async () => {
@@ -79,7 +80,7 @@ describe("base nueva desde cero y RLS", () => {
       (await db.query<{ status: string }>("select status from task_instances"))
         .rows[0].status,
     ).toBe("Completada");
-    await actor(ids.boss);
+    await actor(ids.boss, "aal2");
     expect((await db.query("select * from audit_events")).rows).toHaveLength(2);
   });
   it("checklist mueve y reabre automáticamente", async () => {
@@ -100,6 +101,7 @@ describe("base nueva desde cero y RLS", () => {
       (await db.query<{ status: string }>("select status from task_instances"))
         .rows[0].status,
     ).toBe("En curso");
+    await expect(db.exec("update task_reopen_events set reason='alterado'" )).rejects.toThrow();
     await expect(
       db.query("select set_checklist_item($1,$2,true)", [ids.t, "missing"]),
     ).rejects.toThrow("Paso inválido");
@@ -192,6 +194,96 @@ describe("base nueva desde cero y RLS", () => {
     await db.query("select pause_task_timer($1,$2)", [session, pause]);
     expect((await db.query<{ ended_at: string | null }>("select ended_at::text from task_time_sessions where id=$1", [session])).rows[0].ended_at).not.toBeNull();
     expect((await db.query<{ state_revision: number }>("select state_revision from task_instances where id=$1", [timed])).rows[0].state_revision).toBe(2);
+  });
+  it("rechaza revisiones y switch nulos y conserva el recibo de un inicio no-op", async () => {
+    const task = "50000000-0000-0000-0000-000000000211";
+    await db.exec("reset role");
+    await db.query("insert into task_instances(id,organization_id,assignment_id,company_id,owner_id,team_id,period,scheduled_on,title,kind,weight,due_date) values($1,$2,$3,$4,$5,$6,'2026-11-01','2026-11-02','Receipts','resultado',5,'2026-11-30')", [task,ids.org,ids.a,ids.c,ids.employee,ids.team]);
+    await actor(ids.employee);
+    await expect(db.query("select start_task_timer($1,null,$2,false)",[task,"90000000-0000-0000-0000-000000000211"])).rejects.toThrow("revisión");
+    await expect(db.query("select start_task_timer($1,0,$2,null)",[task,"90000000-0000-0000-0000-000000000212"])).rejects.toThrow("revisión");
+    const first="90000000-0000-0000-0000-000000000213",noop="90000000-0000-0000-0000-000000000214",pause="90000000-0000-0000-0000-000000000215";
+    const session=(await db.query<{start_task_timer:string}>("select start_task_timer($1,0,$2,false)",[task,first])).rows[0].start_task_timer;
+    expect((await db.query<{start_task_timer:string}>("select start_task_timer($1,1,$2,false)",[task,noop])).rows[0].start_task_timer).toBe(session);
+    await db.query("select pause_task_timer($1,$2)",[session,pause]);
+    expect((await db.query<{start_task_timer:string}>("select start_task_timer($1,1,$2,false)",[task,noop])).rows[0].start_task_timer).toBe(session);
+    expect((await db.query<{ended_at:string|null}>("select ended_at::text from task_time_sessions where id=$1",[session])).rows[0].ended_at).not.toBeNull();
+  });
+  it("solo permite pausar al suspendido, protege el mes cerrado y bloquea inicio en espera", async () => {
+    const closed="50000000-0000-0000-0000-000000000221",blocked="50000000-0000-0000-0000-000000000222",suspendedTask="50000000-0000-0000-0000-000000000223";
+    await db.exec("reset role");
+    await db.query("insert into task_instances(id,organization_id,assignment_id,company_id,owner_id,team_id,period,scheduled_on,title,kind,weight,due_date,checklist) values($1,$2,$3,$4,$5,$6,'2026-11-01','2026-11-04','Espera','resultado',5,'2026-11-30','[{\"id\":\"step\",\"done\":false}]')",[blocked,ids.org,ids.a,ids.c,ids.employee,ids.team]);
+    const session=(await db.query<{id:string}>("insert into task_time_sessions(organization_id,instance_id,actor_id,started_at) values($1,$2,$3,now()-interval '1 hour') returning id",[ids.org,ids.t,ids.employee])).rows[0].id;
+    await actor(ids.employee);
+    await expect(db.query("select pause_task_timer($1,$2)",[session,"90000000-0000-0000-0000-000000000221"])).rejects.toThrow("cerrado");
+    await db.exec("reset role");
+    await db.query("update task_time_sessions set ended_at=clock_timestamp() where id=$1",[session]);
+    await db.query("insert into task_instances(id,organization_id,assignment_id,company_id,owner_id,team_id,period,scheduled_on,title,kind,weight,due_date) values($1,$2,$3,$4,$5,$6,'2027-01-01','2027-01-08','Pausa de usuario suspendido','resultado',5,'2027-01-30')",[suspendedTask,ids.org,ids.a,ids.c,ids.employee,ids.team]);
+    const ownSession=(await db.query<{id:string}>("insert into task_time_sessions(organization_id,instance_id,actor_id,started_at) values($1,$2,$3,now()-interval '1 hour') returning id",[ids.org,suspendedTask,ids.employee])).rows[0].id;
+    await db.exec("reset role"); await db.query("update profiles set active=false where id=$1",[ids.employee]);
+    await actor(ids.employee);
+    await db.query("select pause_task_timer($1,$2)",[ownSession,"90000000-0000-0000-0000-000000000222"]);
+    expect((await db.query<{ended_at:string|null}>("select ended_at::text from task_time_sessions where id=$1",[ownSession])).rows[0].ended_at).not.toBeNull();
+    await db.exec("reset role"); await db.query("update profiles set active=true where id=$1",[ids.employee]);
+    await actor(ids.employee);
+    await expect(db.query("select set_task_wait($1,$2,0,$3)",[blocked,"   ","90000000-0000-0000-0000-000000000223"])).rejects.toThrow("descripción");
+    await expect(db.query("select transition_task_reviewed($1,'En curso',null,null,$2)",[blocked,"90000000-0000-0000-0000-000000000227"])).rejects.toThrow("revisión");
+    await expect(db.query("select set_checklist_item_reviewed($1,'step',true,null,null,$2)",[blocked,"90000000-0000-0000-0000-000000000228"])).rejects.toThrow("revisión");
+    await db.query("select set_task_wait($1,$2,0,$3)",[blocked,"Esperando soporte","90000000-0000-0000-0000-000000000224"]);
+    await expect(db.query("select transition_task_reviewed($1,'En curso',null,1,$2)",[blocked,"90000000-0000-0000-0000-000000000225"])).rejects.toThrow("iniciarla");
+    expect((await db.query<{status:string;state_revision:number}>("select status,state_revision from task_instances where id=$1",[blocked])).rows[0]).toMatchObject({status:"Pendiente",state_revision:1});
+    await db.query("select set_checklist_item_reviewed($1,'step',true,null,1,$2)",[blocked,"90000000-0000-0000-0000-000000000226"]);
+    expect((await db.query<{status:string;state_revision:number}>("select status,state_revision from task_instances where id=$1",[blocked])).rows[0]).toMatchObject({status:"Pendiente",state_revision:2});
+    expect((await db.query("select * from task_time_sessions where instance_id=$1 and ended_at is null",[blocked])).rows).toHaveLength(0);
+  });
+  it("el empleado no puede completar controles ni detener el reloj de un encargado", async () => {
+    const task="50000000-0000-0000-0000-000000000231";
+    await db.exec("reset role");
+    await db.query("insert into task_instances(id,organization_id,assignment_id,company_id,owner_id,team_id,period,scheduled_on,title,kind,weight,due_date,status,started_at,checklist) values($1,$2,$3,$4,$5,$6,'2026-12-01','2026-12-02','Revisión entre actores','resultado',5,'2026-12-30','En curso',now(),'[{\"id\":\"step\",\"done\":false}]')",[task,ids.org,ids.a,ids.c,ids.employee,ids.team]);
+    await actor(ids.manager);
+    const session=(await db.query<{start_task_timer:string}>("select start_task_timer($1,0,$2,false)",[task,"90000000-0000-0000-0000-000000000231"])).rows[0].start_task_timer;
+    await actor(ids.employee);
+    await expect(db.query("select set_checklist_item_reviewed($1,'step',true,null,1,$2)",[task,"90000000-0000-0000-0000-000000000232"])).rejects.toThrow("ejecutor");
+    expect((await db.query<{ended_at:string|null}>("select ended_at::text from task_time_sessions where id=$1",[session])).rows[0].ended_at).toBeNull();
+    expect((await db.query<{status:string;done:boolean}>("select status,checklist->0->>'done'='true' as done from task_instances where id=$1",[task])).rows[0]).toMatchObject({status:"En curso",done:false});
+    await actor(ids.boss);
+    await expect(db.query("select transition_task_reviewed($1,'Pendiente','Intervención verificada',1,$2)",[task,"90000000-0000-0000-0000-000000000233"])).rejects.toThrow("MFA");
+    await actor(ids.boss,"aal2");
+    await expect(db.query("select transition_task_reviewed($1,'Pendiente','   ',1,$2)",[task,"90000000-0000-0000-0000-000000000234"])).rejects.toThrow("motivo");
+    await db.query("select transition_task_reviewed($1,'Pendiente','Interrupción revisada por jefatura',1,$2)",[task,"90000000-0000-0000-0000-000000000235"]);
+    expect((await db.query<{ended_at:string|null}>("select ended_at::text from task_time_sessions where id=$1",[session])).rows[0].ended_at).not.toBeNull();
+    await db.exec("reset role");
+    await db.query("update task_time_sessions set ended_at=clock_timestamp() where id=$1",[session]);
+  });
+  it("cota una sesión cubierta a medianoche ART aunque se cancele después", async () => {
+    const task="50000000-0000-0000-0000-000000000241";
+    await db.exec("reset role");
+    await db.query("insert into task_instances(id,organization_id,assignment_id,company_id,owner_id,team_id,period,scheduled_on,title,kind,weight,due_date) values($1,$2,$3,$4,$5,$6,'2026-01-01','2026-01-12','Cobertura finita','resultado',5,'2026-01-30')",[task,ids.org,ids.a,ids.c,ids.employee,ids.team]);
+    await db.exec(`reset role;select set_config('request.jwt.claim.sub','${ids.boss}',false);select set_config('request.jwt.claims','{"aal":"aal2"}',false);set role authenticated;`);
+    const absence=(await db.query<{approve_employee_absence:string}>("select approve_employee_absence($1,$2,'licencia','2026-01-01','2026-01-01',array[$3]::uuid[],'Cobertura de prueba',$4)",[ids.employee,ids.manager,ids.c,"90000000-0000-0000-0000-000000000241"])).rows[0].approve_employee_absence;
+    await db.exec("reset role");
+    await db.query("update task_time_sessions set ended_at=clock_timestamp() where actor_id=$1 and ended_at is null",[ids.manager]);
+    const session=(await db.query<{id:string}>("insert into task_time_sessions(organization_id,instance_id,actor_id,started_at,absence_id) values($1,$2,$3,'2026-01-01 12:00+00',$4) returning id",[ids.org,task,ids.manager,absence])).rows[0].id;
+    await db.exec(`reset role;select set_config('request.jwt.claim.sub','${ids.boss}',false);select set_config('request.jwt.claims','{"aal":"aal2"}',false);set role authenticated;`);
+    await db.query("select cancel_employee_absence($1,'Fin anticipado confirmado',$2)",[absence,"90000000-0000-0000-0000-000000000242"]);
+    await db.exec("reset role");
+    const result=(await db.query<{end:string;expiry:string}>("select ended_at::text as end,('2026-01-02'::date::timestamp at time zone 'America/Argentina/Buenos_Aires')::text as expiry from task_time_sessions where id=$1",[session])).rows[0];
+    expect(new Date(result.end).toISOString()).toBe(new Date(result.expiry).toISOString());
+    await db.query("select cancel_employee_absence($1,'Texto distinto de reintento',$2)",[absence,"90000000-0000-0000-0000-000000000243"]);
+    expect((await db.query("select * from audit_events where action='absence.cancelled' and entity_id=$1",[absence])).rows).toHaveLength(1);
+    const expiredSession=(await db.query<{id:string}>("insert into task_time_sessions(organization_id,instance_id,actor_id,started_at,absence_id) values($1,$2,$3,'2026-01-01 12:00+00',$4) returning id",[ids.org,task,ids.manager,absence])).rows[0].id;
+    await actor(ids.manager);
+    const resumed=(await db.query<{start_task_timer:string}>("select start_task_timer($1,1,$2,false)",["50000000-0000-0000-0000-000000000223","90000000-0000-0000-0000-000000000246"])).rows[0].start_task_timer;
+    await db.exec("reset role");
+    expect((await db.query<{ended_at:string|null}>("select ended_at::text from task_time_sessions where id=$1",[expiredSession])).rows[0].ended_at).not.toBeNull();
+    await actor(ids.manager);
+    await db.query("select pause_task_timer($1,$2)",[resumed,"90000000-0000-0000-0000-000000000247"]);
+    await actor(ids.boss,"aal2");
+    const noCoverage=(await db.query<{approve_employee_absence:string}>("select approve_employee_absence($1,null,'vacaciones','2026-02-01','2026-02-03','{}','Sin reemplazo',$2)",[ids.employee,"90000000-0000-0000-0000-000000000244"])).rows[0].approve_employee_absence;
+    await expect(db.query("select approve_employee_absence($1,null,'licencia','2026-02-03','2026-02-05','{}','Otro rango',$2)",[ids.employee,"90000000-0000-0000-0000-000000000245"])).rejects.toThrow("superpone");
+    await db.exec("reset role");
+    expect((await db.query("select * from employee_absences where owner_id=$1 and cancelled_at is null and starts_on='2026-02-01'",[ids.employee])).rows).toHaveLength(1);
+    expect(noCoverage).toBeTruthy();
   });
   it("anon no tiene lectura", async () => {
     await db.exec("reset role;set role anon");
@@ -292,6 +384,9 @@ describe("base nueva desde cero y RLS", () => {
         ),
       );
       await legacy.exec(readFileSync(new URL("../supabase/migrations/202610010003_report_delivery.sql", import.meta.url), "utf8"));
+      await legacy.exec(`insert into audit_events(organization_id,actor_id,action,entity_id,details) values('${ids.org}','${ids.boss}','task.transition','${ids.t.replace("500", "600")}','{"from":"Completada","to":"Pendiente"}');insert into period_reports(id,organization_id,closure_id,owner_id,period,snapshot) select '81000000-0000-0000-0000-000000000001',organization_id,id,owner_id,period,'{"legacy_report":true}' from monthly_closures where owner_id='${ids.employee}' and period='2026-09-01';insert into report_deliveries(id,organization_id,report_id,recipient_id,recipient_email) values('82000000-0000-0000-0000-000000000001','${ids.org}','81000000-0000-0000-0000-000000000001','${ids.boss}','boss@legacy.test');insert into report_outbox_events(id,organization_id,delivery_id) values('83000000-0000-0000-0000-000000000001','${ids.org}','82000000-0000-0000-0000-000000000001');`);
+      for (const f of readdirSync(new URL("../supabase/migrations/", import.meta.url)).filter((n) => /^20261001000[45]_/.test(n)).sort())
+        await legacy.exec(readFileSync(new URL("../supabase/migrations/" + f, import.meta.url), "utf8"));
       const instance = (
         await legacy.query<{
           scheduled_on: string;
@@ -324,6 +419,11 @@ describe("base nueva desde cero y RLS", () => {
         ).rows[0].template_version_id,
       ).toBeTruthy();
       expect((await legacy.query("select * from onboarding_requests")).rows).toHaveLength(0);
+      expect((await legacy.query("select * from task_time_sessions")).rows).toHaveLength(0);
+      expect((await legacy.query<{snapshot:object}>("select snapshot from monthly_closures")).rows[0].snapshot).toEqual({ immutable: true });
+      expect((await legacy.query<{id:string;snapshot:object}>("select id,snapshot from period_reports")).rows[0]).toEqual({id:"81000000-0000-0000-0000-000000000001",snapshot:{legacy_report:true}});
+      expect((await legacy.query("select * from report_outbox_events where id='83000000-0000-0000-0000-000000000001'")).rows).toHaveLength(1);
+      expect((await legacy.query("select * from task_reopen_events where legacy_audit_id=(select max(id) from audit_events where action='task.transition')")).rows).toHaveLength(1);
     } finally {
       await legacy.close();
     }
@@ -377,7 +477,7 @@ describe("base nueva desde cero y RLS", () => {
     await db.exec(
       `insert into companies values('${ids.c2}','${ids.org}','Otra empresa');insert into company_memberships values('${ids.org}','${ids.c2}','${ids.employee}'),('${ids.org}','${ids.c2}','${ids.manager}');`,
     );
-    await actor(ids.manager);
+    await actor(ids.manager, "aal2");
     await expect(db.query("select create_catalog_assignment($1,$2,$3,$4,'2026-10-01',31,'mensual')", [templateId, ids.c, ids.employee, ids.team])).rejects.toThrow("Sólo jefatura");
     await db.exec(`reset role;select set_config('request.jwt.claim.sub','${ids.boss}',false);select set_config('request.jwt.claims','{\"aal\":\"aal2\"}',false);set role authenticated;`);
     const created = await db.query<{ create_catalog_assignment: string }>(
@@ -503,7 +603,7 @@ describe("base nueva desde cero y RLS", () => {
     await expect(db.query("select claim_report_deliveries(1)")).rejects.toThrow();
     await actor(ids.outsider);
     expect((await db.query("select * from period_reports")).rows).toHaveLength(0);
-    await actor(ids.boss);
+    await actor(ids.boss, "aal2");
     await expect(db.query("select set_report_recipient($1)", [ids.manager])).rejects.toThrow("correo verificado");
     await expect(db.query("select set_report_recipient($1)", [ids.outsider])).rejects.toThrow("correo verificado");
     await db.query("select set_report_recipient($1)", [ids.boss]);
@@ -534,19 +634,19 @@ describe("base nueva desde cero y RLS", () => {
   it("un destinatario inválido o cronómetro activo revierte el cierre; sin vencimiento no inventa puntualidad", async () => {
     const task = "50000000-0000-0000-0000-000000000099";
     await db.exec("reset role");
-    await db.query("insert into task_instances(id,organization_id,assignment_id,company_id,owner_id,team_id,period,scheduled_on,title,kind,weight,due_date,status,completed_at) values($1,$2,$3,$4,$5,$6,'2026-10-01','2026-10-01','Sin vencimiento','resultado',5,null,'Completada',now())",[task,ids.org,ids.a,ids.c,ids.employee,ids.team]);
+    await db.query("insert into task_instances(id,organization_id,assignment_id,company_id,owner_id,team_id,period,scheduled_on,title,kind,weight,due_date,status,completed_at) values($1,$2,$3,$4,$5,$6,'2026-10-01','2026-10-15','Sin vencimiento','resultado',5,null,'Completada',now())",[task,ids.org,ids.a,ids.c,ids.employee,ids.team]);
     await db.query("update auth.users set email_confirmed_at=null where id=$1",[ids.boss]);
-    await actor(ids.boss);
+    await actor(ids.boss, "aal2");
     await expect(db.query("select close_employee_month($1,'2026-10-01','Controlado')",[ids.employee])).rejects.toThrow("correo verificado");
     await db.exec("reset role");
     expect((await db.query("select * from monthly_closures where period='2026-10-01'")).rows).toHaveLength(0);
     await db.query("update auth.users set email_confirmed_at=now() where id=$1",[ids.boss]);
     await db.query("insert into task_time_sessions(organization_id,instance_id,actor_id,started_at) values($1,$2,$3,now()-interval '1 hour')",[ids.org,task,ids.employee]);
-    await actor(ids.boss);
+    await actor(ids.boss, "aal2");
     await expect(db.query("select close_employee_month($1,'2026-10-01','Controlado')",[ids.employee])).rejects.toThrow("cronómetros activos");
     await db.exec("reset role");
     await db.query("update task_time_sessions set ended_at=started_at+interval '30 minutes' where instance_id=$1",[task]);
-    await actor(ids.boss);
+    await actor(ids.boss, "aal2");
     await db.query("select close_employee_month($1,'2026-10-01','Controlado')",[ids.employee]);
     const snap = (await db.query<{snapshot:{version:number;metrics:{onTime:number|null;recordedSeconds:number};sessions:unknown[]}}>("select snapshot from period_reports where period='2026-10-01'")).rows[0].snapshot;
     expect(snap.version).toBe(3);
@@ -568,7 +668,7 @@ describe("base nueva desde cero y RLS", () => {
       expect(state.status).toBe(attempt===5?"failed":"retry_wait");
       await db.query("update report_deliveries set next_attempt_at=now()-interval '1 second' where id=$1",[id]);
     }
-    await actor(ids.boss);
+    await actor(ids.boss, "aal2");
     await db.query("select retry_report_delivery($1)",[id]);
     await db.exec("reset role;set role service_role");
     const next=(await db.query<{id:string;lease_token:string;total_attempts:number}>("select * from claim_report_deliveries(1)")).rows[0];
