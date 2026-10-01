@@ -10,6 +10,7 @@ import {
   defaultSchedule,
   validateSchedule,
   describeSchedule,
+  validDate,
   type Schedule,
 } from "./domain/schedule";
 import {
@@ -227,7 +228,7 @@ export default function App() {
   }
   function saveAnnotation(
     input: Pick<Annotation, "id" | "title" | "content" | "kind" | "reminderOn">,
-  ) {
+  ): boolean {
     const now = new Date().toISOString();
     const existing = state.annotations?.find(
       (a) => a.id === input.id && a.ownerId === active.id,
@@ -244,18 +245,28 @@ export default function App() {
       notify(
         "Esta anotación ya está vinculada a una tarea y quedó como referencia.",
       );
-      return;
+      return false;
     }
-    if (
-      commit({
-        ...state,
-        annotations: [
-          ...(state.annotations || []).filter((a) => a.id !== annotation.id),
-          annotation,
-        ],
-      })
-    )
+    if (input.kind === "reminder" && !input.reminderOn) {
+      notify("Elegí una fecha para el recordatorio.");
+      return false;
+    }
+    if (input.reminderOn && !validDate(input.reminderOn)) {
+      notify("La fecha del recordatorio no es válida.");
+      return false;
+    }
+    const saved = commit({
+      ...state,
+      annotations: [
+        ...(state.annotations || []).filter((a) => a.id !== annotation.id),
+        annotation,
+      ],
+    });
+    if (saved) {
       notify("Anotación guardada en este perfil.");
+      return true;
+    }
+    return false;
   }
   function deleteAnnotation(annotationId: string) {
     const note = state.annotations?.find(
@@ -269,10 +280,18 @@ export default function App() {
     });
   }
   function convertAnnotation(note: Annotation) {
-    if (note.ownerId !== active.id || note.convertedTaskId) return;
-    setNoteToTask(note);
+    const latest = state.annotations?.find((entry) => entry.id === note.id);
+    if (!latest || latest.ownerId !== active.id) {
+      notify("Esta anotación ya no está disponible en tu perfil.");
+      return;
+    }
+    if (latest.convertedTaskId) {
+      notify("Esta anotación ya está vinculada a una tarea.");
+      return;
+    }
+    setNoteToTask(latest);
     setOwner(active.id);
-    if (note.reminderOn) setMonth(note.reminderOn.slice(0, 7));
+    if (latest.reminderOn) setMonth(latest.reminderOn.slice(0, 7));
     setPage("tasks");
     setModal("new");
   }
@@ -499,11 +518,13 @@ export default function App() {
           step: 5,
         },
       },
+      tour: { ...state.tour, [active.id]: 0 },
+      tourVersion: { ...state.tourVersion, [active.id]: 2 },
     };
     next = materialize(next, month);
     if (commit(next, "Completó inducción", active.id)) {
       setInduct(false);
-      setPage(draft.home);
+      setPage("day");
       setOwner(active.id);
       setTourOpen(true);
     }
@@ -944,11 +965,16 @@ export default function App() {
       : []),
   ];
   const tourVersion = 2;
-  const savedTour =
+  const savedTourValue =
     state.tourVersion?.[active.id] === tourVersion
       ? state.tour[active.id] || 0
       : 0;
-  const tourStep = Math.min(savedTour, tours.length - 1);
+  const savedTour = Number.isSafeInteger(savedTourValue)
+    ? Math.min(Math.max(savedTourValue, 0), tours.length)
+    : 0;
+  const tourStep = Number.isSafeInteger(savedTour)
+    ? Math.min(Math.max(savedTour, 0), tours.length - 1)
+    : 0;
   return (
     <>
       <aside className="sidebar">
@@ -995,16 +1021,19 @@ export default function App() {
           </button>
           <button
             onClick={() => {
-              const progress =
-                state.tourVersion?.[active.id] === tourVersion
-                  ? state.tour[active.id] || 0
-                  : 0;
+              const progress = savedTour;
               const start = progress >= tours.length ? 0 : progress;
-              commit({
-                ...state,
-                tour: { ...state.tour, [active.id]: start },
-                tourVersion: { ...state.tourVersion, [active.id]: tourVersion },
-              });
+              if (
+                !commit({
+                  ...state,
+                  tour: { ...state.tour, [active.id]: start },
+                  tourVersion: {
+                    ...state.tourVersion,
+                    [active.id]: tourVersion,
+                  },
+                })
+              )
+                return;
               setPage(tours[start].page);
               setTourOpen(true);
             }}
@@ -1260,7 +1289,6 @@ export default function App() {
                   (state.annotations || []).some(
                     (a) =>
                       a.ownerId === active.id &&
-                      a.kind === "reminder" &&
                       a.reminderOn &&
                       a.reminderOn <= dateART() &&
                       !a.convertedTaskId,
@@ -1272,7 +1300,6 @@ export default function App() {
                           (state.annotations || []).filter(
                             (a) =>
                               a.ownerId === active.id &&
-                              a.kind === "reminder" &&
                               a.reminderOn &&
                               a.reminderOn <= dateART() &&
                               !a.convertedTaskId,
@@ -2269,16 +2296,18 @@ export default function App() {
               className="primary"
               onClick={() => {
                 if (tourStep === tours.length - 1) {
-                  setTourOpen(false);
-                  commit({
-                    ...state,
-                    tour: { ...state.tour, [active.id]: tours.length },
-                    tourVersion: {
-                      ...state.tourVersion,
-                      [active.id]: tourVersion,
-                    },
-                  });
-                } else
+                  if (
+                    commit({
+                      ...state,
+                      tour: { ...state.tour, [active.id]: tours.length },
+                      tourVersion: {
+                        ...state.tourVersion,
+                        [active.id]: tourVersion,
+                      },
+                    })
+                  )
+                    setTourOpen(false);
+                } else if (
                   commit({
                     ...state,
                     tour: { ...state.tour, [active.id]: tourStep + 1 },
@@ -2286,9 +2315,10 @@ export default function App() {
                       ...state.tourVersion,
                       [active.id]: tourVersion,
                     },
-                  });
-                if (tourStep < tours.length - 1)
+                  })
+                ) {
                   setPage(tours[tourStep + 1].page);
+                }
               }}
             >
               {tourStep === tours.length - 1 ? "Listo" : "Siguiente"}
@@ -2317,6 +2347,36 @@ export default function App() {
               notify((e as Error).message);
               return;
             }
+            const converting = noteToTask !== null;
+            const effectiveSchedule =
+              a.schedule || defaultSchedule(a.startMonth + "-01", a.frequency);
+            const sourceNote = converting
+              ? state.annotations?.find((entry) => entry.id === noteToTask.id)
+              : undefined;
+            if (
+              converting &&
+              (!sourceNote ||
+                sourceNote.ownerId !== active.id ||
+                sourceNote.convertedTaskId)
+            ) {
+              notify(
+                "La anotación ya no está disponible o ya tiene una tarea vinculada.",
+              );
+              return;
+            }
+            if (
+              converting &&
+              (a.frequency !== "única" ||
+                effectiveSchedule.frequency !== "única")
+            ) {
+              notify(
+                "Una anotación se convierte en una tarea puntual; cambiá la frecuencia a una sola vez.",
+              );
+              return;
+            }
+            const targetPeriod = converting
+              ? effectiveSchedule.startDate.slice(0, 7)
+              : month;
             const responsible = state.profiles.find((p) => p.id === a.ownerId);
             if (
               !responsible?.active ||
@@ -2328,41 +2388,35 @@ export default function App() {
             }
             if (
               state.closures.some(
-                (c) => c.ownerId === a.ownerId && c.month === month,
+                (c) => c.ownerId === a.ownerId && c.month === targetPeriod,
               )
             ) {
-              notify("El mes de esa persona está cerrado.");
+              notify(`El período ${targetPeriod} de esa persona está cerrado.`);
               return;
             }
-            const annotationDraft =
-              noteToTask && noteToTask.ownerId === active.id
-                ? (state.annotations || []).map((entry) =>
-                    entry.id === noteToTask.id
-                      ? {
-                          ...entry,
-                          reminderOn: null,
-                          updatedAt: new Date().toISOString(),
-                        }
-                      : entry,
-                  )
-                : state.annotations;
             const next = materialize(
               {
                 ...state,
                 assignments: [...state.assignments, a],
-                annotations: annotationDraft,
               },
-              month,
+              targetPeriod,
             );
-            const created = next.tasks.find(
-              (task) => task.assignmentId === a.id,
+            const created = next.tasks.filter(
+              (task) =>
+                task.assignmentId === a.id && task.month === targetPeriod,
             );
-            if (noteToTask && created)
+            if (converting && created.length !== 1) {
+              notify(
+                "No se pudo crear una tarjeta única para esta anotación. No guardé cambios.",
+              );
+              return;
+            }
+            if (converting && sourceNote && created.length === 1)
               next.annotations = (next.annotations || []).map((entry) =>
-                entry.id === noteToTask.id
+                entry.id === sourceNote.id
                   ? {
                       ...entry,
-                      convertedTaskId: created.id,
+                      convertedTaskId: created[0].id,
                       reminderOn: null,
                       updatedAt: new Date().toISOString(),
                     }
@@ -2371,6 +2425,7 @@ export default function App() {
             if (commit(next, "Creó asignación", a.id)) {
               setModal(null);
               setNoteToTask(null);
+              setMonth(targetPeriod);
               notify("Tarea creada con empresa y período propios.");
             }
           }}
@@ -2908,7 +2963,7 @@ function NewTask({
               .map((s) => s.trim())
               .filter(Boolean)
           : [],
-      startMonth: month,
+      startMonth: seedAnnotation ? schedule.startDate.slice(0, 7) : month,
       priority: String(f.get("priority")) as Assignment["priority"],
     });
   }
@@ -3056,7 +3111,7 @@ function NewTask({
           value={schedule}
           onChange={setSchedule}
           month={month}
-          onlyOnce={!t}
+          onlyOnce={!!seedAnnotation || !t}
         />
         {scheduleError && <p role="alert">{scheduleError}</p>}
         {kind === "resultado" && (

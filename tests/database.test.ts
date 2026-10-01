@@ -23,6 +23,19 @@ async function actor(uid: string, aal = "aal1") {
   await db.query("select set_config('request.jwt.claims',$1,false)", [JSON.stringify({ aal })]);
   await db.exec("set role authenticated");
 }
+async function prepareReportFixture(suffix: string, period: string, withDelivery = false) {
+  const closureId = `81000000-0000-0000-0000-${suffix}`;
+  const reportId = `82000000-0000-0000-0000-${suffix}`;
+  const deliveryId = `83000000-0000-0000-0000-${suffix}`;
+  await db.exec("reset role");
+  await db.query("insert into monthly_closures(id,organization_id,owner_id,period,snapshot,closed_by,note) values($1,$2,$3,$4,'{}',$5,'Isolated report fixture')", [closureId, ids.org, ids.employee, period, ids.boss]);
+  await db.query("insert into period_reports(id,organization_id,closure_id,owner_id,period,snapshot) values($1,$2,$3,$4,$5,'{}')", [reportId, ids.org, closureId, ids.employee, period]);
+  if (withDelivery) {
+    await db.query("insert into report_deliveries(id,organization_id,report_id,recipient_id,recipient_email) values($1,$2,$3,$4,'boss@example.test')", [deliveryId, ids.org, reportId, ids.boss]);
+    await db.query("insert into report_outbox_events(id,organization_id,delivery_id) values($1,$2,$3)", [`84000000-0000-0000-0000-${suffix}`, ids.org, deliveryId]);
+  }
+  return { closureId, reportId, deliveryId };
+}
 beforeAll(async () => {
   db = new PGlite();
   await db.exec(
@@ -616,19 +629,23 @@ describe("base nueva desde cero y RLS", () => {
     expect((await db.query<{ approve_onboarding: number }>("select approve_onboarding($1,2)", [request])).rows[0].approve_onboarding).toBe(2);
   });
   it("reportes privados, destinatario verificado y consumidor reservado al servidor", async () => {
+    const fixture = await prepareReportFixture("000000000101", "2025-01-01");
     await actor(ids.employee);
-    expect((await db.query("select * from period_reports")).rows).toHaveLength(1);
-    expect((await db.query("select * from report_deliveries")).rows).toHaveLength(0);
+    expect((await db.query("select * from period_reports where id=$1", [fixture.reportId])).rows).toHaveLength(1);
+    expect((await db.query("select * from report_deliveries where report_id=$1", [fixture.reportId])).rows).toHaveLength(0);
     await expect(db.query("select claim_report_deliveries(1)")).rejects.toThrow();
     await actor(ids.outsider);
-    expect((await db.query("select * from period_reports")).rows).toHaveLength(0);
+    expect((await db.query("select * from period_reports where id=$1", [fixture.reportId])).rows).toHaveLength(0);
     await actor(ids.boss, "aal2");
     await expect(db.query("select set_report_recipient($1)", [ids.manager])).rejects.toThrow("correo verificado");
     await expect(db.query("select set_report_recipient($1)", [ids.outsider])).rejects.toThrow("correo verificado");
     await db.query("select set_report_recipient($1)", [ids.boss]);
   });
   it("la entrega respeta lease, reintenta y no regenera cierre ni eventos", async () => {
-    await db.exec("reset role;set role service_role");
+    await db.exec("reset role");
+    await db.query("update report_deliveries set status='failed',last_error='isolated worker fixture' where status in ('pending','retry_wait')");
+    const fixture = await prepareReportFixture("000000000102", "2025-02-01", true);
+    await db.exec("set role service_role");
     const first = (await db.query<{id:string;lease_token:string}>("select * from claim_report_deliveries(1)")).rows[0];
     expect(first).toBeDefined();
     expect((await db.query("select * from claim_report_deliveries(1)")).rows).toHaveLength(0);
@@ -646,8 +663,8 @@ describe("base nueva desde cero y RLS", () => {
     await db.query("select complete_report_delivery($1,$2,'fake-accepted')",[second.id,second.lease_token]);
     expect((await db.query("select * from claim_report_deliveries(1)")).rows).toHaveLength(0);
     await db.exec("reset role");
-    expect((await db.query("select * from report_outbox_events")).rows).toHaveLength(1);
-    expect((await db.query("select * from monthly_closures")).rows).toHaveLength(1);
+    expect((await db.query("select * from report_outbox_events where delivery_id=$1", [fixture.deliveryId])).rows).toHaveLength(1);
+    expect((await db.query("select * from monthly_closures where id=$1", [fixture.closureId])).rows).toHaveLength(1);
     await expect(db.exec("update period_reports set snapshot='{}'")).rejects.toThrow("inmutables");
   });
   it("un destinatario inválido o cronómetro activo revierte el cierre; sin vencimiento no inventa puntualidad", async () => {
@@ -670,13 +687,19 @@ describe("base nueva desde cero y RLS", () => {
     await expect(db.query("select close_employee_month($1,'2026-10-01','Controlado')",[ids.boss])).rejects.toThrow("cronómetros activos");
     await db.query("select pause_task_timer($1,$2)",[activeSession,"90000000-0000-0000-0000-000000000099"]);
     await db.query("select close_employee_month($1,'2026-10-01','Controlado')",[ids.boss]);
-    const snap = (await db.query<{snapshot:{version:number;metrics:{onTime:number|null;recordedSeconds:number};sessions:unknown[]}}>("select snapshot from period_reports where period='2026-10-01'")).rows[0].snapshot;
+    const snap = (await db.query<{snapshot:{version:number;metrics:{onTime:number|null;recordedSeconds:number;operational:number;operationalTarget:number};sessions:unknown[]}}>("select snapshot from period_reports where period='2026-10-01'")).rows[0].snapshot;
     expect(snap.version).toBe(3);
     expect(snap.metrics.onTime).toBeNull();
-    expect(Number(snap.metrics.recordedSeconds)).toBeCloseTo(1800,1);
+    expect(Number(snap.metrics.recordedSeconds)).toBeGreaterThanOrEqual(1800);
+    expect(Number(snap.metrics.recordedSeconds)).toBeLessThan(1801);
+    expect(snap.metrics.operational).toBe(0);
+    expect(snap.metrics.operationalTarget).toBe(0);
     expect(snap.sessions).toHaveLength(1);
   });
   it("cinco fallos agotan reintentos; el reintento manual conserva identidad y contador histórico", async () => {
+    await db.exec("reset role");
+    await db.query("update report_deliveries set status='failed',last_error='isolated retry fixture' where status in ('pending','retry_wait')");
+    await prepareReportFixture("000000000103", "2025-03-01", true);
     let id="";
     for(let attempt=1;attempt<=5;attempt++) {
       await db.exec("reset role;set role service_role");

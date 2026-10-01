@@ -3,8 +3,9 @@
 **Estado: NO EJECUTADO.** La suite local usa PGlite y no comprueba bloqueos,
 interbloqueos ni carreras de PostgreSQL con dos conexiones. Este procedimiento
 es para una base descartable, jamás para producción ni para datos de empleados.
-Revisión y contrato: docs/architecture/REVIEW-006-20261001.md y
-docs/architecture/TIME-COVERAGE-007-ACCEPTANCE.md.
+Revisión y contratos: `docs/architecture/REVIEW-006-20261001.md`,
+`docs/architecture/TIME-COVERAGE-007-ACCEPTANCE.md` y
+`docs/architecture/TIME-COVERAGE-008-ACCEPTANCE.md`.
 
 ## Preparar el laboratorio
 
@@ -12,8 +13,8 @@ Instalar PostgreSQL local de una versión soportada por Supabase. Crear una base
 vacía y ejecutar como dueño PostgreSQL. No apuntar la URL a Supabase:
 
 ~~~sh
-createdb tablero_cobertura_007_lab
-export TIME_COVERAGE_TEST_DATABASE_URL='postgresql://postgres:postgres@127.0.0.1:54322/tablero_cobertura_007_lab'
+createdb tablero_cobertura_008_lab
+export TIME_COVERAGE_TEST_DATABASE_URL='postgresql://postgres:postgres@127.0.0.1:54322/tablero_cobertura_008_lab'
 psql "$TIME_COVERAGE_TEST_DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
 create role anon nologin;
 create role authenticated nologin;
@@ -34,6 +35,11 @@ for migration_path in supabase/migrations/*.sql; do
 done
 psql "$TIME_COVERAGE_TEST_DATABASE_URL" -v ON_ERROR_STOP=1 -f tests/review/time-coverage-007-postgres-fixture.sql
 ~~~
+
+El loop debe aplicar también `202610010008_time_coverage_finalization.sql` en
+último lugar. Los UUID de la fixture 007 sirven para los ensayos de carrera; para
+cada repetición se restaura la base vacía. La prueba local de 008 vive en
+`tests/time-coverage-008.test.ts` y no reemplaza la fixture PostgreSQL.
 
 El fixture crea jefe, titular, reemplazante, dos empresas, dos tareas y una
 cobertura limitada a Empresa A con UUID fijo
@@ -159,6 +165,31 @@ select action,at,entity_id,details from public.audit_events
 where action in ('absence.cancelled','absence.session_stopped','task.timer_expired')
 order by id;
 ~~~
+
+## Comprobaciones locales específicas de 008
+
+En una base desechable recién migrada, verificar que las funciones públicas
+conservan sus permisos y que el helper temporal sigue sin ejecución directa para
+clientes:
+
+~~~sql
+select has_function_privilege('anon','public._can_access_instance_at(uuid,timestamptz)','execute') as anon_can_call,
+       has_function_privilege('authenticated','public._can_access_instance_at(uuid,timestamptz)','execute') as client_can_call,
+       has_function_privilege('authenticated','public.can_cover_instance(uuid)','execute') as client_can_cover;
+~~~
+
+Los dos primeros resultados deben ser `false` y el tercero `true`. Para probar
+un control de checklist repetido con un reloj propio en el período anterior,
+cerrado, preparar el origen y el destino de la prueba en la base aislada, repetir
+el valor ya guardado con su revisión actual y confirmar que queda el mismo reloj,
+una sola revisión sin cambios y un receipt. No se debe ejecutar esta operación
+contra tareas reales.
+
+La fixture automatizada también compara el contexto de una sesión vencida en los
+eventos `task.timer_expired` y `task.wait`. PGlite valida resultados y permisos,
+pero no identidad cambiada entre conexiones mientras una transacción espera un
+bloqueo. Ese punto requiere completar los escenarios A/B de esta guía en
+PostgreSQL real antes de habilitar migraciones de empleados.
 
 ## Locks restantes y permisos
 

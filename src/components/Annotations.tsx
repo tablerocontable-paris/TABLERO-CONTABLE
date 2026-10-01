@@ -35,13 +35,14 @@ export default function Annotations({
   tasks: Task[];
   onSave: (
     entry: Pick<Annotation, "id" | "title" | "content" | "kind" | "reminderOn">,
-  ) => void;
+  ) => boolean;
   onDelete: (id: string) => void;
   onConvert: (entry: Annotation) => void;
   onOpenTask: (id: string) => void;
 }) {
   const [search, setSearch] = useState("");
   const [kind, setKind] = useState("all");
+  const [formKind, setFormKind] = useState<AnnotationKind>("personal");
   const [editing, setEditing] = useState<string | null>(null);
   const [copied, setCopied] = useState("");
   const visible = useMemo(
@@ -63,11 +64,7 @@ export default function Annotations({
   );
   const today = dateART();
   const due = rows.filter(
-    (r) =>
-      r.kind === "reminder" &&
-      r.reminderOn &&
-      r.reminderOn <= today &&
-      !r.convertedTaskId,
+    (r) => r.reminderOn && r.reminderOn <= today && !r.convertedTaskId,
   );
 
   function submit(e: React.FormEvent<HTMLFormElement>) {
@@ -77,15 +74,18 @@ export default function Annotations({
     const content = String(data.get("content") || "").trim();
     if (!title || !content) return;
     const original = rows.find((r) => r.id === editing);
-    onSave({
+    const saved = onSave({
       id: original?.id || "",
       title,
       content,
       kind: String(data.get("kind")) as AnnotationKind,
       reminderOn: String(data.get("reminderOn") || "") || null,
     });
-    e.currentTarget.reset();
-    setEditing(null);
+    if (saved) {
+      e.currentTarget.reset();
+      setEditing(null);
+      setFormKind("personal");
+    }
   }
   return (
     <div className="annotations-page">
@@ -123,9 +123,8 @@ export default function Annotations({
             Tipo
             <select
               name="kind"
-              defaultValue={
-                rows.find((r) => r.id === editing)?.kind || "personal"
-              }
+              value={formKind}
+              onChange={(e) => setFormKind(e.target.value as AnnotationKind)}
             >
               <option value="personal">Nota personal</option>
               <option value="formula">Fórmula de Excel</option>
@@ -137,6 +136,7 @@ export default function Annotations({
             <input
               name="reminderOn"
               type="date"
+              required={formKind === "reminder"}
               defaultValue={
                 rows.find((r) => r.id === editing)?.reminderOn || ""
               }
@@ -158,7 +158,13 @@ export default function Annotations({
               {editing ? "Guardar cambios" : "Guardar anotación"}
             </button>
             {editing && (
-              <button type="button" onClick={() => setEditing(null)}>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditing(null);
+                  setFormKind("personal");
+                }}
+              >
                 Cancelar
               </button>
             )}
@@ -204,6 +210,7 @@ export default function Annotations({
               const linked = entry.convertedTaskId
                 ? tasks.find((t) => t.id === entry.convertedTaskId)
                 : undefined;
+              const converted = entry.convertedTaskId !== null;
               return (
                 <article className="annotation-card" key={entry.id}>
                   <div className="annotation-card-head">
@@ -258,12 +265,21 @@ export default function Annotations({
                         <Check size={14} />
                         Tarea creada · {linked.title}
                       </button>
+                    ) : converted ? (
+                      <span className="annotation-linked-unavailable">
+                        Tarea vinculada no disponible
+                      </span>
                     ) : (
-                      <button onClick={() => setEditing(entry.id)}>
+                      <button
+                        onClick={() => {
+                          setEditing(entry.id);
+                          setFormKind(entry.kind);
+                        }}
+                      >
                         Editar
                       </button>
                     )}
-                    {!linked && (
+                    {!converted && (
                       <button
                         className="primary"
                         onClick={() => onConvert(entry)}
@@ -272,7 +288,7 @@ export default function Annotations({
                         Convertir en tarea
                       </button>
                     )}
-                    {!linked && (
+                    {!converted && (
                       <button
                         aria-label={`Eliminar ${entry.title}`}
                         onClick={() => onDelete(entry.id)}
