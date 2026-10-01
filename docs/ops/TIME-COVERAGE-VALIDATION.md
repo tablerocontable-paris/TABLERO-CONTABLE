@@ -1,19 +1,19 @@
 # Validación real PostgreSQL: cobertura, cronómetro y cierre
 
-**Advertencia de revisión 005:** esta guía aún es un borrador, no un harness
+**Advertencia de revisión 006:** esta guía aún es un borrador, no un harness
 ejecutable. Falta fixture concreto y separar bloques de dos conexiones. La
 corrección se exige en `../architecture/TIME-COVERAGE-006-ACCEPTANCE.md`; no tomar
-las 53 pruebas locales como aprobación de concurrencia ni de contrato completo.
+las 58 pruebas locales como aprobación de concurrencia ni de contrato completo.
 
 Estado: **NO EJECUTADO**. `npm test` usa PGlite, una sola conexión emulada. No
 verifica interbloqueos, Auth/RLS/MFA reales ni carreras PostgreSQL. En este
 entorno no están instalados `psql` ni `postgres`, y no hay una base de integración.
-Esta guía es para una base local descartable con las migraciones **001–005**; no
+Esta guía es para una base local descartable con las migraciones **001–006**; no
 ejecutar en producción ni en Supabase de empleados.
 
-La ejecución local 005 tiene 53 pruebas aprobadas, incluido el fixture de upgrade
-0.3→005 que conserva un snapshot/cierre, un reporte/outbox y una reapertura con
-referencia auditada. Eso no sustituye las pruebas de dos conexiones de abajo.
+La ejecución local 006 tiene 58 pruebas aprobadas en PGlite. Eso no sustituye el
+fixture de upgrade 004/005→006 ni las pruebas de dos conexiones de abajo; ambas
+siguen pendientes y esta guía continúa en estado borrador.
 
 ## Preparación aislada
 

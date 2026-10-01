@@ -1,7 +1,9 @@
 # Contrato 006 — cerrar hallazgos de 005
 
 Decisiones de revisión del 01/10/2026 sobre `b3de414872fa246761b7785c22e0103224f678c4`.
-**Aprobado para ejecución local GPT 6 Luna, esfuerzo medio.**
+**Aprobado para ejecución local GPT 6 Luna, esfuerzo medio.** Estado 01/10/2026:
+migración 006 implementada localmente; suite completa y build se vuelven a verificar
+antes de publicar. La revisión Sol 6.1 y los gates PostgreSQL/Supabase siguen pendientes.
 Evidencia: `REVIEW-005-20261001.md`. No implementar durante la fase de revisión Sol.
 Las reglas de 005 siguen vigentes salvo la aclaración de replay de abajo.
 
