@@ -40,3 +40,10 @@ El esquema SQL 0.3 NO constituye todavía el backend definitivo de 0.4. Se requi
 7. Sólo después: infraestructura dedicada nueva, pruebas integradas, piloto real y migración manual por equipos.
 
 No prometer ausencia total de errores: se reducen con reglas separadas, pruebas y piloto. La base actual es una evolución verificable; todavía no es una entrega productiva final.
+
+## Nuevos pedidos — 01/10/2026
+
+- Flujo permanente de modelos y revisión: `AGENTS.md` y `docs/WORKFLOW-MODELS.md`. Sol 6.1 alto para razonar/revisar; GPT 6 Luna medio para ejecutar instrucciones definidas. Cada devolución recomienda el próximo modelo.
+- Estandarización, reportes por usuario y Kaizen/5S: contrato en `docs/product/STANDARDIZATION-REPORTS-IMPROVEMENT.md`.
+- Esta demo protege nombre/proceso/controles del catálogo, permite a Juan Pablo incorporar procesos y genera reportes automáticamente al cerrar cada empleado. Correo automático todavía requiere backend y destinatario verificado.
+- Kaizen/5S: requisitos orientados a calidad y mejora del proceso; módulo funcional pendiente. No incorporarlos como puntuación arbitraria de desempeño.

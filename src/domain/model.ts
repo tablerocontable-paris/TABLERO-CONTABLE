@@ -5,6 +5,7 @@ import {
   type Frequency,
 } from "./schedule";
 import { stopClock, type TimeSession, type Absence } from "./workforce";
+import { generatePeriodReport, type PeriodReport } from "./reports";
 export type Role = "jefe" | "encargado" | "empleado";
 export type Status = "Pendiente" | "En curso" | "Completada";
 export type Kind = "resultado" | "operativa";
@@ -65,6 +66,7 @@ export interface Assignment {
   priority: "Alta" | "Media" | "Baja";
 }
 export interface Task {
+  templateId?: string | null;
   scheduledOn?: string;
   sessions?: TimeSession[];
   reopenCount?: number;
@@ -118,6 +120,7 @@ export interface Metrics {
   operationalTarget: number;
 }
 export interface Closure {
+  report?: PeriodReport;
   id: string;
   ownerId: string;
   month: string;
@@ -129,6 +132,7 @@ export interface Closure {
   note: string;
 }
 export interface Onboarding {
+  assignmentCompanyIds?: Record<string, string[]>;
   schedules?: Record<string, Schedule>;
   customTasks?: {
     id: string;
@@ -320,6 +324,7 @@ export function materialize(s: State, month: string): State {
       tasks.push({
         id: id(),
         assignmentId: a.id,
+        templateId: a.templateId,
         title: a.title,
         ownerId: a.ownerId,
         companyId: a.companyId,
@@ -387,6 +392,7 @@ export function closeMonth(
     tasks: structuredClone(tasks),
     activity: structuredClone(logs),
   };
+  c.report = generatePeriodReport(s, c);
   return { ...s, closures: [...s.closures, c] };
 }
 export function csvCell(v: unknown) {

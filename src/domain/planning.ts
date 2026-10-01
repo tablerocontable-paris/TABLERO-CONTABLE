@@ -33,6 +33,10 @@ export function reviseAssignment(
   validateSchedule(rule);
   const old = s.assignments.find((a) => a.id === assignmentId);
   if (!old || old.retired) throw Error("La planificación ya fue reemplazada.");
+  if (!old.templateId && rule.frequency !== "única")
+    throw Error(
+      "Una tarea habitual necesita un proceso estándar en el catálogo.",
+    );
   const oldRule = scheduleOf(old);
   const affected = s.tasks.filter(
     (t) =>

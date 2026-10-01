@@ -62,13 +62,18 @@ export default function Onboarding({
   const all = [...chosen, ...custom];
   const scheduleFor = (tid: string) =>
     draft.schedules?.[tid] || defaultSchedule(month + "-25");
+  const companiesFor = (tid: string) =>
+    (draft.assignmentCompanyIds?.[tid] || draft.selectedCompanyIds).filter(
+      (cid) => draft.selectedCompanyIds.includes(cid),
+    );
   let validSchedules = true;
   let count = 0;
   for (const t of all) {
     try {
       count +=
         occurrences(scheduleFor(t.id), month).length *
-        draft.selectedCompanyIds.length;
+        companiesFor(t.id).length;
+      if (!companiesFor(t.id).length) validSchedules = false;
     } catch {
       validSchedules = false;
     }
@@ -203,7 +208,8 @@ export default function Onboarding({
               <h2>Contanos qué hacés habitualmente.</h2>
               <p>
                 Elegí del catálogo. Los pesos y las metas son definidos por el
-                jefe; después podés agregar tareas particulares.
+                jefe. El nombre, proceso y controles son iguales para todas las
+                empresas; la empresa, fecha y meta corresponden a tu asignación.
               </p>
               <div className="catalog-options">
                 {[...state.templates]
@@ -252,7 +258,13 @@ export default function Onboarding({
                   ))}
               </div>
               <details>
-                <summary>Agregar una tarea particular</summary>
+                <summary>Agregar un trabajo esporádico · una sola vez</summary>
+                <p>
+                  Para una tarea habitual que falta, pedí a Juan Pablo que
+                  incorpore el proceso al catálogo antes de completar la
+                  inducción. Auditorías y correcciones puntuales se registran
+                  aquí.
+                </p>
                 <label>
                   Título
                   <input
@@ -329,6 +341,7 @@ export default function Onboarding({
                     <small>{describeSchedule(scheduleFor(t.id))}</small>
                   </summary>
                   <ScheduleEditor
+                    onlyOnce={!chosen.some((x) => x.id === t.id)}
                     value={scheduleFor(t.id)}
                     onChange={(schedule) =>
                       patch({
@@ -337,6 +350,34 @@ export default function Onboarding({
                     }
                     month={month}
                   />
+                  <fieldset>
+                    <legend>¿En qué empresas realizás este proceso?</legend>
+                    <div className="company-options">
+                      {state.companies
+                        .filter((c) => draft.selectedCompanyIds.includes(c.id))
+                        .map((c) => (
+                          <label key={c.id}>
+                            <input
+                              type="checkbox"
+                              checked={companiesFor(t.id).includes(c.id)}
+                              onChange={(e) =>
+                                patch({
+                                  assignmentCompanyIds: {
+                                    ...draft.assignmentCompanyIds,
+                                    [t.id]: e.target.checked
+                                      ? [...companiesFor(t.id), c.id]
+                                      : companiesFor(t.id).filter(
+                                          (cid) => cid !== c.id,
+                                        ),
+                                  },
+                                })
+                              }
+                            />
+                            {c.name}
+                          </label>
+                        ))}
+                    </div>
+                  </fieldset>
                 </details>
               ))}
               <div className="note">

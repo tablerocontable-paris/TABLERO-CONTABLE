@@ -29,3 +29,11 @@ Seleccionar una versión anterior guardada en Sites y desplegarla preservando la
 30 pruebas automatizadas (dominio y contrato SQL 0.3), build TypeScript/Vite y recorrido Chromium del build: temas claro/oscuro/sistema, inducción, aislamiento por empresa, checklist, operativas, agrupaciones, cierre íntegro y bloqueo, recurrencias octubre/noviembre, tarea puntual, cronómetro persistente/pausa, registro de ausencia y laboratorio aislado. Se revisaron capturas de escritorio oscuro, ausencias y laboratorio; se verificó ancho móvil sin desbordamiento.
 
 El laboratorio fija su destino de guardado por instancia de la app, para que salir en otra pestaña no convierta una pestaña de pruebas en escritora del tablero principal. No es una cuenta técnica real y no publica señales de presencia.
+
+## Actualización del 01/10/2026
+
+Reporte generado en cada nuevo cierre: snapshot por empleado y período, destinatarios de jefatura, agrupación por empresa y código de catálogo, tiempo registrado y reaperturas. Visible en Cierre del mes y exportable a CSV. No envía correo; el contrato de entrega productiva está en docs/product/STANDARDIZATION-REPORTS-IMPROVEMENT.md.
+
+Las nuevas tareas del catálogo conservan identidad y controles; las particulares libres sólo admiten frecuencia única. La inducción puede elegir empresas por proceso. Jefatura puede incorporar procesos estándar.
+
+34 pruebas de dominio/SQL aprobadas y build TypeScript/Vite. Cuatro pruebas adicionales verifican consistencia entre empresas, restricción de recurrencia libre, generación única de reportes y conservación del snapshot. Esta actualización no añade una verificación de navegador: el Chromium de este entorno falla al iniciar, antes de cargar la aplicación.

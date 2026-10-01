@@ -5,11 +5,13 @@ export default function ScheduleEditor({
   onChange,
   month,
   compact = false,
+  onlyOnce = false,
 }: {
   value: Schedule;
   onChange: (v: Schedule) => void;
   month: string;
   compact?: boolean;
+  onlyOnce?: boolean;
 }) {
   const patch = (v: Partial<Schedule>) => onChange({ ...s, ...v });
   let preview: { date: string; due: string }[] = [];
@@ -32,9 +34,13 @@ export default function ScheduleEditor({
             }
           >
             <option value="única">No · una sola vez</option>
-            <option value="diaria">Diaria</option>
-            <option value="semanal">Semanal</option>
-            <option value="mensual">Mensual</option>
+            {!onlyOnce && (
+              <>
+                <option value="diaria">Diaria</option>
+                <option value="semanal">Semanal</option>
+                <option value="mensual">Mensual</option>
+              </>
+            )}
           </select>
         </label>
         <label>

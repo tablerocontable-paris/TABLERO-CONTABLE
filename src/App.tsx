@@ -1,4 +1,7 @@
 import Planning from "./components/Planning";
+import PeriodReports from "./components/PeriodReports";
+import CatalogueCreator from "./components/CatalogueCreator";
+import { standardizeAssignment } from "./domain/catalogue";
 import ThemeControl from "./components/ThemeControl";
 import ScheduleEditor from "./components/ScheduleEditor";
 import { Absences, Workforce } from "./components/Workforce";
@@ -326,6 +329,20 @@ export default function App() {
     try {
       for (const schedule of Object.values(draft.schedules || {}))
         validateSchedule(schedule);
+      const customIds = [
+        ...(draft.customTasks || []).map((t) => t.id),
+        "custom",
+      ];
+      if (
+        customIds.some(
+          (key) =>
+            draft.schedules?.[key] &&
+            draft.schedules[key].frequency !== "única",
+        )
+      )
+        throw Error(
+          "Los trabajos particulares son puntuales. Para repetirlos, Juan Pablo debe incorporar el proceso al catálogo.",
+        );
     } catch (e) {
       notify((e as Error).message);
       return;
@@ -333,6 +350,12 @@ export default function App() {
     const assignments: Assignment[] = [];
     for (const cid of draft.selectedCompanyIds) {
       for (const tid of draft.selectedTemplateIds) {
+        if (
+          !(
+            draft.assignmentCompanyIds?.[tid] || draft.selectedCompanyIds
+          ).includes(cid)
+        )
+          continue;
         const t = state.templates.find((t) => t.id === tid)!;
         assignments.push({
           id: `onboard-${active.id}-${cid}-${tid}`,
@@ -368,7 +391,13 @@ export default function App() {
             ]
           : []),
       ];
-      for (const c of custom)
+      for (const c of custom) {
+        if (
+          !(
+            draft.assignmentCompanyIds?.[c.id] || draft.selectedCompanyIds
+          ).includes(cid)
+        )
+          continue;
         assignments.push({
           id: `onboard-${active.id}-${cid}-${c.id}`,
           templateId: null,
@@ -390,6 +419,7 @@ export default function App() {
           schedule: draft.schedules?.[c.id] || defaultSchedule(month + "-25"),
           priority: "Media",
         });
+      }
     }
     let next: State = {
       ...state,
@@ -1850,6 +1880,13 @@ export default function App() {
                 title="Catálogo estándar y pesos"
                 sub="El jefe define el peso. Los cambios se aplican a nuevas asignaciones; no reescriben meses anteriores."
               >
+                {active.role === "jefe" && (
+                  <CatalogueCreator
+                    state={state}
+                    commit={commit}
+                    notify={notify}
+                  />
+                )}
                 <div className="catalog-grid">
                   {state.templates.map((t) => (
                     <section className="catalog-item" key={t.id}>
@@ -1939,6 +1976,7 @@ export default function App() {
                     cambios en esta demostración.
                   </span>
                 </div>
+                <PeriodReports state={state} month={month} />
                 <Panel
                   title={`Cierre de ${monthLabel(month)}`}
                   sub="Cada persona tiene su propia consolidación"
@@ -2099,6 +2137,12 @@ export default function App() {
           people={people}
           close={() => setModal(null)}
           create={(a) => {
+            try {
+              a = standardizeAssignment(state, a);
+            } catch (e) {
+              notify((e as Error).message);
+              return;
+            }
             const responsible = state.profiles.find((p) => p.id === a.ownerId);
             if (
               !responsible?.active ||
@@ -2569,7 +2613,7 @@ export default function App() {
                 ) {
                   setModal(null);
                   notify(
-                    "Mes consolidado. El historial quedó protegido en esta demostración.",
+                    "Mes consolidado y reporte emitido para Juan Pablo en esta demostración.",
                   );
                 }
               } catch (e) {
@@ -2635,6 +2679,8 @@ function NewTask({
     if (!title) return;
     try {
       validateSchedule(schedule);
+      if (!t && schedule.frequency !== "única")
+        throw Error("Las tareas habituales requieren un proceso del catálogo.");
     } catch (e) {
       setScheduleError((e as Error).message);
       return;
@@ -2678,7 +2724,7 @@ function NewTask({
             );
           }}
         >
-          <option value="">Tarea particular</option>
+          <option value="">Trabajo esporádico · una sola vez</option>
           {state.templates.map((t) => (
             <option key={t.id} value={t.id}>
               {t.title}
@@ -2694,6 +2740,7 @@ function NewTask({
             required
             maxLength={120}
             defaultValue={t?.title}
+            readOnly={!!t}
           />
         </label>
         <div className="form-grid">
@@ -2722,7 +2769,11 @@ function NewTask({
           </label>
           <label>
             Sector
-            <select name="sector" defaultValue={t?.sector || active.sector}>
+            <select
+              name="sector"
+              disabled={!!t}
+              defaultValue={t?.sector || active.sector}
+            >
               {[
                 "Tesorería",
                 "Impuestos",
@@ -2737,6 +2788,7 @@ function NewTask({
             Tipo de trabajo
             <select
               value={kind}
+              disabled={!!t}
               onChange={(e) => setKind(e.target.value as typeof kind)}
             >
               <option value="resultado">Entregable · se completa</option>
@@ -2750,7 +2802,7 @@ function NewTask({
             <select
               name="weight"
               defaultValue={t?.weight || 1}
-              disabled={active.role !== "jefe"}
+              disabled={!!t || active.role !== "jefe"}
             >
               {[1, 2, 3, 5, 8].map((n) => (
                 <option key={n} value={n}>
@@ -2775,6 +2827,7 @@ function NewTask({
                   name="unit"
                   required
                   defaultValue={t?.unit}
+                  readOnly={!!t}
                   placeholder="facturas, pagos, trámites…"
                   maxLength={30}
                 />
@@ -2793,7 +2846,12 @@ function NewTask({
             </>
           )}
         </div>
-        <ScheduleEditor value={schedule} onChange={setSchedule} month={month} />
+        <ScheduleEditor
+          value={schedule}
+          onChange={setSchedule}
+          month={month}
+          onlyOnce={!t}
+        />
         {scheduleError && <p role="alert">{scheduleError}</p>}
         {kind === "resultado" && (
           <label>
@@ -2802,6 +2860,7 @@ function NewTask({
               name="steps"
               rows={4}
               defaultValue={t?.steps.join("\n")}
+              readOnly={!!t}
             />
           </label>
         )}

@@ -45,3 +45,7 @@ supabase/migrations es la fuente del esquema nuevo. El contrato SQL actualmente 
 Faltan el adaptador remoto, invitaciones, bootstrap, Auth/MFA real, finalización de inducción en servidor, tareas particulares con aprobación, evidencia en Storage, recuperación y diagnóstico. No se ejecutaron migraciones remotas ni se modificó la base legacy.
 
 Ver [decisiones](docs/architecture/DECISIONS.md), [revisión legacy](docs/architecture/LEGACY-REVIEW.md), [incorporación manual](docs/MIGRATION.md) y [contrato SQL](supabase/README.md).
+
+## Flujo de modelos
+
+Ver [AGENTS.md](AGENTS.md) y [WORKFLOW-MODELS.md](docs/WORKFLOW-MODELS.md): Sol 6.1 alto para razonamiento/revisión; GPT 6 Luna medio para ejecución. Cada devolución debe indicar próximo modelo y acción.
