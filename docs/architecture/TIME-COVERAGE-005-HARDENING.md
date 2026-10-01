@@ -1,5 +1,11 @@
 # Contrato 005 — corrección de cobertura y cronómetros
 
+**Revisión posterior de la ejecución:** once regresiones previas corregidas,
+seis casos adicionales reproducidos que aún incumplen, y diferencias de locks y
+revalidación. 005 requiere correcciones. La especificación de abajo se conserva
+como contrato original, no como certificación del resultado.
+Ver `REVIEW-005-20261001.md` y siguiente ejecución `TIME-COVERAGE-006-ACCEPTANCE.md`.
+
 Revisión Sol 6.1, 01/10/2026, sobre `f547d006b2e191968e3a6a9f20b2778a140a1c6e`.
 **Estado: especificación aprobada para ejecución local con GPT 6 Luna, esfuerzo medio.**
 004 no cumple todavía todos los requisitos y no está aprobada para aplicación remota.

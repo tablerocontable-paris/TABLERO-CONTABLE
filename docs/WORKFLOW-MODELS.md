@@ -10,10 +10,11 @@ Una tarea nueva o un fallo que exige replantear el diseño vuelve a Sol 6.1. Una
 
 Continuidad acordada: si la fase siguiente usa el mismo modelo, seguir sin pedir ni esperar otro «continuar». Finalizar al llegar a un cambio de modelo necesario, indicando esfuerzo y el archivo con instrucciones preparadas; Valentino cambia el modelo manualmente. No activar subagentes para sustituir ese cambio.
 
-Estado posterior: las once violaciones de 004 están corregidas localmente en 005,
-con 53/53 pruebas, build y diff check aprobados. 005 aún no está aprobada para
-Supabase. **Próximo modelo GPT Sol 6.1, esfuerzo alto:** revisar SQL/locks/permisos,
-fixture de upgrade y matriz de aceptación; las carreras PostgreSQL reales continúan
-pendientes. Tras cerrar esa revisión, GPT 6 Luna medio ejecuta sólo correcciones
-concretas. Evidencia: `docs/architecture/REVIEW-004-20261001.md` y
-`docs/architecture/TIME-COVERAGE-005-HARDENING.md`.
+Estado posterior a revisión 005: once correcciones previas confirmadas; seis
+incumplimientos adicionales reproducidos en 17 diagnósticos, además de huecos de
+locks/permisos y cobertura de pruebas. 005 requiere corrección y no está aprobada.
+**Próximo modelo GPT 6 Luna, esfuerzo medio:** ejecutar exclusivamente
+`docs/architecture/TIME-COVERAGE-006-ACCEPTANCE.md`, con fixtures aislados y preservando
+001–005. Después Sol 6.1 alto revisa. Evidencia:
+`docs/architecture/REVIEW-005-20261001.md`. PostgreSQL real, Supabase Auth/MFA e
+integración siguen pendientes; no importar empleados ni crear infraestructura.

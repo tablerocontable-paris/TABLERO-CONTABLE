@@ -1,5 +1,10 @@
 # Validación real PostgreSQL: cobertura, cronómetro y cierre
 
+**Advertencia de revisión 005:** esta guía aún es un borrador, no un harness
+ejecutable. Falta fixture concreto y separar bloques de dos conexiones. La
+corrección se exige en `../architecture/TIME-COVERAGE-006-ACCEPTANCE.md`; no tomar
+las 53 pruebas locales como aprobación de concurrencia ni de contrato completo.
+
 Estado: **NO EJECUTADO**. `npm test` usa PGlite, una sola conexión emulada. No
 verifica interbloqueos, Auth/RLS/MFA reales ni carreras PostgreSQL. En este
 entorno no están instalados `psql` ni `postgres`, y no hay una base de integración.

@@ -1,5 +1,12 @@
 # Decisiones vigentes — 30/09/2026
 
+**Estado actual tras revisión del 01/10:** 005 no está aprobada. Se confirmaron
+once correcciones anteriores y seis incumplimientos nuevos en 17 diagnósticos;
+también quedan locks, permisos tras espera y aislamiento de tests por completar.
+Siguiente ejecución local: Luna medio con `architecture/TIME-COVERAGE-006-ACCEPTANCE.md`.
+Luego Sol alto revisa. La demo sigue privada, sin SQL remoto ni cuentas reales;
+no está lista para migración. Los apartados siguientes conservan historia del avance.
+
 ## Infraestructura futura (pedido expreso, todavía no ejecutar)
 
 Durante el desarrollo: código, commits, versiones y deploy privado en Sites. Al validar la versión definitiva: crear un GitHub nuevo, Supabase nuevo y alojamiento nuevo (Cloudflare, Vercel u opción que se elija entonces), bajo una cuenta dedicada propuesta como **tablerocontable@gmail.com**. La cuenta no fue creada ni se verificó su disponibilidad. No hay que contratar ni migrar servicios ahora. Preservar legado como consulta durante la transición.
