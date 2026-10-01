@@ -47,3 +47,9 @@ No prometer ausencia total de errores: se reducen con reglas separadas, pruebas 
 - Estandarización, reportes por usuario y Kaizen/5S: contrato en `docs/product/STANDARDIZATION-REPORTS-IMPROVEMENT.md`.
 - Esta demo protege nombre/proceso/controles del catálogo, permite a Juan Pablo incorporar procesos y genera reportes automáticamente al cerrar cada empleado. Correo automático todavía requiere backend y destinatario verificado.
 - Kaizen/5S: requisitos orientados a calidad y mejora del proceso; módulo funcional pendiente. No incorporarlos como puntuación arbitraria de desempeño.
+
+## Revisión y próxima ejecución — 01/10/2026
+
+El contrato revisado y las instrucciones para Luna están en `docs/architecture/CONTRACT-REVIEW-20261001.md`. Se confirmó que SQL 0.3 no representa ocurrencias diarias/semanales, vencimientos opcionales, sesiones, coberturas, aprobación ni entrega automática de reportes. La siguiente ejecución implementará sólo contrato SQL por ocurrencia y pruebas locales; luego se revisará antes de abordar aprobación y correo. No crear infraestructura todavía.
+
+La vista de tablero permite plegar/desplegar cada columna por separado y ordenar tareas de A a Z o Z a A, tanto en tarjetas como en lista. Son preferencias de vista: no cambian estados, datos o KPI.

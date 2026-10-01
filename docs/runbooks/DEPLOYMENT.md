@@ -37,3 +37,7 @@ Reporte generado en cada nuevo cierre: snapshot por empleado y período, destina
 Las nuevas tareas del catálogo conservan identidad y controles; las particulares libres sólo admiten frecuencia única. La inducción puede elegir empresas por proceso. Jefatura puede incorporar procesos estándar.
 
 34 pruebas de dominio/SQL aprobadas y build TypeScript/Vite. Cuatro pruebas adicionales verifican consistencia entre empresas, restricción de recurrencia libre, generación única de reportes y conservación del snapshot. Esta actualización no añade una verificación de navegador: el Chromium de este entorno falla al iniciar, antes de cargar la aplicación.
+
+## Tablero plegable y revisión de contrato — 01/10/2026
+
+Columnas Pendiente/En curso/Completada independientes: Pendiente inicia abierta; las otras plegadas. Abrir una conserva el estado de las demás. Orden A-Z/Z-A aplica al tablero y lista después de filtrar; no altera las tareas guardadas. Dos pruebas adicionales verifican expansión independiente y orden con acentos/números. La revisión contractual y el siguiente trabajo acotado están en docs/architecture/CONTRACT-REVIEW-20261001.md; no se modificó ni aplicó SQL en esta entrega.

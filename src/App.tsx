@@ -1,4 +1,5 @@
 import Planning from "./components/Planning";
+import TaskBoard, { orderTasks, type TaskOrder } from "./components/TaskBoard";
 import PeriodReports from "./components/PeriodReports";
 import CatalogueCreator from "./components/CatalogueCreator";
 import { standardizeAssignment } from "./domain/catalogue";
@@ -153,6 +154,7 @@ export default function App() {
   const [sector, setSector] = useState("");
   const [team, setTeam] = useState("");
   const [query, setQuery] = useState("");
+  const [taskOrder, setTaskOrder] = useState<TaskOrder>("az");
   const [view, setView] = useState<"board" | "list">("board");
   const [group, setGroup] = useState<"individual" | "team" | "sector">(
     "individual",
@@ -238,6 +240,7 @@ export default function App() {
   );
   const m = metrics(filtered, state.activity);
   const resultTasks = filtered.filter((t) => t.kind === "resultado");
+  const orderedTasks = orderTasks(resultTasks, taskOrder);
   const operations = filtered.filter((t) => t.kind === "operativa");
   function changeProfile(pid: string) {
     if (commit({ ...state, activeId: pid })) {
@@ -1230,6 +1233,20 @@ export default function App() {
                       onChange={(e) => setQuery(e.target.value)}
                     />
                   </div>
+                  <label className="task-order">
+                    Ordenar tareas
+                    <select
+                      aria-label="Ordenar tareas"
+                      value={taskOrder}
+                      onChange={(e) =>
+                        setTaskOrder(e.target.value as TaskOrder)
+                      }
+                    >
+                      <option value="az">Nombre · A a Z</option>
+                      <option value="za">Nombre · Z a A</option>
+                      <option value="original">Orden original</option>
+                    </select>
+                  </label>
                   <div className="segmented">
                     <button
                       className={view === "board" ? "selected" : ""}
@@ -1255,34 +1272,10 @@ export default function App() {
                     title="Entregables"
                     sub="Una instancia independiente por empresa y mes"
                   >
-                    {table(resultTasks)}
+                    {table(orderedTasks)}
                   </Panel>
                 ) : (
-                  <div className="kanban">
-                    {(["Pendiente", "En curso", "Completada"] as Status[]).map(
-                      (s) => (
-                        <section className="column" key={s}>
-                          <h2>
-                            <span
-                              className={
-                                "dot " + (s === "Completada" ? "green" : "")
-                              }
-                            />
-                            {s}
-                            <b>
-                              {resultTasks.filter((t) => t.status === s).length}
-                            </b>
-                          </h2>
-                          {resultTasks
-                            .filter((t) => t.status === s)
-                            .map(taskCard)}
-                          {!resultTasks.some((t) => t.status === s) && (
-                            <Empty text="Sin tareas en esta columna." />
-                          )}
-                        </section>
-                      ),
-                    )}
-                  </div>
+                  <TaskBoard tasks={orderedTasks} renderCard={taskCard} />
                 )}
               </>
             )}

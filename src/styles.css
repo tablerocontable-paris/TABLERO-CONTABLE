@@ -2046,3 +2046,54 @@ summary {
   background: #354152;
   color: #e4ecf8;
 }
+
+/* Cada columna conserva su expansión, independiente de las otras. */
+.column.folded {
+  min-height: 0;
+}
+.column .column-heading {
+  margin: 0 0 14px;
+  font-size: 14px;
+}
+.column.folded .column-heading {
+  margin-bottom: 0;
+}
+.column-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  text-align: left;
+  font-size: 14px;
+}
+.column-toggle b {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 5px;
+  background: var(--surface);
+  font-size: 14px;
+}
+.column-toggle:focus-visible {
+  outline: 2px solid var(--accent, #75624a);
+  outline-offset: 4px;
+}
+.task-order {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+.task-order select {
+  width: auto;
+  min-width: 150px;
+}
+@media (max-width: 600px) {
+  .task-order {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
