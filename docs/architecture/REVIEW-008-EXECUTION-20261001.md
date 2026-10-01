@@ -1,4 +1,71 @@
-# Ejecución parcial del contrato 008 — 01/10/2026
+# Ejecución completa local del contrato 008 — 01/10/2026
+
+## Entrega vigente
+
+Completado `TIME-COVERAGE-008-COMPLETION.md` sobre la base revisada
+`640c376efd4aec6e7564227aa2d74fac4093a102`. **Pendiente revisión Sol 6.1 alto**;
+esto no aprueba PostgreSQL real, integración ni migración de empleados. El SHA
+publicado queda en Git/main y en la versión privada nativa de Sites.
+
+### Cambios y matriz de aceptación
+
+| Grupo | Estado y evidencia |
+| --- | --- |
+| Coherencia del plan R008-01 | Checklist recalcula changes_check/updated/next_status/actual_needs_start desde fila bloqueada y compara con needs_start antes de no-op/expiración/escritura. Transición hace comparación equivalente; error exacto y rollback. Sin firmas/ACL/backfill nuevos. |
+| Cronómetros/cobertura | 39 pruebas aisladas por BEGIN/ROLLBACK; savepoints para errores. No-op con TRUE/FALSE, cortes distintos de origen/destino, destino sin reloj, revisión, cinco identidades, permisos, sello, replay, pausa y regresiones. Capturas completas antes/después. |
+| Reportes | Seis casos con base propia y rollback por caso, extraídos de database.test sin UPDATE de cola global. Claim comprueba delivery propio. Sesión fija 1800 segundos y cantidades 7+11=18/meta40; métricas operativas cuentan tareas (1/0). Cierre único, snapshots, privacidad simulada, lease/retry/ACK y fallos atómicos. |
+| Upgrades | Cinco bases: 0.3→001–008 y 004/005/006/007→008. Compara todo campo original de cada tabla, snapshots::text, IDs/times/empresas/sesiones/audits/receipts y estado de entregas/outbox. Admite nuevas columnas del contrato, incluida autorización sellada, y backfill legacy definido por 004. No altera historia cerrada. |
+| Abortos | Diez bases descartables: múltiples clocks en 004; auditoría huérfana/actor de otra organización en 005 y 006; sesión con titular/ejecutor incompatible, inicio previo o posterior al rango y fin posterior al corte en 006. Error con ID, filas, columnas, constraints, índices, funciones/ACL, triggers y políticas íntegros tras rollback. |
+| Anotaciones/recorrido | 18 pruebas integradas, cinco nuevas: inicio tras inducción con home=tasks y coach/vista/progreso coherentes; Listo/reinicio; fallo al abrir/cerrar; edición fallida conserva campos/ID y reintento actualiza una sola nota. Sin cambios de frontend/producto en esta ejecución. |
+| Guía PostgreSQL | SQL/runner nuevos para 24 combinaciones A/B, conexión explícita coherente, espera observada y asserts. 22 checks secuenciales PGlite pasan; corte ART no simulado. Toda concurrencia PostgreSQL: **NO EJECUTADO**. |
+| Entrega | 151/13, 32 casos críticos con exactamente una prueba por proceso, TypeScript/Vite y diff-check pasan; archivos congelados comparados con base revisada. Commit/push y Sites privado usan el mismo SHA. |
+
+### Comandos y evidencia
+
+- `npm test`: **151 pruebas en 13 archivos**, todas pasan.
+- `node tests/verify-008-completion.mjs`: **32 procesos**, cada uno confirma una
+  prueba seleccionada y pasada, cero fallos; un patrón sin selección falla.
+  Los seis casos de reportes se ejecutaron individualmente.
+- `node tests/postgres-008/check-sql.mjs`: **22 escenarios secuenciales** PGlite;
+  verifica SQL emitido, no bloqueos entre conexiones.
+- `npm run build`: TypeScript y Vite pasan. `git diff --check`: pasa.
+- Evidencia nueva: `review-evidence/time-coverage-008-completion-isolation-20261001.jsonl`
+  y `review-evidence/time-coverage-008-completion-validation-20261001.json`.
+  Base SHA y hash de entradas probadas permiten distinguirla de la revisión v24.
+  No se sobrescribieron los probes ni la evidencia histórica.
+
+### Límites concretos
+
+Las pruebas JWT/aal son simuladas. Las inyecciones de funciones para cambiar
+identidad/plan/permiso están sólo dentro de fixtures y se revierten; no prueban
+carreras reales ni cambian funciones del producto. Para simular membresía propia
+retirada con una asignación activa se elimina temporalmente la FK
+`assignment_company_member` en esos casos aislados, porque el esquema vigente
+impide esa eliminación ordinaria. No hay una RPC productiva de retiro implementada.
+El fixture de aborto de fin corrupto desactiva/restaura su trigger de clamp antes
+del intento de upgrade; no se debilitan las migraciones congeladas.
+
+005 no contiene el preflight completo de sesiones: los abortos de auditorías se
+prueban en 005/006 y los de sesiones en 006. No se atribuye retroactivamente a 005
+la defensa añadida por 006. En 0.3 se comparan todos los campos originales; la
+adición contractual de versiones/ocurrencias y el backfill de reapertura NULL
+se verifican aparte. No se infiere recuperación automática del legacy real.
+
+Frontend sigue localStorage; el SQL preparado no gobierna la demo. No hay correo
+real por observar la cola local. QA visual móvil/contraste, integración, dos
+conexiones PostgreSQL, Supabase Auth/invitaciones/MFA/RLS, recuperación y piloto
+siguen pendientes. No crear servicios ni migrar los 20 empleados todavía.
+
+**Próximo modelo: GPT-6.1 Sol, alto, Standard**, cambio manual, contrato de
+revisión en `../EXECUTION-NEXT.md`. Continuar autónomamente dentro de esa revisión.
+
+---
+
+## Historia de ejecución parcial y revisión v24
+
+Lo que sigue documenta la iteración anterior y sus pendientes en ese momento.
+La matriz de entrega vigente de arriba reemplaza esos pendientes locales;
+se conserva el registro para distinguir evidencia antigua y actual.
 
 ## Revisión posterior de versión 24
 

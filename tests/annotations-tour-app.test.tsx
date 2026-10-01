@@ -4,7 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import App from "../src/App";
 import { KEY, load, seed } from "../src/data/repository";
-import { metrics, type State } from "../src/domain/model";
+import { currentMonth, metrics, type State } from "../src/domain/model";
+import { defaultSchedule } from "../src/domain/schedule";
 
 vi.mock("recharts", () =>
   Object.fromEntries(
@@ -336,5 +337,178 @@ describe("anotaciones y recorrido integrados", () => {
     expect(document.querySelector(".tour-coach small")?.textContent).toContain(
       "1/7",
     );
+  });
+  it("fin de inducción abre Mi día aunque home sea tablero y no duplica asignaciones", () => {
+    const state = prepare();
+    state.onboarding.e0 = {
+      ...state.onboarding.e0,
+      completedAt: null,
+      step: 5,
+      home: "tasks",
+      selectedTemplateIds: ["cat1"],
+      selectedCompanyIds: ["c1"],
+      schedules: { cat1: defaultSchedule(currentMonth() + "-25") },
+    };
+    localStorage.setItem(KEY, JSON.stringify(state));
+    const view = render(<App />);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Preparar mi tablero" }),
+    );
+    expect(
+      document.querySelector("nav button.active")?.getAttribute("data-nav"),
+    ).toBe("day");
+    expect(document.querySelector(".tour-coach small")?.textContent).toContain(
+      "1/7",
+    );
+    const saved = stored();
+    expect(saved.tour.e0).toBe(0);
+    expect(saved.tourVersion?.e0).toBe(2);
+    expect(saved.onboarding.e0.completedAt).toBeTruthy();
+    expect(saved.onboarding.e0.home).toBe("tasks");
+    expect(saved.assignments).toHaveLength(1);
+    expect(saved.tasks).toHaveLength(1);
+    view.unmount();
+    render(<App />);
+    expect(
+      document.querySelector("nav button.active")?.getAttribute("data-nav"),
+    ).toBe("tasks");
+    expect(
+      screen.queryByRole("button", { name: "Preparar mi tablero" }),
+    ).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
+    expect(stored().assignments).toEqual(saved.assignments);
+    expect(stored().tasks).toEqual(saved.tasks);
+    expect(
+      document.querySelector("nav button.active")?.getAttribute("data-nav"),
+    ).toBe("day");
+  });
+  it("Listo guarda finalización y reiniciar comienza de cero sin alterar tareas", () => {
+    prepare();
+    render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
+    for (let step = 0; step < 6; step++)
+      fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
+    expect(document.querySelector(".tour-coach small")?.textContent).toContain(
+      "7/7",
+    );
+    const before = stored();
+    fireEvent.click(screen.getByRole("button", { name: "Listo" }));
+    expect(document.querySelector(".tour-coach")).toBeNull();
+    expect(stored().tour.e0).toBe(7);
+    expect(stored().tourVersion?.e0).toBe(2);
+    fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
+    expect(document.querySelector(".tour-coach small")?.textContent).toContain(
+      "1/7",
+    );
+    expect(stored().tour.e0).toBe(0);
+    expect(stored().assignments).toEqual(before.assignments);
+    expect(stored().tasks).toEqual(before.tasks);
+  });
+  it("fallo al abrir recorrido mantiene vista y progreso; reintento abre coherente", () => {
+    const state = prepare();
+    state.onboarding.e0.home = "tasks";
+    state.tour.e0 = 4;
+    state.tourVersion = { e0: 2 };
+    localStorage.setItem(KEY, JSON.stringify(state));
+    render(<App />);
+    const before = stored();
+    const setItem = vi
+      .spyOn(Storage.prototype, "setItem")
+      .mockImplementationOnce(() => {
+        throw new DOMException("Full", "QuotaExceededError");
+      });
+    fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
+    expect(document.querySelector(".tour-coach")).toBeNull();
+    expect(
+      document.querySelector("nav button.active")?.getAttribute("data-nav"),
+    ).toBe("tasks");
+    expect(stored()).toEqual(before);
+    setItem.mockRestore();
+    fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
+    expect(document.querySelector(".tour-coach small")?.textContent).toContain(
+      "5/7",
+    );
+    expect(
+      document.querySelector("nav button.active")?.getAttribute("data-nav"),
+    ).toBe("operations");
+  });
+  it("fallo al cerrar recorrido conserva último paso; Listo se puede reintentar", () => {
+    const state = prepare();
+    state.tour.e0 = 6;
+    state.tourVersion = { e0: 2 };
+    localStorage.setItem(KEY, JSON.stringify(state));
+    render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
+    const before = stored();
+    const setItem = vi
+      .spyOn(Storage.prototype, "setItem")
+      .mockImplementationOnce(() => {
+        throw new DOMException("Full", "QuotaExceededError");
+      });
+    fireEvent.click(screen.getByRole("button", { name: "Listo" }));
+    expect(document.querySelector(".tour-coach small")?.textContent).toContain(
+      "7/7",
+    );
+    expect(
+      document.querySelector("nav button.active")?.getAttribute("data-nav"),
+    ).toBe("annotations");
+    expect(stored()).toEqual(before);
+    setItem.mockRestore();
+    fireEvent.click(screen.getByRole("button", { name: "Listo" }));
+    expect(document.querySelector(".tour-coach")).toBeNull();
+    expect(stored().tour.e0).toBe(7);
+  });
+  it("editar nota con guardado fallido preserva ID y campos; reintento actualiza una sola nota", () => {
+    prepare();
+    render(<App />);
+    openNotes();
+    fireEvent.click(screen.getByRole("button", { name: "Editar" }));
+    const original = stored().annotations![0];
+    fireEvent.change(screen.getByLabelText("Título"), {
+      target: { value: "Fórmula revisada" },
+    });
+    fireEvent.change(screen.getByLabelText("Contenido"), {
+      target: { value: "=SUMAR.SI(A:A;B1;C:C)" },
+    });
+    fireEvent.change(screen.getByLabelText("Tipo"), {
+      target: { value: "formula" },
+    });
+    fireEvent.change(screen.getByLabelText("Recordarme el"), {
+      target: { value: "2026-10-15" },
+    });
+    const setItem = vi
+      .spyOn(Storage.prototype, "setItem")
+      .mockImplementationOnce(() => {
+        throw new DOMException("Full", "QuotaExceededError");
+      });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+    expect(stored().annotations).toEqual([original]);
+    expect((screen.getByLabelText("Título") as HTMLInputElement).value).toBe(
+      "Fórmula revisada",
+    );
+    expect(
+      (screen.getByLabelText("Contenido") as HTMLTextAreaElement).value,
+    ).toBe("=SUMAR.SI(A:A;B1;C:C)");
+    expect((screen.getByLabelText("Tipo") as HTMLSelectElement).value).toBe(
+      "formula",
+    );
+    expect(
+      (screen.getByLabelText("Recordarme el") as HTMLInputElement).value,
+    ).toBe("2026-10-15");
+    setItem.mockRestore();
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+    expect(stored().annotations).toHaveLength(1);
+    expect(stored().annotations![0]).toMatchObject({
+      id: original.id,
+      createdAt: original.createdAt,
+      title: "Fórmula revisada",
+      content: "=SUMAR.SI(A:A;B1;C:C)",
+      kind: "formula",
+      reminderOn: "2026-10-15",
+      convertedTaskId: null,
+    });
+    expect(
+      screen.getByRole("button", { name: "Guardar anotación" }),
+    ).toBeTruthy();
   });
 });

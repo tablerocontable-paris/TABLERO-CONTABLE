@@ -1,5 +1,18 @@
 # Publicación y operación
 
+## Entrega 008 — 01/10/2026
+
+Ejecución local completa: 151 pruebas/13 archivos, 32 casos críticos aislados,
+build TypeScript/Vite y archivos congelados verificados. El código se guarda,
+envía y publica en Sites privado con el mismo SHA. Fuente exacta: `git log -1`
+y registro de versión en Sites; el detalle está en
+`docs/architecture/REVIEW-008-EXECUTION-20261001.md`.
+
+Próximo paso: revisión Sol 6.1 alto. PostgreSQL concurrente, Supabase real,
+integración y correo siguen pendientes; aún no se migra al Gmail/GitHub/Supabase/
+hosting dedicados. Las verificaciones históricas inferiores pertenecen a sus
+iteraciones y no implican QA visual nueva en esta entrega.
+
 ## Ubicación actual
 
 - Fuente: repositorio Git privado asignado por Sites, rama main; ver git remote -v.

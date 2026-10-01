@@ -1,10 +1,11 @@
 # Decisiones vigentes — 30/09/2026
 
-**Estado actual tras revisión de versión 24 del 01/10:** las cinco fallas de
-anotaciones/recorrido están corregidas; diez observaciones de revisión pasan.
-SQL 008 local corrige las cuatro fallas R007; falta coherencia del plan y
-aceptación completa. Evidencia: `architecture/REVIEW-008-20261001.md`.
-Próximo paso: Luna medio con `docs/EXECUTION-NEXT.md`, luego revisión Sol alto.
+**Estado actual tras completar la ejecución 008 del 01/10:** defensa de inicio
+recalculado y aceptación local completas; 151 pruebas en 13 archivos pasan.
+Reportes aislados, upgrades/abortos y aceptación de anotaciones/recorrido están
+verificados. Evidencia: `architecture/REVIEW-008-EXECUTION-20261001.md`.
+Próximo paso: **Sol 6.1 alto**, revisión según `docs/EXECUTION-NEXT.md`.
+Concurrencia PostgreSQL y Supabase/Auth/MFA/correo reales siguen pendientes.
 La demo sigue privada, sin SQL remoto ni cuentas reales; no está lista para
 migración. Los apartados siguientes conservan historia del avance.
 

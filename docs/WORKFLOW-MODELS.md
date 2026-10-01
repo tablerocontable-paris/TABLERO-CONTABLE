@@ -55,7 +55,7 @@ sin pedir otro «continuá».
 
 ## Próximo bloque
 
-**GPT-6 Luna medio, Standard:** completar 008 según EXECUTION-NEXT.md y
-architecture/TIME-COVERAGE-008-COMPLETION.md. Después **GPT-6.1 Sol alto** para
-revisar datos y permisos. Infraestructura dedicada y migración de empleados
-siguen pendientes de integración y piloto.
+**GPT-6.1 Sol alto, Standard:** revisar la ejecución local completa de 008 según
+EXECUTION-NEXT.md y architecture/REVIEW-008-EXECUTION-20261001.md. El cambio es
+manual; no simularlo con subagentes. Infraestructura dedicada y migración de
+empleados siguen pendientes de integración, concurrencia real y piloto.

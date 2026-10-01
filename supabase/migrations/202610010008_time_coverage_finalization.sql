@@ -50,7 +50,7 @@ $$;
 
 create or replace function public.set_checklist_item_reviewed(p_instance uuid,p_check text,p_done boolean,p_reason text,p_expected_revision bigint,p_operation_id uuid) returns bigint
 language plpgsql security definer set search_path='' as $$
-declare t public.task_instances; updated jsonb; next_status text; v bigint; cached jsonb; s public.task_time_sessions; args jsonb; now_at timestamptz; absence uuid; ended timestamptz; old public.task_time_sessions; source_task public.task_instances; planned_source_task public.task_instances; owner_lock uuid; r_period record; planned_source_id uuid; planned_source_revision bigint; needs_start boolean; expired_s public.task_time_sessions; dest_ended timestamptz; planned_t public.task_instances; changes_check boolean;
+declare t public.task_instances; updated jsonb; next_status text; v bigint; cached jsonb; s public.task_time_sessions; args jsonb; now_at timestamptz; absence uuid; ended timestamptz; old public.task_time_sessions; source_task public.task_instances; planned_source_task public.task_instances; owner_lock uuid; r_period record; planned_source_id uuid; planned_source_revision bigint; needs_start boolean; expired_s public.task_time_sessions; dest_ended timestamptz; planned_t public.task_instances; changes_check boolean; actual_needs_start boolean;
 begin
   if auth.uid() is null or p_expected_revision is null or p_expected_revision<0 or p_done is null then raise exception 'Identidad, control y revisión requeridos'; end if;
   args:=jsonb_build_object('instance',p_instance,'check',p_check,'done',p_done,'reason',p_reason,'revision',p_expected_revision);
@@ -95,16 +95,19 @@ begin
   if not public._can_access_instance_at(t.id,now_at) or public.actor_role()='auditor' then raise exception 'Sin permiso'; end if;
   if t.state_revision is distinct from p_expected_revision then raise exception 'La tarea cambió'; end if;
   if not exists(select 1 from jsonb_array_elements(t.checklist) x where x->>'id'=p_check) then raise exception 'Paso inválido'; end if;
-  if exists(select 1 from jsonb_array_elements(t.checklist) x where x->>'id'=p_check and coalesce((x->>'done')::boolean,false)=p_done) then
-    perform public._save_mutation_receipt('checklist_reviewed',args,p_operation_id,jsonb_build_object('revision',t.state_revision));
-    return t.state_revision;
-  end if;
-  if t.status='Completada' and nullif(trim(coalesce(p_reason,'')),'') is null then raise exception 'La reapertura requiere motivo'; end if;
+  changes_check:=exists(select 1 from jsonb_array_elements(t.checklist) x where x->>'id'=p_check and coalesce((x->>'done')::boolean,false) is distinct from p_done);
   select jsonb_agg(case when x->>'id'=p_check then jsonb_set(x,'{done}',to_jsonb(p_done)) else x end order by pos)
     into updated from jsonb_array_elements(t.checklist) with ordinality items(x,pos);
   next_status:=case when t.status='Completada' then 'En curso' when p_done and t.status='Pendiente' and t.blocked_by is null then 'En curso' else t.status end;
   if t.kind='resultado' and next_status<>'Pendiente' and t.blocked_by is null
     and not exists(select 1 from jsonb_array_elements(updated) x where coalesce((x->>'done')::boolean,false)=false) then next_status:='Completada'; end if;
+  actual_needs_start:=changes_check and t.status='Pendiente' and next_status='En curso';
+  if actual_needs_start is distinct from needs_start then raise exception 'El plan de inicio cambió; vuelva a intentar'; end if;
+  if exists(select 1 from jsonb_array_elements(t.checklist) x where x->>'id'=p_check and coalesce((x->>'done')::boolean,false)=p_done) then
+    perform public._save_mutation_receipt('checklist_reviewed',args,p_operation_id,jsonb_build_object('revision',t.state_revision));
+    return t.state_revision;
+  end if;
+  if t.status='Completada' and nullif(trim(coalesce(p_reason,'')),'') is null then raise exception 'La reapertura requiere motivo'; end if;
   if s.id is not null and s.absence_id is not null and public._session_cutoff(s.id)<=now_at then
     expired_s:=s; ended:=public._effective_session_end(s.id,now_at); dest_ended:=ended; update public.task_time_sessions set ended_at=ended where id=s.id;
     insert into public.audit_events(organization_id,actor_id,action,entity_id,at,details) values(t.organization_id,auth.uid(),'task.timer_expired',s.id,now_at,jsonb_build_object('instance',t.id,'executor',s.actor_id,'session',s.id,'started_at',s.started_at,'ended_at',ended,'absence',s.absence_id)); s.id:=null;
@@ -335,6 +338,7 @@ begin
   end if;
   now_at:=clock_timestamp(); if not public._can_access_instance_at(p_instance,now_at) or public.actor_role()='auditor' then raise exception 'Sin permiso'; end if;
   if t.state_revision is distinct from p_expected_revision then raise exception 'La tarea cambió'; end if;
+  if (p_next='En curso' and t.status='Pendiente') is distinct from needs_start then raise exception 'El plan de inicio cambió; vuelva a intentar'; end if;
   if t.status=p_next then perform public._save_mutation_receipt('transition_reviewed',args,p_operation_id,jsonb_build_object('revision',t.state_revision)); return t.state_revision; end if;
   if p_next='En curso' and t.blocked_by is not null then raise exception 'Desbloquee la tarea antes de iniciarla'; end if;
   if t.status='Completada' and p_next<>'Completada' and nullif(trim(coalesce(p_reason,'')),'') is null then raise exception 'La reapertura requiere motivo'; end if;
