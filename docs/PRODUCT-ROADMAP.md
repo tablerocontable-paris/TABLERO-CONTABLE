@@ -56,8 +56,8 @@ La vista de tablero permite plegar/desplegar cada columna por separado y ordenar
 
 ## Revisión y próxima ejecución — 01/10/2026 (continuación)
 
-- Implementada localmente `202610010002_onboarding_approval.sql`: borrador → enviado → cambios solicitados → aprobado. Los envíos sellan revisiones; sólo jefatura con MFA aprueba. El encargado de la persona puede solicitar correcciones, no activar tareas.
+- Implementada localmente `202610010002_onboarding_approval.sql`: borrador → enviado → cambios solicitados → aprobado. El empleado puede guardar y pausar el borrador; los envíos sellan revisiones. Sólo jefatura con MFA aprueba. El encargado de la persona puede solicitar correcciones, no activar tareas.
 - La aprobación valida membresías activas, estándar vigente, calendario y cierres; asigna cada línea por empresa de forma independiente y materializa sólo el período abierto actual, todo de forma transaccional. Repetir una aprobación exitosa devuelve el mismo conteo, sin duplicar asignaciones. Las tareas particulares requieren peso explícito de jefatura.
-- Pruebas nuevas verifican que el envío no active tareas, MFA, encargado restringido, revisión obsoleta, el mismo estándar en dos empresas con reglas distintas e idempotencia. PGlite no simula Auth/MFA real.
+- Pruebas nuevas verifican guardado/pausa, que el envío no active tareas, MFA, encargado restringido, revisión obsoleta, el mismo estándar en dos empresas con reglas distintas, rollback ante membresía retirada e idempotencia. PGlite no simula Auth/MFA real.
 - El deseo de commits/push/deploy automatizados, pre-commit, Supabase dev/prod y rama `dev` está en `docs/ops/AUTOMATED-DELIVERY.md`. Es diseño pendiente; no crear servicios/cuentas hasta aprobar infraestructura.
 - Próxima ejecución de código: cierre + reporte + outbox en `202610010003_report_delivery.sql`, con proveedor falso. No enviar correo real.

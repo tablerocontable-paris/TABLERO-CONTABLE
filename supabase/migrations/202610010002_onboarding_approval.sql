@@ -5,7 +5,9 @@ begin;
 create table public.onboarding_requests (
   id uuid primary key default gen_random_uuid(), organization_id uuid not null,
   owner_id uuid not null, status text not null default 'draft' check(status in ('draft','submitted','changes_requested','approved')),
-  current_revision integer not null default 0 check(current_revision>=0), submitted_at timestamptz,
+  current_revision integer not null default 0 check(current_revision>=0),
+  draft_revision integer not null default 0 check(draft_revision>=0),
+  draft_payload jsonb not null default '{"lines":[]}'::jsonb check(jsonb_typeof(draft_payload)='object'), submitted_at timestamptz,
   approved_at timestamptz, approved_by uuid, created_at timestamptz not null default now(), updated_at timestamptz not null default now(),
   unique(owner_id), unique(id,organization_id),
   foreign key(owner_id,organization_id) references public.profiles(id,organization_id),
@@ -45,18 +47,12 @@ create policy onboarding_activations_read on public.onboarding_activations for s
 revoke all on public.onboarding_requests,public.onboarding_request_versions,public.onboarding_reviews,public.onboarding_activations from anon,authenticated;
 grant select on public.onboarding_requests,public.onboarding_request_versions,public.onboarding_reviews,public.onboarding_activations to authenticated;
 
-create function public.submit_onboarding(p_payload jsonb,p_expected_revision integer) returns uuid
-language plpgsql security definer set search_path='' as $$
-declare org uuid; req public.onboarding_requests; next_revision integer;
+create function public.validate_onboarding_payload(p_payload jsonb,p_allow_empty boolean default false) returns void
+language plpgsql immutable set search_path='' as $$
 begin
-  select organization_id into org from public.profiles where id=auth.uid() and active and role='empleado';
-  if org is null then raise exception 'Sólo un empleado activo puede enviar su inducción'; end if;
-  if jsonb_typeof(p_payload) is distinct from 'object' or jsonb_typeof(p_payload->'lines') is distinct from 'array' or jsonb_array_length(p_payload->'lines')=0 then raise exception 'La propuesta requiere al menos una tarea'; end if;
+  if jsonb_typeof(p_payload) is distinct from 'object' or jsonb_typeof(p_payload->'lines') is distinct from 'array' then raise exception 'Formato de inducción inválido'; end if;
+  if not p_allow_empty and jsonb_array_length(p_payload->'lines')=0 then raise exception 'La propuesta requiere al menos una tarea'; end if;
   if jsonb_array_length(p_payload->'lines')>100 then raise exception 'La propuesta excede el máximo de líneas'; end if;
-  insert into public.onboarding_requests(organization_id,owner_id) values(org,auth.uid()) on conflict(owner_id) do nothing;
-  select * into req from public.onboarding_requests where owner_id=auth.uid() for update;
-  if p_expected_revision is distinct from req.current_revision then raise exception 'La revisión cambió; recargue la inducción'; end if;
-  if req.status not in ('draft','changes_requested') then raise exception 'La inducción no admite edición en este estado'; end if;
   if exists(select 1 from jsonb_array_elements(p_payload->'lines') l where
     nullif(l->>'line_id','') is null or nullif(l->>'company_id','') is null or nullif(l->>'team_id','') is null or
     nullif(l->>'frequency','') not in ('unica','diaria','semanal','mensual') or nullif(l->>'start_date','') is null or
@@ -66,11 +62,45 @@ begin
     raise exception 'Hay una tarea con proceso o regla de calendario inválida';
   end if;
   if exists(select 1 from jsonb_array_elements(p_payload->'lines') l group by l->>'line_id' having count(*)>1) then raise exception 'La propuesta repite identificadores de tarea'; end if;
+end $$;
+
+create function public.save_onboarding_draft(p_request uuid,p_payload jsonb,p_expected_revision integer,p_expected_draft_revision integer) returns uuid
+language plpgsql security definer set search_path='' as $$
+declare org uuid; req public.onboarding_requests;
+begin
+  select organization_id into org from public.profiles where id=auth.uid() and active and role='empleado';
+  if org is null then raise exception 'Sólo un empleado activo puede editar su inducción'; end if;
+  perform public.validate_onboarding_payload(p_payload,true);
+  if p_request is null then
+    insert into public.onboarding_requests(organization_id,owner_id,draft_payload) values(org,auth.uid(),p_payload) on conflict(owner_id) do nothing;
+    select * into req from public.onboarding_requests where owner_id=auth.uid() for update;
+  else
+    select * into req from public.onboarding_requests where id=p_request and owner_id=auth.uid() and organization_id=org for update;
+    if not found then raise exception 'Inducción inexistente'; end if;
+  end if;
+  if req.status not in ('draft','changes_requested') then raise exception 'La inducción no admite edición en este estado'; end if;
+  if p_expected_revision is distinct from req.current_revision or p_expected_draft_revision is distinct from req.draft_revision then raise exception 'El borrador cambió; recargue la inducción'; end if;
+  update public.onboarding_requests set draft_payload=p_payload,draft_revision=draft_revision+1,updated_at=now() where id=req.id;
+  insert into public.audit_events(organization_id,actor_id,action,entity_id,details) values(org,auth.uid(),'onboarding.draft_saved',req.id,jsonb_build_object('draft_revision',req.draft_revision+1,'lines',jsonb_array_length(p_payload->'lines')));
+  return req.id;
+end $$;
+
+create function public.submit_onboarding(p_request uuid,p_expected_revision integer,p_expected_draft_revision integer) returns uuid
+language plpgsql security definer set search_path='' as $$
+declare org uuid; req public.onboarding_requests; next_revision integer;
+begin
+  select organization_id into org from public.profiles where id=auth.uid() and active and role='empleado';
+  if org is null then raise exception 'Sólo un empleado activo puede enviar su inducción'; end if;
+  select * into req from public.onboarding_requests where id=p_request and owner_id=auth.uid() and organization_id=org for update;
+  if not found then raise exception 'Inducción inexistente'; end if;
+  if p_expected_revision is distinct from req.current_revision or p_expected_draft_revision is distinct from req.draft_revision then raise exception 'La revisión cambió; recargue la inducción'; end if;
+  if req.status not in ('draft','changes_requested') then raise exception 'La inducción no admite envío en este estado'; end if;
+  perform public.validate_onboarding_payload(req.draft_payload,false);
   next_revision:=req.current_revision+1;
-  insert into public.onboarding_request_versions(organization_id,request_id,revision,payload,submitted_by) values(org,req.id,next_revision,p_payload,auth.uid());
+  insert into public.onboarding_request_versions(organization_id,request_id,revision,payload,submitted_by) values(org,req.id,next_revision,req.draft_payload,auth.uid());
   update public.onboarding_requests set current_revision=next_revision,status='submitted',submitted_at=now(),approved_at=null,approved_by=null,updated_at=now() where id=req.id;
   insert into public.onboarding_reviews(organization_id,request_id,revision,actor_id,action) values(org,req.id,next_revision,auth.uid(),'submitted');
-  insert into public.audit_events(organization_id,actor_id,action,entity_id,details) values(org,auth.uid(),'onboarding.submitted',req.id,jsonb_build_object('revision',next_revision,'lines',jsonb_array_length(p_payload->'lines')));
+  insert into public.audit_events(organization_id,actor_id,action,entity_id,details) values(org,auth.uid(),'onboarding.submitted',req.id,jsonb_build_object('revision',next_revision,'lines',jsonb_array_length(req.draft_payload->'lines')));
   return req.id;
 end $$;
 
@@ -144,6 +174,6 @@ begin
   return line_count;
 end $$;
 
-revoke execute on function public.submit_onboarding(jsonb,integer),public.request_onboarding_changes(uuid,integer,text),public.approve_onboarding(uuid,integer,jsonb) from public,anon;
-grant execute on function public.submit_onboarding(jsonb,integer),public.request_onboarding_changes(uuid,integer,text),public.approve_onboarding(uuid,integer,jsonb) to authenticated;
+revoke execute on function public.validate_onboarding_payload(jsonb,boolean),public.save_onboarding_draft(uuid,jsonb,integer,integer),public.submit_onboarding(uuid,integer,integer),public.request_onboarding_changes(uuid,integer,text),public.approve_onboarding(uuid,integer,jsonb) from public,anon;
+grant execute on function public.save_onboarding_draft(uuid,jsonb,integer,integer),public.submit_onboarding(uuid,integer,integer),public.request_onboarding_changes(uuid,integer,text),public.approve_onboarding(uuid,integer,jsonb) to authenticated;
 commit;

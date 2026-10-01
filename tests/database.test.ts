@@ -428,11 +428,15 @@ describe("base nueva desde cero y RLS", () => {
     const priorAssignments = (await db.query<{ count: string }>(
       "select count(*)::text as count from task_assignments where owner_id=$1", [ids.employee],
     )).rows[0].count;
-    const request = (await db.query<{ submit_onboarding: string }>(
-      "select submit_onboarding($1::jsonb,0)", [payload],
-    )).rows[0].submit_onboarding;
+    const request = (await db.query<{ save_onboarding_draft: string }>(
+      "select save_onboarding_draft(null,$1::jsonb,0,0)", ['{"lines":[]}'],
+    )).rows[0].save_onboarding_draft;
+    expect((await db.query<{ status: string }>("select status from onboarding_requests where id=$1", [request])).rows[0].status).toBe("draft");
+    await expect(db.query("select submit_onboarding($1,0,1)", [request])).rejects.toThrow("al menos una tarea");
+    await db.query("select save_onboarding_draft($1,$2::jsonb,0,1)", [request, payload]);
+    await db.query("select submit_onboarding($1,0,2)", [request]);
     expect((await db.query<{ count: string }>("select count(*)::text as count from task_assignments where owner_id=$1", [ids.employee])).rows[0].count).toBe(priorAssignments);
-    await expect(db.query("select submit_onboarding($1::jsonb,0)", [payload])).rejects.toThrow("revisión cambió");
+    await expect(db.query("select submit_onboarding($1,0,2)", [request])).rejects.toThrow("revisión cambió");
     await expect(db.query("select * from onboarding_requests where id=$1", [request])).resolves.toBeDefined();
     await db.exec(`reset role;delete from company_memberships where company_id='${ids.c3}' and profile_id='${ids.employee}';`);
 
@@ -440,7 +444,8 @@ describe("base nueva desde cero y RLS", () => {
     await expect(db.query("select approve_onboarding($1,1)", [request])).rejects.toThrow("Sólo jefatura");
     await db.query("select request_onboarding_changes($1,1,'Confirmar los días')", [request]);
     await actor(ids.employee);
-    await db.query("select submit_onboarding($1::jsonb,1)", [payload]);
+    await db.query("select save_onboarding_draft($1,$2::jsonb,1,2)", [request, payload]);
+    await db.query("select submit_onboarding($1,1,3)", [request]);
 
     await db.exec(`reset role;select set_config('request.jwt.claim.sub','${ids.boss}',false);select set_config('request.jwt.claims','{"aal":"aal1"}',false);set role authenticated;`);
     await expect(db.query("select approve_onboarding($1,2)", [request])).rejects.toThrow("MFA");
