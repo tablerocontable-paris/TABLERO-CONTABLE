@@ -1,7 +1,7 @@
 # Anotaciones y recorrido guiado
 
-Estado: cambios locales de aceptación posteriores a la demo versión 22. Las
-correcciones de esta iteración están cubiertas por
+Estado: publicado en Sites versión 23 (commit
+`65e01b0c103edc69e80035bb7b3372267e18be22`). Las correcciones de esta iteración están cubiertas por
 `tests/annotations-tour-app.test.tsx`; ver además
 `docs/architecture/ANNOTATIONS-TOUR-HARDENING.md` y la revisión inicial.
 

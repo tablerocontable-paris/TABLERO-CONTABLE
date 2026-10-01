@@ -25,17 +25,21 @@ contrato `TIME-COVERAGE-008-ACCEPTANCE.md`.
 
 ## Evidencia ejecutada
 
-La evidencia de esta revisión debe actualizarse al confirmar el commit final:
+Evidencia de la iteración publicada como Sites versión 23, commit
+`65e01b0c103edc69e80035bb7b3372267e18be22`:
 
-- Suite completa: **96 pruebas en 11 archivos**, resultado esperado: todas
-  pasan.
+- `npm test`: **96 pruebas en 11 archivos**, todas pasan.
 - `tests/time-coverage-008.test.ts`: seis pruebas locales de sello, ACL,
   checklist repetido con período previo cerrado, contexto de espera vencida,
   expiración simultánea de origen/destino y reporte con 1800 segundos exactos.
 - Las cuatro pruebas focalizadas de reportes corren solas con fixtures propios.
-- `npm run build` y `git diff --check` deben quedar verdes en la ejecución final.
+- Las cuatro pruebas focalizadas de reportes pasan ejecutadas cada una por
+  separado.
+- `npm run build` y `git diff --check` pasan.
 - Migraciones `202609300001` y `202610010001`–`007`, pruebas bajo `tests/review`
-  y evidencia congelada deben permanecer idénticas a la base.
+  y evidencia congelada permanecen idénticas a la base.
+- Sites confirma despliegue `succeeded` y mantiene la audiencia personalizada de
+  sólo la propietaria.
 
 ## Pendiente antes de aprobar 008
 
