@@ -75,6 +75,17 @@ Contrato local 003 implementado: cierre idempotente, reporte inmutable, entrega/
 
 Todavía no están conectados al frontend ni a Supabase real, y no existe correo/cron productivo. Hace falta revisar coberturas por empresa y las escrituras de cronómetros/reaperturas; después integrar Auth/MFA, adaptadores y el reporte privado. El documento operativo está en `docs/ops/REPORT-DELIVERY.md`. No migrar empleados todavía.
 
+## Anotaciones y orientación — 01/10/2026
+
+La demo ahora incluye anotaciones de perfil para notas, fórmulas y recordatorios,
+búsqueda/copia, y conversión explícita a tarea de una sola vez con vínculo a la
+tarjeta resultante. No entran en KPI ni reportes. El recorrido guiado tiene siete
+pasos para empleados, extensiones por rol y avance que se puede pausar y retomar.
+Las anotaciones sólo se guardan localmente y el selector de perfil es simulado;
+no son privadas frente a otros usuarios del navegador. La producción requiere
+Auth y políticas RLS por propietario. Ver
+`docs/product/ANNOTATIONS-GUIDED-TOUR.md`.
+
 ## Revisión 004 cerrada — 01/10/2026
 
 Contrato ejecutable: `docs/architecture/TIME-COVERAGE-004.md`. Incluye empresas explícitas para cobertura, autorización temporal limitada a tareas, relojes únicos y pausa atómica, reapertura con motivo y cierre coordinado. Corrige bypass de inducción en create_catalog_assignment. Todavía no implementado: siguiente fase Luna medio. La continuidad entre pasos del mismo modelo queda en AGENTS.md.

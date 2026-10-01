@@ -165,9 +165,11 @@ export function seed(): State {
     activity: [],
     audit: [],
     closures: [],
+    annotations: [],
     onboarding: {},
     activeId: "boss",
     tour: {},
+    tourVersion: {},
   };
   for (const [i, p] of s.profiles.entries()) {
     s.onboarding[p.id] = {
@@ -270,9 +272,25 @@ const schema = z.object({
   templates: z.array(z.unknown()),
   closures: z.array(z.unknown()),
   audit: z.array(z.unknown()),
+  annotations: z
+    .array(
+      z.object({
+        id: z.string(),
+        ownerId: z.string(),
+        title: z.string(),
+        content: z.string(),
+        kind: z.enum(["personal", "formula", "reminder"]),
+        reminderOn: z.string().nullable(),
+        createdAt: z.string(),
+        updatedAt: z.string(),
+        convertedTaskId: z.string().nullable(),
+      }),
+    )
+    .optional(),
   onboarding: z.record(z.string(), z.unknown()),
   activeId: z.string(),
   tour: z.record(z.string(), z.number()),
+  tourVersion: z.record(z.string(), z.number()).optional(),
 });
 export const isLab = () => localStorage.getItem("paris-environment") === "lab";
 export function enterLab(state: State) {
@@ -356,6 +374,8 @@ export function load(laboratory = isLab()): State {
       : p,
   );
   state.absences ||= [];
+  state.annotations ||= [];
+  state.tourVersion ||= {};
   return state;
 }
 export function persist(s: State, laboratory = false) {

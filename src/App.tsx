@@ -70,6 +70,7 @@ import {
   type Task,
   type Profile,
   type Assignment,
+  type Annotation,
   type Status,
   id,
   metrics,
@@ -87,6 +88,7 @@ import {
 import { load, persist, blankOnboarding } from "./data/repository";
 import { Dialog, Panel, Empty, Meter } from "./components/ui";
 import Onboarding from "./components/Onboarding";
+import Annotations from "./components/Annotations";
 type Page =
   | "overview"
   | "day"
@@ -98,7 +100,8 @@ type Page =
   | "closing"
   | "calendar"
   | "absences"
-  | "planning";
+  | "planning"
+  | "annotations";
 const pages: { id: Page; name: string; icon: typeof Users }[] = [
   { id: "overview", name: "Resumen", icon: LayoutDashboard },
   { id: "day", name: "Mi día", icon: Flag },
@@ -111,6 +114,7 @@ const pages: { id: Page; name: string; icon: typeof Users }[] = [
   { id: "catalog", name: "Catálogo y pesos", icon: BookOpen },
   { id: "planning", name: "Planificación", icon: CalendarDays },
   { id: "absences", name: "Ausencias y cobertura", icon: CalendarDays },
+  { id: "annotations", name: "Anotaciones", icon: BookOpen },
 ];
 const fmt = (date: string) =>
   !date
@@ -160,6 +164,7 @@ export default function App() {
     "individual",
   );
   const [modal, setModal] = useState<"new" | "employee" | "close" | null>(null);
+  const [noteToTask, setNoteToTask] = useState<Annotation | null>(null);
   const [detail, setDetail] = useState<string | null>(null);
   const [logFor, setLogFor] = useState<string | null>(null);
   const [induct, setInduct] = useState(false);
@@ -219,6 +224,57 @@ export default function App() {
       );
       return false;
     }
+  }
+  function saveAnnotation(
+    input: Pick<Annotation, "id" | "title" | "content" | "kind" | "reminderOn">,
+  ) {
+    const now = new Date().toISOString();
+    const existing = state.annotations?.find(
+      (a) => a.id === input.id && a.ownerId === active.id,
+    );
+    const annotation: Annotation = {
+      ...input,
+      id: existing?.id || id(),
+      ownerId: active.id,
+      createdAt: existing?.createdAt || now,
+      updatedAt: now,
+      convertedTaskId: existing?.convertedTaskId || null,
+    };
+    if (existing?.convertedTaskId) {
+      notify(
+        "Esta anotación ya está vinculada a una tarea y quedó como referencia.",
+      );
+      return;
+    }
+    if (
+      commit({
+        ...state,
+        annotations: [
+          ...(state.annotations || []).filter((a) => a.id !== annotation.id),
+          annotation,
+        ],
+      })
+    )
+      notify("Anotación guardada en este perfil.");
+  }
+  function deleteAnnotation(annotationId: string) {
+    const note = state.annotations?.find(
+      (a) => a.id === annotationId && a.ownerId === active.id,
+    );
+    if (!note || note.convertedTaskId) return;
+    if (!window.confirm(`¿Eliminar “${note.title}”?`)) return;
+    commit({
+      ...state,
+      annotations: (state.annotations || []).filter((a) => a.id !== note.id),
+    });
+  }
+  function convertAnnotation(note: Annotation) {
+    if (note.ownerId !== active.id || note.convertedTaskId) return;
+    setNoteToTask(note);
+    setOwner(active.id);
+    if (note.reminderOn) setMonth(note.reminderOn.slice(0, 7));
+    setPage("tasks");
+    setModal("new");
   }
   useEffect(() => {
     const next = materialize(state, month);
@@ -813,36 +869,86 @@ export default function App() {
   const logTask = state.tasks.find((t) => t.id === logFor);
   const tours = [
     {
+      page: "day" as Page,
       selector: '[data-nav="day"]',
       title: "Tu punto de partida",
-      text: "Mi día reúne tus prioridades y vencimientos.",
+      text: "Mi día reúne tus prioridades y vencimientos para que sepas por dónde empezar.",
     },
     {
+      page: "day" as Page,
       selector: ".filters",
       title: "Elegí el ambiente",
-      text: "Cambiá de empresa o miralas todas juntas. Cada tarea mantiene su identidad.",
+      text: "Filtrá por empresa o mirá todas juntas. La misma conciliación en dos empresas son dos tareas distintas.",
     },
     {
+      page: "tasks" as Page,
       selector: '[data-nav="tasks"]',
-      title: "El trabajo avanza con vos",
-      text: "Iniciar mueve la tarjeta a En curso. Al completar el último paso, pasa a Completada.",
+      title: "Avanzá cada tarjeta",
+      text: "Iniciar la tarea la mueve a En curso. Podés abrir cada columna de manera independiente.",
     },
     {
+      page: "tasks" as Page,
+      selector: '[data-nav="tasks"]',
+      title: "Dejá constancia del proceso",
+      text: "Marcá los controles y usá el cronómetro para registrar el tiempo dedicado.",
+    },
+    {
+      page: "operations" as Page,
       selector: '[data-nav="operations"]',
-      title: "Registrá lo que hiciste",
-      text: "Las operativas acumulan cantidades por fecha y empresa.",
+      title: "Registrá resultados operativos",
+      text: "Cargá facturas, trámites o pagos con cantidades y referencias para el cierre mensual.",
+    },
+    {
+      page: "calendar" as Page,
+      selector: '[data-nav="calendar"]',
+      title: "Atendé los vencimientos",
+      text: "Revisá las fechas de trabajo del período y organizá lo próximo antes de que venza.",
+    },
+    {
+      page: "annotations" as Page,
+      selector: '[data-nav="annotations"]',
+      title: "Guardá tus referencias",
+      text: "Conservá fórmulas y recordatorios personales. Cuando una nota requiera seguimiento, convertíla en tarea.",
     },
     ...(manager
       ? [
           {
+            page: "analytics" as Page,
             selector: '[data-nav="analytics"]',
-            title: "Mirá el contexto completo",
-            text: "Compará puntos, puntualidad y metas por persona, equipo o sector.",
+            title: "Analizá el desempeño",
+            text: "Compará cumplimiento, tiempos y peso por persona, equipo y sector.",
+          },
+          {
+            page: "team" as Page,
+            selector: '[data-nav="team"]',
+            title: "Acompañá a tu equipo",
+            text: "La estructura define qué perfiles forman parte de tu ámbito de supervisión.",
+          },
+        ]
+      : []),
+    ...(active.role === "jefe"
+      ? [
+          {
+            page: "catalog" as Page,
+            selector: '[data-nav="catalog"]',
+            title: "Estandarizá el trabajo",
+            text: "Configurá procesos compartidos y sus pesos para que el análisis use criterios consistentes.",
+          },
+          {
+            page: "closing" as Page,
+            selector: '[data-nav="closing"]',
+            title: "Prepará el cierre",
+            text: "El cierre conserva un resumen mensual individual para la revisión de jefatura.",
           },
         ]
       : []),
   ];
-  const tourStep = Math.min(state.tour[active.id] || 0, tours.length - 1);
+  const tourVersion = 2;
+  const savedTour =
+    state.tourVersion?.[active.id] === tourVersion
+      ? state.tour[active.id] || 0
+      : 0;
+  const tourStep = Math.min(savedTour, tours.length - 1);
   return (
     <>
       <aside className="sidebar">
@@ -889,7 +995,17 @@ export default function App() {
           </button>
           <button
             onClick={() => {
-              commit({ ...state, tour: { ...state.tour, [active.id]: 0 } });
+              const progress =
+                state.tourVersion?.[active.id] === tourVersion
+                  ? state.tour[active.id] || 0
+                  : 0;
+              const start = progress >= tours.length ? 0 : progress;
+              commit({
+                ...state,
+                tour: { ...state.tour, [active.id]: start },
+                tourVersion: { ...state.tourVersion, [active.id]: tourVersion },
+              });
+              setPage(tours[start].page);
               setTourOpen(true);
             }}
           >
@@ -995,30 +1111,34 @@ export default function App() {
                       ? "El trabajo avanza con vos."
                       : page === "operations"
                         ? "Cada jornada deja su huella."
-                        : page === "analytics"
-                          ? "Medir para acompañar mejor."
-                          : page === "team"
-                            ? "Personas, responsabilidades y equipo."
-                            : page === "catalog"
-                              ? "El mismo criterio para todos."
-                              : page === "closing"
-                                ? "Un cierre con evidencia."
-                                : page === "absences"
-                                  ? "El equipo se cubre, el trabajo sigue."
-                                  : page === "planning"
-                                    ? "Cada tarea, en su momento."
-                                    : "Lo próximo, a la vista."}
+                        : page === "annotations"
+                          ? "Tus referencias, siempre a mano."
+                          : page === "analytics"
+                            ? "Medir para acompañar mejor."
+                            : page === "team"
+                              ? "Personas, responsabilidades y equipo."
+                              : page === "catalog"
+                                ? "El mismo criterio para todos."
+                                : page === "closing"
+                                  ? "Un cierre con evidencia."
+                                  : page === "absences"
+                                    ? "El equipo se cubre, el trabajo sigue."
+                                    : page === "planning"
+                                      ? "Cada tarea, en su momento."
+                                      : "Lo próximo, a la vista."}
               </h1>
               <p>
                 {page === "operations"
                   ? "Facturas, trámites y pagos: cantidades, referencias y metas por mes."
-                  : page === "analytics"
-                    ? "Pesos definidos por el jefe. Resultados explicables, con el detalle detrás de cada número."
-                    : page === "team"
-                      ? "La relación jefe → encargado → empleado define el ámbito de trabajo."
-                      : page === "closing"
-                        ? "Consolidá el trabajo mensual de cada persona y conservá una foto del resultado."
-                        : "Tus empresas, tus prioridades y el contexto que necesitás para decidir."}
+                  : page === "annotations"
+                    ? "Guardá fórmulas y recordatorios personales; convertí una anotación en tarea cuando necesite seguimiento."
+                    : page === "analytics"
+                      ? "Pesos definidos por el jefe. Resultados explicables, con el detalle detrás de cada número."
+                      : page === "team"
+                        ? "La relación jefe → encargado → empleado define el ámbito de trabajo."
+                        : page === "closing"
+                          ? "Consolidá el trabajo mensual de cada persona y conservá una foto del resultado."
+                          : "Tus empresas, tus prioridades y el contexto que necesitás para decidir."}
               </p>
             </div>
             <button className="primary" onClick={() => setModal("new")}>
@@ -1136,6 +1256,35 @@ export default function App() {
                     </button>
                   </div>
                 )}
+                {page === "day" &&
+                  (state.annotations || []).some(
+                    (a) =>
+                      a.ownerId === active.id &&
+                      a.kind === "reminder" &&
+                      a.reminderOn &&
+                      a.reminderOn <= dateART() &&
+                      !a.convertedTaskId,
+                  ) && (
+                    <div className="reminder annotation-reminder">
+                      <BookOpen size={18} />
+                      <span>
+                        {
+                          (state.annotations || []).filter(
+                            (a) =>
+                              a.ownerId === active.id &&
+                              a.kind === "reminder" &&
+                              a.reminderOn &&
+                              a.reminderOn <= dateART() &&
+                              !a.convertedTaskId,
+                          ).length
+                        }{" "}
+                        recordatorios personales necesitan atención.
+                      </span>
+                      <button onClick={() => setPage("annotations")}>
+                        Ver anotaciones <ArrowRight size={14} />
+                      </button>
+                    </div>
+                  )}
                 <div className="dashboard-row">
                   <Panel
                     title="Avance ponderado del equipo"
@@ -1278,6 +1427,24 @@ export default function App() {
                   <TaskBoard tasks={orderedTasks} renderCard={taskCard} />
                 )}
               </>
+            )}
+            {page === "annotations" && (
+              <Annotations
+                rows={(state.annotations || []).filter(
+                  (a) => a.ownerId === active.id,
+                )}
+                tasks={state.tasks}
+                onSave={saveAnnotation}
+                onDelete={deleteAnnotation}
+                onConvert={convertAnnotation}
+                onOpenTask={(taskId) => {
+                  const task = state.tasks.find((t) => t.id === taskId);
+                  if (!task) return;
+                  setMonth(task.month);
+                  setPage("tasks");
+                  setDetail(taskId);
+                }}
+              />
             )}
             {page === "operations" && (
               <>
@@ -2106,12 +2273,22 @@ export default function App() {
                   commit({
                     ...state,
                     tour: { ...state.tour, [active.id]: tours.length },
+                    tourVersion: {
+                      ...state.tourVersion,
+                      [active.id]: tourVersion,
+                    },
                   });
                 } else
                   commit({
                     ...state,
                     tour: { ...state.tour, [active.id]: tourStep + 1 },
+                    tourVersion: {
+                      ...state.tourVersion,
+                      [active.id]: tourVersion,
+                    },
                   });
+                if (tourStep < tours.length - 1)
+                  setPage(tours[tourStep + 1].page);
               }}
             >
               {tourStep === tours.length - 1 ? "Listo" : "Siguiente"}
@@ -2128,7 +2305,11 @@ export default function App() {
           company={company}
           owner={owner}
           people={people}
-          close={() => setModal(null)}
+          seedAnnotation={noteToTask}
+          close={() => {
+            setModal(null);
+            setNoteToTask(null);
+          }}
           create={(a) => {
             try {
               a = standardizeAssignment(state, a);
@@ -2153,17 +2334,43 @@ export default function App() {
               notify("El mes de esa persona está cerrado.");
               return;
             }
-            if (
-              commit(
-                materialize(
-                  { ...state, assignments: [...state.assignments, a] },
-                  month,
-                ),
-                "Creó asignación",
-                a.id,
-              )
-            ) {
+            const annotationDraft =
+              noteToTask && noteToTask.ownerId === active.id
+                ? (state.annotations || []).map((entry) =>
+                    entry.id === noteToTask.id
+                      ? {
+                          ...entry,
+                          reminderOn: null,
+                          updatedAt: new Date().toISOString(),
+                        }
+                      : entry,
+                  )
+                : state.annotations;
+            const next = materialize(
+              {
+                ...state,
+                assignments: [...state.assignments, a],
+                annotations: annotationDraft,
+              },
+              month,
+            );
+            const created = next.tasks.find(
+              (task) => task.assignmentId === a.id,
+            );
+            if (noteToTask && created)
+              next.annotations = (next.annotations || []).map((entry) =>
+                entry.id === noteToTask.id
+                  ? {
+                      ...entry,
+                      convertedTaskId: created.id,
+                      reminderOn: null,
+                      updatedAt: new Date().toISOString(),
+                    }
+                  : entry,
+              );
+            if (commit(next, "Creó asignación", a.id)) {
               setModal(null);
+              setNoteToTask(null);
               notify("Tarea creada con empresa y período propios.");
             }
           }}
@@ -2646,6 +2853,7 @@ function NewTask({
   company,
   owner,
   people,
+  seedAnnotation,
   close,
   create,
 }: {
@@ -2655,12 +2863,13 @@ function NewTask({
   company: string;
   owner: string;
   people: Profile[];
+  seedAnnotation: Annotation | null;
   close: () => void;
   create: (a: Assignment) => void;
 }) {
   const [template, setTemplate] = useState("");
   const [schedule, setSchedule] = useState<Schedule>(() =>
-    defaultSchedule(month + "-25"),
+    defaultSchedule(seedAnnotation?.reminderOn || month + "-25"),
   );
   const [scheduleError, setScheduleError] = useState("");
   const [kind, setKind] = useState<"resultado" | "operativa">("resultado");
@@ -2732,14 +2941,18 @@ function NewTask({
             name="title"
             required
             maxLength={120}
-            defaultValue={t?.title}
+            defaultValue={t?.title || seedAnnotation?.title}
             readOnly={!!t}
           />
         </label>
         <div className="form-grid">
           <label>
             Empresa obligatoria
-            <select name="company" defaultValue={company || ""} required>
+            <select
+              name="company"
+              defaultValue={company || active.companyIds[0] || ""}
+              required
+            >
               <option value="" disabled>
                 Seleccioná una empresa
               </option>
@@ -2852,7 +3065,7 @@ function NewTask({
             <textarea
               name="steps"
               rows={4}
-              defaultValue={t?.steps.join("\n")}
+              defaultValue={t?.steps.join("\n") || seedAnnotation?.content}
               readOnly={!!t}
             />
           </label>

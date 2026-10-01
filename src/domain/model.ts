@@ -131,6 +131,18 @@ export interface Closure {
   activity: Activity[];
   note: string;
 }
+export type AnnotationKind = "personal" | "formula" | "reminder";
+export interface Annotation {
+  id: string;
+  ownerId: string;
+  title: string;
+  content: string;
+  kind: AnnotationKind;
+  reminderOn: string | null;
+  createdAt: string;
+  updatedAt: string;
+  convertedTaskId: string | null;
+}
 export interface Onboarding {
   assignmentCompanyIds?: Record<string, string[]>;
   schedules?: Record<string, Schedule>;
@@ -172,6 +184,8 @@ export interface State {
   onboarding: Record<string, Onboarding>;
   activeId: string;
   tour: Record<string, number>;
+  tourVersion?: Record<string, number>;
+  annotations?: Annotation[];
 }
 export const id = () => crypto.randomUUID();
 export const dateART = (iso = new Date().toISOString()) =>
