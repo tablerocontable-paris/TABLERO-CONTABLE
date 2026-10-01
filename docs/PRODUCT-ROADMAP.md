@@ -1,10 +1,12 @@
 # Decisiones vigentes — 30/09/2026
 
-**Estado actual tras completar la ejecución 008 del 01/10:** defensa de inicio
-recalculado y aceptación local completas; 151 pruebas en 13 archivos pasan.
-Reportes aislados, upgrades/abortos y aceptación de anotaciones/recorrido están
-verificados. Evidencia: `architecture/REVIEW-008-EXECUTION-20261001.md`.
-Próximo paso: **Sol 6.1 alto**, revisión según `docs/EXECUTION-NEXT.md`.
+**Estado actual tras revisión de v26 del 01/10:** defensa de inicio recalculado
+aceptada localmente; evidencia de 151 pruebas/13 archivos y 32 casos críticos
+verificada. Reportes, upgrades/abortos y aceptación frontend conservados.
+Se detectó actor incorrecto en una rama de la guía PostgreSQL, no una falla de
+permisos SQL. Revisión: `architecture/REVIEW-008-FINAL-20261001.md`.
+Próximo paso: **Luna medio**, ajuste puntual según `docs/EXECUTION-NEXT.md`.
+Grado de avance y pendientes actuales: `docs/PROJECT-STATUS.md`.
 Concurrencia PostgreSQL y Supabase/Auth/MFA/correo reales siguen pendientes.
 La demo sigue privada, sin SQL remoto ni cuentas reales; no está lista para
 migración. Los apartados siguientes conservan historia del avance.
@@ -36,7 +38,7 @@ Durante el desarrollo: código, commits, versiones y deploy privado en Sites. Al
 
 Implementado en demostración local: criterios anteriores de recurrencia, cronómetro, cobertura, laboratorio aislado, temas, administración de perfiles y planificación, además de KPI/cierre de 0.3. Las vistas de usuarios siguen siendo simulación; aún no hay cuentas reales.
 
-El SQL 0.3 no se puede conectar directamente al frontend. Las migraciones locales 202610010001 y 202610010002 adaptan ocurrencias fechadas, versiones de catálogo, vencimientos opcionales, sesiones y ausencias, y la inducción versionada con aprobación transaccional. Falta RPC de escritura para sesiones/coberturas, entrega de reportes y el adaptador frontend. No se aplicaron en Supabase.
+El SQL 0.3 no se puede conectar directamente al frontend. Las migraciones locales 001–008 preparan ocurrencias fechadas, versiones de catálogo, vencimientos opcionales, inducción aprobada, cronómetros/coberturas, revisiones y reportes/outbox. Sus RPCs ya están implementadas y probadas localmente. Faltan adaptador frontend y validaciones reales; no se aplicaron en Supabase. Los apartados cronológicos inferiores documentan etapas anteriores.
 
 ## Próximas etapas para llegar a versión definitiva
 

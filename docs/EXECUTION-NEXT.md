@@ -1,48 +1,32 @@
-# Próximo bloque — revisión de la ejecución completa 008
+# Próximo bloque — ajuste de guía R008-F01
 
-**Modelo: GPT-6.1 Sol. Esfuerzo: alto. Velocidad: Standard.** Cambio manual del
-usuario; con «continuá» basta, no pedir copiar otro prompt ni sustituir por agentes.
+**GPT-6 Luna, medio, Standard.** Cambio manual; basta «continuá» y no se delega
+para sustituir ese cambio. Revisión actual:
+`architecture/REVIEW-008-FINAL-20261001.md`, fuente v26
+`bdb87e235e3871d1f6f3d712834812fb78b3a48c`.
 
-Fuente: commit vigente de main y su versión privada de Sites. La ejecución parte
-de `640c376efd4aec6e7564227aa2d74fac4093a102` y completa el suplemento
-`architecture/TIME-COVERAGE-008-COMPLETION.md`. Evidencia actual:
-`architecture/REVIEW-008-EXECUTION-20261001.md` y archivos nuevos
-`review-evidence/time-coverage-008-completion-*`. La revisión v24 es histórica;
-no interpretar sus pendientes como trabajo todavía sin ejecutar.
+## Contrato cerrado
 
-## Revisión requerida
+Ejecutar íntegramente `architecture/TIME-COVERAGE-GUIDE-FIX.md`:
 
-1. Revisar el diff de 008: `actual_needs_start` recalculado desde fila bloqueada
-   en checklist y comparación equivalente en transición, antes de no-op,
-   expiración, auditoría y receipt. Verificar reglas iguales al plan, orden de
-   locks, rechazo íntegro y conservación de casos legítimos.
-2. Revisar aceptación aislada de 39 casos de cronómetros y seis de reportes.
-   Confirmar rollback por caso, SAVEPOINT en errores, JWT/aal explícitos y fechas
-   ART. Capturas exactas, cortes distintos, destino sin reloj, permisos/sello,
-   pausas y no-op con dos pasos; no aprobar por exit 0 ni por inyecciones de fixture.
-3. Revisar 15 upgrades/abortos, proyección completa de campos originales y
-   snapshots::text. El sello añadido por 006 es permitido. Historia con actor
-   NULL/reemplazante suspendido y membresía retirada no se reconstruye. Los
-   abortos comprueban IDs, filas, DDL, funciones, triggers, políticas y ACL.
-4. Inspeccionar guía y scripts `tests/postgres-008/`: 24 pares preparados, host/
-   puerto/usuario/base coherentes, SQL A/B, espera observada y COMMIT/ROLLBACK,
-   asserts. Los 22 casos locales son **secuenciales**; corte real ART y toda
-   concurrencia PostgreSQL siguen **NO EJECUTADO**. No ejecutar `--run` ahora.
-5. Revisar las cinco nuevas pruebas integradas de inducción/recorrido/anotaciones,
-   sin ampliar diseño ni atribuir privacidad al selector local. QA visual móvil,
-   contraste y accesibilidad no se completaron en este bloque.
-6. Verificar evidencia de casos críticos (exactamente una prueba seleccionada
-   por proceso), 151/13, build y comparación de archivos congelados. Repetir sólo
-   si una discrepancia concreta lo requiere; no sobrescribir diagnósticos viejos.
+1. Actor B de expiry-wait será jefe MFA en ambos órdenes.
+2. Añadir aceptación secuencial del renderer antes del corte, sin pg_sleep ni
+   conexión PostgreSQL; 23 casos locales, 24 pares reales todavía NO EJECUTADO.
+3. Actualizar guía y evidencia nueva. Preservar SQL 001–008, frontend y todos los
+   diagnósticos/evidencias anteriores. No dar permisos nuevos al empleado.
+4. Verificar, commit/push y Sites privado del mismo SHA. No interrumpir entre
+   pasos de este contrato. Después revisión acotada **Sol 6.1 medio**.
 
-## Resultado de la revisión
+La revisión acepta localmente R008-01. No reabrir SQL ni repetir toda la revisión
+de cronómetros para corregir una llamada de la guía. Tras cerrar este ajuste,
+Sol prepara integración frontend/SQL y sus gates.
 
-Guardar decisión con hallazgos reproducibles y riesgos restantes. Si falta una
-corrección acotada, definir contrato completo para Luna medio y detenerse sólo
-al cambio manual. Si 008 se aprueba localmente, Sol prepara el siguiente bloque
-de integración frontend/SQL y sus gates; aprobación local no habilita migración.
+## Grado de avance y límites
 
-No instalar PostgreSQL, aplicar SQL remoto, crear Gmail/GitHub/Supabase/hosting,
-migrar empleados ni enviar correo. Infraestructura dedicada, Git automático,
-Supabase dev/prod, Auth/MFA/RLS reales, recuperación y piloto continúan anotados
-en PRODUCT-ROADMAP.md y ops/AUTOMATED-DELIVERY.md.
+Ver `PROJECT-STATUS.md`. Demo avanzada y contrato SQL local preparado; producto
+final todavía requiere integración, cuentas/permisos reales, funcionalidades
+restantes, pruebas concurrentes, correo, recuperación y piloto.
+
+No crear Gmail/GitHub/Supabase/hosting, ejecutar --run, aplicar SQL remoto, migrar
+empleados ni enviar correo. Cuenta dedicada y operación dev/prod automática
+siguen anotadas en PRODUCT-ROADMAP.md y ops/AUTOMATED-DELIVERY.md.
