@@ -80,9 +80,13 @@ Evidencia: 48 pruebas + build aprobados; base nueva y upgrade fixture 0.3 + 001/
 
 Límites: no SQL remoto, proveedor real, correo ni cron ejecutándose; no frontend/URL `/reportes/:id` conectados. Las funciones de escritura de sesiones/coberturas aún faltan. El snapshot de reaperturas contiene las transiciones explícitas ya auditadas; la RPC de checklist antigua no guarda from/to y requiere una migración posterior, sin inferir historia anterior. El cierre actual genera la entrega cuando lo invoca un responsable; la programación del cierre/revisión mensual debe definirse y probarse antes de automatizar por calendario. Ver `docs/ops/REPORT-DELIVERY.md`.
 
-## Revisión 004 completada — cambio a Luna
+## Ejecución 004 — pendiente de revisión arquitectónica Sol 6.1
 
-Contrato detallado en `docs/architecture/TIME-COVERAGE-004.md`. Se confirmó una vía de creación de asignaciones por empleado/encargado que evita la aprobación; 004 la restringe a jefatura MFA. Decisiones cerradas: coberturas por empresa sin ampliar perfiles/administración, cronómetro único por actor/tarea, expiración/cancelación con límite servidor, reapertura con motivo, wrappers antiguos seguros, receipts idempotentes y orden de locks compartido con cierre. Implementar sólo 004 local con Luna medio; no conectar frontend ni crear infraestructura.
+Contrato detallado en `docs/architecture/TIME-COVERAGE-004.md`. Se agregó `202610010004_time_coverage.sql`, sin editar 001–003, y una guía de validación de carreras reales en `docs/ops/TIME-COVERAGE-VALIDATION.md`. Se restringió `create_catalog_assignment` a jefatura con MFA; se añadieron autorización explícita de empresas para cobertura, RPCs de aprobación/cancelación, reloj, espera, actividad idempotente, reapertura con motivo y receipt de operaciones. El cierre nuevo genera snapshot versión 3 con eventos de reapertura y sesiones, sin reescribir snapshots anteriores. La UI no se conectó a este contrato.
+
+Evidencia: **49 pruebas pasan**, incluida base vacía y fixture de actualización anterior; `npm run build` y `git diff --check` pasan. Commit `2ad47732c10c31e1354ca41af2680d6a3280117c` quedó en `main` del repositorio fuente de Sites y se publicó la versión privada 12 en `https://grupo-paris-contabilidad.valentino-magni.chatgpt.site`. Ese despliegue sólo sirve la build estática existente; **no aplica la migración ni conecta Supabase**. Las cuatro carreras reales están documentadas como NO EJECUTADAS; PGlite no prueba concurrencia real.
+
+Antes de aplicar 004 o conectarla al frontend, revisión Sol 6.1 alto: confirmar el orden de locks para pausas/interrupciones de sesiones en `set_task_wait`, `transition_task_reviewed`, `set_checklist_item_reviewed` y `pause_task_timer`; pausa actualmente no toma guards de propietario/período; comprobar el cambio atómico `p_switch=true` con origen y destino en meses distintos; verificar que los wrappers preservan permisos de cobertura y que la migración de eventos legacy es robusta ante cualquier actor huérfano. Resolver cualquier ajuste en un commit nuevo y volver a ejecutar todos los checks. No ejecutar migración remota aún.
 
 ### Aceptación y límites
 
