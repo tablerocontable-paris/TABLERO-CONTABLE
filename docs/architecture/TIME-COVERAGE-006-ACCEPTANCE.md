@@ -7,6 +7,10 @@ antes de publicar. La revisión Sol 6.1 y los gates PostgreSQL/Supabase siguen p
 Evidencia: `REVIEW-005-20261001.md`. No implementar durante la fase de revisión Sol.
 Las reglas de 005 siguen vigentes salvo la aclaración de replay de abajo.
 
+Revisión posterior completada: `REVIEW-006-20261001.md`. 006 requiere corrección
+007 antes de integración; siguiente ejecución en `TIME-COVERAGE-007-ACCEPTANCE.md`.
+El contrato original se conserva como referencia de aceptación y sus pendientes.
+
 ## Entrega acotada
 
 1. Una migración nueva `202610010006_time_coverage_acceptance.sql`, BEGIN/COMMIT.

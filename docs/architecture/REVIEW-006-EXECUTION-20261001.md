@@ -37,3 +37,12 @@ cancelación y limpieza/auditoría de reloj de cobertura vencido.
 Esto es evidencia de ejecución PGlite local, no una aprobación de arquitectura ni
 de producción. Sol 6.1 (alto) debe revisar 006, el preflight, el orden de locks y el
 aislamiento antes de ampliar el alcance. No ejecutar SQL remoto ni migrar empleados.
+
+## Revisión posterior — 01/10/2026
+
+Sol 6.1 revisó esta ejecución; ver `REVIEW-006-20261001.md`. Los seis defectos
+de 005 cumplen en el diagnóstico de 006, pero nueve grupos de fallas y dependencia
+de JWT en una prueba impiden aprobar 006 para integración. La suite completa en
+verde registrada arriba no demuestra aislamiento. El siguiente contrato local
+para Luna medio es `TIME-COVERAGE-007-ACCEPTANCE.md`; la evidencia original de
+ejecución se conserva y no se presenta como validación PostgreSQL/Supabase real.
