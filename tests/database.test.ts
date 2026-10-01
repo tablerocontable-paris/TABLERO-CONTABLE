@@ -399,8 +399,9 @@ describe("base nueva desde cero y RLS", () => {
         ),
       );
       await legacy.exec(readFileSync(new URL("../supabase/migrations/202610010003_report_delivery.sql", import.meta.url), "utf8"));
-      await legacy.exec(`insert into audit_events(organization_id,actor_id,action,entity_id,details) values('${ids.org}','${ids.boss}','task.transition','${ids.t.replace("500", "600")}','{"from":"Completada","to":"Pendiente"}');insert into period_reports(id,organization_id,closure_id,owner_id,period,snapshot) select '81000000-0000-0000-0000-000000000001',organization_id,id,owner_id,period,'{"legacy_report":true}' from monthly_closures where owner_id='${ids.employee}' and period='2026-09-01';insert into report_deliveries(id,organization_id,report_id,recipient_id,recipient_email) values('82000000-0000-0000-0000-000000000001','${ids.org}','81000000-0000-0000-0000-000000000001','${ids.boss}','boss@legacy.test');insert into report_outbox_events(id,organization_id,delivery_id) values('83000000-0000-0000-0000-000000000001','${ids.org}','82000000-0000-0000-0000-000000000001');`);
-      for (const f of readdirSync(new URL("../supabase/migrations/", import.meta.url)).filter((n) => /^20261001000[45]_/.test(n)).sort())
+      await legacy.exec(`insert into task_time_sessions(id,organization_id,instance_id,actor_id,started_at,ended_at) values('84000000-0000-0000-0000-000000000001','${ids.org}','${ids.t.replace("500", "600")}','${ids.employee}','2026-09-10 12:00:00+00','2026-09-10 12:30:00+00');insert into audit_events(organization_id,actor_id,action,entity_id,details) values('${ids.org}',null,'task.transition','${ids.t.replace("500", "600")}','{"from":"Completada","to":"Pendiente"}');insert into period_reports(id,organization_id,closure_id,owner_id,period,snapshot) select '81000000-0000-0000-0000-000000000001',organization_id,id,owner_id,period,'{"legacy_report":true}' from monthly_closures where owner_id='${ids.employee}' and period='2026-09-01';insert into report_deliveries(id,organization_id,report_id,recipient_id,recipient_email) values('82000000-0000-0000-0000-000000000001','${ids.org}','81000000-0000-0000-0000-000000000001','${ids.boss}','boss@legacy.test');insert into report_outbox_events(id,organization_id,delivery_id) values('83000000-0000-0000-0000-000000000001','${ids.org}','82000000-0000-0000-0000-000000000001');`);
+      const closureSnapshotBefore = (await legacy.query<{snapshot_text:string}>("select snapshot::text snapshot_text from monthly_closures where owner_id=$1",[ids.employee])).rows[0].snapshot_text;
+      for (const f of readdirSync(new URL("../supabase/migrations/", import.meta.url)).filter((n) => /^20261001000[4567]_/.test(n)).sort())
         await legacy.exec(readFileSync(new URL("../supabase/migrations/" + f, import.meta.url), "utf8"));
       const instance = (
         await legacy.query<{
@@ -434,11 +435,14 @@ describe("base nueva desde cero y RLS", () => {
         ).rows[0].template_version_id,
       ).toBeTruthy();
       expect((await legacy.query("select * from onboarding_requests")).rows).toHaveLength(0);
-      expect((await legacy.query("select * from task_time_sessions")).rows).toHaveLength(0);
-      expect((await legacy.query<{snapshot:object}>("select snapshot from monthly_closures")).rows[0].snapshot).toEqual({ immutable: true });
+      const keptSession=(await legacy.query<{id:string;started_at:string;ended_at:string}>("select id,started_at::text,ended_at::text from task_time_sessions")).rows[0];
+      expect(keptSession.id).toBe("84000000-0000-0000-0000-000000000001");
+      expect(new Date(keptSession.started_at).toISOString()).toBe("2026-09-10T12:00:00.000Z");
+      expect(new Date(keptSession.ended_at).toISOString()).toBe("2026-09-10T12:30:00.000Z");
+      expect((await legacy.query<{snapshot_text:string}>("select snapshot::text snapshot_text from monthly_closures where owner_id=$1",[ids.employee])).rows[0].snapshot_text).toBe(closureSnapshotBefore);
       expect((await legacy.query<{id:string;snapshot:object}>("select id,snapshot from period_reports")).rows[0]).toEqual({id:"81000000-0000-0000-0000-000000000001",snapshot:{legacy_report:true}});
       expect((await legacy.query("select * from report_outbox_events where id='83000000-0000-0000-0000-000000000001'")).rows).toHaveLength(1);
-      expect((await legacy.query("select * from task_reopen_events where legacy_audit_id=(select max(id) from audit_events where action='task.transition')")).rows).toHaveLength(1);
+      expect((await legacy.query<{actor_id:string|null}>("select actor_id from task_reopen_events where legacy_audit_id=(select max(id) from audit_events where action='task.transition')")).rows).toEqual([{actor_id:null}]);
     } finally {
       await legacy.close();
     }

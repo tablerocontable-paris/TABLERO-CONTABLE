@@ -83,8 +83,10 @@ describe("Contrato 006 con fixture propio",()=>{
     const source=await makeTask(5,"resultado",'[]');
     const destination=await makeTask(6,"resultado",'[]');
     await db.exec("reset role");
+    try {
     await db.query("update profiles set role='encargado' where id=$1",[reemplazo]);
     await db.query("update profiles set manager_id=$1 where id=$2",[reemplazo,empleado]);
+    await actor(jefe,"aal2");
     const absence=(await db.query<{id:string}>("select approve_employee_absence($1,$2,'licencia','2025-04-05','2025-04-06',array[$3]::uuid[],'Cobertura vencida',$4) as id",[empleado,reemplazo,empresa,"90000000-0000-0000-0000-000000000607"])).rows[0].id;
     await db.exec("reset role");
     await db.query("update task_instances set period='2025-04-01',scheduled_on='2025-04-05',due_date='2025-04-30' where id=$1",[source]);
@@ -105,5 +107,11 @@ describe("Contrato 006 con fixture propio",()=>{
     const open=(await db.query<{id:string}>("select id from task_time_sessions where instance_id=$1 and ended_at is null",[destination])).rows;
     expect(open).toHaveLength(1);
     await db.query("select pause_task_timer($1,$2)",[open[0].id,"90000000-0000-0000-0000-000000000609"]);
+    } finally {
+      await db.exec("reset role");
+      await db.query("update profiles set role='empleado' where id=$1",[reemplazo]);
+      await db.query("update profiles set manager_id=$1 where id=$2",[jefe,empleado]);
+      await db.exec("reset role");
+    }
   });
 });

@@ -1,131 +1,188 @@
-# Validación real PostgreSQL: cobertura, cronómetro y cierre
+# Validación PostgreSQL de cronómetros y coberturas
 
-**Advertencia de revisión 006:** esta guía aún es un borrador, no un harness
-ejecutable. Falta fixture concreto y separar bloques de dos conexiones. La
-corrección se exige en `../architecture/TIME-COVERAGE-006-ACCEPTANCE.md`; no tomar
-las 58 pruebas locales como aprobación de concurrencia ni de contrato completo.
+**Estado: NO EJECUTADO.** La suite local usa PGlite y no comprueba bloqueos,
+interbloqueos ni carreras de PostgreSQL con dos conexiones. Este procedimiento
+es para una base descartable, jamás para producción ni para datos de empleados.
+Revisión y contrato: docs/architecture/REVIEW-006-20261001.md y
+docs/architecture/TIME-COVERAGE-007-ACCEPTANCE.md.
 
-Estado: **NO EJECUTADO**. `npm test` usa PGlite, una sola conexión emulada. No
-verifica interbloqueos, Auth/RLS/MFA reales ni carreras PostgreSQL. En este
-entorno no están instalados `psql` ni `postgres`, y no hay una base de integración.
-Esta guía es para una base local descartable con las migraciones **001–006**; no
-ejecutar en producción ni en Supabase de empleados.
+## Preparar el laboratorio
 
-La ejecución local 006 tiene 58 pruebas aprobadas en PGlite. Eso no sustituye el
-fixture de upgrade 004/005→006 ni las pruebas de dos conexiones de abajo; ambas
-siguen pendientes y esta guía continúa en estado borrador.
+Instalar PostgreSQL local de una versión soportada por Supabase. Crear una base
+vacía y ejecutar como dueño PostgreSQL. No apuntar la URL a Supabase:
 
-## Preparación aislada
+~~~sh
+createdb tablero_cobertura_007_lab
+export TIME_COVERAGE_TEST_DATABASE_URL='postgresql://postgres:postgres@127.0.0.1:54322/tablero_cobertura_007_lab'
+psql "$TIME_COVERAGE_TEST_DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+create role anon nologin;
+create role authenticated nologin;
+create role service_role nologin bypassrls;
+create schema auth;
+create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz);
+create function auth.uid() returns uuid language sql stable as $$
+  select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid
+$$;
+create function auth.jwt() returns jsonb language sql stable as $$
+  select coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb
+$$;
+grant usage on schema auth to authenticated;
+grant execute on function auth.uid(),auth.jwt() to authenticated;
+SQL
+for migration_path in supabase/migrations/*.sql; do
+  psql "$TIME_COVERAGE_TEST_DATABASE_URL" -v ON_ERROR_STOP=1 -f "$migration_path"
+done
+psql "$TIME_COVERAGE_TEST_DATABASE_URL" -v ON_ERROR_STOP=1 -f tests/review/time-coverage-007-postgres-fixture.sql
+~~~
 
-Crear dos actores, dos tareas pendientes del mismo titular y período, un reemplazante
-con membresía explícita, una ausencia autorizada y un jefe con MFA. Usar un email de
-prueba y UUID de operación diferentes para cada llamada. En cada conexión autenticada
-configurar JWT local con `request.jwt.claim.sub` y `request.jwt.claims` (`aal1` o
-`aal2`) según el rol; nunca reutilizar datos personales/productivos.
+El fixture crea jefe, titular, reemplazante, dos empresas, dos tareas y una
+cobertura limitada a Empresa A con UUID fijo
+60000000-0000-0000-0000-000007000001. El período es el mes actual. Cada repetición requiere
+recrear la base vacía para no heredar cierres ni cronómetros.
 
-Las consultas `SELECT` de control siguientes se ejecutan como rol de laboratorio;
-las mutaciones como `authenticated`. Guardar logs con IDs ficticios y resultados.
+Cada terminal psql debe ser una conexión distinta. Antes de operar, configurar el
+JWT y el rol de esa conexión:
 
-## Dos actores intentan la misma tarea
+~~~sql
+select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000007000002',false);
+select set_config('request.jwt.claims','{"aal":"aal1"}',false);
+set role authenticated;
+~~~
 
-Conexión A y B, al mismo tiempo, cada una con su propio UUID de operación:
+Para jefe MFA, usar el UUID 10000000-0000-0000-0000-000007000001 y
+claims {"aal":"aal2"}. Para ejecutar controles como administrador de laboratorio,
+usar reset role. No reutilizar JWT de otro actor.
 
-```sql
--- A
+## Mismo actor intenta iniciar dos tareas
+
+Terminal A, titular:
+
+~~~sql
 begin;
-select start_task_timer('<instancia>', 0, '<uuid-operacion-A>', false);
--- mantener abierta la transacción
+select public.start_task_timer(
+ '50000000-0000-0000-0000-000007000001',0,
+ '90000000-0000-0000-0000-000007000011',false
+);
+~~~
 
--- B
+Mantener A abierta. Terminal B, con el mismo JWT, intenta iniciar Empresa B:
+
+~~~sql
 begin;
-select start_task_timer('<instancia>', 0, '<uuid-operacion-B>', false);
-```
+select public.start_task_timer(
+ '50000000-0000-0000-0000-000007000002',0,
+ '90000000-0000-0000-0000-000007000012',false
+);
+~~~
 
-Confirmar A y después B. Debe existir una sola sesión abierta; B devuelve conflicto
-por estado/revisión o tarea ocupada, sin dejar cambios parciales:
+B debe esperar el guard del actor. Confirmar A; B debe fallar sin abrir segundo
+reloj ni cambiar revisiones. Ejecutar rollback en B. Repetir desde base limpia con
+true como cuarto argumento de B: el switch debe finalizar origen e iniciar destino
+en una unidad. Consultar:
 
-```sql
-select count(*) from task_time_sessions
- where instance_id='<instancia>' and ended_at is null;
-select status,state_revision from task_instances where id='<instancia>';
-```
+~~~sql
+select actor_id,instance_id,started_at,ended_at from public.task_time_sessions
+ where actor_id='10000000-0000-0000-0000-000007000002' order by started_at,id;
+select id,status,state_revision from public.task_instances
+ where id in ('50000000-0000-0000-0000-000007000001',
+              '50000000-0000-0000-0000-000007000002') order by id;
+~~~
 
-## Un actor intenta iniciar dos tareas
+Sólo destino debe quedar abierto. Repetir invirtiendo qué conexión obtiene primero
+el guard.
 
-Ejecutar en dos conexiones bajo el mismo actor, dejando A sin confirmar:
+## Inicio frente a cierre mensual
 
-```sql
--- A                         -- B
-begin;                        begin;
-select start_task_timer(      select start_task_timer(
- '<instancia-A>',0,'<op-A>',false); '<instancia-B>',0,'<op-B>',false);
-```
+En base limpia, terminal A inicia Empresa A con operación
+90000000-0000-0000-0000-000007000021 y deja la transacción sin confirmar. Terminal
+B usa JWT de jefe MFA:
 
-Una sola llamada puede dejar reloj abierto. Repetir con B `p_switch=true`: el
-cambio debe cerrar el origen e iniciar destino como una unidad. Forzar un destino
-inválido debe revertir el cierre del origen. Consultar sesiones y ambas revisiones.
+~~~sql
+begin;
+select public.close_employee_month(
+ '10000000-0000-0000-0000-000007000002',
+ date_trunc('month',current_date)::date,
+ 'Cierre sintético de concurrencia'
+);
+~~~
 
-## Inicio frente a cierre del mes
+Dejar que ambas consultas se resuelvan y confirmar primero la que ganó. Si gana
+inicio, cierre falla por reloj abierto. Si gana cierre, inicio falla por mes
+cerrado. Nunca debe haber cierre con reloj abierto ni reloj nuevo posterior al
+cierre. Comprobar:
 
-Empleado A inicia una sesión mientras jefe MFA B llama
-`close_employee_month('<titular>','<periodo-primer-dia>','Revisión de prueba')`.
-Si gana el cierre, inicio falla por período cerrado; si gana el inicio, el cierre
-falla por sesión activa. Nunca debe haber cierre con un reloj abierto ni inicio
-posterior a cierre confirmado:
-
-```sql
-select c.id, count(*) filter(where s.ended_at is null) as open_sessions
-from monthly_closures c
-left join task_instances t on t.owner_id=c.owner_id and t.period=c.period
-left join task_time_sessions s on s.instance_id=t.id
-where c.owner_id='<titular>' and c.period='<periodo-primer-dia>'
+~~~sql
+select c.id,count(*) filter(where s.ended_at is null) open_sessions
+from public.monthly_closures c
+left join public.task_instances t on t.owner_id=c.owner_id and t.period=c.period
+left join public.task_time_sessions s on s.instance_id=t.id
+where c.owner_id='10000000-0000-0000-0000-000007000002'
+ and c.period=date_trunc('month',current_date)::date
 group by c.id;
-```
-
-Resultado esperado: `open_sessions = 0`; snapshot e instancia no cambian después.
+~~~
 
 ## Cancelación frente a inicio de cobertura
 
-Encargado MFA A cancela una ausencia mientras reemplazante B intenta iniciar una
-tarea de una empresa y período autorizados. Probar ambos órdenes manteniendo abierta
-la primera transacción hasta que la segunda espere el guard `work-owner:`.
+Usar base limpia. Terminal A,
+reemplazante, inicia Empresa A con operación
+90000000-0000-0000-0000-000007000031 y deja abierta la transacción. Terminal B,
+jefe MFA, comienza cancelación:
 
-- Si gana cancelación: inicio falla por falta de cobertura.
-- Si gana inicio: cancelación espera, limita ended_at al mínimo entre cancelación
-  y fin ART, incrementa revisión y audita actor/ejecutor/tarea/sesión/motivo.
-- Un mes cerrado con sesión abierta produce rollback íntegro.
-- Repetir cancelación con nueva clave conserva `cancelled_at` y no duplica auditoría.
+~~~sql
+begin;
+select public.cancel_employee_absence(
+ '60000000-0000-0000-0000-000007000001','Prueba de concurrencia',
+ '90000000-0000-0000-0000-000007000032'
+);
+~~~
 
-Verificar corte y único evento:
+Mantener la primera transacción abierta hasta que la otra consulte y espere el
+guard. Probar ambos órdenes en bases limpias:
 
-```sql
-select s.started_at,s.ended_at,a.ends_on,a.cancelled_at,
-       (a.ends_on+1)::timestamp at time zone 'America/Argentina/Buenos_Aires' as expiry
-from task_time_sessions s join employee_absences a on a.id=s.absence_id
-where a.id='<ausencia>';
-select action,count(*) from audit_events where entity_id='<ausencia>'
- group by action;
-```
+- Si confirma primero la cancelación, el inicio del reemplazante falla por
+  cobertura cancelada; no queda sesión ni receipt de inicio.
+- Si confirma primero el inicio, cancelación espera, conserva cutoff y finaliza
+  sesión en el mínimo entre operación, fin ART y cutoff. Revisión avanza una vez.
+  Auditorías comparten at de operación y guardan el fin efectivo.
+- Repetir cancelación con clave nueva no modifica sesión, tarea, motivo, cutoff ni
+  cantidad de eventos.
 
-## Orden de locks adicional
+Comprobar corte y auditoría:
 
-Probar también en conexiones separadas:
+~~~sql
+select a.cancelled_at,s.started_at,s.ended_at,
+       ((a.ends_on+1)::timestamp at time zone 'America/Argentina/Buenos_Aires') expiry
+from public.employee_absences a
+join public.task_time_sessions s on s.absence_id=a.id
+where a.note='Cobertura sintética de PostgreSQL';
+select action,at,entity_id,details from public.audit_events
+where action in ('absence.cancelled','absence.session_stopped','task.timer_expired')
+order by id;
+~~~
 
-- pausa vs finalización/checklist de la misma tarea;
-- transición/wait vs switch del mismo ejecutor;
-- inicio mientras aprobación de ausencia toma owner guard;
-- cancelación con dos períodos abiertos (meses, instancias y sesiones en orden);
-- replay simultáneo de la misma clave receipt y rechazo de clave reutilizada con
-  argumentos distintos.
+## Locks restantes y permisos
 
-Cada carrera se repite invirtiendo cuál transacción obtiene primero el guard.
-Verificar que no haya deadlock, duplicados, medio switch, fin previo a inicio,
-sesión abierta en snapshot, revisión perdida ni operación inválida que deje receipt.
+Ejecutar con transacciones separadas e invertir orden A/B:
 
-## Aprobación
+- pausa propia frente a checklist/transición en la misma tarea;
+- checklist que completa resultado mientras existe otro reloj propio;
+- cierre frente a inicio con switch;
+- retiro de acceso permanente mientras una RPC espera owner guard;
+- inserción de empresa autorizada frente al sellado de ausencia;
+- replay simultáneo de receipt y UUID reutilizado con argumentos distintos.
 
-Registrar versión exacta de PostgreSQL, comandos/resultados sin datos personales,
-fecha, cantidad de repeticiones y consultas de control en este documento. Mantener
-el estado **NO EJECUTADO** hasta realizar las carreras en PostgreSQL real. No marcar
-005 como aprobada, no conectar frontend y no migrar empleados basándose sólo en
-PGlite, build o despliegue de Sites.
+Empresa B no pertenece a cobertura del reemplazante; su inicio debe fallar sin
+receipt ni sesión. Jefe fuera de organización y encargado fuera de jerarquía no
+pueden interrumpir el reloj. El titular puede desbloquear conservándolo, sin MFA
+porque no pausa al ejecutor. Pausa sobre una sesión terminada admite receipt
+escalar después del cierre mensual; una sesión abierta en mes cerrado falla intacta.
+
+En cada carrera verificar estado, revisión, sesiones, ausencias, auditorías y
+receipts. No debe haber deadlock, duplicados, fin anterior al inicio, estado
+parcial, evento repetido ni sesión en snapshot ya cerrado.
+
+## Registro
+
+No cambiar NO EJECUTADO hasta guardar logs de PostgreSQL real: versión, sistema,
+conexiones A/B, comandos, resultado de cada orden, consultas finales y cantidad de
+repeticiones. PGlite no es una prueba de concurrencia. Nunca usar base productiva.

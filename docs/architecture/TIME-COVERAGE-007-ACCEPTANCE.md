@@ -1,8 +1,9 @@
 # Contrato 007 — completar aceptación de cronómetros y coberturas
 
 Revisión del 01/10/2026 sobre `0df96abcd853ccec00a8ecbd02327cccd6b52415`.
-**Aprobado para ejecución local GPT 6 Luna, esfuerzo medio.** Evidencia y límites:
-`REVIEW-006-20261001.md`. 007 aún no implementada. Este contrato complementa 006;
+**Aprobado para ejecución local GPT 6 Luna, esfuerzo medio.** Implementación
+local completada; revisión Sol 6.1 pendiente. Evidencia y límites:
+`REVIEW-006-20261001.md` y `REVIEW-007-EXECUTION-20261001.md`. Este contrato complementa 006;
 sus reglas de permisos, replay, reporte y conservación histórica siguen vigentes.
 
 ## Entrega y límites
