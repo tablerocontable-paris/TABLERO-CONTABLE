@@ -1,6 +1,10 @@
 # Contrato revisado 004 — cronómetro, cobertura y reaperturas
 
-Revisión 01/10/2026 sobre el commit 044c882. Documento listo para implementación con GPT 6 Luna, esfuerzo medio. No es código implementado ni autorización para conectar SQL remoto, crear cuentas o mandar correo.
+Especificación inicial del 01/10/2026 sobre el commit 044c882. 004 fue implementada
+localmente, pero la revisión posterior encontró incumplimientos reproducidos y
+no la aprueba para conexión/aplicación remota. Ver `REVIEW-004-20261001.md` y el
+contrato correctivo `TIME-COVERAGE-005-HARDENING.md`. Este documento conserva las
+reglas originales; no autoriza SQL remoto, cuentas ni correo.
 
 ## Hallazgos y decisiones
 

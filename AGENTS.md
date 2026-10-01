@@ -27,4 +27,4 @@
 
 - Continuar autónomamente entre pasos/revisiones que usan el mismo modelo; no terminar cada bloque para pedir «continuar».
 - Detenerse al llegar a un cambio de modelo necesario y comunicar modelo, esfuerzo y contrato concreto preparado. El usuario hará el cambio manual. No delegar ni simular un cambio de modelo para sortear esta preferencia.
-- Razonamiento y revisión Sol 6.1 alto; ejecución del contrato 004: Luna medio, siguiendo `docs/architecture/TIME-COVERAGE-004.md`. Si Luna encuentra una decisión nueva, volver a revisión Sol antes de resolverla.
+- Razonamiento y revisión Sol 6.1 alto; próxima ejecución: Luna medio, siguiendo `docs/architecture/TIME-COVERAGE-005-HARDENING.md`. 004 no está aprobada para aplicación remota; ver evidencia en `docs/architecture/REVIEW-004-20261001.md`. Si Luna encuentra una decisión nueva, volver a revisión Sol antes de resolverla.
