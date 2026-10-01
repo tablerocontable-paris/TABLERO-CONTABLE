@@ -11,6 +11,7 @@ const ids = {
   outsider: "10000000-0000-0000-0000-000000000004",
   c: "20000000-0000-0000-0000-000000000001",
   c2: "20000000-0000-0000-0000-000000000002",
+  c3: "20000000-0000-0000-0000-000000000003",
   team: "30000000-0000-0000-0000-000000000001",
   a: "40000000-0000-0000-0000-000000000001",
   t: "50000000-0000-0000-0000-000000000001",
@@ -255,6 +256,15 @@ describe("base nueva desde cero y RLS", () => {
           "utf8",
         ),
       );
+      await legacy.exec(
+        readFileSync(
+          new URL(
+            "../supabase/migrations/202610010002_onboarding_approval.sql",
+            import.meta.url,
+          ),
+          "utf8",
+        ),
+      );
       const instance = (
         await legacy.query<{
           scheduled_on: string;
@@ -286,6 +296,7 @@ describe("base nueva desde cero y RLS", () => {
           )
         ).rows[0].template_version_id,
       ).toBeTruthy();
+      expect((await legacy.query("select * from onboarding_requests")).rows).toHaveLength(0);
     } finally {
       await legacy.close();
     }
@@ -387,5 +398,68 @@ describe("base nueva desde cero y RLS", () => {
       month_day: 31,
     });
     expect(assignment.template_version_id).toBeTruthy();
+  });
+  it("la inducción requiere revisión, respeta empresas y sólo jefatura activa las tareas", async () => {
+    await db.exec(`reset role;insert into companies values('${ids.c3}','${ids.org}','Empresa de prueba');insert into company_memberships values('${ids.org}','${ids.c3}','${ids.employee}');`);
+    await db.exec(
+      `reset role;select set_config('request.jwt.claim.sub','${ids.boss}',false);select set_config('request.jwt.claims','{"aal":"aal2"}',false);set role authenticated;`,
+    );
+    const template = (
+      await db.query<{ create_task_template: string }>(
+        "select create_task_template($1,$2,$3,$4,$5,$6,$7,$8::jsonb)",
+        ["Conciliación bancaria", "Conciliar y controlar", "Tesorería", "resultado", 7, null, null, '["Saldo conciliado"]'],
+      )
+    ).rows[0].create_task_template;
+    const version = (
+      await db.query<{ id: string }>(
+        "select id from task_template_versions where template_id=$1 order by version desc limit 1",
+        [template],
+      )
+    ).rows[0].id;
+    const line1 = "80000000-0000-0000-0000-000000000001";
+    const line2 = "80000000-0000-0000-0000-000000000002";
+    const payload = JSON.stringify({
+      lines: [
+        { line_id: line1, template_version_id: version, company_id: ids.c, team_id: ids.team, frequency: "semanal", start_date: "2026-11-02", interval_count: 1, weekdays: [1], has_deadline: true, due_offset_days: 2 },
+        { line_id: line2, template_version_id: version, company_id: ids.c3, team_id: ids.team, frequency: "mensual", start_date: "2026-11-10", interval_count: 1, month_day: 10, has_deadline: false, due_offset_days: 0 },
+      ],
+    });
+    await actor(ids.employee);
+    const priorAssignments = (await db.query<{ count: string }>(
+      "select count(*)::text as count from task_assignments where owner_id=$1", [ids.employee],
+    )).rows[0].count;
+    const request = (await db.query<{ submit_onboarding: string }>(
+      "select submit_onboarding($1::jsonb,0)", [payload],
+    )).rows[0].submit_onboarding;
+    expect((await db.query<{ count: string }>("select count(*)::text as count from task_assignments where owner_id=$1", [ids.employee])).rows[0].count).toBe(priorAssignments);
+    await expect(db.query("select submit_onboarding($1::jsonb,0)", [payload])).rejects.toThrow("revisión cambió");
+    await expect(db.query("select * from onboarding_requests where id=$1", [request])).resolves.toBeDefined();
+    await db.exec(`reset role;delete from company_memberships where company_id='${ids.c3}' and profile_id='${ids.employee}';`);
+
+    await db.exec(`reset role;select set_config('request.jwt.claim.sub','${ids.manager}',false);select set_config('request.jwt.claims','{"aal":"aal2"}',false);set role authenticated;`);
+    await expect(db.query("select approve_onboarding($1,1)", [request])).rejects.toThrow("Sólo jefatura");
+    await db.query("select request_onboarding_changes($1,1,'Confirmar los días')", [request]);
+    await actor(ids.employee);
+    await db.query("select submit_onboarding($1::jsonb,1)", [payload]);
+
+    await db.exec(`reset role;select set_config('request.jwt.claim.sub','${ids.boss}',false);select set_config('request.jwt.claims','{"aal":"aal1"}',false);set role authenticated;`);
+    await expect(db.query("select approve_onboarding($1,2)", [request])).rejects.toThrow("MFA");
+    await db.exec(`reset role;select set_config('request.jwt.claim.sub','${ids.boss}',false);select set_config('request.jwt.claims','{"aal":"aal2"}',false);set role authenticated;`);
+    await expect(db.query("select approve_onboarding($1,1)", [request])).rejects.toThrow("desactualizada");
+    await expect(db.query("select approve_onboarding($1,2)", [request])).rejects.toThrow("Empresa o equipo ya no asignado");
+    expect((await db.query("select * from onboarding_activations where request_id=$1", [request])).rows).toHaveLength(0);
+    expect((await db.query("select * from task_assignments where owner_id=$1 and template_version_id=$2", [ids.employee, version])).rows).toHaveLength(0);
+    await db.exec(`reset role;insert into company_memberships values('${ids.org}','${ids.c3}','${ids.employee}');select set_config('request.jwt.claim.sub','${ids.boss}',false);select set_config('request.jwt.claims','{"aal":"aal2"}',false);set role authenticated;`);
+    expect((await db.query<{ approve_onboarding: number }>("select approve_onboarding($1,2)", [request])).rows[0].approve_onboarding).toBe(2);
+    const assigned = (await db.query<{ company_id: string; frequency: string; has_deadline: boolean; weight: number }>(
+      "select company_id,frequency,has_deadline,weight from task_assignments where owner_id=$1 and template_version_id=$2 order by company_id",
+      [ids.employee, version],
+    )).rows;
+    expect(assigned).toHaveLength(2);
+    expect(assigned.map(({ company_id, frequency }) => [company_id, frequency])).toEqual([
+      [ids.c, "semanal"], [ids.c3, "mensual"],
+    ]);
+    expect((await db.query("select * from onboarding_activations where request_id=$1", [request])).rows).toHaveLength(2);
+    expect((await db.query<{ approve_onboarding: number }>("select approve_onboarding($1,2)", [request])).rows[0].approve_onboarding).toBe(2);
   });
 });

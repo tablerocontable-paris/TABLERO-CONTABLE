@@ -27,7 +27,7 @@ Durante el desarrollo: código, commits, versiones y deploy privado en Sites. Al
 
 Implementado en demostración local: criterios anteriores de recurrencia, cronómetro, cobertura, laboratorio aislado, temas, administración de perfiles y planificación, además de KPI/cierre de 0.3. Las vistas de usuarios siguen siendo simulación; aún no hay cuentas reales.
 
-El SQL 0.3 no se puede conectar directamente al frontend. La migración local 202610010001 adapta ocurrencias fechadas, versiones de catálogo, vencimientos opcionales, tablas de sesiones y ausencias, con políticas de lectura. Falta RPC de escritura para sesiones/coberturas, la aprobación de inducción, entrega de reportes y el adaptador frontend. No se aplicó en Supabase.
+El SQL 0.3 no se puede conectar directamente al frontend. Las migraciones locales 202610010001 y 202610010002 adaptan ocurrencias fechadas, versiones de catálogo, vencimientos opcionales, sesiones y ausencias, y la inducción versionada con aprobación transaccional. Falta RPC de escritura para sesiones/coberturas, entrega de reportes y el adaptador frontend. No se aplicaron en Supabase.
 
 ## Próximas etapas para llegar a versión definitiva
 
@@ -53,3 +53,11 @@ No prometer ausencia total de errores: se reducen con reglas separadas, pruebas 
 El contrato revisado y las instrucciones para Luna están en `docs/architecture/CONTRACT-REVIEW-20261001.md`. Se confirmó que SQL 0.3 no representa ocurrencias diarias/semanales, vencimientos opcionales, sesiones, coberturas, aprobación ni entrega automática de reportes. La siguiente ejecución implementará sólo aprobación transaccional de inducción `202610010002`; entrega de reportes irá después como `202610010003`. No crear infraestructura todavía.
 
 La vista de tablero permite plegar/desplegar cada columna por separado y ordenar tareas de A a Z o Z a A, tanto en tarjetas como en lista. Son preferencias de vista: no cambian estados, datos o KPI.
+
+## Revisión y próxima ejecución — 01/10/2026 (continuación)
+
+- Implementada localmente `202610010002_onboarding_approval.sql`: borrador → enviado → cambios solicitados → aprobado. Los envíos sellan revisiones; sólo jefatura con MFA aprueba. El encargado de la persona puede solicitar correcciones, no activar tareas.
+- La aprobación valida membresías activas, estándar vigente, calendario y cierres; asigna cada línea por empresa de forma independiente y materializa sólo el período abierto actual, todo de forma transaccional. Repetir una aprobación exitosa devuelve el mismo conteo, sin duplicar asignaciones. Las tareas particulares requieren peso explícito de jefatura.
+- Pruebas nuevas verifican que el envío no active tareas, MFA, encargado restringido, revisión obsoleta, el mismo estándar en dos empresas con reglas distintas e idempotencia. PGlite no simula Auth/MFA real.
+- El deseo de commits/push/deploy automatizados, pre-commit, Supabase dev/prod y rama `dev` está en `docs/ops/AUTOMATED-DELIVERY.md`. Es diseño pendiente; no crear servicios/cuentas hasta aprobar infraestructura.
+- Próxima ejecución de código: cierre + reporte + outbox en `202610010003_report_delivery.sql`, con proveedor falso. No enviar correo real.

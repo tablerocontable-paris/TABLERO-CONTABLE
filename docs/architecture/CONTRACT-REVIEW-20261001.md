@@ -62,7 +62,9 @@ La separación catálogo/asignación/instancia y el cierre transaccional son una
 
 ## Instrucciones ejecutables para GPT 6 Luna — esfuerzo medio
 
-Ejecución completada: **`202610010001_occurrence_contract.sql` y pruebas locales**. Agrega revisiones inmutables del catálogo y alta de procesos de jefatura con MFA; reglas por fecha; ocurrencias con fecha propia y vencimiento opcional; materialización idempotente diaria/semanal/mensual/única; cronómetro y rangos de ausencias. Conserva instancia/lista y cierre existentes durante el upgrade. El día de trabajo histórico se infiere de la fecha de vencimiento disponible en 0.3; las fotos de cierre anteriores quedan intactas.
+Ejecuciones completadas: **`202610010001_occurrence_contract.sql`** y **`202610010002_onboarding_approval.sql`**, con pruebas locales. La segunda agrega solicitudes versionadas, registro de revisión, solicitud de cambios limitada al encargado de la persona y aprobación transaccional exclusiva de jefatura con MFA. Aprobación valida vigencia del catálogo y membresías por empresa/equipo; genera asignaciones con recurrencia independiente por empresa, registra procedencia, rechaza revisiones obsoletas y es idempotente. El borrador/envío no activa tareas; particulares requieren peso aprobado por jefatura.
+
+Evidencia de esta ejecución: 41 tests pasan, incluyendo PGlite desde cero y upgrade fixture 0.3 + 001 + 002; el flujo verifica dos empresas/calendarios, cambios solicitados, MFA, revisión obsoleta, membresía removida con rollback total, cero asignaciones al enviar e idempotencia al aprobar. `npm run build` pasa. Sigue siendo validación local, sin Supabase Auth/MFA real.
 
 Evidencia de esta ejecución: 40 tests aprobaron, incluyendo PGlite desde cero, upgrade real de fixture 0.3 que conserva snapshot/checklist/catálogo, recurrencia semanal/diaria, semana de intervalo, vencimiento posterior a febrero, ausencia de vencimiento, día 31, identidad/versionado y nueva asignación al último estándar. Build TypeScript/Vite aprobado.
 
@@ -70,12 +72,12 @@ Pendientes confirmados de esta etapa: el nuevo contrato no tiene aún un adaptad
 
 ## Instrucciones ejecutables para GPT 6 Luna — esfuerzo medio: siguiente ejecución
 
-Implementar sólo la aprobación de inducción en `202610010002_onboarding_approval.sql`, localmente y sin conectar la interfaz, crear cuentas/infraestructura ni enviar correos reales. No editar migraciones anteriores.
+Implementación de aprobación completada. El siguiente paso es sólo reportes/cierre/outbox en `202610010003_report_delivery.sql`, localmente y sin conectar la interfaz, crear cuentas/infraestructura ni enviar correos reales. No editar migraciones anteriores.
 
-1. Leer AGENTS.md, esta revisión y las tres migraciones. Definir snapshot por revisión de inducción y líneas por proceso/empresa, cada una con regla completa y meta. Estados `draft`, `submitted`, `changes_requested`, `approved`. Un empleado sólo edita/envía su borrador. Encargado recomienda cambios sin aprobar. Jefatura con MFA aprueba.
+1. Leer AGENTS.md, esta revisión y migraciones 001/002. El cierre inserta reporte inmutable y evento outbox dentro de una transacción idempotente.
 2. Añadir tablas/RLS/RPCs con organización obtenida del perfil del actor, control de revisión obsoleta, idempotencia y auditoría. Aprobar en una transacción: validar catálogo vigente, perfil, membresías y calendarios; sellar solicitud; generar asignaciones para cada línea; materializar sólo períodos abiertos. Error en una línea revierte todo. Evitar que un borrador o paso “terminado” genere trabajo.
-3. Casos PGlite: pausa/continuación; otro usuario no lee ni altera borrador; encargado sólo revisa su equipo; MFA/rol; rechazo/solicitud de cambios; dos empresas mismo estándar con reglas propias; intento de doble envío/aprobación; revisión desactualizada; membresía cambiada; un período cerrado y rollback; catálogo/versiones preservados.
-4. Mantener 40 pruebas previas y añadir los casos anteriores; npm test + npm run build. Revisar migración desde cero y fixture 0.3 + 001. Ajustar materialize_month para recibir reglas completas desde una futura RPC, sin abrir escritor directo. Documentar límites.
+3. Probar cierre/repetición, evento único, reintento, lease y destinatario inválido; probar base vacía y upgrade fixture.
+4. Ejecutar `npm test` y `npm run build`; documentar límites (sin proveedor real ni Auth remoto).
 
 **No empezar correo en esta ejecución.** Entrega de reportes sigue en `202610010003_report_delivery.sql`, con cierre/report/outbox atómico y consumidor falso, según los apartados anteriores. Cualquier decisión no definida aquí vuelve a Sol 6.1 alto.
 
