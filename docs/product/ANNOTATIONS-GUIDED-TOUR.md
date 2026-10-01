@@ -1,5 +1,11 @@
 # Anotaciones y recorrido guiado
 
+Estado: demo versión 21. La revisión encontró correcciones pendientes; la
+conversión de una sola vez con vínculo se cumple en el caso normal, pero aún
+falla al elegir otra fecha/período y habilita recurrencia al elegir catálogo.
+Ver `docs/architecture/REVIEW-ANNOTATIONS-TOUR-20261001.md` y el contrato
+`ANNOTATIONS-TOUR-HARDENING.md` antes de considerarlo aprobado.
+
 ## Anotaciones personales
 
 Cada perfil puede guardar referencias de tipo nota, fórmula de Excel o

@@ -1,11 +1,12 @@
 # Decisiones vigentes — 30/09/2026
 
-**Estado actual tras revisión del 01/10:** 005 no está aprobada. Se confirmaron
-once correcciones anteriores y seis incumplimientos nuevos en 17 diagnósticos;
-también quedan locks, permisos tras espera y aislamiento de tests por completar.
-Siguiente ejecución local: Luna medio con `architecture/TIME-COVERAGE-006-ACCEPTANCE.md`.
-Luego Sol alto revisa. La demo sigue privada, sin SQL remoto ni cuentas reales;
-no está lista para migración. Los apartados siguientes conservan historia del avance.
+**Estado actual tras revisión de versión 21 del 01/10:** las anotaciones y el
+recorrido ya están en la demo; la revisión reprodujo cinco fallos de guardado,
+conversión y coherencia del recorrido que requieren corrección. SQL 007 requiere
+la corrección/aceptación 008, todavía sin ejecutar. Próximo paso: Luna medio con
+`docs/EXECUTION-NEXT.md`, ambas partes, luego revisión Sol alto. La demo sigue
+privada, sin SQL remoto ni cuentas reales; no está lista para migración. Los
+apartados siguientes conservan historia del avance.
 
 ## Infraestructura futura (pedido expreso, todavía no ejecutar)
 
@@ -85,6 +86,14 @@ Las anotaciones sólo se guardan localmente y el selector de perfil es simulado;
 no son privadas frente a otros usuarios del navegador. La producción requiere
 Auth y políticas RLS por propietario. Ver
 `docs/product/ANNOTATIONS-GUIDED-TOUR.md`.
+
+La revisión posterior confirmó recorrido/reanudación y compatibilidad v3, pero
+detectó guardado que vacía el borrador al fallar, conversión con fecha fuera del
+mes sin tarjeta/vínculo, recurrencia habilitada durante conversión, controles
+incorrectos ante vínculo ausente y vista/coach desalineados al fallar la
+persistencia. Evidencia y correcciones aprobadas en
+`docs/architecture/REVIEW-ANNOTATIONS-TOUR-20261001.md` y
+`docs/product/ANNOTATIONS-TOUR-HARDENING.md`.
 
 ## Revisión 004 cerrada — 01/10/2026
 

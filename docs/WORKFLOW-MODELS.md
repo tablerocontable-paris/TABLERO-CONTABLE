@@ -10,6 +10,15 @@ Una tarea nueva o un fallo que exige replantear el diseño vuelve a Sol 6.1. Una
 
 Continuidad acordada: si la fase siguiente usa el mismo modelo, seguir sin pedir ni esperar otro «continuar». Finalizar al llegar a un cambio de modelo necesario, indicando esfuerzo y el archivo con instrucciones preparadas; Valentino cambia el modelo manualmente. No activar subagentes para sustituir ese cambio.
 
+## Estado vigente tras revisar versión 21
+
+**Próximo modelo GPT 6 Luna, esfuerzo medio:** seguir `docs/EXECUTION-NEXT.md`.
+Reparar anotaciones/recorrido y completar SQL/aceptación 008 en una fase continua.
+Después revisión Sol 6.1 alto. Basta «continuá» tras el cambio de modelo:
+consultar AGENTS.md y ese contrato; no requerir copiar otro prompt.
+
+## Historial anterior (no sustituye el próximo paso vigente)
+
 Estado posterior a revisión 005: once correcciones previas confirmadas; seis
 incumplimientos adicionales reproducidos en 17 diagnósticos, además de huecos de
 locks/permisos y cobertura de pruebas. 005 requiere corrección y no está aprobada.
