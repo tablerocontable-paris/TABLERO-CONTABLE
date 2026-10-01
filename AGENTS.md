@@ -17,8 +17,9 @@
 
 ## Modelos y devolución de cada ejecución (pedido 01/10/2026)
 
-- Razonamiento, decisiones de arquitectura y revisión: **GPT Sol 6.1**, esfuerzo alto.
-- Ejecución de instrucciones ya definidas: **GPT 6 Luna**, esfuerzo medio. Si la revisión descubre una decisión nueva o un problema complejo, volver a Sol 6.1 antes de ejecutar otra solución.
+- Planificación habitual y revisión acotada: **GPT-6.1 Sol**, esfuerzo medio. Arquitectura, permisos, migraciones y fallos complejos: esfuerzo alto.
+- Ejecución de instrucciones ya definidas: **GPT-6 Luna**, esfuerzo medio; bajo sólo para cambios simples. Si aparece una decisión nueva o un problema complejo, volver a Sol antes de ejecutar otra solución.
+- Preferir velocidad Standard; no activar Fast para ahorrar cupo. Política, fuentes y límites del plan Plus: `docs/WORKFLOW-MODELS.md` (actualizada por pedido del usuario).
 - Al terminar cada ejecución: revisar alcance, cambios, comprobaciones y pendientes. En cada devolución final indicar el modelo recomendado para el próximo paso y su propósito.
 - Si el entorno permite seleccionar el modelo, respetar esta separación. Si no permite cambiarlo, decirlo brevemente y recomendar el modelo que el usuario debe seleccionar. Nunca afirmar que se usó un modelo sin verificarlo ni prometer ahorro medido sin evidencia.
 - Esta regla se aplica también después de reinicios/compacción de contexto. Mantener instrucciones ejecutables concretas para Luna, con criterios de aceptación y sin decisiones arquitectónicas abiertas.
@@ -27,5 +28,5 @@
 
 - Continuar autónomamente entre pasos/revisiones que usan el mismo modelo; no terminar cada bloque para pedir «continuar».
 - Detenerse al llegar a un cambio de modelo necesario y comunicar modelo, esfuerzo y contrato concreto preparado. El usuario hará el cambio manual. No delegar ni simular un cambio de modelo para sortear esta preferencia.
-- Próxima ejecución vigente: **GPT 6 Luna, esfuerzo medio**, seguir `docs/EXECUTION-NEXT.md`. Primero reparar anotaciones/recorrido según la revisión de versión 21; luego completar SQL/aceptación 008 en el mismo modelo. No volver a postergar 008 por una mejora visual. Después revisión **GPT Sol 6.1 alto** y cambio manual. La aprobación del frontend está acotada al contrato `docs/product/ANNOTATIONS-TOUR-HARDENING.md`.
-- Revisión 007: `docs/architecture/REVIEW-007-20261001.md`. 26 diagnósticos: 21 cumplen, 5 violaciones agrupadas en cuatro fallas. Las 16 pruebas 007 pasan solas; tres pruebas históricas de reportes fallan individualmente. Upgrades 004/005/006→007 preservan historia en diagnóstico, pendientes de asserts de aceptación. Preservar 001–007 y probes/evidencia congelados 004–007. Concurrencia PostgreSQL y Supabase Auth/invitaciones/MFA/RLS/correo reales siguen pendientes; no aplicar SQL remoto, migrar empleados ni declarar producción.
+- Próxima ejecución vigente: **GPT-6 Luna, esfuerzo medio**, seguir `docs/EXECUTION-NEXT.md` y `docs/architecture/TIME-COVERAGE-008-COMPLETION.md`. Completar 008 antes de ampliar frontend. La revisión de versión 24 está en `docs/architecture/REVIEW-008-20261001.md`: cuatro fallas R007 corregidas; queda coherencia del plan y aceptación incompleta. Después revisión **GPT-6.1 Sol alto**, con cambio manual.
+- Preservar 001–007 y probes/evidencia congelados. 008 no se aplicó remotamente y puede completarse en su archivo actual según el contrato; no crear 009 sólo por esta revisión. Concurrencia PostgreSQL, integración y Supabase Auth/invitaciones/MFA/RLS/correo reales siguen pendientes; no aplicar SQL remoto, migrar empleados ni declarar producción.

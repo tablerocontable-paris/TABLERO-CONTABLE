@@ -1,12 +1,12 @@
 # Decisiones vigentes — 30/09/2026
 
-**Estado actual tras revisión de versión 21 del 01/10:** las anotaciones y el
-recorrido ya están en la demo; la revisión reprodujo cinco fallos de guardado,
-conversión y coherencia del recorrido que requieren corrección. SQL 007 requiere
-la corrección/aceptación 008, todavía sin ejecutar. Próximo paso: Luna medio con
-`docs/EXECUTION-NEXT.md`, ambas partes, luego revisión Sol alto. La demo sigue
-privada, sin SQL remoto ni cuentas reales; no está lista para migración. Los
-apartados siguientes conservan historia del avance.
+**Estado actual tras revisión de versión 24 del 01/10:** las cinco fallas de
+anotaciones/recorrido están corregidas; diez observaciones de revisión pasan.
+SQL 008 local corrige las cuatro fallas R007; falta coherencia del plan y
+aceptación completa. Evidencia: `architecture/REVIEW-008-20261001.md`.
+Próximo paso: Luna medio con `docs/EXECUTION-NEXT.md`, luego revisión Sol alto.
+La demo sigue privada, sin SQL remoto ni cuentas reales; no está lista para
+migración. Los apartados siguientes conservan historia del avance.
 
 ## Infraestructura futura (pedido expreso, todavía no ejecutar)
 
@@ -51,7 +51,7 @@ No prometer ausencia total de errores: se reducen con reglas separadas, pruebas 
 
 ## Nuevos pedidos — 01/10/2026
 
-- Flujo permanente de modelos y revisión: `AGENTS.md` y `docs/WORKFLOW-MODELS.md`. Sol 6.1 alto para razonar/revisar; GPT 6 Luna medio para ejecutar instrucciones definidas. Cada devolución recomienda el próximo modelo.
+- Flujo permanente de modelos y revisión: `AGENTS.md` y `docs/WORKFLOW-MODELS.md`. Política vigente para Plus: Sol 6.1 medio para planes habituales, alto para datos/permisos/migraciones; Luna 6 medio para ejecutar, bajo para cambios simples. Velocidad Standard. Cada devolución recomienda el próximo modelo.
 - Estandarización, reportes por usuario y Kaizen/5S: contrato en `docs/product/STANDARDIZATION-REPORTS-IMPROVEMENT.md`.
 - Esta demo protege nombre/proceso/controles del catálogo, permite a Juan Pablo incorporar procesos y genera reportes automáticamente al cerrar cada empleado. Correo automático todavía requiere backend y destinatario verificado.
 - Kaizen/5S: requisitos orientados a calidad y mejora del proceso; módulo funcional pendiente. No incorporarlos como puntuación arbitraria de desempeño.

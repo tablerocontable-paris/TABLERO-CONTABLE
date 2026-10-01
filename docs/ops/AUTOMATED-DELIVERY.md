@@ -35,4 +35,4 @@ El objetivo es que el pedido de cambio sea la única tarea rutinaria de Valentin
 
 - Git y deploy del prototipo siguen dentro de Sites; el sitio actual es privado. No existe aún el remoto GitHub ni los entornos Supabase dev/prod de la cuenta dedicada.
 - La infraestructura y secretos no están configurados; por eso el flujo descrito es plan, no una capacidad activa.
-- A la fecha existe verificación local con Vitest/PGlite y build. Todavía falta adaptar el frontend al contrato nuevo, Auth/invitaciones/MFA real, RPC completos para actividad/cronómetro/ausencias, integración de reportes/outbox ya implementados localmente, correo real, piloto y procedimiento de migración/restore.
+- A la fecha existe verificación local con Vitest/PGlite y build. RPC de actividad/cronómetro/ausencias y reportes/outbox están implementados localmente; 008 todavía requiere la aceptación documentada en `../architecture/REVIEW-008-20261001.md`. Falta adaptar el frontend al contrato nuevo, Auth/invitaciones/MFA real, concurrencia PostgreSQL, integración de reportes, correo real, piloto y procedimiento de migración/restore.

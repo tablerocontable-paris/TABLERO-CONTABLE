@@ -1,0 +1,154 @@
+{
+  "source_sha": "81148aa1343ecd4271159e7e8e20a86f3d9fd704",
+  "environment": "jsdom, simulated local profiles; no browser visual QA, Auth or backend",
+  "acceptance": true,
+  "results": [
+    {
+      "id": "normal_conversion",
+      "passes": true,
+      "observed": {
+        "note": {
+          "id": "review-note",
+          "ownerId": "e0",
+          "title": "Referencia personal",
+          "content": "=SUMA(A1:A4)",
+          "kind": "reminder",
+          "reminderOn": null,
+          "createdAt": "2026-10-01T12:00:00Z",
+          "updatedAt": "2026-10-01T20:41:26.445Z",
+          "convertedTaskId": "cfcda921-94f5-48a8-bfef-350b4a8c6215"
+        },
+        "taskCount": 1,
+        "assignmentCount": 1
+      }
+    },
+    {
+      "id": "conversion_other_month",
+      "passes": true,
+      "observed": {
+        "note": {
+          "id": "review-note",
+          "ownerId": "e0",
+          "title": "Referencia personal",
+          "content": "=SUMA(A1:A4)",
+          "kind": "reminder",
+          "reminderOn": null,
+          "createdAt": "2026-10-01T12:00:00Z",
+          "updatedAt": "2026-10-01T20:41:26.598Z",
+          "convertedTaskId": "f41f1366-f25c-43c8-8e5b-d77ff36df848"
+        },
+        "taskCount": 1,
+        "assignments": [
+          {
+            "schedule": {
+              "frequency": "única",
+              "startDate": "2026-11-12",
+              "endDate": "",
+              "interval": 1,
+              "weekdays": [
+                1
+              ],
+              "monthDay": 10,
+              "hasDeadline": true,
+              "dueOffsetDays": 0
+            },
+            "id": "adcd164e-1603-4eea-943b-0d3e36d2b3cb",
+            "templateId": null,
+            "title": "Referencia personal",
+            "ownerId": "e0",
+            "companyId": "c1",
+            "sector": "Tesorería",
+            "kind": "resultado",
+            "weight": 1,
+            "unit": "",
+            "target": 0,
+            "day": 10,
+            "frequency": "única",
+            "steps": [
+              "=SUMA(A1:A4)"
+            ],
+            "startMonth": "2026-11",
+            "priority": "Media"
+          }
+        ]
+      }
+    },
+    {
+      "id": "failed_save_preserves_draft",
+      "passes": true,
+      "observed": {
+        "title": "No perder",
+        "content": "Texto irremplazable",
+        "savedNotes": 1
+      }
+    },
+    {
+      "id": "conversion_one_off",
+      "passes": true,
+      "observed": {
+        "options": [
+          "única"
+        ]
+      }
+    },
+    {
+      "id": "missing_link_keeps_conversion_lock",
+      "passes": true,
+      "observed": {
+        "offersConvert": false,
+        "offersEdit": false
+      }
+    },
+    {
+      "id": "tour_resume_e0",
+      "passes": true,
+      "observed": {
+        "count": "RECORRIDO · 1/7",
+        "resume": "RECORRIDO · 2/7",
+        "version": {
+          "e0": 2
+        }
+      }
+    },
+    {
+      "id": "tour_resume_m1",
+      "passes": true,
+      "observed": {
+        "count": "RECORRIDO · 1/9",
+        "resume": "RECORRIDO · 2/9",
+        "version": {
+          "m1": 2
+        }
+      }
+    },
+    {
+      "id": "tour_resume_boss",
+      "passes": true,
+      "observed": {
+        "count": "RECORRIDO · 1/11",
+        "resume": "RECORRIDO · 2/11",
+        "version": {
+          "boss": 2
+        }
+      }
+    },
+    {
+      "id": "failed_tour_save_stays_consistent",
+      "passes": true,
+      "observed": {
+        "currentPage": "operations",
+        "coach": "Registrá resultados operativos",
+        "savedStep": 4
+      }
+    },
+    {
+      "id": "old_v3_compatible",
+      "passes": true,
+      "observed": {
+        "profiles": 13,
+        "annotations": [],
+        "tourVersion": {}
+      }
+    }
+  ]
+}

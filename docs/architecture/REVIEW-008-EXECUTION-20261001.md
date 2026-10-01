@@ -1,5 +1,14 @@
 # Ejecución parcial del contrato 008 — 01/10/2026
 
+## Revisión posterior de versión 24
+
+La revisión en `REVIEW-008-20261001.md` confirma las cuatro correcciones R007 y
+las cinco de anotaciones/recorrido, pero no aprueba 008: detecta coherencia del
+plan pendiente y aceptación/aislamiento incompletos. La ejecución siguiente
+debe seguir `TIME-COVERAGE-008-COMPLETION.md`. El bloque inferior conserva la
+evidencia de ejecución anterior; que los casos de reportes pasen solos no implica
+que no modifiquen fixtures ajenas en la suite compartida.
+
 Estado: **avance local parcial; no aprobado para migrar empleados ni activar
 producción**. Esta nota distingue los casos probados de la matriz completa del
 contrato `TIME-COVERAGE-008-ACCEPTANCE.md`.
