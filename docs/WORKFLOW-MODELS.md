@@ -7,3 +7,5 @@
 Formato de cierre: resultado concreto; verificación y limitaciones relevantes; **Próximo modelo: [modelo y esfuerzo] — [acción]**.
 
 Una tarea nueva o un fallo que exige replantear el diseño vuelve a Sol 6.1. Una ejecución concreta ya revisada corresponde a Luna. La preferencia no modifica automáticamente el modelo activo en entornos que no ofrecen esa capacidad.
+
+Continuidad acordada: si la fase siguiente usa el mismo modelo, seguir sin pedir ni esperar otro «continuar». Finalizar al llegar a un cambio de modelo necesario, indicando esfuerzo y el archivo con instrucciones preparadas; Valentino cambia el modelo manualmente. No activar subagentes para sustituir ese cambio.

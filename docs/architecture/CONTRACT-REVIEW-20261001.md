@@ -80,9 +80,9 @@ Evidencia: 48 pruebas + build aprobados; base nueva y upgrade fixture 0.3 + 001/
 
 Límites: no SQL remoto, proveedor real, correo ni cron ejecutándose; no frontend/URL `/reportes/:id` conectados. Las funciones de escritura de sesiones/coberturas aún faltan. El snapshot de reaperturas contiene las transiciones explícitas ya auditadas; la RPC de checklist antigua no guarda from/to y requiere una migración posterior, sin inferir historia anterior. El cierre actual genera la entrega cuando lo invoca un responsable; la programación del cierre/revisión mensual debe definirse y probarse antes de automatizar por calendario. Ver `docs/ops/REPORT-DELIVERY.md`.
 
-## Próximo paso — Sol 6.1, esfuerzo alto
+## Revisión 004 completada — cambio a Luna
 
-Revisar el contrato de sesiones, reaperturas y coberturas antes de dar una nueva ejecución a Luna. Resolver la inclusión por empresa de una ausencia, autorización temporal, inicio/pausa/reanudación, cronómetro único por ejecutor, lock de cierre compartido y registro explícito de reapertura al usar checklist. La tabla de ausencias actual no contiene la selección de empresas del contrato. No conectar el frontend hasta cerrar ese hueco. La revisión debe entregar instrucciones para `202610010004` y pruebas de permisos/concurrencia concretas. Ejecución posterior: GPT 6 Luna, esfuerzo medio.
+Contrato detallado en `docs/architecture/TIME-COVERAGE-004.md`. Se confirmó una vía de creación de asignaciones por empleado/encargado que evita la aprobación; 004 la restringe a jefatura MFA. Decisiones cerradas: coberturas por empresa sin ampliar perfiles/administración, cronómetro único por actor/tarea, expiración/cancelación con límite servidor, reapertura con motivo, wrappers antiguos seguros, receipts idempotentes y orden de locks compartido con cierre. Implementar sólo 004 local con Luna medio; no conectar frontend ni crear infraestructura.
 
 ### Aceptación y límites
 

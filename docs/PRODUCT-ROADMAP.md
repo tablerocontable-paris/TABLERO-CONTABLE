@@ -67,3 +67,7 @@ La vista de tablero permite plegar/desplegar cada columna por separado y ordenar
 Contrato local 003 implementado: cierre idempotente, reporte inmutable, entrega/outbox atómicos, destinatario gerente con correo Auth verificado, snapshot con sesiones y tiempo registrado. Cola con lease, intentos limitados, reintento manual auditado y RPC de consumo reservadas a servidor. Consumidor TypeScript y proveedor falso prueban deduplicación ante aceptación ambigua/ACK fallido. 48 pruebas y build pasan.
 
 Todavía no están conectados al frontend ni a Supabase real, y no existe correo/cron productivo. Hace falta revisar coberturas por empresa y las escrituras de cronómetros/reaperturas; después integrar Auth/MFA, adaptadores y el reporte privado. El documento operativo está en `docs/ops/REPORT-DELIVERY.md`. No migrar empleados todavía.
+
+## Revisión 004 cerrada — 01/10/2026
+
+Contrato ejecutable: `docs/architecture/TIME-COVERAGE-004.md`. Incluye empresas explícitas para cobertura, autorización temporal limitada a tareas, relojes únicos y pausa atómica, reapertura con motivo y cierre coordinado. Corrige bypass de inducción en create_catalog_assignment. Todavía no implementado: siguiente fase Luna medio. La continuidad entre pasos del mismo modelo queda en AGENTS.md.
