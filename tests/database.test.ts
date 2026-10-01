@@ -85,7 +85,7 @@ describe("base nueva desde cero y RLS", () => {
   it("checklist mueve y reabre automáticamente", async () => {
     await db.exec("reset role");
     await db.query(
-      `update task_instances set checklist='[{"id":"step","text":"Control","done":false}]',status='En curso',completed_at=null where id=$1`,
+      `update task_instances set checklist='[{"id":"step","text":"Control","done":false}]',status='En curso',completed_at=null,state_revision=0 where id=$1`,
       [ids.t],
     );
     await actor(ids.employee);
@@ -94,7 +94,8 @@ describe("base nueva desde cero y RLS", () => {
       (await db.query<{ status: string }>("select status from task_instances"))
         .rows[0].status,
     ).toBe("Completada");
-    await db.query("select set_checklist_item($1,$2,false)", [ids.t, "step"]);
+    await expect(db.query("select set_checklist_item($1,$2,false)", [ids.t, "step"])).rejects.toThrow("motivo");
+    await db.query("select set_checklist_item_reviewed($1,$2,false,'Control omitido deliberadamente',1,$3)", [ids.t, "step", "90000000-0000-0000-0000-000000000001"]);
     expect(
       (await db.query<{ status: string }>("select status from task_instances"))
         .rows[0].status,
@@ -165,6 +166,32 @@ describe("base nueva desde cero y RLS", () => {
     await expect(
       db.query("select transition_task($1,'En curso')", [ids.t]),
     ).rejects.toThrow("El mes está cerrado");
+  });
+  it("el cronómetro es idempotente, versiona el estado y bloquea otro reloj simultáneo", async () => {
+    const timed = "50000000-0000-0000-0000-000000000201";
+    const timedOther = "50000000-0000-0000-0000-000000000202";
+    await db.exec("reset role");
+    await db.query(
+      "insert into task_instances(id,organization_id,assignment_id,company_id,owner_id,team_id,period,scheduled_on,title,kind,weight,due_date) values($1,$2,$3,$4,$5,$6,'2026-10-01','2026-10-02','Reloj idempotente','resultado',5,'2026-10-31'),($7,$2,$3,$4,$5,$6,'2026-10-01','2026-10-03','Segundo reloj','resultado',5,'2026-10-31')",
+      [timed, ids.org, ids.a, ids.c, ids.employee, ids.team, timedOther],
+    );
+    await actor(ids.employee);
+    const op = "90000000-0000-0000-0000-000000000201";
+    const session = (await db.query<{ start_task_timer: string }>(
+      "select start_task_timer($1,0,$2,false)", [timed, op],
+    )).rows[0].start_task_timer;
+    const retry = (await db.query<{ start_task_timer: string }>(
+      "select start_task_timer($1,0,$2,false)", [timed, op],
+    )).rows[0].start_task_timer;
+    expect(retry).toBe(session);
+    expect((await db.query<{ state_revision: number; status: string }>("select state_revision,status from task_instances where id=$1", [timed])).rows[0]).toMatchObject({ state_revision: 1, status: "En curso" });
+    await expect(db.query("select start_task_timer($1,0,$2,false)", [timedOther, "90000000-0000-0000-0000-000000000202"])).rejects.toThrow("cronómetro actual");
+    await expect(db.query("select start_task_timer($1,0,$2,false)", [timedOther, op])).rejects.toThrow("reutilizado");
+    const pause = "90000000-0000-0000-0000-000000000203";
+    const ended = (await db.query<{ pause_task_timer: string }>("select pause_task_timer($1,$2)", [session, pause])).rows[0].pause_task_timer;
+    await db.query("select pause_task_timer($1,$2)", [session, pause]);
+    expect((await db.query<{ ended_at: string | null }>("select ended_at::text from task_time_sessions where id=$1", [session])).rows[0].ended_at).not.toBeNull();
+    expect((await db.query<{ state_revision: number }>("select state_revision from task_instances where id=$1", [timed])).rows[0].state_revision).toBe(2);
   });
   it("anon no tiene lectura", async () => {
     await db.exec("reset role;set role anon");
@@ -351,6 +378,8 @@ describe("base nueva desde cero y RLS", () => {
       `insert into companies values('${ids.c2}','${ids.org}','Otra empresa');insert into company_memberships values('${ids.org}','${ids.c2}','${ids.employee}'),('${ids.org}','${ids.c2}','${ids.manager}');`,
     );
     await actor(ids.manager);
+    await expect(db.query("select create_catalog_assignment($1,$2,$3,$4,'2026-10-01',31,'mensual')", [templateId, ids.c, ids.employee, ids.team])).rejects.toThrow("Sólo jefatura");
+    await db.exec(`reset role;select set_config('request.jwt.claim.sub','${ids.boss}',false);select set_config('request.jwt.claims','{\"aal\":\"aal2\"}',false);set role authenticated;`);
     const created = await db.query<{ create_catalog_assignment: string }>(
       "select create_catalog_assignment($1,$2,$3,$4,'2026-10-01',31,'mensual')",
       [templateId, ids.c, ids.employee, ids.team],
@@ -520,10 +549,11 @@ describe("base nueva desde cero y RLS", () => {
     await actor(ids.boss);
     await db.query("select close_employee_month($1,'2026-10-01','Controlado')",[ids.employee]);
     const snap = (await db.query<{snapshot:{version:number;metrics:{onTime:number|null;recordedSeconds:number};sessions:unknown[]}}>("select snapshot from period_reports where period='2026-10-01'")).rows[0].snapshot;
-    expect(snap.version).toBe(2);
+    expect(snap.version).toBe(3);
     expect(snap.metrics.onTime).toBeNull();
-    expect(Number(snap.metrics.recordedSeconds)).toBe(1800);
-    expect(snap.sessions).toHaveLength(1);
+    expect(Number(snap.metrics.recordedSeconds)).toBeGreaterThanOrEqual(1800);
+    expect(Number(snap.metrics.recordedSeconds)).toBeLessThan(1801);
+    expect(snap.sessions).toHaveLength(2);
   });
   it("cinco fallos agotan reintentos; el reintento manual conserva identidad y contador histórico", async () => {
     let id="";
