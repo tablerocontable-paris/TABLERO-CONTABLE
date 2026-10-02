@@ -1,15 +1,16 @@
 # Decisiones vigentes — 02/10/2026
 
-**Estado vigente tras revisión v37 y reparación A:** las siete fallas reproducidas
-quedaron corregidas en la demo; la revisión independiente de Sol sigue pendiente.
-El lector fue aceptado localmente y sus comprobaciones complementarias quedaron
-en la suite normal. Evidencia histórica: `architecture/REVIEW-V37-INDEPENDENT-20261002.md`.
-La suite actual pasó 202 pruebas en 17 archivos y el build de producción pasó.
+**Estado vigente tras revisión independiente v39:** las ocho comprobaciones
+históricas de la UI pasan. La revisión ampliada obtuvo 10 aprobaciones y 6 fallas
+(5 de spotlight/alternativa y 1 del avatar del encargado). Falta cerrar además
+cursor tenue y constante de versión compartida. A todavía no tiene aceptación
+completa. Evidencia: `architecture/REVIEW-V39-INDEPENDENT-20261002.md`.
 
-Próximo modelo **GPT-6.1 Sol medio** para aceptar A contra
-`product/CORRECTIONS-UI-A-REPAIR-20261002.md`. Después Sol alto define servidor
-B/C antes de Luna. No activar integración remota ni ampliar SQL para corregir
-interfaz.
+Próximo modelo **GPT-6 Luna medio** para
+`product/CORRECTIONS-UI-A-FOLLOWUP-20261002.md`; después **Sol medio** acepta A.
+Sólo después Sol alto define B/C. No integrar servicios ni ampliar SQL por estos
+ajustes. La suite anterior pasó 202 pruebas/17 archivos y build; no se volvió a
+contar como nueva ejecución. Los 17 hashes congelados siguen idénticos.
 
 Gateway y lector aceptados localmente no equivalen a concurrencia PostgreSQL,
 Supabase/Auth/MFA, presencia o correo productivos. Grado estimado **40%**,

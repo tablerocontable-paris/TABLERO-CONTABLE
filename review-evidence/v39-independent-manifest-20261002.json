@@ -1,0 +1,128 @@
+{
+  "reviewed_application_commit": "cfe05f7ea4f613f27e9c5f99a0061f0ad63ae801",
+  "review_checkout_commit": "98127385cf6cae756b1b5718d5caa0154229767d",
+  "site_version": 39,
+  "source_changes_in_review": false,
+  "ui_acceptance_probes": {
+    "passed": 10,
+    "failed": 6,
+    "total": 16,
+    "report": "ui-a-v39-probes-20261002.json",
+    "log": "ui-a-v39-probes-20261002.txt",
+    "probe": "ui-a-v39.probe.tsx"
+  },
+  "prior_baseline": {
+    "passed": 202,
+    "files": 17,
+    "build_passed": true,
+    "rerun_in_this_review": false
+  },
+  "frozen_sources": [
+    {
+      "path": "package-lock.json",
+      "sha256": "d6190a9645475d1d71a0a3d7b8fee0bb24b158594c9947b7b8f9f7350caf75ce",
+      "unchanged_from_planning_base": true,
+      "unchanged_from_v37": true
+    },
+    {
+      "path": "package.json",
+      "sha256": "3d8c376fde9d6c62eaca170045e753aae89e20ee63e8153add5d77146b1fa895",
+      "unchanged_from_planning_base": true,
+      "unchanged_from_v37": true
+    },
+    {
+      "path": "src/data/remote/task-contract.ts",
+      "sha256": "100c0e170ee5e2ad7fc5f732e0aad37585ad41e7f155a23dfc1d389d8384b106",
+      "unchanged_from_planning_base": true,
+      "unchanged_from_v37": true
+    },
+    {
+      "path": "src/data/remote/task-gateway.ts",
+      "sha256": "b38a7a4c371d7142f3dd4c412b64052d88fd8f2493e8c3ecfa7cfcfd3bc2c146",
+      "unchanged_from_planning_base": true,
+      "unchanged_from_v37": true
+    },
+    {
+      "path": "src/data/remote/task-reader.ts",
+      "sha256": "60703e4b4ba11dbd2831cb30a0ef2448c68cbeeb344042af742d52d97343fcbd",
+      "unchanged_from_planning_base": true,
+      "unchanged_from_v37": true
+    },
+    {
+      "path": "supabase/README.md",
+      "sha256": "ffcdaf51c6243665e3b589defe59cbc8f27db2da8d8bb50c87d6b3435d0013b3",
+      "unchanged_from_planning_base": true,
+      "unchanged_from_v37": true
+    },
+    {
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "sha256": "4ae00143f3740d21a828165139fa929dea0dcb8775849939a505ca5cb8bdf161",
+      "unchanged_from_planning_base": true,
+      "unchanged_from_v37": true
+    },
+    {
+      "path": "supabase/migrations/202609300002_workflows.sql",
+      "sha256": "ec5aa503834dc8a10e0a7cf858c0c6c4f09a3b0c5bb0a53df9e34fd834697832",
+      "unchanged_from_planning_base": true,
+      "unchanged_from_v37": true
+    },
+    {
+      "path": "supabase/migrations/202610010001_occurrence_contract.sql",
+      "sha256": "009e453942d2609f6f84913d2684015326fe5874eb39351a9e75a0525c4c17b0",
+      "unchanged_from_planning_base": true,
+      "unchanged_from_v37": true
+    },
+    {
+      "path": "supabase/migrations/202610010002_onboarding_approval.sql",
+      "sha256": "f531cec7664a4e58b2575f8f8fb154ec933d53973f63a7a1036387e2b27c02f3",
+      "unchanged_from_planning_base": true,
+      "unchanged_from_v37": true
+    },
+    {
+      "path": "supabase/migrations/202610010003_report_delivery.sql",
+      "sha256": "2ca30367916fe708464bae2a857c34b014089f1d7618d21c1a822dc16e5c7ff4",
+      "unchanged_from_planning_base": true,
+      "unchanged_from_v37": true
+    },
+    {
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "sha256": "c4868ecc2a0ac7b440d459d80c06edb65b15ad2929517cfb178570412392a7e3",
+      "unchanged_from_planning_base": true,
+      "unchanged_from_v37": true
+    },
+    {
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "sha256": "50a073aac2913d7ef3f5fe3d32d2879226dda19a4a15239cf02d65bd9d0179ac",
+      "unchanged_from_planning_base": true,
+      "unchanged_from_v37": true
+    },
+    {
+      "path": "supabase/migrations/202610010006_time_coverage_acceptance.sql",
+      "sha256": "394e3354fab91ca3babd850f3e5b08e32513e08ccc172064f74cde16594d906b",
+      "unchanged_from_planning_base": true,
+      "unchanged_from_v37": true
+    },
+    {
+      "path": "supabase/migrations/202610010007_time_coverage_completion.sql",
+      "sha256": "5fee47ab9a401a6d05a205431365bb3e5840cba98147e9950ab84ff18c1e454f",
+      "unchanged_from_planning_base": true,
+      "unchanged_from_v37": true
+    },
+    {
+      "path": "supabase/migrations/202610010008_time_coverage_finalization.sql",
+      "sha256": "ad0da14254585c341c3f0846ea21e9fd7f8f71020f44a4079d4d5e1424e45a3e",
+      "unchanged_from_planning_base": true,
+      "unchanged_from_v37": true
+    },
+    {
+      "path": "tests/helpers/accounting-lab.ts",
+      "sha256": "e9c33a590a335c0053826333fd393c82de3950a5386ce5dc16be0adc068f1339",
+      "unchanged_from_planning_base": true,
+      "unchanged_from_v37": true
+    }
+  ],
+  "visual_acceptance": false,
+  "visual_evidence": "User attachment shows org-manager branch icon; no complete light/dark/mobile QA performed in this review. Previous supervised preview blocked by net::ERR_BLOCKED_BY_CLIENT.",
+  "decision": "A not fully accepted; bounded follow-up repair required",
+  "progress_percent_estimate": 40
+}

@@ -6,11 +6,14 @@ deploy `appgdep_6abff343556c819187d8b243325659f4`, estado correcto:
 https://grupo-paris-contabilidad.valentino-magni.chatgpt.site. La audiencia sigue
 restringida al propietario; 0 visitantes externos.
 
-El bloque UI A reparó el editor y los límites del checklist, meta operativa
-editable, vista por perfil y cobertura, detalles/acciones, anotaciones, gráficos,
-seed y recorrido v4. Suite: 202 pruebas/17 archivos. Build de producción
-correcto. Pendiente aceptación independiente de Sol. No hubo cambios en SQL,
-gateway, lector, dependencias ni servicios conectados.
+La revisión independiente v39 confirma las ocho comprobaciones anteriores y
+actor/Anterior fallido: 10 aprobaciones y 6 fallas en 16 probes. A requiere una
+reparación final acotada de destinos del recorrido, avatar uniforme, cursor tenue
+y versión compartida; contrato `product/CORRECTIONS-UI-A-FOLLOWUP-20261002.md`.
+Suite de implementación anterior: 202 pruebas/17 archivos y build aprobado; no
+se repitió sobre código idéntico. Los 17 hashes congelados permanecen iguales.
+Esta revisión sólo guarda documentación/evidencia; la aplicación publicada v39
+no cambió. Próximo modelo Luna medio, luego revisión Sol medio.
 
 **Avance estimado: 40% del producto final (rango razonable: 35–45%).** Es una
 estimación por etapas, no una medición automática: la demo y los contratos locales
@@ -36,7 +39,7 @@ que 40% de los empleados puedan migrarse: hoy no hay base de producción conecta
 `appgdep_6abfdd0e24848191b88f55518bd6184e`, verificado activo. Resultado en
 `architecture/REVIEW-V37-INDEPENDENT-20261002.md`: lector aceptado localmente con
 tres comprobaciones independientes adicionales. Sus fallas UI fueron la base del
-bloque A que ahora espera aceptación.
+bloque A, revisado parcialmente en v39.
 QA visual sigue pendiente: preview arrancó pero navegador bloqueó el acceso con
 `net::ERR_BLOCKED_BY_CLIENT`; la ausencia de un binario Chromium no fue confirmada.
 

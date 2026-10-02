@@ -235,3 +235,12 @@ No sumar porcentajes individuales para obtener el KPI del equipo.
 La arquitectura del coordinador la define Sol; Luna implementa contratos
 aprobados. Las 18 correcciones siguen pendientes hasta tener evidencia concreta.
 El avance estimado sigue en 40% (35–45%); registrar requisitos no eleva ese grado.
+
+
+## Seguimiento del avatar — 02/10/2026
+
+El usuario observó que Lucía Fernández aparecía con un ícono de ramificación en
+el organigrama. La fuente usa ese ícono para todos los encargados, mientras jefe y
+empleados usan iniciales. Unificar el avatar circular de personas, conservar
+cargo/equipo como texto y no renombrar perfiles guardados. Contrato:
+`CORRECTIONS-UI-A-FOLLOWUP-20261002.md`; revisión v39 documentada.

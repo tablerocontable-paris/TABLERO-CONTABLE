@@ -55,11 +55,10 @@ sin pedir otro «continuá».
 
 ## Próximo bloque
 
-**GPT-6.1 Sol medio:** revisar y aceptar la reparación A implementada según
-`product/CORRECTIONS-UI-A-REPAIR-20261002.md`. La suite completa pasó 202
-pruebas/17 archivos y build; revisar el contrato, especialmente actor/perfil,
-cobertura sin duplicar identidad, límites de pasos, tour v4 y cierre protegido.
-Luego **Sol alto** define arquitectura B/C, permisos y coordinación antes de
-Luna. El cambio es manual; no simularlo con subagentes. Infraestructura y
-migración siguen pendientes de integración, concurrencia y piloto. Estado único
-de continuidad: EXECUTION-NEXT.md.
+**GPT-6 Luna medio, Standard:** ejecutar reparación acotada
+`product/CORRECTIONS-UI-A-FOLLOWUP-20261002.md`. Sol revisó v39 y dejó evidencia:
+10 aprobaciones / 6 fallas en 16 probes; ocho comprobaciones históricas pasan.
+Faltan destinos reales del recorrido, avatar uniforme, cursor tenue y versión
+compartida. Después **Sol medio** acepta A; sólo entonces **Sol alto** define B/C.
+El usuario cambia manualmente el modelo. No simularlo con subagentes.
+Infraestructura/migración siguen pendientes. Continuidad: EXECUTION-NEXT.md.
