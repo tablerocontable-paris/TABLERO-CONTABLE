@@ -55,11 +55,10 @@ sin pedir otro «continuá».
 
 ## Próximo bloque
 
-**GPT-6.1 Sol medio, Standard:** aceptar independientemente A en Sites v40 contra
-`product/CORRECTIONS-UI-A-FOLLOWUP-20261002.md` y
-`architecture/REPAIR-A-V40-IMPLEMENTATION-20261002.md`. Implementación v40 pasó
-206 pruebas/17 archivos, build y diff check; deploy privado verificado. Inspección
-visual completa del hover en claro/oscuro/móvil sigue pendiente. Sólo al aceptar
-A, Sol alto define B/C. El usuario cambia manualmente de modelo; no simularlo con
-subagentes. Infraestructura/migración siguen pendientes. Continuidad:
-EXECUTION-NEXT.md.
+**GPT-6.1 Sol alto, Standard:** cerrar contrato B de datos/permisos y su relación
+con C, siguiendo EXECUTION-NEXT.md. Aceptación funcional local de A en v40:
+20 probes independientes aprobados; QA visual completa todavía abierta para
+aceptar el producto final. Evidencia:
+`architecture/REVIEW-V40-INDEPENDENT-20261002.md`.
+Después del diseño cerrado, Luna medio implementa por bloque y Sol lo revisa.
+El cambio de esfuerzo/modelo es manual; no simularlo con subagentes.

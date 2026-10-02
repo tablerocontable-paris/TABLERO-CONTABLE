@@ -1,0 +1,2 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+JSON report written to /workspace/scratch/0de2d62eef9c/site/review-evidence/ui-a-v40-independent-20261002.json

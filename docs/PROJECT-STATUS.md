@@ -2,19 +2,19 @@
 
 **Release actual — Sites v40:** commit de implementación
 `1099e9d8ae47c2b1953288b7fa8d7d0bbd380fc5`.
-Versión `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_d8f07e23ce4c81918847eeb7ea3de22`,
+Versión `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_d8f07e23ce4c81918847eeb7ea3de22f`,
 deploy `appgdep_6abffc86ca808191be701a9954b3e491`, estado succeeded:
 https://grupo-paris-contabilidad.valentino-magni.chatgpt.site. Audiencia
 restringida al propietario, cero visitantes externos.
 
-Reparación A implementada: avatares uniformes; spotlight del recorrido enfocado
-en un destino visible con fallback explicativo; constante de versión v4
-compartida; cursor de gráficos atenuado. También se resolvió el orden de Hooks
-entre inducción y tablero. Ver `architecture/REPAIR-A-V40-IMPLEMENTATION-20261002.md`.
-Suite **206 pruebas/17 archivos**, build y diff check correctos. Falta revisión
-independiente Sol medio y QA visual completa del hover en móvil/claro/oscuro.
-No se tocaron SQL 001–008, gateway, lector, métricas ni servicios.
+UI A **aceptada localmente en funcionalidad** tras revisión independiente:
+20 comprobaciones pasan y cuatro regresiones adicionales quedaron en la suite
+normal: 210 pruebas/18 archivos y build aprobados. Fuente live 1099e9d sin cambios en esta revisión. QA visual completa del
+hover en ambos temas y móvil sigue pendiente para aceptar el producto final.
+Ver `architecture/REVIEW-V40-INDEPENDENT-20261002.md`.
 
+Próximo paso: Sol alto, contrato B de datos/permisos y relación con C. Los 17
+hashes congelados siguen idénticos; infraestructura e integración siguen abiertas.
 
 **Avance estimado: 40% del producto final (rango razonable: 35–45%).** Es una
 estimación por etapas, no una medición automática: la demo y los contratos locales

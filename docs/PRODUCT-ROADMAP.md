@@ -1,15 +1,14 @@
 # Decisiones vigentes — 02/10/2026
 
-**Estado vigente tras implementación Sites v40:** reparadas las fallas observadas
-en v39: foco del recorrido a un destino, alternativa explicativa cuando no está
-disponible, avatar uniforme, cursor tenue y constante v4 única. Suite 206/17 y
-build pasan. La revisión independiente Sol medio está pendiente; inspección visual
-completa de los gráficos en claro/oscuro/móvil también. Evidencia:
-`architecture/REPAIR-A-V40-IMPLEMENTATION-20261002.md`.
+**Estado vigente tras revisión independiente v40:** UI A aceptada localmente en
+funcionalidad. 20 comprobaciones independientes pasan: incluye recorrido completo
+por rol, recuperación de foco, actor/titular y persistencia fallida. QA visual de
+claro/oscuro/móvil todavía pendiente para aceptar el producto final. Evidencia:
+`architecture/REVIEW-V40-INDEPENDENT-20261002.md`. Aplicación live sin cambios.
 
-Próximo modelo **GPT-6.1 Sol medio** para aceptar A. Después, y sólo si se acepta,
-Sol alto define contratos B/C. No integrar servicios ni ampliar SQL por esta UI.
-Avance **40% (35–45%)**; demo localStorage, no lista para migración.
+Próximo modelo **GPT-6.1 Sol alto**: cerrar contrato B y relación con C antes de
+Luna medio. Alcance de arquitectura y orden en EXECUTION-NEXT.md. Avance estimado
+**40% (35–45%)**; no lista para migración.
 
 Gateway y lector aceptados localmente no equivalen a concurrencia PostgreSQL,
 Supabase/Auth/MFA, presencia o correo productivos. Grado estimado **40%**,

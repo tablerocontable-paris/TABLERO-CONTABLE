@@ -1,7 +1,7 @@
 # Reparación UI A — implementación v40
 
 Implementación: `1099e9d8ae47c2b1953288b7fa8d7d0bbd380fc5`.
-Deploy Sites v40: `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_d8f07e23ce4c81918847eeb7ea3de22`.
+Deploy Sites v40: `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_d8f07e23ce4c81918847eeb7ea3de22f`.
 Deploy `appgdep_6abffc86ca808191be701a9954b3e491`: **succeeded**.
 
 Cambios:
