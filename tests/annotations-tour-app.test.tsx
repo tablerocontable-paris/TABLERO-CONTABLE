@@ -474,6 +474,37 @@ describe("anotaciones y recorrido integrados", () => {
     expect(document.querySelector(".org-manager .avatar")?.textContent).toBe("LF");
     expect(document.querySelectorAll(".org-manager .avatar").length).toBeGreaterThan(0);
   });
+  it("muestra anticipación en el tablero personal y análisis de gerencia", () => {
+    const employee = prepare("e0");
+    const sample = seed().tasks.find((row) => row.ownerId === "e0" && row.kind === "resultado")!;
+    employee.tasks = [{
+      ...sample,
+      id: "timeliness-card",
+      month: currentMonth(),
+      due: "9999-12-31",
+      status: "Completada",
+      completedAt: new Date(Date.now() - 2 * 86_400_000).toISOString(),
+    }];
+    localStorage.setItem(KEY, JSON.stringify(employee));
+    render(<App />);
+    fireEvent.click(document.querySelector('[data-nav="tasks"]')!);
+    fireEvent.click(screen.getByRole("button", { name: /Completada/ }));
+    const badge = document.querySelector(".timeliness-badge");
+    record("timeliness_employee_card", !!badge && /Completada \d+ días antes/.test(badge.textContent || ""), {
+      badge: badge?.textContent,
+      task: stored().tasks[0],
+      renderedTasks: document.querySelectorAll("[data-task-id]").length,
+    });
+
+    cleanup();
+    const manager = prepare("boss");
+    manager.tasks = [{ ...employee.tasks[0]!, ownerId: "e0" }];
+    localStorage.setItem(KEY, JSON.stringify(manager));
+    render(<App />);
+    fireEvent.click(document.querySelector('[data-nav="analytics"]')!);
+    expect(screen.getByRole("heading", { name: "Anticipación de plazos" })).toBeTruthy();
+    expect(screen.getByText("1/1 antes del plazo · 100%")).toBeTruthy();
+  });
   it("pasa cursor tenue al gráfico y conserva la navegación del clic por empleado", () => {
     const state = prepare("boss");
     const task = seed().tasks.find((row) => row.ownerId === "e0" && row.kind === "resultado")!;

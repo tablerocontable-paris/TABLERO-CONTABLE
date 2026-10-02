@@ -1,16 +1,15 @@
-# Próximo paso — contraste y anticipación de plazos
+# Próximo paso — revisión de contraste y anticipación
 
-**GPT-6 Luna, esfuerzo medio, Standard.** Ejecutar el contrato cerrado
-`product/DEADLINE-EFFICIENCY-20261002.md`, pedido posterior del usuario.
-Las dos capturas adjuntas se pudieron leer y confirman fondos claros fijos en
-cabecera del encargado y checklist oscuro. Plan completo: tokens legibles,
-medición antes/en fecha/después de plazos por ocurrencia, metas operativas con
-fecha de registro, análisis por ámbito y snapshots/CSV compatibles.
+**GPT-6.1 Sol, esfuerzo medio, Standard.** Revisar la implementación local del
+contrato `product/DEADLINE-EFFICIENCY-20261002.md`. Incluye contraste en la
+cabecera del encargado/checklist, medición por fecha ART, metas operativas con
+instante registrado, análisis por ámbito y snapshots/CSV compatibles.
 
-No implementado ni publicado todavía. Mantener v40 hasta terminar código,
-pruebas y build; después publicar privadamente el build exacto, revisar con
-Sol 6.1 medio. No modificar SQL001–008 ni integrar servidor en ese bloque.
-Avance sigue 40% estimado; no lista para migración.
+Implementación local completa: 217 pruebas/19 archivos, build y diff check
+aprobados. Cambió la aplicación y debe publicarse en un nuevo Sites privado
+antes de declarar deploy. QA visual completa de navegador pendiente. No se
+modificó SQL001–008 ni se conectó el servidor. Avance sigue 40%; no lista para
+migración.
 
 ## Trabajo de arquitectura a retomar después de aceptar el arreglo
 

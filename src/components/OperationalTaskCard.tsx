@@ -1,6 +1,8 @@
 import { ArrowRight, Building2, CalendarDays, Plus } from "lucide-react";
 import type { Task } from "../domain/model";
 import { Meter } from "./ui";
+import TimelinessBadge from "./TimelinessBadge";
+import type { TaskTimeliness } from "../domain/timeliness";
 
 export default function OperationalTaskCard({
   task,
@@ -11,6 +13,7 @@ export default function OperationalTaskCard({
   quantity,
   time,
   closed,
+  timeliness,
   onClock,
   onLog,
   onDetails,
@@ -23,6 +26,7 @@ export default function OperationalTaskCard({
   quantity: number;
   time: string;
   closed: boolean;
+  timeliness: TaskTimeliness;
   onClock: () => void;
   onLog: () => void;
   onDetails: () => void;
@@ -36,6 +40,7 @@ export default function OperationalTaskCard({
         <b>{task.weight} pts</b>
       </div>
       <h2>{task.title}</h2>
+      <TimelinessBadge value={timeliness} />
       <p>{coverOwner ? `Tarea de ${owner} · cobertura a cargo de ${coverOwner}` : owner}</p>
       {task.scheduledOn && <small>Realización: {scheduled}</small>}
       <div className="timer-mini">

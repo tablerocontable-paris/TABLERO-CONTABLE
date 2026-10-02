@@ -2,6 +2,7 @@ import { useState } from "react";
 import { canSee, csvCell, type State, type Closure } from "../domain/model";
 import { duration } from "../domain/workforce";
 import { Panel, Dialog, Empty } from "./ui";
+import { TimelinessNumbers } from "./TimelinessPanel";
 const percent = (n: number | null) =>
   n === null ? "Sin base" : `${Math.round(n)}%`;
 export default function PeriodReports({
@@ -38,6 +39,10 @@ export default function PeriodReports({
         "Cumplimiento %",
         "Tiempo registrado",
         "Reaperturas",
+        "Entregables antes / evaluables",
+        "Entregables antes %",
+        "Metas antes / evaluables",
+        "Metas antes %",
       ],
       ...r.groups.map((g) => [
         r.employee,
@@ -54,6 +59,10 @@ export default function PeriodReports({
         g.metrics.weighted ?? "Sin base",
         duration(g.recordedSeconds),
         g.reopenings,
+        `${g.metrics.timeliness?.results.early ?? "Sin medición histórica"}/${g.metrics.timeliness?.results.evaluated ?? "Sin medición histórica"}`,
+        g.metrics.timeliness?.results.earlyRate ?? "Sin medición histórica",
+        `${g.metrics.timeliness?.operational.early ?? "Sin medición histórica"}/${g.metrics.timeliness?.operational.evaluated ?? "Sin medición histórica"}`,
+        g.metrics.timeliness?.operational.earlyRate ?? "Sin medición histórica",
       ]),
     ];
     const url = URL.createObjectURL(
@@ -83,6 +92,7 @@ export default function PeriodReports({
                 <th>Empleado</th>
                 <th>Destinatario al cierre</th>
                 <th>Cumplimiento</th>
+                <th>Anticipación</th>
                 <th>Tiempo registrado</th>
                 <th>Reporte</th>
               </tr>
@@ -96,6 +106,11 @@ export default function PeriodReports({
                       "Sin jefe activo configurado"}
                   </td>
                   <td>{percent(c.metrics.weighted)}</td>
+                  <td>
+                    {c.metrics.timeliness
+                      ? `${c.metrics.timeliness.total.early}/${c.metrics.timeliness.total.evaluated} antes`
+                      : "Sin medición histórica"}
+                  </td>
                   <td>{duration(c.report!.recordedSeconds)}</td>
                   <td>
                     <button onClick={() => setSelected(c)}>Ver reporte</button>
@@ -121,6 +136,7 @@ export default function PeriodReports({
             {r.reopenings}. Las coberturas conservan el titular y los ejecutores
             en el historial. El tiempo no mide por sí solo productividad.
           </div>
+          <TimelinessNumbers value={selected.metrics.timeliness} historical={!selected.metrics.timeliness} />
           <div className="table-wrap">
             <table>
               <thead>
@@ -130,6 +146,7 @@ export default function PeriodReports({
                   <th>Entregables</th>
                   <th>Operativas en meta</th>
                   <th>Cumplimiento</th>
+                  <th>Antes / evaluables</th>
                   <th>Tiempo</th>
                 </tr>
               </thead>
@@ -152,6 +169,11 @@ export default function PeriodReports({
                       {g.metrics.operationalTarget}/{g.metrics.operational}
                     </td>
                     <td>{percent(g.metrics.weighted)}</td>
+                    <td>
+                      {g.metrics.timeliness
+                        ? `${g.metrics.timeliness.total.early}/${g.metrics.timeliness.total.evaluated}`
+                        : "Sin medición histórica"}
+                    </td>
                     <td>{duration(g.recordedSeconds)}</td>
                   </tr>
                 ))}

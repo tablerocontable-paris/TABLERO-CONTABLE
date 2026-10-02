@@ -6,6 +6,7 @@ import {
 } from "./schedule";
 import { stopClock, type TimeSession, type Absence } from "./workforce";
 import { generatePeriodReport, type PeriodReport } from "./reports";
+import { endOfARTDate, summarizeTimeliness, type TimelinessSummary } from "./timeliness";
 export type Role = "jefe" | "encargado" | "empleado";
 export type Status = "Pendiente" | "En curso" | "Completada";
 export type Kind = "resultado" | "operativa";
@@ -118,6 +119,7 @@ export interface Metrics {
   blocked: number;
   operational: number;
   operationalTarget: number;
+  timeliness?: TimelinessSummary;
 }
 export interface Closure {
   report?: PeriodReport;
@@ -231,6 +233,7 @@ export function transition(
     if (t.checklist.some((c) => !c.done))
       throw Error("Completá todos los pasos del checklist.");
   }
+  if (next === "Completada" && t.status === "Completada") return t;
   return {
     ...(next !== "En curso" ? stopClock(t, at) : t),
     reopenCount:
@@ -269,7 +272,9 @@ export function metrics(
   tasks: Task[],
   logs: Activity[],
   today = dateART(),
+  asOfISO?: string,
 ): Metrics {
+  const reference = asOfISO || endOfARTDate(today) || "invalid";
   const results = tasks.filter((t) => t.kind === "resultado");
   const done = results.filter((t) => t.status === "Completada");
   const ontime = done.filter(
@@ -306,6 +311,7 @@ export function metrics(
     operationalTarget: tasks.filter(
       (t) => t.kind === "operativa" && taskQuantity(t, logs) >= t.target,
     ).length,
+    timeliness: summarizeTimeliness(tasks, logs, reference),
   };
 }
 export function materialize(s: State, month: string): State {
@@ -396,14 +402,15 @@ export function closeMonth(
   const logs = s.activity.filter(
     (a) => tasks.some((t) => t.id === a.taskId) && a.date.startsWith(month),
   );
+  const at = new Date().toISOString();
   const c: Closure = {
     id: id(),
     ownerId,
     month,
-    at: new Date().toISOString(),
+    at,
     by: actorId,
     note,
-    metrics: metrics(tasks, logs),
+    metrics: metrics(tasks, logs, dateART(at), at),
     tasks: structuredClone(tasks),
     activity: structuredClone(logs),
   };

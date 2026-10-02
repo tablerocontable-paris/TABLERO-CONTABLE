@@ -7,10 +7,10 @@ claro/oscuro/móvil todavía pendiente para aceptar el producto final. Evidencia
 `architecture/REVIEW-V40-INDEPENDENT-20261002.md`. Aplicación live sin cambios.
 
 Pedido posterior: contraste de organigrama/checklist y medición de anticipación
-de tareas y metas operativas. Contrato cerrado, implementación pendiente:
-`product/DEADLINE-EFFICIENCY-20261002.md`. Próximo modelo **GPT-6 Luna medio**;
-después Sol medio revisa y Sol alto retoma B/C. La aceptación funcional anterior
-no cubre los defectos de contraste confirmados por las capturas nuevas. Avance
+de tareas y metas operativas. Implementado localmente bajo
+`product/DEADLINE-EFFICIENCY-20261002.md`; requiere revisión Sol medio y QA visual
+de navegador. Después Sol alto retoma B/C. La aceptación funcional anterior no
+cubría los defectos de contraste confirmados por las capturas nuevas. Avance
 estimado **40% (35–45%)**; no lista para migración.
 
 Gateway y lector aceptados localmente no equivalen a concurrencia PostgreSQL,

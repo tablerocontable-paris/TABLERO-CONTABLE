@@ -55,11 +55,9 @@ sin pedir otro «continuá».
 
 ## Próximo bloque
 
-**GPT-6 Luna medio, Standard:** ejecutar el contrato cerrado
-`product/DEADLINE-EFFICIENCY-20261002.md`, pedido posterior a la revisión v40.
-Arreglar contraste de organigrama/checklist y añadir anticipación de plazos/metas
-en demo, análisis y nuevos reportes. Después Sol 6.1 medio revisa; B/C con Sol
-alto vuelve tras aceptar este bloque. Aceptación funcional anterior de A no
-equivale a aceptación visual: las nuevas capturas confirman dos defectos de
-contraste. QA visual completa y producción conectada siguen abiertas.
+**GPT-6.1 Sol medio, Standard:** revisar la implementación local del contrato
+`product/DEADLINE-EFFICIENCY-20261002.md`. Las capturas originales confirmaron
+los dos defectos de contraste. Código, 217 pruebas y build pasan; QA visual de
+navegador completa y producción conectada siguen abiertas. Tras revisión aceptar
+o reparar; después B/C requiere Sol alto.
 El cambio de esfuerzo/modelo es manual; no simularlo con subagentes.

@@ -1,9 +1,8 @@
 # Contrato de ejecución — contraste y anticipación de objetivos
 
-Pedido de Valentino del 02/10/2026, posterior a la revisión v40. Estado:
-**diseño cerrado, implementación pendiente**. Ejecutar con GPT-6 Luna medio,
-Standard; después revisión independiente con Sol 6.1 medio. La aplicación sigue
-en v40; este documento no significa que la función ya exista.
+Pedido de Valentino del 02/10/2026, posterior a la revisión v40. El diseño se
+cerró y la implementación local ya se ejecutó con Luna. Sigue pendiente revisión
+independiente de Sol, QA visual de navegador y aceptación de los resultados.
 
 ## Evidencia y alcance
 
@@ -182,6 +181,19 @@ documental de este contrato como si incluyera el arreglo. Tras implementación,
 alinear AGENTS/EXECUTION-NEXT/PROJECT-STATUS/WORKFLOW-MODELS y recomendar revisión
 Sol 6.1 medio. B/C vuelve después de aceptar este bloque. Avance sigue estimado
 40%; no aumentarlo por este diseño.
+
+## Resultado de implementación local
+
+`src/domain/timeliness.ts` calcula estados con fechas ART y conserva la base de
+anticipación separada para entregables y metas. Los paneles aparecen en tareas,
+operativas, análisis agrupado y reportes nuevos. `Metrics.timeliness` es
+opcional/aditivo: cierres antiguos no se recalculan y se muestran como
+«Sin medición histórica». Completada→Completada y repetir el mismo checklist son
+no-op; la reapertura borra el logro vigente sin alterar snapshots previos.
+Los dos fondos fijos de contraste usan tokens del tema. El proyecto pasa 217
+pruebas/19 archivos, `npm run build` y `git diff --check`. SQL/gateway/lector y
+dependencias permanecen congelados. La QA visual real del navegador aún está
+pendiente; este resultado local no verifica autenticación ni entrega de correo.
 
 ## Contrato productivo pendiente (sin implementación ahora)
 

@@ -1,4 +1,4 @@
-import { metrics, type State, type Closure, type Metrics } from "./model";
+import { dateART, metrics, type State, type Closure, type Metrics } from "./model";
 import { elapsedSeconds } from "./workforce";
 export interface ReportGroup {
   key: string;
@@ -66,7 +66,7 @@ export function generatePeriodReport(s: State, c: Closure): PeriodReport {
         null,
       kind: tasks[0].kind,
       unit: tasks[0].unit,
-      metrics: metrics(tasks, c.activity),
+      metrics: metrics(tasks, c.activity, dateART(c.at), c.at),
       recordedSeconds: tasks.reduce((n, t) => n + elapsedSeconds(t, c.at), 0),
       reopenings: tasks.reduce((n, t) => n + (t.reopenCount || 0), 0),
     })),

@@ -17,6 +17,8 @@
   --chart-muted: #aebdce;
   --ink: #202226;
   --muted: #737982;
+  --control-muted: #5f6772;
+  --check-accent: #303e50;
   --chart-cursor: #667085;
   --chart-cursor-border: #354052;
   --chart-active: #233d64;
@@ -963,11 +965,13 @@ td .text-button {
   display: flex;
   gap: 13px;
   align-items: center;
-  background: #f8f9fb;
+  background: var(--surface-soft);
   border-bottom: 1px solid var(--line);
   padding: 19px 22px;
   font-size: 13px;
+  color: var(--ink);
 }
+.org-manager small { color: var(--control-muted); }
 .org-manager small,
 .org-person small {
   display: block;
@@ -1146,20 +1150,21 @@ dialog::backdrop {
   flex-direction: row;
   align-items: center;
   gap: 10px;
-  background: #f8f9fb;
-  border: 1px solid #e9edf2;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
   border-radius: 7px;
   padding: 12px 14px;
-  font-size: 12px;
-  color: #4e5b6d;
+  font-size: 14px;
+  color: var(--ink);
 }
+[data-theme] .check-line,
+[data-theme] .check-line.checked { color: var(--ink); }
 .check-line input {
-  accent-color: #303e50;
-  width: 15px;
-  height: 15px;
+  accent-color: var(--check-accent);
+  width: 17px;
+  height: 17px;
 }
 .check-line.checked {
-  color: #97a1ad;
   text-decoration: line-through;
 }
 .activity-history {
@@ -1170,6 +1175,27 @@ dialog::backdrop {
   border-bottom: 1px solid #eee;
   font-size: 12px;
 }
+.timeliness-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin: 4px 0;
+  padding: 4px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+.timeliness-early { border-color: color-mix(in srgb, var(--green) 55%, var(--line)); }
+.timeliness-late, .timeliness-overdue { border-color: color-mix(in srgb, var(--red) 60%, var(--line)); }
+.timeliness-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.timeliness-summary { display: grid; gap: 5px; min-width: 0; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.timeliness-summary strong { font-size: 15px; }
+.timeliness-summary span, .timeliness-summary small { color: var(--muted); }
+.timeliness-table { margin-top: 16px; }
+@media (max-width: 700px) { .timeliness-grid { grid-template-columns: 1fr; } }
 .activity-history span {
   display: block;
   color: #8f99a6;
@@ -1827,6 +1853,8 @@ summary {
   --chart-muted: #56677d;
   --green: #91d9b6;
   --red: #eea39a;
+  --control-muted: #a9b2c0;
+  --check-accent: #8fb8ef;
 }
 [data-theme="dark"] header {
   background: #171c24ed;

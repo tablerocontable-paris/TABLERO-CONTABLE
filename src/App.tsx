@@ -90,7 +90,10 @@ import { Dialog, Panel, Empty, Meter } from "./components/ui";
 import Onboarding from "./components/Onboarding";
 import Annotations from "./components/Annotations";
 import OperationalTaskCard from "./components/OperationalTaskCard";
+import TimelinessBadge from "./components/TimelinessBadge";
+import TimelinessPanel from "./components/TimelinessPanel";
 import StepListEditor, { parseSteps, validateSteps } from "./components/StepListEditor";
+import { taskTimeliness } from "./domain/timeliness";
 type Page =
   | "overview"
   | "day"
@@ -781,6 +784,7 @@ export default function App() {
   }
   function taskCard(t: Task) {
     const closed = isClosed(state, t);
+    const timeliness = taskTimeliness(t, state.activity, new Date().toISOString());
     return (
       <article
         className={"task-card " + (t.status === "Completada" ? "done" : "")}
@@ -809,6 +813,7 @@ export default function App() {
             </small>
           )}
         </p>
+        <TimelinessBadge value={timeliness} />
         {coverageFor(state, t)?.replacementId === active.id && viewedOwner === active.id && (
           <span className="coverage-task-badge">Tarea de cobertura para {nameOf(coverageFor(state, t)!.ownerId)}</span>
         )}
@@ -921,8 +926,8 @@ export default function App() {
                 </td>
                 <td>{companyOf(t.companyId)}</td>
                 <td>{nameOf(t.ownerId)}</td>
-                <td>{t.weight} pts</td>
-                <td>{fmt(t.due)}</td>
+                          <td>{t.weight} pts</td>
+                          <td>{fmt(t.due)}<br /><TimelinessBadge value={taskTimeliness(t, state.activity, new Date().toISOString())} /></td>
                 <td>
                   <span
                     className={
@@ -1550,6 +1555,7 @@ export default function App() {
                         quantity={taskQuantity(t, state.activity)}
                         time={duration(elapsedSeconds(t, new Date(tick).toISOString()))}
                         closed={isClosed(state, t)}
+                        timeliness={taskTimeliness(t, state.activity, new Date().toISOString())}
                         onClock={() => clock(t, !t.sessions?.some((session) => !session.end))}
                         onLog={() => setLogFor(t.id)}
                         onDetails={() => setDetail(t.id)}
@@ -1573,6 +1579,7 @@ export default function App() {
                           quantity={taskQuantity(t, state.activity)}
                           time={duration(elapsedSeconds(t, new Date(tick).toISOString()))}
                           closed={isClosed(state, t)}
+                          timeliness={taskTimeliness(t, state.activity, new Date().toISOString())}
                           onClock={() => clock(t, !t.sessions?.some((session) => !session.end))}
                           onLog={() => setLogFor(t.id)}
                           onDetails={() => setDetail(t.id)}
@@ -1662,6 +1669,12 @@ export default function App() {
                             "Entregables",
                             "Completados",
                             "Vencidos",
+                            "Entregables antes / evaluables",
+                            "Entregables antes %",
+                            "Promedio días de anticipación",
+                            "Metas operativas antes / evaluables",
+                            "Metas operativas antes %",
+                            "Promedio días meta anticipada",
                           ],
                           ...chartGroups.map((g) => [
                             g.name,
@@ -1672,6 +1685,12 @@ export default function App() {
                             g.assigned,
                             g.done,
                             g.late,
+                            `${g.timeliness?.results.early ?? 0}/${g.timeliness?.results.evaluated ?? 0}`,
+                            g.timeliness?.results.earlyRate,
+                            g.timeliness?.results.averageDaysAhead,
+                            `${g.timeliness?.operational.early ?? 0}/${g.timeliness?.operational.evaluated ?? 0}`,
+                            g.timeliness?.operational.earlyRate,
+                            g.timeliness?.operational.averageDaysAhead,
                           ]),
                         ],
                         `analisis-${month}.csv`,
@@ -1683,6 +1702,14 @@ export default function App() {
                   </button>
                 </div>
                 {stats()}
+                <TimelinessPanel
+                  value={m.timeliness!}
+                  rows={chartGroups.map((g) => ({
+                    id: g.id,
+                    name: g.name,
+                    timeliness: g.timeliness,
+                  }))}
+                />
                 <div className="dashboard-row">
                   <Panel
                     title="Cumplimiento ponderado"
@@ -2477,6 +2504,7 @@ export default function App() {
               Estado
             </span>
           </div>
+          <TimelinessBadge value={taskTimeliness(tasksForDetail, state.activity, new Date().toISOString())} />
           <div className="timer-panel">
             <div>
               <small>TIEMPO REGISTRADO</small>
