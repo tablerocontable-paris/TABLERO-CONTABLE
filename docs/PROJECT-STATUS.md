@@ -19,9 +19,13 @@ que 40% de los empleados puedan migrarse: hoy no hay base de producción conecta
 
 ## Evidencia actual
 
-**Código y publicación:** registrar aquí el SHA/version del deploy privado antes
-de cerrar el cambio. El bloque UI A y los tests del lector forman este cambio
-lógico; no se modificaron gateway, lector de producción, SQL 001–008 ni dependencias.
+**Publicación privada:** commit de implementación `d1a071d8f1f541f0a5bf0e2110bc970185c847bb`,
+Sites v36 (`appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_83b0f5c176e08191af78af0b53f50326`),
+deploy `appgdep_6abfdc54a0748191aba607029ceb2066`,
+https://grupo-paris-contabilidad.valentino-magni.chatgpt.site. El bloque UI A y
+los tests del lector forman este cambio; no se modificaron gateway, lector de
+producción, SQL 001–008 ni dependencias. La publicación de seguimiento puede
+incluir sólo esta actualización documental, con el mismo build de aplicación.
 
 195 pruebas en 17 archivos y compilación correctas. El laboratorio PGlite verifica
 23 casos secuenciales; 24 pares preparados para PostgreSQL siguen sin ejecutarse.
