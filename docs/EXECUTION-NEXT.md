@@ -14,9 +14,12 @@ desde Planificación y seed de equipos. Los probes mixtos del lector están en l
 suite regular; el SQL, gateway, lector de producción, dependencias y servicios
 conectados siguen sin cambios.
 
-El código está listo para commit y publicación privada en Sites. Al registrar la
-versión, actualizar aquí el SHA, versión y resultado de despliegue exactos junto
-con `PROJECT-STATUS.md`. El sitio continúa privado y la demo usa localStorage.
+Publicado en Sites v39 desde el commit
+`cfe05f7ea4f613f27e9c5f99a0061f0ad63ae801`; versión
+`appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_87564356e6d08191a423e3c9eaded924`,
+deploy `appgdep_6abff343556c819187d8b243325659f4`, estado correcto. La URL sigue
+siendo https://grupo-paris-contabilidad.valentino-magni.chatgpt.site, privada
+para el propietario y sin visitantes externos. La demo usa localStorage.
 La QA visual del preview quedó bloqueada previamente por
 `net::ERR_BLOCKED_BY_CLIENT`; no se sustituyó ni evadió el entorno del navegador.
 

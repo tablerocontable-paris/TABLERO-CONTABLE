@@ -1,10 +1,15 @@
 # Estado del proyecto — 02/10/2026
 
-**Actualización más reciente:** bloque UI A implementado y verificado en local;
-publicación privada pendiente de registrar aquí. Se repararon el editor y los
-límites del checklist, meta operativa editable, vista por perfil y cobertura,
-detalles/acciones, anotaciones, gráficos, seed y recorrido v4. Suite:
-202 pruebas/17 archivos. Build de producción correcto. No hubo cambios en SQL,
+**Release actual — Sites v39:** `cfe05f7ea4f613f27e9c5f99a0061f0ad63ae801`.
+Versión `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_87564356e6d08191a423e3c9eaded924`,
+deploy `appgdep_6abff343556c819187d8b243325659f4`, estado correcto:
+https://grupo-paris-contabilidad.valentino-magni.chatgpt.site. La audiencia sigue
+restringida al propietario; 0 visitantes externos.
+
+El bloque UI A reparó el editor y los límites del checklist, meta operativa
+editable, vista por perfil y cobertura, detalles/acciones, anotaciones, gráficos,
+seed y recorrido v4. Suite: 202 pruebas/17 archivos. Build de producción
+correcto. Pendiente aceptación independiente de Sol. No hubo cambios en SQL,
 gateway, lector, dependencias ni servicios conectados.
 
 **Avance estimado: 40% del producto final (rango razonable: 35–45%).** Es una
@@ -35,8 +40,8 @@ bloque A que ahora espera aceptación.
 QA visual sigue pendiente: preview arrancó pero navegador bloqueó el acceso con
 `net::ERR_BLOCKED_BY_CLIENT`; la ausencia de un binario Chromium no fue confirmada.
 
-**Publicación privada:** commit de implementación `d1a071d8f1f541f0a5bf0e2110bc970185c847bb`,
-Sites v36 (`appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_83b0f5c176e08191af78af0b53f50326`),
+**Registro histórico — Sites v36:** commit de implementación `d1a071d8f1f541f0a5bf0e2110bc970185c847bb`,
+versión (`appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_83b0f5c176e08191af78af0b53f50326`),
 deploy `appgdep_6abfdc54a0748191aba607029ceb2066`,
 https://grupo-paris-contabilidad.valentino-magni.chatgpt.site. El bloque UI A y
 los tests del lector forman este cambio; no se modificaron gateway, lector de
