@@ -1,22 +1,14 @@
 # Decisiones vigentes — 02/10/2026
 
-**Estado vigente tras revisión independiente v40:** UI A aceptada localmente en
-funcionalidad. 20 comprobaciones independientes pasan: incluye recorrido completo
-por rol, recuperación de foco, actor/titular y persistencia fallida. QA visual de
-claro/oscuro/móvil todavía pendiente para aceptar el producto final. Evidencia:
-`architecture/REVIEW-V40-INDEPENDENT-20261002.md`. Aplicación live sin cambios.
+UI A (v40) y reparación de anticipación (v43) aceptadas localmente en
+funcionalidad. Evidencia en REVIEW-V40-INDEPENDENT-20261002.md y
+REVIEW-V43-INDEPENDENT-20261002.md de docs/architecture. QA visual completa sigue
+pendiente. Próxima fase: Sol 6.1 alto diseña B/C, datos y permisos de coordinación.
 
-Pedido posterior: contraste de organigrama/checklist y medición de anticipación
-de tareas y metas operativas. Implementado localmente bajo
-`product/DEADLINE-EFFICIENCY-20261002.md`; requiere revisión Sol medio y QA visual
-de navegador. Después Sol alto retoma B/C. La aceptación funcional anterior no
-cubría los defectos de contraste confirmados por las capturas nuevas. Avance
-estimado **40% (35–45%)**; no lista para migración.
-
-Gateway y lector aceptados localmente no equivalen a concurrencia PostgreSQL,
-Supabase/Auth/MFA, presencia o correo productivos. Grado estimado **40%**,
-`PROJECT-STATUS.md`. Demo privada/localStorage, no lista para migración.
-Los apartados cronológicos siguientes conservan historia.
+Avance estimado actual **41% (35–45%)**, cálculo vigente en PROJECT-STATUS.md.
+Lector/gateway/SQL locales no equivalen a Auth/RLS/datos compartidos ni correo
+conectados. Demo localStorage, sin migración habilitada. Los apartados
+cronológicos inferiores conservan historia; el próximo paso es EXECUTION-NEXT.md.
 
 ## Infraestructura futura (pedido expreso, todavía no ejecutar)
 

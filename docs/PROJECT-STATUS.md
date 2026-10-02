@@ -1,146 +1,81 @@
-# Estado del proyecto — 02/10/2026
+# Estado vigente del proyecto — 02/10/2026
 
-**Código funcional — Sites v41/v42:** commit
-`20d4db3c151c3c2eb963352bde4578ab321a0a8d`.
-Versión `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_c8c11bed53e08191b963c2e770f681de`,
-deploy `appgdep_6ac0053d99ec8191adc2f8769abecc19`, estado succeeded:
-https://grupo-paris-contabilidad.valentino-magni.chatgpt.site. Audiencia
-restringida al propietario, cero visitantes externos.
+**Avance global estimado: 41% (rango 35–45%).** La estimación anterior era 40%.
+Hay avance funcional real: UI A y reparación de anticipación de v43 están
+aceptadas localmente. El incremento corresponde al indicador de anticipación
+por tarea, metas registradas, agregados y reportes; no al número de pruebas o
+documentos. QA visual completa y producción conectada siguen pendientes.
 
-v40 conserva la aceptación funcional independiente de UI A, con QA visual
-pendiente. Las capturas posteriores detectaron dos colores fijos en tema oscuro;
-v41 los corrigió y agregó anticipación de plazos y metas operativas al análisis y
-a los nuevos reportes. **217 pruebas/19 archivos, build y diff check aprobados.**
-La revisión independiente detectó cuatro fallos reproducibles y discrepancias
-de auditoría/CSV/presentación. Reparación pendiente; QA visual completa abierta. Ver `architecture/REVIEW-V40-INDEPENDENT-20261002.md` y
-`product/DEADLINE-EFFICIENCY-20261002.md`.
-
-Pedido posterior del 02/10: el arreglo de contraste y la anticipación ya están en
-v41/v42. Próximo paso: Luna medio ejecuta DEADLINE-EFFICIENCY-REPAIR-20261002;
-luego Sol medio revisa y, tras aceptación, Sol alto retoma B/C. SQL 001–008, permisos remotos e infraestructura no se modificaron.
-
-**Avance estimado: 40% del producto final (rango razonable: 35–45%).** Es una
-estimación por etapas, no una medición automática: la demo y los contratos locales
-están avanzados, pero autenticación, datos compartidos, integración, validación
-operativa e infraestructura final siguen pendientes. No está listo para migrar.
-
-| Etapa (peso estimado) | Estado y avance estimado de esa etapa |
-| --- | --- |
-| Demo, experiencia y reglas (25%) | 75%: tablero y funciones demostrables avanzadas; faltan cerrar parte de experiencia y funciones de administración/proceso |
-| Contrato de datos y reglas SQL (25%) | 65%: migraciones 001–008 revisadas y pruebas locales; concurrencia y Supabase real pendientes |
-| Integración, cuentas y permisos (25%) | 5%: gateway y lector aceptados localmente; frontend aún usa persistencia/selector de demostración, sin Auth/RLS/datos compartidos conectados |
-| Funcionalidad final y operación (15%) | 25%: reportes/reglas están delineados; faltan integración de reportes, áreas de administración y procesos Kaizen/5S aplicados |
-| Validación, infraestructura y migración (10%) | 0%: faltan QA real, piloto de Juan Pablo y servicios definitivos |
-
-El 40% se obtiene ponderando esas etapas; el rango
-35–45% refleja que los porcentajes por etapa todavía son estimaciones. No significa
-que 40% de los empleados puedan migrarse: hoy no hay base de producción conectada.
-
-## Evidencia actual
-
-**Revisión independiente anterior:** Sites v37,
-`3f2995270081f6d5c54ac2590c32f81d035d6ad1`, deploy
-`appgdep_6abfdd0e24848191b88f55518bd6184e`, verificado activo. Resultado en
-`architecture/REVIEW-V37-INDEPENDENT-20261002.md`: lector aceptado localmente con
-tres comprobaciones independientes adicionales. Sus fallas UI fueron la base del
-bloque A, revisado parcialmente en v39.
-QA visual sigue pendiente: preview arrancó pero navegador bloqueó el acceso con
-`net::ERR_BLOCKED_BY_CLIENT`; la ausencia de un binario Chromium no fue confirmada.
-
-**Registro histórico — Sites v36:** commit de implementación `d1a071d8f1f541f0a5bf0e2110bc970185c847bb`,
-versión (`appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_83b0f5c176e08191af78af0b53f50326`),
-deploy `appgdep_6abfdc54a0748191aba607029ceb2066`,
-https://grupo-paris-contabilidad.valentino-magni.chatgpt.site. El bloque UI A y
-los tests del lector forman ese cambio; no se modificaron gateway, lector de
-producción, SQL 001–008 ni dependencias.
-
-La suite vigente de v41 tiene 217 pruebas en 19 archivos. El laboratorio PGlite
-verifica 23 casos secuenciales; 24 pares preparados para PostgreSQL siguen sin
-ejecutarse. La rama BA previa al corte usa jefe con aal2 y confirma replay
-idempotente. Esas comprobaciones locales no sustituyen carreras PostgreSQL reales.
-
-Las assertions pendientes de la guía están completas, incluida la identidad
-dentro del B renderizado, motivo, conteo de sesiones y receipt de seed. El primer
-adaptador de seis RPC conserva filas, claves y argumentos, valida ACKs y separa
-fallos sin reintentar automáticamente. 23 pruebas nuevas cubren esta frontera
-y su composición con SQL. La revisión del adaptador está aceptada tras corregir
-ADP-R01: comparación temporal conserva fracciones menores a un milisegundo.
-El lector tipado/paginado tiene pruebas de perfiles, filtros, jerarquía,
-cancelación y cobertura por empresa/período con filas existentes; se añadieron
-lecturas completas con precisión temporal, checklist operativo, paginación de
-sesiones y rechazo de respuestas null/malformadas. La prueba de cobertura
-restaura el actor authenticated después de capturas administrativas. La matriz
-de ejecución está en `architecture/REVIEW-DATA-READ-INDEPENDENT-RESULT-20261002.md`;
-la revisión posterior `architecture/REVIEW-V37-INDEPENDENT-20261002.md` completa
-la evidencia y acepta el lector local. Lector y gateway siguen sin conectarse
-a la página.
-
-Las 18 correcciones siguen registradas en `product/CORRECTIONS-20261002.md`.
-El bloque A y la corrección posterior están demostrados en la UI privada; QA
-visual final y reparación de la revisión independiente pendientes. Los bloques B/C/D siguen pendientes.
-No aumentar el porcentaje por documentos o pruebas.
-
-La demo usa localStorage y selector simulado. Que haya pruebas SQL verdes no
-significa que esos permisos ya gobiernen la página ni que se envíe correo.
-
-El cronómetro se puede accionar y visualizar en la demo; su estado y sesiones
-persisten en el almacenamiento local de ese navegador, por lo que no es todavía
-un registro compartido ni sirve para controlar tiempo real de los empleados. Las
-RPC de cronómetro existen en SQL local y tienen pruebas de laboratorio; no están
-conectadas al sitio publicado. La presencia/última conexión tampoco está
-implementada: sin Auth y señales de sesión servidor no se puede saber de manera
-fiable quién está usando la aplicación. Requisito de gerencia agregado al
-roadmap, pendiente de diseño/revisión y de la fase de autenticación.
-
-## Siguiente camino
-
-1. Luna medio repara según contrato; luego Sol medio revisa. QA visual abierta.
-2. Sol alto define contratos de coordinación y pedidos de datos/permisos por
-   bloques; Luna implementa cada contrato cerrado.
-3. Completar producto y validaciones reales/piloto antes de migrar a compañeros.
-4. Al aprobar la versión definitiva, registrar esa decisión y activar los nuevos
-   servicios dedicados y flujo dev/prod según AUTOMATED-DELIVERY.md.
-
-Referencias: architecture/REVIEW-008-FINAL-20261001.md, EXECUTION-NEXT.md,
-architecture/REVIEW-DATA-ADAPTER-20261002.md, PRODUCT-ROADMAP.md y
-ops/AUTOMATED-DELIVERY.md. La página y código continúan en Sites
-privado; cada publicación nativa registra su SHA exacto en Git/main.
-
-## Revisión independiente v42 — registro histórico
-
-Sites live confirmado v42, versión
-`appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_bd5d2636e4388191acdd41af1daca971`,
-deploy `appgdep_6ac00614bbd881919b493c582d5fcd14`, fuente documental
-`97b0cb20432f88e55bd1f09da925cfbf0f07f3ee`. Misma aplicación que v41.
-Cuatro probes independientes fallaron; evidencia y contrato en
-`product/DEADLINE-EFFICIENCY-REPAIR-20261002.md`. No se modifica producto en esta
-revisión ni se despliega documentación para aparentar una reparación.
-
-
-## Reparación de anticipación — Sites v43 — 02/10/2026
-
-Se cerraron los cuatro defectos reproducidos en v42: completedAt posterior al
-corte en el mismo día, timestamp calendario imposible/incompleto, fecha inválida
-de actividad propia ignorada y checklist repetido tratado como cambio. La ruta de
-mutación ya corta por identidad para evitar audit/commit del no-op. Los timestamps
-ISO completos se validan antes de interpretar; `createdAt` futuro no acredita meta.
-
-CSV de análisis marca tasas/promedios nulos como “Sin muestra”; CSV de cierre
-distingue ausencia histórica de falta de muestra y añade ambos promedios. La tabla
-agrupada muestra promedio operativo y la etiqueta especifica “Meta registrada”.
-El corte de análisis se congela una vez por render y se pasa a agregados.
-
-Regresiones integradas: suite **222 pruebas/21 archivos**, `npm run build` y
-`git diff --check` aprobados. No se cambió SQL, gateway, lector ni dependencias.
-Revisión Sol medio y QA visual de navegador pendientes; avance sigue **40%**.
-
-
-## Publicación de la reparación
-
-Sites v43 publicada con éxito: implementación commit
+**Aplicación live: Sites v43**, fuente de implementación
 `9d6b97dc16625c974d6679cf7d69b7fe2fdb3900`, versión
 `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_3e2fc69b4dac819196d375f0c836aa5a`,
-deploy `appgdep_6ac00b2ad81c81919a50bafab9f7101d`. La suite fue 222/222 en
-21 archivos, build y diff check aprobados. No se cambió SQL ni infraestructura.
-La QA visual real claro/oscuro/Sistema sigue abierta; Sol debe revisar el bloque
-antes de aceptarlo.
+deploy `appgdep_6ac00b2ad81c81919a50bafab9f7101d` succeeded:
+https://grupo-paris-contabilidad.valentino-magni.chatgpt.site.
+La revisión posterior sólo modifica evidencia, tests y documentación en Git;
+conserva la aplicación publicada desde ese commit.
+
+## Cómo se estima el avance
+
+Los pesos representan esfuerzo y riesgo restantes aproximados. Los porcentajes
+de cada etapa son juicio de planificación, sin precisión estadística ni una
+medición automática de requisitos. Se mantienen los mismos pesos para comparar.
+
+| Etapa | Peso | Estimación anterior → actual | Evidencia / pendiente |
+| --- | --- | --- | --- |
+| Demo, experiencia y reglas | 25% | 75% → 80% | UI A y anticipación aceptadas localmente; pendientes funciones B/C/D y QA visual |
+| Contrato de datos y SQL | 25% | 65% → 65% | SQL001–008 y adaptadores revisados localmente; coordinación nueva y carreras reales pendientes |
+| Integración, cuentas y permisos | 25% | 5% → 5% | Lector/gateway listos localmente; frontend usa localStorage y actor simulado |
+| Funcionalidad final y operación | 15% | 25% → 25% | Reportes/outbox locales; pendientes integración, notificaciones, Kaizen/5S y administración final |
+| Validación, infraestructura y migración | 10% | 0% → 0% | Piloto, servicios definitivos y migración aún pendientes |
+
+La ponderación pasó de 40 a 41,25; se comunica **aproximadamente 41%**. El rango
+35–45% muestra la incertidumbre. No corresponde elevarlo al 50% por tener más
+commits o reparaciones. La demo está mucho más cerca de terminarse que la entrega
+operativa completa. No hay una base de producción conectada ni usuarios reales.
+
+## Avance concreto del último bloque
+
+- Contraste de cabecera del encargado y checklist adaptado a tokens del tema;
+  capturas posteriores motivaron el cambio. QA de navegador aún abierta.
+- Anticipación por ocurrencia/empresa y período: antes/en fecha/después,
+  pendiente/vencida, sin plazo y sin medición. Metas usan el registro que cruza
+  el objetivo y muestran “Meta registrada”. No dan bonificación al KPI.
+- Nuevos cierres conservan métricas del corte; históricos sin campo no se
+  recalculan. Análisis y CSV incluyen bases, tasas y promedios.
+- Revisión v42 encontró cuatro fallos; reparación v43 pasa los cuatro probes
+  originales. Revisión independiente actual acepta este comportamiento local.
+- Regresión adicional verifica que no-op del reductor no escribe ni audita en
+  el llamador. Evidencia: architecture/REVIEW-V43-INDEPENDENT-20261002.md.
+
+## Pendientes que impiden migrar a los empleados
+
+1. Diseñar e implementar B/C: jerarquía multiarea, conjuntas y contribuciones,
+   cobertura por tareas, bajas/huérfanas y comentarios privados separados.
+2. Integrar frontend con lector/gateway y completar equivalencia de reglas,
+   Auth/invitaciones/MFA/RLS y datos compartidos.
+3. Cerrar agenda/cumplimiento, presencia y última conexión, notificaciones,
+   entrega de reportes, consultas y procesos de mejora.
+4. Ejecutar concurrencia PostgreSQL real, QA visual y volumen, piloto con Juan
+   Pablo y encargado, pruebas de restauración y actualización.
+5. Al aceptar versión definitiva, crear infraestructura dedicada nueva y flujo
+   dev/prod, GitHub/Supabase/hosting e iniciar migración manual por equipos.
+
+El cronómetro funciona localmente y guarda sesiones en ese navegador. Sus RPC
+existen en SQL local, pero no están conectadas a la página. Presencia y última
+conexión siguen pendientes de Auth y señales del servidor. Correo/outbox tienen
+contratos y consumidor de prueba; no hay correo productivo.
+
+## Evidencia y continuidad
+
+SQL001–008, gateway y lector conservan aceptación local. Laboratorio PGlite:
+23 casos secuenciales y 24 pares preparados para PostgreSQL sin ejecutar. Esas
+pruebas no sustituyen carreras reales ni Supabase Auth/MFA/RLS en producción.
+Revisiones de lector/adaptador, upgrades y reportes se conservan en docs/architecture.
+UI A: REVIEW-V40-INDEPENDENT-20261002.md. Anticipación: REVIEW-V43-INDEPENDENT-20261002.md.
+El registro v42 y sus probes fallidos permanecen como evidencia histórica.
+Suite regular actual: 223 pruebas/21 archivos (una regresión del llamador añadida
+en revisión), build y diff check pasan. V43 tenía 222 pruebas; src no cambió.
+
+**Próximo paso: GPT-6.1 Sol, esfuerzo alto, Standard**, diseño B/C según
+EXECUTION-NEXT.md. No repetir la misma revisión ni añadir pulido menor antes de
+cerrar las relaciones de datos y permisos que necesitan los próximos módulos.

@@ -1,0 +1,12 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+ RUN  v3.2.7 /workspace/scratch/0de2d62eef9c/site
+
+ ✓ tests/ui-a-acceptance.test.tsx (5 tests) 3036ms
+   ✓ A-V40: every role completes the complete tour with exactly one highlight  2410ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  15:59:08
+   Duration  4.04s (transform 317ms, setup 0ms, collect 545ms, tests 3.04s, environment 254ms, prepare 55ms)
+

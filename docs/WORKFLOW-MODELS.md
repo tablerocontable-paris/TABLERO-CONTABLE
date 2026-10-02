@@ -55,8 +55,7 @@ sin pedir otro «continuá».
 
 ## Próximo bloque
 
-**GPT-6 Luna medio, Standard:** ejecutar
-`product/DEADLINE-EFFICIENCY-REPAIR-20261002.md`. Revisión independiente v42
-no aceptada: cuatro probes fallaron y hay discrepancias de auditoría/CSV.
-Después Sol medio revisa; B/C requiere Sol alto tras aceptar el arreglo.
-El cambio es manual; no simularlo con subagentes.
+**GPT-6.1 Sol alto, Standard:** diseñar B/C según EXECUTION-NEXT.md. V43 quedó
+aceptada localmente por REVIEW-V43-INDEPENDENT-20261002.md. QA visual real sigue
+abierta. Pasar a relaciones y permisos antes de otro bloque de pulido.
+El cambio de esfuerzo es manual; no simularlo con subagentes.

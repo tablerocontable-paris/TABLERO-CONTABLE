@@ -103,3 +103,11 @@ deploy `appgdep_6ac00b2ad81c81919a50bafab9f7101d`. La suite fue 222/222 en
 21 archivos, build y diff check aprobados. No se cambió SQL ni infraestructura.
 La QA visual real claro/oscuro/Sistema sigue abierta; Sol debe revisar el bloque
 antes de aceptarlo.
+
+
+## Aceptación independiente v43
+
+Comportamiento local aceptado tras ejecutar los cuatro probes originales y
+verificar CSV, paneles y frontera no-op del llamador. Ver
+`../architecture/REVIEW-V43-INDEPENDENT-20261002.md`. QA visual real continúa
+abierta. Próximo paso Sol alto B/C; estimación vigente en PROJECT-STATUS.md.

@@ -221,3 +221,11 @@ checklist repetido no-op no quedó confirmada: devuelve otro objeto y el llamado
 siempre hace commit. Seguir `DEADLINE-EFFICIENCY-REPAIR-20261002.md`.
 El resultado anterior de 217 pruebas es evidencia de implementación, no de
 aceptación. Contraste visual en navegador continúa abierto.
+
+
+## Aceptación independiente v43
+
+Comportamiento local aceptado tras ejecutar los cuatro probes originales y
+verificar CSV, paneles y frontera no-op del llamador. Ver
+`../architecture/REVIEW-V43-INDEPENDENT-20261002.md`. QA visual real continúa
+abierta. Próximo paso Sol alto B/C; estimación vigente en PROJECT-STATUS.md.

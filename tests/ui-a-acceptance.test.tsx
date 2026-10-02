@@ -9,6 +9,7 @@ import Annotations from "../src/components/Annotations";
 import { KEY, seed, blankOnboarding } from "../src/data/repository";
 import { currentMonth } from "../src/domain/model";
 import type { State } from "../src/domain/model";
+import * as domain from "../src/domain/model";
 
 vi.mock("recharts", () => Object.fromEntries(["ResponsiveContainer", "BarChart", "Bar", "XAxis", "YAxis", "CartesianGrid", "Tooltip", "Legend", "LineChart", "Line", "ReferenceLine"].map(key => [key, () => null])));
 function prepare(activeId = "e0") {
@@ -91,4 +92,23 @@ it("A-V40: filtering and folding recover one target without opening columns auto
   fireEvent.click(toggle);
   await waitFor(expectTimer);
   expect(document.querySelectorAll(".spotlight")).toHaveLength(1);
+});
+
+
+it("V43: mutation reducer no-op does not persist or append an audit", () => {
+  const state = prepare();
+  const example = seed().tasks.find(t => t.ownerId === "e0" && t.kind === "resultado")!;
+  state.tasks = [{ ...example, id: "noop-task", title: "Control sin cambio", month: currentMonth(), status: "En curso", completedAt: null, blockedBy: "", checklist: [{ id: "check", text: "Control único", done: true }] }];
+  save(state);
+  render(<App />); nav("tasks");
+  fireEvent.click(screen.getByRole("button", { name: /^En curso/ }));
+  fireEvent.click(screen.getByRole("button", { name: "Control sin cambio" }));
+  const reducer = vi.spyOn(domain, "checkTask").mockImplementation(t => t);
+  const writes = vi.spyOn(Storage.prototype, "setItem");
+  const before = localStorage.getItem(KEY);
+  fireEvent.click(screen.getByRole("checkbox", { name: "Control único" }));
+  expect(reducer).toHaveBeenCalledTimes(1);
+  expect(writes).not.toHaveBeenCalled();
+  expect(localStorage.getItem(KEY)).toBe(before);
+  expect(stored().audit).toHaveLength(0);
 });
