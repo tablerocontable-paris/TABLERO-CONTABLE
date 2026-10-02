@@ -1,24 +1,23 @@
 # Estado del proyecto — 02/10/2026
 
-**Release actual — Sites v40:** commit de implementación
-`1099e9d8ae47c2b1953288b7fa8d7d0bbd380fc5`.
-Versión `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_d8f07e23ce4c81918847eeb7ea3de22f`,
-deploy `appgdep_6abffc86ca808191be701a9954b3e491`, estado succeeded:
+**Release actual — Sites v41:** commit
+`20d4db3c151c3c2eb963352bde4578ab321a0a8d`.
+Versión `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_c8c11bed53e08191b963c2e770f681de`,
+deploy `appgdep_6ac0053d99ec8191adc2f8769abecc19`, estado succeeded:
 https://grupo-paris-contabilidad.valentino-magni.chatgpt.site. Audiencia
 restringida al propietario, cero visitantes externos.
 
-UI A **aceptada localmente en funcionalidad** tras revisión independiente:
-20 comprobaciones pasan y cuatro regresiones adicionales quedaron en la suite
-normal: 210 pruebas/18 archivos y build aprobados. Fuente live 1099e9d sin cambios en esta revisión. QA visual completa del
-hover en ambos temas y móvil sigue pendiente para aceptar el producto final.
-Ver `architecture/REVIEW-V40-INDEPENDENT-20261002.md`.
+v40 conserva la aceptación funcional independiente de UI A, con QA visual
+pendiente. Las capturas posteriores detectaron dos colores fijos en tema oscuro;
+v41 los corrigió y agregó anticipación de plazos y metas operativas al análisis y
+a los nuevos reportes. **217 pruebas/19 archivos, build y diff check aprobados.**
+La revisión independiente de v41 y la QA visual completa del navegador siguen
+pendientes. Ver `architecture/REVIEW-V40-INDEPENDENT-20261002.md` y
+`product/DEADLINE-EFFICIENCY-20261002.md`.
 
-Pedido posterior del 02/10: las capturas confirman defectos de contraste en
-cabecera del encargado y checklist en tema oscuro. No están corregidos todavía.
-Contrato cerrado para el arreglo y la anticipación de plazos/metas:
-`product/DEADLINE-EFFICIENCY-20261002.md`. Próximo paso: Luna medio implementa;
-Sol medio revisa, después Sol alto retoma B/C. Los 17 hashes congelados no se
-modifican en este diseño; infraestructura e integración siguen abiertas.
+Pedido posterior del 02/10: el arreglo de contraste y la anticipación ya están en
+v41. Próximo paso: Sol medio revisa implementación y reporte; después Sol alto
+retoma B/C. SQL 001–008, permisos remotos e infraestructura no se modificaron.
 
 **Avance estimado: 40% del producto final (rango razonable: 35–45%).** Es una
 estimación por etapas, no una medición automática: la demo y los contratos locales
@@ -52,14 +51,13 @@ QA visual sigue pendiente: preview arrancó pero navegador bloqueó el acceso co
 versión (`appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_83b0f5c176e08191af78af0b53f50326`),
 deploy `appgdep_6abfdc54a0748191aba607029ceb2066`,
 https://grupo-paris-contabilidad.valentino-magni.chatgpt.site. El bloque UI A y
-los tests del lector forman este cambio; no se modificaron gateway, lector de
-producción, SQL 001–008 ni dependencias. La publicación de seguimiento puede
-incluir sólo esta actualización documental, con el mismo build de aplicación.
+los tests del lector forman ese cambio; no se modificaron gateway, lector de
+producción, SQL 001–008 ni dependencias.
 
-202 pruebas en 17 archivos y compilación correctas. El laboratorio PGlite verifica
-23 casos secuenciales; 24 pares preparados para PostgreSQL siguen sin ejecutarse.
-La rama BA previa al corte usa jefe con aal2 y confirma replay idempotente. No se
-modificaron SQL 001–008 ni el frontend durante este ajuste.
+La suite vigente de v41 tiene 217 pruebas en 19 archivos. El laboratorio PGlite
+verifica 23 casos secuenciales; 24 pares preparados para PostgreSQL siguen sin
+ejecutarse. La rama BA previa al corte usa jefe con aal2 y confirma replay
+idempotente. Esas comprobaciones locales no sustituyen carreras PostgreSQL reales.
 
 Las assertions pendientes de la guía están completas, incluida la identidad
 dentro del B renderizado, motivo, conteo de sesiones y receipt de seed. El primer
@@ -78,8 +76,8 @@ la evidencia y acepta el lector local. Lector y gateway siguen sin conectarse
 a la página.
 
 Las 18 correcciones siguen registradas en `product/CORRECTIONS-20261002.md`.
-El bloque A fue implementado como demo local y espera aceptación de Sol según
-`product/CORRECTIONS-UI-A-REPAIR-20261002.md`. Los bloques B/C/D siguen pendientes.
+El bloque A y la corrección posterior están demostrados en la UI privada; QA
+visual final y revisión Sol de v41 pendientes. Los bloques B/C/D siguen pendientes.
 No aumentar el porcentaje por documentos o pruebas.
 
 La demo usa localStorage y selector simulado. Que haya pruebas SQL verdes no
@@ -96,8 +94,7 @@ roadmap, pendiente de diseño/revisión y de la fase de autenticación.
 
 ## Siguiente camino
 
-1. Luna medio implementa contraste/anticipación y Sol medio revisa el contrato
-   DEADLINE-EFFICIENCY-20261002; las nuevas capturas reabren la aceptación visual.
+1. Sol 6.1 medio revisa v41; QA visual completa permanece como aceptación abierta.
 2. Sol alto define contratos de coordinación y pedidos de datos/permisos por
    bloques; Luna implementa cada contrato cerrado.
 3. Completar producto y validaciones reales/piloto antes de migrar a compañeros.

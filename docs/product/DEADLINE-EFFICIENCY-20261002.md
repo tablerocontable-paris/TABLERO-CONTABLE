@@ -193,7 +193,13 @@ no-op; la reapertura borra el logro vigente sin alterar snapshots previos.
 Los dos fondos fijos de contraste usan tokens del tema. El proyecto pasa 217
 pruebas/19 archivos, `npm run build` y `git diff --check`. SQL/gateway/lector y
 dependencias permanecen congelados. La QA visual real del navegador aún está
-pendiente; este resultado local no verifica autenticación ni entrega de correo.
+pendiente; v41 tampoco verifica autenticación ni entrega de correo.
+
+Release de implementación: Sites v41, commit
+`20d4db3c151c3c2eb963352bde4578ab321a0a8d`, versión
+`appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_c8c11bed53e08191b963c2e770f681de`,
+deploy privado succeeded `appgdep_6ac0053d99ec8191adc2f8769abecc19`.
+Próximo paso: revisión Sol 6.1 medio; QA visual de navegador aún abierta.
 
 ## Contrato productivo pendiente (sin implementación ahora)
 

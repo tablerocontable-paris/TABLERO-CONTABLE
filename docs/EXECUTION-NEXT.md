@@ -1,15 +1,16 @@
 # Próximo paso — revisión de contraste y anticipación
 
-**GPT-6.1 Sol, esfuerzo medio, Standard.** Revisar la implementación local del
+**GPT-6.1 Sol, esfuerzo medio, Standard.** Revisar la implementación desplegada del
 contrato `product/DEADLINE-EFFICIENCY-20261002.md`. Incluye contraste en la
 cabecera del encargado/checklist, medición por fecha ART, metas operativas con
 instante registrado, análisis por ámbito y snapshots/CSV compatibles.
 
-Implementación local completa: 217 pruebas/19 archivos, build y diff check
-aprobados. Cambió la aplicación y debe publicarse en un nuevo Sites privado
-antes de declarar deploy. QA visual completa de navegador pendiente. No se
-modificó SQL001–008 ni se conectó el servidor. Avance sigue 40%; no lista para
-migración.
+Implementación publicada en Sites v41: commit `20d4db3c151c3c2eb963352bde4578ab321a0a8d`,
+versión `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_c8c11bed53e08191b963c2e770f681de`,
+deploy `appgdep_6ac0053d99ec8191adc2f8769abecc19`, privado y succeeded. Suite:
+217 pruebas/19 archivos, build y diff check aprobados. QA visual completa de
+navegador pendiente. No se modificó SQL001–008 ni se conectó el servidor. Avance
+sigue 40%; no lista para migración.
 
 ## Trabajo de arquitectura a retomar después de aceptar el arreglo
 
@@ -39,12 +40,12 @@ No implementar B/C durante el diseño; no modificar migraciones aplicadas ni
 aplicar SQL remoto. Crear servicios y migrar empleados sigue siendo futuro,
 después de piloto y aceptación final.
 
-Aplicación live: Sites v40, fuente `1099e9d8ae47c2b1953288b7fa8d7d0bbd380fc5`,
-versión `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_d8f07e23ce4c81918847eeb7ea3de22f`,
-deploy `appgdep_6abffc86ca808191be701a9954b3e491`, privado y activo:
+Aplicación live: Sites v41, fuente `20d4db3c151c3c2eb963352bde4578ab321a0a8d`,
+versión `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_c8c11bed53e08191b963c2e770f681de`,
+deploy `appgdep_6ac0053d99ec8191adc2f8769abecc19`, privado y activo:
 https://grupo-paris-contabilidad.valentino-magni.chatgpt.site.
-Esta revisión sólo añade tests/evidencia/documentación; conserva el build live.
-Avance **40% estimado (35–45%)**. Auth/MFA/RLS, integración, presencia,
+El build live incluye contraste por tema y anticipación local. Avance
+**40% estimado (35–45%)**. Auth/MFA/RLS, integración, presencia,
 concurrencia, correo e infraestructura final siguen pendientes.
 
 El usuario cambia el esfuerzo/modelo manualmente; después basta «continuá».

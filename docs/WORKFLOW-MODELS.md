@@ -55,7 +55,7 @@ sin pedir otro «continuá».
 
 ## Próximo bloque
 
-**GPT-6.1 Sol medio, Standard:** revisar la implementación local del contrato
+**GPT-6.1 Sol medio, Standard:** revisar la implementación desplegada v41 del contrato
 `product/DEADLINE-EFFICIENCY-20261002.md`. Las capturas originales confirmaron
 los dos defectos de contraste. Código, 217 pruebas y build pasan; QA visual de
 navegador completa y producción conectada siguen abiertas. Tras revisión aceptar
