@@ -1,29 +1,31 @@
 // @vitest-environment jsdom
 // Diagnostics report acceptance explicitly. Green execution means setup completed.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import type { ReactNode } from "react";
 import App from "../src/App";
 import { KEY, load, seed } from "../src/data/repository";
 import { currentMonth, dateART, metrics, type State } from "../src/domain/model";
 import { defaultSchedule } from "../src/domain/schedule";
 
-vi.mock("recharts", () =>
-  Object.fromEntries(
-    [
-      "ResponsiveContainer",
-      "BarChart",
-      "Bar",
-      "XAxis",
-      "YAxis",
-      "CartesianGrid",
-      "Tooltip",
-      "Legend",
-      "LineChart",
-      "Line",
-      "ReferenceLine",
-    ].map((key) => [key, () => null]),
-  ),
-);
+const chartProbe = vi.hoisted(() => ({ cursorProps: [] as Array<Record<string, number>>, rowId: "e0" }));
+vi.mock("recharts", () => ({
+  ResponsiveContainer: ({ children }: { children: ReactNode }) => children,
+  BarChart: ({ children }: { children: ReactNode }) => children,
+  Bar: ({ name, dataKey, onClick }: { name: string; dataKey: string; onClick?: (row: { id: string }) => void }) =>
+    <button aria-label={`chart ${dataKey}`} onClick={() => onClick?.({ id: chartProbe.rowId })}>{name}</button>,
+  Tooltip: ({ cursor = {} }: { cursor?: Record<string, number> }) => {
+    chartProbe.cursorProps.push(cursor);
+    return null;
+  },
+  XAxis: () => null,
+  YAxis: () => null,
+  CartesianGrid: () => null,
+  Legend: () => null,
+  LineChart: () => null,
+  Line: () => null,
+  ReferenceLine: () => null,
+}));
 
 const record = (id: string, passes: boolean, observed: unknown) =>
   expect({ id, passes, observed }).toEqual(
@@ -418,6 +420,83 @@ describe("anotaciones y recorrido integrados", () => {
       resumed.unmount();
       localStorage.clear();
     }
+  });
+  it("resalta un único destino del recorrido y explica el fallback cuando falta", async () => {
+    const state = prepare("e0");
+    render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
+    const assertOneSpotlight = async (selector: string) => {
+      await waitFor(() => {
+        expect(document.querySelectorAll(".spotlight")).toHaveLength(1);
+        expect(document.querySelector(selector)?.closest(".spotlight")).not.toBeNull();
+      });
+    };
+    await assertOneSpotlight(".heading");
+    fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
+    await assertOneSpotlight(".sidebar-workspace");
+    fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
+    await assertOneSpotlight(".board-owner-filter");
+    fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
+    await assertOneSpotlight(".task-order");
+    fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
+    await assertOneSpotlight('[data-tour="task-actions"]');
+    fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
+    await waitFor(() => {
+      expect(document.querySelector(".heading")?.classList.contains("spotlight")).toBe(true);
+      expect(screen.getByRole("dialog", { name: "Recorrido guiado" }).textContent).toContain("tablero está vacío");
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Pausar" }));
+    expect(document.querySelector(".spotlight")).toBeNull();
+  });
+  it("elige una sola tarjeta abierta para reloj y controles y vuelve al encabezado al plegarla", async () => {
+    const state = prepare("e0");
+    const task = seed().tasks.find((row) => row.ownerId === "e0" && row.kind === "resultado")!;
+    state.tasks = [{ ...task, id: "tour-spotlight-task", month: currentMonth(), status: "Pendiente" }];
+    localStorage.setItem(KEY, JSON.stringify(state));
+    render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
+    for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
+    await waitFor(() => {
+      expect(document.querySelectorAll("[data-tour=task-timers].spotlight")).toHaveLength(1);
+      expect(document.querySelectorAll(".spotlight")).toHaveLength(1);
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
+    await waitFor(() => expect(document.querySelectorAll("[data-tour=task-controls].spotlight")).toHaveLength(1));
+    fireEvent.click(document.querySelector(".column-toggle")!);
+    await waitFor(() => expect(document.querySelector(".heading")?.classList.contains("spotlight")).toBe(true));
+  });
+  it("muestra iniciales de encargado en el organigrama", () => {
+    const state = prepare("boss");
+    state.profiles.find((profile) => profile.id === "m1")!.name = "Lucía Fernández";
+    localStorage.setItem(KEY, JSON.stringify(state));
+    render(<App />);
+    fireEvent.click(document.querySelector('[data-nav="team"]')!);
+    expect(document.querySelector(".org-manager .avatar")?.textContent).toBe("LF");
+    expect(document.querySelectorAll(".org-manager .avatar").length).toBeGreaterThan(0);
+  });
+  it("pasa cursor tenue al gráfico y conserva la navegación del clic por empleado", () => {
+    const state = prepare("boss");
+    const task = seed().tasks.find((row) => row.ownerId === "e0" && row.kind === "resultado")!;
+    state.tasks = [{ ...task, id: "chart-navigation-task", month: currentMonth() }];
+    localStorage.setItem(KEY, JSON.stringify(state));
+    chartProbe.cursorProps = [];
+    render(<App />);
+    fireEvent.click(document.querySelector('[data-nav="analytics"]')!);
+    expect(chartProbe.cursorProps.length).toBeGreaterThanOrEqual(2);
+    expect(chartProbe.cursorProps.every((cursor) => cursor.fillOpacity === 0.12 && cursor.strokeOpacity === 0.55)).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "Por equipo" }));
+    chartProbe.rowId = "t1";
+    fireEvent.click(screen.getByRole("button", { name: "chart weighted" }));
+    expect((screen.getByLabelText("Equipo") as HTMLSelectElement).value).toBe("t1");
+    fireEvent.click(screen.getByRole("button", { name: "Por sector" }));
+    chartProbe.rowId = "Tesorería";
+    fireEvent.click(screen.getByRole("button", { name: "chart weighted" }));
+    expect((screen.getByLabelText("Sector") as HTMLSelectElement).value).toBe("Tesorería");
+    fireEvent.click(screen.getByRole("button", { name: "Por empleado" }));
+    chartProbe.rowId = "e0";
+    fireEvent.click(screen.getByRole("button", { name: "chart weighted" }));
+    expect(document.querySelector("nav button.active")?.getAttribute("data-nav")).toBe("tasks");
+    expect((screen.getByLabelText("Perfil que estás viendo") as HTMLSelectElement).value).toBe("e0");
   });
   it("recorrido no avanza vista si falló guardar avance", () => {
     const state = prepare();

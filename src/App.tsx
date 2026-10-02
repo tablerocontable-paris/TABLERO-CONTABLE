@@ -50,7 +50,6 @@ import {
   Flag,
   ArrowUpRight,
   HelpCircle,
-  GitBranch,
   RotateCcw,
 } from "lucide-react";
 import {
@@ -138,6 +137,7 @@ const ini = (s: string) =>
     .map((x) => x[0])
     .join("");
 const pct = (n: number | null) => (n === null ? "—" : n + "%");
+const TOUR_VERSION = 4;
 export default function App() {
   const [laboratory] = useState(isLab);
   const [state, setState] = useState<State>(() => load(laboratory));
@@ -552,7 +552,7 @@ export default function App() {
         },
       },
       tour: { ...state.tour, [active.id]: 0 },
-      tourVersion: { ...state.tourVersion, [active.id]: 4 },
+      tourVersion: { ...state.tourVersion, [active.id]: TOUR_VERSION },
     };
     next = materialize(next, month);
     if (commit(next, "Completó inducción", active.id)) {
@@ -562,6 +562,85 @@ export default function App() {
       setTourOpen(true);
     }
   }
+  const tours: { page: Page; selector: string; title: string; text: string }[] = [
+    { page: "day", selector: ".heading", title: "Tu punto de partida", text: "Mi día reúne prioridades y vencimientos del perfil consultado para empezar el período." },
+    { page: "day", selector: ".sidebar-workspace", title: "Elegí el ambiente", text: "Filtrá las empresas autorizadas. La misma conciliación en dos empresas conserva estados independientes." },
+    { page: "tasks", selector: ".board-owner-filter", title: "Elegí el perfil", text: active.role === "empleado" ? "Este es tu espacio personal. El encargado y Juan Pablo consultan otros perfiles desde su selector." : "Tu tablero abre con tus tareas. Podés consultar a una persona autorizada sin cambiar quién realiza las acciones." },
+    { page: "tasks", selector: ".task-order", title: "Ordená el tablero", text: "Plegá cada estado por separado y ordená por nombre para encontrar una tarjeta rápido." },
+    { page: "tasks", selector: '[data-tour="task-actions"]', title: "Cargá una tarea", text: "Elegí una tarea puntual o un proceso del catálogo; revisá su empresa, frecuencia y vencimiento." },
+    { page: "tasks", selector: '[data-tour="task-timers"]', title: "Medí el tiempo", text: "Iniciá, pausá o reanudá el cronómetro desde la tarjeta. El tiempo queda asociado a quien acciona." },
+    { page: "tasks", selector: '[data-tour="task-controls"]', title: "Avanzá los controles", text: "Abrí la tarjeta y completá cada paso. El último control mueve el entregable a terminado automáticamente." },
+    { page: "operations", selector: '[data-nav="operations"]', title: "Cargá la actividad", text: "Registrá cantidades y referencias de facturas, trámites o pagos para el cierre del período." },
+    { page: "calendar", selector: '[data-nav="calendar"]', title: "Revisá las fechas", text: "Consultá los vencimientos de las tareas del período y atendé primero lo próximo." },
+    { page: "absences", selector: '[data-nav="absences"]', title: "Coordiná cobertura", text: "Registrá vacaciones o licencias y organizá con el encargado quién cubre las tareas abiertas." },
+    { page: "annotations", selector: '[data-nav="annotations"]', title: "Guardá referencias", text: "Conservá fórmulas y recordatorios personales. Convertí una anotación en una tarea puntual si necesitás seguimiento." },
+    ...(manager ? [
+      { page: "analytics" as Page, selector: '[data-nav="analytics"]', title: "Analizá resultados", text: "Compará cumplimiento, tiempos y pesos por persona, equipo o sector." },
+      { page: "team" as Page, selector: '[data-nav="team"]', title: "Acompañá a tu equipo", text: "La relación jerárquica define los perfiles que podés consultar." },
+      { page: "closing" as Page, selector: '[data-nav="closing"]', title: "Revisá el período", text: "El cierre mensual consolida la actividad de cada persona para revisión." },
+    ] : []),
+    ...(active.role === "jefe" ? [
+      { page: "catalog" as Page, selector: '[data-nav="catalog"]', title: "Estandarizá procesos", text: "Configurá controles y pesos comunes para las tareas habituales." },
+      { page: "team" as Page, selector: '[data-nav="team"]', title: "Administrá perfiles", text: "Configurá accesos, responsables, equipos y empresas del organigrama." },
+    ] : []),
+  ];
+  const savedTourValue =
+    state.tourVersion?.[active.id] === TOUR_VERSION
+      ? state.tour[active.id] || 0
+      : 0;
+  const savedTour = Number.isSafeInteger(savedTourValue)
+    ? Math.min(Math.max(savedTourValue, 0), tours.length)
+    : 0;
+  const tourStep = Number.isSafeInteger(savedTour)
+    ? Math.min(Math.max(savedTour, 0), tours.length - 1)
+    : 0;
+  const [tourFallback, setTourFallback] = useState(false);
+  useEffect(() => {
+    let highlighted: Element | null = null;
+    let observer: MutationObserver | undefined;
+    const isVisible = (element: HTMLElement) => {
+      for (let node: HTMLElement | null = element; node; node = node.parentElement) {
+        const style = getComputedStyle(node);
+        if (style.display === "none" || style.visibility === "hidden") return false;
+      }
+      return true;
+    };
+    const resolveTarget = () => {
+      highlighted?.classList.remove("spotlight");
+      highlighted = null;
+      let fallback = false;
+      if (tourOpen && page === tours[tourStep].page) {
+        const candidates = Array.from(
+          document.querySelectorAll<HTMLElement>(tours[tourStep].selector),
+        );
+        const target = candidates.find(
+          (candidate) =>
+            !candidate.closest("[hidden], .column.folded") &&
+            !candidate.matches(":disabled") &&
+            isVisible(candidate),
+        );
+        highlighted = target || document.querySelector(".heading");
+        fallback = !target && tours[tourStep].selector !== ".heading";
+        highlighted?.classList.add("spotlight");
+      }
+      setTourFallback((current) => (current === fallback ? current : fallback));
+    };
+    resolveTarget();
+    const main = document.querySelector(".main");
+    if (main && tourOpen) {
+      observer = new MutationObserver(resolveTarget);
+      observer.observe(main, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["aria-expanded", "hidden"],
+      });
+    }
+    return () => {
+      observer?.disconnect();
+      highlighted?.classList.remove("spotlight");
+    };
+  }, [tourOpen, tourStep, page, active.id]);
   if (!draft.completedAt && paused && !induct)
     return (
       <div className="induction-pause">
@@ -928,44 +1007,7 @@ export default function App() {
   }
   const tasksForDetail = state.tasks.find((t) => t.id === detail && canWork(state, active, t));
   const logTask = state.tasks.find((t) => t.id === logFor && canWork(state, active, t));
-  const tours: { page: Page; selector: string; title: string; text: string }[] = [
-    { page: "day", selector: ".heading", title: "Tu punto de partida", text: "Mi día reúne prioridades y vencimientos del perfil consultado para empezar el período." },
-    { page: "day", selector: ".sidebar-workspace", title: "Elegí el ambiente", text: "Filtrá las empresas autorizadas. La misma conciliación en dos empresas conserva estados independientes." },
-    { page: "tasks", selector: ".board-owner-filter", title: "Elegí el perfil", text: active.role === "empleado" ? "Este es tu espacio personal. El encargado y Juan Pablo consultan otros perfiles desde su selector." : "Tu tablero abre con tus tareas. Podés consultar a una persona autorizada sin cambiar quién realiza las acciones." },
-    { page: "tasks", selector: ".task-order", title: "Ordená el tablero", text: "Plegá cada estado por separado y ordená por nombre para encontrar una tarjeta rápido." },
-    { page: "tasks", selector: '[data-tour="task-actions"]', title: "Cargá una tarea", text: "Elegí una tarea puntual o un proceso del catálogo; revisá su empresa, frecuencia y vencimiento." },
-    { page: "tasks", selector: '[data-tour="task-timers"]', title: "Medí el tiempo", text: "Iniciá, pausá o reanudá el cronómetro desde la tarjeta. El tiempo queda asociado a quien acciona." },
-    { page: "tasks", selector: '[data-tour="task-controls"]', title: "Avanzá los controles", text: "Abrí la tarjeta y completá cada paso. El último control mueve el entregable a terminado automáticamente." },
-    { page: "operations", selector: '[data-nav="operations"]', title: "Cargá la actividad", text: "Registrá cantidades y referencias de facturas, trámites o pagos para el cierre del período." },
-    { page: "calendar", selector: '[data-nav="calendar"]', title: "Revisá las fechas", text: "Consultá los vencimientos de las tareas del período y atendé primero lo próximo." },
-    { page: "absences", selector: '[data-nav="absences"]', title: "Coordiná cobertura", text: "Registrá vacaciones o licencias y organizá con el encargado quién cubre las tareas abiertas." },
-    { page: "annotations", selector: '[data-nav="annotations"]', title: "Guardá referencias", text: "Conservá fórmulas y recordatorios personales. Convertí una anotación en una tarea puntual si necesitás seguimiento." },
-    ...(manager ? [
-      { page: "analytics" as Page, selector: '[data-nav="analytics"]', title: "Analizá resultados", text: "Compará cumplimiento, tiempos y pesos por persona, equipo o sector." },
-      { page: "team" as Page, selector: '[data-nav="team"]', title: "Acompañá a tu equipo", text: "La relación jerárquica define los perfiles que podés consultar." },
-      { page: "closing" as Page, selector: '[data-nav="closing"]', title: "Revisá el período", text: "El cierre mensual consolida la actividad de cada persona para revisión." },
-    ] : []),
-    ...(active.role === "jefe" ? [
-      { page: "catalog" as Page, selector: '[data-nav="catalog"]', title: "Estandarizá procesos", text: "Configurá controles y pesos comunes para las tareas habituales." },
-      { page: "team" as Page, selector: '[data-nav="team"]', title: "Administrá perfiles", text: "Configurá accesos, responsables, equipos y empresas del organigrama." },
-    ] : []),
-  ];
-  const tourVersion = 4;
-  const savedTourValue =
-    state.tourVersion?.[active.id] === tourVersion
-      ? state.tour[active.id] || 0
-      : 0;
-  const savedTour = Number.isSafeInteger(savedTourValue)
-    ? Math.min(Math.max(savedTourValue, 0), tours.length)
-    : 0;
-  const tourStep = Number.isSafeInteger(savedTour)
-    ? Math.min(Math.max(savedTour, 0), tours.length - 1)
-    : 0;
-  const isTourSpotlight = (selector: string) => {
-    if (!tourOpen) return false;
-    if (tours[tourStep].selector === selector) return true;
-    return !document.querySelector(tours[tourStep].selector) && selector === ".heading";
-  };
+
   return (
     <>
       <aside className="sidebar">
@@ -973,7 +1015,7 @@ export default function App() {
           <img src="/logo-grupo-paris.svg" alt="Grupo París" />
           <span>ESPACIO CONTABLE</span>
         </div>
-        <label className={"workspace sidebar-workspace" + (isTourSpotlight(".sidebar-workspace") ? " spotlight" : "")}>
+        <label className="workspace sidebar-workspace">
           <Building2 size={18} />
           <div>
             <span>AMBIENTE DE TRABAJO</span>
@@ -991,10 +1033,7 @@ export default function App() {
               <button
                 data-nav={p.id}
                 key={p.id}
-                className={
-                  (page === p.id ? "active " : "") +
-                  (isTourSpotlight(`[data-nav="${p.id}"]`) ? "spotlight" : "")
-                }
+                className={page === p.id ? "active" : ""}
                 onClick={() => {
                   setPage(p.id);
                   setQuery("");
@@ -1020,7 +1059,7 @@ export default function App() {
                   tour: { ...state.tour, [active.id]: start },
                   tourVersion: {
                     ...state.tourVersion,
-                    [active.id]: tourVersion,
+                    [active.id]: TOUR_VERSION,
                   },
                 })
               )
@@ -1164,16 +1203,12 @@ export default function App() {
               </p>
             </div>
             {(["day", "tasks", "operations", "planning"] as Page[]).includes(page) && (
-              <button className="primary" data-tour="task-actions" onClick={() => setModal("new")}>
+            <button className="primary" data-tour="task-actions" onClick={() => setModal("new")}>
                 <Plus size={17} /> Nueva tarea
               </button>
             )}
           </div>
-          <div
-            className={
-              "filters " + (isTourSpotlight(".board-owner-filter") ? "spotlight" : "")
-            }
-          >
+          <div className="filters">
             <label className="company-filter">
               <span>AMBIENTE DE TRABAJO</span>
               <select
@@ -1339,7 +1374,7 @@ export default function App() {
                             height={56}
                           />
                           <YAxis tick={{ fontSize: 11 }} />
-                          <Tooltip cursor={{ fill: "var(--chart-cursor)", stroke: "var(--chart-cursor-border)" }} contentStyle={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 9, color: "var(--ink)" }} labelStyle={{ color: "var(--ink)", fontWeight: 600 }} itemStyle={{ color: "var(--ink)" }} />
+                          <Tooltip cursor={{ fill: "var(--chart-cursor)", fillOpacity: 0.12, stroke: "var(--chart-cursor-border)", strokeOpacity: 0.55 }} contentStyle={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 9, color: "var(--ink)" }} labelStyle={{ color: "var(--ink)", fontWeight: 600 }} itemStyle={{ color: "var(--ink)" }} />
                           <Legend />
                           <Bar
                             dataKey="earned"
@@ -1413,7 +1448,7 @@ export default function App() {
                       onChange={(e) => setQuery(e.target.value)}
                     />
                   </div>
-                  <label className={"task-order" + (isTourSpotlight(".task-order") ? " spotlight" : "")}>
+                  <label className="task-order">
                     Ordenar tareas
                     <select
                       aria-label="Ordenar tareas"
@@ -1679,7 +1714,7 @@ export default function App() {
                             width={135}
                             tick={{ fontSize: 11 }}
                           />
-                          <Tooltip cursor={{ fill: "var(--chart-cursor)", stroke: "var(--chart-cursor-border)" }} contentStyle={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 9, color: "var(--ink)" }} labelStyle={{ color: "var(--ink)", fontWeight: 600 }} itemStyle={{ color: "var(--ink)" }} formatter={(v) => `${v}%`} />
+                          <Tooltip cursor={{ fill: "var(--chart-cursor)", fillOpacity: 0.12, stroke: "var(--chart-cursor-border)", strokeOpacity: 0.55 }} contentStyle={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 9, color: "var(--ink)" }} labelStyle={{ color: "var(--ink)", fontWeight: 600 }} itemStyle={{ color: "var(--ink)" }} formatter={(v) => `${v}%`} />
                           <ReferenceLine x={100} stroke="#a4a8b0" />
                           <Bar
                             dataKey="weighted"
@@ -1971,7 +2006,7 @@ export default function App() {
                     .map((t) => (
                       <section className="panel" key={t.id}>
                         <div className="org-manager">
-                          <GitBranch size={20} />
+                          <span className="avatar">{ini(nameOf(t.managerId))}</span>
                           <div>
                             <b>{nameOf(t.managerId)}</b>
                             <small>Encargado · {teamName(t.id)}</small>
@@ -2270,13 +2305,13 @@ export default function App() {
             RECORRIDO · {tourStep + 1}/{tours.length}
           </small>
           <h3>{tours[tourStep].title}</h3>
-          <p>{tours[tourStep].text}</p>
+          <p>{tours[tourStep].text}{tourFallback ? " Este elemento no está visible con estos filtros o el tablero está vacío; podés seguir con el recorrido." : ""}</p>
           <div>
             <button
               disabled={tourStep === 0}
               onClick={() => {
                 const previous = Math.max(0, tourStep - 1);
-                if (commit({ ...state, tour: { ...state.tour, [active.id]: previous }, tourVersion: { ...state.tourVersion, [active.id]: tourVersion } })) setPage(tours[previous].page);
+                if (commit({ ...state, tour: { ...state.tour, [active.id]: previous }, tourVersion: { ...state.tourVersion, [active.id]: TOUR_VERSION } })) setPage(tours[previous].page);
               }}
             >Anterior</button>
             <button onClick={() => setTourOpen(false)}>Pausar</button>
@@ -2290,7 +2325,7 @@ export default function App() {
                       tour: { ...state.tour, [active.id]: tours.length },
                       tourVersion: {
                         ...state.tourVersion,
-                        [active.id]: tourVersion,
+                        [active.id]: TOUR_VERSION,
                       },
                     })
                   )
@@ -2301,7 +2336,7 @@ export default function App() {
                     tour: { ...state.tour, [active.id]: tourStep + 1 },
                     tourVersion: {
                       ...state.tourVersion,
-                      [active.id]: tourVersion,
+                      [active.id]: TOUR_VERSION,
                     },
                   })
                 ) {
