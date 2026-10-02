@@ -267,6 +267,50 @@ describe("filas remotas sin traducción a tareas locales", () => {
       expect(taskTimeSessionSchema.safeParse(incomplete).success).toBe(false);
     }
   });
+  it("compara fracciones originales sin aceptar un cierre anterior al inicio", () => {
+    const intervals: [string, string, boolean][] = [
+      ["2026-10-01T15:00:00.123456Z", "2026-10-01T15:00:00.123455Z", false],
+      [
+        "2026-10-01T00:00:00.000001+03:00",
+        "2026-09-30T21:00:00.000000Z",
+        false,
+      ],
+      [
+        "2026-10-01T12:00:00.123456-03:00",
+        "2026-10-01T15:00:00.123456000Z",
+        true,
+      ],
+      ["2026-10-01T15:00:00.123456Z", "2026-10-01T15:00:00.123457Z", true],
+      ["1969-12-31T23:59:59.999999Z", "1970-01-01T00:00:00Z", true],
+      ["2026-10-01T15:00:00.999999Z", "2026-10-01T15:00:01.000000Z", true],
+    ];
+    for (const [started_at, ended_at, valid] of intervals) {
+      const session = {
+        id: id(20),
+        organization_id: id(2),
+        instance_id: id(1),
+        actor_id: id(5),
+        started_at,
+        ended_at,
+        absence_id: null,
+      };
+      expect(
+        taskTimeSessionSchema.safeParse(session).success,
+        `${started_at} → ${ended_at}`,
+      ).toBe(valid);
+      const task = {
+        ...base,
+        status: "Completada",
+        started_at,
+        completed_at: ended_at,
+      };
+      expect(taskInstanceSchema.safeParse(task).success).toBe(valid);
+      if (valid) {
+        expect(taskTimeSessionSchema.parse(session)).toEqual(session);
+        expect(taskInstanceSchema.parse(task)).toEqual(task);
+      }
+    }
+  });
 });
 
 describe("gateway de seis RPC con intenciones conservadas", () => {

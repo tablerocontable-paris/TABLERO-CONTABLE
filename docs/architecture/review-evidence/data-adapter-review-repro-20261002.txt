@@ -1,0 +1,50 @@
+
+ RUN  v3.2.7 /workspace/scratch/0de2d62eef9c/site
+
+ ❯ tests/task-gateway.test.ts (18 tests | 1 failed | 17 skipped) 9ms
+   ↓ filas remotas sin traducción a tareas locales > preserva identidad de dos empresas para el mismo banco, snapshots, metadatos y nulos
+   ↓ filas remotas sin traducción a tareas locales > acepta UUID PostgreSQL versión cero y exige filas completas
+   ↓ filas remotas sin traducción a tareas locales > rechaza períodos, fechas, estados, pesos y revisiones inválidos sin rellenarlos
+   ↓ filas remotas sin traducción a tareas locales > conserva sesiones y offsets; compara instantes y exige zona/calendario válidos
+   × filas remotas sin traducción a tareas locales > compara fracciones originales sin aceptar un cierre anterior al inicio 9ms
+     → 2026-10-01T15:00:00.123456Z → 2026-10-01T15:00:00.123455Z: expected true to be false // Object.is equality
+   ↓ gateway de seis RPC con intenciones conservadas > envía una vez 'start_task_timer' con firma exacta y valida el ACK escalar
+   ↓ gateway de seis RPC con intenciones conservadas > envía una vez 'pause_task_timer' con firma exacta y valida el ACK escalar
+   ↓ gateway de seis RPC con intenciones conservadas > envía una vez 'set_task_wait' con firma exacta y valida el ACK escalar
+   ↓ gateway de seis RPC con intenciones conservadas > envía una vez 'transition_task_reviewed' con firma exacta y valida el ACK escalar
+   ↓ gateway de seis RPC con intenciones conservadas > envía una vez 'set_checklist_item_reviewed' con firma exacta y valida el ACK escalar
+   ↓ gateway de seis RPC con intenciones conservadas > envía una vez 'record_activity_once' con firma exacta y valida el ACK escalar
+   ↓ gateway de seis RPC con intenciones conservadas > clona y congela la intención sin mutar entrada ni cambiar nulos/texto
+   ↓ gateway de seis RPC con intenciones conservadas > rechaza entradas sin intención, switch explícito o con autoridad añadida
+   ↓ gateway de seis RPC con intenciones conservadas > un cast no elude validación de RPC, firma, autoridad o clave antes del transporte
+   ↓ gateway de seis RPC con intenciones conservadas > separa fallos de transporte/servidor/protocolo y omite excepciones privadas
+   ↓ gateway de seis RPC con intenciones conservadas > rechaza ACK de otra forma, fecha sin zona y revisiones inseguras sin reintentar
+   ↓ gateway de seis RPC con intenciones conservadas > replay explícito tras fallo transport conserva clave y argumentos byte a byte
+   ↓ gateway de seis RPC con intenciones conservadas > replay explícito tras fallo protocol conserva clave y argumentos byte a byte
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/task-gateway.test.ts > filas remotas sin traducción a tareas locales > compara fracciones originales sin aceptar un cierre anterior al inicio
+AssertionError: 2026-10-01T15:00:00.123456Z → 2026-10-01T15:00:00.123455Z: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/task-gateway.test.ts:281:95
+    279|     for (const [started_at, ended_at, valid] of intervals) {
+    280|       const session = { id: id(20), organization_id: id(2), instance_i…
+    281|       expect(taskTimeSessionSchema.safeParse(session).success, `${star…
+       |                                                                                               ^
+    282|       const task = { ...base, status: "Completada", started_at, comple…
+    283|       expect(taskInstanceSchema.safeParse(task).success).toBe(valid);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 17 skipped (18)
+   Start at  22:58:21
+   Duration  326ms (transform 62ms, setup 0ms, collect 116ms, tests 9ms, environment 0ms, prepare 63ms)

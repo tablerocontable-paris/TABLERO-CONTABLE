@@ -1,9 +1,10 @@
-# Decisiones vigentes — 30/09/2026
+# Decisiones vigentes — 02/10/2026
 
-**Estado tras revisión de v28:** actor R008-F01 corregido y aceptado; 23 checks
-secuenciales pasan. Las assertions adicionales de motivo/sesión/seed acompañan
-la fundación del adaptador. Revisión: `architecture/REVIEW-GUIDE-FIX-20261001.md`.
-Próximo paso: **Luna medio**, contrato DATA-ADAPTER-FOUNDATION.md y EXECUTION-NEXT.md.
+**Estado tras revisión de v30 (02/10/2026):** adaptador de seis RPC aceptado tras
+corregir ADP-R01, precisión temporal; 175 pruebas y build correctos. Assertions
+de la guía completas y checker 23 verificado por evidencia. Revisión:
+`architecture/REVIEW-DATA-ADAPTER-20261002.md`. Próximo paso: **Luna medio**,
+contrato DATA-READ-FOUNDATION.md y EXECUTION-NEXT.md.
 Grado de avance estimado y pendientes: `docs/PROJECT-STATUS.md`.
 Concurrencia PostgreSQL y Supabase/Auth/MFA/correo reales siguen pendientes.
 La demo sigue privada, sin SQL remoto ni cuentas reales; no está lista para

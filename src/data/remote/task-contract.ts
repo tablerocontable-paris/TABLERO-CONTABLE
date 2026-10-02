@@ -16,22 +16,43 @@ function validCalendarDate(value: string) {
 }
 
 export const calendarDateSchema = z.string().refine(validCalendarDate);
-export const timestampSchema = z.string().refine((value) => {
+function readTimestamp(value: string) {
   const parts =
-    /^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?(Z|[+-]\d{2}:\d{2})$/.exec(
+    /^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?(Z|[+-]\d{2}:\d{2})$/.exec(
       value,
     );
-  if (!parts || !validCalendarDate(parts[1])) return false;
-  const [, , hour, minute, second, zone] = parts;
-  return (
-    Number(hour) < 24 &&
-    Number(minute) < 60 &&
-    Number(second) < 60 &&
-    (zone === "Z" ||
-      (Number(zone.slice(1, 3)) < 24 && Number(zone.slice(4)) < 60)) &&
-    Number.isFinite(Date.parse(value))
+  if (!parts || !validCalendarDate(parts[1])) return null;
+  const [, date, hour, minute, second, fraction, zone] = parts;
+  if (
+    Number(hour) >= 24 ||
+    Number(minute) >= 60 ||
+    Number(second) >= 60 ||
+    (zone !== "Z" &&
+      (Number(zone.slice(1, 3)) >= 24 || Number(zone.slice(4)) >= 60))
+  )
+    return null;
+  const wholeSecondMs = Date.parse(
+    `${date}T${hour}:${minute}:${second}${zone}`,
   );
-});
+  return Number.isFinite(wholeSecondMs)
+    ? { wholeSecondMs, fraction: fraction ?? "" }
+    : null;
+}
+export const timestampSchema = z
+  .string()
+  .refine((value) => readTimestamp(value) !== null);
+
+// Date.parse discards sub-millisecond digits. Compare the original fractions
+// within the exact offset-adjusted second without changing the received strings.
+function endsBefore(ending: string, starting: string) {
+  const end = readTimestamp(ending),
+    start = readTimestamp(starting);
+  if (end === null || start === null) return false; // Their schemas report invalid instants.
+  if (end.wholeSecondMs !== start.wholeSecondMs)
+    return end.wholeSecondMs < start.wholeSecondMs;
+  const digits = Math.max(end.fraction.length, start.fraction.length);
+  return end.fraction.padEnd(digits, "0") < start.fraction.padEnd(digits, "0");
+}
 
 export const revisionSchema = z
   .number()
@@ -105,7 +126,7 @@ export const taskInstanceSchema = z
     if (
       row.started_at !== null &&
       row.completed_at !== null &&
-      Date.parse(row.completed_at) < Date.parse(row.started_at)
+      endsBefore(row.completed_at, row.started_at)
     )
       context.addIssue({
         code: "custom",
@@ -126,10 +147,7 @@ export const taskTimeSessionSchema = z
   })
   .passthrough()
   .superRefine((row, context) => {
-    if (
-      row.ended_at !== null &&
-      Date.parse(row.ended_at) < Date.parse(row.started_at)
-    )
+    if (row.ended_at !== null && endsBefore(row.ended_at, row.started_at))
       context.addIssue({
         code: "custom",
         path: ["ended_at"],

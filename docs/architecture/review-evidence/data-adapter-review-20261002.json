@@ -1,0 +1,111 @@
+{
+  "date": "2026-10-02",
+  "reviewed_commit": "723b0693079610bde0141c67e6dd8eb6a13796dc",
+  "prior_evidence": {
+    "path": "docs/architecture/review-evidence/data-adapter-foundation-20261002.json",
+    "sha256": "460c925ac72189451c5d8351bc74e23e6109695268ad59e52095a69c7bd3b9f1",
+    "matched_before_review": {
+      "source_hashes": 22,
+      "logs": 2,
+      "build_files": 8
+    }
+  },
+  "finding": {
+    "id": "ADP-R01",
+    "before": "sub-millisecond negative interval accepted",
+    "reproduced_exit_code": 1,
+    "after": "whole second plus original fraction compared exactly",
+    "regression_after_exit_code": 0
+  },
+  "hashes": {
+    "src/data/remote/task-contract.ts": "100c0e170ee5e2ad7fc5f732e0aad37585ad41e7f155a23dfc1d389d8384b106",
+    "src/data/remote/task-gateway.ts": "b38a7a4c371d7142f3dd4c412b64052d88fd8f2493e8c3ecfa7cfcfd3bc2c146",
+    "tests/task-gateway.test.ts": "d9f0ebe2bb412b62873e648ac7cca83a58a6b2daf3d0e3905b1beab5e7cbf4ed",
+    "tests/task-gateway-sql.test.ts": "96131ee266acbea47fe9faad17d9afa5b80199fd88212c93b51e519319c62967",
+    "tests/postgres-008/check-sql.mjs": "1884d4d90604dd75e9394a6eaa4d537cb54c82851d74b72a9e4e2cf24a4f67c3",
+    "supabase/migrations/202609300001_foundation.sql": "4ae00143f3740d21a828165139fa929dea0dcb8775849939a505ca5cb8bdf161",
+    "supabase/migrations/202609300002_workflows.sql": "ec5aa503834dc8a10e0a7cf858c0c6c4f09a3b0c5bb0a53df9e34fd834697832",
+    "supabase/migrations/202610010001_occurrence_contract.sql": "009e453942d2609f6f84913d2684015326fe5874eb39351a9e75a0525c4c17b0",
+    "supabase/migrations/202610010002_onboarding_approval.sql": "f531cec7664a4e58b2575f8f8fb154ec933d53973f63a7a1036387e2b27c02f3",
+    "supabase/migrations/202610010003_report_delivery.sql": "2ca30367916fe708464bae2a857c34b014089f1d7618d21c1a822dc16e5c7ff4",
+    "supabase/migrations/202610010004_time_coverage.sql": "c4868ecc2a0ac7b440d459d80c06edb65b15ad2929517cfb178570412392a7e3",
+    "supabase/migrations/202610010005_time_coverage_hardening.sql": "50a073aac2913d7ef3f5fe3d32d2879226dda19a4a15239cf02d65bd9d0179ac",
+    "supabase/migrations/202610010006_time_coverage_acceptance.sql": "394e3354fab91ca3babd850f3e5b08e32513e08ccc172064f74cde16594d906b",
+    "supabase/migrations/202610010007_time_coverage_completion.sql": "5fee47ab9a401a6d05a205431365bb3e5840cba98147e9950ab84ff18c1e454f",
+    "supabase/migrations/202610010008_time_coverage_finalization.sql": "ad0da14254585c341c3f0846ea21e9fd7f8f71020f44a4079d4d5e1424e45a3e",
+    "src/App.tsx": "8779b240fc9d0b757bdc620d6a2a230b1f64d0d775c94236a0a84ac320400867",
+    "src/data/repository.ts": "ca839aa806f0d7b06fda6bd5effc2cb336534f965e03e80b037ad49ecc7036a2",
+    "package.json": "3d8c376fde9d6c62eaca170045e753aae89e20ee63e8153add5d77146b1fa895",
+    "package-lock.json": "d6190a9645475d1d71a0a3d7b8fee0bb24b158594c9947b7b8f9f7350caf75ce",
+    "tests/helpers/accounting-lab.ts": "e9c33a590a335c0053826333fd393c82de3950a5386ce5dc16be0adc068f1339",
+    "tests/postgres-008/scenarios.mjs": "4e149ad6efa9a9c1d2bf8c5d874ce25a364ef0a0d5183fd1bb90c59c404422c5",
+    "tests/postgres-008/fixture.sql": "88d6ad77764788f124090446437c249d2bfdd40b2daeb36c8ef278eccb7b42b4"
+  },
+  "frozen_unchanged": [
+    "package-lock.json",
+    "package.json",
+    "src/App.tsx",
+    "src/data/remote/task-gateway.ts",
+    "src/data/repository.ts",
+    "supabase/migrations/202609300001_foundation.sql",
+    "supabase/migrations/202609300002_workflows.sql",
+    "supabase/migrations/202610010001_occurrence_contract.sql",
+    "supabase/migrations/202610010002_onboarding_approval.sql",
+    "supabase/migrations/202610010003_report_delivery.sql",
+    "supabase/migrations/202610010004_time_coverage.sql",
+    "supabase/migrations/202610010005_time_coverage_hardening.sql",
+    "supabase/migrations/202610010006_time_coverage_acceptance.sql",
+    "supabase/migrations/202610010007_time_coverage_completion.sql",
+    "supabase/migrations/202610010008_time_coverage_finalization.sql",
+    "tests/helpers/accounting-lab.ts",
+    "tests/postgres-008/check-sql.mjs",
+    "tests/postgres-008/fixture.sql",
+    "tests/postgres-008/scenarios.mjs",
+    "tests/task-gateway-sql.test.ts"
+  ],
+  "checks": {
+    "npm_test": {
+      "files": 15,
+      "passed": 175,
+      "exit_code": 0
+    },
+    "npm_run_build": {
+      "exit_code": 0
+    },
+    "sequential_checker": {
+      "reused_from": "docs/architecture/review-evidence/data-adapter-foundation-20261002.json",
+      "passed": 23,
+      "checker_and_migrations_unchanged": true,
+      "concurrency_tested": false
+    }
+  },
+  "logs": {
+    "docs/architecture/review-evidence/data-adapter-review-tests-20261002.txt": "87a98e46467b06805de9f1f57acd39269fc74df7036e45ec4e760be50500e596",
+    "docs/architecture/review-evidence/data-adapter-review-build-20261002.txt": "72163101e3f8ac44a8d3e70d6cf33d5c781bebcb09be52f950b74fca19665483",
+    "docs/architecture/review-evidence/data-adapter-review-repro-20261002.txt": "4fe2163076a1f483929688628ad4de2a441bebb5d309d5dad9b9bcc985861f64"
+  },
+  "build_output": {
+    "dist/InterVariable.woff2": "693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3",
+    "dist/assets/charts-pvllrPPo.js": "80101ae1e5cac2cd467f02835ef60f8a47065ae4abb8359f82025a765fdf0547",
+    "dist/assets/icons-RIB6cG9z.js": "309a4b6f27d05f9eb06f08bca7fee3c5f0b6a4b84c4157f9840371e709226993",
+    "dist/assets/index-CtOvgJHa.css": "3dc6058611ccc187ad93e961ba651f69f021cc2b05d31eee9b3928289a001540",
+    "dist/assets/index-Ob6wdEsP.js": "bb3f02788d0e70dc624637dee9b7763a13f3b6cf5bd27ddc4de8c69a6a3b3c11",
+    "dist/fonts.css": "547aa234b73ee22cabf681fe050bd12e5d856087cd2e2415cacd14d494b9679c",
+    "dist/index.html": "37b2b4edee666c5a81dff0f262a667f2b6b392d63d1c7a3eec980e5d3d87543e",
+    "dist/logo-grupo-paris.svg": "55865124adb1f141de32e5aede6e6e2b714a01b3861cad33721e01dbfb6026b3"
+  },
+  "next_contract": {
+    "path": "docs/architecture/DATA-READ-FOUNDATION.md",
+    "sha256": "7e852997473643b7ff5420528f80abfa95e1a8c9143ddd3dde4fb60ac0276560",
+    "model": "GPT-6 Luna",
+    "effort": "medium",
+    "speed": "Standard"
+  },
+  "limits": {
+    "postgresql_concurrency": "NO EJECUTADO",
+    "postgrest": "NO EJECUTADO",
+    "supabase_auth_mfa_rls_live": "NO EJECUTADO",
+    "remote_frontend_active": false,
+    "employee_migration_ready": false
+  }
+}

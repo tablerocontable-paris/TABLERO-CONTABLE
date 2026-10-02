@@ -55,8 +55,8 @@ sin pedir otro «continuá».
 
 ## Próximo bloque
 
-**GPT-6.1 Sol medio, Standard:** revisar la fundación del adaptador ya ejecutada
-según EXECUTION-NEXT.md; comprobar hashes y reutilizar evidencia válida. Después
-cerrar el próximo contrato para **Luna medio**. Nuevas decisiones de Auth/administración requieren
+**GPT-6 Luna medio, Standard:** ejecutar DATA-READ-FOUNDATION.md; lector paginado
+y recarga de filas confirmadas con aceptación local. Después revisión
+**Sol 6.1 medio**. Nuevas decisiones de Auth/administración requieren
 Sol alto. El cambio es manual; no simularlo con subagentes. Infraestructura dedicada y
 migración de empleados siguen pendientes de integración, concurrencia y piloto.
