@@ -19,7 +19,7 @@ que 40% de los empleados puedan migrarse: hoy no hay base de producción conecta
 
 ## Evidencia actual
 
-175 pruebas en 15 archivos y compilación correctas. El laboratorio PGlite verifica
+182 pruebas en 17 archivos y compilación correctas. El laboratorio PGlite verifica
 23 casos secuenciales; 24 pares preparados para PostgreSQL siguen sin ejecutarse.
 La rama BA previa al corte usa jefe con aal2 y confirma replay idempotente. No se
 modificaron SQL 001–008 ni el frontend durante este ajuste.
@@ -30,21 +30,29 @@ adaptador de seis RPC conserva filas, claves y argumentos, valida ACKs y separa
 fallos sin reintentar automáticamente. 23 pruebas nuevas cubren esta frontera
 y su composición con SQL. La revisión del adaptador está aceptada tras corregir
 ADP-R01: comparación temporal conserva fracciones menores a un milisegundo.
-La prueba de regresión pasó y los contratos de lectura ya están definidos.
+El lector tipado/paginado está implementado y probado con transportes unitarios
+y SELECTs parametrizados bajo RLS simulada; evidencia en
+`architecture/review-evidence/data-read-foundation-20261002.json`.
 Esta base local eleva ligeramente la etapa de integración; el porcentaje global
 redondeado sigue en 40%. La página todavía no utiliza el gateway.
 
 La demo usa localStorage y selector simulado. Que haya pruebas SQL verdes no
 significa que esos permisos ya gobiernen la página ni que se envíe correo.
 
+El cronómetro se puede accionar y visualizar en la demo; su estado y sesiones
+persisten en el almacenamiento local de ese navegador, por lo que no es todavía
+un registro compartido ni sirve para controlar tiempo real de los empleados. Las
+RPC de cronómetro existen en SQL local y tienen pruebas de laboratorio; no están
+conectadas al sitio publicado. La presencia/última conexión tampoco está
+implementada: sin Auth y señales de sesión servidor no se puede saber de manera
+fiable quién está usando la aplicación. Requisito de gerencia agregado al
+roadmap, pendiente de diseño/revisión y de la fase de autenticación.
+
 ## Siguiente camino
 
-1. Ejecutar lector tipado/paginado y recarga confirmada de filas (Luna medio),
-   según DATA-READ-FOUNDATION.md; después revisión Sol medio.
-2. Cerrar coordinación asíncrona del frontend con el contrato actual,
-   sin crear servicios antes de lo previsto.
-3. Completar producto y validaciones reales/piloto antes de migrar a compañeros.
-4. Al aprobar la versión definitiva, registrar esa decisión y activar los nuevos
+1. Revisión del lector y coordinación asíncrona del frontend (Sol 6.1 medio).
+2. Completar producto y validaciones reales/piloto antes de migrar a compañeros.
+3. Al aprobar la versión definitiva, registrar esa decisión y activar los nuevos
    servicios dedicados y flujo dev/prod según AUTOMATED-DELIVERY.md.
 
 Referencias: architecture/REVIEW-008-FINAL-20261001.md, EXECUTION-NEXT.md,

@@ -39,6 +39,23 @@ Implementado en demostración local: criterios anteriores de recurrencia, cronó
 
 El SQL 0.3 no se puede conectar directamente al frontend. Las migraciones locales 001–008 preparan ocurrencias fechadas, versiones de catálogo, vencimientos opcionales, inducción aprobada, cronómetros/coberturas, revisiones y reportes/outbox. Sus RPCs ya están implementadas y probadas localmente. Faltan adaptador frontend y validaciones reales; no se aplicaron en Supabase. Los apartados cronológicos inferiores documentan etapas anteriores.
 
+### Presencia del equipo — pedido 02/10/2026
+
+Recuperar la vista del tablero anterior para que Juan Pablo pueda ver a cada
+persona, su estado de conexión (activa/inactiva) y la fecha/hora de su última
+conexión. No mostrar presencia del personal al resto del equipo ni incluirla en
+KPI, reportes de desempeño o cronometraje. La cuenta técnica de pruebas permanece
+fuera de esa vista. En producción, derivar el estado activo de una sesión
+autenticada con una señal periódica del servidor y un umbral explícito de
+caducidad; guardar la última actividad de sesión que permita estimar la última
+conexión. Definir intervalo, umbral, zona horaria y retención en la revisión de
+arquitectura antes de implementarlo. No usar el selector de perfil de demostración
+ni inferir presencia desde el cronómetro: una sesión de trabajo no prueba que la
+persona siga usando la plataforma.
+
+Estado: pendiente. La demo no tiene autenticación ni actividad de sesión real,
+por lo que aún no puede mostrar presencia o última conexión fiable.
+
 ## Próximas etapas para llegar a versión definitiva
 
 1. Consolidar contrato SQL de 0.4 y equivalencia con reglas de dominio; integración y tipos generados.
