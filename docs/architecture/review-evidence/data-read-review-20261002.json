@@ -1,0 +1,62 @@
+{
+  "source_sha": "0a73c2ed1407746ae01eafcd9298aa9ba0f53449",
+  "source_version": 32,
+  "result": "acceptance_pending",
+  "findings": [
+    "READ-R01",
+    "READ-R02",
+    "READ-R03",
+    "READ-R04"
+  ],
+  "checks": {
+    "npm_test": {
+      "exit_code": 0,
+      "files": 17,
+      "tests": 182
+    },
+    "npm_run_build": {
+      "exit_code": 0
+    },
+    "code_sql_dependency_files_unchanged_from_source": true,
+    "execution_reader_hashes_match": true
+  },
+  "coverage_review": {
+    "new_unit_tests": 5,
+    "new_sql_tests": 2,
+    "sql_reader_actor_cases": [
+      "owner"
+    ],
+    "manager_boss_other_org_matrix_present": false,
+    "coverage_cancellation_reader_case_present": false,
+    "post_rpc_and_switch_reader_case_present": false,
+    "uppercase_uuid_fixture_changes_text": false,
+    "query_table_literal_present": false
+  },
+  "files_sha256": {
+    "src/data/remote/task-reader.ts": "4e881925277e7af10828ad9d03ce02d747f47fb1ddcfd10c50c2927a26b47423",
+    "src/data/remote/task-contract.ts": "100c0e170ee5e2ad7fc5f732e0aad37585ad41e7f155a23dfc1d389d8384b106",
+    "src/data/remote/task-gateway.ts": "b38a7a4c371d7142f3dd4c412b64052d88fd8f2493e8c3ecfa7cfcfd3bc2c146",
+    "src/App.tsx": "8779b240fc9d0b757bdc620d6a2a230b1f64d0d775c94236a0a84ac320400867",
+    "src/data/repository.ts": "ca839aa806f0d7b06fda6bd5effc2cb336534f965e03e80b037ad49ecc7036a2",
+    "tests/task-reader.test.ts": "941a6ddb13a8b1d289f0da2159f494c9e1eaf39b2d54ced38281bbb08cb54fad",
+    "tests/task-reader-sql.test.ts": "cb1d834ceff8093bc7589c014275fb501f8696bf08d18483f3268a70b89d20f8",
+    "tests/helpers/accounting-lab.ts": "e9c33a590a335c0053826333fd393c82de3950a5386ce5dc16be0adc068f1339",
+    "package.json": "3d8c376fde9d6c62eaca170045e753aae89e20ee63e8153add5d77146b1fa895",
+    "package-lock.json": "d6190a9645475d1d71a0a3d7b8fee0bb24b158594c9947b7b8f9f7350caf75ce",
+    "supabase/migrations/202609300001_foundation.sql": "4ae00143f3740d21a828165139fa929dea0dcb8775849939a505ca5cb8bdf161",
+    "supabase/migrations/202609300002_workflows.sql": "ec5aa503834dc8a10e0a7cf858c0c6c4f09a3b0c5bb0a53df9e34fd834697832",
+    "supabase/migrations/202610010001_occurrence_contract.sql": "009e453942d2609f6f84913d2684015326fe5874eb39351a9e75a0525c4c17b0",
+    "supabase/migrations/202610010002_onboarding_approval.sql": "f531cec7664a4e58b2575f8f8fb154ec933d53973f63a7a1036387e2b27c02f3",
+    "supabase/migrations/202610010003_report_delivery.sql": "2ca30367916fe708464bae2a857c34b014089f1d7618d21c1a822dc16e5c7ff4",
+    "supabase/migrations/202610010004_time_coverage.sql": "c4868ecc2a0ac7b440d459d80c06edb65b15ad2929517cfb178570412392a7e3",
+    "supabase/migrations/202610010005_time_coverage_hardening.sql": "50a073aac2913d7ef3f5fe3d32d2879226dda19a4a15239cf02d65bd9d0179ac",
+    "supabase/migrations/202610010006_time_coverage_acceptance.sql": "394e3354fab91ca3babd850f3e5b08e32513e08ccc172064f74cde16594d906b",
+    "supabase/migrations/202610010007_time_coverage_completion.sql": "5fee47ab9a401a6d05a205431365bb3e5840cba98147e9950ab84ff18c1e454f",
+    "supabase/migrations/202610010008_time_coverage_finalization.sql": "ad0da14254585c341c3f0846ea21e9fd7f8f71020f44a4079d4d5e1424e45a3e"
+  },
+  "limits": [
+    "No functional reader bug was reproduced in this review; acceptance is incomplete.",
+    "No live Supabase Auth/MFA/PostgREST/RLS, mail, presence or PostgreSQL concurrency was tested."
+  ],
+  "next_contract": "DATA-READ-ACCEPTANCE-COMPLETION.md"
+}

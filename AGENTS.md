@@ -14,6 +14,7 @@
 - Juan Pablo es gerente y administrador de usuarios/parámetros. Valentino es empleado y tendrá una cuenta técnica separada del trabajo/KPI.
 - No restablecer las decisiones legacy que descartaban cronómetro: el pedido actual lo requiere. Pruebas de escritura exclusivamente en laboratorio aislado; diagnóstico real autorizado y auditado.
 - Respetar reglas y pendientes en docs/PRODUCT-ROADMAP.md. No conectar frontend 0.4 a contrato SQL 0.3 sin adaptar y probar.
+- Integrar pedidos nuevos según docs/product/CONSISTENCY-RULES.md: registrar cruces con reglas existentes y comprobar los criterios acordados. Implementado y pruebas verdes no significan aceptación completa. Mantener AGENTS/EXECUTION-NEXT/PROJECT-STATUS alineados; los documentos cronológicos conservan evidencia histórica.
 
 ## Modelos y devolución de cada ejecución (pedido 01/10/2026)
 
@@ -28,5 +29,5 @@
 
 - Continuar autónomamente entre pasos/revisiones que usan el mismo modelo; no terminar cada bloque para pedir «continuar».
 - Detenerse al llegar a un cambio de modelo necesario y comunicar modelo, esfuerzo y contrato concreto preparado. El usuario hará el cambio manual. No delegar ni simular un cambio de modelo para sortear esta preferencia.
-- Próxima fase vigente: **GPT-6 Luna, esfuerzo medio, Standard**. Ejecutar `docs/architecture/DATA-READ-FOUNDATION.md`: lector tipado/paginado y recarga de filas confirmadas, sin activar frontend ni cambiar políticas. Adaptador aceptado con ADP-R01 corregido en `REVIEW-DATA-ADAPTER-20261002.md`; 175 pruebas/15 archivos y build correctos, checker 23 reutilizado por hashes iguales. Después revisión Sol 6.1 medio; Auth/administración nueva requiere Sol alto.
+- Próxima fase vigente: **GPT-6 Luna, esfuerzo medio, Standard**. Ejecutar `docs/architecture/DATA-READ-ACCEPTANCE-COMPLETION.md`. Lector v32 implementado, aceptación pendiente en REVIEW-DATA-READ-20261002.md por READ-R01–03: completar roles/cobertura/recarga posterior a RPC/switch, unitarias y tabla literal fija. 182 pruebas/17 archivos y build correctos no demuestran los escenarios ausentes. No avanzar al coordinador hasta revisión Sol 6.1 medio; Auth/administración/presencia con nuevas políticas requieren Sol alto.
 - En la corrección se preservaron SQL 001–008 y evidencia histórica; no se alteraron permisos ni se creó 009. Concurrencia PostgreSQL, integración y Supabase Auth/invitaciones/MFA/RLS/correo reales siguen pendientes; no aplicar SQL remoto, migrar empleados ni declarar producción. Grado de avance: `docs/PROJECT-STATUS.md`.
