@@ -64,23 +64,6 @@ try {
           "Fixture crossed ART cutoff; recreate instead of testing another branch",
         );
 
-      await db.exec(
-        "reset role;select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000008000001',false),set_config('request.jwt.claims','{\"aal\":\"aal2\"}',false);set role authenticated;",
-      );
-      const identity = (
-        await db.query(
-          "select auth.uid()::text actor,auth.jwt()->>'aal' aal,current_user role",
-        )
-      ).rows[0];
-      if (
-        identity.actor !== "10000000-0000-0000-0000-000008000001" ||
-        identity.aal !== "aal2" ||
-        identity.role !== "authenticated"
-      )
-        throw Error(
-          "B must execute as permanent boss with aal2 as authenticated",
-        );
-      await db.exec("reset role");
       const sourceClock = (
         await db.query(
           "select id::text,started_at::text from task_time_sessions where instance_id='50000000-0000-0000-0000-000008000001' and ended_at is null",
@@ -90,7 +73,10 @@ try {
 
       const scalarB = spec.B.replace(
         /perform (public\.set_task_wait\([\s\S]*?\));/,
-        "insert into lab008.results values('wait',to_jsonb($1));",
+        `perform lab008.assert_true(auth.uid()='10000000-0000-0000-0000-000008000001'::uuid
+          and auth.jwt()->>'aal'='aal2' and current_user='authenticated',
+          'B must execute as permanent boss with aal2 as authenticated');
+        insert into lab008.results values('wait',to_jsonb($1));`,
       );
       if (scalarB === spec.B)
         throw Error("Could not capture the original scalar return from B");
@@ -108,8 +94,15 @@ try {
 
       const waitAssertions = (
         await db.query(`select
-          (select actor_id='10000000-0000-0000-0000-000008000001' and result='{"revision":2}'::jsonb
+          (select actor_id='10000000-0000-0000-0000-000008000001' and operation_kind='task_wait' and result='{"revision":2}'::jsonb
              from task_mutation_receipts where operation_id='90000000-0000-0000-0000-000008000001') boss_receipt,
+          (select actor_id='10000000-0000-0000-0000-000008000003' and operation_kind='start_timer'
+             and result=jsonb_build_object('session_id','${sourceClock.id}')
+             from task_mutation_receipts where operation_id='90000000-0000-0000-0000-000008000090') seed_receipt,
+          (select blocked_by='Synthetic wait' from task_instances
+             where id='50000000-0000-0000-0000-000008000001') exact_wait_reason,
+          (select count(*)=1 and count(*) filter(where ended_at is null)=0
+             from task_time_sessions) one_closed_session,
           (select s.id::text='${sourceClock.id}' and s.started_at::text='${sourceClock.started_at}' and s.ended_at < ((a.ends_on+1)::timestamp at time zone 'America/Argentina/Buenos_Aires')
              from task_time_sessions s join employee_absences a on a.id=s.absence_id where s.id='${sourceClock.id}') source_closed,
           (select count(*)=1 and bool_and(actor_id='10000000-0000-0000-0000-000008000001'

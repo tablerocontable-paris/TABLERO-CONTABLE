@@ -1,0 +1,48 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> grupo-paris-nueva-generacion@0.4.0 test
+> vitest run
+
+
+ RUN  v3.2.7 /workspace/scratch/0de2d62eef9c/site
+
+ ✓ tests/time-coverage-006.test.ts (5 tests) 4091ms
+ ✓ tests/report-isolation-008.test.ts (6 tests) 4535ms
+ ✓ tests/time-coverage-007.test.ts (16 tests) 4616ms
+ ✓ tests/domain.test.ts (10 tests) 70ms
+ ✓ tests/task-gateway-sql.test.ts (6 tests) 4535ms
+ ✓ tests/report-worker.test.ts (3 tests) 9ms
+ ✓ tests/catalogue-reports.test.ts (4 tests) 69ms
+ ✓ tests/task-gateway.test.ts (17 tests) 63ms
+ ✓ tests/scheduling-workforce.test.ts (11 tests) 162ms
+ ✓ tests/time-coverage-008.test.ts (39 tests) 5510ms
+   ✓ 008: aceptación aislada de plan, cobertura y tiempos > sello FALSE niega RLS y todas las escrituras; TRUE limita empresa y período sin afectar acceso permanente  438ms
+ ✓ tests/database.test.ts (19 tests) 6166ms
+   ✓ base nueva desde cero y RLS > actualiza desde 0.3 preservando cierres, tareas y catálogo existente  1860ms
+ ✓ tests/task-board.test.tsx (2 tests) 172ms
+ ✓ tests/annotations.test.tsx (3 tests) 267ms
+ ✓ tests/annotations-tour-app.test.tsx (18 tests) 2870ms
+   ✓ anotaciones y recorrido integrados > conversión normal conserva texto y crea vínculo  327ms
+   ✓ anotaciones y recorrido integrados > recorrido extenso por rol y pausa/reanudación  614ms
+   ✓ anotaciones y recorrido integrados > Listo guarda finalización y reiniciar comienza de cero sin alterar tareas  316ms
+ ✓ tests/upgrades-008.test.ts (15 tests) 23779ms
+   ✓ upgrades poblados hasta 008 > 004→008 conserva todas las filas históricas y snapshots  4506ms
+   ✓ upgrades poblados hasta 008 > 005→008 conserva todas las filas históricas y snapshots  1661ms
+   ✓ upgrades poblados hasta 008 > 006→008 conserva todas las filas históricas y snapshots  1453ms
+   ✓ upgrades poblados hasta 008 > 007→008 conserva todas las filas históricas y snapshots  1512ms
+   ✓ upgrades poblados hasta 008 > 0.3→001–008 preserva campos originales y añade contratos sin reescribir cierres  1380ms
+   ✓ preflight y rollback de migraciones > 004 rechaza multiple con ID y revierte filas, DDL, funciones y ACL  1333ms
+   ✓ preflight y rollback de migraciones > 005 rechaza orphan con ID y revierte filas, DDL, funciones y ACL  1346ms
+   ✓ preflight y rollback de migraciones > 005 rechaza organization con ID y revierte filas, DDL, funciones y ACL  1289ms
+   ✓ preflight y rollback de migraciones > 006 rechaza orphan con ID y revierte filas, DDL, funciones y ACL  1325ms
+   ✓ preflight y rollback de migraciones > 006 rechaza organization con ID y revierte filas, DDL, funciones y ACL  1304ms
+   ✓ preflight y rollback de migraciones > 006 rechaza absence_owner con ID y revierte filas, DDL, funciones y ACL  1305ms
+   ✓ preflight y rollback de migraciones > 006 rechaza absence_actor con ID y revierte filas, DDL, funciones y ACL  1361ms
+   ✓ preflight y rollback de migraciones > 006 rechaza after_cutoff con ID y revierte filas, DDL, funciones y ACL  1319ms
+   ✓ preflight y rollback de migraciones > 006 rechaza before_start con ID y revierte filas, DDL, funciones y ACL  1349ms
+   ✓ preflight y rollback de migraciones > 006 rechaza end_after_cutoff con ID y revierte filas, DDL, funciones y ACL  1328ms
+
+ Test Files  15 passed (15)
+      Tests  174 passed (174)
+   Start at  22:34:36
+   Duration  24.24s (transform 1.25s, setup 0ms, collect 3.46s, tests 56.92s, environment 1.17s, prepare 1.07s)
