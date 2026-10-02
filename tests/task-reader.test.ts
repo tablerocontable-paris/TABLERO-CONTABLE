@@ -145,6 +145,8 @@ describe("task reader", () => {
       { period: "2026-10-01", limit: 1.5 },
       { period: "2026-10-01", actorId: ids[0] },
       { period: "2026-10-01", companyId: "bad" },
+      { period: null },
+      { period: "2026-10-01", limit: null },
     ])
       expect(await reader.listTasks(input)).toMatchObject({
         ok: false,
@@ -156,6 +158,8 @@ describe("task reader", () => {
       { instanceIds: Array.from({ length: 101 }, (_, i) => uid(i + 1)) },
       { instanceIds: [ids[0], ids[0]] },
       { instanceIds: [ids[0]], table: "profiles" },
+      { instanceIds: null },
+      { instanceIds: [ids[0]], limit: null },
     ])
       expect(await reader.listSessions(input)).toMatchObject({
         ok: false,
@@ -168,6 +172,7 @@ describe("task reader", () => {
       ok: false,
       error: "validation",
     });
+    expect(await reader.findTask({ instanceId: null })).toMatchObject({ ok: false, error: "validation" });
     expect(read).not.toHaveBeenCalled();
   });
 
@@ -358,6 +363,45 @@ describe("task reader", () => {
         instanceId: ids[0],
       }),
     ).toEqual({ ok: true, kind: "unavailable" });
+    const incomplete = { ...task(1) } as Record<string, unknown>;
+    delete incomplete.state_revision;
+    expect(await createTaskReader({ read: async () => ok([incomplete]) }).findTask({ instanceId: ids[0] })).toMatchObject({ ok: false, error: "protocol" });
+  });
+
+  it("validates null inputs and fully pages bounded sessions with metadata and precise timestamps", async () => {
+    const read = vi.fn(async () => ok([]));
+    const reader = createTaskReader({ read });
+    expect(await reader.listTasks(null)).toMatchObject({ ok: false, error: "validation" });
+    expect(await reader.findTask(null)).toMatchObject({ ok: false, error: "validation" });
+    expect(await reader.listSessions(null)).toMatchObject({ ok: false, error: "validation" });
+    expect(await reader.findTask({})).toMatchObject({ ok: false, error: "validation" });
+    expect(read).not.toHaveBeenCalled();
+
+    const rows = [1, 2, 3].map((n) => ({
+      ...session(n), id: uid(20 + n), actor_id: ids[2], instance_id: ids[1],
+      started_at: `2026-10-02T10:00:0${n}.123456Z`,
+      ended_at: `2026-10-02T10:01:0${n}.654321Z`, metadata: { trace: `session-${n}` },
+    }));
+    const paged = createTaskReader({ read: async (query) => {
+      if (query.kind !== "sessionPage") return ok([]);
+      const sorted = [...rows].sort((a, b) => a.id.localeCompare(b.id));
+      return ok(sorted.filter((row) => query.afterId === null || row.id > query.afterId).slice(0, query.take));
+    }});
+    const traversed: unknown[] = [];
+    let afterId: string | null = null;
+    for (let pageNo = 0; pageNo < 3; pageNo += 1) {
+      const page = await paged.listSessions({ instanceIds: [ids[1]], limit: 1, afterId });
+      expect(page).toMatchObject({ ok: true, hasMore: pageNo < 2 });
+      if (!page.ok) throw new Error("Expected session page");
+      traversed.push(...page.rows);
+      afterId = page.nextCursor;
+    }
+    expect(traversed).toEqual([...rows].sort((a, b) => a.id.localeCompare(b.id)));
+    expect(JSON.stringify(traversed)).toContain('"trace":"session-1"');
+    expect(JSON.stringify(traversed[0])).toContain(".123456");
+    expect(JSON.stringify(traversed[0])).toContain(".654321");
+    expect(await createTaskReader({ read: async () => ok([{ ...rows[0], instance_id: ids[0] }]) }).listSessions({ instanceIds: [ids[1]] })).toMatchObject({ ok: false, error: "protocol" });
+    expect(await createTaskReader({ read: async () => ok([rows[0], { ...rows[1], actor_id: undefined }]) }).listSessions({ instanceIds: [ids[1]], limit: 1 })).toMatchObject({ ok: false, error: "protocol" });
   });
 
   it("classifies envelope, server and transport failures once for each method", async () => {
@@ -372,6 +416,7 @@ describe("task reader", () => {
         [{ nope: true }, "protocol"],
         [{ data: [], error: undefined }, "protocol"],
         [{ data: null, error: { secret: "hidden" } }, "server"],
+        [{ data: null, error: null }, "protocol"],
         [new Error("private detail"), "transport"],
       ] as const) {
         const read = vi.fn(async () => {

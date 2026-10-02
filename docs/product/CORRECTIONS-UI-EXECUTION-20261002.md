@@ -148,6 +148,24 @@ copias de tareas ni prometer coordinación entre compañeros aún no implementad
 
 ## Comprobaciones necesarias
 
+### Resultado de ejecución — 02/10/2026
+
+Implementado en Luna y pendiente de revisión Sol: gráficos con bandas de hover
+visibles y barras estrechas; checklists editables paso a paso en catálogo,
+inducción y alta puntual; categorías libres en anotaciones con edición plegable;
+recorrido base de 11 pasos, con pasos por rol, pausa y regreso; filtro de empresa
+en sidebar; tablero de perfil propio/subordinado; etiquetas de cobertura;
+selector subordinado persistente al navegar; equipos rotulados por responsable;
+cierre oculto a empleados y CTA contextual. Se corrigió además el fallback de
+sector, peso, unidad y meta al asignar un catálogo aunque sus controles estén
+bloqueados. La semilla ahora muestra a Carolina Díaz como encargada de Valentino.
+
+Pruebas dirigidas cubren persistencia/categorías, pausa/regreso del recorrido,
+vista propia y selección subordinada; `npm test` completo, build y diff-check.
+La inspección visual automatizada no se ejecutó: no hay Chromium instalado en el
+entorno. No se alteraron esquema/gateway ni los bloques B/C/D; la cobertura es
+demo local y no concede permisos productivos.
+
 Pruebas de flujos, evitando snapshots del CSS:
 
 1. Crear tarea puntual con dos pasos y quitarlos/agregarlos: comprobar checklist

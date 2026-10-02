@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { id, type State, type Template } from "../domain/model";
 import { Dialog } from "./ui";
+import StepListEditor, { parseSteps } from "./StepListEditor";
 export default function CatalogueCreator({
   state,
   commit,
@@ -12,6 +13,7 @@ export default function CatalogueCreator({
 }) {
   const [open, setOpen] = useState(false);
   const [kind, setKind] = useState<Template["kind"]>("resultado");
+  const [steps, setSteps] = useState<string[]>([]);
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (state.profiles.find((p) => p.id === state.activeId)?.role !== "jefe")
@@ -26,10 +28,7 @@ export default function CatalogueCreator({
       notify("Ese proceso ya existe. Usá el mismo catálogo para cada empresa.");
       return;
     }
-    const steps = String(f.get("steps"))
-      .split("\n")
-      .map((s) => s.trim())
-      .filter(Boolean);
+    const steps = parseSteps(String(f.get("steps") || ""));
     if (!title || !steps.length) {
       notify("El proceso necesita un nombre y al menos un control estándar.");
       return;
@@ -53,6 +52,7 @@ export default function CatalogueCreator({
       )
     ) {
       setOpen(false);
+      setSteps([]);
       notify("Proceso incorporado al catálogo para todas las empresas.");
     }
   }
@@ -137,12 +137,7 @@ export default function CatalogueCreator({
             </div>
             <label>
               Proceso y controles · un paso por línea
-              <textarea
-                name="steps"
-                required
-                rows={5}
-                placeholder="Obtener documentación del período\nContrastar registros\nDocumentar diferencias\nValidar resultado"
-              />
+              <StepListEditor name="steps" value={steps} onChange={setSteps} />
             </label>
             <div className="modal-actions">
               <button className="primary">Guardar proceso estándar</button>

@@ -6,6 +6,7 @@ import {
   describeSchedule,
 } from "../domain/schedule";
 import { id } from "../domain/model";
+import StepListEditor, { parseSteps } from "./StepListEditor";
 import {
   ArrowRight,
   ArrowLeft,
@@ -51,7 +52,7 @@ export default function Onboarding({
           {
             id: "custom",
             title: draft.customTitle,
-            steps: draft.customSteps,
+            steps: parseSteps(draft.customSteps),
             kind: "resultado" as const,
             unit: "",
             target: 0,
@@ -273,13 +274,11 @@ export default function Onboarding({
                     maxLength={120}
                   />
                 </label>
-                <label>
-                  Checklist · un paso por línea
-                  <textarea
-                    value={draft.customSteps}
-                    onChange={(e) => patch({ customSteps: e.target.value })}
-                  />
-                </label>
+                <label>Controles propuestos</label>
+                <StepListEditor
+                  value={draft.customSteps ? draft.customSteps.split("\n") : []}
+                  onChange={(steps) => patch({ customSteps: steps.join("\n") })}
+                />
                 <p>Se propone con peso 1 para revisión de Juan Pablo.</p>
                 <button
                   type="button"
@@ -291,7 +290,7 @@ export default function Onboarding({
                         {
                           id: id(),
                           title: draft.customTitle.trim(),
-                          steps: draft.customSteps,
+                          steps: parseSteps(draft.customSteps).join("\n"),
                           kind: "resultado",
                           unit: "",
                           target: 0,

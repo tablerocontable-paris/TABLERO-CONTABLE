@@ -55,6 +55,8 @@ function prepare(role = "e0") {
 }
 function openNotes() {
   fireEvent.click(document.querySelector('[data-nav="annotations"]')!);
+  const create = screen.queryByRole("button", { name: "Nueva anotación" });
+  if (create) fireEvent.click(create);
 }
 function convert() {
   openNotes();
@@ -80,6 +82,52 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 describe("anotaciones y recorrido integrados", () => {
+  it("guarda y vuelve a cargar una categoría libre de anotación", () => {
+    prepare();
+    render(<App />);
+    openNotes();
+    fireEvent.change(screen.getByLabelText("Título"), { target: { value: "Criterio de revisión" } });
+    fireEvent.change(screen.getByLabelText("Tipo"), { target: { value: "Control interno" } });
+    fireEvent.change(screen.getByLabelText("Contenido"), { target: { value: "Validar soporte antes de conciliar." } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar anotación" }));
+    expect(stored().annotations!.find((note) => note.title === "Criterio de revisión")).toMatchObject({ category: "Control interno", kind: "personal" });
+    expect(screen.getByText("Criterio de revisión").closest("article")?.querySelector(".annotation-kind")?.textContent).toContain("Control interno");
+  });
+
+  it("el paso anterior del recorrido restaura su página y avance guardado", () => {
+    prepare();
+    render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
+    fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
+    fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
+    expect(document.querySelector(".tour-coach small")?.textContent).toContain("3/11");
+    fireEvent.click(screen.getByRole("button", { name: "Anterior" }));
+    expect(document.querySelector(".tour-coach small")?.textContent).toContain("2/11");
+    expect(document.querySelector("nav button.active")?.getAttribute("data-nav")).toBe("day");
+    expect(stored().tour.e0).toBe(1);
+  });
+
+  it("abre la vista del encargado con sus tareas y conserva el perfil al volver al tablero", () => {
+    const state = prepare("m1");
+    const example = seed().tasks[0]!;
+    state.tasks = [
+      { ...example, id: "manager-own", ownerId: "m1", title: "Tarea de Carolina" },
+      { ...example, id: "employee-own", ownerId: "e0", title: "Tarea de Valentino" },
+    ];
+    localStorage.setItem(KEY, JSON.stringify(state));
+    render(<App />);
+    fireEvent.click(document.querySelector('[data-nav="tasks"]')!);
+    expect(screen.getByText("Tarea de Carolina")).toBeTruthy();
+    expect(screen.queryByText("Tarea de Valentino")).toBeNull();
+    fireEvent.change(screen.getByLabelText("Perfil que estás viendo"), { target: { value: "e0" } });
+    expect(screen.getByText("Tarea de Valentino")).toBeTruthy();
+    expect(screen.queryByText("Tarea de Carolina")).toBeNull();
+    fireEvent.click(document.querySelector('[data-nav="day"]')!);
+    fireEvent.click(document.querySelector('[data-nav="tasks"]')!);
+    expect((screen.getByLabelText("Perfil que estás viendo") as HTMLSelectElement).value).toBe("e0");
+    expect(screen.getByText("Tarea de Valentino")).toBeTruthy();
+  });
+
   it("conversión normal conserva texto y crea vínculo", () => {
     prepare();
     render(<App />);
@@ -264,9 +312,9 @@ describe("anotaciones y recorrido integrados", () => {
   });
   it("recorrido extenso por rol y pausa/reanudación", () => {
     for (const [role, total] of [
-      ["e0", 7],
-      ["m1", 9],
-      ["boss", 11],
+      ["e0", 11],
+      ["m1", 14],
+      ["boss", 16],
     ] as const) {
       prepare(role);
       const view = render(<App />);
@@ -289,8 +337,8 @@ describe("anotaciones y recorrido integrados", () => {
   });
   it("recorrido no avanza vista si falló guardar avance", () => {
     const state = prepare();
-    state.tour.e0 = 4;
-    state.tourVersion = { e0: 2 };
+    state.tour.e0 = 5;
+    state.tourVersion = { e0: 3 };
     localStorage.setItem(KEY, JSON.stringify(state));
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
@@ -302,7 +350,7 @@ describe("anotaciones y recorrido integrados", () => {
       .querySelector("nav button.active")!
       .getAttribute("data-nav");
     const coach = document.querySelector(".tour-coach h3")!.textContent;
-    record("failed_tour_save_stays_consistent", currentPage === "operations", {
+    record("failed_tour_save_stays_consistent", currentPage === "tasks", {
       currentPage,
       coach,
       savedStep: stored().tour.e0,
@@ -335,7 +383,7 @@ describe("anotaciones y recorrido integrados", () => {
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
     expect(document.querySelector(".tour-coach small")?.textContent).toContain(
-      "1/7",
+      "1/11",
     );
   });
   it("fin de inducción abre Mi día aunque home sea tablero y no duplica asignaciones", () => {
@@ -358,11 +406,11 @@ describe("anotaciones y recorrido integrados", () => {
       document.querySelector("nav button.active")?.getAttribute("data-nav"),
     ).toBe("day");
     expect(document.querySelector(".tour-coach small")?.textContent).toContain(
-      "1/7",
+      "1/11",
     );
     const saved = stored();
     expect(saved.tour.e0).toBe(0);
-    expect(saved.tourVersion?.e0).toBe(2);
+    expect(saved.tourVersion?.e0).toBe(3);
     expect(saved.onboarding.e0.completedAt).toBeTruthy();
     expect(saved.onboarding.e0.home).toBe("tasks");
     expect(saved.assignments).toHaveLength(1);
@@ -386,19 +434,19 @@ describe("anotaciones y recorrido integrados", () => {
     prepare();
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
-    for (let step = 0; step < 6; step++)
+    for (let step = 0; step < 10; step++)
       fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
     expect(document.querySelector(".tour-coach small")?.textContent).toContain(
-      "7/7",
+      "11/11",
     );
     const before = stored();
     fireEvent.click(screen.getByRole("button", { name: "Listo" }));
     expect(document.querySelector(".tour-coach")).toBeNull();
-    expect(stored().tour.e0).toBe(7);
-    expect(stored().tourVersion?.e0).toBe(2);
+    expect(stored().tour.e0).toBe(11);
+    expect(stored().tourVersion?.e0).toBe(3);
     fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
     expect(document.querySelector(".tour-coach small")?.textContent).toContain(
-      "1/7",
+      "1/11",
     );
     expect(stored().tour.e0).toBe(0);
     expect(stored().assignments).toEqual(before.assignments);
@@ -408,7 +456,7 @@ describe("anotaciones y recorrido integrados", () => {
     const state = prepare();
     state.onboarding.e0.home = "tasks";
     state.tour.e0 = 4;
-    state.tourVersion = { e0: 2 };
+    state.tourVersion = { e0: 3 };
     localStorage.setItem(KEY, JSON.stringify(state));
     render(<App />);
     const before = stored();
@@ -426,16 +474,16 @@ describe("anotaciones y recorrido integrados", () => {
     setItem.mockRestore();
     fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
     expect(document.querySelector(".tour-coach small")?.textContent).toContain(
-      "5/7",
+      "5/11",
     );
     expect(
       document.querySelector("nav button.active")?.getAttribute("data-nav"),
-    ).toBe("operations");
+    ).toBe("tasks");
   });
   it("fallo al cerrar recorrido conserva último paso; Listo se puede reintentar", () => {
     const state = prepare();
-    state.tour.e0 = 6;
-    state.tourVersion = { e0: 2 };
+    state.tour.e0 = 10;
+    state.tourVersion = { e0: 3 };
     localStorage.setItem(KEY, JSON.stringify(state));
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
@@ -447,16 +495,16 @@ describe("anotaciones y recorrido integrados", () => {
       });
     fireEvent.click(screen.getByRole("button", { name: "Listo" }));
     expect(document.querySelector(".tour-coach small")?.textContent).toContain(
-      "7/7",
+      "11/11",
     );
     expect(
       document.querySelector("nav button.active")?.getAttribute("data-nav"),
-    ).toBe("annotations");
+    ).toBe("day");
     expect(stored()).toEqual(before);
     setItem.mockRestore();
     fireEvent.click(screen.getByRole("button", { name: "Listo" }));
     expect(document.querySelector(".tour-coach")).toBeNull();
-    expect(stored().tour.e0).toBe(7);
+    expect(stored().tour.e0).toBe(11);
   });
   it("editar nota con guardado fallido preserva ID y campos; reintento actualiza una sola nota", () => {
     prepare();
@@ -489,7 +537,7 @@ describe("anotaciones y recorrido integrados", () => {
     expect(
       (screen.getByLabelText("Contenido") as HTMLTextAreaElement).value,
     ).toBe("=SUMAR.SI(A:A;B1;C:C)");
-    expect((screen.getByLabelText("Tipo") as HTMLSelectElement).value).toBe(
+    expect((screen.getByLabelText("Tipo") as HTMLInputElement).value).toBe(
       "formula",
     );
     expect(
@@ -508,7 +556,7 @@ describe("anotaciones y recorrido integrados", () => {
       convertedTaskId: null,
     });
     expect(
-      screen.getByRole("button", { name: "Guardar anotación" }),
+      screen.getByRole("button", { name: "Nueva anotación" }),
     ).toBeTruthy();
   });
 });

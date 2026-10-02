@@ -213,6 +213,69 @@ describe("task reader con SELECT allowlistado y RLS del AccountingLab", () => {
     ).toMatchObject({ ok: true, rows: [] });
   });
 
+  it("compares complete SQL task/session rows without losing timestamp precision", async () => {
+    const taskId = await lab.task({
+      checklist: [{ id: "control", done: false, evidence: "retained" }],
+    });
+    const sessionId = await lab.session(taskId, ids.owner, null,
+      "2026-10-02T10:00:00.123456Z", "2026-10-02T10:01:00.654321Z");
+    await lab.admin();
+    const expectedTask = (await lab.first(
+      "select to_jsonb(t) row from task_instances t where id=$1", [taskId],
+    )).row;
+    const expectedSession = (await lab.first(
+      "select to_jsonb(s) row from task_time_sessions s where id=$1", [sessionId],
+    )).row;
+    await lab.actor(ids.owner);
+    const reader = createTaskReader(sqlTransport());
+    expect(await reader.findTask({ instanceId: taskId })).toEqual({
+      ok: true, kind: "found", row: expectedTask,
+    });
+    const result = await reader.listSessions({ instanceIds: [taskId] });
+    expect(result).toMatchObject({ ok: true, rows: [expectedSession] });
+    expect(expectedSession.started_at).toContain(".123456");
+    expect(expectedSession.ended_at).toContain(".654321");
+  });
+
+  it("keeps operative checklists in progress and reloads confirmed work and paused timer", async () => {
+    const taskId = await lab.task({
+      kind: "operativa",
+      checklist: [{ id: "control-a", done: false }, { id: "control-b", done: false }],
+    });
+    const reader = createTaskReader(sqlTransport());
+    const { gateway } = gatewayHarness();
+    await lab.actor(ids.owner);
+    const started = await gateway.execute(command({
+      kind: "start", instanceId: taskId, expectedRevision: 0, switch: false,
+    }));
+    expect(started).toMatchObject({ ok: true, kind: "start" });
+    if (!started.ok || started.kind !== "start") throw new Error("Expected timer start");
+    await lab.actor(ids.owner);
+    expect(await gateway.execute(command({
+      kind: "checklist", instanceId: taskId, expectedRevision: 1,
+      checkId: "control-a", done: true, reason: null,
+    }))).toMatchObject({ ok: true, kind: "checklist", revision: 2 });
+    await lab.actor(ids.owner);
+    expect(await gateway.execute(command({
+      kind: "checklist", instanceId: taskId, expectedRevision: 2,
+      checkId: "control-b", done: true, reason: null,
+    }))).toMatchObject({ ok: true, kind: "checklist", revision: 3 });
+    await lab.actor(ids.owner);
+    expect(await reader.findTask({ instanceId: taskId })).toMatchObject({
+      ok: true, kind: "found", row: {
+        status: "En curso", state_revision: 3,
+        checklist: [{ id: "control-a", done: true }, { id: "control-b", done: true }],
+      },
+    });
+    await lab.actor(ids.owner);
+    expect(await gateway.execute(command({ kind: "pause", sessionId: started.sessionId }))).toMatchObject({ ok: true, kind: "pause" });
+    await lab.actor(ids.owner);
+    const history = await reader.listSessions({ instanceIds: [taskId] });
+    expect(history).toMatchObject({ ok: true, rows: [{ id: started.sessionId, ended_at: expect.any(String) }] });
+    await lab.actor(ids.owner);
+    expect(await reader.findTask({ instanceId: taskId })).toMatchObject({ ok: true, kind: "found", row: { status: "En curso", state_revision: 4 } });
+  });
+
   it("enforces employee, current manager, boss and organization scope despite caller filters", async () => {
     const period = "2098-02-01";
     const ownA = await lab.task({ company: ids.company, period });
@@ -384,7 +447,10 @@ describe("task reader con SELECT allowlistado y RLS del AccountingLab", () => {
   });
 
   it("retains an executor's historical session after its sealed coverage is cancelled", async () => {
-    const taskId = await lab.task();
+    const taskId = await lab.task({ period: lab.period });
+    const otherCompanyTask = await lab.task({ company: ids.otherCompany, period: lab.period });
+    const priorPeriod = `${String(Number(lab.period.slice(0, 4)) - (lab.period.slice(5, 7) === "01" ? 1 : 0)).padStart(4, "0")}-${lab.period.slice(5, 7) === "01" ? "12" : String(Number(lab.period.slice(5, 7)) - 1).padStart(2, "0")}-01`;
+    const priorPeriodTask = await lab.task({ period: priorPeriod });
     const originalOwnerSession = await lab.session(
       taskId,
       ids.owner,
@@ -419,6 +485,15 @@ describe("task reader con SELECT allowlistado y RLS del AccountingLab", () => {
       kind: "found",
       row: { status: "En curso", state_revision: 1 },
     });
+    await lab.actor(ids.peer);
+    expect(await reader.findTask({ instanceId: otherCompanyTask })).toEqual({ ok: true, kind: "unavailable" });
+    await lab.actor(ids.peer);
+    expect(await reader.findTask({ instanceId: priorPeriodTask })).toEqual({ ok: true, kind: "unavailable" });
+    await lab.actor(ids.peer);
+    expect(await reader.listTasks({ period: lab.period, companyId: ids.otherCompany, ownerId: ids.owner })).toMatchObject({ ok: true, rows: [] });
+    await lab.actor(ids.peer);
+    expect(await reader.listTasks({ period: priorPeriod, companyId: ids.company, ownerId: ids.owner })).toMatchObject({ ok: true, rows: [] });
+    expect(await lab.first("select current_user role,auth.uid() actor")).toEqual({ role: "authenticated", actor: ids.peer });
 
     await lab.actor(ids.boss, "aal2");
     await lab.first("select public.cancel_employee_absence($1,$2,$3)", [
@@ -453,6 +528,7 @@ describe("task reader con SELECT allowlistado y RLS del AccountingLab", () => {
     );
     const afterDeniedRead = await lab.capture();
     expect(afterDeniedRead).toEqual(beforeDeniedRead);
+    await lab.actor(ids.peer);
     expect(
       await reader.listTasks({
         period: lab.period,
@@ -460,6 +536,8 @@ describe("task reader con SELECT allowlistado y RLS del AccountingLab", () => {
         ownerId: ids.owner,
       }),
     ).toMatchObject({ ok: true, rows: [] });
+    await lab.actor(ids.peer);
+    expect(await reader.listTasks({ period: priorPeriod, companyId: ids.company, ownerId: ids.owner })).toMatchObject({ ok: true, rows: [] });
   });
 
   it("re-reads confirmed state after starting, checklist, transition and switching timers", async () => {

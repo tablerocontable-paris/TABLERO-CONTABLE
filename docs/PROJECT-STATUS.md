@@ -19,7 +19,11 @@ que 40% de los empleados puedan migrarse: hoy no hay base de producción conecta
 
 ## Evidencia actual
 
-189 pruebas en 17 archivos y compilación correctas. El laboratorio PGlite verifica
+**Código y publicación:** registrar aquí el SHA/version del deploy privado antes
+de cerrar el cambio. El bloque UI A y los tests del lector forman este cambio
+lógico; no se modificaron gateway, lector de producción, SQL 001–008 ni dependencias.
+
+195 pruebas en 17 archivos y compilación correctas. El laboratorio PGlite verifica
 23 casos secuenciales; 24 pares preparados para PostgreSQL siguen sin ejecutarse.
 La rama BA previa al corte usa jefe con aal2 y confirma replay idempotente. No se
 modificaron SQL 001–008 ni el frontend durante este ajuste.
@@ -30,20 +34,17 @@ adaptador de seis RPC conserva filas, claves y argumentos, valida ACKs y separa
 fallos sin reintentar automáticamente. 23 pruebas nuevas cubren esta frontera
 y su composición con SQL. La revisión del adaptador está aceptada tras corregir
 ADP-R01: comparación temporal conserva fracciones menores a un milisegundo.
-El lector tipado/paginado está implementado y tiene pruebas de perfiles,
-filtros, jerarquía, cancelación de cobertura y recargas tras RPC. La revisión
-independiente sobre v34 no acepta todavía toda la matriz: la última lectura de
-un test de cobertura corre como postgres tras capture; faltan límites de empresa/
-período con filas existentes, semántica de checklist operativo y algunos casos
-de sesiones/metadata. Reproducción y contrato acotado en
-`architecture/REVIEW-DATA-READ-INDEPENDENT-20261002.md`. La evidencia de ejecución
-anterior se conserva como histórica; tests verdes no cubren criterios ausentes.
-El lector y el gateway siguen sin conectarse a la página.
+El lector tipado/paginado tiene pruebas de perfiles, filtros, jerarquía,
+cancelación y cobertura por empresa/período con filas existentes; se añadieron
+lecturas completas con precisión temporal, checklist operativo, paginación de
+sesiones y rechazo de respuestas null/malformadas. La prueba de cobertura
+restaura el actor authenticated después de capturas administrativas. La matriz
+de evidencias está en `architecture/REVIEW-DATA-READ-INDEPENDENT-RESULT-20261002.md`
+y espera revisión Sol. El lector y gateway siguen sin conectarse a la página.
 
-Las 18 correcciones del nuevo pedido se analizaron y tienen reglas/aceptación
-por bloque en `product/CORRECTIONS-20261002.md`. Aún no se implementaron:
-próxima ejecución Luna medio en `product/CORRECTIONS-UI-EXECUTION-20261002.md`.
-No aumentar el porcentaje por documentos o por el número de pruebas.
+Las 18 correcciones siguen registradas en `product/CORRECTIONS-20261002.md`.
+El bloque A está implementado como demo local y aguarda revisión Sol; los bloques
+B/C/D siguen pendientes. No aumentar el porcentaje por documentos o pruebas.
 
 La demo usa localStorage y selector simulado. Que haya pruebas SQL verdes no
 significa que esos permisos ya gobiernen la página ni que se envíe correo.
@@ -59,8 +60,7 @@ roadmap, pendiente de diseño/revisión y de la fase de autenticación.
 
 ## Siguiente camino
 
-1. Ejecutar bloque A de interfaz y completar evidencia del lector (Luna medio);
-   revisión independiente después con Sol medio.
+1. Revisar bloque A de interfaz y evidencia del lector con Sol 6.1 medio.
 2. Sol define contratos de coordinación e integra pedidos nuevos de datos/permisos
    por bloques; Luna implementa cada contrato cerrado.
 3. Completar producto y validaciones reales/piloto antes de migrar a compañeros.

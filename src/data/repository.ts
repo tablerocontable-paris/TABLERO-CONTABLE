@@ -46,7 +46,7 @@ export function seed(): State {
         companyIds: ["c1", "c2", "c3", "c4"],
         active: true,
       },
-      ...["Lucía Fernández", "Martín Acosta"].map((name, i) => ({
+      ...["Carolina Díaz", "Martín Acosta"].map((name, i) => ({
         id: "m" + (i + 1),
         name,
         role: "encargado" as const,
@@ -60,7 +60,7 @@ export function seed(): State {
       })),
       ...[
         "Valentino Magni",
-        "Carolina Díaz",
+        "Lucía Fernández",
         "Joaquín Pérez",
         "Sofía Torres",
         "Emilia Romero",
@@ -280,6 +280,7 @@ const schema = z.object({
         title: z.string(),
         content: z.string(),
         kind: z.enum(["personal", "formula", "reminder"]),
+        category: z.string().max(40).optional(),
         reminderOn: z.string().nullable(),
         createdAt: z.string(),
         updatedAt: z.string(),

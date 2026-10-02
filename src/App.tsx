@@ -90,6 +90,7 @@ import { load, persist, blankOnboarding } from "./data/repository";
 import { Dialog, Panel, Empty, Meter } from "./components/ui";
 import Onboarding from "./components/Onboarding";
 import Annotations from "./components/Annotations";
+import StepListEditor, { parseSteps } from "./components/StepListEditor";
 type Page =
   | "overview"
   | "day"
@@ -155,6 +156,7 @@ export default function App() {
   );
   const [month, setMonth] = useState(currentMonth);
   const [company, setCompany] = useState("");
+  const [boardOwner, setBoardOwner] = useState("");
   const [owner, setOwner] = useState("");
   const [sector, setSector] = useState("");
   const [team, setTeam] = useState("");
@@ -182,6 +184,10 @@ export default function App() {
     state.profiles.find((p) => p.id === pid)?.name || "Sin responsable";
   const companyOf = (cid: string) =>
     state.companies.find((c) => c.id === cid)?.name || "Sin empresa";
+  const teamName = (teamId: string) => {
+    const selectedTeam = state.teams.find((t) => t.id === teamId);
+    return selectedTeam ? `Equipo de ${nameOf(selectedTeam.managerId)}` : "Sin equipo";
+  };
   function notify(s: string) {
     setNotice(s);
   }
@@ -227,14 +233,16 @@ export default function App() {
     }
   }
   function saveAnnotation(
-    input: Pick<Annotation, "id" | "title" | "content" | "kind" | "reminderOn">,
+    input: Pick<Annotation, "id" | "title" | "content" | "kind" | "category" | "reminderOn">,
   ): boolean {
     const now = new Date().toISOString();
     const existing = state.annotations?.find(
       (a) => a.id === input.id && a.ownerId === active.id,
     );
+    const category = input.category?.trim().slice(0, 40) || undefined;
     const annotation: Annotation = {
       ...input,
+      category,
       id: existing?.id || id(),
       ownerId: active.id,
       createdAt: existing?.createdAt || now,
@@ -302,10 +310,16 @@ export default function App() {
   const monthTasks = state.tasks.filter(
     (t) => t.month === month && canWork(state, active, t),
   );
+  const ownBoardPages: Page[] = ["day", "tasks", "operations", "calendar"];
+  const viewedOwner = boardOwner || active.id;
+  const ownerFilter = ownBoardPages.includes(page) ? viewedOwner : owner;
   const filtered = monthTasks.filter(
     (t) =>
       (!company || t.companyId === company) &&
-      (!owner || t.ownerId === owner) &&
+      (!ownerFilter ||
+        t.ownerId === ownerFilter ||
+        (ownBoardPages.includes(page) && viewedOwner === active.id &&
+          coverageFor(state, t)?.replacementId === active.id)) &&
       (!sector || t.sector === sector) &&
       (!team || t.teamId === team) &&
       (!query ||
@@ -320,6 +334,7 @@ export default function App() {
   function changeProfile(pid: string) {
     if (commit({ ...state, activeId: pid })) {
       setOwner("");
+      setBoardOwner(pid);
       setCompany("");
       setTeam("");
       setSector("");
@@ -519,7 +534,7 @@ export default function App() {
         },
       },
       tour: { ...state.tour, [active.id]: 0 },
-      tourVersion: { ...state.tourVersion, [active.id]: 2 },
+      tourVersion: { ...state.tourVersion, [active.id]: 3 },
     };
     next = materialize(next, month);
     if (commit(next, "Completó inducción", active.id)) {
@@ -578,7 +593,7 @@ export default function App() {
     group === "individual"
       ? people.map((p) => ({ id: p.id, name: p.name }))
       : group === "team"
-        ? state.teams
+        ? state.teams.map((t) => ({ ...t, name: teamName(t.id) }))
         : [...new Set(filtered.map((t) => t.sector))].map((s) => ({
             id: s,
             name: s,
@@ -693,6 +708,9 @@ export default function App() {
             </small>
           )}
         </p>
+        {coverageFor(state, t)?.replacementId === active.id && viewedOwner === active.id && (
+          <span className="coverage-task-badge">Tarea de cobertura para {nameOf(coverageFor(state, t)!.ownerId)}</span>
+        )}
         {t.scheduledOn && <small>Realización: {fmt(t.scheduledOn)}</small>}
         <div className="timer-mini">
           {t.sessions?.length ? (
@@ -888,83 +906,29 @@ export default function App() {
   }
   const tasksForDetail = state.tasks.find((t) => t.id === detail);
   const logTask = state.tasks.find((t) => t.id === logFor);
-  const tours = [
-    {
-      page: "day" as Page,
-      selector: '[data-nav="day"]',
-      title: "Tu punto de partida",
-      text: "Mi día reúne tus prioridades y vencimientos para que sepas por dónde empezar.",
-    },
-    {
-      page: "day" as Page,
-      selector: ".filters",
-      title: "Elegí el ambiente",
-      text: "Filtrá por empresa o mirá todas juntas. La misma conciliación en dos empresas son dos tareas distintas.",
-    },
-    {
-      page: "tasks" as Page,
-      selector: '[data-nav="tasks"]',
-      title: "Avanzá cada tarjeta",
-      text: "Iniciar la tarea la mueve a En curso. Podés abrir cada columna de manera independiente.",
-    },
-    {
-      page: "tasks" as Page,
-      selector: '[data-nav="tasks"]',
-      title: "Dejá constancia del proceso",
-      text: "Marcá los controles y usá el cronómetro para registrar el tiempo dedicado.",
-    },
-    {
-      page: "operations" as Page,
-      selector: '[data-nav="operations"]',
-      title: "Registrá resultados operativos",
-      text: "Cargá facturas, trámites o pagos con cantidades y referencias para el cierre mensual.",
-    },
-    {
-      page: "calendar" as Page,
-      selector: '[data-nav="calendar"]',
-      title: "Atendé los vencimientos",
-      text: "Revisá las fechas de trabajo del período y organizá lo próximo antes de que venza.",
-    },
-    {
-      page: "annotations" as Page,
-      selector: '[data-nav="annotations"]',
-      title: "Guardá tus referencias",
-      text: "Conservá fórmulas y recordatorios personales. Cuando una nota requiera seguimiento, convertíla en tarea.",
-    },
-    ...(manager
-      ? [
-          {
-            page: "analytics" as Page,
-            selector: '[data-nav="analytics"]',
-            title: "Analizá el desempeño",
-            text: "Compará cumplimiento, tiempos y peso por persona, equipo y sector.",
-          },
-          {
-            page: "team" as Page,
-            selector: '[data-nav="team"]',
-            title: "Acompañá a tu equipo",
-            text: "La estructura define qué perfiles forman parte de tu ámbito de supervisión.",
-          },
-        ]
-      : []),
-    ...(active.role === "jefe"
-      ? [
-          {
-            page: "catalog" as Page,
-            selector: '[data-nav="catalog"]',
-            title: "Estandarizá el trabajo",
-            text: "Configurá procesos compartidos y sus pesos para que el análisis use criterios consistentes.",
-          },
-          {
-            page: "closing" as Page,
-            selector: '[data-nav="closing"]',
-            title: "Prepará el cierre",
-            text: "El cierre conserva un resumen mensual individual para la revisión de jefatura.",
-          },
-        ]
-      : []),
+  const tours: { page: Page; selector: string; title: string; text: string }[] = [
+    { page: "day", selector: '[data-nav="day"]', title: "Tu punto de partida", text: "Mi día reúne prioridades y vencimientos para empezar el período." },
+    { page: "day", selector: ".sidebar-workspace", title: "Elegí el ambiente", text: "Filtrá las empresas autorizadas. La misma conciliación en dos empresas conserva estados independientes." },
+    { page: "tasks", selector: ".board-owner-filter", title: "Elegí el perfil", text: "Tu tablero abre con tus tareas. Si supervisás a alguien, podés consultar su perfil sin cambiar quién realiza las acciones." },
+    { page: "tasks", selector: ".task-order", title: "Ordená el tablero", text: "Plegá cada estado por separado y ordená por nombre para encontrar una tarjeta rápido." },
+    { page: "tasks", selector: '[data-tour="task-actions"]', title: "Cargá una tarea", text: "Elegí una tarea puntual o un proceso del catálogo; revisá su empresa, frecuencia y vencimiento." },
+    { page: "tasks", selector: '[data-nav="tasks"]', title: "Registrá tu trabajo", text: "Iniciá el cronómetro, completá los controles paso a paso y cerrá la tarjeta cuando termines." },
+    { page: "operations", selector: '[data-nav="operations"]', title: "Cargá la actividad", text: "Registrá cantidades y referencias de facturas, trámites o pagos para el cierre del período." },
+    { page: "calendar", selector: '[data-nav="calendar"]', title: "Revisá las fechas", text: "Consultá los vencimientos de las tareas del período y atendé primero lo próximo." },
+    { page: "absences", selector: '[data-nav="absences"]', title: "Coordiná cobertura", text: "Registrá vacaciones o licencias y organizá con el encargado quién cubre las tareas abiertas." },
+    { page: "annotations", selector: '[data-nav="annotations"]', title: "Guardá referencias", text: "Conservá fórmulas y recordatorios personales. Convertí una anotación en una tarea puntual si necesitás seguimiento." },
+    { page: "day", selector: '[data-nav="day"]', title: "Volvé a tus prioridades", text: "Al terminar, Mi día te muestra tus próximas acciones y recordatorios propios." },
+    ...(manager ? [
+      { page: "analytics" as Page, selector: '[data-nav="analytics"]', title: "Analizá resultados", text: "Compará cumplimiento, tiempos y pesos por persona, equipo o sector." },
+      { page: "team" as Page, selector: '[data-nav="team"]', title: "Acompañá a tu equipo", text: "La relación jerárquica define los perfiles que podés consultar." },
+      { page: "closing" as Page, selector: '[data-nav="closing"]', title: "Revisá el período", text: "El cierre mensual consolida la actividad de cada persona para revisión." },
+    ] : []),
+    ...(active.role === "jefe" ? [
+      { page: "catalog" as Page, selector: '[data-nav="catalog"]', title: "Estandarizá procesos", text: "Configurá controles y pesos comunes para las tareas habituales." },
+      { page: "team" as Page, selector: '[data-nav="team"]', title: "Administrá perfiles", text: "Configurá accesos, responsables, equipos y empresas del organigrama." },
+    ] : []),
   ];
-  const tourVersion = 2;
+  const tourVersion = 3;
   const savedTourValue =
     state.tourVersion?.[active.id] === tourVersion
       ? state.tour[active.id] || 0
@@ -982,17 +946,20 @@ export default function App() {
           <img src="/logo-grupo-paris.svg" alt="Grupo París" />
           <span>ESPACIO CONTABLE</span>
         </div>
-        <div className="workspace">
+        <label className="workspace sidebar-workspace">
           <Building2 size={18} />
           <div>
-            Grupo París<small>4 empresas · un equipo</small>
+            <span>AMBIENTE DE TRABAJO</span>
+            <select aria-label="Ambiente de trabajo" value={company} onChange={(e) => setCompany(e.target.value)}>
+              <option value="">Todas las empresas</option>
+              {state.companies.filter((c) => active.companyIds.includes(c.id)).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
           </div>
-          <ChevronDown size={14} />
-        </div>
+        </label>
         <span className="nav-label">TU ESPACIO DE TRABAJO</span>
         <nav>
           {pages
-            .filter((p) => manager || !["overview", "catalog"].includes(p.id))
+            .filter((p) => manager || !["overview", "catalog", "closing"].includes(p.id))
             .map((p) => (
               <button
                 data-nav={p.id}
@@ -1170,10 +1137,11 @@ export default function App() {
                           : "Tus empresas, tus prioridades y el contexto que necesitás para decidir."}
               </p>
             </div>
-            <button className="primary" onClick={() => setModal("new")}>
-              <Plus size={17} />
-              Nueva tarea
-            </button>
+            {(["day", "tasks", "operations"] as Page[]).includes(page) && (
+              <button className="primary" data-tour="task-actions" onClick={() => setModal("new")}>
+                <Plus size={17} /> Nueva tarea
+              </button>
+            )}
           </div>
           <div
             className={
@@ -1188,7 +1156,7 @@ export default function App() {
                 onChange={(e) => setCompany(e.target.value)}
               >
                 <option value="">Todas las empresas</option>
-                {state.companies.map((c) => (
+                {state.companies.filter((c) => active.companyIds.includes(c.id)).map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
                   </option>
@@ -1213,24 +1181,24 @@ export default function App() {
               <option value="">Todos los equipos</option>
               {state.teams.map((t) => (
                 <option key={t.id} value={t.id}>
-                  {t.name}
+                  {teamName(t.id)}
                 </option>
               ))}
             </select>
-            <select
-              aria-label="Empleado"
-              value={owner}
-              onChange={(e) => setOwner(e.target.value)}
-            >
-              <option value="">
-                {manager ? "Todo mi ámbito" : "Mis tareas"}
-              </option>
-              {people.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+            {ownBoardPages.includes(page) ? (
+              <label className="board-owner-filter">
+                <span>PERFIL QUE ESTÁS VIENDO</span>
+                <select aria-label="Perfil que estás viendo" value={viewedOwner} onChange={(e) => setBoardOwner(e.target.value)}>
+                  <option value={active.id}>Mis tareas · {active.name}</option>
+                  {people.filter((p) => p.id !== active.id).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </label>
+            ) : (
+              <select aria-label="Empleado" value={owner} onChange={(e) => setOwner(e.target.value)}>
+                <option value="">{manager ? "Todo mi ámbito" : "Mis tareas"}</option>
+                {people.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+            )}
             <select
               aria-label="Sector"
               value={sector}
@@ -1337,24 +1305,31 @@ export default function App() {
                           />
                           <XAxis
                             dataKey="name"
-                            tickFormatter={(s) => s.split(" ")[0]}
-                            tick={{ fontSize: 11 }}
+                            tick={{ fontSize: 10 }}
+                            interval={0}
+                            angle={-22}
+                            textAnchor="end"
+                            height={56}
                           />
                           <YAxis tick={{ fontSize: 11 }} />
-                          <Tooltip />
+                          <Tooltip cursor={{ fill: "var(--chart-cursor)", stroke: "var(--chart-cursor-border)" }} contentStyle={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 9, color: "var(--ink)" }} labelStyle={{ color: "var(--ink)", fontWeight: 600 }} itemStyle={{ color: "var(--ink)" }} />
                           <Legend />
                           <Bar
                             dataKey="earned"
                             name="Puntos logrados"
                             stackId="a"
                             fill="var(--chart-ink)"
+                            maxBarSize={28}
+                            activeBar={{ fill: "var(--chart-active)", stroke: "var(--chart-active-border)" }}
                           />
                           <Bar
                             dataKey="pendingPoints"
                             name="Puntos pendientes"
                             stackId="a"
-                            fill="#dddfe4"
+                            fill="var(--chart-muted)"
                             radius={[4, 4, 0, 0]}
+                            maxBarSize={28}
+                            activeBar={{ fill: "var(--chart-active)", stroke: "var(--chart-active-border)" }}
                           />
                         </BarChart>
                       </ResponsiveContainer>
@@ -1704,19 +1679,25 @@ export default function App() {
                             width={135}
                             tick={{ fontSize: 11 }}
                           />
-                          <Tooltip formatter={(v) => `${v}%`} />
+                          <Tooltip cursor={{ fill: "var(--chart-cursor)", stroke: "var(--chart-cursor-border)" }} contentStyle={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 9, color: "var(--ink)" }} labelStyle={{ color: "var(--ink)", fontWeight: 600 }} itemStyle={{ color: "var(--ink)" }} formatter={(v) => `${v}%`} />
                           <ReferenceLine x={100} stroke="#a4a8b0" />
                           <Bar
                             dataKey="weighted"
                             name="Cumplimiento"
                             fill="var(--chart-ink)"
                             radius={[0, 5, 5, 0]}
+                            maxBarSize={22}
+                            activeBar={{ fill: "var(--chart-active)", stroke: "var(--chart-active-border)" }}
                             onClick={(d) => {
                               if (group === "individual")
-                                setOwner(String(d.id));
+                                setBoardOwner(String(d.id));
                               if (group === "team") setTeam(String(d.id));
                               if (group === "sector") setSector(String(d.id));
-                              setPage("tasks");
+                              if (group !== "individual") {
+                                setPage("analytics");
+                              } else {
+                                setPage("tasks");
+                              }
                             }}
                           />
                         </BarChart>
@@ -1993,7 +1974,7 @@ export default function App() {
                           <GitBranch size={20} />
                           <div>
                             <b>{nameOf(t.managerId)}</b>
-                            <small>Encargado · {t.name}</small>
+                            <small>Encargado · {teamName(t.id)}</small>
                           </div>
                         </div>
                         {people
@@ -2015,7 +1996,7 @@ export default function App() {
                               <button
                                 aria-label={`Ver tareas de ${p.name}`}
                                 onClick={() => {
-                                  setOwner(p.id);
+                                  setBoardOwner(p.id);
                                   setPage("tasks");
                                 }}
                               >
@@ -2153,7 +2134,7 @@ export default function App() {
                 </div>
               </Panel>
             )}
-            {page === "closing" && (
+            {page === "closing" && manager && (
               <>
                 <div className="notice-banner">
                   <LockKeyhole size={18} />
@@ -2291,6 +2272,13 @@ export default function App() {
           <h3>{tours[tourStep].title}</h3>
           <p>{tours[tourStep].text}</p>
           <div>
+            <button
+              disabled={tourStep === 0}
+              onClick={() => {
+                const previous = Math.max(0, tourStep - 1);
+                if (commit({ ...state, tour: { ...state.tour, [active.id]: previous }, tourVersion: { ...state.tourVersion, [active.id]: tourVersion } })) setPage(tours[previous].page);
+              }}
+            >Anterior</button>
             <button onClick={() => setTourOpen(false)}>Pausar</button>
             <button
               className="primary"
@@ -2798,7 +2786,7 @@ export default function App() {
                 <select name="team">
                   {state.teams.map((t) => (
                     <option key={t.id} value={t.id}>
-                      {t.name} · {nameOf(t.managerId)}
+                      {teamName(t.id)} · {nameOf(t.managerId)}
                     </option>
                   ))}
                 </select>
@@ -2923,6 +2911,7 @@ function NewTask({
   create: (a: Assignment) => void;
 }) {
   const [template, setTemplate] = useState("");
+  const [steps, setSteps] = useState<string[]>(() => seedAnnotation ? parseSteps(seedAnnotation.content) : []);
   const [schedule, setSchedule] = useState<Schedule>(() =>
     defaultSchedule(seedAnnotation?.reminderOn || month + "-25"),
   );
@@ -2942,6 +2931,8 @@ function NewTask({
       setScheduleError((e as Error).message);
       return;
     }
+    const checklist = parseSteps(String(f.get("steps") || ""));
+    const selectedKind = t?.kind || kind;
     create({
       schedule,
       id: id(),
@@ -2949,20 +2940,15 @@ function NewTask({
       title,
       ownerId: String(f.get("owner")),
       companyId: String(f.get("company")),
-      sector: String(f.get("sector")),
-      kind,
-      weight: active.role === "jefe" ? Number(f.get("weight")) : t?.weight || 1,
-      unit: kind === "operativa" ? String(f.get("unit")).trim() : "",
-      target: kind === "operativa" ? Number(f.get("target")) : 0,
+      sector: t?.sector || String(f.get("sector") || active.sector),
+      kind: selectedKind,
+      weight: t?.weight || (active.role === "jefe" ? Number(f.get("weight") || 1) : 1),
+      unit: selectedKind === "operativa" ? (t?.unit || String(f.get("unit") || "").trim()) : "",
+      target: selectedKind === "operativa" ? (t?.target || Number(f.get("target") || 0)) : 0,
       day: schedule.monthDay,
       frequency: schedule.frequency,
       steps:
-        kind === "resultado"
-          ? String(f.get("steps"))
-              .split("\n")
-              .map((s) => s.trim())
-              .filter(Boolean)
-          : [],
+        selectedKind === "resultado" ? (t?.steps || checklist) : [],
       startMonth: seedAnnotation ? schedule.startDate.slice(0, 7) : month,
       priority: String(f.get("priority")) as Assignment["priority"],
     });
@@ -2975,10 +2961,9 @@ function NewTask({
           value={template}
           onChange={(e) => {
             setTemplate(e.target.value);
-            setKind(
-              state.templates.find((t) => t.id === e.target.value)?.kind ||
-                "resultado",
-            );
+            const selected = state.templates.find((t) => t.id === e.target.value);
+            setKind(selected?.kind || "resultado");
+            setSteps(selected?.steps || (seedAnnotation ? parseSteps(seedAnnotation.content) : []));
           }}
         >
           <option value="">Trabajo esporádico · una sola vez</option>
@@ -3117,10 +3102,10 @@ function NewTask({
         {kind === "resultado" && (
           <label>
             Checklist · un paso por línea
-            <textarea
+            <StepListEditor
               name="steps"
-              rows={4}
-              defaultValue={t?.steps.join("\n") || seedAnnotation?.content}
+              value={t?.steps || steps}
+              onChange={setSteps}
               readOnly={!!t}
             />
           </label>

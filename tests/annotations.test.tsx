@@ -31,8 +31,9 @@ describe("anotaciones personales", () => {
         onOpenTask={vi.fn()}
       />,
     );
+    fireEvent.click(screen.getByRole("button", { name: "Nueva anotación" }));
     fireEvent.change(
-      screen.getByPlaceholderText("Ej. Fórmula para diferencias"),
+      screen.getByLabelText("Título"),
       { target: { value: "Cierre" } },
     );
     fireEvent.change(
@@ -42,7 +43,7 @@ describe("anotaciones personales", () => {
       { target: { value: "Controlar saldos" } },
     );
     fireEvent.change(screen.getByLabelText("Tipo"), {
-      target: { value: "reminder" },
+      target: { value: "Recordatorio" },
     });
     fireEvent.change(screen.getByLabelText("Recordarme el"), {
       target: { value: "2026-10-30" },
@@ -72,13 +73,13 @@ describe("anotaciones personales", () => {
       />,
     );
     fireEvent.change(screen.getByLabelText("Filtrar tipo de anotación"), {
-      target: { value: "reminder" },
+      target: { value: "Recordatorio" },
     });
     expect(
       screen.getByText("No hay resultados con estos filtros."),
     ).toBeTruthy();
     fireEvent.change(screen.getByLabelText("Filtrar tipo de anotación"), {
-      target: { value: "formula" },
+      target: { value: "Fórmula de Excel" },
     });
     expect(screen.getByText(note.content)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Convertir en tarea" }));

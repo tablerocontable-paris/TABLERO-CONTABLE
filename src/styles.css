@@ -15,6 +15,10 @@
   --chart-ink: #373a40;
   --ink: #202226;
   --muted: #737982;
+  --chart-cursor: #667085;
+  --chart-cursor-border: #354052;
+  --chart-active: #233d64;
+  --chart-active-border: #16263d;
   --line: #e4e6eb;
   --side: #101113;
   --green: #278260;
@@ -208,6 +212,12 @@ svg {
   font-size: 10px;
   color: #858992;
 }
+.sidebar-workspace { align-items: flex-start; margin-bottom: 20px; }
+.sidebar-workspace > svg { margin-top: 4px; flex: 0 0 auto; color: #bbc7d8; }
+.sidebar-workspace div { min-width: 0; }
+.sidebar-workspace span { display: block; margin-bottom: 5px; font-size: 9px; letter-spacing: .8px; color: #a8afbb; }
+.sidebar-workspace select { width: 100%; padding: 7px 23px 7px 8px; border: 1px solid #ffffff25; border-radius: 6px; background: #252a32; color: #f2f4f7; font-size: 12px; }
+.sidebar-workspace:focus-within { outline: 2px solid #92a9cb; outline-offset: 2px; }
 .nav-label {
   font-size: 9px;
   letter-spacing: 1.2px;
@@ -495,6 +505,7 @@ header span {
   border: 1px solid #e2e6eb !important;
   box-shadow: 0 6px 25px #2222;
 }
+.recharts-tooltip-cursor { opacity: .14; }
 .distribution {
   padding: 23px;
 }
@@ -1191,7 +1202,7 @@ summary {
   position: fixed;
   bottom: 25px;
   left: 270px;
-  width: 340px;
+  width: min(390px, calc(100vw - 300px));
   background: var(--surface);
   padding: 23px;
   border: 1px solid #d1dae7;
@@ -1200,20 +1211,31 @@ summary {
   z-index: 80;
 }
 .tour-coach small {
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 1.2px;
 }
 .tour-coach h3 {
   margin: 10px 0;
 }
 .tour-coach p {
-  font-size: 12px;
+  font-size: 14px;
+  line-height: 1.55;
 }
 .tour-coach > div {
   display: flex;
   justify-content: space-between;
   margin-top: 17px;
 }
+.tour-coach button:disabled { opacity: .45; cursor: not-allowed; }
+.board-owner-filter { min-width: 205px; }
+.board-owner-filter span, .company-filter span { display: block; margin-bottom: 4px; color: var(--muted); font-size: 10px; letter-spacing: .5px; }
+.step-list-editor { display: grid; gap: 7px; }
+.step-editor-row { display: grid; grid-template-columns: 25px minmax(0, 1fr) 34px; gap: 8px; align-items: center; }
+.step-editor-row > span { display: grid; width: 24px; height: 24px; place-items: center; border-radius: 50%; background: var(--surface-soft); color: var(--muted); font-size: 12px; }
+.step-editor-row input { min-width: 0; }
+.step-editor-row button { min-height: 34px; padding: 6px; }
+.step-add { justify-self: start; display: inline-flex; align-items: center; gap: 6px; margin-top: 2px; }
+.coverage-task-badge { display: inline-flex; margin: 2px 0 8px; padding: 4px 7px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 11px; }
 .spotlight {
   outline: 3px solid #9fbbdf !important;
   outline-offset: 4px;
@@ -1662,6 +1684,7 @@ summary {
   .tour-coach {
     left: 20px;
     bottom: 20px;
+    width: calc(100vw - 40px);
     max-width: calc(100vw - 40px);
   }
   .priority-grid {
@@ -1878,6 +1901,7 @@ summary {
   border-color: #536075 !important;
   color: #fff;
 }
+[data-theme="dark"] { --chart-cursor: #ffffff; --chart-cursor-border: #edf2f8; --chart-active: #dbeafe; --chart-active-border: #ffffff; }
 [data-theme="dark"] .recharts-cartesian-axis-tick-value {
   fill: #bec8d6;
 }
@@ -2126,7 +2150,11 @@ summary {
 .annotation-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 14px; }
 .annotation-kind { display: inline-flex; align-items: center; gap: 5px; }
 .annotation-card h3 { margin: 12px 0 5px; font-size: 15px; }
-.annotation-card pre { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 48px; margin: 0 0 13px; color: var(--muted); font: 16px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.annotation-preview { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; color: var(--muted); font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.annotation-preview:not(.expanded) { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.annotation-expand { display: inline-flex; align-items: center; gap: 4px; margin: 3px 0 5px; color: var(--muted); font-size: 12px; }
+.annotation-new { margin: 6px 0 2px; }
+.annotation-card { padding: 12px; }
 .annotation-card-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding-top: 10px; border-top: 1px solid var(--line); }
 .annotation-card-actions button, .annotation-form-actions button { padding: 6px 8px; font-size: 14px; }
 .annotation-card-actions .annotation-linked { color: var(--green); }

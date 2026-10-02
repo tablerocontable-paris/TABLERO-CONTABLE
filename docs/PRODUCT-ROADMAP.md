@@ -1,18 +1,18 @@
 # Decisiones vigentes — 02/10/2026
 
-**Decisión vigente después de revisar v34 (02/10/2026):** las 18 correcciones
-están registradas en `product/CORRECTIONS-20261002.md`; el próximo paso es
-**Luna 6 medio, Standard**, bloque A de `product/CORRECTIONS-UI-EXECUTION-20261002.md`.
+**Estado vigente, 02/10/2026:** bloque A de interfaz implementado por Luna y
+pendiente de revisión Sol 6.1 medio, Standard. Evidencia en `PROJECT-STATUS.md`
+y `product/CORRECTIONS-UI-EXECUTION-20261002.md`. Luna añadió pruebas focalizadas
+para READ-I01–04; Sol debe revisar esa evidencia antes de aceptar el lector.
 Los bloques de datos/permisos B/C/D requieren contratos específicos posteriores.
-No confundir planificación con implementación: la interfaz aún no tiene esos ajustes.
 
 El adaptador de seis RPC está aceptado localmente. La revisión independiente del
 lector sobre `16862eec715d81193c1b8a30403cae0288b8a326` encontró READ-I01
-reproducido y criterios READ-I02–03 sin demostrar. Aceptación del lector todavía
-pendiente: `architecture/REVIEW-DATA-READ-INDEPENDENT-20261002.md`.
-Suite original: 189 pruebas en 17 archivos, build correcto. La prueba temporal
-que reproduce READ-I01 falló intencionalmente y se retiró antes de la suite.
-Concurrencia PostgreSQL y Supabase/Auth/MFA/correo reales siguen pendientes.
+reproducido y criterios READ-I02–03 sin demostrar. Luna añadió pruebas para esas
+brechas; la suite actual tiene 195 pruebas en 17 archivos y build correcto.
+La matriz está en `architecture/REVIEW-DATA-READ-INDEPENDENT-RESULT-20261002.md`.
+Esa evidencia local no equivale a aceptación independiente, concurrencia real de
+PostgreSQL ni integración Supabase/Auth/MFA/correo.
 Grado de avance estimado: 40%, `PROJECT-STATUS.md`. La demo sigue privada,
 sin SQL remoto ni cuentas reales; no está lista para migración. Los apartados
 cronológicos siguientes conservan historia, no reemplazan esta decisión.

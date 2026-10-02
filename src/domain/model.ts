@@ -138,6 +138,7 @@ export interface Annotation {
   title: string;
   content: string;
   kind: AnnotationKind;
+  category?: string;
   reminderOn: string | null;
   createdAt: string;
   updatedAt: string;
