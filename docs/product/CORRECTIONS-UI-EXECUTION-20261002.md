@@ -1,5 +1,10 @@
 # Bloque A — contrato cerrado de implementación de interfaz
 
+**Estado posterior a v37:** implementación revisada, aceptación A pendiente de
+reparación. Ver `../architecture/REVIEW-V37-INDEPENDENT-20261002.md` y ejecutar
+`CORRECTIONS-UI-A-REPAIR-20261002.md`. El contrato y reporte de ejecución siguientes
+se conservan como historial; no reemplazan la revisión independiente.
+
 **Siguiente modelo: GPT-6 Luna, esfuerzo medio, Standard.** Fuente base:
 `16862eec715d81193c1b8a30403cae0288b8a326`, más este commit de planificación.
 Leer AGENTS, CORRECTIONS-20261002 y CONSISTENCY-RULES. No decidir nuevos permisos,

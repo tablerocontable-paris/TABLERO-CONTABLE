@@ -55,8 +55,10 @@ sin pedir otro «continuá».
 
 ## Próximo bloque
 
-**GPT-6 Luna medio, Standard:** ejecutar DATA-READ-FOUNDATION.md; lector paginado
-y recarga de filas confirmadas con aceptación local. Después revisión
-**Sol 6.1 medio**. Nuevas decisiones de Auth/administración requieren
-Sol alto. El cambio es manual; no simularlo con subagentes. Infraestructura dedicada y
-migración de empleados siguen pendientes de integración, concurrencia y piloto.
+**GPT-6 Luna medio, Standard:** ejecutar
+`product/CORRECTIONS-UI-A-REPAIR-20261002.md`. El lector fue aceptado localmente;
+esta ejecución repara A e incorpora sus probes complementarios a los tests.
+Después **Sol 6.1 medio** revisa A. Luego **Sol alto** define arquitectura B/C,
+permisos y coordinación antes de Luna. El cambio es manual; no simularlo con
+subagentes. Infraestructura y migración siguen pendientes de integración,
+concurrencia y piloto. Estado único de continuidad: EXECUTION-NEXT.md.

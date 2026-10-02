@@ -1,0 +1,24 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> grupo-paris-nueva-generacion@0.4.0 test
+> vitest run tests/review-reader-v37.probe.test.ts tests/review-reader-coverage-v37.probe.test.ts -t READ-V37|retains an executor --reporter=verbose --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.7 /workspace/scratch/0de2d62eef9c/site
+
+ ↓ tests/review-reader-coverage-v37.probe.test.ts > task reader con SELECT allowlistado y RLS del AccountingLab > pagina tareas autorizadas sin saltos, separa empresa y encuentra filas completas
+ ↓ tests/review-reader-coverage-v37.probe.test.ts > task reader con SELECT allowlistado y RLS del AccountingLab > reads persisted sessions only for listed task IDs and preserves metadata
+ ↓ tests/review-reader-coverage-v37.probe.test.ts > task reader con SELECT allowlistado y RLS del AccountingLab > compares complete SQL task/session rows without losing timestamp precision
+ ↓ tests/review-reader-coverage-v37.probe.test.ts > task reader con SELECT allowlistado y RLS del AccountingLab > keeps operative checklists in progress and reloads confirmed work and paused timer
+ ↓ tests/review-reader-coverage-v37.probe.test.ts > task reader con SELECT allowlistado y RLS del AccountingLab > enforces employee, current manager, boss and organization scope despite caller filters
+ ↓ tests/review-reader-coverage-v37.probe.test.ts > task reader con SELECT allowlistado y RLS del AccountingLab > applies hierarchy and membership changes on each read
+ ✓ tests/review-reader-coverage-v37.probe.test.ts > task reader con SELECT allowlistado y RLS del AccountingLab > retains an executor's historical session after its sealed coverage is cancelled 336ms
+ ↓ tests/review-reader-coverage-v37.probe.test.ts > task reader con SELECT allowlistado y RLS del AccountingLab > re-reads confirmed state after starting, checklist, transition and switching timers
+ ✓ tests/review-reader-v37.probe.test.ts > READ-V37-01: pages alphabetic and uppercase session UUIDs without skipping lookahead 6ms
+ ✓ tests/review-reader-v37.probe.test.ts > READ-V37-02: rejects out of order and excessive otherwise-valid session pages 1ms
+
+ Test Files  2 passed (2)
+      Tests  3 passed | 7 skipped (10)
+   Start at  13:12:40
+   Duration  2.74s (transform 86ms, setup 0ms, collect 222ms, tests 2.22s, environment 0ms, prepare 98ms)
+

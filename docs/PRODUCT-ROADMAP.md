@@ -1,21 +1,21 @@
 # Decisiones vigentes — 02/10/2026
 
-**Estado vigente, 02/10/2026:** bloque A de interfaz implementado por Luna y
-pendiente de revisión Sol 6.1 medio, Standard. Evidencia en `PROJECT-STATUS.md`
-y `product/CORRECTIONS-UI-EXECUTION-20261002.md`. Luna añadió pruebas focalizadas
-para READ-I01–04; Sol debe revisar esa evidencia antes de aceptar el lector.
-Los bloques de datos/permisos B/C/D requieren contratos específicos posteriores.
+**Estado vigente tras revisión v37:** bloque A requiere reparación de siete
+fallas reproducidas y detalles omitidos. Lector aceptado localmente tras revisar
+READ-I01–04 y completar tres comprobaciones independientes. Resultado:
+`architecture/REVIEW-V37-INDEPENDENT-20261002.md`. La suite original mantiene
+195 pruebas/17 archivos y build correcto; probes UI se registran aparte.
 
-El adaptador de seis RPC está aceptado localmente. La revisión independiente del
-lector sobre `16862eec715d81193c1b8a30403cae0288b8a326` encontró READ-I01
-reproducido y criterios READ-I02–03 sin demostrar. Luna añadió pruebas para esas
-brechas; la suite actual tiene 195 pruebas en 17 archivos y build correcto.
-La matriz está en `architecture/REVIEW-DATA-READ-INDEPENDENT-RESULT-20261002.md`.
-Esa evidencia local no equivale a aceptación independiente, concurrencia real de
-PostgreSQL ni integración Supabase/Auth/MFA/correo.
-Grado de avance estimado: 40%, `PROJECT-STATUS.md`. La demo sigue privada,
-sin SQL remoto ni cuentas reales; no está lista para migración. Los apartados
-cronológicos siguientes conservan historia, no reemplazan esta decisión.
+Próximo modelo **GPT-6 Luna medio, Standard**, contrato
+`product/CORRECTIONS-UI-A-REPAIR-20261002.md`; luego Sol medio acepta A y Sol alto
+define servidor B/C antes de implementar. El usuario cambia el modelo manualmente.
+No activar integración remota ni ampliar SQL para corregir interfaz.
+
+Gateway y lector aceptados localmente no equivalen a concurrencia PostgreSQL,
+Supabase/Auth/MFA, presencia o correo productivos. Grado estimado **40%**,
+`PROJECT-STATUS.md`. Demo privada/localStorage, no lista para migración.
+La revisión documental conserva el build de v37 y no declara reparaciones ya
+implementadas. Los apartados cronológicos siguientes conservan historia.
 
 ## Infraestructura futura (pedido expreso, todavía no ejecutar)
 
