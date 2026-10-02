@@ -1,19 +1,20 @@
 # Estado del proyecto — 02/10/2026
 
-**Release actual — Sites v39:** `cfe05f7ea4f613f27e9c5f99a0061f0ad63ae801`.
-Versión `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_87564356e6d08191a423e3c9eaded924`,
-deploy `appgdep_6abff343556c819187d8b243325659f4`, estado correcto:
-https://grupo-paris-contabilidad.valentino-magni.chatgpt.site. La audiencia sigue
-restringida al propietario; 0 visitantes externos.
+**Release actual — Sites v40:** commit de implementación
+`1099e9d8ae47c2b1953288b7fa8d7d0bbd380fc5`.
+Versión `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_d8f07e23ce4c81918847eeb7ea3de22`,
+deploy `appgdep_6abffc86ca808191be701a9954b3e491`, estado succeeded:
+https://grupo-paris-contabilidad.valentino-magni.chatgpt.site. Audiencia
+restringida al propietario, cero visitantes externos.
 
-La revisión independiente v39 confirma las ocho comprobaciones anteriores y
-actor/Anterior fallido: 10 aprobaciones y 6 fallas en 16 probes. A requiere una
-reparación final acotada de destinos del recorrido, avatar uniforme, cursor tenue
-y versión compartida; contrato `product/CORRECTIONS-UI-A-FOLLOWUP-20261002.md`.
-Suite de implementación anterior: 202 pruebas/17 archivos y build aprobado; no
-se repitió sobre código idéntico. Los 17 hashes congelados permanecen iguales.
-Esta revisión sólo guarda documentación/evidencia; la aplicación publicada v39
-no cambió. Próximo modelo Luna medio, luego revisión Sol medio.
+Reparación A implementada: avatares uniformes; spotlight del recorrido enfocado
+en un destino visible con fallback explicativo; constante de versión v4
+compartida; cursor de gráficos atenuado. También se resolvió el orden de Hooks
+entre inducción y tablero. Ver `architecture/REPAIR-A-V40-IMPLEMENTATION-20261002.md`.
+Suite **206 pruebas/17 archivos**, build y diff check correctos. Falta revisión
+independiente Sol medio y QA visual completa del hover en móvil/claro/oscuro.
+No se tocaron SQL 001–008, gateway, lector, métricas ni servicios.
+
 
 **Avance estimado: 40% del producto final (rango razonable: 35–45%).** Es una
 estimación por etapas, no una medición automática: la demo y los contratos locales

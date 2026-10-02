@@ -55,10 +55,11 @@ sin pedir otro «continuá».
 
 ## Próximo bloque
 
-**GPT-6 Luna medio, Standard:** ejecutar reparación acotada
-`product/CORRECTIONS-UI-A-FOLLOWUP-20261002.md`. Sol revisó v39 y dejó evidencia:
-10 aprobaciones / 6 fallas en 16 probes; ocho comprobaciones históricas pasan.
-Faltan destinos reales del recorrido, avatar uniforme, cursor tenue y versión
-compartida. Después **Sol medio** acepta A; sólo entonces **Sol alto** define B/C.
-El usuario cambia manualmente el modelo. No simularlo con subagentes.
-Infraestructura/migración siguen pendientes. Continuidad: EXECUTION-NEXT.md.
+**GPT-6.1 Sol medio, Standard:** aceptar independientemente A en Sites v40 contra
+`product/CORRECTIONS-UI-A-FOLLOWUP-20261002.md` y
+`architecture/REPAIR-A-V40-IMPLEMENTATION-20261002.md`. Implementación v40 pasó
+206 pruebas/17 archivos, build y diff check; deploy privado verificado. Inspección
+visual completa del hover en claro/oscuro/móvil sigue pendiente. Sólo al aceptar
+A, Sol alto define B/C. El usuario cambia manualmente de modelo; no simularlo con
+subagentes. Infraestructura/migración siguen pendientes. Continuidad:
+EXECUTION-NEXT.md.
