@@ -23,6 +23,7 @@ Hay módulos pendientes de recuperar, validar e integrar en el producto nuevo.
 | Cuenta técnica/laboratorio | Pruebas de escritura aisladas de empleados y KPI | Diagnóstico autorizado/auditado y datos productivos protegidos |
 | Notas → tarea | Conversión explícita y tarea puntual, con vínculo | Privacidad, empresa/fecha/mes y persistencia sin perder nota |
 | Cierre/reporte | Snapshot íntegro, reporte inmutable y entrega idempotente | Tiempos abiertos, revisión, destinatario y reintentos |
+| Anticipación de plazo/meta | Vencimiento y meta por ocurrencia; logro real/registrado comparado por fecha ART | Antes/en fecha/después separados; meta operativa no completa tarea; sin plazo/evidencia fuera del denominador; cierre congelado, sin bonus KPI |
 | Tema y tablero | Claro/oscuro/sistema; columnas independientes | Contraste, móviles y accesibilidad sin alterar datos |
 | Equipos y sectores | Equipo jerárquico multiarea; sector por proceso/tarea | Organigrama, filtros y agregados sin reclasificar personas por tarea |
 | Perfil propio y supervisión | Tablero personal por defecto; consultar no cambia actor | Desplegable autorizado, reset, cronómetro y cobertura conservados |
@@ -57,3 +58,7 @@ Pedidos actuales y decisiones que amplían estos cruces:
 `CORRECTIONS-20261002.md`. Su matriz distingue implementación pendiente de
 criterios aceptados. Los nuevos permisos no se agregan de manera implícita a
 tests o adaptadores de las políticas antiguas.
+
+Pedido posterior y contrato cerrado: `DEADLINE-EFFICIENCY-20261002.md`.
+Diseñado pero no ejecutado: corrige contraste de dos capturas y añade medición
+local de anticipación. SQL/entrega productiva requieren fase propia posterior.

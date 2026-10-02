@@ -1,4 +1,18 @@
-# Próximo paso — contrato B y relación con C
+# Próximo paso — contraste y anticipación de plazos
+
+**GPT-6 Luna, esfuerzo medio, Standard.** Ejecutar el contrato cerrado
+`product/DEADLINE-EFFICIENCY-20261002.md`, pedido posterior del usuario.
+Las dos capturas adjuntas se pudieron leer y confirman fondos claros fijos en
+cabecera del encargado y checklist oscuro. Plan completo: tokens legibles,
+medición antes/en fecha/después de plazos por ocurrencia, metas operativas con
+fecha de registro, análisis por ámbito y snapshots/CSV compatibles.
+
+No implementado ni publicado todavía. Mantener v40 hasta terminar código,
+pruebas y build; después publicar privadamente el build exacto, revisar con
+Sol 6.1 medio. No modificar SQL001–008 ni integrar servidor en ese bloque.
+Avance sigue 40% estimado; no lista para migración.
+
+## Trabajo de arquitectura a retomar después de aceptar el arreglo
 
 **GPT-6.1 Sol, esfuerzo alto, Standard.** Aceptación local de la funcionalidad UI
 A terminada contra v40. Ver `architecture/REVIEW-V40-INDEPENDENT-20261002.md`.

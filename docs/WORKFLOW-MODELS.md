@@ -55,10 +55,11 @@ sin pedir otro «continuá».
 
 ## Próximo bloque
 
-**GPT-6.1 Sol alto, Standard:** cerrar contrato B de datos/permisos y su relación
-con C, siguiendo EXECUTION-NEXT.md. Aceptación funcional local de A en v40:
-20 probes independientes aprobados; QA visual completa todavía abierta para
-aceptar el producto final. Evidencia:
-`architecture/REVIEW-V40-INDEPENDENT-20261002.md`.
-Después del diseño cerrado, Luna medio implementa por bloque y Sol lo revisa.
+**GPT-6 Luna medio, Standard:** ejecutar el contrato cerrado
+`product/DEADLINE-EFFICIENCY-20261002.md`, pedido posterior a la revisión v40.
+Arreglar contraste de organigrama/checklist y añadir anticipación de plazos/metas
+en demo, análisis y nuevos reportes. Después Sol 6.1 medio revisa; B/C con Sol
+alto vuelve tras aceptar este bloque. Aceptación funcional anterior de A no
+equivale a aceptación visual: las nuevas capturas confirman dos defectos de
+contraste. QA visual completa y producción conectada siguen abiertas.
 El cambio de esfuerzo/modelo es manual; no simularlo con subagentes.

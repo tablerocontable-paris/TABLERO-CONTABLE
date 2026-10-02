@@ -13,8 +13,12 @@ normal: 210 pruebas/18 archivos y build aprobados. Fuente live 1099e9d sin cambi
 hover en ambos temas y móvil sigue pendiente para aceptar el producto final.
 Ver `architecture/REVIEW-V40-INDEPENDENT-20261002.md`.
 
-Próximo paso: Sol alto, contrato B de datos/permisos y relación con C. Los 17
-hashes congelados siguen idénticos; infraestructura e integración siguen abiertas.
+Pedido posterior del 02/10: las capturas confirman defectos de contraste en
+cabecera del encargado y checklist en tema oscuro. No están corregidos todavía.
+Contrato cerrado para el arreglo y la anticipación de plazos/metas:
+`product/DEADLINE-EFFICIENCY-20261002.md`. Próximo paso: Luna medio implementa;
+Sol medio revisa, después Sol alto retoma B/C. Los 17 hashes congelados no se
+modifican en este diseño; infraestructura e integración siguen abiertas.
 
 **Avance estimado: 40% del producto final (rango razonable: 35–45%).** Es una
 estimación por etapas, no una medición automática: la demo y los contratos locales
@@ -92,7 +96,8 @@ roadmap, pendiente de diseño/revisión y de la fase de autenticación.
 
 ## Siguiente camino
 
-1. Sol 6.1 medio acepta la reparación A según el contrato cerrado.
+1. Luna medio implementa contraste/anticipación y Sol medio revisa el contrato
+   DEADLINE-EFFICIENCY-20261002; las nuevas capturas reabren la aceptación visual.
 2. Sol alto define contratos de coordinación y pedidos de datos/permisos por
    bloques; Luna implementa cada contrato cerrado.
 3. Completar producto y validaciones reales/piloto antes de migrar a compañeros.
