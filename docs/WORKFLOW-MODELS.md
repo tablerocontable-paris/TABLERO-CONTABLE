@@ -55,9 +55,8 @@ sin pedir otro «continuá».
 
 ## Próximo bloque
 
-**GPT-6.1 Sol medio, Standard:** revisar la implementación desplegada v41 del contrato
-`product/DEADLINE-EFFICIENCY-20261002.md`. Las capturas originales confirmaron
-los dos defectos de contraste. Código, 217 pruebas y build pasan; QA visual de
-navegador completa y producción conectada siguen abiertas. Tras revisión aceptar
-o reparar; después B/C requiere Sol alto.
-El cambio de esfuerzo/modelo es manual; no simularlo con subagentes.
+**GPT-6 Luna medio, Standard:** ejecutar
+`product/DEADLINE-EFFICIENCY-REPAIR-20261002.md`. Revisión independiente v42
+no aceptada: cuatro probes fallaron y hay discrepancias de auditoría/CSV.
+Después Sol medio revisa; B/C requiere Sol alto tras aceptar el arreglo.
+El cambio es manual; no simularlo con subagentes.

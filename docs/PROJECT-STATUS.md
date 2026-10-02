@@ -1,6 +1,6 @@
 # Estado del proyecto — 02/10/2026
 
-**Release actual — Sites v41:** commit
+**Código funcional — Sites v41/v42:** commit
 `20d4db3c151c3c2eb963352bde4578ab321a0a8d`.
 Versión `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_c8c11bed53e08191b963c2e770f681de`,
 deploy `appgdep_6ac0053d99ec8191adc2f8769abecc19`, estado succeeded:
@@ -11,13 +11,13 @@ v40 conserva la aceptación funcional independiente de UI A, con QA visual
 pendiente. Las capturas posteriores detectaron dos colores fijos en tema oscuro;
 v41 los corrigió y agregó anticipación de plazos y metas operativas al análisis y
 a los nuevos reportes. **217 pruebas/19 archivos, build y diff check aprobados.**
-La revisión independiente de v41 y la QA visual completa del navegador siguen
-pendientes. Ver `architecture/REVIEW-V40-INDEPENDENT-20261002.md` y
+La revisión independiente detectó cuatro fallos reproducibles y discrepancias
+de auditoría/CSV/presentación. Reparación pendiente; QA visual completa abierta. Ver `architecture/REVIEW-V40-INDEPENDENT-20261002.md` y
 `product/DEADLINE-EFFICIENCY-20261002.md`.
 
 Pedido posterior del 02/10: el arreglo de contraste y la anticipación ya están en
-v41. Próximo paso: Sol medio revisa implementación y reporte; después Sol alto
-retoma B/C. SQL 001–008, permisos remotos e infraestructura no se modificaron.
+v41/v42. Próximo paso: Luna medio ejecuta DEADLINE-EFFICIENCY-REPAIR-20261002;
+luego Sol medio revisa y, tras aceptación, Sol alto retoma B/C. SQL 001–008, permisos remotos e infraestructura no se modificaron.
 
 **Avance estimado: 40% del producto final (rango razonable: 35–45%).** Es una
 estimación por etapas, no una medición automática: la demo y los contratos locales
@@ -77,7 +77,7 @@ a la página.
 
 Las 18 correcciones siguen registradas en `product/CORRECTIONS-20261002.md`.
 El bloque A y la corrección posterior están demostrados en la UI privada; QA
-visual final y revisión Sol de v41 pendientes. Los bloques B/C/D siguen pendientes.
+visual final y reparación de la revisión independiente pendientes. Los bloques B/C/D siguen pendientes.
 No aumentar el porcentaje por documentos o pruebas.
 
 La demo usa localStorage y selector simulado. Que haya pruebas SQL verdes no
@@ -94,7 +94,7 @@ roadmap, pendiente de diseño/revisión y de la fase de autenticación.
 
 ## Siguiente camino
 
-1. Sol 6.1 medio revisa v41; QA visual completa permanece como aceptación abierta.
+1. Luna medio repara según contrato; luego Sol medio revisa. QA visual abierta.
 2. Sol alto define contratos de coordinación y pedidos de datos/permisos por
    bloques; Luna implementa cada contrato cerrado.
 3. Completar producto y validaciones reales/piloto antes de migrar a compañeros.
@@ -105,3 +105,13 @@ Referencias: architecture/REVIEW-008-FINAL-20261001.md, EXECUTION-NEXT.md,
 architecture/REVIEW-DATA-ADAPTER-20261002.md, PRODUCT-ROADMAP.md y
 ops/AUTOMATED-DELIVERY.md. La página y código continúan en Sites
 privado; cada publicación nativa registra su SHA exacto en Git/main.
+
+## Revisión independiente actual
+
+Sites live confirmado v42, versión
+`appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_bd5d2636e4388191acdd41af1daca971`,
+deploy `appgdep_6ac00614bbd881919b493c582d5fcd14`, fuente documental
+`97b0cb20432f88e55bd1f09da925cfbf0f07f3ee`. Misma aplicación que v41.
+Cuatro probes independientes fallaron; evidencia y contrato en
+`product/DEADLINE-EFFICIENCY-REPAIR-20261002.md`. No se modifica producto en esta
+revisión ni se despliega documentación para aparentar una reparación.

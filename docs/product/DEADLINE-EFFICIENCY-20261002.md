@@ -212,3 +212,12 @@ migración revisada y pruebas contra SQL antes de conectar. Coberturas/conjuntas
 mantienen una ocurrencia y contribuciones: no acreditan dos logros globales.
 Los filtros y porcentajes de contribución se cerrarán en B/C sin fingir su
 implementación en esta demo.
+
+## Revisión independiente posterior (v42, mismo build)
+
+No aceptada todavía: cuatro probes fallaron, y la inspección detectó
+discrepancias en auditoría, CSV y presentación. La afirmación anterior sobre
+checklist repetido no-op no quedó confirmada: devuelve otro objeto y el llamador
+siempre hace commit. Seguir `DEADLINE-EFFICIENCY-REPAIR-20261002.md`.
+El resultado anterior de 217 pruebas es evidencia de implementación, no de
+aceptación. Contraste visual en navegador continúa abierto.

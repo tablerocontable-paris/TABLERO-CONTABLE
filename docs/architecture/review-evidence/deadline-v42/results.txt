@@ -1,0 +1,86 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+ RUN  v3.2.7 /workspace/scratch/0de2d62eef9c/site
+
+ ❯ tests/review-deadline-probe.test.ts (4 tests | 4 failed) 25ms
+   × R1 rejects a completion later on the same day 19ms
+     → expected 'early' to be 'unknown' // Object.is equality
+   × R2 rejects normalized February timestamp 1ms
+     → expected 'early' to be 'unknown' // Object.is equality
+   × R3 rejects invalid own work date before filtering period 1ms
+     → expected 'pending' to be 'unknown' // Object.is equality
+   × R4 repeated checklist is a no-op object 3ms
+     → expected { id: 'review', title: 'Banco', …(17) } to be { id: 'review', title: 'Banco', …(17) } // Object.is equality
+
+If it should pass with deep equality, replace "toBe" with "toStrictEqual"
+
+Expected: { id: 'review', title: 'Banco', …(17) }
+Received: serializes to the same string
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/review-deadline-probe.test.ts > R1 rejects a completion later on the same day
+AssertionError: expected 'early' to be 'unknown' // Object.is equality
+
+Expected: "unknown"
+Received: "early"
+
+ ❯ tests/review-deadline-probe.test.ts:5:115
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/review-deadline-probe.test.ts > R2 rejects normalized February timestamp
+AssertionError: expected 'early' to be 'unknown' // Object.is equality
+
+Expected: "unknown"
+Received: "early"
+
+ ❯ tests/review-deadline-probe.test.ts:6:150
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/review-deadline-probe.test.ts > R3 rejects invalid own work date before filtering period
+AssertionError: expected 'pending' to be 'unknown' // Object.is equality
+
+Expected: "unknown"
+Received: "pending"
+
+ ❯ tests/review-deadline-probe.test.ts:9:128
+      7| it('R3 rejects invalid own work date before filtering period',()=>{
+      8|  const a:Activity={id:'a',taskId:t.id,qty:1,createdAt:'2026-10-08T15:0…
+      9|  expect(taskTimeliness({...t,kind:'operativa',target:1,status:'En curs…
+       |                                                                                                                                ^
+     10| });
+     11| it('R4 repeated checklist is a no-op object',()=>{const completed={...…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/review-deadline-probe.test.ts > R4 repeated checklist is a no-op object
+AssertionError: expected { id: 'review', title: 'Banco', …(17) } to be { id: 'review', title: 'Banco', …(17) } // Object.is equality
+
+If it should pass with deep equality, replace "toBe" with "toStrictEqual"
+
+Expected: { id: 'review', title: 'Banco', …(17) }
+Received: serializes to the same string
+
+
+Compared values have no visual difference.
+
+ ❯ tests/review-deadline-probe.test.ts:11:158
+      9|  expect(taskTimeliness({...t,kind:'operativa',target:1,status:'En curs…
+     10| });
+     11| it('R4 repeated checklist is a no-op object',()=>{const completed={...…
+       |                                                                                                                                                              ^
+     12| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+   Start at  15:37:08
+   Duration  320ms (transform 84ms, setup 0ms, collect 89ms, tests 25ms, environment 0ms, prepare 60ms)
+

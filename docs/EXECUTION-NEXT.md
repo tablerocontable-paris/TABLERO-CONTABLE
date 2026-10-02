@@ -1,16 +1,16 @@
-# Próximo paso — revisión de contraste y anticipación
+# Próximo paso — reparar anticipación tras revisión independiente
 
-**GPT-6.1 Sol, esfuerzo medio, Standard.** Revisar la implementación desplegada del
-contrato `product/DEADLINE-EFFICIENCY-20261002.md`. Incluye contraste en la
-cabecera del encargado/checklist, medición por fecha ART, metas operativas con
-instante registrado, análisis por ámbito y snapshots/CSV compatibles.
+**GPT-6 Luna, esfuerzo medio, Standard.** Ejecutar el contrato cerrado
+`product/DEADLINE-EFFICIENCY-REPAIR-20261002.md`. Cuatro probes fallaron:
+logro futuro del mismo día, timestamp normalizado, fecha de actividad inválida
+y checklist repetido. Además reparar no-op del llamador, CSV y presentación.
+No implementar B/C hasta revisión independiente posterior con Sol medio.
 
-Implementación publicada en Sites v41: commit `20d4db3c151c3c2eb963352bde4578ab321a0a8d`,
-versión `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_c8c11bed53e08191b963c2e770f681de`,
-deploy `appgdep_6ac0053d99ec8191adc2f8769abecc19`, privado y succeeded. Suite:
-217 pruebas/19 archivos, build y diff check aprobados. QA visual completa de
-navegador pendiente. No se modificó SQL001–008 ni se conectó el servidor. Avance
-sigue 40%; no lista para migración.
+Live confirmado Sites v42, misma aplicación de v41, fuente documental
+`97b0cb20432f88e55bd1f09da925cfbf0f07f3ee`; código funcional
+`20d4db3c151c3c2eb963352bde4578ab321a0a8d`. QA visual sigue abierta.
+Avance 40%; no lista para migrar. Esta revisión sólo cambia documentación
+y conserva el build live.
 
 ## Trabajo de arquitectura a retomar después de aceptar el arreglo
 
@@ -40,7 +40,7 @@ No implementar B/C durante el diseño; no modificar migraciones aplicadas ni
 aplicar SQL remoto. Crear servicios y migrar empleados sigue siendo futuro,
 después de piloto y aceptación final.
 
-Aplicación live: Sites v41, fuente `20d4db3c151c3c2eb963352bde4578ab321a0a8d`,
+Aplicación live: Sites v42 (mismo build que v41), fuente `20d4db3c151c3c2eb963352bde4578ab321a0a8d`,
 versión `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_c8c11bed53e08191b963c2e770f681de`,
 deploy `appgdep_6ac0053d99ec8191adc2f8769abecc19`, privado y activo:
 https://grupo-paris-contabilidad.valentino-magni.chatgpt.site.
