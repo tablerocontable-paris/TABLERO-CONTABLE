@@ -3,7 +3,8 @@
 UI A (v40) y reparación de anticipación (v43) aceptadas localmente en
 funcionalidad. Evidencia en REVIEW-V40-INDEPENDENT-20261002.md y
 REVIEW-V43-INDEPENDENT-20261002.md de docs/architecture. QA visual completa sigue
-pendiente. Próxima fase: Sol 6.1 alto diseña B/C, datos y permisos de coordinación.
+pendiente. Diseño B en COORDINATION-B-DESIGN-20261002.md de docs/architecture.
+Próxima fase Luna medio ejecuta B1 privado009; contratos B2/B3 después.
 
 Avance estimado actual **41% (35–45%)**, cálculo vigente en PROJECT-STATUS.md.
 Lector/gateway/SQL locales no equivalen a Auth/RLS/datos compartidos ni correo

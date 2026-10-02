@@ -55,7 +55,7 @@ sin pedir otro «continuá».
 
 ## Próximo bloque
 
-**GPT-6.1 Sol alto, Standard:** diseñar B/C según EXECUTION-NEXT.md. V43 quedó
-aceptada localmente por REVIEW-V43-INDEPENDENT-20261002.md. QA visual real sigue
-abierta. Pasar a relaciones y permisos antes de otro bloque de pulido.
-El cambio de esfuerzo es manual; no simularlo con subagentes.
+**GPT-6 Luna medio, Standard:** B1 local, contrato
+`architecture/PRIVATE-BLOCK-NOTES-009-20261002.md`. Sin servicios remotos ni
+integración App. Luego Sol6.1 alto revisa009 y prepara B2. Diseño global y camino
+hacia infraestructura están registrados. Cambio de modelo manual, sin delegarlo.

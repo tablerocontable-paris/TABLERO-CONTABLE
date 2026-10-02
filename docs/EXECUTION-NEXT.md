@@ -1,36 +1,27 @@
-# Próximo paso — arquitectura de coordinación y permisos
+# Próxima ejecución — B1, comentarios privados
 
-**GPT-6.1 Sol, esfuerzo alto, Standard.** La reparación de anticipación v43 está
-aceptada localmente. Ver `architecture/REVIEW-V43-INDEPENDENT-20261002.md`.
-Cuatro probes originales pasan; se verificó la frontera no-op del llamador y
-CSV/paneles. QA visual real claro/oscuro/Sistema y móvil sigue abierta.
+**GPT-6 Luna, esfuerzo medio, Standard.** Implementar
+`architecture/PRIVATE-BLOCK-NOTES-009-20261002.md`: nueva migración 009 local,
+RLS de comentarios separados, versiones/receipts privados y wrapper RPC propio.
+El contrato define permisos, locks, no-op, replay, formato ACK y pruebas.
+No cambiar App ni simular privacidad en localStorage. Preservar SQL 001–008,
+lector/gateway existentes y snapshots; no conectar Supabase ni crear servicios.
 
-Diseñar el siguiente bloque acotado a partir de
-`product/CORRECTIONS-20261002.md`, los contratos SQL 001–008 y el frontend actual:
+Arquitectura B y dependencias cerradas en
+`architecture/COORDINATION-B-DESIGN-20261002.md`. B2/B3 requieren su contrato API
+posterior antes de implementación. Después de 009 Sol 6.1 alto revisa seguridad,
+upgrade y locks, y prepara responsabilidad conjunta/cobertura/contribuciones.
 
-1. Jerarquía gerente/encargado/empleado y equipos multiarea; empresa/sector son
-   dimensiones independientes del equipo.
-2. Asignación conjunta sólo puntual, una identidad y contribuciones sin doble
-   KPI; distinguir titular, participante y actor real.
-3. Cobertura por período y tareas seleccionadas, con historial y contribuciones
-   preservados; retiro de acceso e historial después de la cobertura.
-4. Bajas y tareas huérfanas reasignables; comentarios de bloqueo privados para
-   superiores en datos/políticas separados.
-5. Impacto sobre estandarización/inducción, recurrencia, vencimientos, cierres y
-   reportes. Preparar matriz de invariantes/permisos y contrato ejecutable para
-   Luna por bloque, sin decisiones abiertas.
+Camino a servicios gratuitos y puertas de salida de Sites:
+`ops/FREE-HOSTING-PATH-20261002.md`. Primero preparar integración, luego decidir
+inicio de infraestructura nueva/dev sintético, piloto conectado y producción.
+La migración de 20 empleados sólo se habilita con aceptación final.
 
-
-Preparar contrato ejecutable para Luna por bloque, con matriz de invariantes,
-permisos, identidad, snapshots y pruebas. Revisar SQL001–008 y datos existentes
-antes de proponer migración nueva. No implementar ni aplicar SQL remoto durante
-el diseño. Infraestructura final y migración de empleados son futuras.
-
-Live: Sites v43, implementación `9d6b97dc16625c974d6679cf7d69b7fe2fdb3900`,
-deploy succeeded `appgdep_6ac00b2ad81c81919a50bafab9f7101d`:
+Live conserva Sites v43, implementación
+`9d6b97dc16625c974d6679cf7d69b7fe2fdb3900`, deploy succeeded
+`appgdep_6ac00b2ad81c81919a50bafab9f7101d`:
 https://grupo-paris-contabilidad.valentino-magni.chatgpt.site.
-Revisión actual sólo cambia tests/evidencia/documentación; conserva ese build.
-Avance **41% estimado (35–45%)**; cálculo en PROJECT-STATUS.md.
+No hay nuevo código productivo en este diseño. Avance **41% estimado (35–45%)**.
+QA visual real sigue abierta. No elevar avance por contratos escritos.
 
-El usuario cambia el esfuerzo/modelo manualmente; después basta «continuá».
-No delegar ni simularlo. Continuidad: AGENTS.md y WORKFLOW-MODELS.md.
+El usuario cambia modelo/esfuerzo manualmente; basta «continuá». No delegarlo.

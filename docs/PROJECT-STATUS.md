@@ -76,6 +76,13 @@ El registro v42 y sus probes fallidos permanecen como evidencia histórica.
 Suite regular actual: 223 pruebas/21 archivos (una regresión del llamador añadida
 en revisión), build y diff check pasan. V43 tenía 222 pruebas; src no cambió.
 
-**Próximo paso: GPT-6.1 Sol, esfuerzo alto, Standard**, diseño B/C según
-EXECUTION-NEXT.md. No repetir la misma revisión ni añadir pulido menor antes de
-cerrar las relaciones de datos y permisos que necesitan los próximos módulos.
+**Próximo paso: GPT-6 Luna, esfuerzo medio, Standard**, ejecutar B1 local por
+`architecture/PRIVATE-BLOCK-NOTES-009-20261002.md`. Diseño de coordinación B
+completado; no se implementó009 ni se modificó la aplicación. B2/B3 requieren
+contratos SQL/API posteriores. El diseño no aumenta el porcentaje.
+
+Puertas hacia Supabase/hosting y evaluación gratuita verificadas en
+`ops/FREE-HOSTING-PATH-20261002.md`. Preferencia Cloudflare Pages+Supabase dev/prod,
+con límites, backup y correo a validar antes de alta. No hay fecha fiable de
+migración; se reportan puertas completadas y pendientes, sin estimarlas desde el
+número de commits. Recursos finales no creados.

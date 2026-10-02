@@ -36,3 +36,13 @@ El objetivo es que el pedido de cambio sea la única tarea rutinaria de Valentin
 - Git y deploy del prototipo siguen dentro de Sites; el sitio actual es privado. No existe aún el remoto GitHub ni los entornos Supabase dev/prod de la cuenta dedicada.
 - La infraestructura y secretos no están configurados; por eso el flujo descrito es plan, no una capacidad activa.
 - A la fecha existe verificación local con Vitest/PGlite y build. RPC de actividad/cronómetro/ausencias y reportes/outbox están implementados localmente; 008 todavía requiere la aceptación documentada en `../architecture/REVIEW-008-20261001.md`. Falta adaptar el frontend al contrato nuevo, Auth/invitaciones/MFA real, concurrencia PostgreSQL, integración de reportes, correo real, piloto y procedimiento de migración/restore.
+
+## Evaluación gratuita y puertas — 02/10/2026
+
+Ver FREE-HOSTING-PATH-20261002.md para límites oficiales y etapas hacia dev real.
+Cloudflare Pages es la preferencia de frontend; Vercel Hobby restringe uso a
+personal no comercial. Supabase Free permite2 proyectos activos, pero sin
+branching/backups automáticos; mantener dev/prod separados y preparar restore.
+No se crearon recursos. Preparar integración antes de producto100% no implica
+autorización para crear infraestructura ahora; registrar decisión de inicio y
+validar versión definitiva antes de migración productiva.
