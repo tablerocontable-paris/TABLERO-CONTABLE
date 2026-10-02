@@ -1,5 +1,11 @@
 # Estándares, cierre y mejora continua — pedido 01/10/2026
 
+Ampliación vigente 02/10/2026: `CORRECTIONS-20261002.md` permite entrada libre
+inicial como propuesta, agrupación de coincidencias y confirmación de estándar
+por Juan Pablo antes de activar tareas habituales. El catálogo no es taxativo;
+las reglas de estándar común siguientes aplican al trabajo aprobado. Agenda,
+participación conjunta y revisión de cierre requieren sus contratos posteriores.
+
 ## Catálogo e inducción
 
 Juan Pablo administra un catálogo con código estable, nombre, objetivo, instrucciones, controles, tipo, unidad y peso. «Conciliación Banco X» es un único proceso del catálogo. Empresa 1 y empresa 2 tienen asignaciones y ocurrencias independientes del mismo proceso; no nombres o procedimientos libres. Los cambios futuros del estándar requieren versionado; nunca reescribir los cierres anteriores.

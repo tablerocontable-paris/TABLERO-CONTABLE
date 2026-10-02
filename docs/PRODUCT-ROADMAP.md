@@ -1,16 +1,21 @@
 # Decisiones vigentes — 02/10/2026
 
-**Estado tras ejecución sobre v33 (02/10/2026):** adaptador de seis RPC aceptado;
-lector y criterios locales READ-R01–03 completados con AccountingLab. Suite:
-189 pruebas en 17 archivos, build correcto. Evidencia:
-`architecture/review-evidence/data-read-acceptance-20261002.json`.
-Revisión independiente pendiente en `architecture/REVIEW-DATA-READ-ACCEPTANCE-20261002.md`.
-Próximo paso: **Sol 6.1 medio**.
-Reglas para incorporar pedidos nuevos: `product/CONSISTENCY-RULES.md`.
-Grado de avance estimado y pendientes: `docs/PROJECT-STATUS.md`.
+**Decisión vigente después de revisar v34 (02/10/2026):** las 18 correcciones
+están registradas en `product/CORRECTIONS-20261002.md`; el próximo paso es
+**Luna 6 medio, Standard**, bloque A de `product/CORRECTIONS-UI-EXECUTION-20261002.md`.
+Los bloques de datos/permisos B/C/D requieren contratos específicos posteriores.
+No confundir planificación con implementación: la interfaz aún no tiene esos ajustes.
+
+El adaptador de seis RPC está aceptado localmente. La revisión independiente del
+lector sobre `16862eec715d81193c1b8a30403cae0288b8a326` encontró READ-I01
+reproducido y criterios READ-I02–03 sin demostrar. Aceptación del lector todavía
+pendiente: `architecture/REVIEW-DATA-READ-INDEPENDENT-20261002.md`.
+Suite original: 189 pruebas en 17 archivos, build correcto. La prueba temporal
+que reproduce READ-I01 falló intencionalmente y se retiró antes de la suite.
 Concurrencia PostgreSQL y Supabase/Auth/MFA/correo reales siguen pendientes.
-La demo sigue privada, sin SQL remoto ni cuentas reales; no está lista para
-migración. Los apartados siguientes conservan historia del avance.
+Grado de avance estimado: 40%, `PROJECT-STATUS.md`. La demo sigue privada,
+sin SQL remoto ni cuentas reales; no está lista para migración. Los apartados
+cronológicos siguientes conservan historia, no reemplazan esta decisión.
 
 ## Infraestructura futura (pedido expreso, todavía no ejecutar)
 

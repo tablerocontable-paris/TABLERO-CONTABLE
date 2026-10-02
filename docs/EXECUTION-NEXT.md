@@ -1,26 +1,29 @@
-# Próximo bloque — revisión del lector
+# Próxima ejecución — correcciones visibles y evidencia del lector
 
-**GPT-6.1 Sol, esfuerzo medio, Standard.** Contrato de revisión:
-`architecture/REVIEW-DATA-READ-ACCEPTANCE-20261002.md`. La ejecución Luna ya
-completó READ-R01–03 sobre v33 `4a8bdb4d643d318cd39c8aec021afd4d7446c2c9`.
+**GPT-6 Luna, esfuerzo medio, Standard.** Base de planificación/revisión:
+`16862eec715d81193c1b8a30403cae0288b8a326` (v34), más este commit de documentos.
+El usuario cambia modelo manualmente; no delegar ni simular ese cambio.
 
-## Alcance de la revisión
+1. Implementar bloque A completo de
+   `product/CORRECTIONS-UI-EXECUTION-20261002.md`: gráficos, pasos, notas,
+   recorrido, selector, tablero personal y acciones por módulo/rol. No implementar
+   todavía los esquemas/permisos B/C/D del nuevo pedido.
+2. Registrar comprobaciones y publicar cambio A como commit propio, con tests y
+   build del SHA publicado. No detenerse para pedir «continuar» dentro de la misma
+   ejecución/modelo.
+3. En cambio separado, completar contrato de tests en
+   `architecture/REVIEW-DATA-READ-INDEPENDENT-20261002.md` READ-I01–03 y matriz
+   READ-I04. El lector no queda aceptado por el conteo de pruebas anterior.
+   Cualquier defecto nuevo de política SQL exige reproducción y Sol alto.
+4. Pasar a revisión Sol 6.1 medio de A y lector con evidencia de ambos. Sol define
+   contratos de arquitectura; Luna sólo implementa instrucciones cerradas.
 
-1. Comparar DATA-READ-FOUNDATION.md y
-   DATA-READ-ACCEPTANCE-COMPLETION.md con assertions/matriz/evidencia nueva.
-2. Verificar table literal, paginación/filtros, perfiles/RLS simulada,
-   jerarquía/membresía actual, cobertura cancelada, historial propio y recargas
-   tras inicio/checklist/transition/switch. Confirmar archivos congelados.
-3. Clasificar cualquier defecto reproducido y conservar evidencia previa. No
-   aplicar SQL remoto, conectar el frontend a Supabase, crear cuentas, migrar
-   empleados ni diseñar presencia o el coordinador en esta revisión.
-4. Si acepta el lector, la próxima ejecución Luna medio puede definir/implementar
-   el coordinador según la fase autorizada; presencia y Auth con permisos nuevos
-   requieren primero Sol alto.
+Las 18 correcciones están registradas con aceptación y dependencias en
+`product/CORRECTIONS-20261002.md`. Bloque B requiere diseño de servidor y revisión
+Sol alto antes de ejecutar. No conectar frontend a Supabase, crear cuentas,
+migrar empleados, enviar correo ni aplicar SQL remoto en A o en los tests del
+lector. Mantener SQL 001–008 y evidencia anterior.
 
-Ejecución completada: 189 pruebas en 17 archivos, build y diff-check correctos.
-Ver evidencia `architecture/review-evidence/data-read-acceptance-20261002.json`.
-No implica integración Supabase/PostgREST/Auth/MFA real ni migración. La demo usa
-localStorage: el cronómetro no sincroniza entre personas y presencia/última
-conexión siguen pendientes. Avance estimado 40% (35–45%):
-`docs/PROJECT-STATUS.md`.
+La demo usa localStorage; el cronómetro no sincroniza entre personas. Presencia,
+última conexión, importación mensual IVA y correo reales permanecen pendientes.
+Avance estimado 40% (35–45%): `PROJECT-STATUS.md`.

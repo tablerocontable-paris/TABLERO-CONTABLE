@@ -1,0 +1,37 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+ RUN  v3.2.7 /workspace/scratch/0de2d62eef9c/site
+
+ ❯ tests/review-reader-role.tmp.test.ts (6 tests | 1 failed | 5 skipped) 4301ms
+   ↓ task reader con SELECT allowlistado y RLS del AccountingLab > pagina tareas autorizadas sin saltos, separa empresa y encuentra filas completas
+   ↓ task reader con SELECT allowlistado y RLS del AccountingLab > reads persisted sessions only for listed task IDs and preserves metadata
+   ↓ task reader con SELECT allowlistado y RLS del AccountingLab > enforces employee, current manager, boss and organization scope despite caller filters
+   ↓ task reader con SELECT allowlistado y RLS del AccountingLab > applies hierarchy and membership changes on each read
+   × task reader con SELECT allowlistado y RLS del AccountingLab > retains an executor's historical session after its sealed coverage is cancelled 453ms
+     → expected 'postgres' to be 'authenticated' // Object.is equality
+   ↓ task reader con SELECT allowlistado y RLS del AccountingLab > re-reads confirmed state after starting, checklist, transition and switching timers
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/review-reader-role.tmp.test.ts > task reader con SELECT allowlistado y RLS del AccountingLab > retains an executor's historical session after its sealed coverage is cancelled
+AssertionError: expected 'postgres' to be 'authenticated' // Object.is equality
+
+Expected: "authenticated"
+Received: "postgres"
+
+ ❯ tests/review-reader-role.tmp.test.ts:456:64
+    454|     const afterDeniedRead = await lab.capture();
+    455|     expect(afterDeniedRead).toEqual(beforeDeniedRead);
+    456|     expect((await lab.first("select current_user role")).role).toBe("a…
+       |                                                                ^
+    457|     expect(
+    458|       await reader.listTasks({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 skipped (6)
+   Start at  22:30:25
+   Duration  4.93s (transform 134ms, setup 0ms, collect 268ms, tests 4.30s, environment 0ms, prepare 73ms)
+

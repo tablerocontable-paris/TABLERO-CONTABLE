@@ -9,7 +9,7 @@ operativa e infraestructura final siguen pendientes. No está listo para migrar.
 | --- | --- |
 | Demo, experiencia y reglas (25%) | 75%: tablero y funciones demostrables avanzadas; faltan cerrar parte de experiencia y funciones de administración/proceso |
 | Contrato de datos y reglas SQL (25%) | 65%: migraciones 001–008 revisadas y pruebas locales; concurrencia y Supabase real pendientes |
-| Integración, cuentas y permisos (25%) | 5%: gateway de escritura y lector paginado validados localmente; frontend aún usa persistencia/selector de demostración, sin Auth/RLS/datos compartidos conectados |
+| Integración, cuentas y permisos (25%) | 5%: gateway aceptado localmente; lector implementado con aceptación pendiente; frontend aún usa persistencia/selector de demostración, sin Auth/RLS/datos compartidos conectados |
 | Funcionalidad final y operación (15%) | 25%: reportes/reglas están delineados; faltan integración de reportes, áreas de administración y procesos Kaizen/5S aplicados |
 | Validación, infraestructura y migración (10%) | 0%: faltan QA real, piloto de Juan Pablo y servicios definitivos |
 
@@ -30,14 +30,20 @@ adaptador de seis RPC conserva filas, claves y argumentos, valida ACKs y separa
 fallos sin reintentar automáticamente. 23 pruebas nuevas cubren esta frontera
 y su composición con SQL. La revisión del adaptador está aceptada tras corregir
 ADP-R01: comparación temporal conserva fracciones menores a un milisegundo.
-El lector tipado/paginado quedó implementado y su aceptación local completada:
-pruebas unitarias, SELECTs parametrizados bajo RLS simulada, cuatro perfiles,
-dos organizaciones, jerarquía/empresa cambiantes, cobertura cancelada, sesiones
-históricas y recarga tras RPC/switch. Evidencia/hash y matriz en
-`architecture/review-evidence/data-read-acceptance-20261002.json`.
-Revisión independiente Sol pendiente; el frontend no usa aún el lector remoto.
-Esta base local eleva ligeramente la etapa de integración; el porcentaje global
-redondeado sigue en 40%. La página todavía no utiliza el gateway.
+El lector tipado/paginado está implementado y tiene pruebas de perfiles,
+filtros, jerarquía, cancelación de cobertura y recargas tras RPC. La revisión
+independiente sobre v34 no acepta todavía toda la matriz: la última lectura de
+un test de cobertura corre como postgres tras capture; faltan límites de empresa/
+período con filas existentes, semántica de checklist operativo y algunos casos
+de sesiones/metadata. Reproducción y contrato acotado en
+`architecture/REVIEW-DATA-READ-INDEPENDENT-20261002.md`. La evidencia de ejecución
+anterior se conserva como histórica; tests verdes no cubren criterios ausentes.
+El lector y el gateway siguen sin conectarse a la página.
+
+Las 18 correcciones del nuevo pedido se analizaron y tienen reglas/aceptación
+por bloque en `product/CORRECTIONS-20261002.md`. Aún no se implementaron:
+próxima ejecución Luna medio en `product/CORRECTIONS-UI-EXECUTION-20261002.md`.
+No aumentar el porcentaje por documentos o por el número de pruebas.
 
 La demo usa localStorage y selector simulado. Que haya pruebas SQL verdes no
 significa que esos permisos ya gobiernen la página ni que se envíe correo.
@@ -53,8 +59,10 @@ roadmap, pendiente de diseño/revisión y de la fase de autenticación.
 
 ## Siguiente camino
 
-1. Revisión Sol 6.1 medio del lector y de su evidencia.
-2. Después definir coordinación asíncrona del frontend.
+1. Ejecutar bloque A de interfaz y completar evidencia del lector (Luna medio);
+   revisión independiente después con Sol medio.
+2. Sol define contratos de coordinación e integra pedidos nuevos de datos/permisos
+   por bloques; Luna implementa cada contrato cerrado.
 3. Completar producto y validaciones reales/piloto antes de migrar a compañeros.
 4. Al aprobar la versión definitiva, registrar esa decisión y activar los nuevos
    servicios dedicados y flujo dev/prod según AUTOMATED-DELIVERY.md.

@@ -24,6 +24,14 @@ Hay módulos pendientes de recuperar, validar e integrar en el producto nuevo.
 | Notas → tarea | Conversión explícita y tarea puntual, con vínculo | Privacidad, empresa/fecha/mes y persistencia sin perder nota |
 | Cierre/reporte | Snapshot íntegro, reporte inmutable y entrega idempotente | Tiempos abiertos, revisión, destinatario y reintentos |
 | Tema y tablero | Claro/oscuro/sistema; columnas independientes | Contraste, móviles y accesibilidad sin alterar datos |
+| Equipos y sectores | Equipo jerárquico multiarea; sector por proceso/tarea | Organigrama, filtros y agregados sin reclasificar personas por tarea |
+| Perfil propio y supervisión | Tablero personal por defecto; consultar no cambia actor | Desplegable autorizado, reset, cronómetro y cobertura conservados |
+| Nombres libres de inducción | Propuestas agrupadas por coincidencia, confirmadas por Juan Pablo | Estándar versionado sin fusionar empresas/asignaciones/historia |
+| Tarea conjunta puntual | Una ocurrencia compartida, participaciones snapshot suman 100% | Sesiones por actor, cierre de ambos y peso global contado una vez |
+| Detalle interpersonal de bloqueo | Autor y superiores vigentes; datos separados | No exponer a coautor/reemplazo/persona señalada ni correo/exports comunes |
+| Agenda y cumplimiento | Evento por empresa/obligación/período vinculado explícitamente | IVA/pago/balance, fechas oficiales versionadas y terminado no pendiente vencido |
+| Baja y tareas huérfanas | Perfil histórico conservado; trabajo futuro se reasigna auditado | Pausa de recurrencia/reloj, cierres intactos y sin doble materialización |
+| Consultas/avisos/ciclo | Destinatarios permitidos, deduplicación y magnitudes separadas | Privacidad, ausencia, correo y carga planificada frente a ejecución |
 
 ## Antes de implementar y antes de aprobar
 
@@ -44,3 +52,8 @@ Hay módulos pendientes de recuperar, validar e integrar en el producto nuevo.
 Estas reglas reducen regresiones y contradicciones. No garantizan ausencia de
 errores; un fallo detectado se registra, se reproduce y se corrige antes de
 aprobar la función afectada.
+
+Pedidos actuales y decisiones que amplían estos cruces:
+`CORRECTIONS-20261002.md`. Su matriz distingue implementación pendiente de
+criterios aceptados. Los nuevos permisos no se agregan de manera implícita a
+tests o adaptadores de las políticas antiguas.
