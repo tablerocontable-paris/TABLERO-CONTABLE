@@ -1,0 +1,66 @@
+{
+  "source_sha": "4a8bdb4d643d318cd39c8aec021afd4d7446c2c9",
+  "result": "local_acceptance_complete_pending_independent_Sol_review",
+  "checks": {
+    "npm_test": {
+      "exit_code": 0,
+      "files": 17,
+      "tests": 189
+    },
+    "npm_run_build": {
+      "exit_code": 0
+    },
+    "git_diff_check": {
+      "exit_code": 0
+    },
+    "frozen_files_identical_to_base": true
+  },
+  "frozen_file_count": 16,
+  "acceptance_matrix": {
+    "READ-R03_query_table_literals": [
+      "task_instances",
+      "task_instances",
+      "task_time_sessions"
+    ],
+    "READ-R02_unit_test_cases": [
+      "builds frozen allowlisted query signatures with defaults and boundary take values",
+      "strictly rejects invalid values before a read",
+      "clones and freezes arrays before yielding, and detects duplicate UUIDs across case",
+      "uses UUID textual order/case and never skips a lookahead row",
+      "compares filter and find IDs case-insensitively while preserving received UUID text",
+      "rejects malformed pages including lookahead, excess, order, cursor, filters and sessions",
+      "preserves full rows, task availability semantics and catches wrong/excess task reads",
+      "classifies envelope, server and transport failures once for each method"
+    ],
+    "READ-R01_AccountingLab_cases": [
+      "pagina tareas autorizadas sin saltos, separa empresa y encuentra filas completas",
+      "reads persisted sessions only for listed task IDs and preserves metadata",
+      "enforces employee, current manager, boss and organization scope despite caller filters",
+      "applies hierarchy and membership changes on each read",
+      "retains an executor's historical session after its sealed coverage is cancelled",
+      "re-reads confirmed state after starting, checklist, transition and switching timers"
+    ],
+    "sql": {
+      "fixed_allowlist_parameterized": true,
+      "authenticated_personas": [
+        "employee",
+        "manager",
+        "boss",
+        "other organization boss"
+      ],
+      "coverage_cancellation_and_own_history": true,
+      "post_rpc_start_checklist_transition_switch_reads": true,
+      "denied_reads_preserve_db_snapshots": true
+    }
+  },
+  "limitations": [
+    "AccountingLab simulates RLS and is not live Supabase Auth/PostgREST/MFA",
+    "No live PostgreSQL concurrency test",
+    "The reader remains unconnected to the demo UI and production services"
+  ],
+  "files_sha256": {
+    "src/data/remote/task-reader.ts": "60703e4b4ba11dbd2831cb30a0ef2448c68cbeeb344042af742d52d97343fcbd",
+    "tests/task-reader.test.ts": "f387856f76e05f60a3425a65096befcd3f620e5fb471edbfca0c8c39a552aa03",
+    "tests/task-reader-sql.test.ts": "a49c30fc53f28a0d048bb3e55bf53edf3c809300b71c088c3c80ba23e32d0c91"
+  }
+}

@@ -1,10 +1,11 @@
 # Decisiones vigentes — 02/10/2026
 
-**Estado tras revisión de v32 (02/10/2026):** adaptador de seis RPC aceptado;
-lector implementado pero aceptación pendiente por cobertura incompleta.
-182 pruebas/build correctos no cubren aún todos los criterios del lector.
-Revisión: `architecture/REVIEW-DATA-READ-20261002.md`. Próximo paso:
-**Luna medio**, contrato DATA-READ-ACCEPTANCE-COMPLETION.md y EXECUTION-NEXT.md.
+**Estado tras ejecución sobre v33 (02/10/2026):** adaptador de seis RPC aceptado;
+lector y criterios locales READ-R01–03 completados con AccountingLab. Suite:
+189 pruebas en 17 archivos, build correcto. Evidencia:
+`architecture/review-evidence/data-read-acceptance-20261002.json`.
+Revisión independiente pendiente en `architecture/REVIEW-DATA-READ-ACCEPTANCE-20261002.md`.
+Próximo paso: **Sol 6.1 medio**.
 Reglas para incorporar pedidos nuevos: `product/CONSISTENCY-RULES.md`.
 Grado de avance estimado y pendientes: `docs/PROJECT-STATUS.md`.
 Concurrencia PostgreSQL y Supabase/Auth/MFA/correo reales siguen pendientes.

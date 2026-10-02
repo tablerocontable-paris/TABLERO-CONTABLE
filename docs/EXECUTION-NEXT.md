@@ -1,35 +1,26 @@
-# Próximo bloque — completar aceptación del lector
+# Próximo bloque — revisión del lector
 
-**GPT-6 Luna, esfuerzo medio, Standard.** Basta «continuá» después del cambio
-manual. Contrato cerrado: `architecture/DATA-READ-ACCEPTANCE-COMPLETION.md`.
+**GPT-6.1 Sol, esfuerzo medio, Standard.** Contrato de revisión:
+`architecture/REVIEW-DATA-READ-ACCEPTANCE-20261002.md`. La ejecución Luna ya
+completó READ-R01–03 sobre v33 `4a8bdb4d643d318cd39c8aec021afd4d7446c2c9`.
 
-Revisión de v32, fuente `0a73c2ed1407746ae01eafcd9298aa9ba0f53449`:
-`architecture/REVIEW-DATA-READ-20261002.md`. Lector implementado, aceptación
-pendiente: 182 pruebas/17 archivos y build correctos, pero no demuestran los
-escenarios ausentes. No avanzar al coordinador todavía.
+## Alcance de la revisión
 
-## Ejecución autorizada
+1. Comparar DATA-READ-FOUNDATION.md y
+   DATA-READ-ACCEPTANCE-COMPLETION.md con assertions/matriz/evidencia nueva.
+2. Verificar table literal, paginación/filtros, perfiles/RLS simulada,
+   jerarquía/membresía actual, cobertura cancelada, historial propio y recargas
+   tras inicio/checklist/transition/switch. Confirmar archivos congelados.
+3. Clasificar cualquier defecto reproducido y conservar evidencia previa. No
+   aplicar SQL remoto, conectar el frontend a Supabase, crear cuentas, migrar
+   empleados ni diseñar presencia o el coordinador en esta revisión.
+4. Si acepta el lector, la próxima ejecución Luna medio puede definir/implementar
+   el coordinador según la fase autorizada; presencia y Auth con permisos nuevos
+   requieren primero Sol alto.
 
-1. READ-R03: table literal fija en cada variante/query del lector; no input table.
-2. READ-R02: completar unitarias de límites, arrays clonados/congelados, UUID con
-   letras/case real, cursores, filas/envelopes adversarios y fallos por método.
-3. READ-R01: completar SELECTs parametrizados bajo authenticated con empleado,
-   encargado, jefe y outsider; tres páginas/empresas, cobertura/cancelación,
-   sesiones históricas sin padre visible y recargas tras RPC/switch. Snapshots
-   antes/después verifican que lecturas fallidas no escriben.
-4. Matriz criterio→assertions, npm test, build, diff-check y evidencia nueva.
-   Commit/push y Sites privado del mismo SHA. Después revisión Sol 6.1 medio.
-
-Usar el commit que contiene esta revisión como base de ejecución. SQL 001–008,
-gateway, esquemas de filas, App/repositorio local, dependencias y evidencia previa
-congelados. Si se reproduce un defecto fuera del alcance, guardar evidencia y
-volver a Sol; no improvisar reglas ni ampliar permisos para pasar pruebas.
-
-El pedido de presencia/última conexión quedó registrado en PRODUCT-ROADMAP.
-Cronómetro local funciona en demo, sin sincronización real; presencia no existe
-todavía. Reglas de coherencia: `product/CONSISTENCY-RULES.md`.
-
-Avance estimado: 40% (35–45%). Sin SQL remoto, cuentas, correo ni migración de
-empleados. PostgreSQL concurrencia, Auth/MFA/RLS/PostgREST reales y piloto siguen
-pendientes. Auth/administración/presencia con políticas nuevas requiere Sol alto;
-infraestructura futura: `ops/AUTOMATED-DELIVERY.md`.
+Ejecución completada: 189 pruebas en 17 archivos, build y diff-check correctos.
+Ver evidencia `architecture/review-evidence/data-read-acceptance-20261002.json`.
+No implica integración Supabase/PostgREST/Auth/MFA real ni migración. La demo usa
+localStorage: el cronómetro no sincroniza entre personas y presencia/última
+conexión siguen pendientes. Avance estimado 40% (35–45%):
+`docs/PROJECT-STATUS.md`.

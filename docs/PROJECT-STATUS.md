@@ -9,7 +9,7 @@ operativa e infraestructura final siguen pendientes. No está listo para migrar.
 | --- | --- |
 | Demo, experiencia y reglas (25%) | 75%: tablero y funciones demostrables avanzadas; faltan cerrar parte de experiencia y funciones de administración/proceso |
 | Contrato de datos y reglas SQL (25%) | 65%: migraciones 001–008 revisadas y pruebas locales; concurrencia y Supabase real pendientes |
-| Integración, cuentas y permisos (25%) | 5%: frontera de seis RPC validada localmente; frontend aún usa persistencia/selector de demostración, sin Auth/RLS/datos compartidos conectados |
+| Integración, cuentas y permisos (25%) | 5%: gateway de escritura y lector paginado validados localmente; frontend aún usa persistencia/selector de demostración, sin Auth/RLS/datos compartidos conectados |
 | Funcionalidad final y operación (15%) | 25%: reportes/reglas están delineados; faltan integración de reportes, áreas de administración y procesos Kaizen/5S aplicados |
 | Validación, infraestructura y migración (10%) | 0%: faltan QA real, piloto de Juan Pablo y servicios definitivos |
 
@@ -19,7 +19,7 @@ que 40% de los empleados puedan migrarse: hoy no hay base de producción conecta
 
 ## Evidencia actual
 
-182 pruebas en 17 archivos y compilación correctas. El laboratorio PGlite verifica
+189 pruebas en 17 archivos y compilación correctas. El laboratorio PGlite verifica
 23 casos secuenciales; 24 pares preparados para PostgreSQL siguen sin ejecutarse.
 La rama BA previa al corte usa jefe con aal2 y confirma replay idempotente. No se
 modificaron SQL 001–008 ni el frontend durante este ajuste.
@@ -30,14 +30,12 @@ adaptador de seis RPC conserva filas, claves y argumentos, valida ACKs y separa
 fallos sin reintentar automáticamente. 23 pruebas nuevas cubren esta frontera
 y su composición con SQL. La revisión del adaptador está aceptada tras corregir
 ADP-R01: comparación temporal conserva fracciones menores a un milisegundo.
-El lector tipado/paginado está implementado y probado con transportes unitarios
-y SELECTs parametrizados bajo RLS simulada; evidencia en
-`architecture/review-evidence/data-read-foundation-20261002.json`.
-Su revisión v32 deja la aceptación pendiente: faltan escenarios acordados de
-roles/cobertura y lecturas tras RPC/switch, además de unitarias y table literal
-fija. La batería se reejecutó con 182 pruebas/17 archivos y build correctos,
-pero no demuestra los casos ausentes. Ver REVIEW-DATA-READ-20261002.md y
-su evidencia data-read-review-20261002.json. No avanzar al coordinador todavía.
+El lector tipado/paginado quedó implementado y su aceptación local completada:
+pruebas unitarias, SELECTs parametrizados bajo RLS simulada, cuatro perfiles,
+dos organizaciones, jerarquía/empresa cambiantes, cobertura cancelada, sesiones
+históricas y recarga tras RPC/switch. Evidencia/hash y matriz en
+`architecture/review-evidence/data-read-acceptance-20261002.json`.
+Revisión independiente Sol pendiente; el frontend no usa aún el lector remoto.
 Esta base local eleva ligeramente la etapa de integración; el porcentaje global
 redondeado sigue en 40%. La página todavía no utiliza el gateway.
 
@@ -55,8 +53,8 @@ roadmap, pendiente de diseño/revisión y de la fase de autenticación.
 
 ## Siguiente camino
 
-1. Completar aceptación del lector (Luna medio): DATA-READ-ACCEPTANCE-COMPLETION.md.
-2. Revisión Sol 6.1 medio; después definir coordinación asíncrona del frontend.
+1. Revisión Sol 6.1 medio del lector y de su evidencia.
+2. Después definir coordinación asíncrona del frontend.
 3. Completar producto y validaciones reales/piloto antes de migrar a compañeros.
 4. Al aprobar la versión definitiva, registrar esa decisión y activar los nuevos
    servicios dedicados y flujo dev/prod según AUTOMATED-DELIVERY.md.
