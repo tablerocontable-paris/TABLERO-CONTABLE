@@ -1,21 +1,20 @@
 # Decisiones vigentes — 02/10/2026
 
-**Estado vigente tras revisión v37:** bloque A requiere reparación de siete
-fallas reproducidas y detalles omitidos. Lector aceptado localmente tras revisar
-READ-I01–04 y completar tres comprobaciones independientes. Resultado:
-`architecture/REVIEW-V37-INDEPENDENT-20261002.md`. La suite original mantiene
-195 pruebas/17 archivos y build correcto; probes UI se registran aparte.
+**Estado vigente tras revisión v37 y reparación A:** las siete fallas reproducidas
+quedaron corregidas en la demo; la revisión independiente de Sol sigue pendiente.
+El lector fue aceptado localmente y sus comprobaciones complementarias quedaron
+en la suite normal. Evidencia histórica: `architecture/REVIEW-V37-INDEPENDENT-20261002.md`.
+La suite actual pasó 202 pruebas en 17 archivos y el build de producción pasó.
 
-Próximo modelo **GPT-6 Luna medio, Standard**, contrato
-`product/CORRECTIONS-UI-A-REPAIR-20261002.md`; luego Sol medio acepta A y Sol alto
-define servidor B/C antes de implementar. El usuario cambia el modelo manualmente.
-No activar integración remota ni ampliar SQL para corregir interfaz.
+Próximo modelo **GPT-6.1 Sol medio** para aceptar A contra
+`product/CORRECTIONS-UI-A-REPAIR-20261002.md`. Después Sol alto define servidor
+B/C antes de Luna. No activar integración remota ni ampliar SQL para corregir
+interfaz.
 
 Gateway y lector aceptados localmente no equivalen a concurrencia PostgreSQL,
 Supabase/Auth/MFA, presencia o correo productivos. Grado estimado **40%**,
 `PROJECT-STATUS.md`. Demo privada/localStorage, no lista para migración.
-La revisión documental conserva el build de v37 y no declara reparaciones ya
-implementadas. Los apartados cronológicos siguientes conservan historia.
+Los apartados cronológicos siguientes conservan historia.
 
 ## Infraestructura futura (pedido expreso, todavía no ejecutar)
 

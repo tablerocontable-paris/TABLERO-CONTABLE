@@ -1,5 +1,12 @@
 # Estado del proyecto — 02/10/2026
 
+**Actualización más reciente:** bloque UI A implementado y verificado en local;
+publicación privada pendiente de registrar aquí. Se repararon el editor y los
+límites del checklist, meta operativa editable, vista por perfil y cobertura,
+detalles/acciones, anotaciones, gráficos, seed y recorrido v4. Suite:
+202 pruebas/17 archivos. Build de producción correcto. No hubo cambios en SQL,
+gateway, lector, dependencias ni servicios conectados.
+
 **Avance estimado: 40% del producto final (rango razonable: 35–45%).** Es una
 estimación por etapas, no una medición automática: la demo y los contratos locales
 están avanzados, pero autenticación, datos compartidos, integración, validación
@@ -19,13 +26,12 @@ que 40% de los empleados puedan migrarse: hoy no hay base de producción conecta
 
 ## Evidencia actual
 
-**Revisión independiente vigente:** Sites v37,
+**Revisión independiente anterior:** Sites v37,
 `3f2995270081f6d5c54ac2590c32f81d035d6ad1`, deploy
 `appgdep_6abfdd0e24848191b88f55518bd6184e`, verificado activo. Resultado en
 `architecture/REVIEW-V37-INDEPENDENT-20261002.md`: lector aceptado localmente con
-tres comprobaciones independientes adicionales; A necesita siete correcciones
-reproducidas y detalles omitidos. Suite original 195/17 y build correctos. La
-publicación de esta revisión es documental, con igual código de aplicación.
+tres comprobaciones independientes adicionales. Sus fallas UI fueron la base del
+bloque A que ahora espera aceptación.
 QA visual sigue pendiente: preview arrancó pero navegador bloqueó el acceso con
 `net::ERR_BLOCKED_BY_CLIENT`; la ausencia de un binario Chromium no fue confirmada.
 
@@ -37,7 +43,7 @@ los tests del lector forman este cambio; no se modificaron gateway, lector de
 producción, SQL 001–008 ni dependencias. La publicación de seguimiento puede
 incluir sólo esta actualización documental, con el mismo build de aplicación.
 
-195 pruebas en 17 archivos y compilación correctas. El laboratorio PGlite verifica
+202 pruebas en 17 archivos y compilación correctas. El laboratorio PGlite verifica
 23 casos secuenciales; 24 pares preparados para PostgreSQL siguen sin ejecutarse.
 La rama BA previa al corte usa jefe con aal2 y confirma replay idempotente. No se
 modificaron SQL 001–008 ni el frontend durante este ajuste.
@@ -59,9 +65,9 @@ la evidencia y acepta el lector local. Lector y gateway siguen sin conectarse
 a la página.
 
 Las 18 correcciones siguen registradas en `product/CORRECTIONS-20261002.md`.
-El bloque A fue implementado como demo local y revisado; requiere reparación
-según `product/CORRECTIONS-UI-A-REPAIR-20261002.md`. Los bloques B/C/D siguen
-pendientes. No aumentar el porcentaje por documentos o pruebas.
+El bloque A fue implementado como demo local y espera aceptación de Sol según
+`product/CORRECTIONS-UI-A-REPAIR-20261002.md`. Los bloques B/C/D siguen pendientes.
+No aumentar el porcentaje por documentos o pruebas.
 
 La demo usa localStorage y selector simulado. Que haya pruebas SQL verdes no
 significa que esos permisos ya gobiernen la página ni que se envíe correo.
@@ -77,7 +83,7 @@ roadmap, pendiente de diseño/revisión y de la fase de autenticación.
 
 ## Siguiente camino
 
-1. Luna medio repara A según contrato cerrado; Sol medio revisa su aceptación.
+1. Sol 6.1 medio acepta la reparación A según el contrato cerrado.
 2. Sol alto define contratos de coordinación y pedidos de datos/permisos por
    bloques; Luna implementa cada contrato cerrado.
 3. Completar producto y validaciones reales/piloto antes de migrar a compañeros.

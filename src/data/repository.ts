@@ -30,8 +30,8 @@ export function seed(): State {
     version: 3,
     companies: [1, 2, 3, 4].map((n) => ({ id: "c" + n, name: "Empresa " + n })),
     teams: [
-      { id: "t1", name: "Tesorería", managerId: "m1" },
-      { id: "t2", name: "Impuestos y cierre", managerId: "m2" },
+      { id: "t1", name: "Equipo de Carolina Díaz", managerId: "m1" },
+      { id: "t2", name: "Equipo de Martín Acosta", managerId: "m2" },
     ],
     profiles: [
       {

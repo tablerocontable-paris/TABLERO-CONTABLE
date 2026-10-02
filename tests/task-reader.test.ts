@@ -404,6 +404,67 @@ describe("task reader", () => {
     expect(await createTaskReader({ read: async () => ok([rows[0], { ...rows[1], actor_id: undefined }]) }).listSessions({ instanceIds: [ids[1]], limit: 1 })).toMatchObject({ ok: false, error: "protocol" });
   });
 
+  it("pages mixed-case UUID sessions with one-row limits and preserves the lookahead cursor", async () => {
+    const instanceId = "fedcba01-2345-6789-abcd-ef0123456789";
+    const rowIds = [
+      "ABCDEF01-2345-6789-ABCD-EF0123456789",
+      "abcdef01-2345-6789-abcd-ef0123456790",
+      "abcdef01-2345-6789-abcd-ef0123456791",
+    ];
+    const rows = rowIds.map((id, index) => ({
+      ...session(index + 1, id),
+      instance_id: instanceId,
+      actor_id: ids[2],
+      started_at: "2026-10-02T10:00:00.123456Z",
+      ended_at: "2026-10-02T10:01:00.654321Z",
+      metadata: { trace: index },
+    }));
+    const read = vi.fn(async (query: TaskReadQuery) => {
+      if (query.kind !== "sessionPage") throw new Error("Wrong query");
+      return ok(rows.filter((row) =>
+        !query.afterId || row.id.toLowerCase() > query.afterId.toLowerCase(),
+      ).slice(0, query.take));
+    });
+    const reader = createTaskReader({ read });
+    let afterId: string | null = null;
+    const traversed: unknown[] = [];
+    for (let index = 0; index < rows.length; index += 1) {
+      const page = await reader.listSessions({ instanceIds: [instanceId.toUpperCase()], limit: 1, afterId });
+      expect(page).toMatchObject({
+        ok: true,
+        rows: [rows[index]],
+        hasMore: index < rows.length - 1,
+        nextCursor: index < rows.length - 1 ? rows[index]!.id : null,
+      });
+      if (!page.ok) throw new Error("Expected a session page");
+      traversed.push(...page.rows);
+      afterId = page.nextCursor;
+    }
+    expect(traversed).toEqual(rows);
+    expect(read).toHaveBeenCalledTimes(3);
+    expect(read.mock.calls.map(([query]) => query)).toEqual(rows.map((_, index) => ({
+      kind: "sessionPage",
+      table: "task_time_sessions",
+      instanceIds: [instanceId.toUpperCase()],
+      afterId: index ? rows[index - 1]!.id : null,
+      take: 2,
+    })));
+  });
+
+  it("rejects out-of-order and overfull bounded session pages", async () => {
+    const instanceId = "fedcba01-2345-6789-abcd-ef0123456789";
+    const rows = [1, 2, 3].map((n) => ({
+      ...session(n, uid(20 + n)),
+      instance_id: instanceId,
+    }));
+    for (const data of [[rows[1], rows[0]], rows]) {
+      const read = vi.fn(async () => ok(data));
+      expect(await createTaskReader({ read }).listSessions({ instanceIds: [instanceId], limit: 1 }))
+        .toMatchObject({ ok: false, error: "protocol" });
+      expect(read).toHaveBeenCalledOnce();
+    }
+  });
+
   it("classifies envelope, server and transport failures once for each method", async () => {
     for (const method of ["listTasks", "findTask", "listSessions"] as const) {
       const input =

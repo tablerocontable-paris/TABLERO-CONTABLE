@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { id, type State, type Template } from "../domain/model";
 import { Dialog } from "./ui";
-import StepListEditor, { parseSteps } from "./StepListEditor";
+import StepListEditor, { validateSteps } from "./StepListEditor";
 export default function CatalogueCreator({
   state,
   commit,
@@ -14,6 +14,7 @@ export default function CatalogueCreator({
   const [open, setOpen] = useState(false);
   const [kind, setKind] = useState<Template["kind"]>("resultado");
   const [steps, setSteps] = useState<string[]>([]);
+  const [stepsError, setStepsError] = useState("");
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (state.profiles.find((p) => p.id === state.activeId)?.role !== "jefe")
@@ -28,8 +29,14 @@ export default function CatalogueCreator({
       notify("Ese proceso ya existe. Usá el mismo catálogo para cada empresa.");
       return;
     }
-    const steps = parseSteps(String(f.get("steps") || ""));
-    if (!title || !steps.length) {
+    let safeSteps: string[];
+    try {
+      safeSteps = validateSteps(steps);
+    } catch (error) {
+      setStepsError((error as Error).message);
+      return;
+    }
+    if (!title || !safeSteps.length) {
       notify("El proceso necesita un nombre y al menos un control estándar.");
       return;
     }
@@ -42,7 +49,7 @@ export default function CatalogueCreator({
       unit: kind === "operativa" ? String(f.get("unit")).trim() : "",
       target: kind === "operativa" ? Number(f.get("target")) : 0,
       description: String(f.get("description")).trim(),
-      steps,
+      steps: safeSteps,
     };
     if (
       commit(
@@ -53,6 +60,7 @@ export default function CatalogueCreator({
     ) {
       setOpen(false);
       setSteps([]);
+      setStepsError("");
       notify("Proceso incorporado al catálogo para todas las empresas.");
     }
   }
@@ -135,10 +143,16 @@ export default function CatalogueCreator({
                 </>
               )}
             </div>
-            <label>
-              Proceso y controles · un paso por línea
-              <StepListEditor name="steps" value={steps} onChange={setSteps} />
-            </label>
+            <div className="checklist-field">
+              <p className="checklist-field-title">Proceso y controles · un paso por línea</p>
+              <StepListEditor
+                name="steps"
+                value={steps}
+                error={stepsError}
+                emptyMessage="Agregá al menos un control estándar para guardar este proceso."
+                onChange={(next) => { setSteps(next); setStepsError(""); }}
+              />
+            </div>
             <div className="modal-actions">
               <button className="primary">Guardar proceso estándar</button>
             </div>

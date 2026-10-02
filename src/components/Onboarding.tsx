@@ -1,3 +1,4 @@
+import { useState } from "react";
 import ScheduleEditor from "./ScheduleEditor";
 import ThemeControl from "./ThemeControl";
 import {
@@ -6,7 +7,7 @@ import {
   describeSchedule,
 } from "../domain/schedule";
 import { id } from "../domain/model";
-import StepListEditor, { parseSteps } from "./StepListEditor";
+import StepListEditor, { parseSteps, validateSteps } from "./StepListEditor";
 import {
   ArrowRight,
   ArrowLeft,
@@ -42,6 +43,25 @@ export default function Onboarding({
     "Preferencias",
     "Tu mes",
   ];
+  const [customStepRows, setCustomStepRows] = useState<string[]>(() =>
+    draft.customSteps ? draft.customSteps.split("\n") : [],
+  );
+  const customStepError = (() => {
+    if (!draft.customTitle.trim()) return "";
+    try {
+      validateSteps(customStepRows);
+      return "";
+    } catch (error) {
+      return (error as Error).message;
+    }
+  })();
+  const customStepValues = (() => {
+    try {
+      return validateSteps(customStepRows);
+    } catch {
+      return [];
+    }
+  })();
   const chosen = state.templates.filter((t) =>
     draft.selectedTemplateIds.includes(t.id),
   );
@@ -52,7 +72,7 @@ export default function Onboarding({
           {
             id: "custom",
             title: draft.customTitle,
-            steps: parseSteps(draft.customSteps),
+            steps: customStepValues,
             kind: "resultado" as const,
             unit: "",
             target: 0,
@@ -85,7 +105,7 @@ export default function Onboarding({
       : draft.step === 1
         ? draft.selectedCompanyIds.length > 0
         : draft.step === 2
-          ? all.length > 0
+          ? all.length > 0 && !customStepError
           : draft.step === 3
             ? validSchedules
             : true;
@@ -276,21 +296,31 @@ export default function Onboarding({
                 </label>
                 <label>Controles propuestos</label>
                 <StepListEditor
-                  value={draft.customSteps ? draft.customSteps.split("\n") : []}
-                  onChange={(steps) => patch({ customSteps: steps.join("\n") })}
+                  value={customStepRows}
+                  error={customStepError}
+                  onChange={(next) => {
+                    setCustomStepRows(next);
+                    patch({ customSteps: next.join("\n") });
+                  }}
                 />
                 <p>Se propone con peso 1 para revisión de Juan Pablo.</p>
                 <button
                   type="button"
-                  disabled={!draft.customTitle.trim()}
-                  onClick={() =>
+                  disabled={!draft.customTitle.trim() || !!customStepError}
+                  onClick={() => {
+                    let safeSteps: string[];
+                    try {
+                      safeSteps = validateSteps(customStepRows);
+                    } catch {
+                      return;
+                    }
                     patch({
                       customTasks: [
                         ...(draft.customTasks || []),
                         {
                           id: id(),
                           title: draft.customTitle.trim(),
-                          steps: parseSteps(draft.customSteps).join("\n"),
+                          steps: safeSteps.join("\n"),
                           kind: "resultado",
                           unit: "",
                           target: 0,
@@ -298,8 +328,9 @@ export default function Onboarding({
                       ],
                       customTitle: "",
                       customSteps: "",
-                    })
-                  }
+                    });
+                    setCustomStepRows([]);
+                  }}
                 >
                   Agregar esta tarea y escribir otra
                 </button>

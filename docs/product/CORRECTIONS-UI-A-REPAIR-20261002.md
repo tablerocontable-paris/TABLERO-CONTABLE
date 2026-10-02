@@ -1,8 +1,12 @@
 # Reparación cerrada del bloque A — 02/10/2026
 
+**Estado:** implementada en código local con 202 pruebas/17 archivos y build
+correctos; pendiente publicación privada y aceptación independiente de Sol 6.1
+medio. Se conserva este contrato como criterio de revisión.
+
 **Modelo: GPT-6 Luna, esfuerzo medio, Standard.** Base revisada:
-`3f2995270081f6d5c54ac2590c32f81d035d6ad1`, más el commit documental de esta
-revisión. Leer AGENTS, el contrato A1–A8 original y REVIEW-V37-INDEPENDENT.
+`f6c019ada555f5ea76dcdfa78f60162f0710eac1` (Sites v38). Leer AGENTS, el contrato
+A1–A8 original y REVIEW-V37-INDEPENDENT.
 Este documento cierra decisiones de corrección; no inicia los bloques B/C/D.
 
 ## Límites

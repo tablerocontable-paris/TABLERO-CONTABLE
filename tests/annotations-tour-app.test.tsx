@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import App from "../src/App";
 import { KEY, load, seed } from "../src/data/repository";
-import { currentMonth, metrics, type State } from "../src/domain/model";
+import { currentMonth, dateART, metrics, type State } from "../src/domain/model";
 import { defaultSchedule } from "../src/domain/schedule";
 
 vi.mock("recharts", () =>
@@ -126,6 +126,90 @@ describe("anotaciones y recorrido integrados", () => {
     fireEvent.click(document.querySelector('[data-nav="tasks"]')!);
     expect((screen.getByLabelText("Perfil que estás viendo") as HTMLSelectElement).value).toBe("e0");
     expect(screen.getByText("Tarea de Valentino")).toBeTruthy();
+  });
+
+  it("separa las tareas cubiertas sin duplicar su identidad en el tablero", () => {
+    const state = prepare("e1");
+    const example = seed().tasks[0]!;
+    state.tasks = [{ ...example, id: "coverage-task", ownerId: "e0", month: currentMonth(), companyId: "c1", title: "Conciliación cubierta" }];
+    state.absences = [{
+      id: "coverage-absence",
+      ownerId: "e0",
+      replacementId: "e1",
+      from: dateART(),
+      to: dateART(),
+      kind: "Vacaciones",
+      note: "Prueba",
+      createdBy: "m1",
+    }];
+    localStorage.setItem(KEY, JSON.stringify(state));
+    render(<App />);
+    fireEvent.click(document.querySelector('[data-nav="tasks"]')!);
+    expect(screen.getByText(/Tareas que cubrís/)).toBeTruthy();
+    expect(document.querySelectorAll('[data-task-id="coverage-task"]')).toHaveLength(1);
+    expect(screen.getByText(/Tarea de cobertura para Valentino Magni/)).toBeTruthy();
+  });
+
+  it("asigna una tarea nueva al perfil consultado y respeta la meta editada", () => {
+    prepare("m1");
+    render(<App />);
+    fireEvent.click(document.querySelector('[data-nav="tasks"]')!);
+    fireEvent.click(screen.getByRole("button", { name: "Nueva tarea" }));
+    fireEvent.change(screen.getByLabelText("Elegí del catálogo"), { target: { value: "cat3" } });
+    fireEvent.change(screen.getByLabelText("Meta por ocurrencia"), { target: { value: "321" } });
+    fireEvent.click(screen.getByRole("button", { name: /Crear tarea/ }));
+    expect(stored().assignments.at(-1)).toMatchObject({
+      title: "Carga de facturas",
+      ownerId: "m1",
+      target: 321,
+    });
+    expect(stored().templates.find((item) => item.id === "cat3")?.target).toBe(120);
+  });
+
+  it("crea un checklist línea por línea y conserva errores sin truncar el control", () => {
+    prepare();
+    render(<App />);
+    fireEvent.click(document.querySelector('[data-nav="tasks"]')!);
+    fireEvent.click(screen.getByRole("button", { name: "Nueva tarea" }));
+    fireEvent.change(screen.getByLabelText("Título"), { target: { value: "Trabajo puntual" } });
+    expect(screen.getByText(/Se creará sin checklist/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Agregar paso" }));
+    const step = screen.getByLabelText("Paso 1") as HTMLInputElement;
+    const tooLong = "x".repeat(301);
+    fireEvent.change(step, { target: { value: tooLong } });
+    fireEvent.click(screen.getByRole("button", { name: /Crear tarea/ }));
+    expect(stored().assignments).toHaveLength(0);
+    expect(screen.getByRole("alert").textContent).toContain("300 caracteres");
+    fireEvent.change(screen.getByLabelText("Paso 1"), { target: { value: "Revisar comprobantes" } });
+    fireEvent.click(screen.getByRole("button", { name: /Crear tarea/ }));
+    expect(stored().assignments.at(-1)?.steps).toEqual(["Revisar comprobantes"]);
+  });
+
+  it("limpia detalle y modal al cambiar de actor de la demostración", () => {
+    const state = prepare("m1");
+    const example = seed().tasks[0]!;
+    state.tasks = [{ ...example, id: "employee-detail", ownerId: "e0", title: "Tarea supervisada" }];
+    localStorage.setItem(KEY, JSON.stringify(state));
+    render(<App />);
+    fireEvent.click(document.querySelector('[data-nav="tasks"]')!);
+    fireEvent.change(screen.getByLabelText("Perfil que estás viendo"), { target: { value: "e0" } });
+    fireEvent.click(screen.getByRole("button", { name: "Tarea supervisada" }));
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("Vista de usuario"), { target: { value: "e0" } });
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("permite desplegar una anotación multilineal corta", () => {
+    const state = prepare();
+    state.annotations![0]!.content = "Control uno\nControl dos\nControl tres";
+    localStorage.setItem(KEY, JSON.stringify(state));
+    render(<App />);
+    fireEvent.click(document.querySelector('[data-nav="annotations"]')!);
+    const expand = screen.getByRole("button", { name: "Leer completo" });
+    expect(expand.getAttribute("aria-expanded")).toBe("false");
+    fireEvent.click(expand);
+    expect(screen.getByRole("button", { name: "Mostrar menos" }).getAttribute("aria-expanded")).toBe("true");
+    expect(screen.getByText(/Control uno/).className).toContain("expanded");
   });
 
   it("conversión normal conserva texto y crea vínculo", () => {
@@ -338,7 +422,7 @@ describe("anotaciones y recorrido integrados", () => {
   it("recorrido no avanza vista si falló guardar avance", () => {
     const state = prepare();
     state.tour.e0 = 5;
-    state.tourVersion = { e0: 3 };
+    state.tourVersion = { e0: 4 };
     localStorage.setItem(KEY, JSON.stringify(state));
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
@@ -410,7 +494,7 @@ describe("anotaciones y recorrido integrados", () => {
     );
     const saved = stored();
     expect(saved.tour.e0).toBe(0);
-    expect(saved.tourVersion?.e0).toBe(3);
+    expect(saved.tourVersion?.e0).toBe(4);
     expect(saved.onboarding.e0.completedAt).toBeTruthy();
     expect(saved.onboarding.e0.home).toBe("tasks");
     expect(saved.assignments).toHaveLength(1);
@@ -443,7 +527,7 @@ describe("anotaciones y recorrido integrados", () => {
     fireEvent.click(screen.getByRole("button", { name: "Listo" }));
     expect(document.querySelector(".tour-coach")).toBeNull();
     expect(stored().tour.e0).toBe(11);
-    expect(stored().tourVersion?.e0).toBe(3);
+    expect(stored().tourVersion?.e0).toBe(4);
     fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
     expect(document.querySelector(".tour-coach small")?.textContent).toContain(
       "1/11",
@@ -456,7 +540,7 @@ describe("anotaciones y recorrido integrados", () => {
     const state = prepare();
     state.onboarding.e0.home = "tasks";
     state.tour.e0 = 4;
-    state.tourVersion = { e0: 3 };
+    state.tourVersion = { e0: 4 };
     localStorage.setItem(KEY, JSON.stringify(state));
     render(<App />);
     const before = stored();
@@ -483,7 +567,7 @@ describe("anotaciones y recorrido integrados", () => {
   it("fallo al cerrar recorrido conserva último paso; Listo se puede reintentar", () => {
     const state = prepare();
     state.tour.e0 = 10;
-    state.tourVersion = { e0: 3 };
+    state.tourVersion = { e0: 4 };
     localStorage.setItem(KEY, JSON.stringify(state));
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
@@ -499,7 +583,7 @@ describe("anotaciones y recorrido integrados", () => {
     );
     expect(
       document.querySelector("nav button.active")?.getAttribute("data-nav"),
-    ).toBe("day");
+    ).toBe("annotations");
     expect(stored()).toEqual(before);
     setItem.mockRestore();
     fireEvent.click(screen.getByRole("button", { name: "Listo" }));

@@ -3,19 +3,31 @@ export const parseSteps = (text: string) =>
   text
     .split("\n")
     .map((step) => step.trim())
-    .filter(Boolean)
-    .slice(0, 50);
+    .filter(Boolean);
+
+export function validateSteps(value: string[]): string[] {
+  const steps = value.map((step) => step.trim()).filter(Boolean);
+  if (steps.length > 50)
+    throw new Error("El checklist admite hasta 50 pasos.");
+  if (steps.some((step) => step.length > 300))
+    throw new Error("Cada paso debe tener 300 caracteres o menos.");
+  return steps;
+}
 
 export default function StepListEditor({
   value,
   onChange,
   name,
   readOnly = false,
+  error,
+  emptyMessage = "No hay controles agregados todavía.",
 }: {
   value: string[];
   onChange: (next: string[]) => void;
   name?: string;
   readOnly?: boolean;
+  error?: string;
+  emptyMessage?: string;
 }) {
   const steps = value.length ? value : [];
   return (
@@ -25,7 +37,6 @@ export default function StepListEditor({
           <span aria-hidden="true">{index + 1}</span>
           <input
             aria-label={`Paso ${index + 1}`}
-            maxLength={300}
             value={step}
             readOnly={readOnly}
             placeholder="Escribí un control o paso"
@@ -56,6 +67,9 @@ export default function StepListEditor({
           )}
         </div>
       ))}
+      {steps.length === 0 && !readOnly && (
+        <p className="step-list-empty">{emptyMessage}</p>
+      )}
       {!readOnly && (
         <button
           type="button"
@@ -66,6 +80,7 @@ export default function StepListEditor({
           <Plus size={15} /> Agregar paso
         </button>
       )}
+      {error && <p className="step-list-error" role="alert">{error}</p>}
       {name && <input type="hidden" name={name} value={parseSteps(steps.join("\n")).join("\n")} />}
       {readOnly && steps.length === 0 && <p>Este proceso no tiene controles definidos.</p>}
     </div>

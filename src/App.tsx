@@ -90,7 +90,8 @@ import { load, persist, blankOnboarding } from "./data/repository";
 import { Dialog, Panel, Empty, Meter } from "./components/ui";
 import Onboarding from "./components/Onboarding";
 import Annotations from "./components/Annotations";
-import StepListEditor, { parseSteps } from "./components/StepListEditor";
+import OperationalTaskCard from "./components/OperationalTaskCard";
+import StepListEditor, { parseSteps, validateSteps } from "./components/StepListEditor";
 type Page =
   | "overview"
   | "day"
@@ -329,8 +330,15 @@ export default function App() {
   );
   const m = metrics(filtered, state.activity);
   const resultTasks = filtered.filter((t) => t.kind === "resultado");
-  const orderedTasks = orderTasks(resultTasks, taskOrder);
   const operations = filtered.filter((t) => t.kind === "operativa");
+  const coverageTasks = viewedOwner === active.id
+    ? filtered.filter((t) => t.ownerId !== active.id && coverageFor(state, t)?.replacementId === active.id)
+    : [];
+  const ownBoardResults = orderTasks(resultTasks.filter((t) => t.ownerId === viewedOwner), taskOrder);
+  const coveredResults = orderTasks(coverageTasks.filter((t) => t.kind === "resultado"), taskOrder);
+  const ownBoardOperations = orderTasks(operations.filter((t) => t.ownerId === viewedOwner), taskOrder);
+  const coveredOperations = orderTasks(coverageTasks.filter((t) => t.kind === "operativa"), taskOrder);
+  const visibleOperations = [...ownBoardOperations, ...coveredOperations];
   function changeProfile(pid: string) {
     if (commit({ ...state, activeId: pid })) {
       setOwner("");
@@ -341,6 +349,12 @@ export default function App() {
       setPage(state.onboarding[pid]?.home || "day");
       setPaused(false);
       setTourOpen(false);
+      setQuery("");
+      setDetail(null);
+      setLogFor(null);
+      setModal(null);
+      setNoteToTask(null);
+      setInduct(false);
     }
   }
   function mutateTask(t: Task, fn: (t: Task) => Task, action: string) {
@@ -422,6 +436,10 @@ export default function App() {
     try {
       for (const schedule of Object.values(draft.schedules || {}))
         validateSchedule(schedule);
+      for (const task of draft.customTasks || [])
+        validateSteps(task.steps.split(/\r?\n/));
+      if (draft.customTitle.trim())
+        validateSteps(String(draft.customSteps || "").split(/\r?\n/));
       const customIds = [
         ...(draft.customTasks || []).map((t) => t.id),
         "custom",
@@ -534,7 +552,7 @@ export default function App() {
         },
       },
       tour: { ...state.tour, [active.id]: 0 },
-      tourVersion: { ...state.tourVersion, [active.id]: 3 },
+      tourVersion: { ...state.tourVersion, [active.id]: 4 },
     };
     next = materialize(next, month);
     if (commit(next, "Completó inducción", active.id)) {
@@ -687,6 +705,7 @@ export default function App() {
     return (
       <article
         className={"task-card " + (t.status === "Completada" ? "done" : "")}
+        data-task-id={t.id}
         key={t.id}
       >
         <div className="card-top">
@@ -703,8 +722,11 @@ export default function App() {
           {nameOf(t.ownerId)}
           {coverageFor(state, t)?.replacementId && (
             <small>
-              {" "}
-              · cubre {nameOf(coverageFor(state, t)!.replacementId)}
+              {" "}· {active.id === coverageFor(state, t)!.replacementId
+                ? `cubrís a ${nameOf(t.ownerId)}`
+                : active.id === t.ownerId
+                  ? `te cubre ${nameOf(coverageFor(state, t)!.replacementId)}`
+                  : `cobertura a cargo de ${nameOf(coverageFor(state, t)!.replacementId)}`}
             </small>
           )}
         </p>
@@ -712,7 +734,7 @@ export default function App() {
           <span className="coverage-task-badge">Tarea de cobertura para {nameOf(coverageFor(state, t)!.ownerId)}</span>
         )}
         {t.scheduledOn && <small>Realización: {fmt(t.scheduledOn)}</small>}
-        <div className="timer-mini">
+        <div className="timer-mini" data-tour="task-timers">
           {t.sessions?.length ? (
             <span>
               ◷ {duration(elapsedSeconds(t, new Date(tick).toISOString()))}
@@ -734,7 +756,7 @@ export default function App() {
           )}
         </div>
         {t.blockedBy && <span className="wait">Espera a {t.blockedBy}</span>}
-        <div className="card-progress">
+        <div className="card-progress" data-tour="task-controls">
           <Meter
             value={
               t.checklist.length
@@ -904,20 +926,20 @@ export default function App() {
       </Panel>
     );
   }
-  const tasksForDetail = state.tasks.find((t) => t.id === detail);
-  const logTask = state.tasks.find((t) => t.id === logFor);
+  const tasksForDetail = state.tasks.find((t) => t.id === detail && canWork(state, active, t));
+  const logTask = state.tasks.find((t) => t.id === logFor && canWork(state, active, t));
   const tours: { page: Page; selector: string; title: string; text: string }[] = [
-    { page: "day", selector: '[data-nav="day"]', title: "Tu punto de partida", text: "Mi día reúne prioridades y vencimientos para empezar el período." },
+    { page: "day", selector: ".heading", title: "Tu punto de partida", text: "Mi día reúne prioridades y vencimientos del perfil consultado para empezar el período." },
     { page: "day", selector: ".sidebar-workspace", title: "Elegí el ambiente", text: "Filtrá las empresas autorizadas. La misma conciliación en dos empresas conserva estados independientes." },
-    { page: "tasks", selector: ".board-owner-filter", title: "Elegí el perfil", text: "Tu tablero abre con tus tareas. Si supervisás a alguien, podés consultar su perfil sin cambiar quién realiza las acciones." },
+    { page: "tasks", selector: ".board-owner-filter", title: "Elegí el perfil", text: active.role === "empleado" ? "Este es tu espacio personal. El encargado y Juan Pablo consultan otros perfiles desde su selector." : "Tu tablero abre con tus tareas. Podés consultar a una persona autorizada sin cambiar quién realiza las acciones." },
     { page: "tasks", selector: ".task-order", title: "Ordená el tablero", text: "Plegá cada estado por separado y ordená por nombre para encontrar una tarjeta rápido." },
     { page: "tasks", selector: '[data-tour="task-actions"]', title: "Cargá una tarea", text: "Elegí una tarea puntual o un proceso del catálogo; revisá su empresa, frecuencia y vencimiento." },
-    { page: "tasks", selector: '[data-nav="tasks"]', title: "Registrá tu trabajo", text: "Iniciá el cronómetro, completá los controles paso a paso y cerrá la tarjeta cuando termines." },
+    { page: "tasks", selector: '[data-tour="task-timers"]', title: "Medí el tiempo", text: "Iniciá, pausá o reanudá el cronómetro desde la tarjeta. El tiempo queda asociado a quien acciona." },
+    { page: "tasks", selector: '[data-tour="task-controls"]', title: "Avanzá los controles", text: "Abrí la tarjeta y completá cada paso. El último control mueve el entregable a terminado automáticamente." },
     { page: "operations", selector: '[data-nav="operations"]', title: "Cargá la actividad", text: "Registrá cantidades y referencias de facturas, trámites o pagos para el cierre del período." },
     { page: "calendar", selector: '[data-nav="calendar"]', title: "Revisá las fechas", text: "Consultá los vencimientos de las tareas del período y atendé primero lo próximo." },
     { page: "absences", selector: '[data-nav="absences"]', title: "Coordiná cobertura", text: "Registrá vacaciones o licencias y organizá con el encargado quién cubre las tareas abiertas." },
     { page: "annotations", selector: '[data-nav="annotations"]', title: "Guardá referencias", text: "Conservá fórmulas y recordatorios personales. Convertí una anotación en una tarea puntual si necesitás seguimiento." },
-    { page: "day", selector: '[data-nav="day"]', title: "Volvé a tus prioridades", text: "Al terminar, Mi día te muestra tus próximas acciones y recordatorios propios." },
     ...(manager ? [
       { page: "analytics" as Page, selector: '[data-nav="analytics"]', title: "Analizá resultados", text: "Compará cumplimiento, tiempos y pesos por persona, equipo o sector." },
       { page: "team" as Page, selector: '[data-nav="team"]', title: "Acompañá a tu equipo", text: "La relación jerárquica define los perfiles que podés consultar." },
@@ -928,7 +950,7 @@ export default function App() {
       { page: "team" as Page, selector: '[data-nav="team"]', title: "Administrá perfiles", text: "Configurá accesos, responsables, equipos y empresas del organigrama." },
     ] : []),
   ];
-  const tourVersion = 3;
+  const tourVersion = 4;
   const savedTourValue =
     state.tourVersion?.[active.id] === tourVersion
       ? state.tour[active.id] || 0
@@ -939,6 +961,11 @@ export default function App() {
   const tourStep = Number.isSafeInteger(savedTour)
     ? Math.min(Math.max(savedTour, 0), tours.length - 1)
     : 0;
+  const isTourSpotlight = (selector: string) => {
+    if (!tourOpen) return false;
+    if (tours[tourStep].selector === selector) return true;
+    return !document.querySelector(tours[tourStep].selector) && selector === ".heading";
+  };
   return (
     <>
       <aside className="sidebar">
@@ -946,7 +973,7 @@ export default function App() {
           <img src="/logo-grupo-paris.svg" alt="Grupo París" />
           <span>ESPACIO CONTABLE</span>
         </div>
-        <label className="workspace sidebar-workspace">
+        <label className={"workspace sidebar-workspace" + (isTourSpotlight(".sidebar-workspace") ? " spotlight" : "")}>
           <Building2 size={18} />
           <div>
             <span>AMBIENTE DE TRABAJO</span>
@@ -966,10 +993,7 @@ export default function App() {
                 key={p.id}
                 className={
                   (page === p.id ? "active " : "") +
-                  (tourOpen &&
-                  tours[tourStep].selector === `[data-nav="${p.id}"]`
-                    ? "spotlight"
-                    : "")
+                  (isTourSpotlight(`[data-nav="${p.id}"]`) ? "spotlight" : "")
                 }
                 onClick={() => {
                   setPage(p.id);
@@ -1102,7 +1126,9 @@ export default function App() {
                 {page === "overview"
                   ? "Todo el equipo, en perspectiva."
                   : page === "day"
-                    ? `Buen día, ${active.name.split(" ")[0]}.`
+                    ? viewedOwner === active.id
+                      ? `Buen día, ${active.name.split(" ")[0]}.`
+                      : `Tablero de ${nameOf(viewedOwner).split(" ")[0]}.`
                     : page === "tasks"
                       ? "El trabajo avanza con vos."
                       : page === "operations"
@@ -1137,7 +1163,7 @@ export default function App() {
                           : "Tus empresas, tus prioridades y el contexto que necesitás para decidir."}
               </p>
             </div>
-            {(["day", "tasks", "operations"] as Page[]).includes(page) && (
+            {(["day", "tasks", "operations", "planning"] as Page[]).includes(page) && (
               <button className="primary" data-tour="task-actions" onClick={() => setModal("new")}>
                 <Plus size={17} /> Nueva tarea
               </button>
@@ -1145,7 +1171,7 @@ export default function App() {
           </div>
           <div
             className={
-              "filters " + (tourOpen && tourStep === 1 ? "spotlight" : "")
+              "filters " + (isTourSpotlight(".board-owner-filter") ? "spotlight" : "")
             }
           >
             <label className="company-filter">
@@ -1162,6 +1188,7 @@ export default function App() {
                   </option>
                 ))}
               </select>
+              <small className="workspace-count">{filtered.length} tareas visibles · {monthLabel(month)}</small>
             </label>
             <div className="filter-divider" />
             <label>
@@ -1318,7 +1345,7 @@ export default function App() {
                             dataKey="earned"
                             name="Puntos logrados"
                             stackId="a"
-                            fill="var(--chart-ink)"
+                            fill="var(--chart-earned)"
                             maxBarSize={28}
                             activeBar={{ fill: "var(--chart-active)", stroke: "var(--chart-active-border)" }}
                           />
@@ -1340,7 +1367,9 @@ export default function App() {
                 <div className="section-heading">
                   <h2>
                     {page === "day"
-                      ? "Tu próxima acción"
+                      ? viewedOwner === active.id
+                        ? "Tu próxima acción"
+                        : `Próxima acción de ${nameOf(viewedOwner)}`
                       : "Prioridades del equipo"}
                   </h2>
                   <button
@@ -1355,7 +1384,7 @@ export default function App() {
                     .filter(
                       (t) =>
                         t.status !== "Completada" &&
-                        (page !== "day" || t.ownerId === active.id),
+                        (page !== "day" || t.ownerId === viewedOwner),
                     )
                     .sort((a, b) =>
                       (a.due || "9999").localeCompare(b.due || "9999"),
@@ -1366,7 +1395,7 @@ export default function App() {
                 {!resultTasks.some(
                   (t) =>
                     t.status !== "Completada" &&
-                    (page !== "day" || t.ownerId === active.id),
+                    (page !== "day" || t.ownerId === viewedOwner),
                 ) && (
                   <Empty text="No tenés entregables pendientes en esta selección." />
                 )}
@@ -1384,7 +1413,7 @@ export default function App() {
                       onChange={(e) => setQuery(e.target.value)}
                     />
                   </div>
-                  <label className="task-order">
+                  <label className={"task-order" + (isTourSpotlight(".task-order") ? " spotlight" : "")}>
                     Ordenar tareas
                     <select
                       aria-label="Ordenar tareas"
@@ -1418,15 +1447,28 @@ export default function App() {
                     operativas
                   </span>
                 </div>
-                {view === "list" ? (
-                  <Panel
-                    title="Entregables"
-                    sub="Una instancia independiente por empresa y mes"
-                  >
-                    {table(orderedTasks)}
-                  </Panel>
-                ) : (
-                  <TaskBoard tasks={orderedTasks} renderCard={taskCard} />
+                <section className="task-owner-section">
+                  <h2>{viewedOwner === active.id ? "Mis entregables" : `Entregables de ${nameOf(viewedOwner)}`}</h2>
+                  {view === "list" ? (
+                    <Panel title="Entregables" sub="Una instancia independiente por empresa y mes">
+                      {table(ownBoardResults)}
+                    </Panel>
+                  ) : (
+                    <TaskBoard tasks={ownBoardResults} renderCard={taskCard} />
+                  )}
+                </section>
+                {coveredResults.length > 0 && (
+                  <section className="task-owner-section coverage-section">
+                    <h2>Tareas que cubrís <span>{coveredResults.length}</span></h2>
+                    <p>Estas tarjetas conservan a su responsable y el mismo historial de la tarea.</p>
+                    {view === "list" ? (
+                      <Panel title="Entregables cubiertos" sub="La cobertura no crea una tarea duplicada">
+                        {table(coveredResults)}
+                      </Panel>
+                    ) : (
+                      <TaskBoard tasks={coveredResults} renderCard={taskCard} />
+                    )}
+                  </section>
                 )}
               </>
             )}
@@ -1441,7 +1483,7 @@ export default function App() {
                 onConvert={convertAnnotation}
                 onOpenTask={(taskId) => {
                   const task = state.tasks.find((t) => t.id === taskId);
-                  if (!task) return;
+                  if (!task || !canWork(state, active, task)) return;
                   setMonth(task.month);
                   setPage("tasks");
                   setDetail(taskId);
@@ -1460,93 +1502,51 @@ export default function App() {
                     </p>
                   </div>
                 </div>
-                <div className="operations-grid">
-                  {operations.map((t) => {
-                    const qty = taskQuantity(t, state.activity);
-                    return (
-                      <section className="panel operation" key={t.id}>
-                        <div className="card-top">
-                          <span className="company-tag">
-                            {companyOf(t.companyId)}
-                          </span>
-                          <b>{t.weight} pts</b>
-                        </div>
-                        <h2>{t.title}</h2>
-                        <p>
-                          {nameOf(t.ownerId)}
-                          {coverageFor(state, t)?.replacementId && (
-                            <small>
-                              {" "}
-                              · cubre{" "}
-                              {nameOf(coverageFor(state, t)!.replacementId)}
-                            </small>
-                          )}
-                        </p>
-                        {t.scheduledOn && (
-                          <small>Realización: {fmt(t.scheduledOn)}</small>
-                        )}
-                        <div className="timer-mini">
-                          {t.sessions?.length ? (
-                            <span>
-                              ◷{" "}
-                              {duration(
-                                elapsedSeconds(t, new Date(tick).toISOString()),
-                              )}
-                            </span>
-                          ) : (
-                            <span>Sin tiempo registrado</span>
-                          )}
-                          {t.status === "En curso" &&
-                            !closed &&
-                            !t.blockedBy && (
-                              <button
-                                aria-label={
-                                  t.sessions?.some((e) => !e.end)
-                                    ? "Pausar cronómetro"
-                                    : "Reanudar cronómetro"
-                                }
-                                onClick={() =>
-                                  clock(t, !t.sessions?.some((e) => !e.end))
-                                }
-                              >
-                                {t.sessions?.some((e) => !e.end)
-                                  ? "Pausar"
-                                  : "Cronometrar"}
-                              </button>
-                            )}
-                        </div>
-                        <div className="quantity">
-                          <strong>{qty}</strong>
-                          <span>
-                            / {t.target} {t.unit}
-                          </span>
-                        </div>
-                        <Meter value={(qty / t.target) * 100} />
-                        <div className="operation-footer">
-                          <small>
-                            {Math.round((qty / t.target) * 100)}% de la meta
-                            mensual
-                          </small>
-                          <button
-                            className="primary"
-                            onClick={() => setLogFor(t.id)}
-                            disabled={isClosed(state, t)}
-                          >
-                            <Plus size={14} />
-                            Registrar
-                          </button>
-                        </div>
-                        <button
-                          className="text-button"
-                          onClick={() => setDetail(t.id)}
-                        >
-                          Ver registros <ArrowRight size={13} />
-                        </button>
-                      </section>
-                    );
-                  })}
-                </div>
-                {!operations.length && (
+                <section className="task-owner-section">
+                  <h2>{viewedOwner === active.id ? "Mis operativas" : `Operativas de ${nameOf(viewedOwner)}`}</h2>
+                  <div className="operations-grid">
+                    {ownBoardOperations.map((t) => (
+                      <OperationalTaskCard
+                        key={t.id}
+                        task={t}
+                        company={companyOf(t.companyId)}
+                        owner={nameOf(t.ownerId)}
+                        scheduled={t.scheduledOn ? fmt(t.scheduledOn) : ""}
+                        quantity={taskQuantity(t, state.activity)}
+                        time={duration(elapsedSeconds(t, new Date(tick).toISOString()))}
+                        closed={isClosed(state, t)}
+                        onClock={() => clock(t, !t.sessions?.some((session) => !session.end))}
+                        onLog={() => setLogFor(t.id)}
+                        onDetails={() => setDetail(t.id)}
+                      />
+                    ))}
+                  </div>
+                </section>
+                {coveredOperations.length > 0 && (
+                  <section className="task-owner-section coverage-section">
+                    <h2>Tareas operativas que cubrís <span>{coveredOperations.length}</span></h2>
+                    <p>Los registros se conservan en la tarea original y muestran quién realizó cada aporte.</p>
+                    <div className="operations-grid">
+                      {coveredOperations.map((t) => (
+                        <OperationalTaskCard
+                          key={t.id}
+                          task={t}
+                          company={companyOf(t.companyId)}
+                          owner={nameOf(t.ownerId)}
+                          coverOwner={active.name}
+                          scheduled={t.scheduledOn ? fmt(t.scheduledOn) : ""}
+                          quantity={taskQuantity(t, state.activity)}
+                          time={duration(elapsedSeconds(t, new Date(tick).toISOString()))}
+                          closed={isClosed(state, t)}
+                          onClock={() => clock(t, !t.sessions?.some((session) => !session.end))}
+                          onLog={() => setLogFor(t.id)}
+                          onDetails={() => setDetail(t.id)}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                )}
+                {!ownBoardOperations.length && !coveredOperations.length && (
                   <Empty text="No hay operativas. Podés crear una desde Nueva tarea." />
                 )}
                 <Panel
@@ -1569,12 +1569,12 @@ export default function App() {
                         {state.activity
                           .filter(
                             (a) =>
-                              operations.some((t) => t.id === a.taskId) &&
+                              visibleOperations.some((t) => t.id === a.taskId) &&
                               a.date.startsWith(month),
                           )
                           .sort((a, b) => b.date.localeCompare(a.date))
                           .map((a) => {
-                            const t = operations.find(
+                            const t = visibleOperations.find(
                               (t) => t.id === a.taskId,
                             )!;
                             return (
@@ -2321,7 +2321,7 @@ export default function App() {
           active={active}
           month={month}
           company={company}
-          owner={owner}
+          owner={noteToTask ? active.id : ownBoardPages.includes(page) ? viewedOwner : owner || active.id}
           people={people}
           seedAnnotation={noteToTask}
           close={() => {
@@ -2827,7 +2827,9 @@ export default function App() {
           </form>
         </Dialog>
       )}
-      {modal === "close" && (
+      {modal === "close" && manager &&
+        !!state.profiles.find((p) => p.id === owner && p.active) &&
+        canSee(active, owner, state.profiles) && (
         <Dialog
           title={`Cerrar ${monthLabel(month)}`}
           onClose={() => setModal(null)}
@@ -2916,6 +2918,7 @@ function NewTask({
     defaultSchedule(seedAnnotation?.reminderOn || month + "-25"),
   );
   const [scheduleError, setScheduleError] = useState("");
+  const [taskError, setTaskError] = useState("");
   const [kind, setKind] = useState<"resultado" | "operativa">("resultado");
   const t = state.templates.find((t) => t.id === template);
   function submit(e: FormEvent<HTMLFormElement>) {
@@ -2925,14 +2928,31 @@ function NewTask({
     if (!title) return;
     try {
       validateSchedule(schedule);
-      if (!t && schedule.frequency !== "única")
-        throw Error("Las tareas habituales requieren un proceso del catálogo.");
     } catch (e) {
       setScheduleError((e as Error).message);
       return;
     }
-    const checklist = parseSteps(String(f.get("steps") || ""));
+    if (!t && schedule.frequency !== "única") {
+      setScheduleError("Las tareas habituales requieren un proceso del catálogo.");
+      return;
+    }
     const selectedKind = t?.kind || kind;
+    let checklist: string[] = [];
+    let target = 0;
+    try {
+      if (selectedKind === "resultado")
+        checklist = validateSteps(t?.steps || parseSteps(String(f.get("steps") || "")));
+      if (selectedKind === "operativa") {
+        target = Number(f.get("target") || t?.target || 0);
+        if (!Number.isSafeInteger(target) || target < 1 || target > 1000000)
+          throw Error("La meta debe ser un número entero entre 1 y 1.000.000.");
+      }
+    } catch (e) {
+      setTaskError((e as Error).message);
+      return;
+    }
+    setScheduleError("");
+    setTaskError("");
     create({
       schedule,
       id: id(),
@@ -2944,11 +2964,11 @@ function NewTask({
       kind: selectedKind,
       weight: t?.weight || (active.role === "jefe" ? Number(f.get("weight") || 1) : 1),
       unit: selectedKind === "operativa" ? (t?.unit || String(f.get("unit") || "").trim()) : "",
-      target: selectedKind === "operativa" ? (t?.target || Number(f.get("target") || 0)) : 0,
+      target: selectedKind === "operativa" ? target : 0,
       day: schedule.monthDay,
       frequency: schedule.frequency,
       steps:
-        selectedKind === "resultado" ? (t?.steps || checklist) : [],
+        selectedKind === "resultado" ? checklist : [],
       startMonth: seedAnnotation ? schedule.startDate.slice(0, 7) : month,
       priority: String(f.get("priority")) as Assignment["priority"],
     });
@@ -2964,6 +2984,7 @@ function NewTask({
             const selected = state.templates.find((t) => t.id === e.target.value);
             setKind(selected?.kind || "resultado");
             setSteps(selected?.steps || (seedAnnotation ? parseSteps(seedAnnotation.content) : []));
+            setTaskError("");
           }}
         >
           <option value="">Trabajo esporádico · una sola vez</option>
@@ -3005,7 +3026,7 @@ function NewTask({
           </label>
           <label>
             Responsable
-            <select name="owner" defaultValue={owner || active.id}>
+            <select name="owner" defaultValue={owner}>
               {people.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
@@ -3094,22 +3115,25 @@ function NewTask({
         </div>
         <ScheduleEditor
           value={schedule}
-          onChange={setSchedule}
+          onChange={(next) => { setSchedule(next); setScheduleError(""); }}
           month={month}
           onlyOnce={!!seedAnnotation || !t}
         />
         {scheduleError && <p role="alert">{scheduleError}</p>}
         {kind === "resultado" && (
-          <label>
-            Checklist · un paso por línea
+          <div className="checklist-field">
+            <p className="checklist-field-title">Checklist · un paso por línea</p>
             <StepListEditor
               name="steps"
               value={t?.steps || steps}
-              onChange={setSteps}
+              error={taskError}
+              emptyMessage="Se creará sin checklist. Podés agregar controles si este trabajo los requiere."
+              onChange={(next) => { setSteps(next); setTaskError(""); }}
               readOnly={!!t}
             />
-          </label>
+          </div>
         )}
+        {taskError && kind !== "resultado" && <p className="step-list-error" role="alert">{taskError}</p>}
         <div className="note">
           Se crea una instancia para {monthLabel(month)}. Dos empresas conservan
           estados e indicadores independientes.

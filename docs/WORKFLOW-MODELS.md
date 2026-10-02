@@ -55,10 +55,11 @@ sin pedir otro «continuá».
 
 ## Próximo bloque
 
-**GPT-6 Luna medio, Standard:** ejecutar
-`product/CORRECTIONS-UI-A-REPAIR-20261002.md`. El lector fue aceptado localmente;
-esta ejecución repara A e incorpora sus probes complementarios a los tests.
-Después **Sol 6.1 medio** revisa A. Luego **Sol alto** define arquitectura B/C,
-permisos y coordinación antes de Luna. El cambio es manual; no simularlo con
-subagentes. Infraestructura y migración siguen pendientes de integración,
-concurrencia y piloto. Estado único de continuidad: EXECUTION-NEXT.md.
+**GPT-6.1 Sol medio:** revisar y aceptar la reparación A implementada según
+`product/CORRECTIONS-UI-A-REPAIR-20261002.md`. La suite completa pasó 202
+pruebas/17 archivos y build; revisar el contrato, especialmente actor/perfil,
+cobertura sin duplicar identidad, límites de pasos, tour v4 y cierre protegido.
+Luego **Sol alto** define arquitectura B/C, permisos y coordinación antes de
+Luna. El cambio es manual; no simularlo con subagentes. Infraestructura y
+migración siguen pendientes de integración, concurrencia y piloto. Estado único
+de continuidad: EXECUTION-NEXT.md.

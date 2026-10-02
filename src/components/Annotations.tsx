@@ -63,7 +63,6 @@ export default function Annotations({
     if (!title || !content || !category) return;
     const kind = categoryKind(category);
     if (kind === "reminder" && !reminderOn) return;
-    if (kind === "reminder" && !reminderOn) return;
     if (onSave({ id: source?.id || "", title, content, category, kind, reminderOn })) {
       e.currentTarget.reset();
       setEditing(null);
@@ -107,7 +106,7 @@ export default function Annotations({
                   <div className="annotation-card-head"><span className={`annotation-kind kind-${entry.kind}`}>{entry.kind === "reminder" ? <Bell size={13} /> : entry.kind === "formula" ? <Sparkles size={13} /> : <FileText size={13} />}{category}</span>{entry.reminderOn && <time>{new Date(entry.reminderOn + "T12:00:00").toLocaleDateString("es-AR")}</time>}</div>
                   <h3>{entry.title}</h3>
                   <p className={`annotation-preview ${open ? "expanded" : ""}`}>{entry.content}</p>
-                  {entry.content.length > 100 && <button className="annotation-expand" onClick={() => setExpanded((current) => ({ ...current, [entry.id]: !open }))}>{open ? "Mostrar menos" : "Leer completo"} <ChevronDown size={13} /></button>}
+                  <button type="button" className="annotation-expand" aria-expanded={open} onClick={() => setExpanded((current) => ({ ...current, [entry.id]: !open }))}>{open ? "Mostrar menos" : "Leer completo"} <ChevronDown size={13} /></button>
                   <div className="annotation-card-actions">
                     {entry.kind === "formula" && <button onClick={async () => { try { if (!navigator.clipboard?.writeText) throw new Error(); await navigator.clipboard.writeText(entry.content); setCopied(entry.id); } catch { setCopied(`${entry.id}:error`); } setTimeout(() => setCopied(""), 2200); }}><Clipboard size={14} />{copied === entry.id ? "Copiada" : copied === `${entry.id}:error` ? "No se pudo copiar" : "Copiar"}</button>}
                     {linked ? <button className="annotation-linked" onClick={() => onOpenTask(linked.id)}><Check size={14} /> Tarea creada · {linked.title}</button> : converted ? <span className="annotation-linked-unavailable">Tarea vinculada no disponible</span> : <button onClick={() => { setEditing(entry.id); setFormCategory(category); setFormOpen(true); }}>Editar</button>}
