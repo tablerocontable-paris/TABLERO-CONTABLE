@@ -90,5 +90,16 @@ Sólo documentación/evidencia modificada; aplicación live v42 se conserva.
 Corregidos R1–R4 y hallazgos asociados de auditoría, CSV y presentación. Se
 añadieron pruebas temporales estrictas ISO, offset, corte temporal, bisiesto,
 actividad inválida/de otro período y prueba renderizada de la etiqueta/panel.
-Suite 221 pruebas/20 archivos, build y diff check pasan. Falta revisión Sol y QA
+Suite 222 pruebas/21 archivos, build y diff check pasan. Falta revisión Sol y QA
 visual real de temas; no es aceptación final ni habilita migración.
+
+
+## Publicación de la reparación
+
+Sites v43 publicada con éxito: implementación commit
+`9d6b97dc16625c974d6679cf7d69b7fe2fdb3900`, versión
+`appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_3e2fc69b4dac819196d375f0c836aa5a`,
+deploy `appgdep_6ac00b2ad81c81919a50bafab9f7101d`. La suite fue 222/222 en
+21 archivos, build y diff check aprobados. No se cambió SQL ni infraestructura.
+La QA visual real claro/oscuro/Sistema sigue abierta; Sol debe revisar el bloque
+antes de aceptarlo.

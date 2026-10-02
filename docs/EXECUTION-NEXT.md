@@ -2,12 +2,13 @@
 
 **GPT-6.1 Sol, esfuerzo medio, Standard.** Revisar el arreglo implementado del
 contrato `product/DEADLINE-EFFICIENCY-REPAIR-20261002.md`. Cuatro probes que
-fallaban ahora están cubiertos por regresiones; 221 pruebas/20 archivos, build y
+fallaban ahora están cubiertos por regresiones; 222 pruebas/21 archivos, build y
 diff check aprobados. Revisar validación ISO, corte temporal, no-op/auditoría,
 CSV y paneles. QA visual de claro/oscuro/Sistema continúa abierta.
 
-Aplicación actual: Sites privado. El build de reparación se publicará desde el
-commit que registra estas correcciones. Avance global 40%; no lista para migrar.
+Aplicación actual: [Sites v43](https://grupo-paris-contabilidad.valentino-magni.chatgpt.site), deploy succeeded. Fuente de
+implementación `9d6b97dc16625c974d6679cf7d69b7fe2fdb3900`; revisión Sol y QA
+visual pendientes. Avance global 40%; no lista para migrar.
 Tras aceptación, Sol alto diseña B/C.
 
 ## Trabajo de arquitectura a retomar después de aceptar el arreglo

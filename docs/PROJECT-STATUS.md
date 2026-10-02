@@ -106,7 +106,7 @@ architecture/REVIEW-DATA-ADAPTER-20261002.md, PRODUCT-ROADMAP.md y
 ops/AUTOMATED-DELIVERY.md. La página y código continúan en Sites
 privado; cada publicación nativa registra su SHA exacto en Git/main.
 
-## Revisión independiente actual
+## Revisión independiente v42 — registro histórico
 
 Sites live confirmado v42, versión
 `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_bd5d2636e4388191acdd41af1daca971`,
@@ -117,7 +117,7 @@ Cuatro probes independientes fallaron; evidencia y contrato en
 revisión ni se despliega documentación para aparentar una reparación.
 
 
-## Reparación local de anticipación — 02/10/2026
+## Reparación de anticipación — Sites v43 — 02/10/2026
 
 Se cerraron los cuatro defectos reproducidos en v42: completedAt posterior al
 corte en el mismo día, timestamp calendario imposible/incompleto, fecha inválida
@@ -130,6 +130,17 @@ distingue ausencia histórica de falta de muestra y añade ambos promedios. La t
 agrupada muestra promedio operativo y la etiqueta especifica “Meta registrada”.
 El corte de análisis se congela una vez por render y se pasa a agregados.
 
-Regresiones integradas: suite **221 pruebas/20 archivos**, `npm run build` y
+Regresiones integradas: suite **222 pruebas/21 archivos**, `npm run build` y
 `git diff --check` aprobados. No se cambió SQL, gateway, lector ni dependencias.
 Revisión Sol medio y QA visual de navegador pendientes; avance sigue **40%**.
+
+
+## Publicación de la reparación
+
+Sites v43 publicada con éxito: implementación commit
+`9d6b97dc16625c974d6679cf7d69b7fe2fdb3900`, versión
+`appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_3e2fc69b4dac819196d375f0c836aa5a`,
+deploy `appgdep_6ac00b2ad81c81919a50bafab9f7101d`. La suite fue 222/222 en
+21 archivos, build y diff check aprobados. No se cambió SQL ni infraestructura.
+La QA visual real claro/oscuro/Sistema sigue abierta; Sol debe revisar el bloque
+antes de aceptarlo.
