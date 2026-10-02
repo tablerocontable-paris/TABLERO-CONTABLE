@@ -115,3 +115,21 @@ deploy `appgdep_6ac00614bbd881919b493c582d5fcd14`, fuente documental
 Cuatro probes independientes fallaron; evidencia y contrato en
 `product/DEADLINE-EFFICIENCY-REPAIR-20261002.md`. No se modifica producto en esta
 revisión ni se despliega documentación para aparentar una reparación.
+
+
+## Reparación local de anticipación — 02/10/2026
+
+Se cerraron los cuatro defectos reproducidos en v42: completedAt posterior al
+corte en el mismo día, timestamp calendario imposible/incompleto, fecha inválida
+de actividad propia ignorada y checklist repetido tratado como cambio. La ruta de
+mutación ya corta por identidad para evitar audit/commit del no-op. Los timestamps
+ISO completos se validan antes de interpretar; `createdAt` futuro no acredita meta.
+
+CSV de análisis marca tasas/promedios nulos como “Sin muestra”; CSV de cierre
+distingue ausencia histórica de falta de muestra y añade ambos promedios. La tabla
+agrupada muestra promedio operativo y la etiqueta especifica “Meta registrada”.
+El corte de análisis se congela una vez por render y se pasa a agregados.
+
+Regresiones integradas: suite **221 pruebas/20 archivos**, `npm run build` y
+`git diff --check` aprobados. No se cambió SQL, gateway, lector ni dependencias.
+Revisión Sol medio y QA visual de navegador pendientes; avance sigue **40%**.

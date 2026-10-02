@@ -1,14 +1,14 @@
 import type { TaskTimeliness } from "../domain/timeliness";
 
 function label(value: TaskTimeliness): string {
-  const subject = value.evidence === "registered-target" ? "Meta" : "Completada";
+  const subject = value.evidence === "registered-target" ? "Meta registrada" : "Completada";
   switch (value.status) {
     case "early": {
       const days = value.daysAhead || 0;
       return `${subject} ${days} ${days === 1 ? "día" : "días"} antes`;
     }
     case "on-date":
-      return `${value.evidence === "registered-target" ? "Meta alcanzada" : "Completada"} en fecha`;
+      return `${value.evidence === "registered-target" ? "Meta registrada" : "Completada"} en fecha`;
     case "late": {
       const days = Math.abs(value.daysAhead || 0);
       return `${subject} ${days} ${days === 1 ? "día" : "días"} después`;

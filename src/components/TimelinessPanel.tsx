@@ -56,13 +56,14 @@ export default function TimelinessPanel({
       {rows?.length ? (
         <div className="table-wrap timeliness-table">
           <table>
-            <thead><tr><th>Ámbito</th><th>Entregables antes / evaluables</th><th>Anticipación media</th><th>Metas operativas antes / evaluables</th></tr></thead>
+            <thead><tr><th>Ámbito</th><th>Entregables antes / evaluables</th><th>Anticipación media</th><th>Metas operativas antes / evaluables</th><th>Anticipación media de metas</th></tr></thead>
             <tbody>{rows.map((row) => (
               <tr key={row.id}>
                 <td>{row.name}</td>
                 <td>{row.timeliness?.results.early ?? 0}/{row.timeliness?.results.evaluated ?? 0} · {percent(row.timeliness?.results.earlyRate ?? null)}</td>
                 <td>{average(row.timeliness?.results)}</td>
                 <td>{row.timeliness?.operational.early ?? 0}/{row.timeliness?.operational.evaluated ?? 0} · {percent(row.timeliness?.operational.earlyRate ?? null)}</td>
+                <td>{average(row.timeliness?.operational)}</td>
               </tr>
             ))}</tbody>
           </table>

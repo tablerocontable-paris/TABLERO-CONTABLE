@@ -1,16 +1,14 @@
-# Próximo paso — reparar anticipación tras revisión independiente
+# Próximo paso — revisión independiente de la reparación
 
-**GPT-6 Luna, esfuerzo medio, Standard.** Ejecutar el contrato cerrado
-`product/DEADLINE-EFFICIENCY-REPAIR-20261002.md`. Cuatro probes fallaron:
-logro futuro del mismo día, timestamp normalizado, fecha de actividad inválida
-y checklist repetido. Además reparar no-op del llamador, CSV y presentación.
-No implementar B/C hasta revisión independiente posterior con Sol medio.
+**GPT-6.1 Sol, esfuerzo medio, Standard.** Revisar el arreglo implementado del
+contrato `product/DEADLINE-EFFICIENCY-REPAIR-20261002.md`. Cuatro probes que
+fallaban ahora están cubiertos por regresiones; 221 pruebas/20 archivos, build y
+diff check aprobados. Revisar validación ISO, corte temporal, no-op/auditoría,
+CSV y paneles. QA visual de claro/oscuro/Sistema continúa abierta.
 
-Live confirmado Sites v42, misma aplicación de v41, fuente documental
-`97b0cb20432f88e55bd1f09da925cfbf0f07f3ee`; código funcional
-`20d4db3c151c3c2eb963352bde4578ab321a0a8d`. QA visual sigue abierta.
-Avance 40%; no lista para migrar. Esta revisión sólo cambia documentación
-y conserva el build live.
+Aplicación actual: Sites privado. El build de reparación se publicará desde el
+commit que registra estas correcciones. Avance global 40%; no lista para migrar.
+Tras aceptación, Sol alto diseña B/C.
 
 ## Trabajo de arquitectura a retomar después de aceptar el arreglo
 

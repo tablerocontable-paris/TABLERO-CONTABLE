@@ -43,6 +43,8 @@ export default function PeriodReports({
         "Entregables antes %",
         "Metas antes / evaluables",
         "Metas antes %",
+        "Promedio días anticipación entregables",
+        "Promedio días anticipación metas",
       ],
       ...r.groups.map((g) => [
         r.employee,
@@ -60,9 +62,11 @@ export default function PeriodReports({
         duration(g.recordedSeconds),
         g.reopenings,
         `${g.metrics.timeliness?.results.early ?? "Sin medición histórica"}/${g.metrics.timeliness?.results.evaluated ?? "Sin medición histórica"}`,
-        g.metrics.timeliness?.results.earlyRate ?? "Sin medición histórica",
+        g.metrics.timeliness ? (g.metrics.timeliness.results.earlyRate ?? "Sin muestra") : "Sin medición histórica",
         `${g.metrics.timeliness?.operational.early ?? "Sin medición histórica"}/${g.metrics.timeliness?.operational.evaluated ?? "Sin medición histórica"}`,
-        g.metrics.timeliness?.operational.earlyRate ?? "Sin medición histórica",
+        g.metrics.timeliness ? (g.metrics.timeliness.operational.earlyRate ?? "Sin muestra") : "Sin medición histórica",
+        g.metrics.timeliness ? (g.metrics.timeliness.results.averageDaysAhead ?? "Sin muestra") : "Sin medición histórica",
+        g.metrics.timeliness ? (g.metrics.timeliness.operational.averageDaysAhead ?? "Sin muestra") : "Sin medición histórica",
       ]),
     ];
     const url = URL.createObjectURL(

@@ -50,12 +50,31 @@ const emptyBucket = (): TimelinessBucket => ({
 function validDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const [y, m, d] = value.split("-").map(Number);
-  const parsed = new Date(Date.UTC(y, m - 1, d));
+  const parsed = new Date(0);
+  parsed.setUTCHours(0, 0, 0, 0);
+  parsed.setUTCFullYear(y, m - 1, d);
   return (
     parsed.getUTCFullYear() === y &&
     parsed.getUTCMonth() === m - 1 &&
     parsed.getUTCDate() === d
   );
+}
+
+function timestampMs(value: string): number | null {
+  const match = /^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2}):(\d{2})(\.\d+)?(Z|[+-]\d{2}:\d{2})$/.exec(value);
+  if (!match || !validDate(match[1]!)) return null;
+  const hour = Number(match[2]);
+  const minute = Number(match[3]);
+  const second = Number(match[4]);
+  if (hour > 23 || minute > 59 || second > 59) return null;
+  const zone = match[6]!;
+  if (zone !== "Z") {
+    const offsetHour = Number(zone.slice(1, 3));
+    const offsetMinute = Number(zone.slice(4, 6));
+    if (offsetHour > 23 || offsetMinute > 59) return null;
+  }
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? parsed : null;
 }
 
 export function endOfARTDate(today: string): string | null {
@@ -66,8 +85,8 @@ export function endOfARTDate(today: string): string | null {
 }
 
 function dateART(instant: string): string | null {
-  const parsed = Date.parse(instant);
-  if (!Number.isFinite(parsed)) return null;
+  const parsed = timestampMs(instant);
+  if (parsed === null) return null;
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Argentina/Buenos_Aires",
     year: "numeric",
@@ -95,6 +114,7 @@ function operationAchievement(
   if (!Number.isSafeInteger(task.target) || task.target <= 0)
     return { unknown: true };
   const own = activity.filter((entry) => entry.taskId === task.id);
+  if (own.some((entry) => !validDate(entry.date))) return { unknown: true };
   const relevant = own.filter((entry) => entry.date.startsWith(task.month));
   const asOfDate = dateART(new Date(asOfMs).toISOString());
   if (
@@ -111,14 +131,14 @@ function operationAchievement(
       (entry) =>
         !Number.isSafeInteger(entry.qty) ||
         entry.qty <= 0 ||
-        !Number.isFinite(Date.parse(entry.createdAt)) ||
-        Date.parse(entry.createdAt) > asOfMs,
+        timestampMs(entry.createdAt) === null ||
+        timestampMs(entry.createdAt)! > asOfMs,
     )
   )
     return { unknown: true };
   entries.sort(
     (a, b) =>
-      Date.parse(a.createdAt) - Date.parse(b.createdAt) ||
+      timestampMs(a.createdAt)! - timestampMs(b.createdAt)! ||
       a.id.localeCompare(b.id),
   );
   let quantity = 0;
@@ -140,8 +160,8 @@ export function taskTimeliness(
     daysAhead: null,
     evidence: null,
   };
-  const asOfMs = Date.parse(asOfISO);
-  if (!Number.isFinite(asOfMs)) return unknown;
+  const asOfMs = timestampMs(asOfISO);
+  if (asOfMs === null) return unknown;
   if (!task.due) return { ...unknown, status: "no-deadline" };
   if (!validDate(task.due)) return unknown;
 
@@ -157,7 +177,7 @@ export function taskTimeliness(
         status: task.due < today ? "overdue" : "pending",
       };
     }
-    if (!task.completedAt || !Number.isFinite(Date.parse(task.completedAt)))
+    if (!task.completedAt || timestampMs(task.completedAt) === null || timestampMs(task.completedAt)! > asOfMs)
       return unknown;
     achievementAt = task.completedAt;
   } else {

@@ -83,3 +83,12 @@ Revisión actual: suite normal 217/217 en 19 archivos, build aprobado,
 git diff --check aprobado. Los cuatro probes de contrato fallaron por separado.
 Esto confirma huecos de cobertura; no cambia el resultado de no aceptación.
 Sólo documentación/evidencia modificada; aplicación live v42 se conserva.
+
+
+## Resultado de ejecución Luna — código local
+
+Corregidos R1–R4 y hallazgos asociados de auditoría, CSV y presentación. Se
+añadieron pruebas temporales estrictas ISO, offset, corte temporal, bisiesto,
+actividad inválida/de otro período y prueba renderizada de la etiqueta/panel.
+Suite 221 pruebas/20 archivos, build y diff check pasan. Falta revisión Sol y QA
+visual real de temas; no es aceptación final ni habilita migración.

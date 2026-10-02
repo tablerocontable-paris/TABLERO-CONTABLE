@@ -247,6 +247,7 @@ export function transition(
 export function checkTask(t: Task, checkId: string, done: boolean): Task {
   if (!t.checklist.some((c) => c.id === checkId))
     throw Error("El paso no pertenece a esta tarea.");
+  if (t.checklist.find((c) => c.id === checkId)?.done === done) return t;
   let next = {
     ...t,
     checklist: t.checklist.map((c) => (c.id === checkId ? { ...c, done } : c)),

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Activity, Task } from "../src/domain/model";
-import { closeMonth, currentMonth, metrics, transition } from "../src/domain/model";
+import { checkTask, closeMonth, currentMonth, metrics, transition } from "../src/domain/model";
 import { seed } from "../src/data/repository";
 import { summarizeTimeliness, taskTimeliness } from "../src/domain/timeliness";
 
@@ -57,6 +57,16 @@ describe("anticipación de plazos por ocurrencia", () => {
     expect(taskTimeliness(task({ completedAt: null }), [], "2026-10-11T12:00:00Z").status).toBe("unknown");
   });
 
+  it("rechaza timestamps incompletos, normalizados o posteriores al corte y acepta offset válido", () => {
+    const cutoff = "2026-10-08T12:00:00Z";
+    expect(taskTimeliness(task(), [], cutoff).status).toBe("unknown");
+    expect(taskTimeliness(task({ completedAt: "2026-02-31T15:00:00Z" }), [], cutoff).status).toBe("unknown");
+    expect(taskTimeliness(task({ completedAt: "2026-10-08T15:00:00" }), [], cutoff).status).toBe("unknown");
+    expect(taskTimeliness(task({ due: "2026-10-08", completedAt: "2026-10-08T15:00:00+03:00" }), [], cutoff).status).toBe("on-date");
+    expect(taskTimeliness(task(), [], "2026-10-08").status).toBe("unknown");
+    expect(taskTimeliness(task({ completedAt: "2024-02-29T12:00:00Z", due: "2024-03-02" }), [], "2024-03-01T12:00:00Z").status).toBe("early");
+  });
+
   it("toma el primer registro que alcanza la meta, nunca la fecha de trabajo declarada", () => {
     const operational = task({ kind: "operativa", target: 10, unit: "facturas", status: "En curso", completedAt: null });
     const entries = [
@@ -70,6 +80,9 @@ describe("anticipación de plazos por ocurrencia", () => {
     const lateEntered = [activity("late", 10, "2026-10-12T12:00:00Z", "2026-10-08")];
     expect(taskTimeliness(operational, lateEntered, "2026-10-10T12:00:00Z").status).toBe("unknown");
     expect(taskTimeliness(operational, lateEntered, "2026-10-13T12:00:00Z").status).toBe("late");
+    expect(taskTimeliness(operational, [activity("bad-date", 10, "2026-10-08T13:00:00Z", "garbage")], "2026-10-09T12:00:00Z").status).toBe("unknown");
+    expect(taskTimeliness(operational, [activity("other-period", 10, "2026-10-08T13:00:00Z", "2026-09-30")], "2026-10-09T12:00:00Z").status).toBe("pending");
+    expect(taskTimeliness(operational, [activity("bad-created", 10, "2026-10-08T13:00:00", "2026-10-08")], "2026-10-09T12:00:00Z").status).toBe("unknown");
   });
 
   it("da denominadores separados y no duplica una misma ocurrencia", () => {
@@ -93,6 +106,11 @@ describe("anticipación de plazos por ocurrencia", () => {
     const completedAgain = transition(reopened, "Completada", "2026-10-11T13:00:00Z");
     expect(taskTimeliness(completedAgain, [], "2026-10-12T13:00:00Z")).toMatchObject({ status: "late", daysAhead: -1 });
     expect(taskTimeliness(completed, [], "2026-10-12T13:00:00Z").daysAhead).toBe(2);
+  });
+
+  it("repetir un control ya marcado devuelve la misma tarea", () => {
+    const completed = task({ checklist: [{ id: "step", text: "Validar", done: true }] });
+    expect(checkTask(completed, "step", true)).toBe(completed);
   });
 
   it("congela el indicador nuevo en el snapshot de cierre y su reporte", () => {

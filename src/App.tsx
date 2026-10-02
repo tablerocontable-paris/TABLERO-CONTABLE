@@ -331,7 +331,8 @@ export default function App() {
           .toLowerCase()
           .includes(query.toLowerCase())),
   );
-  const m = metrics(filtered, state.activity);
+  const metricAsOf = new Date().toISOString();
+  const m = metrics(filtered, state.activity, dateART(metricAsOf), metricAsOf);
   const resultTasks = filtered.filter((t) => t.kind === "resultado");
   const operations = filtered.filter((t) => t.kind === "operativa");
   const coverageTasks = viewedOwner === active.id
@@ -367,6 +368,7 @@ export default function App() {
       if (isClosed(state, t))
         throw Error("El mes está cerrado y conserva su historial.");
       let next = fn(t);
+      if (next === t) return;
       if (
         next.status === "En curso" &&
         t.status !== "En curso" &&
@@ -707,7 +709,7 @@ export default function App() {
             ? t.teamId === g.id
             : t.sector === g.id,
       );
-      const x = metrics(ts, state.activity);
+      const x = metrics(ts, state.activity, dateART(metricAsOf), metricAsOf);
       return { ...g, ...x, pendingPoints: Math.max(0, x.points - x.earned) };
     })
     .filter((g) => g.points > 0)
@@ -1686,11 +1688,11 @@ export default function App() {
                             g.done,
                             g.late,
                             `${g.timeliness?.results.early ?? 0}/${g.timeliness?.results.evaluated ?? 0}`,
-                            g.timeliness?.results.earlyRate,
-                            g.timeliness?.results.averageDaysAhead,
+                            g.timeliness?.results.earlyRate ?? "Sin muestra",
+                            g.timeliness?.results.averageDaysAhead ?? "Sin muestra",
                             `${g.timeliness?.operational.early ?? 0}/${g.timeliness?.operational.evaluated ?? 0}`,
-                            g.timeliness?.operational.earlyRate,
-                            g.timeliness?.operational.averageDaysAhead,
+                            g.timeliness?.operational.earlyRate ?? "Sin muestra",
+                            g.timeliness?.operational.averageDaysAhead ?? "Sin muestra",
                           ]),
                         ],
                         `analisis-${month}.csv`,
