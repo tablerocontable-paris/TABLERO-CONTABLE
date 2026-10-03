@@ -55,7 +55,7 @@ sin pedir otro «continuá».
 
 ## Próximo bloque
 
-**GPT-6 Luna medio, Standard:** B1 local, contrato
-`architecture/PRIVATE-BLOCK-NOTES-009-20261002.md`. Sin servicios remotos ni
-integración App. Luego Sol6.1 alto revisa009 y prepara B2. Diseño global y camino
-hacia infraestructura están registrados. Cambio de modelo manual, sin delegarlo.
+**GPT-6.1 Sol alto, Standard:** revisar localmente B1/009 (migración, RLS,
+locks, wrapper, pruebas) y cerrar el contrato ejecutable B2. No integrar App ni
+conectar servicios. Diseño global y camino hacia infraestructura están
+registrados. Cambio de modelo manual, sin delegarlo.

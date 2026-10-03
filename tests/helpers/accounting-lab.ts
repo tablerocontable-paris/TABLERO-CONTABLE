@@ -16,6 +16,7 @@ export const stages = {
   m006: "202610010006_time_coverage_acceptance.sql",
   m007: "202610010007_time_coverage_completion.sql",
   m008: "202610010008_time_coverage_finalization.sql",
+  m009: "202610020009_private_block_notes.sql",
 };
 export const uid = (n: number) =>
   `00000000-0000-0000-0000-${String(n).padStart(12, "0")}`;

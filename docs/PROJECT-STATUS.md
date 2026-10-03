@@ -1,10 +1,10 @@
-# Estado vigente del proyecto — 02/10/2026
+# Estado vigente del proyecto — 03/10/2026
 
-**Avance global estimado: 41% (rango 35–45%).** La estimación anterior era 40%.
-Hay avance funcional real: UI A y reparación de anticipación de v43 están
-aceptadas localmente. El incremento corresponde al indicador de anticipación
-por tarea, metas registradas, agregados y reportes; no al número de pruebas o
-documentos. QA visual completa y producción conectada siguen pendientes.
+**Avance global estimado: 42% (rango 36–46%).** La estimación anterior era 41%.
+Hay avance funcional local en UI A y anticipación de v43, más un contrato backend
+privado B1/009 nuevo que aún espera revisión. El avance reconoce este bloque de
+datos aislado; las pruebas y documentos por sí solos no elevan el porcentaje. QA
+visual completa y producción conectada siguen pendientes.
 
 **Aplicación live: Sites v43**, fuente de implementación
 `9d6b97dc16625c974d6679cf7d69b7fe2fdb3900`, versión
@@ -23,17 +23,27 @@ medición automática de requisitos. Se mantienen los mismos pesos para comparar
 | Etapa | Peso | Estimación anterior → actual | Evidencia / pendiente |
 | --- | --- | --- | --- |
 | Demo, experiencia y reglas | 25% | 75% → 80% | UI A y anticipación aceptadas localmente; pendientes funciones B/C/D y QA visual |
-| Contrato de datos y SQL | 25% | 65% → 65% | SQL001–008 y adaptadores revisados localmente; coordinación nueva y carreras reales pendientes |
+| Contrato de datos y SQL | 25% | 65% → 68% | SQL001–008 intactos; nueva frontera privada 009 implementada y probada localmente, a la espera de revisión Sol y PostgreSQL real |
 | Integración, cuentas y permisos | 25% | 5% → 5% | Lector/gateway listos localmente; frontend usa localStorage y actor simulado |
 | Funcionalidad final y operación | 15% | 25% → 25% | Reportes/outbox locales; pendientes integración, notificaciones, Kaizen/5S y administración final |
 | Validación, infraestructura y migración | 10% | 0% → 0% | Piloto, servicios definitivos y migración aún pendientes |
 
-La ponderación pasó de 40 a 41,25; se comunica **aproximadamente 41%**. El rango
-35–45% muestra la incertidumbre. No corresponde elevarlo al 50% por tener más
+La ponderación pasa de 41,25 a 42,0; se comunica **aproximadamente 42%**. El rango
+36–46% muestra la incertidumbre. No corresponde elevarlo al 50% por tener más
 commits o reparaciones. La demo está mucho más cerca de terminarse que la entrega
 operativa completa. No hay una base de producción conectada ni usuarios reales.
 
 ## Avance concreto del último bloque
+
+- B1 `202610020009_private_block_notes.sql` añade notas privadas, historial
+  inmutable, receipts separados y RPC con autorización por autor/jefe/encargado
+  actual y empresa. El wrapper RPC no cambia el gateway existente ni la UI.
+- Siete pruebas locales cubren base vacía, upgrade desde 008 sin tocar snapshots,
+  ciclo de edición/limpieza, permisos, recibos, mes cerrado, ACL y wrapper. PGlite
+  no valida carreras reales ni Supabase Auth/RLS remoto; revisión Sol pendiente.
+- La página sigue v43. Los comentarios aún no aparecen ni funcionan en la UI.
+El commit local B1 quedó creado; el push espera que vuelva la conexión del proxy
+de Git de Sites.
 
 - Contraste de cabecera del encargado y checklist adaptado a tokens del tema;
   capturas posteriores motivaron el cambio. QA de navegador aún abierta.
@@ -49,8 +59,9 @@ operativa completa. No hay una base de producción conectada ni usuarios reales.
 
 ## Pendientes que impiden migrar a los empleados
 
-1. Diseñar e implementar B/C: jerarquía multiarea, conjuntas y contribuciones,
-   cobertura por tareas, bajas/huérfanas y comentarios privados separados.
+1. Revisión Sol de B1/009; luego diseñar e implementar B/C: jerarquía multiarea,
+   conjuntas y contribuciones, cobertura por tareas, bajas/huérfanas, e integrar
+   comentarios privados con Auth real.
 2. Integrar frontend con lector/gateway y completar equivalencia de reglas,
    Auth/invitaciones/MFA/RLS y datos compartidos.
 3. Cerrar agenda/cumplimiento, presencia y última conexión, notificaciones,
@@ -67,19 +78,21 @@ contratos y consumidor de prueba; no hay correo productivo.
 
 ## Evidencia y continuidad
 
-SQL001–008, gateway y lector conservan aceptación local. Laboratorio PGlite:
+SQL001–009, gateway y lector conservan aceptación local (009 aún por revisión Sol).
+Laboratorio PGlite:
 23 casos secuenciales y 24 pares preparados para PostgreSQL sin ejecutar. Esas
 pruebas no sustituyen carreras reales ni Supabase Auth/MFA/RLS en producción.
 Revisiones de lector/adaptador, upgrades y reportes se conservan en docs/architecture.
 UI A: REVIEW-V40-INDEPENDENT-20261002.md. Anticipación: REVIEW-V43-INDEPENDENT-20261002.md.
 El registro v42 y sus probes fallidos permanecen como evidencia histórica.
-Suite regular actual: 223 pruebas/21 archivos (una regresión del llamador añadida
-en revisión), build y diff check pasan. V43 tenía 222 pruebas; src no cambió.
+Suite regular previa 223/21; con B1 son 230 pruebas/22 archivos. La suite y build
+completos de esta ejecución pasaron: 230 pruebas/22 archivos y build.
+`git diff --check` también pasa. Los avisos del build provienen de anotaciones
+Rollup en Zod y no impiden generar el bundle.
 
-**Próximo paso: GPT-6 Luna, esfuerzo medio, Standard**, ejecutar B1 local por
-`architecture/PRIVATE-BLOCK-NOTES-009-20261002.md`. Diseño de coordinación B
-completado; no se implementó009 ni se modificó la aplicación. B2/B3 requieren
-contratos SQL/API posteriores. El diseño no aumenta el porcentaje.
+**Próximo paso: GPT-6.1 Sol, esfuerzo alto, Standard**, auditar B1/009 y preparar
+contrato B2. La implementación backend existe localmente; no se integró ni
+modificó la aplicación v43. B2/B3 requieren contratos SQL/API revisados.
 
 Puertas hacia Supabase/hosting y evaluación gratuita verificadas en
 `ops/FREE-HOSTING-PATH-20261002.md`. Preferencia Cloudflare Pages+Supabase dev/prod,
