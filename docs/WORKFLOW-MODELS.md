@@ -55,9 +55,9 @@ sin pedir otro «continuá».
 
 ## Próximo bloque
 
-**GPT-6 Luna medio, Standard:** ejecutar contrato011 cerrado en
-`architecture/COORDINATION-011-EXECUTION-20261004.md`. Revisión010 sin hallazgos:
+**GPT-6.1 Sol alto, Standard:** corregir el protocolo de locks de011 según
+`architecture/COORDINATION-011-LOCK-REVIEW-20261004.md`. El contrato previo está
+pausado; no iniciar SQL011. Tras el cierre Sol, GPT-6 Luna medio implementa el
+contrato corregido. Revisión010 no tuvo hallazgos:
 `architecture/COORDINATION-010-REVIEW-20261004.md`. Preservar SQL001–010 y live
-v43; no aplicar SQL remoto, publicar ni conectar servicios. Tras 011, Sol alto
-revisará SQL, permisos y concurrencia antes de integración frontend.
-Cambio de modelo manual; sin delegarlo.
+v43; no aplicar SQL remoto ni publicar. Cambio de modelo manual; sin delegarlo.

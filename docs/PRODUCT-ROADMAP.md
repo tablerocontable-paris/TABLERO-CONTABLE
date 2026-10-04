@@ -7,8 +7,10 @@ pendiente. Diseño B en COORDINATION-B-DESIGN-20261002.md de docs/architecture.
 B1/009 revisado y reparado localmente (REVIEW-PRIVATE-NOTES-009-20261004.md).
 B2a/010 staged ejecutado localmente por contrato; evidencia en
 COORDINATION-010-IMPLEMENTATION-20261004.md. Revisión independiente010 sin
-hallazgos: COORDINATION-010-REVIEW-20261004.md. Contrato de motor011 cerrado para
-Luna en COORDINATION-011-EXECUTION-20261004.md; siguiente paso, ejecutarlo.
+hallazgos: COORDINATION-010-REVIEW-20261004.md. La ejecución011 está pausada
+antes de SQL por una inversión de locks en RPC heredadas; resolver con Sol alto:
+COORDINATION-011-LOCK-REVIEW-20261004.md, luego Luna ejecuta el contrato
+actualizado en COORDINATION-011-EXECUTION-20261004.md.
 
 Avance estimado actual **42% (36–46%)**, cálculo vigente en PROJECT-STATUS.md.
 Lector/gateway/SQL locales no equivalen a Auth/RLS/datos compartidos ni correo

@@ -1,18 +1,20 @@
-# Próxima ejecución — implementación011 por contrato cerrado
+# Próxima ejecución — cerrar protocolo de concurrencia para011
 
-**GPT-6 Luna, esfuerzo medio, Standard.** Implementar el contrato completo en
-`architecture/COORDINATION-011-EXECUTION-20261004.md`. La revisión independiente
-Sol de010 pasó sin hallazgos; ocho probes adicionales y el documento de evidencia
-están en `architecture/COORDINATION-010-REVIEW-20261004.md`. No reabrir decisiones
-allí cerradas ni cambiar UI/gateway durante011.
+**GPT-6.1 Sol, esfuerzo alto, Standard.** Antes de ejecutar011, resolver el
+hallazgo reproducible del orden de locks en
+`architecture/COORDINATION-011-LOCK-REVIEW-20261004.md` y actualizar
+`architecture/COORDINATION-011-EXECUTION-20261004.md` con un protocolo aplicable
+a todas las RPC existentes, sin lock global de organización. La revisión010 pasó
+sin hallazgos; evidencia en `architecture/COORDINATION-010-REVIEW-20261004.md`.
+Después de cerrar ese contrato, GPT-6 Luna medio implementa el bloque.
 
-011 activa tareas conjuntas puntuales y coberturas exactas en SQL local. Leer
+011 debe activar tareas conjuntas puntuales y coberturas exactas en SQL local. Leer
 también toda evidencia010, diseño B, contratos001–009 y rutas escritoras reales.
 Parchear conjuntamente autorización, clocks por actor, materialización,
 cancelación, checklist/actividad, todas las RPC heredadas, conjunto de locks,
 cierre, cuotas KPI y reporte versionado. No desplegar ni ejecutar migración
-remota. Si aparece una contradicción real con el contrato, registrar y regresar
-a Sol antes de codificar una decisión distinta.
+remota. No cambiar el orden de locks por intuición ni empezar una activación
+parcial mientras este hallazgo esté abierto.
 
 Ninguna relación010 staged concede acceso, modifica cronómetros o recalcula KPI.
 No cambiar SQL001–010 ni App/lector/gateway durante esta ejecución aislada.

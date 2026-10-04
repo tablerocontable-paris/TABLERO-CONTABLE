@@ -9,6 +9,12 @@ del laboratorio. Si el esquema observado contradice este contrato, detener el
 cambio, registrar el hecho y volver a Sol; no reinterpretar permisos, créditos,
 estados de negocio ni recurrencias.
 
+**Estado actualizado:** la ejecución se pausó antes de crear SQL011 al detectar
+una inversión concreta entre locks de titular/actor heredados y el nuevo lock
+común de participantes. Ver `COORDINATION-011-LOCK-REVIEW-20261004.md`. Este
+contrato queda en suspenso hasta que Sol cierre y apruebe el protocolo; Luna no
+debe ejecutar instrucciones de locks de esta versión sin esa corrección.
+
 ## Resultado requerido y límites
 
 Crear `supabase/migrations/202610040011_coordination_activation.sql`, en una

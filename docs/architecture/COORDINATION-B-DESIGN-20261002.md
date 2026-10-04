@@ -2,11 +2,12 @@
 
 Estado actualizado al 04/10/2026 UTC: B1/009 implementado, revisado y reparado
 localmente. B2a/010 ejecutado y revisado independientemente, sin hallazgos. El
-contrato ejecutable011 está cerrado para Luna; motor011 y B3–B4 no se ejecutaron.
+contrato ejecutable011 requiere corregir el protocolo de locks antes de Luna
+(hallazgo `COORDINATION-011-LOCK-REVIEW-20261004.md`); motor011 y B3–B4 no se ejecutaron.
 Ningún bloque se aplicó remotamente. Fuente:
 SQL001–009, frontend 0.4, `product/CORRECTIONS-20261002.md` y revisión v43 aceptada
 localmente. Ejecución010 en `COORDINATION-010-IMPLEMENTATION-20261004.md`.
-La próxima fase es ejecutar011 según el contrato cerrado.
+La próxima fase es ajustar el contrato011 con Sol alto y después ejecutarlo con Luna.
 
 ## Base encontrada y conflictos que hay que resolver
 

@@ -2,8 +2,10 @@
 
 **Avance global estimado: 42% (rango 36–46%).** Hay avance funcional local en UI A
 y anticipación de v43, contrato privado B1/009 revisado y reparado, y fundación
-B2a/010 revisada independientemente sin hallazgos. Queda el motor011 por contrato
-cerrado, integración, PostgreSQL/Auth reales, UI y producción. Las pruebas y
+B2a/010 revisada independientemente sin hallazgos. La ejecución011 está pausada
+antes de crear SQL tras detectar una inversión posible de locks en RPC heredadas;
+resolución documentada en `architecture/COORDINATION-011-LOCK-REVIEW-20261004.md`.
+También faltan integración, PostgreSQL/Auth reales, UI y producción. Las pruebas y
 documentos por sí solos no elevan el porcentaje. QA visual completa y producción
 conectada siguen pendientes.
 
@@ -107,8 +109,9 @@ con PGlite. Están preparados para PostgreSQL, sin ejecución concurrente real.
 En la revisión009 anterior se quitó un argumento de timeout accidental dentro de
 una aserción; sus aserciones y resultados funcionales no cambiaron.
 
-**Próximo paso: GPT-6 Luna, esfuerzo medio, Standard**, implementar contrato
-`architecture/COORDINATION-011-EXECUTION-20261004.md`. La base staged010 no activa
+**Próximo paso: GPT-6.1 Sol, esfuerzo alto, Standard**, cerrar el protocolo de
+locks descrito en `architecture/COORDINATION-011-LOCK-REVIEW-20261004.md`.
+Después Luna implementa el contrato011 actualizado. La base staged010 no activa
 permisos, relojes o KPI; el motor011 todavía no está ejecutado.
 
 Puertas hacia Supabase/hosting y evaluación gratuita verificadas en
