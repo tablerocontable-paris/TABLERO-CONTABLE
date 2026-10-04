@@ -55,9 +55,9 @@ sin pedir otro «continuá».
 
 ## Próximo bloque
 
-**GPT-6.1 Sol alto, Standard:** revisión independiente B2a/010 y contrato011
-completo. La ejecución local de010 está en
-`architecture/COORDINATION-010-IMPLEMENTATION-20261004.md`. Preservar SQL001–009 y
-live v43; no activar permisos/clock/KPI ni conectar servicios durante la revisión.
-Después Luna ejecutará011 únicamente si su contrato queda cerrado.
+**GPT-6 Luna medio, Standard:** ejecutar contrato011 cerrado en
+`architecture/COORDINATION-011-EXECUTION-20261004.md`. Revisión010 sin hallazgos:
+`architecture/COORDINATION-010-REVIEW-20261004.md`. Preservar SQL001–010 y live
+v43; no aplicar SQL remoto, publicar ni conectar servicios. Tras 011, Sol alto
+revisará SQL, permisos y concurrencia antes de integración frontend.
 Cambio de modelo manual; sin delegarlo.
