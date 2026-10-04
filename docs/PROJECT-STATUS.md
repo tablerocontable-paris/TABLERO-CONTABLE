@@ -2,9 +2,10 @@
 
 **Avance global estimado: 42% (rango 36–46%).** Se mantiene el estimado de la ejecución B1.
 Hay avance funcional local en UI A y anticipación de v43, más un contrato backend
-privado B1/009 revisado y reparado localmente. El avance reconoce este bloque de
-datos aislado; las pruebas y documentos por sí solos no elevan el porcentaje. QA
-visual completa y producción conectada siguen pendientes.
+privado B1/009 revisado y reparado localmente. B2a/010 está implementado y probado
+como base staged; pendiente su revisión independiente y motor011. Las pruebas y
+documentos por sí solos no elevan el porcentaje. QA visual completa y producción
+conectada siguen pendientes.
 
 **Aplicación live: Sites v43**, fuente de implementación
 `9d6b97dc16625c974d6679cf7d69b7fe2fdb3900`, versión
@@ -23,7 +24,7 @@ medición automática de requisitos. Se mantienen los mismos pesos para comparar
 | Etapa | Peso | Estimación anterior → actual | Evidencia / pendiente |
 | --- | --- | --- | --- |
 | Demo, experiencia y reglas | 25% | 80% → 80% | UI A y anticipación aceptadas localmente; pendientes funciones B/C/D y QA visual |
-| Contrato de datos y SQL | 25% | 68% → 68% | SQL001–008 intactos; 009 revisado y reparado localmente, PostgreSQL real pendiente |
+| Contrato de datos y SQL | 25% | 68% → 68% | SQL001–009 intactos en010; fundación staged010 implementada, revisión independiente y PostgreSQL real pendientes |
 | Integración, cuentas y permisos | 25% | 5% → 5% | Lector/gateway listos localmente; frontend usa localStorage y actor simulado |
 | Funcionalidad final y operación | 15% | 25% → 25% | Reportes/outbox locales; pendientes integración, notificaciones, Kaizen/5S y administración final |
 | Validación, infraestructura y migración | 10% | 0% → 0% | Piloto, servicios definitivos y migración aún pendientes |
@@ -35,6 +36,11 @@ operativa completa. No hay una base de producción conectada ni usuarios reales.
 
 ## Avance concreto del último bloque
 
+- B2a/010: seis tablas staged de responsabilidad y cobertura seleccionada, cuotas,
+  sellado/guardas, backfill sin reescribir historia, fallback y tipos Zod propios.
+  Las 18 pruebas del bloque pasan. No activa tareas conjuntas, cobertura selectiva,
+  acceso, relojes o métricas en UI. Evidencia:
+  `architecture/COORDINATION-010-IMPLEMENTATION-20261004.md`.
 - B1 `202610020009_private_block_notes.sql` añade notas privadas, historial
   inmutable, receipts separados y RPC con autorización por autor/jefe/encargado
   actual y empresa. El wrapper RPC no cambia el gateway existente ni la UI.
@@ -60,7 +66,7 @@ con la revisión en el repositorio de Sites. Backend aún local, no SQL remoto.
 
 ## Pendientes que impiden migrar a los empleados
 
-1. Ejecutar B2a/010 y revisar/implementar motor011; después B/C: jerarquía multiarea,
+1. Revisar B2a/010 y definir/implementar motor011; después B/C: jerarquía multiarea,
    conjuntas y contribuciones, cobertura por tareas, bajas/huérfanas, e integrar
    comentarios privados con Auth real.
 2. Integrar frontend con lector/gateway y completar equivalencia de reglas,
@@ -80,26 +86,26 @@ contratos y consumidor de prueba; no hay correo productivo.
 ## Evidencia y continuidad
 
 SQL001–009, gateway y lector conservan aceptación local (009 revisado por Sol).
+010 tiene aceptación de ejecución local; revisión independiente Sol pendiente.
 Laboratorio PGlite:
 23 casos secuenciales y 24 pares preparados para PostgreSQL sin ejecutar. Esas
 pruebas no sustituyen carreras reales ni Supabase Auth/MFA/RLS en producción.
 Revisiones de lector/adaptador, upgrades y reportes se conservan en docs/architecture.
 UI A: REVIEW-V40-INDEPENDENT-20261002.md. Anticipación: REVIEW-V43-INDEPENDENT-20261002.md.
 El registro v42 y sus probes fallidos permanecen como evidencia histórica.
-Suite completa: **242 pruebas en 23 archivos, todas pasan** (333,13s en este
-laboratorio). La revisión añade 12 casos independientes a las 230 previas.
+Suite completa de010: **260 pruebas en 24 archivos, todas pasan** (330,10s en este
+laboratorio). La ejecución010 añade18 casos a las242 previas. Build también pasa.
 Comando con contención controlada:
 `npm test -- --maxWorkers=1 --testTimeout=60000 --hookTimeout=60000`.
 El smoke `node tests/postgres-009/check-sql.mjs` pasa los 8 órdenes009 en secuencia
 con PGlite. Están preparados para PostgreSQL, sin ejecución concurrente real.
-`npm run build` pasa TypeScript y Vite; `git diff --check` también pasa. El build
-se repitió tras quitar un argumento de timeout accidental dentro de una aserción
-del test009; las aserciones y los resultados funcionales no cambiaron.
+`npm run build` de010 pasa TypeScript y Vite; `git diff --check` también pasa.
+En la revisión009 anterior se quitó un argumento de timeout accidental dentro de
+una aserción; sus aserciones y resultados funcionales no cambiaron.
 
-**Próximo paso: GPT-6 Luna, esfuerzo medio, Standard**, ejecutar
-`architecture/COORDINATION-010-EXECUTION-20261004.md`. Este contrato crea la base
-staged de responsabilidad y selección; no activa permisos, relojes o KPI. Sol alto
-revisa010 y prepara011 antes de activar el conjunto de funcionalidades B2.
+**Próximo paso: GPT-6.1 Sol, esfuerzo alto, Standard**, revisión independiente010
+y contrato011 completo. La base staged010 no activa permisos, relojes o KPI. Luna
+volverá a ejecutar cuando el contrato de activación esté cerrado.
 
 Puertas hacia Supabase/hosting y evaluación gratuita verificadas en
 `ops/FREE-HOSTING-PATH-20261002.md`. Preferencia Cloudflare Pages+Supabase dev/prod,
