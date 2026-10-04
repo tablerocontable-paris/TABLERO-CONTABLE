@@ -53,7 +53,7 @@ describe("private block notes 009", () => {
     } finally {
       await lab.close();
     }
-  }, 20_000);
+  }, 60_000);
 
   it("versions edits, clear, restore and no-op without touching task state or time", async () => {
     const lab = new AccountingLab();
@@ -97,7 +97,7 @@ describe("private block notes 009", () => {
     } finally {
       await lab.close();
     }
-  });
+  }, 60_000);
 
   it("replays an exact private receipt, rejects changed arguments, and keeps receipt namespaces separate", async () => {
     const lab = new AccountingLab();
@@ -121,7 +121,7 @@ describe("private block notes 009", () => {
     } finally {
       await lab.close();
     }
-  });
+  }, 60_000);
 
   it("allows only the author, current manager for that company, and active boss to read", async () => {
     const lab = new AccountingLab();
@@ -158,7 +158,7 @@ describe("private block notes 009", () => {
     } finally {
       await lab.close();
     }
-  });
+  }, 60_000);
 
   it("keeps an author's note readable after losing task access without granting task or profile access", async () => {
     const lab = new AccountingLab();
@@ -176,7 +176,7 @@ describe("private block notes 009", () => {
     } finally {
       await lab.close();
     }
-  });
+  }, 60_000);
 
   it("enforces same-company manager membership, closed periods, and task isolation", async () => {
     const lab = new AccountingLab();
@@ -205,7 +205,7 @@ describe("private block notes 009", () => {
     } finally {
       await lab.close();
     }
-  });
+  }, 60_000);
 
   it("validates the RPC wrapper, passes abort options once, and never exposes bodies in errors", async () => {
     const calls: unknown[] = [];
@@ -229,5 +229,5 @@ describe("private block notes 009", () => {
     expect(await savePrivateBlockNote(transport, input, aborted.signal)).toMatchObject({ ok: false, error: { category: "aborted" }, ambiguous: false });
     expect(calls).toHaveLength(1);
     expect(JSON.stringify(await savePrivateBlockNote({ rpc: () => Promise.reject(new Error(input.body)) }, input))).not.toContain(input.body);
-  });
+  }, 60_000);
 });

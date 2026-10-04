@@ -1,13 +1,20 @@
 -- B1 / 009. Private comments are stored outside task fields and shared receipts.
 begin;
 
+-- ECMAScript trim whitespace, shared with the wrapper; SQL trim alone removes spaces only.
+create function public._normalize_private_block_note_body(p_body text) returns text
+language sql immutable strict set search_path='' as $$
+  select pg_catalog.btrim(p_body,U&'\0009\000A\000B\000C\000D\0020\00A0\1680\2000\2001\2002\2003\2004\2005\2006\2007\2008\2009\200A\2028\2029\202F\205F\3000\FEFF')
+$$;
+revoke all on function public._normalize_private_block_note_body(text) from public,anon,authenticated;
+
 create table public.task_private_block_notes(
   id uuid primary key default gen_random_uuid(),
   organization_id uuid not null,
   instance_id uuid not null,
   author_id uuid not null,
   body text not null,
-  revision bigint not null default 1 check(revision>=1),
+  revision bigint not null default 1 check(revision between 1 and 9007199254740991),
   created_at timestamptz not null default clock_timestamp(),
   updated_at timestamptz not null default clock_timestamp(),
   cleared_at timestamptz,
@@ -15,14 +22,15 @@ create table public.task_private_block_notes(
   unique(id,organization_id),
   foreign key(instance_id,organization_id) references public.task_instances(id,organization_id),
   foreign key(author_id,organization_id) references public.profiles(id,organization_id),
-  check((cleared_at is null and length(trim(body)) between 1 and 2000)
+  check((cleared_at is null and length(body) between 1 and 2000
+       and body=public._normalize_private_block_note_body(body))
      or (cleared_at is not null and body=''))
 );
 
 create table public.task_private_block_note_versions(
   note_id uuid not null,
   organization_id uuid not null,
-  revision bigint not null check(revision>=1),
+  revision bigint not null check(revision between 1 and 9007199254740991),
   body text not null,
   cleared_at timestamptz,
   at timestamptz not null,
@@ -30,7 +38,8 @@ create table public.task_private_block_note_versions(
   primary key(note_id,revision),
   foreign key(note_id,organization_id) references public.task_private_block_notes(id,organization_id),
   foreign key(actor_id,organization_id) references public.profiles(id,organization_id),
-  check((cleared_at is null and length(trim(body)) between 1 and 2000)
+  check((cleared_at is null and length(body) between 1 and 2000
+       and body=public._normalize_private_block_note_body(body))
      or (cleared_at is not null and body=''))
 );
 
@@ -111,13 +120,16 @@ begin
   if p_instance is null or p_operation_id is null or p_expected_revision is null or p_expected_revision<0 then
     raise exception 'Identidad, operación y revisión requeridas';
   end if;
-  if p_body is not null and (length(trim(p_body))=0 or length(trim(p_body))>2000) then
+  normalized_body:=public._normalize_private_block_note_body(p_body);
+  if p_body is not null and (length(normalized_body)=0 or length(normalized_body)>2000) then
     raise exception 'El comentario debe tener entre 1 y 2000 caracteres';
   end if;
   args:=jsonb_build_object('instance',p_instance,'body',p_body,'revision',p_expected_revision);
 
   -- Shared operation lock preserves the existing serialization boundary; receipts stay module-private.
   perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(auth.uid()::text||p_operation_id::text,0));
+  if public.actor_org() is distinct from actor_org_id
+    or coalesce(public.actor_role() not in ('empleado','encargado','jefe'),true) then raise exception 'Sin permiso'; end if;
   select * into cached from public.private_block_note_receipts
     where actor_id=auth.uid() and operation_id=p_operation_id;
   if found then
@@ -138,7 +150,8 @@ begin
     raise exception 'La identidad de la tarea cambió';
   end if;
   cleared_time:=clock_timestamp();
-  if not public._can_access_instance_at(t.id,cleared_time) or public.actor_role() not in ('empleado','encargado','jefe') then
+  if public.actor_org() is distinct from actor_org_id or not public._can_access_instance_at(t.id,cleared_time)
+    or coalesce(public.actor_role() not in ('empleado','encargado','jefe'),true) then
     raise exception 'Sin permiso';
   end if;
 
@@ -146,7 +159,6 @@ begin
     where instance_id=t.id and author_id=auth.uid() for update;
   if not found then
     if p_expected_revision<>0 or p_body is null then raise exception 'La revisión del comentario cambió'; end if;
-    normalized_body:=trim(p_body);
     insert into public.task_private_block_notes(organization_id,instance_id,author_id,body,revision,created_at,updated_at)
       values(t.organization_id,t.id,auth.uid(),normalized_body,1,cleared_time,cleared_time) returning * into n;
     action_name:='private_block_note.created';
@@ -154,14 +166,14 @@ begin
       values(n.id,n.organization_id,n.revision,n.body,null,cleared_time,auth.uid());
   else
     if n.revision is distinct from p_expected_revision then raise exception 'La revisión del comentario cambió'; end if;
-    normalized_body:=case when p_body is null then '' else trim(p_body) end;
+    normalized_body:=coalesce(normalized_body,'');
     if n.body=normalized_body and ((p_body is null)=(n.cleared_at is not null)) then
       result:=jsonb_build_object('note_id',n.id,'revision',n.revision,'cleared',n.cleared_at is not null);
       insert into public.private_block_note_receipts(organization_id,actor_id,operation_id,arguments,result)
         values(actor_org_id,auth.uid(),p_operation_id,args,result);
       return result;
     end if;
-    if n.revision>=2147483647 then raise exception 'Se alcanzó el límite de revisiones'; end if;
+    if n.revision>=9007199254740991 then raise exception 'Se alcanzó el límite de revisiones'; end if;
     update public.task_private_block_notes set body=normalized_body,revision=n.revision+1,
       updated_at=cleared_time,cleared_at=case when p_body is null then cleared_time else null end
       where id=n.id returning * into n;

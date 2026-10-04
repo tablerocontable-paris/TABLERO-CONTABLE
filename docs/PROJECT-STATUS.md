@@ -1,8 +1,8 @@
-# Estado vigente del proyecto — 03/10/2026
+# Estado vigente del proyecto — 04/10/2026 UTC (sesión 03/10 Argentina)
 
-**Avance global estimado: 42% (rango 36–46%).** La estimación anterior era 41%.
+**Avance global estimado: 42% (rango 36–46%).** Se mantiene el estimado de la ejecución B1.
 Hay avance funcional local en UI A y anticipación de v43, más un contrato backend
-privado B1/009 nuevo que aún espera revisión. El avance reconoce este bloque de
+privado B1/009 revisado y reparado localmente. El avance reconoce este bloque de
 datos aislado; las pruebas y documentos por sí solos no elevan el porcentaje. QA
 visual completa y producción conectada siguen pendientes.
 
@@ -11,8 +11,8 @@ visual completa y producción conectada siguen pendientes.
 `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_3e2fc69b4dac819196d375f0c836aa5a`,
 deploy `appgdep_6ac00b2ad81c81919a50bafab9f7101d` succeeded:
 https://grupo-paris-contabilidad.valentino-magni.chatgpt.site.
-La revisión posterior sólo modifica evidencia, tests y documentación en Git;
-conserva la aplicación publicada desde ese commit.
+La revisión posterior modifica backend local, contratos, tests y documentación
+en Git; conserva la aplicación publicada desde ese commit.
 
 ## Cómo se estima el avance
 
@@ -22,13 +22,13 @@ medición automática de requisitos. Se mantienen los mismos pesos para comparar
 
 | Etapa | Peso | Estimación anterior → actual | Evidencia / pendiente |
 | --- | --- | --- | --- |
-| Demo, experiencia y reglas | 25% | 75% → 80% | UI A y anticipación aceptadas localmente; pendientes funciones B/C/D y QA visual |
-| Contrato de datos y SQL | 25% | 65% → 68% | SQL001–008 intactos; nueva frontera privada 009 implementada y probada localmente, a la espera de revisión Sol y PostgreSQL real |
+| Demo, experiencia y reglas | 25% | 80% → 80% | UI A y anticipación aceptadas localmente; pendientes funciones B/C/D y QA visual |
+| Contrato de datos y SQL | 25% | 68% → 68% | SQL001–008 intactos; 009 revisado y reparado localmente, PostgreSQL real pendiente |
 | Integración, cuentas y permisos | 25% | 5% → 5% | Lector/gateway listos localmente; frontend usa localStorage y actor simulado |
 | Funcionalidad final y operación | 15% | 25% → 25% | Reportes/outbox locales; pendientes integración, notificaciones, Kaizen/5S y administración final |
 | Validación, infraestructura y migración | 10% | 0% → 0% | Piloto, servicios definitivos y migración aún pendientes |
 
-La ponderación pasa de 41,25 a 42,0; se comunica **aproximadamente 42%**. El rango
+La ponderación permanece en 42,0; se comunica **aproximadamente 42%**. El rango
 36–46% muestra la incertidumbre. No corresponde elevarlo al 50% por tener más
 commits o reparaciones. La demo está mucho más cerca de terminarse que la entrega
 operativa completa. No hay una base de producción conectada ni usuarios reales.
@@ -40,10 +40,11 @@ operativa completa. No hay una base de producción conectada ni usuarios reales.
   actual y empresa. El wrapper RPC no cambia el gateway existente ni la UI.
 - Siete pruebas locales cubren base vacía, upgrade desde 008 sin tocar snapshots,
   ciclo de edición/limpieza, permisos, recibos, mes cerrado, ACL y wrapper. PGlite
-  no valida carreras reales ni Supabase Auth/RLS remoto; revisión Sol pendiente.
+  no valida carreras reales ni Supabase Auth/RLS remoto. Sol añadió 12 pruebas
+  independientes y reparó cancelación, envelope y normalización de whitespace.
 - La página sigue v43. Los comentarios aún no aparecen ni funcionan en la UI.
-El commit local B1 quedó creado; el push espera que vuelva la conexión del proxy
-de Git de Sites.
+El commit de implementación B1 se conserva como evidencia y se sincroniza junto
+con la revisión en el repositorio de Sites. Backend aún local, no SQL remoto.
 
 - Contraste de cabecera del encargado y checklist adaptado a tokens del tema;
   capturas posteriores motivaron el cambio. QA de navegador aún abierta.
@@ -59,7 +60,7 @@ de Git de Sites.
 
 ## Pendientes que impiden migrar a los empleados
 
-1. Revisión Sol de B1/009; luego diseñar e implementar B/C: jerarquía multiarea,
+1. Ejecutar B2a/010 y revisar/implementar motor011; después B/C: jerarquía multiarea,
    conjuntas y contribuciones, cobertura por tareas, bajas/huérfanas, e integrar
    comentarios privados con Auth real.
 2. Integrar frontend con lector/gateway y completar equivalencia de reglas,
@@ -78,21 +79,27 @@ contratos y consumidor de prueba; no hay correo productivo.
 
 ## Evidencia y continuidad
 
-SQL001–009, gateway y lector conservan aceptación local (009 aún por revisión Sol).
+SQL001–009, gateway y lector conservan aceptación local (009 revisado por Sol).
 Laboratorio PGlite:
 23 casos secuenciales y 24 pares preparados para PostgreSQL sin ejecutar. Esas
 pruebas no sustituyen carreras reales ni Supabase Auth/MFA/RLS en producción.
 Revisiones de lector/adaptador, upgrades y reportes se conservan en docs/architecture.
 UI A: REVIEW-V40-INDEPENDENT-20261002.md. Anticipación: REVIEW-V43-INDEPENDENT-20261002.md.
 El registro v42 y sus probes fallidos permanecen como evidencia histórica.
-Suite regular previa 223/21; con B1 son 230 pruebas/22 archivos. La suite y build
-completos de esta ejecución pasaron: 230 pruebas/22 archivos y build.
-`git diff --check` también pasa. Los avisos del build provienen de anotaciones
-Rollup en Zod y no impiden generar el bundle.
+Suite completa: **242 pruebas en 23 archivos, todas pasan** (333,13s en este
+laboratorio). La revisión añade 12 casos independientes a las 230 previas.
+Comando con contención controlada:
+`npm test -- --maxWorkers=1 --testTimeout=60000 --hookTimeout=60000`.
+El smoke `node tests/postgres-009/check-sql.mjs` pasa los 8 órdenes009 en secuencia
+con PGlite. Están preparados para PostgreSQL, sin ejecución concurrente real.
+`npm run build` pasa TypeScript y Vite; `git diff --check` también pasa. El build
+se repitió tras quitar un argumento de timeout accidental dentro de una aserción
+del test009; las aserciones y los resultados funcionales no cambiaron.
 
-**Próximo paso: GPT-6.1 Sol, esfuerzo alto, Standard**, auditar B1/009 y preparar
-contrato B2. La implementación backend existe localmente; no se integró ni
-modificó la aplicación v43. B2/B3 requieren contratos SQL/API revisados.
+**Próximo paso: GPT-6 Luna, esfuerzo medio, Standard**, ejecutar
+`architecture/COORDINATION-010-EXECUTION-20261004.md`. Este contrato crea la base
+staged de responsabilidad y selección; no activa permisos, relojes o KPI. Sol alto
+revisa010 y prepara011 antes de activar el conjunto de funcionalidades B2.
 
 Puertas hacia Supabase/hosting y evaluación gratuita verificadas en
 `ops/FREE-HOSTING-PATH-20261002.md`. Preferencia Cloudflare Pages+Supabase dev/prod,

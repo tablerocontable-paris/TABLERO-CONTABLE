@@ -85,11 +85,30 @@ export async function savePrivateBlockNote(
     return fail(signal?.aborted ? "aborted" : "transport", true);
   }
 
+  // Attach both handlers even if cancellation wins: the RPC may settle later.
+  const settled = Promise.resolve(pending).then(
+    (response) => ({ kind: "response" as const, response: response as unknown }),
+    () => ({ kind: "transport" as const }),
+  );
+  let onAbort: (() => void) | undefined;
+  const cancelled = signal && new Promise<{ kind: "aborted" }>((resolve) => {
+    onAbort = () => resolve({ kind: "aborted" });
+    signal.addEventListener("abort", onAbort, { once: true });
+    if (signal.aborted) onAbort();
+  });
   try {
-    const response = await pending;
-    if (response.error !== null)
-      return fail(signal?.aborted ? "aborted" : "server", signal?.aborted ?? false);
-    const ack = ackSchema.safeParse(response.data);
+    const outcome = await (cancelled ? Promise.race([settled, cancelled]) : settled);
+    if (signal?.aborted || outcome.kind === "aborted") return fail("aborted", true);
+    if (outcome.kind === "transport") return fail("transport", true);
+    const response = outcome.response;
+    if (response === null || typeof response !== "object" || Array.isArray(response))
+      return fail("protocol", true);
+    const envelope = response as Record<string, unknown>;
+    if (!Object.prototype.hasOwnProperty.call(envelope, "data") ||
+        !Object.prototype.hasOwnProperty.call(envelope, "error") || envelope.error === undefined)
+      return fail("protocol", true);
+    if (envelope.error !== null) return fail("server", false);
+    const ack = ackSchema.safeParse(envelope.data);
     if (!ack.success) return fail("protocol", true);
     return {
       ok: true,
@@ -99,5 +118,7 @@ export async function savePrivateBlockNote(
     };
   } catch {
     return fail(signal?.aborted ? "aborted" : "transport", true);
+  } finally {
+    if (signal && onAbort) signal.removeEventListener("abort", onAbort);
   }
 }

@@ -164,3 +164,14 @@ conservar live v43 y marcar 009 como backend local no integrado. No publicar un
 módulo invisible como si el comentario privado ya funcionara en la página.
 Siguiente revisión: **GPT-6.1 Sol alto, Standard**, seguridad, upgrade y locks009.
 No ejecutar B2 mientras el contrato009 no esté revisado.
+
+
+## Ajustes tras revisión independiente 04/10 UTC
+
+Ver REVIEW-PRIVATE-NOTES-009-20261004.md. La versión reparada normaliza con la
+misma lista de whitespace que ECMAScript trim, valida cuerpo almacenado ya
+normalizado y limita revisión a 1..MAX_SAFE_INTEGER. Cancellation después de envío
+retorna aborted/ambiguous=true incluso si llega ACK después o el transporte no
+resuelve; el listener se limpia y no hay retry. Envelope incompleto es protocol
+ambiguo. Auth/org/rol se revalidan después de locks antes de replay/escritura.
+SQL001–008 y snapshots siguen intactos; 009 local y sin integración remota.

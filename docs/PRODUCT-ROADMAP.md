@@ -4,9 +4,11 @@ UI A (v40) y reparación de anticipación (v43) aceptadas localmente en
 funcionalidad. Evidencia en REVIEW-V40-INDEPENDENT-20261002.md y
 REVIEW-V43-INDEPENDENT-20261002.md de docs/architecture. QA visual completa sigue
 pendiente. Diseño B en COORDINATION-B-DESIGN-20261002.md de docs/architecture.
-Próxima fase Luna medio ejecuta B1 privado009; contratos B2/B3 después.
+B1/009 revisado y reparado localmente (REVIEW-PRIVATE-NOTES-009-20261004.md).
+Próxima fase Luna medio ejecuta B2a/010 staged por contrato
+COORDINATION-010-EXECUTION-20261004.md; después Sol alto cierra motor011.
 
-Avance estimado actual **41% (35–45%)**, cálculo vigente en PROJECT-STATUS.md.
+Avance estimado actual **42% (36–46%)**, cálculo vigente en PROJECT-STATUS.md.
 Lector/gateway/SQL locales no equivalen a Auth/RLS/datos compartidos ni correo
 conectados. Demo localStorage, sin migración habilitada. Los apartados
 cronológicos inferiores conservan historia; el próximo paso es EXECUTION-NEXT.md.

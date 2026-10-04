@@ -1,31 +1,31 @@
-# Próxima ejecución — revisión B1 / contrato B2
+# Próxima ejecución — B2a / 010
 
-**GPT-6.1 Sol, esfuerzo alto, Standard.** Revisar la implementación local
-`supabase/migrations/202610020009_private_block_notes.sql`, wrapper
-`src/data/remote/private-block-notes.ts` y pruebas. Auditar privacidad/RLS, matriz
-de roles, autenticación inactiva, orden de locks, límites y manejo de reintento;
-identificar cualquier hueco de PostgreSQL o de actualización. Corregir lo que sea
-demostrablemente incorrecto y volver a ejecutar las pruebas pertinentes.
-Después cerrar el contrato ejecutable de B2 (participación, responsabilidad,
-cobertura y cierre de tareas conjuntas). No cambiar App ni conectar servicios.
+**GPT-6 Luna, esfuerzo medio, Standard.** Ejecutar
+`architecture/COORDINATION-010-EXECUTION-20261004.md`: nueva migración 010 local,
+responsabilidad por ocurrencia y cuotas, selección de cobertura por IDs/reglas,
+sellado/guardas, backfill/fallback y tipos Zod propios. El contrato fija las tablas,
+FK, invariantes, permisos y aceptación. Ninguna relación staged concede acceso,
+modifica cronómetros o recalcula KPI. No cambiar SQL001–009 ni App/lector/gateway.
 
-Arquitectura B y dependencias cerradas en
-`architecture/COORDINATION-B-DESIGN-20261002.md`. B2/B3 requieren su contrato API
-revisado antes de implementación. Migración 009 sólo local; no aplicar SQL remoto.
-Concurrencia real PostgreSQL se valida en el piloto, no queda demostrada por PGlite.
+B1/009 tiene revisión y reparación independiente local en
+`architecture/REVIEW-PRIVATE-NOTES-009-20261004.md`. Se probaron cancelación,
+respuestas incompletas, whitespace equivalente SQL/JS, historia propia tras
+cobertura, replay tras cierre y upgrade poblado. PostgreSQL real aún pendiente.
+El push pendiente de la ejecución B1 se sincroniza junto con esta revisión.
 
-Camino a servicios gratuitos y puertas de salida de Sites:
-`ops/FREE-HOSTING-PATH-20261002.md`. Primero preparar integración, luego decidir
-inicio de infraestructura nueva/dev sintético, piloto conectado y producción.
-La migración de 20 empleados sólo se habilita con aceptación final.
+Después de010: **GPT-6.1 Sol alto, Standard**, revisión y contrato011 completo de
+activación coordinada. 011 deberá adaptar todas las rutas de escritura/RLS,
+cronómetros paralelos, materialización, cobertura, cierres y reportes versionados
+juntos; no basta quitar el índice de un reloj por instancia. B3 jerarquía y bajas
+usa esa responsabilidad para evitar otra forma de transferir tareas.
 
 Live conserva Sites v43, implementación
-`9d6b97dc16625c974d6679cf7d69b7fe2fdb3900`, deploy succeeded
-`appgdep_6ac00b2ad81c81919a50bafab9f7101d`:
+`9d6b97dc16625c974d6679cf7d69b7fe2fdb3900`, deploy
+`appgdep_6ac00b2ad81c81919a50bafab9f7101d` succeeded:
 https://grupo-paris-contabilidad.valentino-magni.chatgpt.site.
-El commit local B1 quedó creado; el push al repositorio de Sites quedó pendiente
-por una falla de conexión del proxy (`browser-proxy:8889`). No está integrado en
-la página ni en Supabase. Live conserva v43 y su audiencia privada. Avance **42% estimado (36–46%)**; QA visual
-y revisión Sol siguen abiertas.
+Backend local y fuentes en Git de Sites; comentarios/conjuntas siguen sin UI ni
+Supabase conectado. No publicar otra versión sólo por SQL invisible.
 
-El usuario cambia modelo/esfuerzo manualmente; basta «continuá». No delegarlo.
+Avance **42% estimado (36–46%)**; revisión/contrato no elevan ese número. Puertas
+hacia infraestructura gratuita en `ops/FREE-HOSTING-PATH-20261002.md`. No crear
+servicios ni migrar empleados. Usuario cambia modelo manualmente; basta «continuá».

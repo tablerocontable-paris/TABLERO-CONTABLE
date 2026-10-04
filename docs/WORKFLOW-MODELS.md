@@ -55,7 +55,8 @@ sin pedir otro «continuá».
 
 ## Próximo bloque
 
-**GPT-6.1 Sol alto, Standard:** revisar localmente B1/009 (migración, RLS,
-locks, wrapper, pruebas) y cerrar el contrato ejecutable B2. No integrar App ni
-conectar servicios. Diseño global y camino hacia infraestructura están
-registrados. Cambio de modelo manual, sin delegarlo.
+**GPT-6 Luna medio, Standard:** B2a/010 local, contrato
+`architecture/COORDINATION-010-EXECUTION-20261004.md`. Ejecutar relaciones staged,
+validadores, backfill/fallback y pruebas; preservar SQL001–009 y live v43. No activar
+permisos/clock/KPI ni conectar servicios. Después Sol6.1 alto revisa010 y cierra011.
+Cambio de modelo manual; sin delegarlo.

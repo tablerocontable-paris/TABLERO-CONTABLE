@@ -1,7 +1,10 @@
 # Coordinación B — decisiones de arquitectura
 
-Estado: diseño; no implementado ni aplicado remotamente. Fuente: SQL001–008,
-frontend 0.4, `product/CORRECTIONS-20261002.md` y revisión v43 aceptada localmente.
+Estado actualizado al 04/10/2026 UTC: B1/009 implementado, revisado y reparado
+localmente. B2–B4 siguen en diseño; ningún bloque se aplicó remotamente. Fuente:
+SQL001–009, frontend 0.4, `product/CORRECTIONS-20261002.md` y revisión v43 aceptada
+localmente. El contrato ejecutable siguiente es
+`COORDINATION-010-EXECUTION-20261004.md`.
 
 ## Base encontrada y conflictos que hay que resolver
 
@@ -112,8 +115,9 @@ ni un cierre de mes. No publicar personas señaladas en avisos o exportaciones.
    `PRIVATE-BLOCK-NOTES-009-20261002.md`. Crea frontera RLS independiente sin
    modificar transición/clock008 ni fingir privacidad de localStorage.
 2. **B2: responsabilidad coordinada**: participantes, selección de cobertura,
-   cuotas/contribuciones y conjunto de locks/cierres/reportes. El siguiente
-   contrato SQL/API se cerrará tras revisión009; no ejecutarlo con este documento.
+   cuotas/contribuciones y conjunto de locks/cierres/reportes. B2a/010 tiene
+   contrato ejecutable cerrado para la base staged; después Sol revisa010 y
+   cierra011 para activar el motor completo. No ejecutar B2 con este documento.
 3. **B3: administración jerárquica y bajas/huérfanas**, usando responsabilidad de
    B2 para no introducir una segunda forma de transferir tareas. RPC de alta de
    usuario Auth irá con servidor/invitaciones, no insert directo de contraseñas.
@@ -126,5 +130,6 @@ a ocurrencias, cumplimiento al concluir todos los vínculos requeridos y lectura
 acotada. No unir por título ni por coincidencia de banco. ARCA y correo requieren
 servidor, cuotas y proveedores confirmados durante infraestructura.
 
-No se aumentó el avance por este diseño. 41% global sigue vigente. Los contratos
-API completos de B2/B3 son el siguiente diseño, no una capacidad implementada.
+El diseño original se registró con 41% global. El estado vigente mantiene 42%
+tras B1; esta revisión y el contrato010 no elevan ese estimado. Consultar
+`../PROJECT-STATUS.md`. B2/B3 todavía no son capacidades operativas.
