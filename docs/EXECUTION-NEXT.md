@@ -1,58 +1,55 @@
-# Próxima ejecución — completar activación coordinada 011
+# Próxima ejecución — continuar desde este repositorio
 
-**GPT-6.1 Sol, esfuerzo alto, Standard.** Revisar el cambio de reglas recurrentes
-y materialización de bindings aplicado localmente a 011, junto con
-`architecture/COORDINATION-011-EXECUTION-20261004.md` y
-`architecture/COORDINATION-011-CONCURRENCY-20261006.md`. Determinar si el
-footprint y la revalidación cumplen el protocolo, y cerrar el contrato para las
-rutas faltantes. Luego GPT-6 Luna medio implementa ese contrato en el mismo corte
-atómico 011; nunca modificar 001–010.
+El código y los commits originales del chat anterior fueron recuperados en este
+checkout. No depende de leer o esperar ese chat. Proyecto Sites existente:
+appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85. No crear otro proyecto ni reiniciar.
 
-## Hallazgos abiertos que bloquean aplicar 011
+## Corte 011 completado localmente
 
-1. `close_employee_month` no se reemplazó. Sigue sin reporte v4, cuotas por
-   miembro/cobertura ni validación de cierre conjunto y outbox reportado.
-2. `materialize_month` y la aprobación de reglas recurrentes ya se ampliaron en
-   011 para congelar regla, materializar bindings según `scheduled_on`, y
-   revalidar assignment/binding antes del write. La prueba focal cubre regla
-   futura y repetición idempotente. Falta aceptación de concurrencia PostgreSQL
-   y compartir C con los demás writers de catálogo.
-3. `approve_employee_absence` y `cancel_employee_absence` permanecen en sus
-   versiones heredadas. Falta integrar su footprint/orden de locks y la
-   intersección con bindings precisos.
-4. `create_catalog_assignment`, actualización de pesos/plantillas y aprobación
-   de inducción no usan el envelope 011 para todas las escrituras. Aún hay
-   escritores con locks bigint heredados.
-5. La ejecución PGlite sólo acredita la secuencia SQL y las políticas simuladas.
-   No hay PostgreSQL real, MVCC/barreras de carrera, Supabase Auth/MFA ni
-   validación remota.
+La continuación incorpora reporte/cierre v4, atribución por cuotas, cobertura
+sin puntos duplicados, cancelación de reglas y sus bindings, envelope completo
+prepare/acquire/revalidate, conversión de ausencias/catálogo/inducción y lectura
+compatible de reportes históricos. SQL 001–010 permanece intacto. El laboratorio
+PostgreSQL 17.11 ejecuta 26 carreras AB/BA con barreras observadas en pg_locks y
+pg_stat_activity, conflictos40001 y rollback íntegro, sin40P01. Evidencia en
+architecture/COORDINATION-011-CONTINUATION-20261006.md.
 
-La migración tiene comentario explícito de **NO apta para producción**. No
-conectar UI, no hacer `db push`, no cambiar migraciones 001–010 ni audiencia. El
-usuario autorizó push de fuente, pero el entorno actual no resolvió la conexión
-al remoto (ver informe de implementación); al continuar, usar el checkout Windows
-con HEAD remoto verificado. No hacer Sites save/deploy ni SQL remoto en esta fase.
+## Siguiente bloque
 
-Implementar rutas restantes y atribución/snapshots v4, pruebas secuenciales y de upgrade,
-auditoría de grants/replay y conversión de todos los writers del inventario. No
-reducir alcance si una ruta resulta difícil: registrar el bloqueo preciso y
-mantener 011 marcada no apta para producción. Ejecutar suite focal/completa,
-build, diff-check, actualizar estado y crear commit local sólo con resultados
-verdes. Las carreras PostgreSQL reales siguen siendo puerta previa a producción.
+**GPT-6.1 Sol, alto, Standard:** revisar este corte y preparar B3 (jerarquía
+multiarea, transferencias/bajas/huérfanas) y el contrato de integración B1/B2
+con las vistas. El proyecto vigente es TypeScript/SQL; no reescribirlo en Python.
+Incorporar las nuevas preferencias IVA/Gemelo al definir la evolución de producto,
+sin reemplazar la reconstrucción existente.
 
-Comprobaciones locales:
+**GPT-6 Luna, medio, Standard:** ejecutar el contrato revisado, mantener APIs
+separadas para datos compartidos y privados, pruebas y continuidad en Git.
 
-```sh
-npm test -- --run tests/coordination-activation-011.test.ts --maxWorkers=1 --testTimeout=60000 --hookTimeout=60000
-npm test -- --maxWorkers=1 --testTimeout=60000 --hookTimeout=60000
-npm run build
-git diff --check
-```
+Antes de conectar: adaptar contratos SQL actuales, manejo de 40001 con rollback
+completo, DTO/reporte3+4 y permisos, aceptación de UI, QA visual y volumen. El
+laboratorio usa Auth/JWT ficticios; NO acredita Supabase Auth, MFA, invitaciones,
+correo, Storage ni RLS con sesiones reales.
 
-La suite de contratos históricos 006/007 está fijada a su cadena original hasta
-008. `database.test.ts` aplica todas las migraciones y la suite focal 011 cubre
-la activación parcial y las reglas recurrentes. Sites live conserva v43; la
-migración SQL nunca se aplica desde Sites ni desde este laboratorio.
+## Autorización y puertas de publicación
 
-Avance global estimado: **42% (36–46%)**. La revisión de contratos y la
-documentación no elevan el porcentaje sin integración y aceptación funcional.
+El usuario autorizó commits y push de fuente al mismo repositorio de Sites.
+No implica despliegue web ni ejecución de SQL remoto. Live sigue en v43.
+No crear GitHub/Supabase/hosting ni cuenta dedicada todavía. No usar legacy.
+Sólo declarar lista la app operativa cuando estén cerrados los pendientes
+funcionales, UI/servicios reales, seguridad, piloto y recuperación en
+PROJECT-STATUS.md. Hoy esa puerta permanece abierta.
+
+## Verificación reproducible
+
+- npm test -- --maxWorkers=1 --testTimeout=60000 --hookTimeout=60000
+- npm run build
+- git diff --check
+- node scripts/coordination-concurrency.mjs --psql /ruta/local/psql --port 55432 --output /ruta/local/evidencia.json
+
+El runner sólo se conecta a 127.0.0.1, crea bases nuevas con prefijo
+coordination_011_lab_, carga datos ficticios y conserva laboratorios para revisión.
+Usar exclusivamente un motor local descartable. Sin PostgreSQL indica
+NO EJECUTADO y sale con código 2; no presentar PGlite como sustituto.
+
+Avance global estimado: **42% (36–46%)**, metodología conservada. El bloque 011
+avanzó en implementación/verificación; el producto aún no está integrado.

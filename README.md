@@ -40,7 +40,7 @@ Ver [decisiones y próximos pasos](docs/PRODUCT-ROADMAP.md). La infraestructura 
 
 ## Backend preparado, no conectado
 
-supabase/migrations es la fuente del esquema nuevo. SQL001–010 preservan la fundación staged; 011 tiene una implementación local parcial de coordinación. Su encabezado y [reporte de implementación](docs/architecture/COORDINATION-011-IMPLEMENTATION-20261006.md) advierten que no es apta para producción: faltan cierre/reporte4, materialización recurrente de coberturas y locks en todas las rutas escritoras. Ver también [protocolo obligatorio](docs/architecture/COORDINATION-011-CONCURRENCY-20261006.md). Nada se aplicó remotamente. El frontend todavía no está adaptado a recurrencias, sesiones, reportes ni coordinación; no conectar el gateway como si estos contratos fueran equivalentes. PGlite no sustituye pruebas PostgreSQL/Supabase reales.
+supabase/migrations es la fuente del esquema nuevo. SQL 001–010 se preserva;011 completa localmente coordinación, cobertura precisa/recurrente, cierre/reporte v4, privados y protocolo de todos los writers. Ver [continuación](docs/architecture/COORDINATION-011-CONTINUATION-20261006.md) y [protocolo](docs/architecture/COORDINATION-011-CONCURRENCY-20261006.md). El laboratorio PostgreSQL 17.11 verificó26 carreras AB/BA con barreras y rollback. Auth/JWT continúa simulado, incluso en ese motor; no verifica Supabase Auth/MFA/RLS reales. No aplicar SQL remoto ni conectar frontend sin adaptar/probar todos los contratos actuales.
 
 Faltan el adaptador remoto, invitaciones, bootstrap, Auth/MFA real, finalización de inducción en servidor, tareas particulares con aprobación, evidencia en Storage, recuperación y diagnóstico. No se ejecutaron migraciones remotas ni se modificó la base legacy.
 

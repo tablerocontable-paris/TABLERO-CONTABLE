@@ -1,38 +1,17 @@
-# Decisiones vigentes — 02/10/2026
+# Decisiones vigentes — continuidad06/10/2026
 
-UI A (v40) y reparación de anticipación (v43) aceptadas localmente en
-funcionalidad. Evidencia en REVIEW-V40-INDEPENDENT-20261002.md y
-REVIEW-V43-INDEPENDENT-20261002.md de docs/architecture. QA visual completa sigue
-pendiente. Diseño B en COORDINATION-B-DESIGN-20261002.md de docs/architecture.
-B1/009 revisado y reparado localmente (REVIEW-PRIVATE-NOTES-009-20261004.md).
-B2a/010 staged ejecutado localmente por contrato; evidencia en
-COORDINATION-010-IMPLEMENTATION-20261004.md. Revisión independiente010 sin
-hallazgos: COORDINATION-010-REVIEW-20261004.md. Protocolo de concurrencia011
-cerrado el06/10 para implementación; Sol revisa el corte y Luna lo ejecuta:
-COORDINATION-011-CONCURRENCY-20261006.md, obligatorio junto al contrato
-COORDINATION-011-EXECUTION-20261004.md. SQL011 tiene una implementación local
-parcial (detalle en COORDINATION-011-IMPLEMENTATION-20261006.md), marcada como
-no apta para producción: faltan reporte4/cierre y conversión de todas las rutas
-escritoras. Pruebas abstractas no sustituyen
-PostgreSQL real ni producción.
+UI A/v43, B1/009 y B2a/010 conservan su evidencia. B2b/011 completado localmente
+desde los commits recuperados: cierre/reporte v4, cuotas, cobertura recurrente,
+cancelación de derivados y conversión de writers. PostgreSQL 17.11 verificó26
+carreras AB/BA. Detalle en architecture/COORDINATION-011-CONTINUATION-20261006.md.
 
-Revisión/ejecución de continuación 06/10: auditadas las funciones efectivas y
-extendida 011 para reglas recurrentes de cobertura y materialización idempotente
-de bindings por `scheduled_on`, con snapshot/footprint revalidado. El cierre
-sigue v3 y quedan writers heredados con locks bigint. Suite focal 11/11, suite
-completa 286/286, build y diff-check pasaron. No hay motor PostgreSQL ni
-contenedor instalado para barreras MVCC. Detalle:
-COORDINATION-011-IMPLEMENTATION-20261006.md. El proyecto continúa en 42% hasta
-integrar y aceptar estos contratos.
+El usuario autorizó commits y push de fuente al mismo Site; no publicar la web,
+aplicar SQL remoto ni crear nuevas cuentas aún. Este chat ya tiene la fuente
+y no depende del anterior. Siguiente contrato: B3 e integración de UI/servicios.
 
-Checkpoint commit local `2c60379f6ddc4fbe0de7cf3c4cd698f1b87bce45`. El push de
-fuente fue autorizado pero bloqueado por proxy/DNS del entorno; el informe guarda
-ambos errores. Repositorio remoto y Site publicado no se actualizaron.
-
-Avance estimado actual **42% (36–46%)**, cálculo vigente en PROJECT-STATUS.md.
-Lector/gateway/SQL locales no equivalen a Auth/RLS/datos compartidos ni correo
-conectados. Demo localStorage, sin migración habilitada. Los apartados
-cronológicos inferiores conservan historia; el próximo paso es EXECUTION-NEXT.md.
+Avance global estimado42% (36–46%). Los apartados siguientes conservan decisiones
+funcionales e historia; el estado corriente está en PROJECT-STATUS.md y el
+próximo bloque en EXECUTION-NEXT.md.
 
 ## Infraestructura futura (pedido expreso, todavía no ejecutar)
 

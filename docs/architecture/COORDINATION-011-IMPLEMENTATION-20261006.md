@@ -1,3 +1,10 @@
+# Nota de continuidad posterior
+
+La ejecución parcial documentada abajo se conserva como historia. Fue continuada
+desde sus commits originales: ver COORDINATION-011-CONTINUATION-20261006.md para
+reporte4, todos los writers y26 carreras PostgreSQL reales. El estado corriente
+se mantiene en ../PROJECT-STATUS.md. El push de fuente fue autorizado.
+
 # B2b / 011 — ejecución local parcial
 
 Fecha: 06/10/2026. **No aplicar esta migración a Supabase.** El encabezado de
