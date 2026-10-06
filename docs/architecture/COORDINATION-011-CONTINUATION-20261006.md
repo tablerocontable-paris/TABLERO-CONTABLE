@@ -61,3 +61,17 @@ Auth/invitaciones/MFA/RLS reales, SMTP, Storage, recuperación y piloto.
 El usuario autorizó commits/push de fuente. No Sites save/deploy ni SQL remoto.
 Live v43 y SQL 001–010 preservados. Avance global 42% (36–46%). Próximo B3/UI en
 EXECUTION-NEXT.md.
+
+
+## Fuente remota incorporada tras la validación 011
+
+Se incorporó el commit c022f82 del mismo repositorio: backend Worker/D1 y UI
+operativa. No sustituye ni aplica las migraciones Supabase. Sites get_site confirmó
+latest_version_number 44; la referencia v43 anterior describe el corte histórico.
+La estimación 42% del alcance completo original es histórica y requiere nueva
+evaluación frente al alcance privado D1. Este chat no publicó ni aplicó SQL remoto.
+
+Validación del conjunto integrado: 320/320 pruebas en 30 archivos, exit 0
+(185,02 s); build TypeScript/Vite/Worker exit 0; git diff --check aprobado.
+SQL 001–010 intacto. Las 26 carreras PostgreSQL corresponden a SQL 011,
+no a D1. UI verificada en DOM simulado, sin piloto autenticado real.

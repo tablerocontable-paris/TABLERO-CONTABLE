@@ -1,51 +1,54 @@
-# Grupo París — nueva generación 0.4
+# Grupo París · versión privada operativa 1.0
 
-Aplicación React + TypeScript + Vite con identidad oficial, inducción guiada, cuatro empresas independientes, tablero automático, actividad operativa, KPI ponderado, jerarquía y cierre mensual.
+React, TypeScript y Vite, con API Cloudflare Worker y persistencia D1 administrada por Sites. Se continúa el proyecto existente; el GitHub legacy `Valentinomagni/tablero-contable-grupo-paris` se conserva como referencia de lectura y no recibe cambios ni datos.
 
-## Ejecución
+## Recorrido diario
+
+1. En **Administrar tablero → Equipo**, renombrar las cuatro empresas y configurar responsables, correos, sectores y empresas autorizadas.
+2. Abrir **Mi tablero · Valentino** y completar la inducción de seis pasos. Los procesos del catálogo conservan nombre, controles y peso; cada empresa tiene asignaciones y ocurrencias independientes.
+3. Crear tareas puntuales o recurrentes. Iniciar trabajo, cronometrar, pausar, completar controles, registrar esperas y cantidades de operativas.
+4. Consultar vencimientos, objetivos con fecha y recordatorios. La última marca del checklist completa el entregable. La meta operativa se alcanza mediante registros fechados, sin atribuir cantidades ficticias.
+5. Revisar cumplimiento, puntos ponderados, anticipación y tiempo por persona, equipo, sector y empresa. Jefatura consolida cada empleado; el servidor calcula el snapshot y bloquea ese período. Reportes y CSV están disponibles inmediatamente.
+
+Los datos se guardan en el servidor y se actualizan cada 30 segundos. El indicador distingue cambios pendientes, confirmados y fallidos. Un conflicto de revisión exige recargar; no sobrescribe otra sesión. Una propuesta fallida permanece en memoria y puede descargarse o reintentarse. No hay guardado offline definitivo.
+
+## Acceso y privacidad
+
+El Site sigue limitado a su propietario. Incorporar un perfil **no** invita personas ni cambia la audiencia. Los demás empleados necesitan aprobación de acceso al Site, además de un perfil activo con correo coincidente y empresas asignadas.
+
+La identidad proviene de los encabezados autenticados que entrega Sites, nunca del selector del navegador. El propietario puede alternar solamente entre su perfil de empleado y su administración técnica, separados del KPI. No puede simular otros empleados en la aplicación publicada. Cada solicitud comprueba rol, persona, empresa y período en servidor. Las notas personales se excluyen de las respuestas de otros perfiles, incluso jefatura. Los relojes y cierres usan tiempos del servidor.
+
+D1 guarda cada entidad por separado. Una revisión y un token de escritura condicionan todos los cambios dentro de un `batch` transaccional; una escritura concurrente obsoleta no puede afectar registros. El esquema generado está en `db/schema.ts` y `drizzle/`. Las migraciones Supabase 001–010 se conservan sin aplicar y no son el backend de esta versión.
+
+## Validación y límites
+
+La suite completa pasó **293 pruebas en 28 archivos**. Después del cambio del almacenamiento se verificaron los **20 casos operativos/UI** afectados y la compilación TypeScript/Vite/Worker. Las pruebas de Worker usan SQLite real; las UI usan DOM simulado. No equivalen a una sesión con varios empleados reales ni a QA visual en navegador. El skill de control de navegador no estaba disponible en esta ejecución; no se improvisó otro controlador.
+
+El despliegue privado permite uso por el propietario y preparar el equipo. Antes de incorporar empleados: aprobación de audiencia, piloto de cuentas reales, revisión visual/móvil y volumen, respaldo/restauración y política de MFA de cuentas privilegiadas. No se anuncia una migración masiva ni equivalencia con Supabase Auth/RLS.
+
+Pendientes secundarios: ARCA para cuatro CUIT, correo/notificaciones externas, conjuntas con reparto de contribuciones, coberturas selectivas, jerarquía multiarea, Kaizen/5S e infraestructura dedicada dev/prod. La cobertura básica por ausencia y las métricas existentes se conservan.
+
+## Desarrollo
 
 ```sh
 npm ci
-npm run dev
-npm test
+npm test -- --maxWorkers=1 --testTimeout=60000 --hookTimeout=60000
 npm run build
-# Con Chromium instalado, opcional:
-CHROMIUM_PATH=/ruta/a/chromium npm run test:browser
 ```
 
-El build produce dist/. Sites publica ese directorio con .openai/hosting.json. Las fuentes y el lockfile se guardan en el repositorio privado de Sites. El repositorio GitHub legacy se consultó en lectura y no recibe commits de esta implementación.
+El build emite `dist/client`, `dist/server/index.js` y metadatos de hosting. `OWNER_EMAIL` y `SITE_ORIGIN` se configuran en Sites; no se escriben secretos en el código. `npm run dev` es la vista local Vite; las pruebas de API usan el Worker y SQLite, y la funcionalidad compartida se sirve en Sites.
 
-## Nuevo en 0.4
+Ver `docs/PROJECT-STATUS.md`, `docs/EXECUTION-NEXT.md` y `docs/runbooks/SITES-PRIVATE-1.md`. La evidencia y los contratos históricos siguen en Git.
 
-- Temas claro, oscuro y automático; se guarda la elección y se sigue el sistema operativo.
-- Recurrencias por tarea: puntual, diaria, semanal/múltiples días y mensual; intervalo y fecha final; vencimiento opcional calculado desde cada ocurrencia.
-- Inducción con múltiples tareas particulares y configuración individual. Reprogramación de jefatura con versión nueva, preservando trabajo iniciado y cierres.
-- Cronómetro con sesiones, pausa, reanudación, un cronómetro por ejecutor, parada al completar/esperar y conteo explícito de reaperturas. Tiempo registrado por ejecutor en análisis.
-- Ausencias y cobertura temporal; relación jerárquica editable por Juan Pablo, gerente. Valentino mantiene perfil de empleado.
-- Laboratorio de pruebas con copia en almacenamiento separado y entorno fijado por pestaña; no modifica KPI ni tareas principales. Todavía no es una cuenta técnica autenticada.
 
-Ver [decisiones y próximos pasos](docs/PRODUCT-ROADMAP.md). La infraestructura nueva con cuenta dedicada se creará después de validar el producto, por pedido del usuario.
+## Integración de continuidad local — 06/10/2026
 
-## Funcionalidad publicada
-
-- Alta local de demostración e inducción de seis pasos, con borrador recuperable, empresas, catálogo, tarea particular, frecuencia, preferencias y previsualización.
-- Una instancia por asignación/fecha de ocurrencia, independiente por empresa. Filtrado global, búsqueda, lista/tablero, vencimientos y recorrido guiado.
-- Inicio y checklist con avance automático de estado, reapertura, esperas externas y bloqueo al cerrar mes.
-- Operativas con fecha, cantidades, referencias y metas por tarea/empresa/mes.
-- Análisis por empleado, equipo y sector: puntos, cumplimiento, puntualidad, vencidos, metas y detalle explicativo exportable.
-- Catálogo de pesos definido por jefe y estructura de responsables. Cierre íntegro por empleado, snapshot y exportación.
-- Diseño responsive, fuente local y movimiento reducido según preferencia del sistema.
-
-**Es una demostración local, no un sistema multiusuario conectado.** Los perfiles y las cuatro empresas son ejemplos. Las selecciones de rol simulan el producto. Cada navegador guarda sus propios datos; no hay cuentas reales ni sincronización. No cargar información productiva ni iniciar la migración de empleados todavía.
-
-## Backend preparado, no conectado
-
-supabase/migrations es la fuente del esquema nuevo. SQL 001–010 se preserva;011 completa localmente coordinación, cobertura precisa/recurrente, cierre/reporte v4, privados y protocolo de todos los writers. Ver [continuación](docs/architecture/COORDINATION-011-CONTINUATION-20261006.md) y [protocolo](docs/architecture/COORDINATION-011-CONCURRENCY-20261006.md). El laboratorio PostgreSQL 17.11 verificó26 carreras AB/BA con barreras y rollback. Auth/JWT continúa simulado, incluso en ese motor; no verifica Supabase Auth/MFA/RLS reales. No aplicar SQL remoto ni conectar frontend sin adaptar/probar todos los contratos actuales.
-
-Faltan el adaptador remoto, invitaciones, bootstrap, Auth/MFA real, finalización de inducción en servidor, tareas particulares con aprobación, evidencia en Storage, recuperación y diagnóstico. No se ejecutaron migraciones remotas ni se modificó la base legacy.
-
-Ver [decisiones](docs/architecture/DECISIONS.md), [revisión legacy](docs/architecture/LEGACY-REVIEW.md), [incorporación manual](docs/MIGRATION.md) y [contrato SQL](supabase/README.md).
-
-## Flujo de modelos
-
-Ver [AGENTS.md](AGENTS.md) y [WORKFLOW-MODELS.md](docs/WORKFLOW-MODELS.md): Sol 6.1 alto para razonamiento/revisión; GPT 6 Luna medio para ejecución. Cada devolución debe indicar próximo modelo y acción.
+Se recuperaron los commits originales cf6fc23/2c60379/54117ea y se completó
+SQL 011 en 65e8391. Evidencia: docs/architecture/COORDINATION-011-CONTINUATION-20261006.md.
+Antes de integrar este backend D1: 300 pruebas aprobadas y 26 carreras PostgreSQL
+aprobadas. El backend D1 recibido del remoto se conserva como ruta activa separada;
+SQL Supabase no se aplica ni se conecta automáticamente a esa UI.
+Este chat autoriza sincronizar fuente, sin desplegar ni ampliar audiencia.
+La documentación remota de publicación describe el trabajo previo; no constituye
+una nueva autorización de despliegue. La estimación histórica 42% corresponde al
+alcance original completo y debe reevaluarse tras aceptar el nuevo alcance D1.

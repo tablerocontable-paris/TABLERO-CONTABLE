@@ -1,72 +1,58 @@
-# Estado vigente del proyecto — 06/10/2026
+# Estado vigente · 06/10/2026 · versión privada 1.0
 
-**Avance global estimado: 42% (36–46%).** La estimación conservadora del producto
-completo se mantiene: el avance de backend todavía no se integra con la UI ni
-con cuentas y servicios reales. No es un porcentaje de tests ni commits.
+El pedido actual reemplaza la ejecución aislada de SQL011 por la entrega de un recorrido diario privado en el Site existente. Se conserva todo el SQL Supabase sin aplicarlo a servicios remotos. La versión operativa usa el almacenamiento D1 de Sites; no se conecta la UI a contratos Supabase incompatibles.
 
-## Continuidad recuperada
+## Implementado
 
-Repositorio del mismo proyecto Sites, con commits originales cf6fc23, 2c60379 y
-54117ea recuperados desde la base remota 6ec239f. Este chat trabaja desde ese
-código y ya no depende de esperar/leer el anterior. El usuario autorizó commits
-y push de fuente. Implementación y evidencia en
-architecture/COORDINATION-011-CONTINUATION-20261006.md.
+- Identidad real de Sites, roles y alcance verificados en servidor; denegación por defecto a cuentas sin perfil. Se elimina el selector que suplantaba a cualquier empleado en la versión publicada.
+- Administración técnica del propietario separada de su perfil e0 y del KPI. Juan Pablo conserva jefatura como perfil a configurar; no se inventan correos ni se envían invitaciones.
+- Cuatro empresas renombrables; administración de perfiles y correos; tareas independientes por empresa/asignación/ocurrencia/período.
+- Persistencia D1 por entidad, lectura coherente y escritura transaccional con revisión/token. Conflictos conservan la propuesta; no hay fallback silencioso a datos locales.
+- Mi día, tablero, lista, tarjetas/columnas plegables independientes, filtros y orden A–Z.
+- Checklist lineal, finalización automática, reapertura, esperas, sesiones de timer con actor y hora del servidor, un reloj por persona.
+- Inducción de seis pasos y recorrido guiado; progreso guardado en servidor; catálogo, recurrencias y planificación.
+- Agenda con entregables, metas operativas, cumplidos opcionales y recordatorios, incluidos plazos que caen en un mes diferente a la ocurrencia.
+- Cantidades operativas con fechas/referencias, KPI ponderados, puntualidad/anticipación, métricas de persona/equipo/sector, reportes y cierre exclusivo de jefatura calculado en servidor.
+- Notas privadas de su autor y conversión a tarea; última actividad basada en consultas al servidor.
+- Tokens de contraste de jerarquía, avatares, controles, checklists y tooltips; tamaño de lectura mejorado; temas claro/oscuro/sistema.
 
-## Bloque local 011 completado
+## Pruebas
 
-- Reporte v4 y cierre por empleado, cuotas, segundos propios, cobertura sin
-  duplicar peso, privacidad y lectura de reportes v3/v4; históricos intactos.
-- Cancelación de regla recurrente y bindings derivados, relojes detenidos
-  atómicamente y grants legacy restringidos a selecciones precisas.
-- Prepare/acquire/revalidate para todas las rutas escritoras del inventario;
-  ausencias/catálogo/inducción comparten el protocolo 011; ningún writer vigente
-  del inventario conserva locks bigint antiguos. SQL 001–010 no se modifica.
-- PostgreSQL 17.11:26 carreras AB/BA verifican espera real, conflicto 40001 o
-  serialización válida, rollback completo, receipts/outbox únicos y sin40P01.
-- Tests completos y build se verifican antes de cada entrega. Los resultados
-  exactos están en el informe de continuidad, no se infieren del progreso.
+Suite completa: 293 casos, 28 archivos, todos pasan (134 s). Tras normalizar el almacenamiento, reejecutados 20 casos de UI/Worker/SQLite, todos pasan. Compilación TypeScript, Vite y Worker ESM; migración Drizzle inspeccionada (tres tablas, sin semillas ni backfills); `git diff --check`.
 
-## Aplicación publicada
+Los tests verifican identidad/CSRF, alcance por empresa, impedimento de cambiar roles/pesos/cierres desde empleado, privacidad de notas frente a jefatura, integración timer/checklist/meta/cierre y rechazo de escrituras simultáneas obsoletas. El adaptador SQLite ejecuta batches transaccionales serializados.
 
-Sites v43, fuente 9d6b97dc16625c974d6679cf7d69b7fe2fdb3900,
-deploy appgdep_6ac00b2ad81c81919a50bafab9f7101d.
-https://grupo-paris-contabilidad.valentino-magni.chatgpt.site
+QA UI mediante DOM simulado. QA visual y navegador autenticado real no ejecutados: control-browser no disponible. No se declara piloto real de varios empleados.
 
-Sigue siendo demostración localStorage, con roles ficticios y datos por
-navegador. El push de código no cambia el deploy web. No se aplicó SQL remoto.
+## Acceso
 
-## Metodología de avance conservada
+Site seleccionado: `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85`.
+URL existente: https://grupo-paris-contabilidad.valentino-magni.chatgpt.site.
+Audiencia confirmada: custom, sólo propietario; cero visitantes externos o grupos. La publicación usa la operación privada. No se llama a cambios de acceso.
 
-| Etapa | Peso | Estimación | Evidencia / pendiente |
-| --- | --- | --- | --- |
-| Demo, experiencia y reglas |25%|80%| UI A/anticipación; faltan B/C/D y QA visual |
-| Contrato de datos y SQL |25%|68%|011 implementado y probado localmente; falta aceptación/integración real|
-| Integración, cuentas y permisos |25%|5%|Lector/gateway locales; UI aún usa actor simulado|
-| Funcionalidad final y operación |15%|25%|Reportes/outbox locales; funciones operativas finales y correo pendientes|
-| Validación, infraestructura y migración |10%|0%|Piloto, recuperación, servicios y migración pendientes|
+## Pendientes
 
-Ponderación 42,0. Son juicios de planificación con incertidumbre; se conservan
-para no atribuir avance integrado a nuevas pruebas o documentación.
+1. Configurar razones sociales y correos reales en UI; el propietario puede trabajar en su tablero desde la inducción. Autorizar y pilotear acceso de empleados antes de ampliar audiencia.
+2. QA visual/móvil real, carga/volumen, MFA para cuentas privilegiadas y respaldo/restauración operativa. Exportación UI incluye sólo datos visibles y no es un backup completo de notas privadas ajenas.
+3. Funciones posteriores: ARCA cuatro CUIT, correo/notificaciones externas, conjuntas con reparto, cobertura por tareas seleccionadas, jerarquía multiarea, Kaizen/5S e infraestructura dedicada dev/prod.
+4. Si se retoma Supabase, revisar la 011 completada localmente y adaptar la UI explícitamente; nunca aplicar001–010 como si fueran el esquema D1.
 
-## Puertas que impiden declarar lista la app operativa
+No se usa el antiguo 42% como medición del nuevo alcance; se comunica funcionalidad y pruebas verificadas. Los documentos cronológicos anteriores describen la demo y el camino Supabase previo.
 
-1. Revisión de 011 y B3: jerarquía multiarea, transferencias, bajas/huérfanas;
-   integrar comentarios privados y contribuciones en la UI.
-2. Adaptador completo de frontend, equivalencia de reglas, manejo de 40001,
-   Auth/invitaciones/MFA/RLS reales y datos compartidos.
-3. Agenda/cumplimiento, presencia/última conexión, notificaciones, consultas,
-   entrega real de reportes y procesos de mejora.
-4. QA visual/volumen, aceptación funcional con Juan Pablo y encargado,
-   piloto y pruebas de recuperación/actualización.
-5. Después de aceptar producto: cuenta e infraestructura dedicadas nuevas,
-   GitHub/Supabase/hosting y flujo dev/prod; luego migración manual por equipos.
 
-PostgreSQL real aquí prueba el motor y esa matriz de carreras con Auth/JWT
-ficticios; no verifica servicios Supabase, emails, Storage ni producción.
-No se crearon cuentas externas ni se modificó la base legacy.
+## Integración de continuidad local — 06/10/2026
 
-## Próxima ejecución
+Se recuperaron los commits originales cf6fc23/2c60379/54117ea y se completó
+SQL 011 en 65e8391. Evidencia: docs/architecture/COORDINATION-011-CONTINUATION-20261006.md.
+Antes de integrar este backend D1: 300 pruebas aprobadas y 26 carreras PostgreSQL
+aprobadas. El backend D1 recibido del remoto se conserva como ruta activa separada;
+SQL Supabase no se aplica ni se conecta automáticamente a esa UI.
+Este chat autoriza sincronizar fuente, sin desplegar ni ampliar audiencia.
+La documentación remota de publicación describe el trabajo previo; no constituye
+una nueva autorización de despliegue. La estimación histórica 42% corresponde al
+alcance original completo y debe reevaluarse tras aceptar el nuevo alcance D1.
 
-Sol6.1 alto: revisión y contrato B3/integración. Luna6 medio: implementar contrato
-definido. Continuar autónomamente siguiendo EXECUTION-NEXT.md. Historial de
-etapas y revisiones conservado en docs/architecture y Git.
+Validación del conjunto integrado: 320/320 pruebas en 30 archivos, exit 0
+(185,02 s); build TypeScript/Vite/Worker exit 0; git diff --check aprobado.
+SQL 001–010 intacto. Las 26 carreras PostgreSQL corresponden a SQL 011,
+no a D1. UI verificada en DOM simulado, sin piloto autenticado real.

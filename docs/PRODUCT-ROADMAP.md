@@ -131,3 +131,12 @@ PGlite no reemplaza la verificación de carreras PostgreSQL ni Supabase Auth/MFA
 Siguiente paso: revisión GPT Sol 6.1 alto del código 005; mantener backend sin
 aplicar remotamente y no migrar empleados hasta aprobar revisión, carreras e
 integración real. Detalle: `docs/architecture/TIME-COVERAGE-005-HARDENING.md`.
+
+
+## Fuente remota incorporada tras la validación 011
+
+Se incorporó el commit c022f82 del mismo repositorio: backend Worker/D1 y UI
+operativa. No sustituye ni aplica las migraciones Supabase. Sites get_site confirmó
+latest_version_number 44; la referencia v43 anterior describe el corte histórico.
+La estimación 42% del alcance completo original es histórica y requiere nueva
+evaluación frente al alcance privado D1. Este chat no publicó ni aplicó SQL remoto.

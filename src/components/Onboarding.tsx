@@ -26,6 +26,7 @@ export default function Onboarding({
   update,
   finish,
   pause,
+  remote=false,
 }: {
   state: State;
   month: string;
@@ -34,6 +35,7 @@ export default function Onboarding({
   update: (d: Draft) => void;
   finish: () => void;
   pause: () => void;
+  remote?:boolean;
 }) {
   const steps = [
     "Tu identidad",
@@ -135,7 +137,7 @@ export default function Onboarding({
           ))}
         </ol>
         <small>
-          Inducción de demostración · progreso guardado en este navegador
+          {remote ? 'Inducción personal · progreso guardado en el servidor' : 'Inducción de demostración · progreso guardado en este navegador'}
         </small>
       </aside>
       <section className="induction-body">

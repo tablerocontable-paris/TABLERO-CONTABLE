@@ -31,5 +31,27 @@
 - Continuar autónomamente entre pasos/revisiones que usan el mismo modelo; no terminar cada bloque para pedir «continuar».
 - Detenerse al llegar a un cambio de modelo necesario y comunicar modelo, esfuerzo y contrato concreto preparado. El usuario hará el cambio manual. No delegar ni simular un cambio de modelo para sortear esta preferencia.
 - Completar una fase entera del mismo modelo (corrección, implementación y verificaciones necesarias); no fraccionarla para pedir continuar después de una subtarea. Pedido de sesiones más largas del 06/10/2026. Detenerse sólo por cambio necesario de modelo o bloqueo concreto.
-- B1/009 y B2a/010 conservan revisión local. B2b/011 se completó localmente con reporte v4, writers comunes y26 carreras PostgreSQL reales AB/BA. Evidencia en docs/architecture/COORDINATION-011-CONTINUATION-20261006.md. SQL 001–010 y live v43 se preservan. El usuario autorizó commits y push de fuente en esta continuación; no implica Sites save/deploy ni SQL remoto.
-- Código y commits del chat anterior recuperados en este repositorio; no depender de esperar/leer ese chat. Auth/invitaciones/MFA/RLS/correo/Storage reales, B3 y UI siguen pendientes. No migrar empleados ni declarar producción. Estado en docs/PROJECT-STATUS.md.
+- B1/009 y B2a/010 conservados. SQL 011 completado localmente en 65e8391; prepare/acquire/revalidate, reportes v4, cobertura precisa y cancelación. Evidencia: docs/architecture/COORDINATION-011-CONTINUATION-20261006.md. Revisar Sol alto antes de adaptar esta ruta al backend activo D1; no aplicar SQL remoto.
+- Se preservaron SQL 001–010 y evidencia histórica. PostgreSQL 17.11: 26/26 escenarios concurrentes aprobados; servicios Supabase/Auth reales no probados. D1 usa sus propios contratos y migraciones.
+
+## Pedido vigente06/10: versión privada utilizable en Sites
+
+- Este pedido sustituye la ejecución aislada de011 y la prohibición anterior de cambiar App o publicar. Continuar el recorrido diario, datos compartidos y despliegue privado del mismo Site.
+- La aplicación publicada1.0 usa Worker+D1 de Sites con identidad real del dispatcher. Los contratos Supabase históricos permanecen intactos/no aplicados y no se confunden con el backend activo.
+- No volver a localStorage ni al selector que suplanta usuarios. Propietario: administración técnica/e0 solamente; empleado ordinario: identidad fija. Roles, empresas, notas y cierres se validan en servidor.
+- Preservar audiencia sólo propietario. Configurar perfiles no autoriza invitaciones ni cambios de visibilidad.
+- Ver docs/PROJECT-STATUS.md, docs/EXECUTION-NEXT.md y docs/runbooks/SITES-PRIVATE-1.md, que son el estado vigente; cronología anterior es evidencia histórica.
+- Pruebas automatizadas/DOM y SQLite no equivalen a QA visual ni piloto real. No declarar listas secundarias o migración masiva que no se hayan ejecutado.
+
+
+## Integración de continuidad local — 06/10/2026
+
+Se recuperaron los commits originales cf6fc23/2c60379/54117ea y se completó
+SQL 011 en 65e8391. Evidencia: docs/architecture/COORDINATION-011-CONTINUATION-20261006.md.
+Antes de integrar este backend D1: 300 pruebas aprobadas y 26 carreras PostgreSQL
+aprobadas. El backend D1 recibido del remoto se conserva como ruta activa separada;
+SQL Supabase no se aplica ni se conecta automáticamente a esa UI.
+Este chat autoriza sincronizar fuente, sin desplegar ni ampliar audiencia.
+La documentación remota de publicación describe el trabajo previo; no constituye
+una nueva autorización de despliegue. La estimación histórica 42% corresponde al
+alcance original completo y debe reevaluarse tras aceptar el nuevo alcance D1.

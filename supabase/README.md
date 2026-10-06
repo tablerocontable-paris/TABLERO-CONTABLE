@@ -14,3 +14,12 @@ Cuando se acepte la versión definitiva, crear un Supabase nuevo y aplicar migra
 B1/009 (`202610020009_private_block_notes.sql`) añade comentarios privados separados, su historial y RPC local. La revisión independiente de Sol reparó cancelación del wrapper, respuestas incompletas y normalización de texto. Aceptada localmente con PGlite; concurrencia local verificada en el bloque 011; pendiente integración Auth/UI. No se aplicó a Supabase remoto.
 
 B2a/010 ejecutado y revisado independientemente localmente: responsabilidad versionada, selección staged, sellado, backfill/fallback y tipos; no activa permisos, relojes o KPI. Evidencia en `docs/architecture/COORDINATION-010-IMPLEMENTATION-20261004.md` y `docs/architecture/COORDINATION-010-REVIEW-20261004.md`. SQL011 se completó localmente: reporte v4/cuotas/privacidad, cobertura recurrente y revocación de derivados, todos los writers y revalidación del footprint. Evidencia en docs/architecture/COORDINATION-011-CONTINUATION-20261006.md. PostgreSQL 17.11 ejecutó 26 carreras AB/BA con barreras reales, sin40P01 y con rollback40001 verificado. **No está listo para producción ni debe aplicarse remotamente.** Faltan integración y Auth/Supabase reales; el laboratorio mantiene JWT ficticios. No se aplicó ninguna migración remota.
+
+
+## Fuente remota incorporada tras la validación 011
+
+Se incorporó el commit c022f82 del mismo repositorio: backend Worker/D1 y UI
+operativa. No sustituye ni aplica las migraciones Supabase. Sites get_site confirmó
+latest_version_number 44; la referencia v43 anterior describe el corte histórico.
+La estimación 42% del alcance completo original es histórica y requiere nueva
+evaluación frente al alcance privado D1. Este chat no publicó ni aplicó SQL remoto.
