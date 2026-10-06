@@ -162,6 +162,36 @@ describe("011 activation smoke", () => {
     expect((await lab.first("select owner_id,period::text from task_instances where id=$1",[task]))).toEqual({owner_id:ids.owner,period:lab.period});
   });
 
+  it("approves a frozen recurring rule and binds existing matching occurrences by scheduled_on", async () => {
+    const task = await lab.task({ period: lab.period });
+    const plan = uid(917);
+    await lab.admin();
+    const assignment = (await lab.first("select assignment_id from task_instances where id=$1", [task])).assignment_id;
+    const nextPeriod = (await lab.first("select ($1::date + interval '1 month')::date::text d", [lab.period])).d;
+    const starts = nextPeriod;
+    const ends = `${nextPeriod.slice(0, 7)}-28`;
+    await lab.db.query(`insert into task_coverage_plans(id,organization_id,responsible_id,replacement_id,starts_on,ends_on,kind,created_by,handover_note)
+      values($1,$2,$3,$4,$5::date,$6::date,'vacaciones',$7,'regla de cobertura')`,
+    [plan, ids.org, ids.owner, ids.peer, starts, ends, ids.boss]);
+    await lab.db.query(`insert into task_coverage_plan_assignment_rules(plan_id,organization_id,assignment_id,company_id_snapshot,assignment_snapshot)
+      select $1,organization_id,id,company_id,to_jsonb(task_assignments) from task_assignments where id=$2`, [plan, assignment]);
+    await lab.db.query("update task_coverage_plans set sealed=true,sealed_by=$2,sealed_at=clock_timestamp() where id=$1", [plan, ids.boss]);
+    await lab.actor(ids.boss, "aal2");
+    const approved = await lab.first("select approve_task_coverage_plan($1,$2) n", [plan, uid(918)]);
+    expect(approved.n).toBe(1);
+    await lab.admin();
+    expect(await lab.rows("select id from task_coverage_bindings where plan_id=$1 and instance_id=$2", [plan, task])).toEqual([]);
+    await lab.actor(ids.owner);
+    expect(await lab.first("select materialize_month($1,$2::date) n", [ids.owner, nextPeriod])).toEqual({ n: 1 });
+    expect(await lab.first("select materialize_month($1,$2::date) n", [ids.owner, nextPeriod])).toEqual({ n: 0 });
+    await lab.admin();
+    expect(await lab.rows("select instance_id,assignment_id,scheduled_on_snapshot::text from task_coverage_bindings where plan_id=$1 order by instance_id nulls first", [plan])).toEqual([
+      { instance_id: null, assignment_id: assignment, scheduled_on_snapshot: null },
+      { instance_id: expect.any(String), assignment_id: null, scheduled_on_snapshot: `${nextPeriod.slice(0, 7)}-15` },
+    ]);
+    expect(await lab.first("select count(*)::int n from task_coverage_bindings where plan_id=$1", [plan])).toEqual({ n: 2 });
+  });
+
   it("allows two responsible clocks but keeps peer session detail private and pauses only its own clock", async () => {
     const task = await lab.task();
     await lab.admin();

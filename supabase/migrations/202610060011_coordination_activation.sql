@@ -903,7 +903,7 @@ end $$;
 create function public.approve_task_coverage_plan(p_plan uuid,p_operation_id uuid) returns integer
 language plpgsql security definer set search_path='' as $$
 declare actor uuid:=auth.uid(); p public.task_coverage_plans%rowtype; cached public.task_mutation_receipts%rowtype;
- args jsonb; n integer:=0; x record; t public.task_instances%rowtype; org uuid; months jsonb; people uuid[];
+ args jsonb; n integer:=0; x record; t public.task_instances%rowtype; a public.task_assignments%rowtype; org uuid; months jsonb; people uuid[]; catalog_keys text[];
  planned public.task_coverage_plans%rowtype;
 begin
  if actor is null or p_operation_id is null then raise exception 'Identidad y operación requeridas'; end if;
@@ -915,15 +915,14 @@ begin
  select * into p from public.task_coverage_plans where id=p_plan;
  if not found or not p.sealed then raise exception 'Plan de cobertura sellado requerido'; end if;
  planned:=p;
- if exists(select 1 from public.task_coverage_plan_assignment_rules r where r.plan_id=p.id) then
-   raise exception 'Las reglas recurrentes requieren el materializador coordinado; seleccione las ocurrencias existentes';
- end if;
  if public.actor_org() is distinct from p.organization_id or public.actor_role() not in ('jefe','encargado') then raise exception 'Sin permiso'; end if;
  if public.actor_role()='encargado' and (not public.can_access_owner(p.responsible_id) or not public.can_access_owner(p.replacement_id)) then raise exception 'Fuera del ámbito del encargado'; end if;
  select coalesce(array_agg(distinct z),array[]::uuid[]) into people from (
   select p.responsible_id z union select p.replacement_id
   union select task_row.owner_id from public.task_coverage_plan_instances i join public.task_instances task_row on task_row.id=i.instance_id where i.plan_id=p.id
   union select m.profile_id from public.task_coverage_plan_instances i join public.task_responsibility_heads h on h.instance_id=i.instance_id join public.task_responsibility_members m on m.set_id=h.set_id where i.plan_id=p.id
+  union select p.responsible_id from public.task_coverage_plan_assignment_rules r where r.plan_id=p.id
+  union select p.replacement_id from public.task_coverage_plan_assignment_rules r where r.plan_id=p.id
  ) q;
  select coalesce(jsonb_agg(jsonb_build_object('ownerId',z.profile_id,'period',z.period)),'[]') into months from (
   select distinct person.profile_id,task.period
@@ -935,19 +934,37 @@ begin
     union select p.responsible_id union select p.replacement_id
   ) person
   where i.plan_id=p.id
+  union
+  select p.responsible_id,month_start::date from generate_series(date_trunc('month',p.starts_on)::date::timestamp,date_trunc('month',p.ends_on)::date::timestamp,interval '1 month') month_start
+  where exists(select 1 from public.task_coverage_plan_assignment_rules r where r.plan_id=p.id)
+  union
+  select p.replacement_id,month_start::date from generate_series(date_trunc('month',p.starts_on)::date::timestamp,date_trunc('month',p.ends_on)::date::timestamp,interval '1 month') month_start
+  where exists(select 1 from public.task_coverage_plan_assignment_rules r where r.plan_id=p.id)
  ) z;
- perform public._coordination_acquire(array[actor],people,months,array[]::text[]);
+ select coalesce(array_agg(distinct 'template:'||ta.template_id::text),'{}') into catalog_keys
+   from public.task_coverage_plan_assignment_rules r join public.task_assignments ta on ta.id=r.assignment_id where r.plan_id=p.id;
+ perform public._coordination_acquire(array[actor],people,months,catalog_keys);
+ -- Lock catalog rows before the plan/task rows, following the shared SQL row order.
+ perform 1 from public.task_templates tt join public.task_assignments ta on ta.template_id=tt.id
+   join public.task_coverage_plan_assignment_rules r on r.assignment_id=ta.id
+   where r.plan_id=p.id order by tt.id for update of tt;
+ perform 1 from public.task_assignments ta join public.task_coverage_plan_assignment_rules r on r.assignment_id=ta.id
+   where r.plan_id=p.id order by ta.id for update of ta;
  select * into p from public.task_coverage_plans where id=p_plan for update;
- if not found or (p.responsible_id,p.replacement_id,p.starts_on,p.ends_on,p.sealed,p.organization_id,p.created_by)
-   is distinct from (planned.responsible_id,planned.replacement_id,planned.starts_on,planned.ends_on,planned.sealed,planned.organization_id,planned.created_by)
+ if not found or to_jsonb(p) is distinct from to_jsonb(planned)
    then raise exception using errcode='40001',message='El plan cambió; reintente'; end if;
- if not exists(select 1 from public.profiles a join public.profiles o on o.id=p.responsible_id and o.organization_id=p.organization_id
-    where a.id=p.replacement_id and a.organization_id=p.organization_id and a.active and a.role in ('empleado','encargado') and o.active)
+ if not exists(select 1 from public.profiles replacement_profile join public.profiles owner_profile on owner_profile.id=p.responsible_id and owner_profile.organization_id=p.organization_id
+    where replacement_profile.id=p.replacement_id and replacement_profile.organization_id=p.organization_id and replacement_profile.active and replacement_profile.role in ('empleado','encargado') and owner_profile.active)
     then raise exception 'Titular o reemplazo inactivo'; end if;
- for x in select i.instance_id,i.company_id_snapshot,i.period_snapshot from public.task_coverage_plan_instances i where i.plan_id=p.id order by i.instance_id loop
+ for x in select i.instance_id,i.company_id_snapshot,i.period_snapshot,i.responsibility_set_id from public.task_coverage_plan_instances i where i.plan_id=p.id order by i.instance_id loop
   select * into t from public.task_instances where id=x.instance_id for update;
   if not found or t.owner_id<>p.responsible_id or t.organization_id<>p.organization_id
     or t.company_id<>x.company_id_snapshot or t.period<>x.period_snapshot then raise exception 'Selección de ocurrencia cambió'; end if;
+  if (x.responsibility_set_id is not null and not exists(select 1 from public.task_responsibility_heads h where h.instance_id=t.id and h.set_id=x.responsibility_set_id))
+    or (x.responsibility_set_id is null and exists(select 1 from public.task_responsibility_heads h join public.task_responsibility_sets rs on rs.id=h.set_id
+      where h.instance_id=t.id and (rs.mode<>'individual' or not exists(select 1 from public.task_responsibility_members rm where rm.set_id=rs.id and rm.profile_id=t.owner_id)))) then
+    raise exception 'La responsabilidad de la selección cambió';
+  end if;
   if not exists(select 1 from public.company_memberships m where m.profile_id=p.replacement_id and m.company_id=t.company_id and m.organization_id=t.organization_id)
     then raise exception 'El reemplazo no pertenece a la empresa de la tarea'; end if;
   if not public.can_access_owner(t.owner_id) and public.actor_role()<>'jefe' then raise exception 'Fuera del equipo asignado'; end if;
@@ -958,6 +975,41 @@ begin
     company_id_snapshot,period_snapshot,scheduled_on_snapshot,approved_by)
   values(p.organization_id,p.id,t.id,p.responsible_id,p.replacement_id,p.starts_on,p.ends_on,t.company_id,t.period,t.scheduled_on,actor);
   n:=n+1;
+ end loop;
+ -- Freeze each approved recurring assignment as an explicit rule binding.
+ -- Existing occurrences are bound only when canonical scheduled_on is inside
+ -- the replacement interval; later occurrences are bound by materialize_month.
+ for x in select r.assignment_id,r.company_id_snapshot,r.assignment_snapshot
+   from public.task_coverage_plan_assignment_rules r where r.plan_id=p.id order by r.assignment_id loop
+  select * into a from public.task_assignments where id=x.assignment_id for update;
+  if not found or a.organization_id<>p.organization_id or a.owner_id<>p.responsible_id
+    or a.company_id<>x.company_id_snapshot or to_jsonb(a) is distinct from x.assignment_snapshot then
+    raise exception 'La regla o su snapshot cambió';
+  end if;
+  if not exists(select 1 from public.company_memberships m where m.profile_id=p.replacement_id and m.company_id=a.company_id and m.organization_id=a.organization_id)
+    then raise exception 'El reemplazo no pertenece a la empresa de la regla'; end if;
+  if not public.can_access_owner(a.owner_id) and public.actor_role()<>'jefe' then raise exception 'Fuera del equipo asignado'; end if;
+  if exists(select 1 from public.task_coverage_bindings b where b.assignment_id=a.id and b.replacement_id=p.replacement_id
+    and b.status='active' and b.starts_on<=p.ends_on and b.ends_on>=p.starts_on) then
+    raise exception 'Ya existe cobertura activa solapada para esta regla';
+  end if;
+  perform public._coordination_assert_month(a.owner_id,date_trunc('month',p.starts_on)::date);
+  insert into public.task_coverage_bindings(organization_id,plan_id,assignment_id,responsible_id,replacement_id,starts_on,ends_on,
+    company_id_snapshot,assignment_snapshot,approved_by)
+  values(p.organization_id,p.id,a.id,p.responsible_id,p.replacement_id,p.starts_on,p.ends_on,a.company_id,to_jsonb(a),actor);
+  n:=n+1;
+  for t in select * from public.task_instances ti where ti.assignment_id=a.id and ti.organization_id=a.organization_id
+      and ti.scheduled_on between p.starts_on and p.ends_on order by ti.id for update loop
+    if not exists(select 1 from public.company_memberships m where m.profile_id=p.replacement_id and m.company_id=t.company_id and m.organization_id=t.organization_id)
+      then raise exception 'El reemplazo no pertenece a la empresa de una ocurrencia'; end if;
+    if exists(select 1 from public.task_responsibility_heads h join public.task_responsibility_members m on m.set_id=h.set_id
+      where h.instance_id=t.id and m.profile_id=p.replacement_id) then raise exception 'Un miembro responsable no se duplica como cobertura'; end if;
+    perform public._coordination_assert_month(t.owner_id,t.period);
+    insert into public.task_coverage_bindings(organization_id,plan_id,instance_id,responsible_id,replacement_id,starts_on,ends_on,
+      company_id_snapshot,period_snapshot,scheduled_on_snapshot,approved_by)
+    values(p.organization_id,p.id,t.id,p.responsible_id,p.replacement_id,p.starts_on,p.ends_on,t.company_id,t.period,t.scheduled_on,actor);
+    n:=n+1;
+  end loop;
  end loop;
  if n=0 then raise exception 'El plan no contiene ocurrencias seleccionadas'; end if;
  insert into public.audit_events(organization_id,actor_id,action,entity_id,at,details)
@@ -1061,6 +1113,96 @@ begin
    (public.actor_role()<>'jefe' and not exists(select 1 from public.company_memberships m
      where m.profile_id=auth.uid() and m.company_id=t.company_id and m.organization_id=t.organization_id)) then raise exception 'Fuera del ámbito'; end if;
  return public._coordinated_task_payload(p_instance);
+end $$;
+
+-- Coordinated month materialization. Assignment and approved-rule snapshots
+-- are the optimistic footprint; rows are locked and fingerprints revalidated
+-- before writing occurrences or explicit occurrence bindings.
+create or replace function public.materialize_month(p_owner uuid,p_period date) returns integer
+language plpgsql security definer set search_path='' as $$
+declare actor uuid:=auth.uid(); op uuid:=gen_random_uuid(); org uuid:=public.actor_org();
+ people uuid[]; months jsonb; catalog_keys text[]; planned_assignments jsonb; current_assignments jsonb;
+ planned_bindings jsonb; current_bindings jsonb; inserted integer:=0; inserted_now integer:=0; bound integer:=0; bound_now integer:=0;
+ assignment_row public.task_assignments%rowtype; task_row public.task_instances%rowtype; day_row date;
+begin
+ if actor is null or org is null or not public.can_access_owner(p_owner) or public.actor_role()='auditor' then raise exception 'Sin permiso'; end if;
+ if p_period is null or extract(day from p_period)<>1 then raise exception 'Período inválido'; end if;
+ perform public._coordination_receipt_lock(actor,op);
+ select coalesce(array_agg(distinct b.replacement_id order by b.replacement_id),array[]::uuid[]) into people
+  from public.task_coverage_bindings b where b.responsible_id=p_owner and b.organization_id=org and b.assignment_id is not null
+    and b.status='active' and b.starts_on<=(p_period+interval '1 month - 1 day')::date and b.ends_on>=p_period;
+ people:=array(select distinct x from unnest(people||array[p_owner]) x order by x);
+ select coalesce(jsonb_agg(jsonb_build_object('ownerId',x,'period',p_period) order by x),'[]'::jsonb) into months from unnest(people) x;
+ select coalesce(array_agg(distinct 'template:'||a.template_id::text order by 'template:'||a.template_id::text),'{}') into catalog_keys
+  from public.task_assignments a where a.owner_id=p_owner and a.organization_id=org and a.start_date<=(p_period+interval '1 month - 1 day')::date
+    and (a.end_date is null or a.end_date>=p_period);
+ select coalesce(jsonb_agg(to_jsonb(a) order by a.id),'[]'::jsonb) into planned_assignments
+  from public.task_assignments a where a.owner_id=p_owner and a.organization_id=org and a.start_date<=(p_period+interval '1 month - 1 day')::date
+    and (a.end_date is null or a.end_date>=p_period);
+ select coalesce(jsonb_agg(jsonb_build_object('id',b.id,'responsible',b.responsible_id,'replacement',b.replacement_id,
+   'starts',b.starts_on,'ends',b.ends_on,'assignment',b.assignment_snapshot) order by b.id),'[]'::jsonb) into planned_bindings
+  from public.task_coverage_bindings b where b.responsible_id=p_owner and b.organization_id=org and b.assignment_id is not null
+    and b.status='active' and b.starts_on<=(p_period+interval '1 month - 1 day')::date and b.ends_on>=p_period;
+ perform public._coordination_acquire(array[actor],people,months,catalog_keys);
+ perform 1 from public.task_templates tt join public.task_assignments ta on ta.template_id=tt.id
+   where ta.owner_id=p_owner and ta.organization_id=org and ta.start_date<=(p_period+interval '1 month - 1 day')::date
+     and (ta.end_date is null or ta.end_date>=p_period) order by tt.id for update of tt;
+ perform 1 from public.task_assignments a where a.owner_id=p_owner and a.organization_id=org
+   and a.start_date<=(p_period+interval '1 month - 1 day')::date and (a.end_date is null or a.end_date>=p_period)
+   order by a.id for update of a;
+ select coalesce(jsonb_agg(to_jsonb(a) order by a.id),'[]'::jsonb) into current_assignments
+  from public.task_assignments a where a.owner_id=p_owner and a.organization_id=org and a.start_date<=(p_period+interval '1 month - 1 day')::date
+    and (a.end_date is null or a.end_date>=p_period);
+ select coalesce(jsonb_agg(jsonb_build_object('id',b.id,'responsible',b.responsible_id,'replacement',b.replacement_id,
+   'starts',b.starts_on,'ends',b.ends_on,'assignment',b.assignment_snapshot) order by b.id),'[]'::jsonb) into current_bindings
+  from public.task_coverage_bindings b where b.responsible_id=p_owner and b.organization_id=org and b.assignment_id is not null
+    and b.status='active' and b.starts_on<=(p_period+interval '1 month - 1 day')::date and b.ends_on>=p_period;
+ if planned_assignments is distinct from current_assignments or planned_bindings is distinct from current_bindings then
+   raise exception using errcode='40001',message='Cambió el catálogo o la cobertura; reintente'; end if;
+ if public.actor_org() is distinct from org or not public.can_access_owner(p_owner) then raise exception 'Permiso modificado durante la materialización'; end if;
+ perform public._coordination_assert_month(p_owner,p_period);
+ for day_row in select g::date from generate_series(p_period::timestamp,(p_period+interval '1 month - 1 day')::timestamp,interval '1 day') g loop
+  for assignment_row in select * from public.task_assignments a where a.owner_id=p_owner and a.organization_id=org
+    and a.start_date<=day_row and (a.end_date is null or a.end_date>=day_row)
+    and (a.frequency<>'unica' or day_row=a.start_date)
+    and (a.frequency<>'mensual' or ((((extract(year from day_row)::integer*12+extract(month from day_row)::integer)-(extract(year from a.start_date)::integer*12+extract(month from a.start_date)::integer)) % a.interval_count=0) and extract(day from day_row)::integer=least(a.month_day,extract(day from (date_trunc('month',day_row)+interval '1 month - 1 day'))::integer)))
+    and (a.frequency<>'diaria' or mod(day_row-a.start_date,a.interval_count)=0)
+    and (a.frequency<>'semanal' or ((extract(dow from day_row)::integer=any(a.weekdays)) and (((day_row-(a.start_date-((extract(isodow from a.start_date)::integer-1))::integer))/7) % a.interval_count=0)))
+    and (public.actor_role()='jefe' or exists(select 1 from public.company_memberships cm where cm.profile_id=actor and cm.company_id=a.company_id and cm.organization_id=org))
+    order by a.id loop
+    perform public._coordination_assert_month(p_owner,p_period);
+    insert into public.task_instances(organization_id,assignment_id,template_version_id,company_id,owner_id,team_id,period,scheduled_on,title,kind,weight,unit,target,due_date,checklist)
+    values(assignment_row.organization_id,assignment_row.id,assignment_row.template_version_id,assignment_row.company_id,assignment_row.owner_id,assignment_row.team_id,p_period,day_row,assignment_row.title,assignment_row.kind,assignment_row.weight,assignment_row.unit,assignment_row.target,
+      case when assignment_row.has_deadline then day_row+assignment_row.due_offset_days else null end,
+      coalesce((select jsonb_agg(jsonb_build_object('id',gen_random_uuid(),'text',case when jsonb_typeof(x)='string' then x#>>'{}' else x->>'text' end,'done',false) order by pos) from jsonb_array_elements(assignment_row.checklist) with ordinality items(x,pos)),'[]'::jsonb))
+    on conflict(assignment_id,scheduled_on) do nothing;
+    get diagnostics inserted_now=row_count; inserted:=inserted+inserted_now;
+  end loop;
+ end loop;
+ for task_row in select ti.* from public.task_instances ti join public.task_coverage_bindings b
+   on b.assignment_id=ti.assignment_id and b.organization_id=ti.organization_id and b.responsible_id=ti.owner_id
+   and b.status='active' and ti.scheduled_on between b.starts_on and b.ends_on
+   join public.task_assignments ta on ta.id=ti.assignment_id and ta.organization_id=ti.organization_id
+   where ti.owner_id=p_owner and ti.period=p_period and ti.organization_id=org and b.assignment_snapshot=to_jsonb(ta)
+   order by ti.id loop
+  perform public._coordination_assert_month(task_row.owner_id,task_row.period);
+  if exists(select 1 from public.task_responsibility_heads h join public.task_responsibility_members m on m.set_id=h.set_id
+    where h.instance_id=task_row.id and m.profile_id in (select cb.replacement_id from public.task_coverage_bindings cb where cb.instance_id is null and cb.assignment_id=task_row.assignment_id and cb.status='active' and task_row.scheduled_on between cb.starts_on and cb.ends_on)) then
+    raise exception 'Un miembro responsable no se duplica como cobertura';
+  end if;
+  insert into public.task_coverage_bindings(organization_id,plan_id,instance_id,responsible_id,replacement_id,starts_on,ends_on,
+    company_id_snapshot,period_snapshot,scheduled_on_snapshot,approved_by)
+  select cb.organization_id,cb.plan_id,task_row.id,cb.responsible_id,cb.replacement_id,cb.starts_on,cb.ends_on,task_row.company_id,task_row.period,task_row.scheduled_on,cb.approved_by
+   from public.task_coverage_bindings cb where cb.assignment_id=task_row.assignment_id and cb.responsible_id=task_row.owner_id
+    and cb.status='active' and task_row.scheduled_on between cb.starts_on and cb.ends_on
+    and not exists(select 1 from public.task_coverage_bindings oldb where oldb.instance_id=task_row.id and oldb.replacement_id=cb.replacement_id and oldb.status='active')
+  on conflict(instance_id,replacement_id) where status='active' and instance_id is not null do nothing;
+  get diagnostics bound_now=row_count; bound:=bound+bound_now;
+ end loop;
+ if inserted>0 or bound>0 then
+  insert into public.audit_events(organization_id,actor_id,action,entity_id,details) values(org,actor,'month.materialized',p_owner,jsonb_build_object('period',p_period,'count',inserted,'coverageBindings',bound));
+ end if;
+ return inserted;
 end $$;
 
 -- RPCs are the sole write path. The read policy exposes only the shared task

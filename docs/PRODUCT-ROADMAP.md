@@ -7,13 +7,23 @@ pendiente. Diseño B en COORDINATION-B-DESIGN-20261002.md de docs/architecture.
 B1/009 revisado y reparado localmente (REVIEW-PRIVATE-NOTES-009-20261004.md).
 B2a/010 staged ejecutado localmente por contrato; evidencia en
 COORDINATION-010-IMPLEMENTATION-20261004.md. Revisión independiente010 sin
-hallazgos: COORDINATION-010-REVIEW-20261004.md. Protocolo de concurrencia011 cerrado el06/10 para implementación Luna medio:
+hallazgos: COORDINATION-010-REVIEW-20261004.md. Protocolo de concurrencia011
+cerrado el06/10 para implementación; Sol revisa el corte y Luna lo ejecuta:
 COORDINATION-011-CONCURRENCY-20261006.md, obligatorio junto al contrato
 COORDINATION-011-EXECUTION-20261004.md. SQL011 tiene una implementación local
 parcial (detalle en COORDINATION-011-IMPLEMENTATION-20261006.md), marcada como
-no apta para producción: faltan reporte4/cierre, materialización recurrente y
-conversión de todas las rutas escritoras. Pruebas abstractas no sustituyen
+no apta para producción: faltan reporte4/cierre y conversión de todas las rutas
+escritoras. Pruebas abstractas no sustituyen
 PostgreSQL real ni producción.
+
+Revisión/ejecución de continuación 06/10: auditadas las funciones efectivas y
+extendida 011 para reglas recurrentes de cobertura y materialización idempotente
+de bindings por `scheduled_on`, con snapshot/footprint revalidado. El cierre
+sigue v3 y quedan writers heredados con locks bigint. Suite focal 11/11, suite
+completa 286/286, build y diff-check pasaron. No hay motor PostgreSQL ni
+contenedor instalado para barreras MVCC. Detalle:
+COORDINATION-011-IMPLEMENTATION-20261006.md. El proyecto continúa en 42% hasta
+integrar y aceptar estos contratos.
 
 Avance estimado actual **42% (36–46%)**, cálculo vigente en PROJECT-STATUS.md.
 Lector/gateway/SQL locales no equivalen a Auth/RLS/datos compartidos ni correo

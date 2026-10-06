@@ -36,9 +36,14 @@ La suite `database.test.ts` sí recorre todas las migraciones; los tests focales
 1. `close_employee_month` no crea snapshot v4. No hay cuotas individuales de
    resultado, contribución operativa por cobertura ni invariantes de conciliación
    entre el peso global único y los puntos por participante.
-2. `materialize_month` no fue reemplazado. La aprobación de un plan con reglas
-   recurrentes hoy se rechaza deliberadamente; no hay binding que se materialice
-   junto a la ocurrencia por fecha canónica `scheduled_on`.
+2. `materialize_month` y la aprobación de reglas recurrentes ahora tienen una
+   implementación local en 011: congela regla, liga ocurrencias existentes por
+   `scheduled_on` dentro del rango, y crea cada nueva ocurrencia junto con su
+   binding. Revalida snapshots de assignment/binding antes de escribir y conserva
+   idempotencia de materialización. Prueba focal actualizada incluye regla futura,
+   binding por fecha y segunda ejecución idempotente. Sigue pendiente PostgreSQL
+   concurrente; además todos los escritores del catálogo deben compartir C antes
+   de considerar seguro el envelope en producción.
 3. `approve_employee_absence` y `cancel_employee_absence` permanecen heredadas;
    falta integrar footprints, locks e intersección restrictiva con bindings.
 4. `create_catalog_assignment`, cambios de plantilla/peso y aprobación de
@@ -73,6 +78,48 @@ Trabajo local y commit local únicamente. No se hizo push, Sites save/deploy ni
 Avance global del producto: **42% estimado (36–46%)**; esta base parcial aún no
 permite migrar empleados.
 
-**Siguiente modelo: GPT-6.1 Sol, esfuerzo alto, Standard**, revisar el diseño
-incompleto de cierre/reporte4, materialización recurrente y writers. Luego GPT-6
-Luna medio ejecuta ese contrato cerrado. Véase también `docs/EXECUTION-NEXT.md`.
+**Siguiente modelo tras esta revisión: GPT-6.1 Sol, esfuerzo alto, Standard**,
+revisar el corte de reglas recurrentes/materializador y definir las rutas aún
+ausentes; Luna ejecuta ese contrato cerrado. Véase `docs/EXECUTION-NEXT.md`.
+
+## Revisión de continuación — 06/10/2026
+
+Se volvió a contrastar 011 con su contrato de ejecución y el orden de
+concurrencia. El corte recurrente se implementó en 011 tras identificar el
+footprint antes de adquirir locks, comparar snapshots después, congelar reglas
+y crear bindings por fecha canónica. La materialización conserva el calendario
+001 y añade binding en la misma transacción. La prueba cubre regla futura,
+exclusión de ocurrencia anterior al rango e idempotencia.
+
+La lista de rutas aún ausentes también se confirmó: `close_employee_month`
+sigue generando `version: 3` y agrupa por `task_instances.owner_id`; 011 no la
+reemplaza. Tampoco hay reemplazos 011 de las dos RPC de ausencia, catálogo,
+peso/plantilla ni `approve_onboarding`. Los writers heredados en 004–007 y 009
+todavía contienen `hashtextextended` para `work-owner`, `timer-actor` y receipts;
+por lo tanto el nuevo orden todavía no cubre el inventario completo.
+
+Por el contrato, las ausencias restantes no son cortes independientes que puedan
+activarse uno por uno: 011 exige reemplazar el conjunto de writers, descubrir
+el footprint completo antes de adquirir locks, revalidar después de esperar y
+conservar grants/replay. Añadir ahora sólo reporte v4 o bindings de materialización
+dejaría más escritores concurrentes usando órdenes diferentes, sin protección
+real ante carreras, y no se acepta como avance seguro. En consecuencia, este
+bloque implementó la porción de cobertura recurrente/materialización en 011;
+no se editó 001–010. No se integró reporte v4 de forma aislada.
+
+Las rutas con contrato aún pendiente en el código incluyen cierre/report v4,
+ambas RPC de ausencia, catálogo/peso/plantilla, aprobación de inducción, y la
+conversión final de transiciones, notas y activity wrappers al helper completo
+`_coordination_prepare`/revalidación del protocolo. Las definiciones 011 actuales
+no convierten todavía el inventario completo a un único envelope.
+
+Puerta local comprobada: no hay `psql`, `postgres`, `initdb`, `pg_ctl`, `docker`
+ni `podman` en PATH. PGlite puede validar la secuencia y el comportamiento
+transaccional secuencial, pero no reemplaza PostgreSQL para ejecutar las
+barreras concurrentes prescritas. Esto deja una comprobación externa pendiente,
+no autoriza a declarar que la migración está lista ni obliga a tocar una base
+remota.
+
+Verificación posterior a esta implementación recurrente: suite focal 011 **11/11**;
+suite completa **286/286 en 27 archivos**; `npm run build` y `git diff --check`
+verdes. PGlite sigue sin demostrar concurrencia PostgreSQL real.

@@ -40,12 +40,22 @@ operativa completa. No hay una base de producción conectada ni usuarios reales.
 
 ## Avance concreto del último bloque
 
-- B2b/011 inició activación local: bindings para ocurrencias seleccionadas,
-  responsabilidad conjunta inicial puntual, relojes por actor, revocación de
-  cobertura, controles compartidos y lectura segura. Suite focal 011: 10 pruebas.
-  No termina el contrato: faltan materialización recurrente de bindings, cierre
-  mensual y reporte4 con atribución, junto con reemplazar el orden de locks en
-  todas las rutas escritoras. No aplicar la migración en remoto. Evidencia:
+- Continuación B2b/011: SQL local ahora aprueba reglas de cobertura recurrentes,
+  crea bindings para ocurrencias existentes por `scheduled_on`, y materializa
+  ocurrencias futuras con sus bindings. Snapshot/footprint se revalida antes de
+  escritura y la repetición no duplica filas. Prueba focal 011 ampliada. Siguen
+  ausentes cierre/reporte v4 y rutas de ausencia/catálogo/inducción; varios
+  escritores 004–007/009 mantienen locks bigint heredados, así que 011 aún no
+  cumple el corte atómico. No hay PostgreSQL/binarios de contenedor disponibles
+  para concurrencia real. Evidencia detallada en
+  `architecture/COORDINATION-011-IMPLEMENTATION-20261006.md`.
+
+- B2b/011 activación local: bindings para ocurrencias seleccionadas y reglas
+  recurrentes por asignación, responsabilidad conjunta inicial puntual, relojes
+  por actor, revocación de cobertura, controles compartidos y lectura segura.
+  Suite focal 011: 11 pruebas. No termina el contrato: faltan cierre mensual y
+  reporte4 con atribución, junto con reemplazar locks en todas las rutas
+  escritoras. No aplicar la migración en remoto. Evidencia:
   `architecture/COORDINATION-011-IMPLEMENTATION-20261006.md`.
 - Las pruebas históricas de contratos 006/007 quedaron fijadas a migraciones
   hasta 008. `database.test` y la suite focal ejercitan la cadena vigente con 011.
@@ -112,8 +122,8 @@ Revisiones de lector/adaptador, upgrades y reportes se conservan en docs/archite
 UI A: REVIEW-V40-INDEPENDENT-20261002.md. Anticipación: REVIEW-V43-INDEPENDENT-20261002.md.
 El registro v42 y sus probes fallidos permanecen como evidencia histórica.
 Suite completa anterior a 011: **275 pruebas en 26 archivos, todas pasan**
-(86,54s). La corrida actual terminó con **285 pruebas en 27 archivos, todas
-pasan** (77,77s); `npm run build` y `git diff --check` también pasan. La primera
+(86,54s). La corrida actual terminó con **286 pruebas en 27 archivos, todas
+pasan**; `npm run build` y `git diff --check` también pasan. La primera
 corrida parcial de 011 halló regresiones que se documentan/corrigen en
 `architecture/COORDINATION-011-IMPLEMENTATION-20261006.md`. No se ejecutó
 PostgreSQL real.
@@ -126,10 +136,12 @@ En la revisión009 anterior se quitó un argumento de timeout accidental dentro 
 una aserción; sus aserciones y resultados funcionales no cambiaron.
 
 **Próximo paso: GPT-6.1 Sol, esfuerzo alto, Standard**, revisar la implementación
-parcial y decidir el contrato restante de writers, cobertura recurrente y reporte4;
-después GPT-6 Luna implementa ese corte cerrado. Las pruebas abstractas no ejecutan
-carreras PostgreSQL ni SQL remoto. No cambia la estimación42% hasta progreso
-funcional.
+recurrente y cerrar las rutas aún ausentes; después GPT-6 Luna, esfuerzo medio,
+ejecuta el corte completo 011 sin editar SQL001–010. Tras pruebas locales quedan
+como gates separados PostgreSQL real con barreras de concurrencia, Supabase
+Auth/RLS/MFA real, integración de frontend y configuración de infraestructura.
+La revisión no cambia la estimación 42% hasta que haya progreso funcional
+integrado y verificado.
 
 Puertas hacia Supabase/hosting y evaluación gratuita verificadas en
 `ops/FREE-HOSTING-PATH-20261002.md`. Preferencia Cloudflare Pages+Supabase dev/prod,
