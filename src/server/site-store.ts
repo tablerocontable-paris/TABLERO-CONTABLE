@@ -31,7 +31,7 @@ const arrays = [
   "annotations",
   "absences",
 ] as const;
-const maps = ["onboarding", "tour", "tourVersion"] as const;
+const maps = ["onboarding", "tour", "tourVersion", "parameterReviews"] as const;
 interface RecordRow {
   collection: string;
   id: string;

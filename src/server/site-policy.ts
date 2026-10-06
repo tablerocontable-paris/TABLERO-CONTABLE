@@ -173,6 +173,11 @@ export function projectState(s: State, p: Profile): State {
         ([k]) => k === p.id || canSee(p, k, s.profiles),
       ),
     ),
+    parameterReviews: Object.fromEntries(
+      Object.entries(s.parameterReviews || {}).filter(
+        ([pid]) => pid === p.id || canSee(p, pid, s.profiles),
+      ),
+    ),
     tour: { [p.id]: s.tour[p.id] || 0 },
     tourVersion: { [p.id]: s.tourVersion?.[p.id] || 0 },
   });
@@ -353,6 +358,13 @@ export function applyProposal(
       );
       return t;
     }
+    const untouched =
+      boss &&
+      old.status === "Pendiente" &&
+      !old.startedAt &&
+      !old.sessions?.length &&
+      old.checklist.every((c) => !c.done) &&
+      !current.activity.some((a) => a.taskId === old.id);
     const mutable = [
       "status",
       "checklist",
@@ -363,6 +375,7 @@ export function applyProposal(
       "sessions",
       "reopenCount",
       ...(boss ? ["weight"] : []),
+      ...(untouched ? ["target"] : []),
     ];
     const immutable = (x: Task) =>
       Object.fromEntries(
@@ -382,6 +395,7 @@ export function applyProposal(
     let result: Task = {
       ...old,
       weight: boss ? t.weight : old.weight,
+      target: untouched ? t.target : old.target,
       blockedBy: t.blockedBy,
       blockedSince: t.blockedBy ? old.blockedSince || dateART(now) : null,
     };
@@ -568,6 +582,48 @@ export function applyProposal(
         : null,
     };
   }
+  next.parameterReviews = { ...current.parameterReviews };
+  for (const [pid, review] of Object.entries(proposed.parameterReviews || {})) {
+    if (equal(current.parameterReviews?.[pid], review)) continue;
+    const completedAt = next.onboarding[pid]?.completedAt;
+    requireRule(
+      boss &&
+        !!completedAt &&
+        review.onboardingCompletedAt === completedAt &&
+        next.profiles.some(
+          (p) => p.id === pid && p.active && p.role !== "jefe",
+        ),
+      "Sólo jefatura confirma los parámetros de un perfil completado.",
+    );
+    requireRule(
+      !current.parameterReviews?.[pid] ||
+        current.parameterReviews[pid].onboardingCompletedAt !== completedAt,
+      "La revisión confirmada es inmutable.",
+    );
+    const assigned = next.assignments.filter(
+      (a) => a.ownerId === pid && !a.retired,
+    );
+    requireRule(
+      assigned.length > 0 &&
+        assigned.every(
+          (a) =>
+            actor.companyIds.includes(a.companyId) &&
+            (a.kind !== "operativa" || a.target > 0),
+        ),
+      "Revisá las empresas autorizadas, tareas y objetivos antes de confirmar.",
+    );
+    next.parameterReviews[pid] = {
+      onboardingCompletedAt: completedAt!,
+      reviewedBy: actor.id,
+      reviewedAt: now,
+    };
+  }
+  if (proposed.parameterReviews)
+    for (const pid of Object.keys(visible.parameterReviews || {}))
+      requireRule(
+        pid in proposed.parameterReviews,
+        "No se elimina una revisión histórica.",
+      );
   next.tour = { ...current.tour, [actor.id]: proposed.tour[actor.id] || 0 };
   next.tourVersion = {
     ...current.tourVersion,

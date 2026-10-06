@@ -1,3 +1,5 @@
+import ParameterizationInbox from "./components/ParameterizationInbox";
+import LaboratoryInvitations from "./components/LaboratoryInvitations";
 import Planning from "./components/Planning";
 import WorkspaceSetup from "./components/WorkspaceSetup";
 import DeadlineAgenda from "./components/DeadlineAgenda";
@@ -143,8 +145,8 @@ const ini = (s: string) =>
     .join("");
 const pct = (n: number | null) => (n === null ? "—" : n + "%");
 const TOUR_VERSION = 4;
-export default function App({initialState, remoteSave, remoteOwner=false, presence={}, onView}: {initialState?:State;remoteSave?:(state:State,action?:string,entityId?:string)=>Promise<State>;remoteOwner?:boolean;presence?:Record<string,string>;onView?:(view:string)=>void} = {}) {
-  const [laboratory] = useState(() => remoteSave ? false : isLab());
+export default function App({initialState, remoteSave, remoteOwner=false, presence={}, onView, laboratoryMode=false}: {laboratoryMode?:boolean;initialState?:State;remoteSave?:(state:State,action?:string,entityId?:string)=>Promise<State>;remoteOwner?:boolean;presence?:Record<string,string>;onView?:(view:string)=>void} = {}) {
+  const [laboratory] = useState(() => laboratoryMode || (remoteSave ? false : isLab()));
   const [state, setState] = useState<State>(() => initialState || load(laboratory));
   useEffect(()=>{if(initialState)setState(initialState)},[initialState]);
   const [tick, setTick] = useState(Date.now());
@@ -811,10 +813,12 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           </span>
           <b>{t.weight} pts</b>
         </div>
+        <div className="card-heading">
         <button className="card-title" onClick={() => setDetail(t.id)}>
           {t.title}
         </button>
-        <button className="card-collapse" aria-label={`${collapsedCards[t.id]?'Desplegar':'Plegar'} tarjeta ${t.title}`} aria-expanded={!collapsedCards[t.id]} onClick={()=>setCollapsedCards({...collapsedCards,[t.id]:!collapsedCards[t.id]})}>{collapsedCards[t.id]?'Ver detalles':'Plegar detalles'}</button>
+        <button className="card-collapse" aria-label={`${collapsedCards[t.id]?'Desplegar':'Plegar'} tarjeta ${t.title}`} aria-expanded={!collapsedCards[t.id]} onClick={()=>setCollapsedCards({...collapsedCards,[t.id]:!collapsedCards[t.id]})}><ChevronDown size={18} aria-hidden="true" /></button>
+        </div>
         <div hidden={!!collapsedCards[t.id]}>
         <p>
           {nameOf(t.ownerId)}
@@ -1067,7 +1071,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             ))}
         </nav>
         <div className="sidebar-bottom">
-          {!remoteSave && <button onClick={() => (laboratory ? exitLab() : enterLab(state))}>
+          {!remoteSave && !laboratoryMode && <button onClick={() => (laboratory ? exitLab() : enterLab(state))}>
             {laboratory ? "Salir del laboratorio" : "Laboratorio de pruebas"}
           </button>}
           <button
@@ -1142,9 +1146,10 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                 Podés probar todos los perfiles. Los cambios y KPI de este
                 entorno no afectan el tablero principal.
               </span>
-              <button onClick={exitLab}>Volver al tablero</button>
+              {!laboratoryMode && <button onClick={exitLab}>Volver al tablero</button>}
             </div>
           )}
+          <ParameterizationInbox state={state} commit={commit} notify={notify} />
           {remoteSave&&active.id==='admin'&&state.tasks.length===0&&<div className="notice-banner"><span>Empezá por configurar las empresas y los responsables en Equipo. Después abrí Mi tablero para completar tu inducción y cargar el primer trabajo.</span><button onClick={()=>setPage('team')}>Configurar equipo</button><button onClick={()=>onView?.('e0')}>Abrir mi tablero</button></div>}
           {state.tasks
             .filter((t) =>
@@ -2002,6 +2007,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
               <Absences state={state} commit={commit} notify={notify} />
             )}
             {page === "team" && active.role === "jefe" && (<>
+              {laboratory && <LaboratoryInvitations state={state} />}
               {remoteSave&&<WorkspaceSetup state={state} commit={commit} presence={presence}/>}
               <Workforce state={state} commit={commit} notify={notify} remote={!!remoteSave}/>
             </>)}

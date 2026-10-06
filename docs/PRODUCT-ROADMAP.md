@@ -140,3 +140,16 @@ operativa. No sustituye ni aplica las migraciones Supabase. Sites get_site confi
 latest_version_number 44; la referencia v43 anterior describe el corte histórico.
 La estimación 42% del alcance completo original es histórica y requiere nueva
 evaluación frente al alcance privado D1. Este chat no publicó ni aplicó SQL remoto.
+
+
+## Decisión vigente posterior — laboratorio hasta la versión final
+
+El usuario rechazó expresamente comenzar cuentas e invitaciones antes del 100%
+y pidió recuperar simulación/datos ficticios. La entrada vuelve a ser
+LaboratoryWorkspace, aislada en paris-state-lab y sin llamadas a la API operativa.
+No activar RemoteWorkspace ni enviar invitaciones reales durante esta etapa.
+Las correcciones de la vista privada de pruebas se conservan en el mismo Sites,
+sin ampliar audiencia. Contrato: docs/product/CORRECTIONS-20261006-LABORATORY.md.
+PROJECT-STATUS y EXECUTION-NEXT son el estado vigente; anteriores afirmaciones
+de producto operativo describen el corte histórico superado por este pedido.
+Avance orientativo 45–50%; no 100%.

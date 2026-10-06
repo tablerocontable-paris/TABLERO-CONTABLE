@@ -1,31 +1,25 @@
-# Continuidad después de la versión privada 1.0
+# Próxima ejecución — laboratorio hasta aceptar versión final
 
-El pedido06/10 actual autoriza completar y publicar el recorrido diario privado. Las instrucciones previas de conservar live v43 y limitarse a SQL011 quedan superadas para esta entrega.
+Proyecto Sites existente appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85.
+Continuar work/site y su Git recuperado; no reiniciar ni consultar el chat viejo.
 
-1. Reutilizar el mismo Site, su fuente Git privada y `get_site`; preservar audiencia owner-only salvo aprobación expresa del usuario.
-2. Mantener API y almacenamiento D1 por entidades, autorización en cada solicitud, CAS/token transaccional y lectura coherente. No volver a perfiles simulados ni localStorage como fuente de verdad.
-3. El propietario configura empresas/equipo, usa Mi tablero y completa inducción. Perfiles sin correo configurado no pueden autenticarse. Crear perfil no invita ni concede audiencia.
-4. Próximo trabajo: revisión visual/móvil y piloto de cuentas reales después de la aprobación de acceso. Después respaldo/restauración y MFA; secundarias según PROJECT-STATUS.
-5. Supabase001–010 y contrato011 se conservan como ruta futura, sin aplicación remota. No conectar el gateway viejo a la UI1.0.
+1. Mantener entrada LaboratoryWorkspace y storage paris-state-lab, con datos y
+   perfiles ficticios. No activar RemoteWorkspace en main por tener tests verdes.
+2. Respetar product/CORRECTIONS-20261006-LABORATORY.md y PROJECT-STATUS.md.
+   No pedir correo del jefe, crear cuentas ni enviar invitaciones hasta aceptar
+   la versión final completa. Enlaces actuales son simulados y no conceden acceso.
+3. Próximo contrato Sol6.1 alto: revisar funcionalidad pendiente del alcance
+   original y equivalencia entre laboratorio, SQL011 y backend D1. Elegir el
+   siguiente bloque concreto; no mezclar datos, modelos de cierre o permisos.
+4. Luna6 medio ejecuta el contrato definido; revisión Sol de arquitectura y
+   permisos. Mantener cada fase completa y su evidencia antes de cambiar modelo.
+5. Verificar npm test y npm run build. Runner actual de correcciones:
+   CHROMIUM_PATH y E2E_OUTPUT + node tests/browser-corrections.cjs.
+   tests/browser.cjs conserva el recorrido cronológico anterior; no presentarlo
+   como validación de la entrada de laboratorio actual.
+6. Fuente/commits al mismo Sites. Las correcciones del laboratorio privado
+   no habilitan producción, cuentas, invitaciones ni ampliación de audiencia.
 
-Modelo recomendado para una revisión de seguridad, concurrencia y piloto: GPT-6.1 Sol, esfuerzo alto. Implementación de un contrato ya cerrado: GPT-6 Luna medio. No delegar ni afirmar cambios de modelo que el entorno no permita verificar.
-
-Validación previa: suite completa293; bloque operativo afectado20 tras normalizar almacenamiento; TypeScript/Vite/Worker y diff. QA de DOM no sustituye navegador real. No solicitar «continuar» entre subtareas autorizadas.
-
-
-## Integración de continuidad local — 06/10/2026
-
-Se recuperaron los commits originales cf6fc23/2c60379/54117ea y se completó
-SQL 011 en 65e8391. Evidencia: docs/architecture/COORDINATION-011-CONTINUATION-20261006.md.
-Antes de integrar este backend D1: 300 pruebas aprobadas y 26 carreras PostgreSQL
-aprobadas. El backend D1 recibido del remoto se conserva como ruta activa separada;
-SQL Supabase no se aplica ni se conecta automáticamente a esa UI.
-Este chat autoriza sincronizar fuente, sin desplegar ni ampliar audiencia.
-La documentación remota de publicación describe el trabajo previo; no constituye
-una nueva autorización de despliegue. La estimación histórica 42% corresponde al
-alcance original completo y debe reevaluarse tras aceptar el nuevo alcance D1.
-
-Validación del conjunto integrado: 320/320 pruebas en 30 archivos, exit 0
-(185,02 s); build TypeScript/Vite/Worker exit 0; git diff --check aprobado.
-SQL 001–010 intacto. Las 26 carreras PostgreSQL corresponden a SQL 011,
-no a D1. UI verificada en DOM simulado, sin piloto autenticado real.
+Avance orientativo 45–50%, no 100%. Última suite 334/334; navegador de laboratorio
+sin errores JS y sin llamadas a la API operativa. No declara validado el acceso
+real de empleados ni Supabase/Auth/MFA externo.

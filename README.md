@@ -52,3 +52,16 @@ Este chat autoriza sincronizar fuente, sin desplegar ni ampliar audiencia.
 La documentación remota de publicación describe el trabajo previo; no constituye
 una nueva autorización de despliegue. La estimación histórica 42% corresponde al
 alcance original completo y debe reevaluarse tras aceptar el nuevo alcance D1.
+
+
+## Decisión vigente posterior — laboratorio hasta la versión final
+
+El usuario rechazó expresamente comenzar cuentas e invitaciones antes del 100%
+y pidió recuperar simulación/datos ficticios. La entrada vuelve a ser
+LaboratoryWorkspace, aislada en paris-state-lab y sin llamadas a la API operativa.
+No activar RemoteWorkspace ni enviar invitaciones reales durante esta etapa.
+Las correcciones de la vista privada de pruebas se conservan en el mismo Sites,
+sin ampliar audiencia. Contrato: docs/product/CORRECTIONS-20261006-LABORATORY.md.
+PROJECT-STATUS y EXECUTION-NEXT son el estado vigente; anteriores afirmaciones
+de producto operativo describen el corte histórico superado por este pedido.
+Avance orientativo 45–50%; no 100%.

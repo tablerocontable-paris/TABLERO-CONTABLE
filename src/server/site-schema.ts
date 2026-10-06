@@ -222,6 +222,18 @@ export const stateSchema = z
     annotations: z.array(annotation).max(10000).optional(),
     absences: z.array(absence).max(10000).optional(),
     onboarding: z.record(key, draft),
+    parameterReviews: z
+      .record(
+        key,
+        z
+          .object({
+            onboardingCompletedAt: iso,
+            reviewedAt: iso,
+            reviewedBy: key,
+          })
+          .strict(),
+      )
+      .optional(),
     activeId: key,
     tour: z.record(key, z.number().int().nonnegative()),
     tourVersion: z.record(key, z.number().int().nonnegative()).optional(),

@@ -1,58 +1,43 @@
-# Estado vigente · 06/10/2026 · versión privada 1.0
+# Estado vigente — 06/10/2026 · laboratorio
 
-El pedido actual reemplaza la ejecución aislada de SQL011 por la entrega de un recorrido diario privado en el Site existente. Se conserva todo el SQL Supabase sin aplicarlo a servicios remotos. La versión operativa usa el almacenamiento D1 de Sites; no se conecta la UI a contratos Supabase incompatibles.
+**Avance global orientativo: 45–50%.** Referencia de planificación; no equivale
+a aceptación ni se calcula a partir de tests. No está al 100% ni lista para
+migrar empleados. El usuario exige terminar la versión final antes de crear
+cuentas o enviar invitaciones reales.
 
-## Implementado
+## Entrada de esta etapa
 
-- Identidad real de Sites, roles y alcance verificados en servidor; denegación por defecto a cuentas sin perfil. Se elimina el selector que suplantaba a cualquier empleado en la versión publicada.
-- Administración técnica del propietario separada de su perfil e0 y del KPI. Juan Pablo conserva jefatura como perfil a configurar; no se inventan correos ni se envían invitaciones.
-- Cuatro empresas renombrables; administración de perfiles y correos; tareas independientes por empresa/asignación/ocurrencia/período.
-- Persistencia D1 por entidad, lectura coherente y escritura transaccional con revisión/token. Conflictos conservan la propuesta; no hay fallback silencioso a datos locales.
-- Mi día, tablero, lista, tarjetas/columnas plegables independientes, filtros y orden A–Z.
-- Checklist lineal, finalización automática, reapertura, esperas, sesiones de timer con actor y hora del servidor, un reloj por persona.
-- Inducción de seis pasos y recorrido guiado; progreso guardado en servidor; catálogo, recurrencias y planificación.
-- Agenda con entregables, metas operativas, cumplidos opcionales y recordatorios, incluidos plazos que caen en un mes diferente a la ocurrencia.
-- Cantidades operativas con fechas/referencias, KPI ponderados, puntualidad/anticipación, métricas de persona/equipo/sector, reportes y cierre exclusivo de jefatura calculado en servidor.
-- Notas privadas de su autor y conversión a tarea; última actividad basada en consultas al servidor.
-- Tokens de contraste de jerarquía, avatares, controles, checklists y tooltips; tamaño de lectura mejorado; temas claro/oscuro/sistema.
+El mismo Site vuelve a abrir el laboratorio con usuarios y datos ficticios.
+No conecta la UI a /api/workspace ni importa datos operativos. El backend D1
+recuperado sigue en el repositorio como ruta separada futura. SQL 001–011
+permanece independiente y sin aplicación remota desde este chat.
 
-## Pruebas
+Correcciones: menú sin barras internas/cortes, logo más grande y completo,
+selector de simulación, invitaciones ficticias con perfiles preconfigurados,
+aviso de parametrización para jefatura y control de plegado por icono.
+Contrato y evidencia: product/CORRECTIONS-20261006-LABORATORY.md.
 
-Suite completa: 293 casos, 28 archivos, todos pasan (134 s). Tras normalizar el almacenamiento, reejecutados 20 casos de UI/Worker/SQLite, todos pasan. Compilación TypeScript, Vite y Worker ESM; migración Drizzle inspeccionada (tres tablas, sin semillas ni backfills); `git diff --check`.
+## Verificación
 
-Los tests verifican identidad/CSRF, alcance por empresa, impedimento de cambiar roles/pesos/cierres desde empleado, privacidad de notas frente a jefatura, integración timer/checklist/meta/cierre y rechazo de escrituras simultáneas obsoletas. El adaptador SQLite ejecuta batches transaccionales serializados.
+334 pruebas aprobadas en 32 archivos; compilación y diff-check aprobados.
+Chromium local: escritorio/móvil, alta simulada de seis pasos, logo, menús,
+tarjetas, aviso y persistencia; cero solicitudes a la API operativa y errores JS.
+SQL 011 conserva su evidencia local previa: 26 carreras PostgreSQL aprobadas.
 
-QA UI mediante DOM simulado. QA visual y navegador autenticado real no ejecutados: control-browser no disponible. No se declara piloto real de varios empleados.
+## Pendientes para la versión final
 
-## Acceso
+- Completar y aceptar funcionalidades del alcance original: conjuntas/cuotas,
+  cobertura precisa y jerarquía multiarea en el backend activo; bajas/huérfanas,
+  agenda/cumplimiento, consultas y procesos operativos pendientes.
+- Revisar equivalencia de frontend, reglas, snapshots y privacidad al elegir
+  la ruta definitiva D1 o Supabase. No mezclar sus esquemas o KPI.
+- QA visual y funcional del producto completo, volumen, recuperación/respaldo,
+  seguridad y ensayo controlado del circuito final.
+- Sólo tras aceptar versión final: configurar cuentas e invitaciones reales,
+  MFA y servicios; piloto autenticado e infraestructura dedicada/migración.
 
-Site seleccionado: `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85`.
-URL existente: https://grupo-paris-contabilidad.valentino-magni.chatgpt.site.
-Audiencia confirmada: custom, sólo propietario; cero visitantes externos o grupos. La publicación usa la operación privada. No se llama a cambios de acceso.
+## Continuidad
 
-## Pendientes
-
-1. Configurar razones sociales y correos reales en UI; el propietario puede trabajar en su tablero desde la inducción. Autorizar y pilotear acceso de empleados antes de ampliar audiencia.
-2. QA visual/móvil real, carga/volumen, MFA para cuentas privilegiadas y respaldo/restauración operativa. Exportación UI incluye sólo datos visibles y no es un backup completo de notas privadas ajenas.
-3. Funciones posteriores: ARCA cuatro CUIT, correo/notificaciones externas, conjuntas con reparto, cobertura por tareas seleccionadas, jerarquía multiarea, Kaizen/5S e infraestructura dedicada dev/prod.
-4. Si se retoma Supabase, revisar la 011 completada localmente y adaptar la UI explícitamente; nunca aplicar001–010 como si fueran el esquema D1.
-
-No se usa el antiguo 42% como medición del nuevo alcance; se comunica funcionalidad y pruebas verificadas. Los documentos cronológicos anteriores describen la demo y el camino Supabase previo.
-
-
-## Integración de continuidad local — 06/10/2026
-
-Se recuperaron los commits originales cf6fc23/2c60379/54117ea y se completó
-SQL 011 en 65e8391. Evidencia: docs/architecture/COORDINATION-011-CONTINUATION-20261006.md.
-Antes de integrar este backend D1: 300 pruebas aprobadas y 26 carreras PostgreSQL
-aprobadas. El backend D1 recibido del remoto se conserva como ruta activa separada;
-SQL Supabase no se aplica ni se conecta automáticamente a esa UI.
-Este chat autoriza sincronizar fuente, sin desplegar ni ampliar audiencia.
-La documentación remota de publicación describe el trabajo previo; no constituye
-una nueva autorización de despliegue. La estimación histórica 42% corresponde al
-alcance original completo y debe reevaluarse tras aceptar el nuevo alcance D1.
-
-Validación del conjunto integrado: 320/320 pruebas en 30 archivos, exit 0
-(185,02 s); build TypeScript/Vite/Worker exit 0; git diff --check aprobado.
-SQL 001–010 intacto. Las 26 carreras PostgreSQL corresponden a SQL 011,
-no a D1. UI verificada en DOM simulado, sin piloto autenticado real.
+Repositorio y commits originales recuperados; no leer/esperar el chat viejo.
+Sol6.1 alto para razonar/planear/revisar próximos contratos; Luna6 medio para
+implementarlos. No simular cambio de modelo ni delegación.

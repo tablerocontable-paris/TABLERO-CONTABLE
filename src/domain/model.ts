@@ -173,7 +173,13 @@ export interface Onboarding {
   customSteps: string;
   customKind: Kind;
 }
+export interface ParameterReview {
+  onboardingCompletedAt: string;
+  reviewedAt: string;
+  reviewedBy: string;
+}
 export interface State {
+  parameterReviews?: Record<string, ParameterReview>;
   version: 3;
   absences?: Absence[];
   companies: Company[];

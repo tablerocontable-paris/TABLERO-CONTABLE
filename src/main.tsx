@@ -1,6 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import RemoteWorkspace from "./components/RemoteWorkspace";
+import LaboratoryWorkspace from "./components/LaboratoryWorkspace";
 import "./styles.css";
 class Boundary extends React.Component<
   { children: React.ReactNode },
@@ -28,7 +28,7 @@ class Boundary extends React.Component<
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <Boundary>
-      <RemoteWorkspace />
+      <LaboratoryWorkspace />
     </Boundary>
   </React.StrictMode>,
 );

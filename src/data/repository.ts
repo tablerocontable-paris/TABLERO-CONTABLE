@@ -289,6 +289,7 @@ const schema = z.object({
     )
     .optional(),
   onboarding: z.record(z.string(), z.unknown()),
+  parameterReviews: z.record(z.string(), z.object({ onboardingCompletedAt: z.string(), reviewedAt: z.string(), reviewedBy: z.string() })).optional(),
   activeId: z.string(),
   tour: z.record(z.string(), z.number()),
   tourVersion: z.record(z.string(), z.number()).optional(),
@@ -312,7 +313,7 @@ export function load(laboratory = isLab()): State {
   if (!raw) {
     const s = seed();
     const legacy = localStorage.getItem("paris-tasks-v1");
-    if (legacy) {
+    if (legacy && !laboratory) {
       localStorage.setItem("paris-tasks-v1-backup", legacy);
       try {
         const rows = JSON.parse(legacy) as Record<string, unknown>[];
