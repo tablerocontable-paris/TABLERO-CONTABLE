@@ -1,5 +1,13 @@
-import { dateART, metrics, type State, type Closure, type Metrics } from "./model";
-import { elapsedSeconds } from "./workforce";
+import { dateART, metrics, metricsForProfile, isResponsible, responsibilityShare, type State, type Closure, type Metrics } from "./model";
+import { actorElapsedSeconds, elapsedSeconds } from "./workforce";
+export interface ReportContribution {
+  taskId: string;
+  title: string;
+  shareBps: number;
+  possiblePoints: number;
+  earnedPoints: number;
+  recordedSeconds: number;
+}
 export interface ReportGroup {
   key: string;
   company: string;
@@ -10,9 +18,10 @@ export interface ReportGroup {
   metrics: Metrics;
   recordedSeconds: number;
   reopenings: number;
+  contributions?: ReportContribution[];
 }
 export interface PeriodReport {
-  schemaVersion: 1;
+  schemaVersion: 1 | 2;
   generatedAt: string;
   employee: string;
   team: string;
@@ -23,6 +32,9 @@ export interface PeriodReport {
   groups: ReportGroup[];
   recordedSeconds: number;
   reopenings: number;
+  profileId?: string;
+  contributions?: ReportContribution[];
+  algorithm?: "joint-lab-v1";
 }
 export function generatePeriodReport(s: State, c: Closure): PeriodReport {
   const p = s.profiles.find((p) => p.id === c.ownerId)!;
@@ -43,8 +55,23 @@ export function generatePeriodReport(s: State, c: Closure): PeriodReport {
     ]);
     grouped.set(key, [...(grouped.get(key) || []), t]);
   }
+  const personalTasks = c.tasks.filter((task) => isResponsible(task, c.ownerId));
+  const hasJointTasks = personalTasks.some((task) => !!task.responsibility);
+  const contributions = personalTasks.map((task) => {
+    const shareBps = responsibilityShare(task, c.ownerId);
+    const globalEarned = task.weight * (task.kind === "resultado"
+      ? task.status === "Completada" ? 1 : 0
+      : task.target > 0 ? Math.min(c.activity.filter((a) => a.taskId === task.id && a.date.startsWith(task.month)).reduce((n, a) => n + a.qty, 0) / task.target, 1) : 0);
+    return {
+      taskId: task.id, title: task.title, shareBps,
+      possiblePoints: task.weight * shareBps / 10000,
+      earnedPoints: globalEarned * shareBps / 10000,
+      recordedSeconds: actorElapsedSeconds(task, c.ownerId, c.at),
+    };
+  });
   return {
-    schemaVersion: 1,
+    schemaVersion: hasJointTasks ? 2 : 1,
+    ...(hasJointTasks ? { profileId: c.ownerId, algorithm: "joint-lab-v1" as const } : {}),
     generatedAt: c.at,
     employee: p.name,
     team: s.teams.find((t) => t.id === p.teamId)?.name || p.teamId,
@@ -52,8 +79,9 @@ export function generatePeriodReport(s: State, c: Closure): PeriodReport {
     recipientIds: recipients.map((p) => p.id),
     recipientNames: recipients.map((p) => p.name),
     delivery: "disponible en demostración",
-    recordedSeconds: c.tasks.reduce((n, t) => n + elapsedSeconds(t, c.at), 0),
-    reopenings: c.tasks.reduce((n, t) => n + (t.reopenCount || 0), 0),
+    recordedSeconds: personalTasks.reduce((n, t) => n + (hasJointTasks ? actorElapsedSeconds(t, c.ownerId, c.at) : elapsedSeconds(t, c.at)), 0),
+    reopenings: personalTasks.reduce((n, t) => n + (t.reopenCount || 0), 0),
+    ...(hasJointTasks ? { contributions } : {}),
     groups: [...grouped.entries()].map(([key, tasks]) => ({
       key,
       company:
@@ -66,9 +94,10 @@ export function generatePeriodReport(s: State, c: Closure): PeriodReport {
         null,
       kind: tasks[0].kind,
       unit: tasks[0].unit,
-      metrics: metrics(tasks, c.activity, dateART(c.at), c.at),
-      recordedSeconds: tasks.reduce((n, t) => n + elapsedSeconds(t, c.at), 0),
+      metrics: hasJointTasks ? metricsForProfile(tasks, c.activity, c.ownerId, dateART(c.at), c.at) : metrics(tasks, c.activity, dateART(c.at), c.at),
+      recordedSeconds: tasks.reduce((n, t) => n + (hasJointTasks ? actorElapsedSeconds(t, c.ownerId, c.at) : elapsedSeconds(t, c.at)), 0),
       reopenings: tasks.reduce((n, t) => n + (t.reopenCount || 0), 0),
+      ...(hasJointTasks ? { contributions: contributions.filter((row) => tasks.some((task) => task.id === row.taskId)) } : {}),
     })),
   };
 }

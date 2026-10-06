@@ -1,4 +1,4 @@
-import { id, type State, type Task } from "./model";
+import { id, isClosed, type State, type Task } from "./model";
 import { canWork } from "./workforce";
 
 export interface WorkNotification {
@@ -73,6 +73,10 @@ export function collectTaskNotifications(
             "Nueva tarea asignada",
           ),
         );
+      continue;
+    }
+    if (!old.responsibility && t.responsibility) {
+      events.push(...taskNotifications(next, t, actorId, "joint", "Tarea compartida con vos"));
       continue;
     }
     if (old.status !== "Completada" && t.status === "Completada") {
@@ -182,7 +186,8 @@ export function addTaskComment(
     !actor?.active ||
     !task ||
     !actor.companyIds.includes(task.companyId) ||
-    !canWork(s, actor, task)
+    !canWork(s, actor, task) ||
+    isClosed(s, task)
   )
     throw Error("No tenés acceso a esta tarea.");
   if (!text || text.length > 2000)

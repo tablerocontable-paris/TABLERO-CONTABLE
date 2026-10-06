@@ -2361,3 +2361,7 @@ header .notification-trigger span { position: absolute; top: -6px; right: -6px; 
   .filters > select, .filters > label, .filters label select { width: 100%; min-width: 0; max-width: 100%; }
   .filters .icon-button { justify-self: end; }
 }
+.joint-setup { display: grid; gap: 12px; margin-top: 12px; }
+.joint-members { display: grid; gap: 8px; }
+.joint-members > div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
+.joint-members span, .joint-task-badge { color: var(--muted); font-size: .88em; }

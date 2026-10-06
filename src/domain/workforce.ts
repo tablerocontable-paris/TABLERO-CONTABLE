@@ -3,6 +3,7 @@ import {
   id,
   dateART,
   canSee,
+  canAccessJointTask,
   isClosed,
   type State,
   type Profile,
@@ -31,6 +32,10 @@ export const elapsedSeconds = (t: Task, at = new Date().toISOString()) =>
       n + Math.max(0, (Date.parse(s.end || at) - Date.parse(s.start)) / 1000),
     0,
   );
+export const actorElapsedSeconds = (t: Task, actorId: string, at = new Date().toISOString()) =>
+  (t.sessions || []).filter((s) => s.actorId === actorId).reduce(
+    (n, s) => n + Math.max(0, (Date.parse(s.end || at) - Date.parse(s.start)) / 1000), 0,
+  );
 export const duration = (secs: number) => {
   const s = Math.floor(secs);
   return `${String(Math.floor(s / 3600)).padStart(2, "0")}:${String(Math.floor((s % 3600) / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
@@ -41,6 +46,10 @@ export function stopClock(t: Task, at = new Date().toISOString()): Task {
     sessions: (t.sessions || []).map((s) => (s.end ? s : { ...s, end: at })),
   };
 }
+export function stopActorClock(t: Task, actorId: string, at = new Date().toISOString()): Task {
+  return { ...t, sessions: (t.sessions || []).map((s) => !s.end && s.actorId === actorId ? { ...s, end: at } : s) };
+}
+export const stopAllTaskClocks = stopClock;
 export function startClock(
   t: Task,
   actorId: string,
@@ -48,7 +57,7 @@ export function startClock(
 ): Task {
   if (t.blockedBy || t.status === "Completada")
     throw Error("Liberá la espera o reabrí la tarea antes de cronometrar.");
-  if ((t.sessions || []).some((s) => !s.end)) return t;
+  if ((t.sessions || []).some((s) => !s.end && s.actorId === actorId)) return t;
   return {
     ...t,
     status: "En curso",
@@ -73,7 +82,7 @@ export function coverageFor(s: State, t: Task, at = dateART()) {
 export function canWork(s: State, p: Profile, t: Task, at = dateART()) {
   if (!p.active || (p.role !== "jefe" && !p.companyIds.includes(t.companyId)))
     return false;
-  if (canSee(p, t.ownerId, s.profiles)) return true;
+  if (canAccessJointTask(s, p, t)) return true;
   return (
     coverageFor(s, t, at)?.replacementId === p.id &&
     p.companyIds.includes(t.companyId)
@@ -174,9 +183,9 @@ export function applyClock(
       x.id === taskId
         ? running
           ? startClock(x, actorId, at)
-          : stopClock(x, at)
+          : stopActorClock(x, actorId, at)
         : running && x.sessions?.some((e) => !e.end && e.actorId === actorId)
-          ? stopClock(x, at)
+          ? stopActorClock(x, actorId, at)
           : x,
     ),
   };

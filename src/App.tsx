@@ -1,5 +1,6 @@
 import NotificationCenter from "./components/NotificationCenter";
 import TaskComments from "./components/TaskComments";
+import JointTaskSetup from "./components/JointTaskSetup";
 import { collectTaskNotifications } from "./domain/notifications";
 import LaboratoryInvitations from "./components/LaboratoryInvitations";
 import Planning from "./components/Planning";
@@ -22,7 +23,9 @@ import {
 import {
   startClock,
   stopClock,
+  stopActorClock,
   elapsedSeconds,
+  actorElapsedSeconds,
   duration,
   applyClock,
   canWork,
@@ -79,6 +82,9 @@ import {
   type Assignment,
   type Annotation,
   type Status,
+  isResponsible,
+  responsibilityShare,
+  metricsForProfile,
   id,
   metrics,
   taskQuantity,
@@ -336,7 +342,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
     (t) =>
       (!company || t.companyId === company) &&
       (!ownerFilter ||
-        t.ownerId === ownerFilter ||
+        isResponsible(t, ownerFilter) ||
         (ownBoardPages.includes(page) && viewedOwner === active.id &&
           coverageFor(state, t)?.replacementId === active.id)) &&
       (!sector || t.sector === sector) &&
@@ -347,15 +353,17 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           .includes(query.toLowerCase())),
   );
   const metricAsOf = new Date().toISOString();
-  const m = metrics(filtered, state.activity, dateART(metricAsOf), metricAsOf);
+  const m = ["day", "tasks", "operations", "calendar"].includes(page)
+    ? metricsForProfile(filtered, state.activity, viewedOwner, dateART(metricAsOf), metricAsOf)
+    : metrics(filtered, state.activity, dateART(metricAsOf), metricAsOf);
   const resultTasks = filtered.filter((t) => t.kind === "resultado");
   const operations = filtered.filter((t) => t.kind === "operativa");
   const coverageTasks = viewedOwner === active.id
-    ? filtered.filter((t) => t.ownerId !== active.id && coverageFor(state, t)?.replacementId === active.id)
+    ? filtered.filter((t) => t.ownerId !== active.id && !isResponsible(t, active.id) && coverageFor(state, t)?.replacementId === active.id)
     : [];
-  const ownBoardResults = orderTasks(resultTasks.filter((t) => t.ownerId === viewedOwner), taskOrder);
+  const ownBoardResults = orderTasks(resultTasks.filter((t) => isResponsible(t, viewedOwner)), taskOrder);
   const coveredResults = orderTasks(coverageTasks.filter((t) => t.kind === "resultado"), taskOrder);
-  const ownBoardOperations = orderTasks(operations.filter((t) => t.ownerId === viewedOwner), taskOrder);
+  const ownBoardOperations = orderTasks(operations.filter((t) => isResponsible(t, viewedOwner)), taskOrder);
   const coveredOperations = orderTasks(coverageTasks.filter((t) => t.kind === "operativa"), taskOrder);
   const visibleOperations = [...ownBoardOperations, ...coveredOperations];
   function changeProfile(pid: string) {
@@ -401,9 +409,9 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           tasks: state.tasks.map((x) =>
             x.id === t.id
               ? next
-              : running &&
+          : running &&
                   x.sessions?.some((e) => !e.end && e.actorId === active.id)
-                ? stopClock(x)
+                ? stopActorClock(x, active.id)
                 : x,
           ),
         },
@@ -450,6 +458,8 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
     try {
       if (!canWork(state, active, task)) throw Error("Esta tarea está fuera de tu ámbito.");
       if (isClosed(state, task)) throw Error("El mes está cerrado y conserva su historial.");
+      if (task.responsibility && nextStatus === "Pendiente" && task.sessions?.some((session) => !session.end && session.actorId !== active.id))
+        throw Error("La tarea compartida tiene el reloj del compañero activo. No podés devolverla a Pendiente mientras sigue trabajando.");
       let moved = nextStatus === task.status ? task : transition(task, nextStatus);
       if (nextStatus === "En curso" && task.status !== "En curso") moved = startClock(moved, active.id);
       const tasks = state.tasks.filter(row => row.id !== taskId);
@@ -462,7 +472,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
       if (insertAt < 0) insertAt = tasks.length;
       tasks.splice(insertAt, 0, moved);
       const stopsOtherClock = moved.sessions?.some(session => !session.end && session.actorId === active.id);
-      const orderedTasks = stopsOtherClock ? tasks.map(row => row.id === taskId ? moved : row.sessions?.some(session => !session.end && session.actorId === active.id) ? stopClock(row) : row) : tasks;
+      const orderedTasks = stopsOtherClock ? tasks.map(row => row.id === taskId ? moved : row.sessions?.some(session => !session.end && session.actorId === active.id) ? stopActorClock(row, active.id) : row) : tasks;
       setTaskOrder("original");
       commit({ ...state, boardOrder: "original", tasks: orderedTasks }, nextStatus === task.status ? undefined : "Movió tarea a " + nextStatus, taskId);
     } catch (error) {
@@ -750,12 +760,14 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
     .map((g) => {
       const ts = filtered.filter((t) =>
         group === "individual"
-          ? t.ownerId === g.id
+          ? isResponsible(t, g.id)
           : group === "team"
             ? t.teamId === g.id
             : t.sector === g.id,
       );
-      const x = metrics(ts, state.activity, dateART(metricAsOf), metricAsOf);
+      const x = group === "individual"
+        ? metricsForProfile(ts, state.activity, g.id, dateART(metricAsOf), metricAsOf)
+        : metrics(ts, state.activity, dateART(metricAsOf), metricAsOf);
       return { ...g, ...x, pendingPoints: Math.max(0, x.points - x.earned) };
     })
     .filter((g) => g.points > 0)
@@ -768,9 +780,9 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
       const tasks = state.tasks.filter(
         (t) =>
           t.month === period &&
-          canSee(active, t.ownerId, state.profiles) &&
+          canWork(state, active, t) &&
           (!company || t.companyId === company) &&
-          (!owner || t.ownerId === owner) &&
+          (!owner || isResponsible(t, owner)) &&
           (!sector || t.sector === sector) &&
           (!team || t.teamId === team) &&
           (!query ||
@@ -855,6 +867,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
         <div hidden={!!collapsedCards[t.id]}>
         <p>
           {nameOf(t.ownerId)}
+          {t.responsibility && <small className="joint-task-badge"> · Tarea conjunta · {responsibilityShare(t, active.id) ? `${(responsibilityShare(t, active.id) / 100).toFixed(2).replace(/\.00$/, "")}% propio` : "supervisión"}</small>}
           {coverageFor(state, t)?.replacementId && (
             <small>
               {" "}· {active.id === coverageFor(state, t)!.replacementId
@@ -871,9 +884,9 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
         )}
         {t.scheduledOn && <small>Realización: {fmt(t.scheduledOn)}</small>}
         <div className="timer-mini" data-tour="task-timers">
-          {t.sessions?.length ? (
+          {(t.sessions || []).some((session) => session.actorId === active.id) ? (
             <span>
-              ◷ {duration(elapsedSeconds(t, new Date(tick).toISOString()))}
+              ◷ {duration(actorElapsedSeconds(t, active.id, new Date(tick).toISOString()))} propio
             </span>
           ) : (
             <span>Sin tiempo registrado</span>
@@ -881,13 +894,13 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           {t.status === "En curso" && !closed && !t.blockedBy && (
             <button
               aria-label={
-                t.sessions?.some((e) => !e.end)
+                t.sessions?.some((e) => !e.end && e.actorId === active.id)
                   ? "Pausar cronómetro"
                   : "Reanudar cronómetro"
               }
-              onClick={() => clock(t, !t.sessions?.some((e) => !e.end))}
+              onClick={() => clock(t, !t.sessions?.some((e) => !e.end && e.actorId === active.id))}
             >
-              {t.sessions?.some((e) => !e.end) ? "Pausar" : "Cronometrar"}
+              {t.sessions?.some((e) => !e.end && e.actorId === active.id) ? "Pausar" : "Cronometrar"}
             </button>
           )}
         </div>
@@ -1194,7 +1207,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
               <div className="active-clock" key={t.id}>
                 <span>
                   ◷ {t.title} ·{" "}
-                  {duration(elapsedSeconds(t, new Date(tick).toISOString()))}
+                  {duration(actorElapsedSeconds(t, active.id, new Date(tick).toISOString()))} propio
                 </span>
                 <button onClick={() => clock(t, false)}>
                   Pausar cronómetro
@@ -1481,7 +1494,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                     .filter(
                       (t) =>
                         t.status !== "Completada" &&
-                        (page !== "day" || t.ownerId === viewedOwner),
+                        (page !== "day" || isResponsible(t, viewedOwner)),
                     )
                     .sort((a, b) =>
                       (a.due || "9999").localeCompare(b.due || "9999"),
@@ -1492,7 +1505,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                 {!resultTasks.some(
                   (t) =>
                     t.status !== "Completada" &&
-                    (page !== "day" || t.ownerId === viewedOwner),
+                    (page !== "day" || isResponsible(t, viewedOwner)),
                 ) && (
                   <Empty text="No tenés entregables pendientes en esta selección." />
                 )}
@@ -1601,10 +1614,11 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                         owner={nameOf(t.ownerId)}
                         scheduled={t.scheduledOn ? fmt(t.scheduledOn) : ""}
                         quantity={taskQuantity(t, state.activity)}
-                        time={duration(elapsedSeconds(t, new Date(tick).toISOString()))}
+                        time={duration(actorElapsedSeconds(t, active.id, new Date(tick).toISOString()))}
+                        actorId={active.id}
                         closed={isClosed(state, t)}
                         timeliness={taskTimeliness(t, state.activity, new Date().toISOString())}
-                        onClock={() => clock(t, !t.sessions?.some((session) => !session.end))}
+                        onClock={() => clock(t, !t.sessions?.some((session) => !session.end && session.actorId === active.id))}
                         onLog={() => setLogFor(t.id)}
                         onDetails={() => setDetail(t.id)}
                       />
@@ -1625,10 +1639,11 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                           coverOwner={active.name}
                           scheduled={t.scheduledOn ? fmt(t.scheduledOn) : ""}
                           quantity={taskQuantity(t, state.activity)}
-                          time={duration(elapsedSeconds(t, new Date(tick).toISOString()))}
+                          time={duration(actorElapsedSeconds(t, active.id, new Date(tick).toISOString()))}
+                          actorId={active.id}
                           closed={isClosed(state, t)}
                           timeliness={taskTimeliness(t, state.activity, new Date().toISOString())}
-                          onClock={() => clock(t, !t.sessions?.some((session) => !session.end))}
+                          onClock={() => clock(t, !t.sessions?.some((session) => !session.end && session.actorId === active.id))}
                           onLog={() => setLogFor(t.id)}
                           onDetails={() => setDetail(t.id)}
                         />
@@ -2542,18 +2557,19 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             </span>
           </div>
           <TimelinessBadge value={taskTimeliness(tasksForDetail, state.activity, new Date().toISOString())} />
+          {laboratory && <JointTaskSetup state={state} task={tasksForDetail} actor={active} commit={commit} notify={notify} />}
           <div className="timer-panel">
             <div>
-              <small>TIEMPO REGISTRADO</small>
+              <small>TIEMPO PROPIO · {active.name.toUpperCase()}</small>
               <strong>
                 {duration(
-                  elapsedSeconds(tasksForDetail, new Date(tick).toISOString()),
+                  actorElapsedSeconds(tasksForDetail, active.id, new Date(tick).toISOString()),
                 )}
               </strong>
               <p>
-                {tasksForDetail.sessions?.some((e) => !e.end)
-                  ? "En marcha · se conserva si recargás. Pausalo al interrumpir el trabajo."
-                  : "Pausado · las esperas no se suman si el cronómetro está detenido."}
+                {tasksForDetail.sessions?.some((e) => !e.end && e.actorId === active.id)
+                  ? "Tu reloj está en marcha y se conserva si recargás."
+                  : "Tu reloj está pausado. Los aportes de otras personas se mantienen separados."}
               </p>
             </div>
             <button
@@ -2565,11 +2581,11 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
               onClick={() =>
                 clock(
                   tasksForDetail,
-                  !tasksForDetail.sessions?.some((e) => !e.end),
+                  !tasksForDetail.sessions?.some((e) => !e.end && e.actorId === active.id),
                 )
               }
             >
-              {tasksForDetail.sessions?.some((e) => !e.end)
+              {tasksForDetail.sessions?.some((e) => !e.end && e.actorId === active.id)
                 ? "Pausar cronómetro"
                 : "Iniciar cronómetro"}
             </button>
@@ -2577,7 +2593,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           {(tasksForDetail.sessions || []).length > 0 && (
             <details>
               <summary>Sesiones y responsables</summary>
-              {tasksForDetail.sessions!.map((e) => (
+              {tasksForDetail.sessions!.filter((e) => active.role !== "empleado" || e.actorId === active.id).map((e) => (
                 <p key={e.id}>
                   {nameOf(e.actorId)} ·{" "}
                   {new Date(e.start).toLocaleString("es-AR")} ·{" "}
@@ -2681,7 +2697,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
               />
               <div className="activity-history">
                 {state.activity
-                  .filter((a) => a.taskId === tasksForDetail.id)
+                  .filter((a) => a.taskId === tasksForDetail.id && (active.role !== "empleado" || !tasksForDetail.responsibility || a.actorId === active.id))
                   .map((a) => (
                     <div key={a.id}>
                       <b>

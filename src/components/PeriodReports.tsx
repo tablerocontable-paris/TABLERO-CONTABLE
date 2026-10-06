@@ -68,6 +68,10 @@ export default function PeriodReports({
         g.metrics.timeliness ? (g.metrics.timeliness.results.averageDaysAhead ?? "Sin muestra") : "Sin medición histórica",
         g.metrics.timeliness ? (g.metrics.timeliness.operational.averageDaysAhead ?? "Sin muestra") : "Sin medición histórica",
       ]),
+      ...(r.contributions?.length ? [
+        ["Contribuciones personales", "Período", "Proceso", "Participación %", "Puntos posibles", "Puntos obtenidos", "Tiempo propio"],
+        ...r.contributions.map((item) => [r.employee, c.month, item.title, item.shareBps / 100, item.possiblePoints, item.earnedPoints, duration(item.recordedSeconds)]),
+      ] : []),
     ];
     const url = URL.createObjectURL(
       new Blob(
@@ -136,7 +140,7 @@ export default function PeriodReports({
             {new Date(r.generatedAt).toLocaleString("es-AR")}
           </p>
           <div className="note">
-            Tiempo registrado: {duration(r.recordedSeconds)} · Reaperturas:{" "}
+            Tiempo propio: {duration(r.recordedSeconds)} · Reaperturas:{" "}
             {r.reopenings}. Las coberturas conservan el titular y los ejecutores
             en el historial. El tiempo no mide por sí solo productividad.
           </div>
@@ -184,6 +188,12 @@ export default function PeriodReports({
               </tbody>
             </table>
           </div>
+          {!!r.contributions?.length && <>
+            <h3>Contribución de {r.employee}</h3>
+            <div className="table-wrap"><table><thead><tr><th>Proceso</th><th>Participación</th><th>Puntos posibles</th><th>Puntos logrados</th><th>Tiempo propio</th></tr></thead>
+              <tbody>{r.contributions.map((item) => <tr key={item.taskId}><td>{item.title}</td><td>{(item.shareBps / 100).toFixed(2).replace(/\.00$/, "")}%</td><td>{item.possiblePoints.toFixed(2)}</td><td>{item.earnedPoints.toFixed(2)}</td><td>{duration(item.recordedSeconds)}</td></tr>)}</tbody>
+            </table></div>
+          </>}
           <p>
             <b>Observaciones de cierre:</b> {selected.note}
           </p>

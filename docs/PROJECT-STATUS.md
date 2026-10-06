@@ -55,3 +55,21 @@ Revisado el desacople SQL011/laboratorio y cerrado architecture/JOINT-LABORATORY
 
 ## Tablero movible — 06/10/2026
 Entregables arrastrables entre estados, orden antes/después y persistencia de orden manual. Cambio respeta transition(): iniciar abre sólo cronómetro del actor, completar requiere pasos y espera liberada, reapertura aumenta contador. Teclado Alt+flecha izquierda/derecha. Evidencia suite 341/341, build y Chromium con cero llamadas API operativa/errores JS.
+
+## Tareas conjuntas del laboratorio — 06/10/2026
+
+Implementación local para una ocurrencia puntual, dos participantes y cuotas
+selladas. Incluye validación/idempotencia, snapshots, acceso acotado por miembro,
+cronómetros paralelos por actor, métricas individuales/globales, cierre separado,
+reporte v2 compatible con reportes v1 y aviso `joint`. UI de activación y tarjetas
+en tableros personales integradas. Contrato y límites:
+`architecture/JOINT-LABORATORY-CONTRACT-20261006.md`.
+
+Verificación vigente: 348/348 pruebas en 34 archivos y 74 suites, build y recorrido Chromium
+de activación 60/40, aviso, relojes A/B y pausa individual; recorrido general
+Chromium desktop/móvil también pasa. Ambos: cero errores JS y cero solicitudes
+a `/api`. Pendiente: ensayo UI del cierre v2 y aceptación visual con estado real.
+La simulación usa localStorage de un navegador; no prueba colaboración entre
+computadoras ni aislamiento Auth/RLS. No se conectó cuenta/API ni se aplicó
+migración. El avance global orientativo permanece alrededor de45%; esto no
+completa la aceptación funcional total ni la infraestructura del 100%.

@@ -77,3 +77,12 @@ Seguir docs/product/CORRECTIONS-20261006-NOTIFICATIONS.md. Continuar sin conexio
 
 ## Contrato conjunto listo — 06/10/2026
 Próxima implementación: docs/architecture/JOINT-LABORATORY-CONTRACT-20261006.md. Luna6 medio Standard ejecuta el bloque completo y pruebas; Sol6.1 alto sólo si surge contradicción material. Diseño cerrado, sin nueva implementación ni aumento del avance global.
+
+## Estado vigente posterior — 06/10/2026
+El contrato de tareas conjuntas ya está implementado en el laboratorio local;
+ver evidencias y límites en PROJECT-STATUS.md y
+architecture/JOINT-LABORATORY-CONTRACT-20261006.md. Continúan fuera de alcance
+Auth, API/D1, Supabase y colaboración entre computadoras. Los cambios aprobados
+de la vista de laboratorio se pueden sincronizar y publicar en el mismo Site
+privado sin cambiar audiencia. La próxima decisión abierta es cobertura,
+jerarquía y atribución; revisar permisos antes de implementarla.

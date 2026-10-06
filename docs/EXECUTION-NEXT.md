@@ -1,34 +1,47 @@
-# Próxima ejecución — tareas conjuntas del laboratorio
+# Próxima ejecución del proyecto
 
-Repositorio work/site; no reconstruir ni consultar el chat anterior.
-Base funcional: commit8ca6933, Site privado v46, 339/339 pruebas.
+Repositorio: `work/site`. Continuar el mismo proyecto y Git. No reconstruir ni
+consultar el chat anterior.
 
-## Contrato cerrado
+## Estado vigente
 
-Implementar docs/architecture/JOINT-LABORATORY-CONTRACT-20261006.md completo:
-responsabilidad puntual de dos miembros, cuotas, acceso sin ampliar perfiles,
-relojes independientes, métricas sin doble KPI, cierres/reportes compatibles,
-UI y notificaciones. Incluye archivos, orden y matriz de aceptación.
+El laboratorio privado conserva simulación y datos ficticios en
+`LaboratoryWorkspace` / `paris-state-lab`; no llamar a la API operativa, no
+activar `RemoteWorkspace`, no crear cuentas ni enviar invitaciones reales. SQL
+Supabase 001–011 y Worker/D1 siguen separados. Audiencia actual del Site:
+privada.
 
-Modelo siguiente: GPT-6 Luna, esfuerzo medio, velocidad Standard.
-No simular cambio de modelo. Si hay contradicción material, volver a Sol6.1 alto.
+El bloque Trello-like está implementado en `65ae477`. La responsabilidad
+conjunta está implementada en el laboratorio local; contrato, alcance y límites
+en `docs/architecture/JOINT-LABORATORY-CONTRACT-20261006.md`. No equivale a
+colaboración en línea o a permisos de producción.
 
-## Límites
+## Próximo trabajo
 
-LaboratoryWorkspace y paris-state-lab. No RemoteWorkspace, API operativa,
-cuentas, invitaciones reales ni conexiones nuevas. SQL001–011 y D1 conservados.
-Cobertura recurrente y jerarquía multiarea siguen en bloques posteriores.
+Revisar y extender en el laboratorio la cobertura que conserva la identidad y
+responsabilidad del titular, pero atribuye la actividad y el tiempo propios al
+reemplazo. Antes de tocar relaciones entre equipos, bajas/reasignaciones o el
+backend activo, cerrar un contrato de permisos y regresión. Referencias: filas
+4, 13 y 14 de `docs/product/CORRECTIONS-20261002.md` y regla de cobertura de
+`docs/product/CONSISTENCY-RULES.md`.
 
-## Entrega del bloque
+Modelo para esa revisión: GPT-6.1 Sol, esfuerzo alto, velocidad Standard, por
+el cruce de permisos, jerarquía y atribución histórica. Cerrado el contrato,
+GPT-6 Luna, esfuerzo medio, Standard, para implementarlo y verificarlo. Si se
+mantiene un alcance sólo local y aparece una decisión nueva, detenerse antes de
+alterar D1 o una migración.
 
-Pruebas de dominio/DOM, suite completa, build y Chromium desktop/mobile.
-Runner actual: CHROMIUM_PATH y E2E_OUTPUT + node tests/browser-corrections.cjs;
-agregar recorrido conjunto propio. No presentar tests/browser.cjs histórico
-como evidencia de la entrada actual.
-Pre-commit, commit, push y publicación del mismo Site con audiencia privada;
-verificar fuente y estado del deploy. Guardar evidencia y actualizar PROJECT-STATUS.
+## Entrega
 
-100% según docs/ops/FINAL-ACCEPTANCE.md: aplicación aceptada e infraestructura
-propia funcionando. Avance aproximado45%; contrato redactado no suma avance funcional.
+Para cambios del Site: suite completa, build, Chromium desktop/móvil,
+pre-commit, commit, sincronizar la fuente interna y publicar el mismo Site
+privado. Guardar evidencia y actualizar `PROJECT-STATUS.md`, `AGENTS.md` y este
+archivo. No cambiar audiencia.
 
-Interacción Trello-like implementada/publicada en este bloque. Siguiente función de producto: iniciar la implementación de responsabilidad conjunta bajo el contrato ya especificado; revisar primero DnD y criterios de joint-laboratory contract. Mantener aún fuera D1/RemoteWorkspace y cuentas reales.
+## Avance y aceptación final
+
+Avance global orientativo: ~45%; no es una medición exacta ni sube por pasar
+pruebas. El 100% requiere producto aceptado sin correcciones conocidas, GitHub
+propio, dos proyectos Supabase dev/producción, hosting propio y automatización
+validada según `docs/ops/FINAL-ACCEPTANCE.md`. No conectar cuentas hasta aceptar
+el producto final.

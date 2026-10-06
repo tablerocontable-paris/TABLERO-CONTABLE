@@ -156,3 +156,10 @@ Avance orientativo 45–50%; no 100%.
 
 ## Actualización de interacción — 06/10/2026
 El tablero del laboratorio permite mover entregables por arrastre y teclado. Arrastrar a En curso inicia el reloj del actor, suelta en Completada valida la tarea y el orden manual persiste. Pruebas Chromium/suite completa/build; no amplía a tareas operativas ni activa coordinación entre miembros.
+
+## Responsabilidad conjunta — 06/10/2026
+
+Se implementó en el laboratorio una ocurrencia compartida con dos personas,
+cuotas snapshot, tiempo propio paralelo, atribución individual y notificación.
+Ver `docs/architecture/JOINT-LABORATORY-CONTRACT-20261006.md` y evidencia actual
+en `docs/PROJECT-STATUS.md`. No es colaboración en línea ni cambia SQL/D1.

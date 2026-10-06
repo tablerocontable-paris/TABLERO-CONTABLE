@@ -1,7 +1,8 @@
 # Contrato ejecutable — tareas conjuntas del laboratorio
 
-Estado: diseño para implementación; todavía no implementado en la UI.
-Base comprobada: commit 8ca6933, Site privado v46. No depende del chat anterior.
+Estado: implementado en el laboratorio privado; pendiente aceptación visual y
+de la ruta completa de cierre en Chromium.
+Base de diseño: commit 8ca6933, Site privado v46. No depende del chat anterior.
 Conservar el laboratorio, Git y SQL001–011. No conectar Auth, D1 o Supabase.
 
 ## 1. Evidencia y frontera
@@ -211,3 +212,27 @@ alto con evidencia concreta; no inventar autorización ni cambiar cuentas.
 Diseño cerrado no incrementa el avance funcional: global aproximado45%.
 
 Estado actualizado 06/10: el tablero ahora conserva orden manual entre columnas, incluye soporte teclado y activa el reloj al mover a En curso. Suite de regresión posterior reportada por proyecto: 341/341. Esto no implementa todavía activación conjunta, responsabilidad/cuotas o cierre.
+
+## Implementación de laboratorio — 06/10/2026
+
+- `Task.responsibility` conserva una sola identidad de tarea y snapshots de dos
+  participantes/cuotas. La activación es idempotente, revisa versión, actor,
+  empresa, equipo, recurrencia, cierres y evidencia previa. El recibo y la
+  auditoría se guardan junto con la activación local.
+- Los dos responsables pueden cronometrar a la vez. Pausa, inicio en otra tarea,
+  etiquetas de tiempo y registros personales no mezclan a los actores. Completar
+  detiene ambos relojes; reabrir mantiene la historia y deja los relojes apagados.
+- Tableros y análisis individuales atribuyen puntos por cuota; el peso global se
+  cuenta una vez. Los cierres personales incluyen la tarea por participación,
+  congelan escritores de ambos cuando cierra uno y generan informe v2 sólo para
+  cierres con tareas conjuntas. Los informes individuales existentes siguen en v1.
+- La UI permite compartir con motivo/reparto, muestra miembros/cuotas, hace una
+  tarjeta por participante, avisa a los lectores autorizados y oculta al otro
+  actor sus sesiones y anotaciones personales.
+- Evidencia: 348 pruebas locales, build TypeScript/Vite/Worker, Chromium de la
+  activación, aviso, dos relojes y pausa individual; el recorrido general también
+  pasa escritorio y móvil. Cero llamadas a `/api` desde los dos recorridos.
+- Límite: `localStorage` es una simulación en un solo navegador, no colaboración
+  autenticada o concurrente entre PCs. No se aplicó SQL, no se conectó D1,
+  Supabase o Auth y no se amplió la audiencia del Site. La cobertura no otorga
+  cuota conjunta; la coordinación entre equipos sigue sin ampliarse para encargados.

@@ -255,6 +255,14 @@ const schema = z.object({
         checklist: z.array(
           z.object({ id: z.string(), text: z.string(), done: z.boolean() }),
         ),
+        responsibility: z.object({
+          version: z.literal(1), revision: z.literal(1), mode: z.literal("joint"),
+          activatedAt: z.string(), activatedBy: z.string(), reason: z.string().min(1).max(500),
+          members: z.tuple([
+            z.object({ profileId: z.string(), shareBps: z.number().int().positive(), name: z.string(), teamId: z.string(), sector: z.string() }),
+            z.object({ profileId: z.string(), shareBps: z.number().int().positive(), name: z.string(), teamId: z.string(), sector: z.string() }),
+          ]).refine((members) => members[0].profileId !== members[1].profileId && members[0].shareBps + members[1].shareBps === 10000),
+        }).optional(),
       })
       .passthrough(),
   ),
@@ -299,9 +307,25 @@ const schema = z.object({
   taskComments: z.array(z.object({ id: z.string(), taskId: z.string(), actorId: z.string(),
     content: z.string().max(2000), createdAt: z.string(),
   })).optional(),
+  jointReceipts: z.array(z.object({ requestId: z.string(), actorId: z.string(), taskId: z.string(),
+    body: z.string(), revision: z.number().int().positive(), acknowledgedAt: z.string(),
+  })).optional(),
   activeId: z.string(),
   tour: z.record(z.string(), z.number()),
   tourVersion: z.record(z.string(), z.number()).optional(),
+}).superRefine((state, context) => {
+  state.tasks.forEach((task, index) => {
+    const responsibility = task.responsibility;
+    if (responsibility && !responsibility.members.some((member) => member.profileId === task.ownerId))
+      context.addIssue({ code: "custom", path: ["tasks", index, "responsibility"], message: "La responsabilidad debe conservar al titular original." });
+  });
+  const receipts = state.jointReceipts || [];
+  if (new Set(receipts.map((receipt) => receipt.requestId)).size !== receipts.length)
+    context.addIssue({ code: "custom", path: ["jointReceipts"], message: "Las claves de idempotencia deben ser únicas." });
+  receipts.forEach((receipt, index) => {
+    if (!state.tasks.some((task) => task.id === receipt.taskId && task.responsibility?.revision === receipt.revision))
+      context.addIssue({ code: "custom", path: ["jointReceipts", index], message: "El recibo debe corresponder a una responsabilidad guardada." });
+  });
 });
 export const isLab = () => localStorage.getItem("paris-environment") === "lab";
 export function enterLab(state: State) {

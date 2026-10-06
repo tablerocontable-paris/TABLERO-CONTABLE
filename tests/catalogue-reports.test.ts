@@ -48,6 +48,7 @@ describe("catálogo común y reportes de cierre", () => {
     const c = s.closures[0];
     expect(c.report?.recipientIds).toContain("boss");
     expect(c.report?.delivery).toBe("disponible en demostración");
+    expect(c.report?.schemaVersion).toBe(1);
     expect(c.report?.groups.length).toBeGreaterThan(0);
     expect(new Set(c.report!.groups.map((g) => g.company)).size).toBe(
       new Set(c.tasks.map((t) => t.companyId)).size,

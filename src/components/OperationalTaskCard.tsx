@@ -12,6 +12,7 @@ export default function OperationalTaskCard({
   scheduled,
   quantity,
   time,
+  actorId,
   closed,
   timeliness,
   onClock,
@@ -25,6 +26,7 @@ export default function OperationalTaskCard({
   scheduled: string;
   quantity: number;
   time: string;
+  actorId: string;
   closed: boolean;
   timeliness: TaskTimeliness;
   onClock: () => void;
@@ -32,7 +34,8 @@ export default function OperationalTaskCard({
   onDetails: () => void;
 }) {
   const completion = Math.round((quantity / task.target) * 100);
-  const running = task.sessions?.some((session) => !session.end) || false;
+  const running = task.sessions?.some((session) => !session.end && session.actorId === actorId) || false;
+  const hasRecorded = task.sessions?.some((session) => session.actorId === actorId) || false;
   return (
     <section className="panel operation" data-task-id={task.id}>
       <div className="card-top">
@@ -44,7 +47,7 @@ export default function OperationalTaskCard({
       <p>{coverOwner ? `Tarea de ${owner} · cobertura a cargo de ${coverOwner}` : owner}</p>
       {task.scheduledOn && <small>Realización: {scheduled}</small>}
       <div className="timer-mini">
-        <span>◷ {task.sessions?.length ? `${time} registrados` : "Sin tiempo registrado"}</span>
+        <span>◷ {hasRecorded ? `${time} propios` : "Sin tiempo propio"}</span>
         {!closed && !task.blockedBy && task.status !== "Completada" && (
           <button aria-label={running ? `Pausar cronómetro de ${task.title}` : `Iniciar cronómetro de ${task.title}`} onClick={onClock}>
             {running ? "Pausar" : "Cronometrar"}

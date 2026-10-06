@@ -92,6 +92,31 @@ export interface Task {
   priority: "Alta" | "Media" | "Baja";
   blockedBy: string;
   blockedSince: string | null;
+  responsibility?: JointResponsibility;
+}
+export interface JointMemberSnapshot {
+  profileId: string;
+  shareBps: number;
+  name: string;
+  teamId: string;
+  sector: string;
+}
+export interface JointResponsibility {
+  version: 1;
+  revision: 1;
+  mode: "joint";
+  activatedAt: string;
+  activatedBy: string;
+  reason: string;
+  members: [JointMemberSnapshot, JointMemberSnapshot];
+}
+export interface JointReceipt {
+  requestId: string;
+  actorId: string;
+  taskId: string;
+  body: string;
+  revision: number;
+  acknowledgedAt: string;
 }
 export interface Activity {
   id: string;
@@ -182,6 +207,7 @@ export interface State {
   boardOrder?: "original" | "az" | "za";
   notifications?: import('./notifications').WorkNotification[];
   taskComments?: import('./notifications').TaskComment[];
+  jointReceipts?: JointReceipt[];
   parameterReviews?: Record<string, ParameterReview>;
   version: 3;
   absences?: Absence[];
@@ -225,8 +251,32 @@ export function canSee(
     profiles.some((p) => p.id === ownerId && p.managerId === profile.id)
   );
 }
-export function isClosed(s: State, t: Pick<Task, "ownerId" | "month">) {
-  return s.closures.some((c) => c.ownerId === t.ownerId && c.month === t.month);
+type TaskResponsibilityView = Pick<Task, "ownerId" | "teamId" | "sector" | "responsibility">;
+export function responsibleMembers(t: TaskResponsibilityView): JointMemberSnapshot[] {
+  return t.responsibility?.members || [{
+    profileId: t.ownerId, shareBps: 10000, name: "", teamId: t.teamId, sector: t.sector,
+  }];
+}
+export function responsibilityShare(t: TaskResponsibilityView, profileId: string) {
+  return responsibleMembers(t).find((m) => m.profileId === profileId)?.shareBps || 0;
+}
+export function isResponsible(t: TaskResponsibilityView, profileId: string) {
+  return responsibleMembers(t).some((m) => m.profileId === profileId);
+}
+export function canAccessJointTask(s: State, actor: Profile, t: Task) {
+  if (!t.responsibility) return canSee(actor, t.ownerId, s.profiles);
+  if (actor.id === "admin") return false;
+  if (!actor.active || !actor.companyIds.includes(t.companyId)) return false;
+  if (isResponsible(t, actor.id)) return true;
+  if (actor.role === "jefe") return true;
+  return actor.role === "encargado" && t.responsibility.members.some((m) => {
+    const member = s.profiles.find((p) => p.id === m.profileId);
+    return member?.managerId === actor.id;
+  });
+}
+export function isClosed(s: State, t: Pick<Task, "ownerId" | "month" | "responsibility">) {
+  const owners = t.responsibility?.members.map((m) => m.profileId) || [t.ownerId];
+  return owners.some((ownerId) => s.closures.some((c) => c.ownerId === ownerId && c.month === t.month));
 }
 export function transition(
   t: Task,
@@ -325,6 +375,13 @@ export function metrics(
     timeliness: summarizeTimeliness(tasks, logs, reference),
   };
 }
+export function metricsForProfile(
+  tasks: Task[], logs: Activity[], profileId: string, today = dateART(), asOfISO?: string,
+): Metrics {
+  return metrics(tasks.filter((t) => isResponsible(t, profileId)).map((t) => ({
+    ...t, weight: t.weight * responsibilityShare(t, profileId) / 10000,
+  })), logs, today, asOfISO);
+}
 export function materialize(s: State, month: string): State {
   const tasks = [...s.tasks];
   for (const a of s.assignments) {
@@ -403,13 +460,17 @@ export function closeMonth(
     throw Error("Este mes ya está cerrado.");
   if (month > currentMonth()) throw Error("No se puede cerrar un mes futuro.");
   const tasks = s.tasks.filter(
-    (t) => t.ownerId === ownerId && t.month === month,
+    (t) => t.month === month && isResponsible(t, ownerId),
   );
   if (!tasks.length) throw Error("No hay tareas para cerrar.");
   if (tasks.some((t) => t.sessions?.some((e) => !e.end)))
     throw Error(
-      "Pausá los cronómetros activos de este empleado antes de cerrar.",
+      "Pausá todos los cronómetros de sus tareas antes de cerrar el período.",
     );
+  if (tasks.some((t) => t.responsibility &&
+      (t.kind === "resultado" ? t.status !== "Completada" :
+        t.blockedBy || t.target <= 0 || taskQuantity(t, s.activity) < t.target)))
+    throw Error("No se puede cerrar una tarea conjunta pendiente o sin meta cumplida.");
   const logs = s.activity.filter(
     (a) => tasks.some((t) => t.id === a.taskId) && a.date.startsWith(month),
   );
@@ -421,7 +482,7 @@ export function closeMonth(
     at,
     by: actorId,
     note,
-    metrics: metrics(tasks, logs, dateART(at), at),
+    metrics: metricsForProfile(tasks, logs, ownerId, dateART(at), at),
     tasks: structuredClone(tasks),
     activity: structuredClone(logs),
   };
