@@ -68,3 +68,6 @@ sin ampliar audiencia. Contrato: docs/product/CORRECTIONS-20261006-LABORATORY.md
 PROJECT-STATUS y EXECUTION-NEXT son el estado vigente; anteriores afirmaciones
 de producto operativo describen el corte histórico superado por este pedido.
 Avance orientativo 45–50%; no 100%.
+
+## Definición final del usuario — 06/10/2026
+100% incluye aplicación aceptada sin correcciones conocidas, GitHub, dos Supabase dev/producción, hosting propio y automatización validada. Seguir docs/ops/FINAL-ACCEPTANCE.md. No crear cuentas ni invitar usuarios durante laboratorio. No confundir CI preparado con CI ejecutado.

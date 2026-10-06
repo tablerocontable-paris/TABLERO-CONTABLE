@@ -23,3 +23,5 @@ Continuar work/site y su Git recuperado; no reiniciar ni consultar el chat viejo
 Avance orientativo 45–50%, no 100%. Última suite 334/334; navegador de laboratorio
 sin errores JS y sin llamadas a la API operativa. No declara validado el acceso
 real de empleados ni Supabase/Auth/MFA externo.
+
+El cierre al 100% se rige por ops/FINAL-ACCEPTANCE.md. Pre-commit local activo; CI GitHub preparado, todavía sin ejecutar. PR/deploy/migraciones remotas pendientes de infraestructura propia.

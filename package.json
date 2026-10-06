@@ -8,7 +8,9 @@
     "build": "tsc --noEmit && vite build && node scripts/build-worker.mjs",
     "test": "vitest run",
     "preview": "vite preview --host 0.0.0.0",
-    "test:browser": "node tests/browser.cjs"
+    "test:browser": "node tests/browser.cjs",
+    "hooks:install": "node scripts/install-hooks.mjs",
+    "check:commit": "node scripts/validate-change.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.0.0",

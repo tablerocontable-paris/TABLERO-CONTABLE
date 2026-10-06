@@ -1,0 +1,15 @@
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+
+process.chdir(fileURLToPath(new URL('../', import.meta.url)));
+function run(command, args) {
+  const result = spawnSync(command, args, { stdio: 'inherit' });
+  if (result.error) console.error(result.error.message);
+  if (result.status !== 0) process.exit(result.status ?? 1);
+}
+// Checks the working tree; GitHub must also validate the exact pushed commit.
+run('git', ['diff', '--cached', '--check']);
+run(process.execPath, ['node_modules/typescript/bin/tsc', '--noEmit']);
+run(process.execPath, ['node_modules/vitest/vitest.mjs', 'run',
+  'tests/domain.test.ts', 'tests/parameterization.test.ts',
+  'tests/laboratory-corrections.test.tsx', '--maxWorkers=1']);

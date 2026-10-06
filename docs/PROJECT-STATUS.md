@@ -41,3 +41,6 @@ SQL 011 conserva su evidencia local previa: 26 carreras PostgreSQL aprobadas.
 Repositorio y commits originales recuperados; no leer/esperar el chat viejo.
 Sol6.1 alto para razonar/planear/revisar próximos contratos; Luna6 medio para
 implementarlos. No simular cambio de modelo ni delegación.
+
+## Definición final de avance
+Avance global aproximado: 45%. El 100% incluye GitHub propio, Supabase dev/producción y hosting funcionando, con entrega automática verificada y todas las correcciones conocidas cerradas. Ver ops/FINAL-ACCEPTANCE.md. Primero aceptación funcional del laboratorio; después configuración e integración de infraestructura. No enviar invitaciones reales ahora.

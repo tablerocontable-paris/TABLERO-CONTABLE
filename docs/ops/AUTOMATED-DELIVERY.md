@@ -14,7 +14,7 @@ Estado: decisión de producto acordada; configuración pendiente hasta la etapa 
 
 Una solicitud de cambio debe permitir que el asistente analice el alcance, implemente la modificación, ejecute validaciones, cree un commit, haga push a la rama correspondiente y despliegue preview sin pedirle a Valentino pasos manuales. El flujo objetivo será:
 
-1. Crear/actualizar rama de trabajo; hooks pre-commit verifican formato, lint/tipos y pruebas rápidas.
+1. Crear/actualizar rama de trabajo; hooks pre-commit verifican tipos, pruebas rápidas y diff staged.
 2. Push y apertura de PR hacia `dev`; CI corre pruebas, build, validación SQL desde cero/upgrade y chequeos de seguridad/dependencias.
 3. Preview automático de la aplicación. Cambios SQL se prueban contra Supabase dev; nunca se ejecutan migraciones productivas desde la laptop.
 4. Al pasar todos los checks, promoción automática de `dev` a `main` según la política acordada. Si los checks fallan, no se promueve ni despliega.
@@ -35,7 +35,9 @@ El objetivo es que el pedido de cambio sea la única tarea rutinaria de Valentin
 
 - Git y deploy del prototipo siguen dentro de Sites; el sitio actual es privado. No existe aún el remoto GitHub ni los entornos Supabase dev/prod de la cuenta dedicada.
 - La infraestructura y secretos no están configurados; por eso el flujo descrito es plan, no una capacidad activa.
-- A la fecha existe verificación local con Vitest/PGlite y build. RPC de actividad/cronómetro/ausencias y reportes/outbox están implementados localmente; 008 todavía requiere la aceptación documentada en `../architecture/REVIEW-008-20261001.md`. Falta adaptar el frontend al contrato nuevo, Auth/invitaciones/MFA real, concurrencia PostgreSQL, integración de reportes, correo real, piloto y procedimiento de migración/restore.
+- SQL011 tiene evidencia local de 26 carreras PostgreSQL; última suite de laboratorio: 334 pruebas aprobadas. Falta integración real de frontend, Auth/MFA/RLS, reportes, correo y recuperación.
+- Pre-commit local instalado. Workflow GitHub preparado para suite/build; no ejecutado allí. Automatización de PR, migraciones y hosting aún pendiente de cuentas propias.
+- Definición del 100% y puertas: FINAL-ACCEPTANCE.md. Avance global orientativo: aproximadamente 45%.
 
 ## Evaluación gratuita y puertas — 02/10/2026
 
