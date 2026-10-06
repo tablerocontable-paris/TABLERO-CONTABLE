@@ -209,3 +209,5 @@ este contrato completo y comprobarlo. Si descubre contradicción material entre
 reglas o necesidad de nuevo esquema remoto, preservar trabajo y volver a Sol6.1
 alto con evidencia concreta; no inventar autorización ni cambiar cuentas.
 Diseño cerrado no incrementa el avance funcional: global aproximado45%.
+
+Estado actualizado 06/10: el tablero ahora conserva orden manual entre columnas, incluye soporte teclado y activa el reloj al mover a En curso. Suite de regresión posterior reportada por proyecto: 341/341. Esto no implementa todavía activación conjunta, responsabilidad/cuotas o cierre.

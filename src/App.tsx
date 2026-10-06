@@ -57,6 +57,7 @@ import {
   ArrowUpRight,
   HelpCircle,
   RotateCcw,
+  GripVertical,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -172,7 +173,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
   const [sector, setSector] = useState("");
   const [team, setTeam] = useState("");
   const [query, setQuery] = useState("");
-  const [taskOrder, setTaskOrder] = useState<TaskOrder>("az");
+  const [taskOrder, setTaskOrder] = useState<TaskOrder>(() => state.boardOrder || "az");
   const [view, setView] = useState<"board" | "list">("board");
   const [group, setGroup] = useState<"individual" | "team" | "sector">(
     "individual",
@@ -438,6 +439,35 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
         ),
       "Cambió estado",
     );
+  }
+  function moveBoardTask(taskId: string, nextStatus: Status, beforeTaskId?: string) {
+    const task = state.tasks.find(t => t.id === taskId);
+    if (!laboratory || !task || task.kind !== "resultado") return;
+    if (task.blockedBy && nextStatus === "En curso") {
+      notify("Liberá la espera externa antes de iniciar esta tarea.");
+      return;
+    }
+    try {
+      if (!canWork(state, active, task)) throw Error("Esta tarea está fuera de tu ámbito.");
+      if (isClosed(state, task)) throw Error("El mes está cerrado y conserva su historial.");
+      let moved = nextStatus === task.status ? task : transition(task, nextStatus);
+      if (nextStatus === "En curso" && task.status !== "En curso") moved = startClock(moved, active.id);
+      const tasks = state.tasks.filter(row => row.id !== taskId);
+      let insertAt = beforeTaskId ? tasks.findIndex(row => row.id === beforeTaskId) : -1;
+      if (insertAt < 0) {
+        for (let i = tasks.length - 1; i >= 0; i--) {
+          if (tasks[i].ownerId === task.ownerId && tasks[i].month === task.month && tasks[i].status === nextStatus && tasks[i].kind === "resultado") { insertAt = i + 1; break; }
+        }
+      }
+      if (insertAt < 0) insertAt = tasks.length;
+      tasks.splice(insertAt, 0, moved);
+      const stopsOtherClock = moved.sessions?.some(session => !session.end && session.actorId === active.id);
+      const orderedTasks = stopsOtherClock ? tasks.map(row => row.id === taskId ? moved : row.sessions?.some(session => !session.end && session.actorId === active.id) ? stopClock(row) : row) : tasks;
+      setTaskOrder("original");
+      commit({ ...state, boardOrder: "original", tasks: orderedTasks }, nextStatus === task.status ? undefined : "Movió tarea a " + nextStatus, taskId);
+    } catch (error) {
+      notify((error as Error).message);
+    }
   }
   function download(rows: unknown[][], filename: string) {
     const a = document.createElement("a");
@@ -814,7 +844,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             <Building2 size={11} />
             {companyOf(t.companyId)}
           </span>
-          <b>{t.weight} pts</b>
+          <span className="board-card-grip" aria-hidden="true" title="Agarrá para mover"><GripVertical size={16} /><b>{t.weight} pts</b></span>
         </div>
         <div className="card-heading">
         <button className="card-title" onClick={() => setDetail(t.id)}>
@@ -1521,7 +1551,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                       {table(ownBoardResults)}
                     </Panel>
                   ) : (
-                    <TaskBoard tasks={ownBoardResults} renderCard={taskCard} />
+                    <TaskBoard tasks={ownBoardResults} renderCard={taskCard} onMove={moveBoardTask} />
                   )}
                 </section>
                 {coveredResults.length > 0 && (

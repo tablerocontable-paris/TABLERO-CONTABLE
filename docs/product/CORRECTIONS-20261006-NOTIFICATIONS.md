@@ -15,6 +15,10 @@
 - Retirado el cartel explicativo de actividad operativa. Cabecera compacta;
   «Vista de prueba» reemplaza el título técnico y sólo existe en laboratorio.
 - Paneles no recortan foco de campos; controles móviles adaptados al ancho.
+- Entregables movibles entre Pendiente/En curso/Completada por arrastre, con
+  inserción antes/después de tarjeta, animación y acceso de teclado. La operación
+  usa la transición existente: iniciar abre el reloj del actor; terminar valida
+  checklist/esperas y detiene su tiempo. Orden manual persiste tras recargar.
 
 ## Límites explícitos
 

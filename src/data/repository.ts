@@ -232,6 +232,7 @@ export function seed(): State {
 }
 const schema = z.object({
   version: z.literal(3),
+  boardOrder: z.enum(["original", "az", "za"]).optional(),
   companies: z.array(z.object({ id: z.string(), name: z.string() })),
   profiles: z.array(
     z

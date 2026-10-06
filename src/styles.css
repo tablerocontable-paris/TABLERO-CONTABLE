@@ -2274,6 +2274,14 @@ label, .filters select, .sidebar select, .sidebar nav button, .card-bottom,
   .brand img { width: 90px; height: 74px; }
   .induction-side img { width: 120px; height: 120px; margin-bottom: 16px; }
 }
+.task-card[draggable="true"] { cursor: grab; }
+.board-card-grip { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); }
+.task-card[draggable="true"] .board-card-grip svg { opacity: .5; cursor: grab; }
+.task-card.is-dragging { opacity: .38; transform: rotate(1deg) scale(.985); cursor: grabbing; box-shadow: 0 12px 30px #1b243222; }
+.task-card.just-landed { animation: task-land .38s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes task-land { 0% { transform: scale(.97) translateY(8px); opacity: .65; } 72% { transform: scale(1.012) translateY(-2px); } 100% { transform: scale(1) translateY(0); opacity: 1; } }
+.column.is-drop-target > div[role="region"] { outline: 2px dashed #7c91ad; outline-offset: 5px; border-radius: 9px; background: color-mix(in srgb, var(--surface-soft) 55%, transparent); }
+@media (prefers-reduced-motion: reduce) { .task-card.just-landed { animation-duration: .01ms; } }
 @media (min-width: 851px) and (max-height: 600px) {
   .sidebar { position: absolute; min-height: 100dvh; height: auto; }
   .sidebar-bottom { margin-top: 14px; }

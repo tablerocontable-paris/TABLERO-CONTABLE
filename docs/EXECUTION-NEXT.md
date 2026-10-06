@@ -30,3 +30,5 @@ verificar fuente y estado del deploy. Guardar evidencia y actualizar PROJECT-STA
 
 100% según docs/ops/FINAL-ACCEPTANCE.md: aplicación aceptada e infraestructura
 propia funcionando. Avance aproximado45%; contrato redactado no suma avance funcional.
+
+Interacción Trello-like implementada/publicada en este bloque. Siguiente función de producto: iniciar la implementación de responsabilidad conjunta bajo el contrato ya especificado; revisar primero DnD y criterios de joint-laboratory contract. Mantener aún fuera D1/RemoteWorkspace y cuentas reales.

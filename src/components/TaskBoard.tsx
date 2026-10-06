@@ -1,9 +1,10 @@
-import { useState, type ReactNode } from "react";
+import { cloneElement, isValidElement, useState, type DragEvent, type KeyboardEvent, type ReactNode } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import type { Task, Status } from "../domain/model";
 import { Empty } from "./ui";
 
 export type TaskOrder = "original" | "az" | "za";
+const STATUSES: Status[] = ["Pendiente", "En curso", "Completada"];
 const alphabet = new Intl.Collator("es-AR", {
   sensitivity: "base",
   numeric: true,
@@ -18,26 +19,83 @@ export function orderTasks(tasks: Task[], order: TaskOrder): Task[] {
 export default function TaskBoard({
   tasks,
   renderCard,
+  onMove,
 }: {
   tasks: Task[];
   renderCard: (task: Task) => ReactNode;
+  onMove?: (taskId: string, status: Status, beforeTaskId?: string) => void;
 }) {
   const [expanded, setExpanded] = useState<Record<Status, boolean>>({
     Pendiente: true,
     "En curso": false,
     Completada: false,
   });
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [dropStatus, setDropStatus] = useState<Status | null>(null);
+  const [landedId, setLandedId] = useState<string | null>(null);
+  function move(taskId: string, status: Status, beforeTaskId?: string, sourceId = draggedId) {
+    if (!onMove || !sourceId) return;
+    const id = sourceId;
+    setDraggedId(null);
+    setDropStatus(null);
+    setLandedId(id);
+    window.setTimeout(() => setLandedId(current => current === id ? null : current), 420);
+    onMove(id, status, beforeTaskId);
+  }
+  function decorateCard(task: Task, status: Status) {
+    const node = renderCard(task);
+    if (!onMove || !isValidElement(node)) return node;
+    const props = node.props as { className?: string };
+    return cloneElement(node as React.ReactElement<Record<string, unknown>>, {
+      draggable: true,
+      tabIndex: 0,
+      "aria-keyshortcuts": "Alt+ArrowLeft Alt+ArrowRight",
+      "aria-roledescription": "tarjeta movible",
+      "aria-label": `${task.title}. Arrastrá para cambiar de columna; también podés usar Alt y las flechas izquierda o derecha. Estado: ${status}`,
+      "data-dragging": draggedId === task.id ? "true" : undefined,
+      "data-landed": landedId === task.id ? "true" : undefined,
+      className: `${props.className || ""}${draggedId === task.id ? " is-dragging" : ""}${landedId === task.id ? " just-landed" : ""}`.trim(),
+      onDragStart: (event: DragEvent<HTMLElement>) => {
+        setDraggedId(task.id);
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", task.id);
+      },
+      onDragEnd: () => { setDraggedId(null); setDropStatus(null); },
+      onDragOver: (event: DragEvent<HTMLElement>) => {
+        if (draggedId && draggedId !== task.id) { event.preventDefault(); event.dataTransfer.dropEffect = "move"; }
+      },
+      onDrop: (event: DragEvent<HTMLElement>) => {
+        event.preventDefault(); event.stopPropagation();
+        if (draggedId && draggedId !== task.id) {
+          const box = event.currentTarget.getBoundingClientRect();
+          const index = tasks.findIndex(row => row.id === task.id);
+          const insertAfter = event.clientY > box.top + box.height / 2;
+          const nextCard = insertAfter ? tasks.slice(index + 1).find(row => row.status === status) : task;
+          move(task.id, status, nextCard?.id);
+        }
+      },
+      onKeyDown: (event: KeyboardEvent<HTMLElement>) => {
+        if (!event.altKey || (event.key !== "ArrowLeft" && event.key !== "ArrowRight")) return;
+        event.preventDefault();
+        const target = STATUSES[STATUSES.indexOf(status) + (event.key === "ArrowRight" ? 1 : -1)];
+        if (target) move(task.id, target, undefined, task.id);
+      },
+    });
+  }
   return (
     <div className="kanban">
-      {(["Pendiente", "En curso", "Completada"] as Status[]).map(
+      {STATUSES.map(
         (status, index) => {
           const rows = tasks.filter((t) => t.status === status);
           const open = expanded[status];
           const region = `task-column-${index}`;
           return (
             <section
-              className={`column ${open ? "expanded" : "folded"}`}
+              className={`column ${open ? "expanded" : "folded"}${dropStatus === status ? " is-drop-target" : ""}`}
               key={status}
+              onDragOver={event => { if (draggedId) { event.preventDefault(); setDropStatus(status); event.dataTransfer.dropEffect = "move"; } }}
+              onDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setDropStatus(current => current === status ? null : current); }}
+              onDrop={event => { event.preventDefault(); if (draggedId) move("", status); }}
             >
               <h2 className="column-heading">
                 <button
@@ -69,7 +127,7 @@ export default function TaskBoard({
               >
                 {open &&
                   (rows.length ? (
-                    rows.map(renderCard)
+                    rows.map(task => decorateCard(task, status))
                   ) : (
                     <Empty text="Sin tareas en esta columna." />
                   ))}

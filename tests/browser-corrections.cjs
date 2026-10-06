@@ -180,6 +180,24 @@ const assert = (ok, message) => {
     path: path.join(output, "task-cards.png"),
     animations: "disabled",
   });
+  const moveTaskId = await page.evaluate(() => {
+    const state = JSON.parse(localStorage.getItem('paris-state-lab'));
+    const openMonths = new Set(state.closures.map(c => `${c.ownerId}:${c.month}`));
+    const card = state.tasks.find(t => t.ownerId === state.activeId && t.month === new Date().toISOString().slice(0, 7)
+      && t.kind === 'resultado' && t.status === 'Pendiente' && !t.blockedBy
+      && !openMonths.has(`${t.ownerId}:${t.month}`));
+    return card?.id;
+  });
+  assert(moveTaskId, 'No eligible pending card for the drag test');
+  await page.locator('.column').nth(1).locator('.column-toggle').click();
+  const origin = page.locator(`[data-task-id="${moveTaskId}"]`).first();
+  const destination = page.locator('.column').nth(1).locator('[role="region"]');
+  assert((await origin.getAttribute('draggable')) === 'true', 'Task card does not expose drag and drop');
+  await origin.dragTo(destination);
+  const afterMove = await page.evaluate(id => JSON.parse(localStorage.getItem('paris-state-lab')).tasks.find(t => t.id === id), moveTaskId);
+  assert(afterMove.status === 'En curso' && afterMove.sessions.some(s => !s.end && s.actorId === 'e0'), 'Dragging to in progress must move and start own clock: ' + JSON.stringify(afterMove));
+  assert((await page.evaluate(() => JSON.parse(localStorage.getItem('paris-state-lab')).boardOrder)) === 'original', 'Manual board ordering must persist after drag');
+  checks.push({ interaction: 'drag-to-progress', taskId: moveTaskId, status: afterMove.status, actorClockStarted: true });
   const search = page.locator('.search input').first();
   if (await search.count()) {
     await search.focus();
@@ -250,6 +268,7 @@ const assert = (ok, message) => {
           "simulated invitation",
           "preconfigured onboarding",
           "independent icon folds",
+          "drag task and auto-start its actor clock",
           "boss parameter review",
           "persisted review",
           "mobile",
@@ -260,7 +279,7 @@ const assert = (ok, message) => {
     ),
   );
   console.log(
-    "PASS: responsive sidebar, logos, laboratory, invitation, card icons, review notification, persistence, mobile; zero operational API calls and JS errors.",
+    "PASS: responsive sidebar, logos, laboratory, invitation, card icons, drag-and-drop, review notification, persistence, mobile; zero operational API calls and JS errors.",
   );
 })()
   .catch((e) => {

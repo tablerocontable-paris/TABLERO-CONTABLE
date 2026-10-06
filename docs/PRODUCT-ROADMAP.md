@@ -153,3 +153,6 @@ sin ampliar audiencia. Contrato: docs/product/CORRECTIONS-20261006-LABORATORY.md
 PROJECT-STATUS y EXECUTION-NEXT son el estado vigente; anteriores afirmaciones
 de producto operativo describen el corte histórico superado por este pedido.
 Avance orientativo 45–50%; no 100%.
+
+## Actualización de interacción — 06/10/2026
+El tablero del laboratorio permite mover entregables por arrastre y teclado. Arrastrar a En curso inicia el reloj del actor, suelta en Completada valida la tarea y el orden manual persiste. Pruebas Chromium/suite completa/build; no amplía a tareas operativas ni activa coordinación entre miembros.

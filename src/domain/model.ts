@@ -179,6 +179,7 @@ export interface ParameterReview {
   reviewedBy: string;
 }
 export interface State {
+  boardOrder?: "original" | "az" | "za";
   notifications?: import('./notifications').WorkNotification[];
   taskComments?: import('./notifications').TaskComment[];
   parameterReviews?: Record<string, ParameterReview>;

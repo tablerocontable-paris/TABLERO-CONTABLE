@@ -52,3 +52,6 @@ Verificación de este bloque: 339/339 pruebas en 33 archivos, build aprobado y C
 
 ## Contrato conjunto listo para implementación
 Revisado el desacople SQL011/laboratorio y cerrado architecture/JOINT-LABORATORY-CONTRACT-20261006.md. Define cambios de permisos, filtros, relojes, cuotas, cierre, reportes y avisos. Todavía no implementado; próximo Luna6 medio Standard. No suma avance funcional ni requiere conexiones.
+
+## Tablero movible — 06/10/2026
+Entregables arrastrables entre estados, orden antes/después y persistencia de orden manual. Cambio respeta transition(): iniciar abre sólo cronómetro del actor, completar requiere pasos y espera liberada, reapertura aumenta contador. Teclado Alt+flecha izquierda/derecha. Evidencia suite 341/341, build y Chromium con cero llamadas API operativa/errores JS.
