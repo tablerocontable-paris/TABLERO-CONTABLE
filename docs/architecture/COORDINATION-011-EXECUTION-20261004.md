@@ -10,11 +10,14 @@ cambio, registrar el hecho y volver a Sol; no reinterpretar permisos, créditos,
 estados de negocio ni recurrencias.
 
 **Estado actualizado 06/10/2026:** revisión de concurrencia cerrada para
-implementación local. Leer obligatoriamente
+implementación local. Existe `supabase/migrations/202610060011_coordination_activation.sql`
+como corte parcial y no apto para producción; alcance y bloqueos vigentes en
+`COORDINATION-011-IMPLEMENTATION-20261006.md`. No cumple aún el contrato entero.
+Leer obligatoriamente
 `COORDINATION-011-CONCURRENCY-20261006.md`: sustituye las instrucciones anteriores
 de locks, replay y envolventes de rutas. El hallazgo previo era una inversión
-posible al extender las RPC, no un fallo reproducido en PostgreSQL. SQL011 aún
-no existe; las pruebas PostgreSQL reales siguen siendo puerta de producción.
+posible al extender las RPC, no un fallo reproducido en PostgreSQL. Las pruebas
+PostgreSQL reales siguen siendo puerta de producción.
 
 ## Resultado requerido y límites
 

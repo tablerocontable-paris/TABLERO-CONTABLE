@@ -39,7 +39,9 @@ beforeAll(async()=>{
   db=new PGlite();
   await db.exec("create role anon;create role authenticated;create role service_role;create schema auth;create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz);create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;create function auth.jwt() returns jsonb language sql stable as $$select coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb$$;grant usage on schema auth to authenticated;grant execute on function auth.uid(),auth.jwt() to authenticated;");
   const migrations=new URL("../supabase/migrations/",import.meta.url);
-  for(const f of readdirSync(migrations).filter(x=>x.endsWith(".sql")).sort()) await db.exec(readFileSync(new URL(f,migrations),"utf8"));
+  // Pin this suite to the migration version it accepted. 009–011 have
+  // independent upgrade/activation coverage and must not alter old evidence.
+  for(const f of readdirSync(migrations).filter(x=>x.endsWith(".sql") && x < "202610020009_private_block_notes.sql").sort()) await db.exec(readFileSync(new URL(f,migrations),"utf8"));
   await db.query("insert into organizations values($1,'Contract 007')",[org]);
   await db.query("insert into auth.users(id,email,email_confirmed_at) values($1,'boss@test',now()),($2,'owner@test',now()),($3,'peer@test',now())",[boss,owner,peer]);
   await db.query("insert into profiles(id,organization_id,name,role,manager_id,sector,branch,position) values($1,$4,'Boss','jefe',null,'A','B','C'),($2,$4,'Owner','empleado',$1,'A','B','C'),($3,$4,'Peer','empleado',$1,'A','B','C')",[boss,owner,peer,org]);

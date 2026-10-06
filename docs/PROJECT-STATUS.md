@@ -4,8 +4,10 @@
 y anticipación de v43, contrato privado B1/009 revisado y reparado, y fundación
 B2a/010 revisada independientemente sin hallazgos. La revisión de concurrencia011
 está cerrada para implementación local en
-`architecture/COORDINATION-011-CONCURRENCY-20261006.md`. SQL011 aún no existe.
-También faltan integración, PostgreSQL/Auth reales, UI y producción. Las pruebas y
+`architecture/COORDINATION-011-CONCURRENCY-20261006.md`. SQL011 ya existe como
+implementación local parcial y se declara no apta para producción hasta cerrar
+todos los writers y el reporte v4. También faltan integración, PostgreSQL/Auth
+reales, UI y producción. Las pruebas y
 documentos por sí solos no elevan el porcentaje. QA visual completa y producción
 conectada siguen pendientes.
 
@@ -26,7 +28,7 @@ medición automática de requisitos. Se mantienen los mismos pesos para comparar
 | Etapa | Peso | Estimación anterior → actual | Evidencia / pendiente |
 | --- | --- | --- | --- |
 | Demo, experiencia y reglas | 25% | 80% → 80% | UI A y anticipación aceptadas localmente; pendientes funciones B/C/D y QA visual |
-| Contrato de datos y SQL | 25% | 68% → 68% | SQL001–010 intactos durante revisión; fundación010 aceptada, motor011 y PostgreSQL real pendientes |
+| Contrato de datos y SQL | 25% | 68% → 68% | SQL001–010 preservados; motor011 parcial, cierre/reporte v4, todos los writers y PostgreSQL real pendientes |
 | Integración, cuentas y permisos | 25% | 5% → 5% | Lector/gateway listos localmente; frontend usa localStorage y actor simulado |
 | Funcionalidad final y operación | 15% | 25% → 25% | Reportes/outbox locales; pendientes integración, notificaciones, Kaizen/5S y administración final |
 | Validación, infraestructura y migración | 10% | 0% → 0% | Piloto, servicios definitivos y migración aún pendientes |
@@ -38,6 +40,16 @@ operativa completa. No hay una base de producción conectada ni usuarios reales.
 
 ## Avance concreto del último bloque
 
+- B2b/011 inició activación local: bindings para ocurrencias seleccionadas,
+  responsabilidad conjunta inicial puntual, relojes por actor, revocación de
+  cobertura, controles compartidos y lectura segura. Suite focal 011: 10 pruebas.
+  No termina el contrato: faltan materialización recurrente de bindings, cierre
+  mensual y reporte4 con atribución, junto con reemplazar el orden de locks en
+  todas las rutas escritoras. No aplicar la migración en remoto. Evidencia:
+  `architecture/COORDINATION-011-IMPLEMENTATION-20261006.md`.
+- Las pruebas históricas de contratos 006/007 quedaron fijadas a migraciones
+  hasta 008. `database.test` y la suite focal ejercitan la cadena vigente con 011.
+
 - B2a/010: seis tablas staged de responsabilidad y cobertura seleccionada, cuotas,
   sellado/guardas, backfill sin reescribir historia, fallback y tipos Zod propios.
   Las 18 pruebas del bloque pasan. No activa tareas conjuntas, cobertura selectiva,
@@ -45,7 +57,7 @@ operativa completa. No hay una base de producción conectada ni usuarios reales.
   `architecture/COORDINATION-010-IMPLEMENTATION-20261004.md`.
 - Revisión independiente010 agrega ocho probes SQL directos y no encontró defectos
   en el alcance staged. Evidencia: `architecture/COORDINATION-010-REVIEW-20261004.md`.
-  Contrato011 de activación está cerrado para Luna; aún no implementado ni conectado.
+  Contrato011 de activación está definido; implementación local parcial y sin conexión al frontend.
 - B1 `202610020009_private_block_notes.sql` añade notas privadas, historial
   inmutable, receipts separados y RPC con autorización por autor/jefe/encargado
   actual y empresa. El wrapper RPC no cambia el gateway existente ni la UI.
@@ -71,8 +83,9 @@ con la revisión en el repositorio de Sites. Backend aún local, no SQL remoto.
 
 ## Pendientes que impiden migrar a los empleados
 
-1. Implementar y revisar motor011; después B/C: jerarquía multiarea,
-   conjuntas y contribuciones, cobertura por tareas, bajas/huérfanas, e integrar
+1. Completar y revisar motor011: escritores y locks comunes, coberturas
+   recurrentes y cierre/KPI/reporte4; después B/C: jerarquía multiarea,
+   contribuciones, bajas/huérfanas, e integrar
    comentarios privados con Auth real.
 2. Integrar frontend con lector/gateway y completar equivalencia de reglas,
    Auth/invitaciones/MFA/RLS y datos compartidos.
@@ -98,9 +111,12 @@ pruebas no sustituyen carreras reales ni Supabase Auth/MFA/RLS en producción.
 Revisiones de lector/adaptador, upgrades y reportes se conservan en docs/architecture.
 UI A: REVIEW-V40-INDEPENDENT-20261002.md. Anticipación: REVIEW-V43-INDEPENDENT-20261002.md.
 El registro v42 y sus probes fallidos permanecen como evidencia histórica.
-Suite completa tras revisión06/10: **275 pruebas en 26 archivos, todas pasan**
-(86,54s). Las siete pruebas abstractas nuevas se agregan a las268 de revisión010.
-Build TypeScript/Vite y `git diff --check` pasan. No se ejecutó PostgreSQL real.
+Suite completa anterior a 011: **275 pruebas en 26 archivos, todas pasan**
+(86,54s). La corrida actual terminó con **285 pruebas en 27 archivos, todas
+pasan** (77,77s); `npm run build` y `git diff --check` también pasan. La primera
+corrida parcial de 011 halló regresiones que se documentan/corrigen en
+`architecture/COORDINATION-011-IMPLEMENTATION-20261006.md`. No se ejecutó
+PostgreSQL real.
 Comando con contención controlada:
 `npm test -- --maxWorkers=1 --testTimeout=60000 --hookTimeout=60000`.
 El smoke de la revisión010 `node tests/postgres-009/check-sql.mjs` pasó los8 órdenes009 en secuencia
@@ -109,12 +125,11 @@ con PGlite. Están preparados para PostgreSQL, sin ejecución concurrente real.
 En la revisión009 anterior se quitó un argumento de timeout accidental dentro de
 una aserción; sus aserciones y resultados funcionales no cambiaron.
 
-**Próximo paso: GPT-6 Luna, esfuerzo medio, Standard**, implementar011 completo
-según contrato y protocolo06/10; luego Sol alto revisa implementación/permisos.
-La base staged010 no activa permisos, relojes o KPI. La revisión06/10 agregó
-siete pruebas abstractas de orden de adquisición y cerró las contradicciones de
-replay, doble cierre y nombres reales del snapshot/actividad. No ejecutó carreras
-PostgreSQL ni SQL remoto. No cambia la estimación42% hasta progreso funcional.
+**Próximo paso: GPT-6.1 Sol, esfuerzo alto, Standard**, revisar la implementación
+parcial y decidir el contrato restante de writers, cobertura recurrente y reporte4;
+después GPT-6 Luna implementa ese corte cerrado. Las pruebas abstractas no ejecutan
+carreras PostgreSQL ni SQL remoto. No cambia la estimación42% hasta progreso
+funcional.
 
 Puertas hacia Supabase/hosting y evaluación gratuita verificadas en
 `ops/FREE-HOSTING-PATH-20261002.md`. Preferencia Cloudflare Pages+Supabase dev/prod,

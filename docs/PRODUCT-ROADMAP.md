@@ -9,8 +9,11 @@ B2a/010 staged ejecutado localmente por contrato; evidencia en
 COORDINATION-010-IMPLEMENTATION-20261004.md. Revisión independiente010 sin
 hallazgos: COORDINATION-010-REVIEW-20261004.md. Protocolo de concurrencia011 cerrado el06/10 para implementación Luna medio:
 COORDINATION-011-CONCURRENCY-20261006.md, obligatorio junto al contrato
-COORDINATION-011-EXECUTION-20261004.md. El motor011 no está implementado.
-Pruebas del orden abstracto no sustituyen PostgreSQL real ni producción.
+COORDINATION-011-EXECUTION-20261004.md. SQL011 tiene una implementación local
+parcial (detalle en COORDINATION-011-IMPLEMENTATION-20261006.md), marcada como
+no apta para producción: faltan reporte4/cierre, materialización recurrente y
+conversión de todas las rutas escritoras. Pruebas abstractas no sustituyen
+PostgreSQL real ni producción.
 
 Avance estimado actual **42% (36–46%)**, cálculo vigente en PROJECT-STATUS.md.
 Lector/gateway/SQL locales no equivalen a Auth/RLS/datos compartidos ni correo

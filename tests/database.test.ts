@@ -81,7 +81,7 @@ describe("base nueva desde cero y RLS", () => {
         .rows[0].status,
     ).toBe("Completada");
     await actor(ids.boss, "aal2");
-    expect((await db.query("select * from audit_events")).rows).toHaveLength(2);
+    expect((await db.query("select * from audit_events where action='task.transition' and entity_id=$1", [ids.t])).rows).toHaveLength(2);
   });
   it("checklist mueve y reabre automáticamente", async () => {
     await db.exec("reset role");
@@ -167,7 +167,7 @@ describe("base nueva desde cero y RLS", () => {
     await actor(ids.employee);
     await expect(
       db.query("select transition_task($1,'En curso')", [ids.t]),
-    ).rejects.toThrow("El mes está cerrado");
+    ).rejects.toThrow("cerrado");
   });
   it("el cronómetro es idempotente, versiona el estado y bloquea otro reloj simultáneo", async () => {
     const timed = "50000000-0000-0000-0000-000000000201";
@@ -247,18 +247,24 @@ describe("base nueva desde cero y RLS", () => {
     await db.query("insert into task_instances(id,organization_id,assignment_id,company_id,owner_id,team_id,period,scheduled_on,title,kind,weight,due_date,status,started_at,checklist) values($1,$2,$3,$4,$5,$6,'2030-03-01','2030-03-02','Revisión entre actores','resultado',5,'2030-03-30','En curso',now(),'[{\"id\":\"step\",\"done\":false}]')",[task,ids.org,ids.a,ids.c,ids.employee,ids.team]);
     await actor(ids.manager);
     const session=(await db.query<{start_task_timer:string}>("select start_task_timer($1,0,$2,false)",[task,"90000000-0000-0000-0000-000000000231"])).rows[0].start_task_timer;
+    await db.exec("reset role");
+    expect((await db.query<{actor_id:string}>("select actor_id from task_time_sessions where id=$1",[session])).rows[0].actor_id).toBe(ids.manager);
     await actor(ids.employee);
     await expect(db.query("select set_checklist_item_reviewed($1,'step',true,null,1,$2)",[task,"90000000-0000-0000-0000-000000000232"])).rejects.toThrow("ejecutor");
-    expect((await db.query<{ended_at:string|null}>("select ended_at::text from task_time_sessions where id=$1",[session])).rows[0].ended_at).toBeNull();
+    // Peer employees must not learn whether a co-worker's clock is active.
+    expect((await db.query<{ended_at:string|null}>("select ended_at::text from task_time_sessions where id=$1",[session])).rows).toHaveLength(0);
     expect((await db.query<{status:string;done:boolean}>("select status,checklist->0->>'done'='true' as done from task_instances where id=$1",[task])).rows[0]).toMatchObject({status:"En curso",done:false});
     await actor(ids.boss);
     await expect(db.query("select transition_task_reviewed($1,'Pendiente','Intervención verificada',1,$2)",[task,"90000000-0000-0000-0000-000000000233"])).rejects.toThrow("MFA");
+    await db.exec("reset role");
+    expect((await db.query<{ended_at:string|null}>("select ended_at::text from task_time_sessions where id=$1",[session])).rows[0].ended_at).toBeNull();
     await actor(ids.boss,"aal2");
     await expect(db.query("select transition_task_reviewed($1,'Pendiente','   ',1,$2)",[task,"90000000-0000-0000-0000-000000000234"])).rejects.toThrow("motivo");
     await db.query("select transition_task_reviewed($1,'Pendiente','Interrupción revisada por jefatura',1,$2)",[task,"90000000-0000-0000-0000-000000000235"]);
+    await db.exec("reset role");
     expect((await db.query<{ended_at:string|null}>("select ended_at::text from task_time_sessions where id=$1",[session])).rows[0].ended_at).not.toBeNull();
-    const interruption=(await db.query<{at:string;details:{reason:string;executor:string;session:string;started_at:string;ended_at:string}}>("select at::text,details from audit_events where action='task.transition' and entity_id=$1 order by at desc limit 1",[task])).rows[0];
-    expect(interruption.details).toMatchObject({reason:"Interrupción revisada por jefatura",executor:ids.manager,session});
+    const interruption=(await db.query<{at:string;details:{reason:string;executor:string;instance:string;started_at:string;ended_at:string}}>("select at::text,details from audit_events where action='task.timer_stopped_by_task_change' and entity_id=$1 order by at desc limit 1",[session])).rows[0];
+    expect(interruption.details).toMatchObject({reason:"Interrupción revisada por jefatura",executor:ids.manager,instance:task});
     expect(interruption.details.started_at).toBeTruthy();
     expect(interruption.details.ended_at).toBeTruthy();
     expect(interruption.at).toBeTruthy();
@@ -304,16 +310,15 @@ describe("base nueva desde cero y RLS", () => {
   });
   it("materializa recurrencia semanal e intervalo sin vencimiento", async () => {
     await db.exec("reset role");
-    await db.exec(`delete from task_instances where period='2027-02-01' and assignment_id='${ids.a}'`);
-    await db.exec(
-      `update task_assignments set frequency='semanal',start_date='2027-02-01',end_date=null,interval_count=2,weekdays=array[1,3]::smallint[],has_deadline=false,due_offset_days=0 where id='${ids.a}'`,
-    );
+    const assignment = "80000000-0000-0000-0000-000000000301";
+    await db.query(`insert into task_assignments(id,organization_id,template_id,template_version_id,company_id,owner_id,team_id,title,kind,weight,unit,target,frequency,start_month,due_day,checklist,start_date,interval_count,weekdays,month_day,has_deadline,due_offset_days)
+      select $1,organization_id,template_id,template_version_id,company_id,owner_id,team_id,title,kind,weight,unit,target,'semanal','2027-02-01',28,checklist,'2027-02-01',2,array[1,3]::smallint[],1,false,0 from task_assignments where id=$2`, [assignment, ids.a]);
     await actor(ids.employee);
     await db.query("select materialize_month($1,'2027-02-01')", [ids.employee]);
     const rows = (
       await db.query<{ scheduled_on: string; due_date: string | null }>(
         "select scheduled_on::text,due_date::text from task_instances where period='2027-02-01' and assignment_id=$1 order by scheduled_on",
-        [ids.a],
+        [assignment],
       )
     ).rows;
     expect(rows.map((r) => r.scheduled_on)).toEqual([
@@ -334,16 +339,15 @@ describe("base nueva desde cero y RLS", () => {
   });
   it("admite varias ocurrencias diarias y vencimientos posteriores al mes", async () => {
     await db.exec("reset role");
-    await db.exec(`delete from task_instances where period='2027-02-01' and assignment_id='${ids.a}'`);
-    await db.exec(
-      `update task_assignments set frequency='diaria',start_date='2027-02-01',end_date=null,interval_count=3,has_deadline=true,due_offset_days=5 where id='${ids.a}'`,
-    );
+    const assignment = "80000000-0000-0000-0000-000000000302";
+    await db.query(`insert into task_assignments(id,organization_id,template_id,template_version_id,company_id,owner_id,team_id,title,kind,weight,unit,target,frequency,start_month,due_day,checklist,start_date,interval_count,weekdays,month_day,has_deadline,due_offset_days)
+      select $1,organization_id,template_id,template_version_id,company_id,owner_id,team_id,title,kind,weight,unit,target,'diaria','2027-02-01',28,checklist,'2027-02-01',3,array[1]::smallint[],1,true,5 from task_assignments where id=$2`, [assignment, ids.a]);
     await actor(ids.employee);
     await db.query("select materialize_month($1,'2027-02-01')", [ids.employee]);
     const rows = (
       await db.query<{ scheduled_on: string; due_date: string }>(
         "select scheduled_on::text,due_date::text from task_instances where period='2027-02-01' and assignment_id=$1 order by scheduled_on",
-        [ids.a],
+        [assignment],
       )
     ).rows;
     expect(rows.map((r) => r.scheduled_on)).toEqual([

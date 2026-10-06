@@ -1,50 +1,54 @@
-# Próxima ejecución — implementación completa011
+# Próxima ejecución — revisión de activación parcial 011
 
-**GPT-6 Luna, esfuerzo medio, Standard.** Contrato de implementación cerrado:
-`architecture/COORDINATION-011-EXECUTION-20261004.md` y protocolo obligatorio
-`architecture/COORDINATION-011-CONCURRENCY-20261006.md`. Leer ambos completos.
-La revisión de concurrencia06/10 corrigió el orden, replay, cierre compartido,
-nota009 e inducción por lote. Siete pruebas exploran el modelo abstracto;
-no equivalen a validación PostgreSQL real. Revisión010 sin hallazgos en
-`architecture/COORDINATION-010-REVIEW-20261004.md`.
+**GPT-6.1 Sol, esfuerzo alto, Standard.** Revisar la implementación local
+`supabase/migrations/202610060011_coordination_activation.sql` y el informe
+`architecture/COORDINATION-011-IMPLEMENTATION-20261006.md` contra el contrato
+`architecture/COORDINATION-011-EXECUTION-20261004.md` y el protocolo
+`architecture/COORDINATION-011-CONCURRENCY-20261006.md`. La revisión debe
+cerrar un plan ejecutable para completar las rutas sin cambiar semántica por
+intuición.
 
-Completar la fase entera sin pausas por subtarea: SQL011 explícito, tipos, fixtures,
-runner concurrente preparado, aceptación focal/completa/build, documentación,
-commit y push verificado. Revisar cada fallo contra el contrato y corregirlo.
-Si aparece una decisión arquitectónica no cerrada, registrar evidencia concreta
-y volver a Sol; no sustituir la fase por otro plan ni fingir cambio de modelo.
+## Hallazgos abiertos que bloquean aplicar 011
 
-011 debe activar tareas conjuntas puntuales y coberturas exactas en SQL local. Leer
-también toda evidencia010, diseño B, contratos001–009 y rutas escritoras reales.
-Parchear conjuntamente autorización, clocks por actor, materialización,
-cancelación, checklist/actividad, todas las RPC heredadas, conjunto de locks,
-cierre, cuotas KPI y reporte versionado. No desplegar ni ejecutar migración
-remota. No cambiar el orden de locks por intuición ni activar sólo parte de las rutas.
-Reemplazar también notas009, catálogo y aprobación de inducción. No mezclar
-keys nuevas con locks bigint antiguos. Si no hay PostgreSQL, dejar pruebas
-concurrentes NO EJECUTADAS; eso no bloquea implementación local, sí producción.
+1. `close_employee_month` no se reemplazó. Sigue sin reporte v4, cuotas por
+   miembro/cobertura ni validación de cierre conjunto y outbox reportado.
+2. `materialize_month` no se reemplazó. La aprobación de planes con reglas
+   recurrentes se rechaza explícitamente; faltan bindings por ocurrencia,
+   validación de `scheduled_on` y locks del materializador.
+3. `approve_employee_absence` y `cancel_employee_absence` permanecen en sus
+   versiones heredadas. Falta integrar su footprint/orden de locks y la
+   intersección con bindings precisos.
+4. `create_catalog_assignment`, actualización de pesos/plantillas y aprobación
+   de inducción no usan el envelope 011 para todas las escrituras. Aún hay
+   escritores con locks bigint heredados.
+5. La ejecución PGlite sólo acredita la secuencia SQL y las políticas simuladas.
+   No hay PostgreSQL real, MVCC/barreras de carrera, Supabase Auth/MFA ni
+   validación remota.
 
-Ninguna relación010 staged concede acceso, modifica cronómetros o recalcula KPI.
-No cambiar SQL001–010 ni App/lector/gateway durante esta ejecución aislada.
+La migración tiene comentario explícito de **NO apta para producción**. No
+conectar UI, no hacer `db push`, no cambiar migraciones 001–010, Site ni audiencia.
+No hacer Sites save/deploy ni push de Git durante esta revisión; el usuario pidió
+mantener esta fase local.
 
-B1/009 tiene revisión y reparación independiente local en
-`architecture/REVIEW-PRIVATE-NOTES-009-20261004.md`. Se probaron cancelación,
-respuestas incompletas, whitespace equivalente SQL/JS, historia propia tras
-cobertura, replay tras cierre y upgrade poblado. PostgreSQL real aún pendiente.
-El push de B1 y su revisión se recuperó en `9a64c6a`; no hay ese pendiente.
+Después de la revisión, si el contrato queda cerrado, cambiar manualmente a
+**GPT-6 Luna, esfuerzo medio, Standard** para implementar el plan completo en
+un solo bloque: rutas restantes, atribución y snapshots v4, pruebas secuenciales
+y de upgrade, suite focal/completa, build, estado y commit local. No simular un
+cambio de modelo. Las carreras reales siguen siendo puerta previa a producción.
 
-Después de implementar011: **GPT-6.1 Sol alto, Standard** revisa el motor,
-pruebas de carreras pendientes y permisos. B3 jerarquía y bajas usa la responsabilidad
-coordinada para evitar otra forma de transferir tareas. Las FKs estructurales de
-membresías se conservan; separar revocación operativa de borrar historia.
+Comprobaciones locales:
 
-Live conserva Sites v43, implementación
-`9d6b97dc16625c974d6679cf7d69b7fe2fdb3900`, deploy
-`appgdep_6ac00b2ad81c81919a50bafab9f7101d` succeeded:
-https://grupo-paris-contabilidad.valentino-magni.chatgpt.site.
-Backend local y fuentes en Git de Sites; comentarios/conjuntas siguen sin UI ni
-Supabase conectado. No publicar otra versión sólo por SQL invisible.
+```sh
+npm test -- --run tests/coordination-activation-011.test.ts --maxWorkers=1 --testTimeout=60000 --hookTimeout=60000
+npm test -- --maxWorkers=1 --testTimeout=60000 --hookTimeout=60000
+npm run build
+git diff --check
+```
 
-Avance **42% estimado (36–46%)**; revisión/contrato no elevan ese número. Puertas
-hacia infraestructura gratuita en `ops/FREE-HOSTING-PATH-20261002.md`. No crear
-servicios ni migrar empleados. Usuario cambia modelo manualmente; basta «continuá».
+La suite de contratos históricos 006/007 está fijada a su cadena original hasta
+008. `database.test.ts` aplica todas las migraciones y la suite focal 011 cubre
+la activación parcial. Sites live conserva v43; la migración SQL nunca se aplica
+desde Sites ni desde este laboratorio.
+
+Avance global estimado: **42% (36–46%)**. Revisiones/documentación no elevan el
+porcentaje sin integración y aceptación funcional.
