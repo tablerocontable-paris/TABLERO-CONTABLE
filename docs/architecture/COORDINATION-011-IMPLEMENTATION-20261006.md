@@ -123,3 +123,11 @@ remota.
 Verificación posterior a esta implementación recurrente: suite focal 011 **11/11**;
 suite completa **286/286 en 27 archivos**; `npm run build` y `git diff --check`
 verdes. PGlite sigue sin demostrar concurrencia PostgreSQL real.
+
+Checkpoint de código fuente: commit local
+`2c60379f6ddc4fbe0de7cf3c4cd698f1b87bce45` en `main`; push normal intentado
+contra el remoto Sites existente, sin éxito por conectividad del entorno. Error
+con proxy: `Failed to connect to browser-proxy port 8889`; reintento directo:
+`Could not resolve host: git.chatgpt-team.site`. No se hizo force push, save/deploy
+ni SQL remoto. El commit queda preservado para reintentar desde el checkout
+Windows ya recuperado.

@@ -25,6 +25,10 @@ contenedor instalado para barreras MVCC. Detalle:
 COORDINATION-011-IMPLEMENTATION-20261006.md. El proyecto continúa en 42% hasta
 integrar y aceptar estos contratos.
 
+Checkpoint commit local `2c60379f6ddc4fbe0de7cf3c4cd698f1b87bce45`. El push de
+fuente fue autorizado pero bloqueado por proxy/DNS del entorno; el informe guarda
+ambos errores. Repositorio remoto y Site publicado no se actualizaron.
+
 Avance estimado actual **42% (36–46%)**, cálculo vigente en PROJECT-STATUS.md.
 Lector/gateway/SQL locales no equivalen a Auth/RLS/datos compartidos ni correo
 conectados. Demo localStorage, sin migración habilitada. Los apartados

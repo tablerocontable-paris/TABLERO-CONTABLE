@@ -28,9 +28,10 @@ atómico 011; nunca modificar 001–010.
    validación remota.
 
 La migración tiene comentario explícito de **NO apta para producción**. No
-conectar UI, no hacer `db push`, no cambiar migraciones 001–010, Site ni audiencia.
-No hacer Sites save/deploy ni push de Git durante esta revisión; el usuario pidió
-mantener esta fase local.
+conectar UI, no hacer `db push`, no cambiar migraciones 001–010 ni audiencia. El
+usuario autorizó push de fuente, pero el entorno actual no resolvió la conexión
+al remoto (ver informe de implementación); al continuar, usar el checkout Windows
+con HEAD remoto verificado. No hacer Sites save/deploy ni SQL remoto en esta fase.
 
 Implementar rutas restantes y atribución/snapshots v4, pruebas secuenciales y de upgrade,
 auditoría de grants/replay y conversión de todos los writers del inventario. No
