@@ -1,6 +1,6 @@
 # Estado vigente — 06/10/2026 · laboratorio
 
-**Avance global orientativo: 45–50%.** Referencia de planificación; no equivale
+**Avance global orientativo: aproximadamente 45%.** Referencia de planificación; no equivale
 a aceptación ni se calcula a partir de tests. No está al 100% ni lista para
 migrar empleados. El usuario exige terminar la versión final antes de crear
 cuentas o enviar invitaciones reales.
@@ -19,7 +19,7 @@ Contrato y evidencia: product/CORRECTIONS-20261006-LABORATORY.md.
 
 ## Verificación
 
-334 pruebas aprobadas en 32 archivos; compilación y diff-check aprobados.
+339 pruebas aprobadas en 33 archivos; compilación y diff-check aprobados.
 Chromium local: escritorio/móvil, alta simulada de seis pasos, logo, menús,
 tarjetas, aviso y persistencia; cero solicitudes a la API operativa y errores JS.
 SQL 011 conserva su evidencia local previa: 26 carreras PostgreSQL aprobadas.
@@ -49,3 +49,6 @@ Avance global aproximado: 45%. El 100% incluye GitHub propio, Supabase dev/produ
 Logo alineado y centrado sin leyenda, cabecera compacta, campana para todos los perfiles y comentarios de tareas en laboratorio. Avisos de asignación, cambios, finalización y comentarios; lectura persistente por destinatario. Contrato conjunto preparado pero disparador funcional aún pendiente. Ver product/CORRECTIONS-20261006-NOTIFICATIONS.md. No se necesitan cuentas/conexiones para continuar estos bloques.
 
 Verificación de este bloque: 339/339 pruebas en 33 archivos, build aprobado y Chromium escritorio/móvil aprobado con cero errores JS y cero llamadas a /api. Fuente y publicación privada del mismo Site; sin cambiar audiencia.
+
+## Contrato conjunto listo para implementación
+Revisado el desacople SQL011/laboratorio y cerrado architecture/JOINT-LABORATORY-CONTRACT-20261006.md. Define cambios de permisos, filtros, relojes, cuotas, cierre, reportes y avisos. Todavía no implementado; próximo Luna6 medio Standard. No suma avance funcional ni requiere conexiones.

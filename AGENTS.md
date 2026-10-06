@@ -74,3 +74,6 @@ Avance orientativo 45–50%; no 100%.
 
 ## Correcciones posteriores — notificaciones
 Seguir docs/product/CORRECTIONS-20261006-NOTIFICATIONS.md. Continuar sin conexiones hasta imposibilidad técnica concreta. La campana y los comentarios funcionan sólo en laboratorio; entrega transaccional en servidor y activación conjunta siguen pendientes de integración.
+
+## Contrato conjunto listo — 06/10/2026
+Próxima implementación: docs/architecture/JOINT-LABORATORY-CONTRACT-20261006.md. Luna6 medio Standard ejecuta el bloque completo y pruebas; Sol6.1 alto sólo si surge contradicción material. Diseño cerrado, sin nueva implementación ni aumento del avance global.

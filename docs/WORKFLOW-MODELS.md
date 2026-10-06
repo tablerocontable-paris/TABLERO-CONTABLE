@@ -61,3 +61,6 @@ la cobertura recurrente y reporte4 antes de otra ejecución. Luego **GPT-6 Luna
 medio, Standard** ejecuta el bloque cerrado, pruebas y commit local. El usuario
 pidió que esta reanudación sea sólo local: sin push, Sites save/deploy ni SQL
 remoto. Preservar SQL001–010 y live v43. PostgreSQL real sigue pendiente.
+
+## Próximo paso vigente — después de Site v46
+Sustituye el próximo bloque histórico011 que figura arriba. Contrato conjunto del laboratorio cerrado en docs/architecture/JOINT-LABORATORY-CONTRACT-20261006.md. Seleccionar GPT-6 Luna, esfuerzo medio, velocidad Standard para implementar el bloque completo. Revisión Sol6.1 alto después o ante contradicción material. Cada devolución debe indicar acción concreta, un modelo inmediato con esfuerzo/velocidad y avance; no repetir sólo la pareja genérica de modelos.
