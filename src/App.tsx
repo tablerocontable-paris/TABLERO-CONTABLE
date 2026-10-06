@@ -1,4 +1,6 @@
 import Planning from "./components/Planning";
+import WorkspaceSetup from "./components/WorkspaceSetup";
+import DeadlineAgenda from "./components/DeadlineAgenda";
 import TaskBoard, { orderTasks, type TaskOrder } from "./components/TaskBoard";
 import PeriodReports from "./components/PeriodReports";
 import CatalogueCreator from "./components/CatalogueCreator";
@@ -141,9 +143,10 @@ const ini = (s: string) =>
     .join("");
 const pct = (n: number | null) => (n === null ? "—" : n + "%");
 const TOUR_VERSION = 4;
-export default function App() {
-  const [laboratory] = useState(isLab);
-  const [state, setState] = useState<State>(() => load(laboratory));
+export default function App({initialState, remoteSave, remoteOwner=false, presence={}, onView}: {initialState?:State;remoteSave?:(state:State,action?:string,entityId?:string)=>Promise<State>;remoteOwner?:boolean;presence?:Record<string,string>;onView?:(view:string)=>void} = {}) {
+  const [laboratory] = useState(() => remoteSave ? false : isLab());
+  const [state, setState] = useState<State>(() => initialState || load(laboratory));
+  useEffect(()=>{if(initialState)setState(initialState)},[initialState]);
   const [tick, setTick] = useState(Date.now());
   const hasRunningClock = state.tasks.some((t) =>
     t.sessions?.some((e) => !e.end),
@@ -173,6 +176,7 @@ export default function App() {
   const [modal, setModal] = useState<"new" | "employee" | "close" | null>(null);
   const [noteToTask, setNoteToTask] = useState<Annotation | null>(null);
   const [detail, setDetail] = useState<string | null>(null);
+  const [collapsedCards,setCollapsedCards]=useState<Record<string,boolean>>({});
   const [logFor, setLogFor] = useState<string | null>(null);
   const [induct, setInduct] = useState(false);
   const [paused, setPaused] = useState(false);
@@ -210,6 +214,11 @@ export default function App() {
     };
   }, []);
   function commit(next: State, action?: string, entityId = "") {
+    if(remoteSave){
+      setState(next);
+      void remoteSave(next,action,entityId).then(setState).catch((e:Error)=>notify(e.message));
+      return true;
+    }
     const s = action
       ? {
           ...next,
@@ -344,6 +353,7 @@ export default function App() {
   const coveredOperations = orderTasks(coverageTasks.filter((t) => t.kind === "operativa"), taskOrder);
   const visibleOperations = [...ownBoardOperations, ...coveredOperations];
   function changeProfile(pid: string) {
+    if(remoteSave){onView?.(pid);return;}
     if (commit({ ...state, activeId: pid })) {
       setOwner("");
       setBoardOwner(pid);
@@ -656,13 +666,13 @@ export default function App() {
           Continuar inducción <ArrowRight size={16} />
         </button>
         <label>
-          Volver a otra vista de demostración
+          {remoteSave ? "Cambiar espacio" : "Volver a otra vista de demostración"}
           <select
             aria-label="Vista de usuario"
             value={active.id}
             onChange={(e) => changeProfile(e.target.value)}
           >
-            {state.profiles.map((p) => (
+            {state.profiles.filter(p=>!remoteSave||(remoteOwner&&['admin','e0'].includes(p.id))||p.id===active.id).map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
               </option>
@@ -674,6 +684,7 @@ export default function App() {
   if ((!draft.completedAt && !paused) || induct)
     return (
       <Onboarding
+        remote={!!remoteSave}
         month={month}
         state={state}
         profile={active}
@@ -803,6 +814,8 @@ export default function App() {
         <button className="card-title" onClick={() => setDetail(t.id)}>
           {t.title}
         </button>
+        <button className="card-collapse" aria-label={`${collapsedCards[t.id]?'Desplegar':'Plegar'} tarjeta ${t.title}`} aria-expanded={!collapsedCards[t.id]} onClick={()=>setCollapsedCards({...collapsedCards,[t.id]:!collapsedCards[t.id]})}>{collapsedCards[t.id]?'Ver detalles':'Plegar detalles'}</button>
+        <div hidden={!!collapsedCards[t.id]}>
         <p>
           {nameOf(t.ownerId)}
           {coverageFor(state, t)?.replacementId && (
@@ -858,6 +871,7 @@ export default function App() {
             {t.checklist.filter((c) => c.done).length}/{t.checklist.length}{" "}
             pasos
           </small>
+        </div>
         </div>
         <div className="card-bottom">
           <span
@@ -1053,9 +1067,9 @@ export default function App() {
             ))}
         </nav>
         <div className="sidebar-bottom">
-          <button onClick={() => (laboratory ? exitLab() : enterLab(state))}>
+          {!remoteSave && <button onClick={() => (laboratory ? exitLab() : enterLab(state))}>
             {laboratory ? "Salir del laboratorio" : "Laboratorio de pruebas"}
-          </button>
+          </button>}
           <button
             onClick={() => {
               const progress = savedTour;
@@ -1080,29 +1094,30 @@ export default function App() {
           </button>
           <div className="demo-indicator">
             <i />
-            DEMOSTRACIÓN INTERACTIVA
+            {remoteSave ? "ESPACIO PRIVADO" : "DEMOSTRACIÓN INTERACTIVA"}
           </div>
           <label>
-            Vista de usuario · simulación
+            {remoteSave ? "Mi espacio" : "Vista de usuario · simulación"}
             <select
               aria-label="Vista de usuario"
               value={active.id}
               onChange={(e) => changeProfile(e.target.value)}
             >
               {state.profiles
-                .filter((p) => p.active)
+                .filter((p) => p.active && (!remoteSave || (remoteOwner && ['admin','e0'].includes(p.id)) || p.id===active.id))
                 .map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name} · {p.role}
+                    {p.id==='admin'&&remoteSave ? 'Administrar tablero' : p.id==='e0'&&remoteSave ? 'Mi tablero · Valentino' : `${p.name} · ${p.role}`}
                   </option>
                 ))}
+              {remoteSave&&remoteOwner&&!state.profiles.some(p=>p.id==='admin')&&<option value="admin">Administrar tablero</option>}
             </select>
           </label>
           <div className="user">
             <span className="avatar">{ini(active.name)}</span>
             <div>
               {active.name}
-              <small>{active.role} · datos locales</small>
+              <small>{active.role} · {remoteSave ? 'sesión autenticada' : 'datos locales'}</small>
             </div>
           </div>
         </div>
@@ -1115,7 +1130,7 @@ export default function App() {
           </div>
           <div className="header-right">
             <ThemeControl />
-            <span className="version">Nueva generación · 0.4</span>
+            <span className="version">{remoteSave ? 'Versión privada · 1.0' : 'Nueva generación · 0.4'}</span>
             <span className="avatar">{ini(active.name)}</span>
           </div>
         </header>
@@ -1130,6 +1145,7 @@ export default function App() {
               <button onClick={exitLab}>Volver al tablero</button>
             </div>
           )}
+          {remoteSave&&active.id==='admin'&&state.tasks.length===0&&<div className="notice-banner"><span>Empezá por configurar las empresas y los responsables en Equipo. Después abrí Mi tablero para completar tu inducción y cargar el primer trabajo.</span><button onClick={()=>setPage('team')}>Configurar equipo</button><button onClick={()=>onView?.('e0')}>Abrir mi tablero</button></div>}
           {state.tasks
             .filter((t) =>
               t.sessions?.some((e) => !e.end && e.actorId === active.id),
@@ -1147,8 +1163,7 @@ export default function App() {
             ))}
           {offline && (
             <div role="status" className="notice-banner">
-              Estás sin conexión. Esta demostración guarda en el navegador; no
-              sincroniza con otros usuarios.
+              {remoteSave ? 'Estás sin conexión. Los cambios necesitan confirmación del servidor; conservaremos tu propuesta si falla el guardado.' : 'Estás sin conexión. Esta demostración guarda en el navegador; no sincroniza con otros usuarios.'}
             </div>
           )}
           {!draft.completedAt && (
@@ -1516,6 +1531,7 @@ export default function App() {
             )}
             {page === "annotations" && (
               <Annotations
+                remote={!!remoteSave}
                 rows={(state.annotations || []).filter(
                   (a) => a.ownerId === active.id,
                 )}
@@ -1985,23 +2001,11 @@ export default function App() {
             {page === "absences" && (
               <Absences state={state} commit={commit} notify={notify} />
             )}
-            {page === "team" && active.role === "jefe" && (
-              <Workforce state={state} commit={commit} notify={notify} />
-            )}
-            {page === "calendar" && (
-              <Panel
-                title="Agenda del mes"
-                sub="Ordenada por vencimiento; el filtro de empresa se mantiene"
-              >
-                {table(
-                  resultTasks
-                    .filter((t) => t.status !== "Completada")
-                    .sort((a, b) =>
-                      (a.due || "9999").localeCompare(b.due || "9999"),
-                    ),
-                )}
-              </Panel>
-            )}
+            {page === "team" && active.role === "jefe" && (<>
+              {remoteSave&&<WorkspaceSetup state={state} commit={commit} presence={presence}/>}
+              <Workforce state={state} commit={commit} notify={notify} remote={!!remoteSave}/>
+            </>)}
+            {page === "calendar" && <DeadlineAgenda state={state} month={month} company={company} owner={viewedOwner} sector={sector} openTask={setDetail} openNotes={()=>setPage('annotations')}/>}
             {page === "team" && (
               <>
                 <div className="section-heading">
@@ -2012,7 +2016,7 @@ export default function App() {
                       onClick={() => setModal("employee")}
                     >
                       <Plus size={15} />
-                      Alta de demostración
+                      {remoteSave ? 'Incorporar empleado' : 'Alta de demostración'}
                     </button>
                   )}
                 </div>
@@ -2073,7 +2077,7 @@ export default function App() {
                 </div>
                 <Panel
                   title="Relaciones del equipo"
-                  sub="Ámbitos de la demostración; los permisos definitivos deben ejecutarse en la base"
+                  sub={remoteSave ? 'Los permisos de cada persona se comprueban en el servidor.' : 'Ámbitos de la demostración; los permisos definitivos deben ejecutarse en la base'}
                 >
                   <div className="table-wrap">
                     <table>
@@ -2205,7 +2209,7 @@ export default function App() {
                   <span>
                     El cierre abarca todas las empresas de cada empleado. Guarda
                     tareas, registros y métricas del mes; después bloquea sus
-                    cambios en esta demostración.
+                    cambios {remoteSave?'en el servidor.':'en esta demostración.'}
                   </span>
                 </div>
                 <PeriodReports state={state} month={month} />
@@ -2290,7 +2294,7 @@ export default function App() {
                                       <Download size={13} />
                                       Exportar cierre
                                     </button>
-                                  ) : manager ? (
+                                  ) : (remoteSave ? active.role==='jefe' : manager) ? (
                                     <button
                                       disabled={
                                         !ts.length || month > currentMonth()
@@ -2303,7 +2307,7 @@ export default function App() {
                                       Revisar y cerrar
                                     </button>
                                   ) : (
-                                    <span>Tu encargado realiza el cierre</span>
+                                    <span>Jefatura realiza el cierre</span>
                                   )}
                                 </td>
                               </tr>
@@ -2319,7 +2323,7 @@ export default function App() {
           <footer>
             <b>GRUPO PARÍS</b>
             <span>Orden para trabajar. Información para decidir.</span>
-            <span>Datos de ejemplo · guardado local · {monthLabel(month)}</span>
+            <span>{remoteSave ? 'Datos compartidos · guardado privado' : 'Datos de ejemplo · guardado local'} · {monthLabel(month)}</span>
           </footer>
         </div>
       </main>
@@ -2688,7 +2692,7 @@ export default function App() {
                 </select>
               </label>
               <p>
-                Se registra en el historial local. No cambia cierres anteriores
+                Se registra en el historial {remoteSave?'del servidor':'local'}. No cambia cierres anteriores
                 ni próximas recurrencias.
               </p>
             </details>
@@ -2796,8 +2800,7 @@ export default function App() {
           onClose={() => setModal(null)}
         >
           <p>
-            Alta de demostración: prepara su perfil y la inducción. No crea una
-            cuenta real ni envía una invitación.
+            {remoteSave ? 'El correo identifica a la persona que inicia sesión con ChatGPT. Configurar un perfil no amplía el acceso al sitio. Por ahora sólo el propietario puede entrar.' : 'Alta de demostración: prepara su perfil y la inducción. No crea una cuenta real ni envía una invitación.'}
           </p>
           <form
             onSubmit={(e) => {
@@ -2809,6 +2812,7 @@ export default function App() {
               const p: Profile = {
                 id: pid,
                 name: String(f.get("name")).trim(),
+                ...(remoteSave ? {email:String(f.get("email")||'').trim().toLowerCase()} : {}),
                 role: "empleado",
                 managerId: t.managerId,
                 teamId: tid,
@@ -2828,14 +2832,14 @@ export default function App() {
                       ...state.onboarding,
                       [pid]: blankOnboarding(p.name),
                     },
-                    activeId: pid,
+                    activeId: remoteSave ? active.id : pid,
                   },
-                  "Alta de demostración",
+                  remoteSave ? "Incorporó empleado" : "Alta de demostración",
                   pid,
                 )
               ) {
                 setModal(null);
-                setInduct(true);
+                setInduct(!remoteSave);
                 setPaused(false);
                 setOwner("");
               }
@@ -2845,6 +2849,7 @@ export default function App() {
               Nombre
               <input name="name" required maxLength={80} />
             </label>
+            {remoteSave && <label>Correo para iniciar sesión<input name="email" type="email" required maxLength={180}/></label>}
             <div className="form-grid">
               <label>
                 Equipo / responsable
@@ -2886,13 +2891,13 @@ export default function App() {
             </div>
             <div className="modal-actions">
               <button className="primary">
-                Crear y probar inducción <GraduationCap size={16} />
+                {remoteSave ? 'Crear perfil' : 'Crear y probar inducción'} <GraduationCap size={16} />
               </button>
             </div>
           </form>
         </Dialog>
       )}
-      {modal === "close" && manager &&
+      {modal === "close" && (remoteSave ? active.role==='jefe' : manager) &&
         !!state.profiles.find((p) => p.id === owner && p.active) &&
         canSee(active, owner, state.profiles) && (
         <Dialog
@@ -2923,7 +2928,7 @@ export default function App() {
                 ) {
                   setModal(null);
                   notify(
-                    "Mes consolidado y reporte emitido para Juan Pablo en esta demostración.",
+                    remoteSave ? "Mes consolidado y reporte guardado para jefatura." : "Mes consolidado y reporte emitido para Juan Pablo en esta demostración.",
                   );
                 }
               } catch (e) {

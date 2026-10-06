@@ -11,6 +11,7 @@ export type Role = "jefe" | "encargado" | "empleado";
 export type Status = "Pendiente" | "En curso" | "Completada";
 export type Kind = "resultado" | "operativa";
 export interface Profile {
+  email?: string;
   id: string;
   name: string;
   role: Role;

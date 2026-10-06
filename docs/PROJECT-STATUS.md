@@ -1,123 +1,40 @@
-# Estado vigente del proyecto — 06/10/2026
+# Estado vigente · 06/10/2026 · versión privada 1.0
 
-**Avance global estimado: 42% (rango 36–46%).** Hay avance funcional local en UI A
-y anticipación de v43, contrato privado B1/009 revisado y reparado, y fundación
-B2a/010 revisada independientemente sin hallazgos. La revisión de concurrencia011
-está cerrada para implementación local en
-`architecture/COORDINATION-011-CONCURRENCY-20261006.md`. SQL011 aún no existe.
-También faltan integración, PostgreSQL/Auth reales, UI y producción. Las pruebas y
-documentos por sí solos no elevan el porcentaje. QA visual completa y producción
-conectada siguen pendientes.
+El pedido actual reemplaza la ejecución aislada de SQL011 por la entrega de un recorrido diario privado en el Site existente. Se conserva todo el SQL Supabase sin aplicarlo a servicios remotos. La versión operativa usa el almacenamiento D1 de Sites; no se conecta la UI a contratos Supabase incompatibles.
 
-**Aplicación live: Sites v43**, fuente de implementación
-`9d6b97dc16625c974d6679cf7d69b7fe2fdb3900`, versión
-`appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_3e2fc69b4dac819196d375f0c836aa5a`,
-deploy `appgdep_6ac00b2ad81c81919a50bafab9f7101d` succeeded:
-https://grupo-paris-contabilidad.valentino-magni.chatgpt.site.
-La revisión06/10 modifica pruebas y documentación en Git; conserva
-la aplicación publicada desde ese commit.
+## Implementado
 
-## Cómo se estima el avance
+- Identidad real de Sites, roles y alcance verificados en servidor; denegación por defecto a cuentas sin perfil. Se elimina el selector que suplantaba a cualquier empleado en la versión publicada.
+- Administración técnica del propietario separada de su perfil e0 y del KPI. Juan Pablo conserva jefatura como perfil a configurar; no se inventan correos ni se envían invitaciones.
+- Cuatro empresas renombrables; administración de perfiles y correos; tareas independientes por empresa/asignación/ocurrencia/período.
+- Persistencia D1 por entidad, lectura coherente y escritura transaccional con revisión/token. Conflictos conservan la propuesta; no hay fallback silencioso a datos locales.
+- Mi día, tablero, lista, tarjetas/columnas plegables independientes, filtros y orden A–Z.
+- Checklist lineal, finalización automática, reapertura, esperas, sesiones de timer con actor y hora del servidor, un reloj por persona.
+- Inducción de seis pasos y recorrido guiado; progreso guardado en servidor; catálogo, recurrencias y planificación.
+- Agenda con entregables, metas operativas, cumplidos opcionales y recordatorios, incluidos plazos que caen en un mes diferente a la ocurrencia.
+- Cantidades operativas con fechas/referencias, KPI ponderados, puntualidad/anticipación, métricas de persona/equipo/sector, reportes y cierre exclusivo de jefatura calculado en servidor.
+- Notas privadas de su autor y conversión a tarea; última actividad basada en consultas al servidor.
+- Tokens de contraste de jerarquía, avatares, controles, checklists y tooltips; tamaño de lectura mejorado; temas claro/oscuro/sistema.
 
-Los pesos representan esfuerzo y riesgo restantes aproximados. Los porcentajes
-de cada etapa son juicio de planificación, sin precisión estadística ni una
-medición automática de requisitos. Se mantienen los mismos pesos para comparar.
+## Pruebas
 
-| Etapa | Peso | Estimación anterior → actual | Evidencia / pendiente |
-| --- | --- | --- | --- |
-| Demo, experiencia y reglas | 25% | 80% → 80% | UI A y anticipación aceptadas localmente; pendientes funciones B/C/D y QA visual |
-| Contrato de datos y SQL | 25% | 68% → 68% | SQL001–010 intactos durante revisión; fundación010 aceptada, motor011 y PostgreSQL real pendientes |
-| Integración, cuentas y permisos | 25% | 5% → 5% | Lector/gateway listos localmente; frontend usa localStorage y actor simulado |
-| Funcionalidad final y operación | 15% | 25% → 25% | Reportes/outbox locales; pendientes integración, notificaciones, Kaizen/5S y administración final |
-| Validación, infraestructura y migración | 10% | 0% → 0% | Piloto, servicios definitivos y migración aún pendientes |
+Suite completa: 293 casos, 28 archivos, todos pasan (134 s). Tras normalizar el almacenamiento, reejecutados 20 casos de UI/Worker/SQLite, todos pasan. Compilación TypeScript, Vite y Worker ESM; migración Drizzle inspeccionada (tres tablas, sin semillas ni backfills); `git diff --check`.
 
-La ponderación permanece en 42,0; se comunica **aproximadamente 42%**. El rango
-36–46% muestra la incertidumbre. No corresponde elevarlo al 50% por tener más
-commits o reparaciones. La demo está mucho más cerca de terminarse que la entrega
-operativa completa. No hay una base de producción conectada ni usuarios reales.
+Los tests verifican identidad/CSRF, alcance por empresa, impedimento de cambiar roles/pesos/cierres desde empleado, privacidad de notas frente a jefatura, integración timer/checklist/meta/cierre y rechazo de escrituras simultáneas obsoletas. El adaptador SQLite ejecuta batches transaccionales serializados.
 
-## Avance concreto del último bloque
+QA UI mediante DOM simulado. QA visual y navegador autenticado real no ejecutados: control-browser no disponible. No se declara piloto real de varios empleados.
 
-- B2a/010: seis tablas staged de responsabilidad y cobertura seleccionada, cuotas,
-  sellado/guardas, backfill sin reescribir historia, fallback y tipos Zod propios.
-  Las 18 pruebas del bloque pasan. No activa tareas conjuntas, cobertura selectiva,
-  acceso, relojes o métricas en UI. Evidencia:
-  `architecture/COORDINATION-010-IMPLEMENTATION-20261004.md`.
-- Revisión independiente010 agrega ocho probes SQL directos y no encontró defectos
-  en el alcance staged. Evidencia: `architecture/COORDINATION-010-REVIEW-20261004.md`.
-  Contrato011 de activación está cerrado para Luna; aún no implementado ni conectado.
-- B1 `202610020009_private_block_notes.sql` añade notas privadas, historial
-  inmutable, receipts separados y RPC con autorización por autor/jefe/encargado
-  actual y empresa. El wrapper RPC no cambia el gateway existente ni la UI.
-- Siete pruebas locales cubren base vacía, upgrade desde 008 sin tocar snapshots,
-  ciclo de edición/limpieza, permisos, recibos, mes cerrado, ACL y wrapper. PGlite
-  no valida carreras reales ni Supabase Auth/RLS remoto. Sol añadió 12 pruebas
-  independientes y reparó cancelación, envelope y normalización de whitespace.
-- La página sigue v43. Los comentarios aún no aparecen ni funcionan en la UI.
-El commit de implementación B1 se conserva como evidencia y se sincroniza junto
-con la revisión en el repositorio de Sites. Backend aún local, no SQL remoto.
+## Acceso
 
-- Contraste de cabecera del encargado y checklist adaptado a tokens del tema;
-  capturas posteriores motivaron el cambio. QA de navegador aún abierta.
-- Anticipación por ocurrencia/empresa y período: antes/en fecha/después,
-  pendiente/vencida, sin plazo y sin medición. Metas usan el registro que cruza
-  el objetivo y muestran “Meta registrada”. No dan bonificación al KPI.
-- Nuevos cierres conservan métricas del corte; históricos sin campo no se
-  recalculan. Análisis y CSV incluyen bases, tasas y promedios.
-- Revisión v42 encontró cuatro fallos; reparación v43 pasa los cuatro probes
-  originales. Revisión independiente actual acepta este comportamiento local.
-- Regresión adicional verifica que no-op del reductor no escribe ni audita en
-  el llamador. Evidencia: architecture/REVIEW-V43-INDEPENDENT-20261002.md.
+Site seleccionado: `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85`.
+URL existente: https://grupo-paris-contabilidad.valentino-magni.chatgpt.site.
+Audiencia confirmada: custom, sólo propietario; cero visitantes externos o grupos. La publicación usa la operación privada. No se llama a cambios de acceso.
 
-## Pendientes que impiden migrar a los empleados
+## Pendientes
 
-1. Implementar y revisar motor011; después B/C: jerarquía multiarea,
-   conjuntas y contribuciones, cobertura por tareas, bajas/huérfanas, e integrar
-   comentarios privados con Auth real.
-2. Integrar frontend con lector/gateway y completar equivalencia de reglas,
-   Auth/invitaciones/MFA/RLS y datos compartidos.
-3. Cerrar agenda/cumplimiento, presencia y última conexión, notificaciones,
-   entrega de reportes, consultas y procesos de mejora.
-4. Ejecutar concurrencia PostgreSQL real, QA visual y volumen, piloto con Juan
-   Pablo y encargado, pruebas de restauración y actualización.
-5. Al aceptar versión definitiva, crear infraestructura dedicada nueva y flujo
-   dev/prod, GitHub/Supabase/hosting e iniciar migración manual por equipos.
+1. Configurar razones sociales y correos reales en UI; el propietario puede trabajar en su tablero desde la inducción. Autorizar y pilotear acceso de empleados antes de ampliar audiencia.
+2. QA visual/móvil real, carga/volumen, MFA para cuentas privilegiadas y respaldo/restauración operativa. Exportación UI incluye sólo datos visibles y no es un backup completo de notas privadas ajenas.
+3. Funciones posteriores: ARCA cuatro CUIT, correo/notificaciones externas, conjuntas con reparto, cobertura por tareas seleccionadas, jerarquía multiarea, Kaizen/5S e infraestructura dedicada dev/prod.
+4. Si se retoma Supabase, implementar/revisar011 y adaptar la UI explícitamente; nunca aplicar001–010 como si fueran el esquema D1.
 
-El cronómetro funciona localmente y guarda sesiones en ese navegador. Sus RPC
-existen en SQL local, pero no están conectadas a la página. Presencia y última
-conexión siguen pendientes de Auth y señales del servidor. Correo/outbox tienen
-contratos y consumidor de prueba; no hay correo productivo.
-
-## Evidencia y continuidad
-
-SQL001–010, gateway y lector conservan aceptación local (009 revisado por Sol).
-010 tiene aceptación de ejecución y revisión independiente local, sin hallazgos.
-Laboratorio PGlite:
-23 casos secuenciales y 24 pares preparados para PostgreSQL sin ejecutar. Esas
-pruebas no sustituyen carreras reales ni Supabase Auth/MFA/RLS en producción.
-Revisiones de lector/adaptador, upgrades y reportes se conservan en docs/architecture.
-UI A: REVIEW-V40-INDEPENDENT-20261002.md. Anticipación: REVIEW-V43-INDEPENDENT-20261002.md.
-El registro v42 y sus probes fallidos permanecen como evidencia histórica.
-Suite completa tras revisión06/10: **275 pruebas en 26 archivos, todas pasan**
-(86,54s). Las siete pruebas abstractas nuevas se agregan a las268 de revisión010.
-Build TypeScript/Vite y `git diff --check` pasan. No se ejecutó PostgreSQL real.
-Comando con contención controlada:
-`npm test -- --maxWorkers=1 --testTimeout=60000 --hookTimeout=60000`.
-El smoke de la revisión010 `node tests/postgres-009/check-sql.mjs` pasó los8 órdenes009 en secuencia
-con PGlite. Están preparados para PostgreSQL, sin ejecución concurrente real.
-`npm run build` de010 pasa TypeScript y Vite; `git diff --check` también pasa.
-En la revisión009 anterior se quitó un argumento de timeout accidental dentro de
-una aserción; sus aserciones y resultados funcionales no cambiaron.
-
-**Próximo paso: GPT-6 Luna, esfuerzo medio, Standard**, implementar011 completo
-según contrato y protocolo06/10; luego Sol alto revisa implementación/permisos.
-La base staged010 no activa permisos, relojes o KPI. La revisión06/10 agregó
-siete pruebas abstractas de orden de adquisición y cerró las contradicciones de
-replay, doble cierre y nombres reales del snapshot/actividad. No ejecutó carreras
-PostgreSQL ni SQL remoto. No cambia la estimación42% hasta progreso funcional.
-
-Puertas hacia Supabase/hosting y evaluación gratuita verificadas en
-`ops/FREE-HOSTING-PATH-20261002.md`. Preferencia Cloudflare Pages+Supabase dev/prod,
-con límites, backup y correo a validar antes de alta. No hay fecha fiable de
-migración; se reportan puertas completadas y pendientes, sin estimarlas desde el
-número de commits. Recursos finales no creados.
+No se usa el antiguo 42% como medición del nuevo alcance; se comunica funcionalidad y pruebas verificadas. Los documentos cronológicos anteriores describen la demo y el camino Supabase previo.

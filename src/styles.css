@@ -34,7 +34,7 @@
 }
 body {
   margin: 0;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.5;
 }
 button,
@@ -2201,3 +2201,24 @@ summary {
 .annotation-card-actions .annotation-linked { color: var(--green); }
 .annotation-linked-unavailable { color: var(--muted); padding: 6px 4px; }
 @media (max-width: 700px) { .annotation-form { grid-template-columns: 1fr; } .annotation-content, .annotation-form-actions { grid-column: 1; } .annotation-tools { flex-direction: column; } }
+
+/* Operational readability: shared tokens also cover cards, hierarchy and dialogs. */
+label, .filters select, .sidebar select, .sidebar nav button, .card-bottom,
+.check-line, .task-order, .timer-mini, .timeliness-badge { font-size: .875rem; }
+.content p, dialog p, .induction-body p { font-size: 1rem; }
+.content :is(label, small, .table-wrap td, .table-wrap th) { font-size: .875rem; }
+.content small, dialog small { color: var(--control-muted); }
+.org-manager, .org-root, .org-person { color: var(--ink); }
+.org-manager, .org-root { background: var(--surface-soft); border-color: var(--line); }
+.org-manager .avatar, .org-person .avatar { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+.org-manager small, .org-person small { color: var(--control-muted); }
+.card-collapse { padding: 3px 0; border: 0; background: none; color: var(--control-muted); font-size: .875rem; margin-bottom: 8px; }
+.card-collapse:hover:not(:disabled) { background: none; }
+.task-card [hidden] { display: none; }
+.sync-status { position: fixed; z-index: 1000; bottom: 12px; right: 16px; display: flex; align-items: center; flex-wrap: wrap; gap: 10px; max-width: calc(100vw - 32px); padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--control-muted); box-shadow: 0 3px 14px #0002; font-size: .875rem; }
+.sync-status.sync-error { color: var(--red); border-color: var(--red); }
+.sync-status button { padding: 5px 8px; }
+.access-note { padding: 12px; background: var(--surface-soft); border-radius: 8px; color: var(--control-muted); }
+[inert] { cursor: wait; }
+@media (max-width: 720px) { .sync-status { position: sticky; top: 0; bottom: auto; right: auto; margin: 8px; max-width: none; }.content { overflow-wrap: anywhere; }.card-bottom { flex-wrap: wrap; } }
+@media print { .sync-status, .sidebar, .header-right, .notice-banner, .card-collapse { display: none!important; } }

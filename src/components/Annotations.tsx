@@ -27,7 +27,7 @@ const categoryKind = (label: string): AnnotationKind => {
 };
 
 export default function Annotations({
-  rows, tasks, onSave, onDelete, onConvert, onOpenTask,
+  rows, tasks, onSave, onDelete, onConvert, onOpenTask, remote=false,
 }: {
   rows: Annotation[];
   tasks: Task[];
@@ -35,6 +35,7 @@ export default function Annotations({
   onDelete: (id: string) => void;
   onConvert: (entry: Annotation) => void;
   onOpenTask: (id: string) => void;
+  remote?:boolean;
 }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
@@ -74,7 +75,7 @@ export default function Annotations({
     <div className="annotations-page">
       <Panel title="Anotaciones personales" sub="Fórmulas, recordatorios y referencias útiles. Convertí una anotación en tarea cuando necesite seguimiento.">
         <div className="annotation-privacy">
-          <FileText size={16} /> Demo local: estas anotaciones quedan en este navegador y asociadas al perfil seleccionado. Aún no hay cuentas privadas ni sincronización.
+          <FileText size={16} /> {remote ? 'Estas anotaciones se guardan en el servidor y sólo se entregan a tu perfil. Si convertís una en tarea, el título y los controles de esa tarea pasan al ámbito de trabajo autorizado.' : 'Demo local: estas anotaciones quedan en este navegador y asociadas al perfil seleccionado. Aún no hay cuentas privadas ni sincronización.'}
         </div>
         {due.length > 0 && <div className="annotation-due"><Bell size={16} /> Tenés {due.length} recordatorio{due.length === 1 ? "" : "s"} para revisar.</div>}
         {!formOpen ? (

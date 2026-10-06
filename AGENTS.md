@@ -33,3 +33,12 @@
 - Completar una fase entera del mismo modelo (corrección, implementación y verificaciones necesarias); no fraccionarla para pedir continuar después de una subtarea. Pedido de sesiones más largas del 06/10/2026. Detenerse sólo por cambio necesario de modelo o bloqueo concreto.
 - B1/009 reparado y B2a/010 revisado independientemente. Protocolo011 cerrado el06/10: `docs/architecture/COORDINATION-011-CONCURRENCY-20261006.md`, obligatorio junto al contrato `COORDINATION-011-EXECUTION-20261004.md`. Próxima fase: **GPT-6 Luna, esfuerzo medio, Standard**, implementar todo011 local, pruebas, documentación y commit/push; revisión posterior Sol alto. Sustituir todas las rutas escritoras en una migración, no activar por partes. Las siete pruebas del modelo abstracto no sustituyen PostgreSQL real. Mantener live v43 y SQL remoto sin aplicar.
 - Se preservaron SQL 001–008 y evidencia histórica; no se aplicó SQL remoto. Concurrencia PostgreSQL, integración y Supabase Auth/invitaciones/MFA/RLS/correo reales siguen pendientes; no migrar empleados ni declarar producción. Grado de avance: `docs/PROJECT-STATUS.md`.
+
+## Pedido vigente06/10: versión privada utilizable en Sites
+
+- Este pedido sustituye la ejecución aislada de011 y la prohibición anterior de cambiar App o publicar. Continuar el recorrido diario, datos compartidos y despliegue privado del mismo Site.
+- La aplicación publicada1.0 usa Worker+D1 de Sites con identidad real del dispatcher. Los contratos Supabase históricos permanecen intactos/no aplicados y no se confunden con el backend activo.
+- No volver a localStorage ni al selector que suplanta usuarios. Propietario: administración técnica/e0 solamente; empleado ordinario: identidad fija. Roles, empresas, notas y cierres se validan en servidor.
+- Preservar audiencia sólo propietario. Configurar perfiles no autoriza invitaciones ni cambios de visibilidad.
+- Ver docs/PROJECT-STATUS.md, docs/EXECUTION-NEXT.md y docs/runbooks/SITES-PRIVATE-1.md, que son el estado vigente; cronología anterior es evidencia histórica.
+- Pruebas automatizadas/DOM y SQLite no equivalen a QA visual ni piloto real. No declarar listas secundarias o migración masiva que no se hayan ejecutado.

@@ -10,10 +10,12 @@ export function Workforce({
   state,
   commit,
   notify,
+  remote=false,
 }: {
   state: State;
   commit: (s: State, action: string, entityId?: string) => boolean;
   notify: (s: string) => void;
+  remote?:boolean;
 }) {
   const active = state.profiles.find((p) => p.id === state.activeId)!;
   const [editing, setEditing] = useState<Profile | null>(null);
@@ -82,6 +84,7 @@ export function Workforce({
                 }
               />
             </label>
+            {remote&&editing.id!=='admin'&&<label>Correo de acceso<input type="email" value={editing.email||''} maxLength={180} onChange={e=>setEditing({...editing,email:e.target.value.trim().toLowerCase()})}/><small>Debe coincidir con el correo usado para iniciar sesión con ChatGPT.</small></label>}
             <label>
               Rol
               <select
@@ -221,9 +224,7 @@ export function Workforce({
             </label>
             <div className="note">
               Al convertir un empleado en encargado se prepara su propio equipo.
-              Las invitaciones y el restablecimiento de contraseña se
-              habilitarán al conectar las cuentas reales. En esta demostración
-              no se almacenan contraseñas.
+              {remote ? 'El correo debe coincidir con su cuenta de ChatGPT. El acceso al sitio se habilita por separado y requiere aprobación del propietario.' : 'Las invitaciones y el restablecimiento de contraseña se habilitarán al conectar las cuentas reales. En esta demostración no se almacenan contraseñas.'}
             </div>
             <div className="modal-actions">
               <button className="primary">Guardar perfil</button>
