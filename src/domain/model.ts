@@ -179,6 +179,8 @@ export interface ParameterReview {
   reviewedBy: string;
 }
 export interface State {
+  notifications?: import('./notifications').WorkNotification[];
+  taskComments?: import('./notifications').TaskComment[];
   parameterReviews?: Record<string, ParameterReview>;
   version: 3;
   absences?: Absence[];

@@ -1,4 +1,6 @@
-import ParameterizationInbox from "./components/ParameterizationInbox";
+import NotificationCenter from "./components/NotificationCenter";
+import TaskComments from "./components/TaskComments";
+import { collectTaskNotifications } from "./domain/notifications";
 import LaboratoryInvitations from "./components/LaboratoryInvitations";
 import Planning from "./components/Planning";
 import WorkspaceSetup from "./components/WorkspaceSetup";
@@ -221,6 +223,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
       void remoteSave(next,action,entityId).then(setState).catch((e:Error)=>notify(e.message));
       return true;
     }
+    if (laboratory) next = collectTaskNotifications(state, next, active.id);
     const s = action
       ? {
           ...next,
@@ -1038,7 +1041,6 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
       <aside className="sidebar">
         <div className="brand">
           <img src="/logo-grupo-paris.svg" alt="Grupo París" />
-          <span>ESPACIO CONTABLE</span>
         </div>
         <label className="workspace sidebar-workspace">
           <Building2 size={18} />
@@ -1133,6 +1135,10 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             <b>{pages.find((p) => p.id === page)?.name}</b>
           </div>
           <div className="header-right">
+            {!remoteSave && <NotificationCenter key={active.id} state={state} commit={commit} notify={notify} onOpenTask={taskId => {
+              const task = state.tasks.find(t => t.id === taskId);
+              if (task && canWork(state, active, task)) { setMonth(task.month); setPage('tasks'); setDetail(taskId); }
+            }} />}
             <ThemeControl />
             <span className="version">{remoteSave ? 'Versión privada · 1.0' : 'Nueva generación · 0.4'}</span>
             <span className="avatar">{ini(active.name)}</span>
@@ -1141,7 +1147,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
         <div className="content">
           {laboratory && (
             <div className="lab-banner">
-              <b>LABORATORIO TÉCNICO · copia aislada</b>
+              <b>Vista de prueba</b>
               <span>
                 Podés probar todos los perfiles. Los cambios y KPI de este
                 entorno no afectan el tablero principal.
@@ -1149,7 +1155,6 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
               {!laboratoryMode && <button onClick={exitLab}>Volver al tablero</button>}
             </div>
           )}
-          <ParameterizationInbox state={state} commit={commit} notify={notify} />
           {remoteSave&&active.id==='admin'&&state.tasks.length===0&&<div className="notice-banner"><span>Empezá por configurar las empresas y los responsables en Equipo. Después abrí Mi tablero para completar tu inducción y cargar el primer trabajo.</span><button onClick={()=>setPage('team')}>Configurar equipo</button><button onClick={()=>onView?.('e0')}>Abrir mi tablero</button></div>}
           {state.tasks
             .filter((t) =>
@@ -1555,16 +1560,6 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             )}
             {page === "operations" && (
               <>
-                <div className="operational-intro">
-                  <ActivityIcon size={23} />
-                  <div>
-                    <b>Trabajo continuo, evidencia concreta.</b>
-                    <p>
-                      Registrá lo realizado. Cada operativa tiene una meta y un
-                      historial propios por empresa y mes.
-                    </p>
-                  </div>
-                </div>
                 <section className="task-owner-section">
                   <h2>{viewedOwner === active.id ? "Mis operativas" : `Operativas de ${nameOf(viewedOwner)}`}</h2>
                   <div className="operations-grid">
@@ -2677,6 +2672,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
               </button>
             </>
           )}
+          {laboratory && <TaskComments key={tasksForDetail.id} state={state} taskId={tasksForDetail.id} commit={commit} notify={notify} />}
           {active.role === "jefe" && !isClosed(state, tasksForDetail) && (
             <details>
               <summary>Configuración del jefe · este período</summary>

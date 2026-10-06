@@ -81,6 +81,8 @@ const assert = (ok, message) => {
         bottom: u.getBoundingClientRect().bottom,
         right: s.getBoundingClientRect().right,
         logoWidth: logo.getBoundingClientRect().width,
+        logoCenter: logo.getBoundingClientRect().x + logo.getBoundingClientRect().width / 2,
+        selectorCenter: s.querySelector('.sidebar-workspace select').getBoundingClientRect().x + s.querySelector('.sidebar-workspace select').getBoundingClientRect().width / 2,
         horizontalOverflow:
           document.documentElement.scrollWidth > innerWidth + 1,
       };
@@ -95,6 +97,9 @@ const assert = (ok, message) => {
     );
     assert(!metrics.horizontalOverflow, "Horizontal page overflow at " + width);
     assert(metrics.logoWidth >= 90, "Logo unexpectedly small");
+    assert(Math.abs(metrics.logoCenter - metrics.selectorCenter) < 6, 'Logo not aligned to company selector');
+    assert((await page.locator('.brand').innerText()) === '', 'Brand caption remains');
+    assert((await page.locator('header .notification-trigger').count()) === 1, 'Notifications missing from header');
     checks.push(metrics);
     await page.screenshot({
       path: path.join(output, "sidebar-" + width + "x" + height + ".png"),
@@ -175,7 +180,20 @@ const assert = (ok, message) => {
     path: path.join(output, "task-cards.png"),
     animations: "disabled",
   });
+  const search = page.locator('.search input').first();
+  if (await search.count()) {
+    await search.focus();
+    const bounds = await page.locator('.search').first().boundingBox();
+    assert(bounds.x >= 4 && bounds.x + bounds.width <= 1596, 'Search focus frame clipped');
+    await page.screenshot({ path: path.join(output, 'search-focus.png'), animations: 'disabled' });
+  }
+  await first.locator('.card-title').click();
+  await page.getByLabel('Nuevo comentario').fill('Nota de prueba para el superior');
+  await page.getByRole('button', { name: 'Publicar comentario', exact: true }).click();
+  await page.getByRole('button', { name: 'Cerrar', exact: true }).click();
   await page.getByLabel("Vista de usuario").selectOption("boss");
+  await page.getByRole('button', { name: /^Notificaciones:/ }).click();
+  assert((await page.getByText('Nuevo comentario en la tarea', { exact: true }).count()) === 1, 'Manager task notification missing');
   await page.locator(".parameterization-inbox summary").click();
   await page
     .getByRole("button", { name: "Revisar Valentino Magni", exact: true })
@@ -195,6 +213,7 @@ const assert = (ok, message) => {
   });
   await page.reload();
   await page.locator(".lab-banner").waitFor();
+  await page.getByRole('button', { name: /^Notificaciones:/ }).click();
   await page.locator(".parameterization-inbox summary").click();
   assert(
     (await page
@@ -202,8 +221,11 @@ const assert = (ok, message) => {
       .count()) === 0,
     "Review lost on reload",
   );
+  await page.getByRole('button', { name: 'Cerrar', exact: true }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.locator('[data-nav="day"]').click();
+  await page.locator('[data-nav="operations"]').click();
+  assert((await page.locator('.operational-intro').count()) === 0, 'Operational banner remains');
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth > innerWidth + 1,
   );

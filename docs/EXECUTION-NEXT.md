@@ -25,3 +25,5 @@ sin errores JS y sin llamadas a la API operativa. No declara validado el acceso
 real de empleados ni Supabase/Auth/MFA externo.
 
 El cierre al 100% se rige por ops/FINAL-ACCEPTANCE.md. Pre-commit local activo; CI GitHub preparado, todavía sin ejecutar. PR/deploy/migraciones remotas pendientes de infraestructura propia.
+
+Siguiente bloque: completar coordinación conjunta del laboratorio conservando una identidad/KPI y conectar su evento a domain/notifications.ts. Luego revisar cobertura precisa y jerarquía. No conectar servicios hasta necesidad técnica concreta; no confundir notificaciones locales con entrega entre usuarios reales.

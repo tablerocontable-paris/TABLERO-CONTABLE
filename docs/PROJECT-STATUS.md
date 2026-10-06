@@ -44,3 +44,8 @@ implementarlos. No simular cambio de modelo ni delegación.
 
 ## Definición final de avance
 Avance global aproximado: 45%. El 100% incluye GitHub propio, Supabase dev/producción y hosting funcionando, con entrega automática verificada y todas las correcciones conocidas cerradas. Ver ops/FINAL-ACCEPTANCE.md. Primero aceptación funcional del laboratorio; después configuración e integración de infraestructura. No enviar invitaciones reales ahora.
+
+## Correcciones de marca y notificaciones
+Logo alineado y centrado sin leyenda, cabecera compacta, campana para todos los perfiles y comentarios de tareas en laboratorio. Avisos de asignación, cambios, finalización y comentarios; lectura persistente por destinatario. Contrato conjunto preparado pero disparador funcional aún pendiente. Ver product/CORRECTIONS-20261006-NOTIFICATIONS.md. No se necesitan cuentas/conexiones para continuar estos bloques.
+
+Verificación de este bloque: 339/339 pruebas en 33 archivos, build aprobado y Chromium escritorio/móvil aprobado con cero errores JS y cero llamadas a /api. Fuente y publicación privada del mismo Site; sin cambiar audiencia.

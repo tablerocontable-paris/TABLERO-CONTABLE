@@ -71,3 +71,6 @@ Avance orientativo 45–50%; no 100%.
 
 ## Definición final del usuario — 06/10/2026
 100% incluye aplicación aceptada sin correcciones conocidas, GitHub, dos Supabase dev/producción, hosting propio y automatización validada. Seguir docs/ops/FINAL-ACCEPTANCE.md. No crear cuentas ni invitar usuarios durante laboratorio. No confundir CI preparado con CI ejecutado.
+
+## Correcciones posteriores — notificaciones
+Seguir docs/product/CORRECTIONS-20261006-NOTIFICATIONS.md. Continuar sin conexiones hasta imposibilidad técnica concreta. La campana y los comentarios funcionan sólo en laboratorio; entrega transaccional en servidor y activación conjunta siguen pendientes de integración.
