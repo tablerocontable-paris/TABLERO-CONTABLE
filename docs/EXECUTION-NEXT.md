@@ -1,20 +1,28 @@
-# Próxima ejecución — cerrar protocolo de concurrencia para011
+# Próxima ejecución — implementación completa011
 
-**GPT-6.1 Sol, esfuerzo alto, Standard.** Antes de ejecutar011, resolver el
-hallazgo reproducible del orden de locks en
-`architecture/COORDINATION-011-LOCK-REVIEW-20261004.md` y actualizar
-`architecture/COORDINATION-011-EXECUTION-20261004.md` con un protocolo aplicable
-a todas las RPC existentes, sin lock global de organización. La revisión010 pasó
-sin hallazgos; evidencia en `architecture/COORDINATION-010-REVIEW-20261004.md`.
-Después de cerrar ese contrato, GPT-6 Luna medio implementa el bloque.
+**GPT-6 Luna, esfuerzo medio, Standard.** Contrato de implementación cerrado:
+`architecture/COORDINATION-011-EXECUTION-20261004.md` y protocolo obligatorio
+`architecture/COORDINATION-011-CONCURRENCY-20261006.md`. Leer ambos completos.
+La revisión de concurrencia06/10 corrigió el orden, replay, cierre compartido,
+nota009 e inducción por lote. Siete pruebas exploran el modelo abstracto;
+no equivalen a validación PostgreSQL real. Revisión010 sin hallazgos en
+`architecture/COORDINATION-010-REVIEW-20261004.md`.
+
+Completar la fase entera sin pausas por subtarea: SQL011 explícito, tipos, fixtures,
+runner concurrente preparado, aceptación focal/completa/build, documentación,
+commit y push verificado. Revisar cada fallo contra el contrato y corregirlo.
+Si aparece una decisión arquitectónica no cerrada, registrar evidencia concreta
+y volver a Sol; no sustituir la fase por otro plan ni fingir cambio de modelo.
 
 011 debe activar tareas conjuntas puntuales y coberturas exactas en SQL local. Leer
 también toda evidencia010, diseño B, contratos001–009 y rutas escritoras reales.
 Parchear conjuntamente autorización, clocks por actor, materialización,
 cancelación, checklist/actividad, todas las RPC heredadas, conjunto de locks,
 cierre, cuotas KPI y reporte versionado. No desplegar ni ejecutar migración
-remota. No cambiar el orden de locks por intuición ni empezar una activación
-parcial mientras este hallazgo esté abierto.
+remota. No cambiar el orden de locks por intuición ni activar sólo parte de las rutas.
+Reemplazar también notas009, catálogo y aprobación de inducción. No mezclar
+keys nuevas con locks bigint antiguos. Si no hay PostgreSQL, dejar pruebas
+concurrentes NO EJECUTADAS; eso no bloquea implementación local, sí producción.
 
 Ninguna relación010 staged concede acceso, modifica cronómetros o recalcula KPI.
 No cambiar SQL001–010 ni App/lector/gateway durante esta ejecución aislada.

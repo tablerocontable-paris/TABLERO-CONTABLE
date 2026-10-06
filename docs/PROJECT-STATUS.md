@@ -1,10 +1,10 @@
-# Estado vigente del proyecto — 04/10/2026 UTC (sesión 03/10 Argentina)
+# Estado vigente del proyecto — 06/10/2026
 
 **Avance global estimado: 42% (rango 36–46%).** Hay avance funcional local en UI A
 y anticipación de v43, contrato privado B1/009 revisado y reparado, y fundación
-B2a/010 revisada independientemente sin hallazgos. La ejecución011 está pausada
-antes de crear SQL tras detectar una inversión posible de locks en RPC heredadas;
-resolución documentada en `architecture/COORDINATION-011-LOCK-REVIEW-20261004.md`.
+B2a/010 revisada independientemente sin hallazgos. La revisión de concurrencia011
+está cerrada para implementación local en
+`architecture/COORDINATION-011-CONCURRENCY-20261006.md`. SQL011 aún no existe.
 También faltan integración, PostgreSQL/Auth reales, UI y producción. Las pruebas y
 documentos por sí solos no elevan el porcentaje. QA visual completa y producción
 conectada siguen pendientes.
@@ -14,7 +14,7 @@ conectada siguen pendientes.
 `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85~appgver_3e2fc69b4dac819196d375f0c836aa5a`,
 deploy `appgdep_6ac00b2ad81c81919a50bafab9f7101d` succeeded:
 https://grupo-paris-contabilidad.valentino-magni.chatgpt.site.
-La revisión010 modifica backend local, pruebas y documentación en Git; conserva
+La revisión06/10 modifica pruebas y documentación en Git; conserva
 la aplicación publicada desde ese commit.
 
 ## Cómo se estima el avance
@@ -98,21 +98,23 @@ pruebas no sustituyen carreras reales ni Supabase Auth/MFA/RLS en producción.
 Revisiones de lector/adaptador, upgrades y reportes se conservan en docs/architecture.
 UI A: REVIEW-V40-INDEPENDENT-20261002.md. Anticipación: REVIEW-V43-INDEPENDENT-20261002.md.
 El registro v42 y sus probes fallidos permanecen como evidencia histórica.
-Suite completa tras revisión010: **268 pruebas en 25 archivos, todas pasan**
-(72,11s en esta ejecución). Las 8 nuevas pruebas independientes se agregan a las
-260 de ejecución010. Build también pasa.
+Suite completa tras revisión06/10: **275 pruebas en 26 archivos, todas pasan**
+(86,54s). Las siete pruebas abstractas nuevas se agregan a las268 de revisión010.
+Build TypeScript/Vite y `git diff --check` pasan. No se ejecutó PostgreSQL real.
 Comando con contención controlada:
 `npm test -- --maxWorkers=1 --testTimeout=60000 --hookTimeout=60000`.
-El smoke `node tests/postgres-009/check-sql.mjs` pasa los 8 órdenes009 en secuencia
+El smoke de la revisión010 `node tests/postgres-009/check-sql.mjs` pasó los8 órdenes009 en secuencia
 con PGlite. Están preparados para PostgreSQL, sin ejecución concurrente real.
 `npm run build` de010 pasa TypeScript y Vite; `git diff --check` también pasa.
 En la revisión009 anterior se quitó un argumento de timeout accidental dentro de
 una aserción; sus aserciones y resultados funcionales no cambiaron.
 
-**Próximo paso: GPT-6.1 Sol, esfuerzo alto, Standard**, cerrar el protocolo de
-locks descrito en `architecture/COORDINATION-011-LOCK-REVIEW-20261004.md`.
-Después Luna implementa el contrato011 actualizado. La base staged010 no activa
-permisos, relojes o KPI; el motor011 todavía no está ejecutado.
+**Próximo paso: GPT-6 Luna, esfuerzo medio, Standard**, implementar011 completo
+según contrato y protocolo06/10; luego Sol alto revisa implementación/permisos.
+La base staged010 no activa permisos, relojes o KPI. La revisión06/10 agregó
+siete pruebas abstractas de orden de adquisición y cerró las contradicciones de
+replay, doble cierre y nombres reales del snapshot/actividad. No ejecutó carreras
+PostgreSQL ni SQL remoto. No cambia la estimación42% hasta progreso funcional.
 
 Puertas hacia Supabase/hosting y evaluación gratuita verificadas en
 `ops/FREE-HOSTING-PATH-20261002.md`. Preferencia Cloudflare Pages+Supabase dev/prod,

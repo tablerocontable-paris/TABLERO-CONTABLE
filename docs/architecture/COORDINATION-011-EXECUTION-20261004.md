@@ -9,11 +9,12 @@ del laboratorio. Si el esquema observado contradice este contrato, detener el
 cambio, registrar el hecho y volver a Sol; no reinterpretar permisos, créditos,
 estados de negocio ni recurrencias.
 
-**Estado actualizado:** la ejecución se pausó antes de crear SQL011 al detectar
-una inversión concreta entre locks de titular/actor heredados y el nuevo lock
-común de participantes. Ver `COORDINATION-011-LOCK-REVIEW-20261004.md`. Este
-contrato queda en suspenso hasta que Sol cierre y apruebe el protocolo; Luna no
-debe ejecutar instrucciones de locks de esta versión sin esa corrección.
+**Estado actualizado 06/10/2026:** revisión de concurrencia cerrada para
+implementación local. Leer obligatoriamente
+`COORDINATION-011-CONCURRENCY-20261006.md`: sustituye las instrucciones anteriores
+de locks, replay y envolventes de rutas. El hallazgo previo era una inversión
+posible al extender las RPC, no un fallo reproducido en PostgreSQL. SQL011 aún
+no existe; las pruebas PostgreSQL reales siguen siendo puerta de producción.
 
 ## Resultado requerido y límites
 
@@ -113,7 +114,8 @@ Auditor/técnico de prueba no pasa roles reales ni adquiere escritura de trabajo
 La solicitud sólo crea conjunto para la tarea puntual, no tarea ni asignación.
 Idempotencia usa receipt011 con actor, RPC, key y hash canónico; misma clave y
 mismo cuerpo retorna resultado original, cuerpo distinto da conflicto. Replay
-jamás salta autenticación, vigencia de perfil, ámbito ni cierre.
+propio exacto devuelve sólo el ACK escalar guardado, conforme al
+protocolo06/10; no concede permiso nuevo ni modifica evidencia cerrada.
 
 La tarea conjunta se crea como una sola instancia espontánea por la ruta ya
 autorizada de tarea ad hoc y la asignación conjunta se hace en la misma
@@ -165,32 +167,19 @@ extra y UUID repetidos por valor canónico.
 
 ## Una transacción y conjunto determinista de locks para toda escritura
 
-Todas las rutas que puedan afectar tareas coordinadas toman el mismo orden,
-deduplicando y ordenando por UUID binario/canonical antes de bloquear:
+Aplicar completo `COORDINATION-011-CONCURRENCY-20261006.md`: receipt R,
+relojes A, perfiles W, cortes M, catálogo C y filas. Ordenar/deduplicar las keys
+físicas signed int por namespace; reemplazar todos los locks bigint heredados,
+incluso los de notas009. Descubrir el footprint completo antes de A, adquirirlo,
+revalidarlo y abortar con40001 si cambió; nunca ampliar locks tarde ni reintentar
+dentro de la transacción. Los cores no adquieren locks ni llaman RPC públicas.
+El envelope de inducción comprende el lote completo antes de bloquear request.
 
-1. advisory lock de receipts `(organization, actor, operation, idempotency_key)`;
-2. todas las llaves `work-owner:<profile>:<YYYY-MM>` de cada participante activo,
-   owner/ancla y sustituto cuyo crédito/evidencia/cierre puede cambiar, ordenadas
-   por `(profile UUID, período)`;
-3. todas las filas `task_instances` ordenadas por UUID;
-4. todas las filas de cabeceras/head y binding/absence relevantes ordenadas por
-   UUID;
-5. todas las filas de sesiones actor-tarea ordenadas por `(instance,actor,id)`;
-6. receipt/outbox bajo la protección ya adquirida.
-
-Antes de esperar locks puede descubrir candidatos; después de adquirirlos vuelve
-a consultar binding/head, estado Auth/perfil/relación/empresa, expected revision,
-períodos y cierres. Si el conjunto afectado cambió, rollback con conflicto
-reintentable y ningún efecto parcial. Cierres compiten usando las llaves del
-mismo orden y cierran solamente el perfil solicitado, nunca a su compañero.
-Cada escritura coordinada serializa la revisión/progreso y comprueba que ningún
-período afectado esté cerrado. No introducir un orden alterno para cancelar una
-cobertura, completar una conjunta o materializar.
-
-La idempotencia/replay conserva recibos incluso al cerrar mes o revocar actor,
-pero antes de devolver respuesta valida actor Auth igual al emisor y organización
-vigente; no filtrará el resultado a otro usuario. Operaciones con expiración
-temporal además devuelven resultado inocuo de expiración sin reactivar.
+El mismo documento fija footprints, orden de filas, excepción de pausa propia,
+replay escalar, matriz de últimas definiciones y barreras de prueba real. Un ACK
+propio existente no vuelve a exigir membresía de tarea ni corte abierto; las
+operaciones nuevas sí validan autorización actual. Las notas009 conservan su
+requisito de perfil activo. No retornar datos nuevos mediante replay.
 
 ## Parche conjunto de todas las rutas escritoras existentes
 
@@ -204,11 +193,15 @@ con task-gateway008 donde el contrato de idempotencia lo permita:
 `record_activity_once`, `record_activity`; creación/materialización de
 asignación/ocurrencia; `approve_employee_absence`, cancelación/terminación de
 ausencia; `close_employee_month`; aprobación de inducción cuando materializa
-tareas; y mutación de pesos/plantillas. Buscar todas las funciones con
-INSERT/UPDATE/DELETE de `task_instances`, `task_time_sessions`, `task_activity`,
+tareas; y mutación de pesos/plantillas; incluir `save_private_block_note`009.
+Buscar todas las funciones con
+INSERT/UPDATE/DELETE de `task_instances`, `task_time_sessions`, `activity_entries`,
 `employee_absences`, `period_reports`, `task_assignments`, receipts y outbox.
 Ningún wrapper SECURITY DEFINER antiguo queda EXECUTE para el cliente si no llama
 al guard común. `service_role` tampoco se convierte en interfaz de producto.
+Preservar los
+grants ya aprobados de consumidores de reportes/outbox; no concederles acceso
+a RPC de tareas ni revocar su interfaz operativa por esta regla.
 
 - Transición, checklist, espera, actividad, reloj y revisión resuelven actor,
   empresa y binding/head vigentes bajo el lock; un participante no puede escribir
@@ -224,7 +217,7 @@ al guard común. `service_role` tampoco se convierte en interfaz de producto.
   termina, desbloqueo resuelto y controles actuales se cumplen. Un miembro no
   puede reabrir tarea cerrada ni vencer un cierre sin rol superior y evento.
 - Operativas no quedan completadas por un botón si el target requiere registros:
-  se usa evidencia `task_activity`, unidad, período original y corte existentes;
+  se usa evidencia `activity_entries`, unidad, período original y corte existentes;
   no convertir la cantidad del reemplazo en actividad del titular.
 - `record_activity_once` conserva key/hash y actor real, exige periodo abierto y
   asignación/obligación adecuada; wrapper no idempotente se limita a usos
@@ -254,10 +247,12 @@ al guard común. `service_role` tampoco se convierte en interfaz de producto.
 
 ## KPI individuales, conjunto y reportes
 
-No editar ni recalcular históricos `period_reports.schemaVersion=3` ni entregas
-anteriores. Incorporar una versión nueva (documentar exacto schemaVersion4 para
+No editar ni recalcular históricos `period_reports.snapshot.version=3` ni entregas
+anteriores. Incorporar una versión nueva (documentar exacto `version: 4` para
 el JSON que introduce atribución coordinada; preservar campos3 byte por byte en
-filas viejas y mantener compatibilidad de lectura 3+4). Reporte4 contiene
+filas viejas y mantener compatibilidad de lectura 3+4). El DTO de lectura puede
+usar schemaVersion; el snapshot SQL conserva la clave
+`version`, sin renombrar la de históricos. Reporte4 contiene
 `period`, `algorithmVersion`, `generatedAt`, una tabla de tareas únicas (por
 `taskId`, una empresa/peso/vencimiento/estado/evidencia) y contribuciones
 individuales separadas por perfil. Por task: peso global único, cuotas bps de la
@@ -287,13 +282,17 @@ sesiones por actor concilian con sus filas auditadas; las métricas3 previas no
 cambian. El responsable puede cerrar su periodo sólo cuando lo autorice rol
 superior de acuerdo con la regla de producto vigente; empleado no cierra mes.
 Jefe/encargado cierra únicamente perfiles permitidos. Cierre incluye su trabajo
-propio y_snapshot inmutable; cerrar miembro A no cierra B. La misma tarea conjunta
+propio y snapshot inmutable; cerrar miembro A no cierra B. La misma tarea conjunta
 se congela para ambas partes: no se escribe si cualquiera de sus períodos está
-cerrado; cierre adquirido primero impide después el cierre conflictivo hasta que
-una operación explícita de revisión/admin resuelva, no escritura escondida.
+cerrado. Cerrar luego el otro miembro es válido leyendo esa evidencia congelada;
+no requiere reabrir el primer corte. Una corrección posterior exige revisión/admin
+explícita, nunca escritura escondida. El cierre del reemplazo conserva su
+contribución de cobertura sin congelar resultado ajeno que no modifique esa
+evidencia; no duplica obligación ni peso.
 
 La generación/envío actual de reportes sigue transaccional con outbox, un reporte
-por empleado al cierre y sólo a su jefe/encargado vigente según regla de entrega;
+por empleado al cierre y sólo al destinatario jefe validado por la regla
+de entrega existente (perfil activo y email verificado);
 no hacer un envío SMTP desde SQL, ni prometer email mientras no exista proveedor.
 011 graba fila/outbox local únicamente con idempotencia y snapshot versionado.
 

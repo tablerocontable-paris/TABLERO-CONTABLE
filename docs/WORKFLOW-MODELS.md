@@ -53,11 +53,11 @@ Cada devolución final: resultado, verificación/límites y **Próximo modelo:
 [modelo y esfuerzo] — [acción]**. Si la próxima fase usa el mismo modelo, seguir
 sin pedir otro «continuá».
 
-## Próximo bloque
+## Próximo bloque — actualizado06/10/2026
 
-**GPT-6.1 Sol alto, Standard:** corregir el protocolo de locks de011 según
-`architecture/COORDINATION-011-LOCK-REVIEW-20261004.md`. El contrato previo está
-pausado; no iniciar SQL011. Tras el cierre Sol, GPT-6 Luna medio implementa el
-contrato corregido. Revisión010 no tuvo hallazgos:
-`architecture/COORDINATION-010-REVIEW-20261004.md`. Preservar SQL001–010 y live
-v43; no aplicar SQL remoto ni publicar. Cambio de modelo manual; sin delegarlo.
+**GPT-6 Luna medio, Standard:** implementar el contrato011 y el protocolo
+obligatorio `architecture/COORDINATION-011-CONCURRENCY-20261006.md`, cerrados
+para ejecución local. Terminar toda la fase, corregir fallos, comprobar y hacer
+commit/push antes de devolver; no detenerse por subtarea. Revisión posterior:
+Sol alto. Preservar SQL001–010 y live v43; no aplicar SQL remoto ni publicar.
+Cambio de modelo manual, sin delegarlo. PostgreSQL real sigue pendiente.

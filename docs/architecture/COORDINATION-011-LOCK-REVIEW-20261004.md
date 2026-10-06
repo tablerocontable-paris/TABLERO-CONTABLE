@@ -2,7 +2,16 @@
 
 04/10/2026 UTC. No se modificó ninguna migración SQL en esta revisión.
 
-## Hallazgo que bloquea la activación
+## Resolución 06/10/2026
+
+Diseño cerrado en `COORDINATION-011-CONCURRENCY-20261006.md` y contrato011
+actualizado. El caso se reproduce mediante un modelo abstracto de adquisición,
+no contra PostgreSQL real. Los wrappers005 vigentes ya delegan sin prelocks;
+las referencias006/008 siguientes describen el riesgo de ampliar envelopes
+heredados, no afirman un defecto activo de010. Luna puede implementar011 local;
+la validación con dos conexiones PostgreSQL sigue pendiente y bloquea producción.
+
+## Hallazgo histórico que bloqueó la activación
 
 El contrato011 propone bloquear todos los participantes/períodos en orden estable
 antes de bloquear filas de tarea/sesión. Las RPC vigentes no llegan a ese punto
