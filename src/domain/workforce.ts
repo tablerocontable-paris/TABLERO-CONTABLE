@@ -1,4 +1,4 @@
-import { validDate } from "./schedule";
+import { defaultSchedule, occurrences, validDate } from "./schedule";
 import {
   id,
   dateART,
@@ -14,6 +14,7 @@ export interface Absence {
   ownerId: string;
   replacementId: string;
   taskIds?: string[];
+  assignmentIds?: string[];
   from: string;
   to: string;
   kind: "Vacaciones" | "Licencia";
@@ -76,22 +77,68 @@ export function coverageFor(s: State, t: Task, at = dateART()) {
       a.ownerId === t.ownerId &&
       a.from <= at &&
       a.to >= at &&
-      t.month >= a.from.slice(0, 7) &&
-      t.month <= a.to.slice(0, 7) &&
       !!a.replacementId &&
-      (a.taskIds || []).includes(t.id),
+      isCoveredOccurrence(a, t) &&
+      !isClosed(s, t),
   );
+}
+function isCoveredOccurrence(absence: Absence, task: Task) {
+  const occursOn = task.scheduledOn || task.due;
+  return !!occursOn && absence.from <= occursOn && occursOn <= absence.to && (
+    (absence.taskIds || []).includes(task.id) ||
+    (!!task.assignmentId && (absence.assignmentIds || []).includes(task.assignmentId))
+  );
+}
+function nextMonth(month: string) {
+  const [year, number] = month.split("-").map(Number);
+  return new Date(Date.UTC(year, number, 1)).toISOString().slice(0, 7);
+}
+export interface RecurringCoveragePreview {
+  assignmentId: string;
+  title: string;
+  companyId: string;
+  dates: string[];
+}
+export function recurringCoveragePreview(
+  s: State, ownerId: string, from: string, to: string, replacementId: string,
+): RecurringCoveragePreview[] {
+  if (!validDate(from) || !validDate(to) || to < from) return [];
+  const replacement = s.profiles.find((profile) => profile.id === replacementId);
+  if (!replacement?.active) return [];
+  return s.assignments.flatMap((assignment) => {
+    if (assignment.ownerId !== ownerId || assignment.retired || assignment.frequency === "única" ||
+      !replacement.companyIds.includes(assignment.companyId)) return [];
+    const schedule = assignment.schedule || {
+      ...defaultSchedule(assignment.startMonth + "-01", assignment.frequency),
+      monthDay: assignment.day,
+    };
+    if (schedule.frequency === "única") return [];
+    const dates: string[] = [];
+    for (let month = from.slice(0, 7); month <= to.slice(0, 7); month = nextMonth(month)) {
+      if (s.closures.some((closure) => closure.ownerId === ownerId && closure.month === month)) continue;
+      try {
+        dates.push(...occurrences(schedule, month)
+          .map((occurrence) => occurrence.date)
+          .filter((date) => from <= date && date <= to)
+          .filter((date) => !s.tasks.some((task) => task.assignmentId === assignment.id &&
+            task.scheduledOn === date && task.status === "Completada")));
+      } catch {
+        return [];
+      }
+    }
+    return dates.length ? [{ assignmentId: assignment.id, title: assignment.title, companyId: assignment.companyId, dates }] : [];
+  });
 }
 export function cancelAbsence(s: State, absenceId: string, actorId: string, at = new Date().toISOString()): State {
   const actor = s.profiles.find((p) => p.id === actorId);
   const absence = s.absences?.find((item) => item.id === absenceId && !item.cancelledAt);
   if (!actor?.active || actor.role === "empleado" || !absence || !canSee(actor, absence.ownerId, s.profiles))
     throw Error("Sólo un responsable autorizado puede cancelar esta cobertura.");
-  const taskIds = new Set(absence.taskIds || []);
   return {
     ...s,
     absences: s.absences!.map((item) => item.id === absenceId ? { ...item, cancelledAt: at } : item),
-    tasks: s.tasks.map((task) => taskIds.has(task.id) ? stopActorClock(task, absence.replacementId, at) : task),
+    tasks: s.tasks.map((task) => task.ownerId === absence.ownerId && isCoveredOccurrence(absence, task)
+      ? stopActorClock(task, absence.replacementId, at) : task),
   };
 }
 export function expireCoverageClocks(s: State, at = dateART()): State {
@@ -101,7 +148,7 @@ export function expireCoverageClocks(s: State, at = dateART()): State {
   const tasks = s.tasks.map((task) => {
     let next = task;
     for (const absence of expired) {
-      if (absence.ownerId !== task.ownerId || !(absence.taskIds || []).includes(task.id)) continue;
+      if (absence.ownerId !== task.ownerId || !isCoveredOccurrence(absence, task)) continue;
       const cutoff = new Date(`${absence.to}T23:59:59.999-03:00`).toISOString();
       next = { ...next, sessions: (next.sessions || []).map((session) => {
         if (session.end || session.actorId !== absence.replacementId) return session;
@@ -142,25 +189,38 @@ export function registerAbsence(s: State, a: Absence, actorId: string): State {
     (!replacement?.active ||
       replacement.id === a.ownerId ||
       !canSee(p, replacement.id, s.profiles) ||
-      !a.taskIds?.length)
+      !(a.taskIds?.length || a.assignmentIds?.length))
   )
     throw Error(
-      "Elegí al menos una tarea y un reemplazante activo de tu ámbito.",
+      "Elegí una tarea o regla recurrente y un reemplazante activo de tu ámbito.",
     );
   if (p.role === "encargado" &&
     (owner.managerId !== p.id || replacement?.managerId !== p.id))
     throw Error("Un encargado sólo puede aprobar coberturas dentro de su equipo.");
   const selected = new Set(a.taskIds || []);
+  const selectedRules = new Set(a.assignmentIds || []);
+  if (selectedRules.size !== (a.assignmentIds || []).length)
+    throw Error("No repitas reglas recurrentes en la cobertura.");
   if (selected.size !== (a.taskIds || []).length)
     throw Error("No repitas tareas en la cobertura.");
   const selectedTasks = s.tasks.filter((t) => selected.has(t.id));
   if (selectedTasks.length !== selected.size || selectedTasks.some((t) =>
     t.ownerId !== owner.id || t.status === "Completada" ||
-    (t.due || t.scheduledOn || "") < a.from || (t.due || t.scheduledOn || "") > a.to ||
+    (t.scheduledOn || t.due || "") < a.from || (t.scheduledOn || t.due || "") > a.to ||
     !owner.companyIds.includes(t.companyId) ||
     (!!replacement && !replacement.companyIds.includes(t.companyId)) ||
     isClosed(s, t)))
     throw Error("La cobertura sólo puede incluir tareas abiertas del titular, dentro del rango y en empresas autorizadas.");
+  const previewableRules = new Set(recurringCoveragePreview(s, owner.id, a.from, a.to, replacement?.id || "")
+    .filter((preview) => owner.companyIds.includes(preview.companyId))
+    .map((preview) => preview.assignmentId));
+  const validRules = new Set(s.assignments.filter((assignment) => selectedRules.has(assignment.id) &&
+    assignment.ownerId === owner.id && !assignment.retired && assignment.frequency !== "única" &&
+    previewableRules.has(assignment.id)).map((assignment) => assignment.id));
+  if (validRules.size !== selectedRules.size)
+    throw Error("Elegí reglas recurrentes activas del titular con ocurrencias abiertas dentro del rango.");
+  if (!a.replacementId && (selected.size || selectedRules.size))
+    throw Error("Asigná un reemplazante antes de autorizar tareas de cobertura.");
   if (
     (s.absences || []).some(
       (x) =>
@@ -223,7 +283,7 @@ export function applyClock(
 ): State {
   const p = s.profiles.find((p) => p.id === actorId)!;
   const t = s.tasks.find((t) => t.id === taskId)!;
-  if (!t || !canWork(s, p, t) || isClosed(s, t))
+  if (!t || !canWork(s, p, t, dateART(at)) || isClosed(s, t))
     throw Error("Tarea fuera de tu ámbito o mes cerrado.");
   return {
     ...s,

@@ -18,23 +18,23 @@ colaboración en línea o a permisos de producción.
 
 ## Cobertura local implementada y siguiente trabajo
 
-La cobertura ahora enumera ocurrencias ya materializadas, mantiene al titular,
+La cobertura ya incluye tareas puntuales y reglas recurrentes seleccionadas;
+previsualiza ocurrencias y aplica acceso al materializarlas. Mantiene al titular,
 atribuye cronómetros al reemplazante, limita accesos por empresa/equipo y revoca
 relojes al cancelar o vencer. Contrato y evidencia en
 `docs/architecture/COVERAGE-LAB-CONTRACT-20261006.md`.
 
-Siguiente: cubrir también las ocurrencias que se materialicen por reglas
-recurrentes durante la ausencia, con vista previa para evitar duplicados;
-después cerrar el circuito de baja/reasignación y auditar cierres e
-exportaciones. Referencias: filas 4, 13 y 14 de
+Siguiente: cerrar traspaso, baja y reasignación sin perder historial ni
+responsabilidad; luego auditar cierres/exportaciones y completar pruebas de
+reglas diarias, semanales y varios meses. Referencias: filas 4, 13 y 14 de
 `docs/product/CORRECTIONS-20261002.md` y regla de cobertura de
 `docs/product/CONSISTENCY-RULES.md`. Mantener el alcance en laboratorio antes de
 alterar relaciones o el backend activo.
 
-Para una decisión nueva de permisos/jerarquía: GPT-6.1 Sol, esfuerzo alto,
-velocidad Standard, revisión breve del contrato; luego GPT-6 Luna, esfuerzo
-medio, Standard, para implementar y verificar. Si los criterios existentes
-bastan, continuar directamente con Luna medio y no gastar el bloque Sol.
+Si los criterios existentes de baja/reasignación bastan: GPT-6 Luna, esfuerzo
+medio, velocidad Standard, para implementar y verificar. Si aparece una decisión
+nueva de permisos/jerarquía, usar GPT-6.1 Sol, esfuerzo alto, Standard, sólo para
+revisar esa decisión antes de volver a Luna.
 
 ## Entrega
 

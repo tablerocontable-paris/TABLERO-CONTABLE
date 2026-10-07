@@ -76,15 +76,16 @@ completa la aceptación funcional total ni la infraestructura del 100%.
 
 ## Cobertura selectiva en laboratorio — 06/10/2026
 
-La vista de ausencias ahora limita acceso a ocurrencias abiertas que el
-responsable selecciona. La persistencia local conserva ese alcance; encargados
-quedan restringidos a su equipo y jefatura puede coordinar cruces. Cancelación
-y vencimiento revocan acceso y cierran sólo el reloj del reemplazante. Contrato
-y límites: `architecture/COVERAGE-LAB-CONTRACT-20261006.md`.
+La vista de ausencias ahora limita acceso a tareas puntuales y reglas recurrentes
+que el responsable selecciona. Previsualiza fechas con la misma regla de
+materialización; las ocurrencias futuras reciben acceso al crearse sin duplicar
+tareas. Encargados quedan restringidos a su equipo y jefatura puede coordinar
+cruces. Cancelación y vencimiento revocan acceso y cierran sólo el reloj del
+reemplazante. Contrato y límites:
+`architecture/COVERAGE-LAB-CONTRACT-20261006.md`.
 
-Validación de esta etapa: 351/351 pruebas en 34 archivos, build y Chromium
-general escritorio/móvil aprobados; formulario probado en jsdom. Cero errores
-JS y cero llamadas operativas a `/api`. Quedan pendientes las ocurrencias
-recurrentes aún no materializadas, su traspaso/aprobación y aceptación de
-cancelaciones con cierres/exportaciones. No modifica el avance global (~45%) ni
-habilita usuarios reales.
+Validación de esta etapa: 353/353 pruebas en 34 archivos, build aprobado,
+formulario puntual/recurrente probado en jsdom. Chromium general escritorio y
+móvil: cero errores JS y cero llamadas operativas a `/api`. Quedan pendientes
+los cierres/exportaciones, traspasos y bajas/reasignaciones. No modifica el
+avance global (~45%) ni habilita usuarios reales.

@@ -4,6 +4,7 @@ import { canSee, dateART, id, isClosed, type State, type Profile } from "../doma
 import {
   cancelAbsence,
   registerAbsence,
+  recurringCoveragePreview,
   updateProfile,
   type Absence,
 } from "../domain/workforce";
@@ -255,6 +256,7 @@ export function Absences({
     kind: "Vacaciones" as Absence["kind"],
     note: "",
     taskIds: [] as string[],
+    assignmentIds: [] as string[],
   });
   const people = state.profiles.filter(
     (p) =>
@@ -266,14 +268,18 @@ export function Absences({
       canSee(active, a.ownerId, state.profiles) ||
       a.replacementId === active.id,
   );
+  const recurringPreviews = recurringCoveragePreview(
+    state, form.ownerId, form.from, form.to, form.replacementId,
+  );
   const affected = state.tasks.filter(
     (t) =>
       t.ownerId === form.ownerId &&
       t.status !== "Completada" &&
       !isClosed(state, t) &&
+      !(t.assignmentId && recurringPreviews.some((preview) => preview.assignmentId === t.assignmentId)) &&
       (!form.replacementId || !!state.profiles.find((profile) => profile.id === form.replacementId)?.companyIds.includes(t.companyId)) &&
-      (t.due || t.scheduledOn || "") >= form.from &&
-      (t.due || t.scheduledOn || "") <= form.to,
+      (t.scheduledOn || t.due || "") >= form.from &&
+      (t.scheduledOn || t.due || "") <= form.to,
   );
   return (
     <>
@@ -374,7 +380,7 @@ export function Absences({
               <select
                 required
                 value={form.ownerId}
-                onChange={(e) => setForm({ ...form, ownerId: e.target.value, taskIds: [] })}
+                onChange={(e) => setForm({ ...form, ownerId: e.target.value, taskIds: [], assignmentIds: [] })}
               >
                 <option value="">Seleccioná una persona</option>
                 {people.map((p) => (
@@ -391,7 +397,7 @@ export function Absences({
                   type="date"
                   required
                   value={form.from}
-                  onChange={(e) => setForm({ ...form, from: e.target.value, taskIds: [] })}
+                  onChange={(e) => setForm({ ...form, from: e.target.value, taskIds: [], assignmentIds: [] })}
                 />
               </label>
               <label>
@@ -401,7 +407,7 @@ export function Absences({
                   required
                   min={form.from}
                   value={form.to}
-                  onChange={(e) => setForm({ ...form, to: e.target.value, taskIds: [] })}
+                  onChange={(e) => setForm({ ...form, to: e.target.value, taskIds: [], assignmentIds: [] })}
                 />
               </label>
             </div>
@@ -461,12 +467,32 @@ export function Absences({
                     />
                     {task.title} · {state.companies.find((company) => company.id === task.companyId)?.name || "Empresa"}
                   </label>
-                )) : <p>No hay tareas abiertas del titular con fecha dentro del rango.</p>}
-                <small>La cobertura exige una tarea seleccionada; cada sesión conserva al reemplazante como ejecutor. En este laboratorio aparecen las ocurrencias ya materializadas dentro del rango.</small>
+                )) : <p>No hay tareas abiertas puntuales dentro del rango.</p>}
+                <small>Las sesiones quedan atribuidas al reemplazante. Las reglas recurrentes se seleccionan por separado y abarcan sólo las fechas previstas dentro del rango.</small>
+              </fieldset>
+            )}
+            {form.replacementId && recurringPreviews.length > 0 && (
+              <fieldset className="coverage-task-selection">
+                <legend>Reglas recurrentes incluidas en el rango</legend>
+                {recurringPreviews.map((preview) => (
+                  <label key={preview.assignmentId}>
+                    <input
+                      type="checkbox"
+                      checked={form.assignmentIds.includes(preview.assignmentId)}
+                      onChange={(e) => setForm({
+                        ...form,
+                        assignmentIds: e.target.checked
+                          ? [...form.assignmentIds, preview.assignmentId]
+                          : form.assignmentIds.filter((id) => id !== preview.assignmentId),
+                      })}
+                    />
+                    {preview.title} · {state.companies.find((company) => company.id === preview.companyId)?.name || "Empresa"} · {preview.dates.length} ocurrencias ({preview.dates.join(", ")})
+                  </label>
+                ))}
               </fieldset>
             )}
             <div className="note">
-              {form.replacementId ? form.taskIds.length : affected.length} tareas autorizadas de {affected.length} abiertas en el rango. Los
+              {form.taskIds.length} tareas puntuales y {form.assignmentIds.length} reglas recurrentes seleccionadas. Los
               vencimientos no se postergan automáticamente.
             </div>
             <div className="modal-actions">

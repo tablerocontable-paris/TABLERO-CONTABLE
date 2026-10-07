@@ -84,7 +84,6 @@ ver evidencias y límites en PROJECT-STATUS.md y
 architecture/JOINT-LABORATORY-CONTRACT-20261006.md. Continúan fuera de alcance
 Auth, API/D1, Supabase y colaboración entre computadoras. Los cambios aprobados
 de la vista de laboratorio se pueden sincronizar y publicar en el mismo Site
-privado sin cambiar audiencia. La cobertura selectiva ya está implementada en
-el laboratorio para ocurrencias materializadas; la siguiente etapa es cubrir
-ocurrencias recurrentes previstas y revisar bajas/reasignaciones antes de
-cambiar permisos del backend.
+privado sin cambiar audiencia. La cobertura selectiva, incluyendo reglas
+recurrentes previstas, está implementada en el laboratorio; la siguiente etapa
+es cerrar bajas/reasignaciones e historial antes de cambiar permisos del backend.

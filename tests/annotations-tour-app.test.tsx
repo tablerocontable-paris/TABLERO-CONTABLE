@@ -133,7 +133,7 @@ describe("anotaciones y recorrido integrados", () => {
   it("separa las tareas cubiertas sin duplicar su identidad en el tablero", () => {
     const state = prepare("e1");
     const example = seed().tasks[0]!;
-    state.tasks = [{ ...example, id: "coverage-task", ownerId: "e0", month: currentMonth(), companyId: "c1", title: "Conciliación cubierta" }];
+    state.tasks = [{ ...example, id: "coverage-task", ownerId: "e0", month: currentMonth(), companyId: "c1", title: "Conciliación cubierta", scheduledOn: dateART(), due: dateART() }];
     state.absences = [{
       id: "coverage-absence",
       ownerId: "e0",
@@ -177,6 +177,28 @@ describe("anotaciones y recorrido integrados", () => {
     expect((selected as HTMLInputElement).checked).toBe(true);
     expect((unselected as HTMLInputElement).checked).toBe(false);
     expect(load().absences?.[0].taskIds).toEqual(["selected-coverage-0"]);
+  });
+
+  it("previsualiza ocurrencias recurrentes y guarda la regla elegida para cobertura futura", () => {
+    const state = prepare("m1");
+    const example = seed().assignments[0]!;
+    state.assignments = [{
+      ...example, id: "monthly-coverage-rule", ownerId: "e0", companyId: "c1",
+      title: "Conciliación mensual", frequency: "mensual", startMonth: "2026-10", day: 12,
+      schedule: { ...defaultSchedule("2026-10-01", "mensual"), monthDay: 12, hasDeadline: false },
+    }];
+    localStorage.setItem(KEY, JSON.stringify(state));
+    render(<App />);
+    fireEvent.click(document.querySelector('[data-nav="absences"]')!);
+    fireEvent.click(screen.getByRole("button", { name: "Registrar ausencia" }));
+    fireEvent.change(screen.getByLabelText("Persona ausente"), { target: { value: "e0" } });
+    fireEvent.change(screen.getByLabelText("Quién cubre"), { target: { value: "e1" } });
+    fireEvent.change(screen.getByLabelText("Desde"), { target: { value: "2026-11-01" } });
+    fireEvent.change(screen.getByLabelText("Hasta"), { target: { value: "2026-11-30" } });
+    const rule = screen.getByLabelText(/Conciliación mensual.*2026-11-12/);
+    fireEvent.click(rule);
+    fireEvent.click(screen.getByRole("button", { name: "Guardar ausencia" }));
+    expect(load().absences?.[0].assignmentIds).toEqual(["monthly-coverage-rule"]);
   });
 
   it("asigna una tarea nueva al perfil consultado y respeta la meta editada", () => {

@@ -59,11 +59,10 @@ Este estado fue reemplazado por las decisiones posteriores del usuario: se
 autorizó commit, sincronización de la fuente del mismo Site y publicación
 privada. No habilita cuentas reales, cambios de audiencia ni migraciones.
 
-## Próximo paso vigente — después de Site v49
-Las tareas conjuntas y la cobertura de ocurrencias existentes están
-implementadas y publicadas en el laboratorio. Falta integrar ocurrencias que se
-materialicen por recurrencias durante la ausencia y revisar traspaso,
-reasignación y exportaciones. Si las reglas de `docs/product/` cierran esos
-casos, GPT-6 Luna medio, Standard, para implementación. Si aparece una decisión
-nueva sobre permisos o jerarquía, GPT-6.1 Sol alto, Standard, para revisar sólo
-ese contrato primero. Mantener infraestructura productiva fuera del laboratorio.
+## Próximo paso vigente — tras cobertura recurrente
+Las tareas conjuntas y la cobertura puntual/recurrente están implementadas en el
+laboratorio. Falta cerrar traspaso, baja/reasignación e historial de reportes.
+GPT-6 Luna medio, Standard, para implementar los criterios ya escritos; si
+aparece una decisión nueva de permisos o jerarquía, GPT-6.1 Sol alto, Standard,
+para revisar sólo ese contrato primero. Mantener infraestructura productiva
+fuera del laboratorio.

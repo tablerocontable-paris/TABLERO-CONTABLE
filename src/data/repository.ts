@@ -315,6 +315,7 @@ const schema = z.object({
     id: z.string(), ownerId: z.string(), replacementId: z.string(),
     from: z.string(), to: z.string(), kind: z.enum(["Vacaciones", "Licencia"]),
     note: z.string(), createdBy: z.string(), taskIds: z.array(z.string()).optional(),
+    assignmentIds: z.array(z.string()).optional(),
     cancelledAt: z.string().optional(),
   })).optional(),
   tour: z.record(z.string(), z.number()),

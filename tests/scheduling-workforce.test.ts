@@ -22,6 +22,7 @@ import {
   canWork,
   cancelAbsence,
   expireCoverageClocks,
+  recurringCoveragePreview,
   updateProfile,
 } from "../src/domain/workforce";
 import { reviseAssignment } from "../src/domain/planning";
@@ -222,7 +223,36 @@ describe("tiempo y cobertura", () => {
     };
     expect(() => registerAbsence(s, absence, "m1")).toThrow("ámbito");
     expect(registerAbsence(s, { ...absence, replacementId: "e1" }, "m1").absences).toHaveLength(1);
-    expect(() => registerAbsence(s, { ...absence, replacementId: "e1", taskIds: [] }, "m1")).toThrow("al menos una tarea");
+    expect(() => registerAbsence(s, { ...absence, replacementId: "e1", taskIds: [] }, "m1")).toThrow("regla recurrente");
+  });
+  it("incluye ocurrencias futuras de una regla seleccionada y no duplica su acceso al materializar", () => {
+    const base = seed();
+    const assignment = {
+      ...base.assignments[0]!, id: "selected-recurring-rule", ownerId: "e0", companyId: "c1",
+      frequency: "mensual" as const, startMonth: "2026-10", day: 12,
+      schedule: { ...defaultSchedule("2026-10-01", "mensual"), monthDay: 12, hasDeadline: false },
+    };
+    const s0 = { ...base, assignments: [assignment], tasks: [], closures: [] };
+    const absence = {
+      id: "recurring-coverage", ownerId: "e0", replacementId: "e1", assignmentIds: [assignment.id],
+      from: "2026-11-01", to: "2026-11-30", kind: "Vacaciones" as const,
+      note: "", createdBy: "boss",
+    };
+    const approved = registerAbsence(s0, absence, "boss");
+    expect(recurringCoveragePreview(approved, "e0", absence.from, absence.to, "e1")).toMatchObject([
+      { assignmentId: assignment.id, dates: ["2026-11-12"] },
+    ]);
+    const once = materialize(approved, "2026-11");
+    const twice = materialize(once, "2026-11");
+    expect(twice.tasks).toHaveLength(1);
+    expect(twice.tasks[0]?.id).toBe(once.tasks[0]?.id);
+    const replacement = twice.profiles.find((profile) => profile.id === "e1")!;
+    expect(canWork(twice, replacement, twice.tasks[0]!, "2026-11-12")).toBe(true);
+    expect(canWork(twice, replacement, twice.tasks[0]!, "2026-12-01")).toBe(false);
+    let working = applyClock(twice, twice.tasks[0]!.id, "e1", true, "2026-11-12T12:00:00Z");
+    working = cancelAbsence(working, absence.id, "boss", "2026-11-12T13:00:00Z");
+    expect(working.tasks[0]?.sessions?.[0]?.end).toBe("2026-11-12T13:00:00Z");
+    expect(canWork(working, replacement, working.tasks[0]!, "2026-11-12")).toBe(false);
   });
   it("empleado no administra, jefe debe mantener relación válida", () => {
     const s = seed(),
