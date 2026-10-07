@@ -25,16 +25,16 @@ El código quedó en `0ca71bb17da997251155d82d5e83355ab12a5c8c` y se publicó co
 Site v61 en el mismo sitio privado; la audiencia continúa owner-only. Ver
 `docs/PROJECT-STATUS.md`.
 
-El usuario quiere continuar desde su PC personal antes de crear cuentas. No hay
-remoto GitHub propio y la cuenta sigue pospuesta hasta la aceptación final. La
-copia portable vigente se entrega como `outputs/grupo-paris-site-personal.bundle`
-junto con `outputs/LEEME-PC-PERSONAL.md`, generados después de dejar el checkout
-limpio y comprometido. Transferir ambos archivos por USB o una carpeta de
-archivos; clonar el bundle en Codex de la PC personal y trabajar una sola copia
-por vez. No sincronizar `.git` con OneDrive. `paris-state-lab` vive en el
-almacenamiento local del navegador y no viaja en el bundle; la simulación puede
-comenzar con sus datos ficticios iniciales en el otro equipo. La sincronización
-automática entre PCs requiere configurar GitHub privado en la etapa final.
+El usuario quiere trabajar desde su PC personal antes de crear cuentas o
+conectar servicios. No hay GitHub propio y sigue pospuesto hasta la aceptación
+final. Para mover el código, generar `outputs/grupo-paris-site-personal.bundle`
+desde un commit limpio y copiarlo con `outputs/LEEME-PC-PERSONAL.md` por USB o
+una carpeta privada. Clonar ese bundle en Codex de la PC personal y mantener
+una sola copia activa a la vez; no sincronizar `.git` con OneDrive. El estado
+`paris-state-lab` vive en el almacenamiento local del navegador: descargarlo
+desde la banda «Vista de prueba» como JSON y restaurarlo en el otro equipo.
+La sincronización automática de código entre PCs requiere configurar GitHub
+privado durante la etapa de infraestructura final.
 
 El bloque Trello-like está implementado en `65ae477`. La responsabilidad
 conjunta está implementada en el laboratorio local; contrato, alcance y límites
