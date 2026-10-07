@@ -13,4 +13,5 @@ run(process.execPath, ['node_modules/typescript/bin/tsc', '--noEmit']);
 run(process.execPath, ['node_modules/vitest/vitest.mjs', 'run',
   'tests/domain.test.ts', 'tests/parameterization.test.ts',
   'tests/laboratory-corrections.test.tsx', 'tests/notifications.test.ts',
-  'tests/scheduling-workforce.test.ts', 'tests/workforce-retirement.test.tsx', '--maxWorkers=1']);
+  'tests/scheduling-workforce.test.ts', 'tests/workforce-retirement.test.tsx',
+  'tests/process-improvement.test.ts', 'tests/site-operational.test.ts', '--maxWorkers=1']);

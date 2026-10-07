@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-06",
+  "scope": "private local laboratory only",
+  "feature": [
+    "Kaizen evidence and comparable before/after measurements",
+    "supervisor-authorized trial and manager adoption as a new catalogue version",
+    "five-area 5S review with evidence-backed corrective action closure",
+    "forward-only changes to untouched future work"
+  ],
+  "automated_tests": {
+    "files": 38,
+    "passed": 385,
+    "failed": 0,
+    "focused_suite": "process-improvement, site-operational, parameterization, site-ui: 35/35"
+  },
+  "build": {
+    "typescript": "passed",
+    "vite": "passed",
+    "worker": "passed",
+    "note": "Vite reports the main minified JavaScript chunk at approximately 543 kB; split-chunk optimization remains a later performance task."
+  },
+  "browser": {
+    "engine": "Microsoft Edge Chromium",
+    "desktop_viewports": ["1440x900", "1600x740", "1280x720", "1024x650"],
+    "mobile_viewport": "390x844",
+    "flows": [
+      "Kaizen proposal, authorization, trial, measurement, adoption and catalogue version 2",
+      "five-area 5S review and verified closure of one corrective action",
+      "existing laboratory, drag-and-drop, notifications, internal requests and monthly analytics"
+    ],
+    "horizontal_overflow": false,
+    "javascript_errors": 0,
+    "operational_api_requests": 0
+  },
+  "site": {
+    "project_id": "appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85",
+    "previous_published_version": 58,
+    "access_before_update": "custom owner-only",
+    "external_visitor_count_before_update": 0,
+    "deployment_of_this_cut": "pending"
+  },
+  "limitations": [
+    "Data remains in paris-state-lab in one browser and does not synchronize across devices.",
+    "No real client data, accounts, invitations, API, D1, or Supabase were used.",
+    "This local module does not establish production identity or permissions."
+  ]
+}

@@ -76,7 +76,7 @@ No prometer ausencia total de errores: se reducen con reglas separadas, pruebas 
 - Flujo permanente de modelos y revisión: `AGENTS.md` y `docs/WORKFLOW-MODELS.md`. Política vigente para Plus: Sol 6.1 medio para planes habituales, alto para datos/permisos/migraciones; Luna 6 medio para ejecutar, bajo para cambios simples. Velocidad Standard. Cada devolución recomienda el próximo modelo.
 - Estandarización, reportes por usuario y Kaizen/5S: contrato en `docs/product/STANDARDIZATION-REPORTS-IMPROVEMENT.md`.
 - Esta demo protege nombre/proceso/controles del catálogo, permite a Juan Pablo incorporar procesos y genera reportes automáticamente al cerrar cada empleado. Correo automático todavía requiere backend y destinatario verificado.
-- Kaizen/5S: requisitos orientados a calidad y mejora del proceso; módulo funcional pendiente. No incorporarlos como puntuación arbitraria de desempeño.
+- Kaizen/5S: implementado en el laboratorio local con medición comparable, autorización de prueba, adopción versionada y acciones 5S verificables. No incorporarlos como puntuación arbitraria de desempeño ni portar al backend antes de revisar identidad, almacenamiento y permisos.
 
 ## Revisión y próxima ejecución — 01/10/2026
 

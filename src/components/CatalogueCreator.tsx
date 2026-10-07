@@ -1,15 +1,18 @@
 import { useState, type FormEvent } from "react";
 import { id, type State, type Template } from "../domain/model";
+import { addCatalogueTemplate } from "../domain/processImprovement";
 import { Dialog } from "./ui";
 import StepListEditor, { validateSteps } from "./StepListEditor";
 export default function CatalogueCreator({
   state,
   commit,
   notify,
+  versioned = true,
 }: {
   state: State;
   commit: (s: State, a: string, id?: string) => boolean;
   notify: (s: string) => void;
+  versioned?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [kind, setKind] = useState<Template["kind"]>("resultado");
@@ -51,13 +54,12 @@ export default function CatalogueCreator({
       description: String(f.get("description")).trim(),
       steps: safeSteps,
     };
-    if (
-      commit(
-        { ...state, templates: [...state.templates, t] },
-        "Creó proceso estándar",
-        t.id,
-      )
-    ) {
+    const actor = state.profiles.find((profile) => profile.id === state.activeId);
+    if (!actor) return;
+    const next = versioned
+      ? addCatalogueTemplate(state, t, actor)
+      : { ...state, templates: [...state.templates, t] };
+    if (commit(next, "Creó proceso estándar", t.id)) {
       setOpen(false);
       setSteps([]);
       setStepsError("");

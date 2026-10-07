@@ -119,3 +119,24 @@ el deployment privado terminó correctamente y sigue owner-only. Siguiente paso:
 contrastar el contrato local de Kaizen/5S con la versionación actual del catálogo.
 Luego, si no aparece una decisión de permisos/esquema, volver a **GPT-6 Luna,
 esfuerzo medio, Standard** para implementar el contrato que quede confirmado.
+
+## Mejora Kaizen/5S y continuidad en otra PC — 06/10/2026
+
+El bloque de mejora de procesos está implementado localmente y validado: 385
+pruebas, TypeScript, Vite/Worker y Edge desktop/móvil; evidencia en
+`architecture/review-evidence/process-quality-lab-20261006.json`. Sigue aislado
+en el laboratorio; no se conectaron cuentas ni se habilitó sincronización.
+
+El checkout actual trabaja en `main` y no tiene remoto GitHub propio. La regla
+vigente posterga esa cuenta hasta aceptar el producto final. Para usar otra PC
+antes de esa etapa, transferir un snapshot Git portable después de dejar el
+checkout limpio; trabajar en una sola PC por vez y devolver el snapshot al
+finalizar. No sincronizar la carpeta `.git` con OneDrive ni editar dos copias en
+paralelo. La sincronización automática permanente entre PCs queda para el
+remoto privado de GitHub previsto en `docs/ops/FINAL-ACCEPTANCE.md`.
+
+Próxima acción: cerrar el commit y publicación privada de este corte, preparar
+el bundle portable y dar instrucciones de apertura en Codex para la PC personal.
+Para decisiones sobre adelantar GitHub o sincronización/backend, GPT-6.1 Sol,
+esfuerzo medio/alto según alcance; para implementar un contrato ya aceptado,
+GPT-6 Luna, esfuerzo medio.

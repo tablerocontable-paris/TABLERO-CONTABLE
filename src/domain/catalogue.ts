@@ -1,4 +1,5 @@
 import type { Assignment, State } from "./model";
+import { currentCatalogueVersion } from "./processImprovement";
 
 /** El contexto cambia por empresa; la identidad y controles los define el catálogo. */
 export function standardizeAssignment(s: State, a: Assignment): Assignment {
@@ -11,6 +12,7 @@ export function standardizeAssignment(s: State, a: Assignment): Assignment {
   }
   const t = s.templates.find((t) => t.id === a.templateId);
   if (!t) throw Error("El proceso ya no está disponible en el catálogo.");
+  const templateVersion = currentCatalogueVersion(s, t.id) || a.templateVersion;
   return {
     ...a,
     title: t.title,
@@ -19,5 +21,6 @@ export function standardizeAssignment(s: State, a: Assignment): Assignment {
     weight: t.weight,
     unit: t.unit,
     steps: [...t.steps],
+    ...(templateVersion === undefined ? {} : { templateVersion }),
   };
 }

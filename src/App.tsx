@@ -1,6 +1,8 @@
 import NotificationCenter from "./components/NotificationCenter";
 import TaskComments from "./components/TaskComments";
 import InternalRequests from "./components/InternalRequests";
+import ProcessQuality from "./components/ProcessQuality";
+import CatalogueVersionCard from "./components/CatalogueVersionCard";
 import WorkCycle from "./components/WorkCycle";
 import JointTaskSetup from "./components/JointTaskSetup";
 import { collectTaskNotifications } from "./domain/notifications";
@@ -65,6 +67,7 @@ import {
   RotateCcw,
   GripVertical,
   MessageSquareText,
+  Sparkles,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -113,6 +116,7 @@ import StepListEditor, { parseSteps, validateSteps } from "./components/StepList
 import { taskTimeliness } from "./domain/timeliness";
 import { closureCsvRows } from "./domain/reports";
 import { applyCompletionAttribution } from "./domain/workCycle";
+import { currentCatalogueVersion } from "./domain/processImprovement";
 import {
   createInternalRequest,
   replyToInternalRequest,
@@ -134,7 +138,8 @@ type Page =
   | "absences"
   | "planning"
   | "annotations"
-  | "requests";
+  | "requests"
+  | "quality";
 const pages: { id: Page; name: string; icon: typeof Users }[] = [
   { id: "overview", name: "Resumen", icon: LayoutDashboard },
   { id: "day", name: "Mi día", icon: Flag },
@@ -145,6 +150,7 @@ const pages: { id: Page; name: string; icon: typeof Users }[] = [
   { id: "closing", name: "Cierre del mes", icon: LockKeyhole },
   { id: "team", name: "Equipo y estructura", icon: Users },
   { id: "catalog", name: "Catálogo y pesos", icon: BookOpen },
+  { id: "quality", name: "Mejora de procesos", icon: Sparkles },
   { id: "planning", name: "Planificación", icon: CalendarDays },
   { id: "absences", name: "Ausencias y cobertura", icon: CalendarDays },
   { id: "annotations", name: "Anotaciones", icon: BookOpen },
@@ -593,6 +599,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
         assignments.push({
           id: `onboard-${active.id}-${cid}-${tid}`,
           templateId: tid,
+          ...(laboratory && !remoteSave ? { templateVersion: currentCatalogueVersion(state, tid) || 1 } : {}),
           title: t.title,
           ownerId: active.id,
           companyId: cid,
@@ -1160,7 +1167,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
         <span className="nav-label">TU ESPACIO DE TRABAJO</span>
         <nav>
           {pages
-            .filter((p) => (manager || !["overview", "catalog", "closing"].includes(p.id)) && (p.id !== "requests" || (laboratory && !remoteSave)))
+            .filter((p) => (manager || !["overview", "catalog", "closing"].includes(p.id)) && (p.id !== "requests" || (laboratory && !remoteSave)) && (p.id !== "quality" || (laboratory && !remoteSave)))
             .map((p) => (
               <button
                 data-nav={p.id}
@@ -1323,8 +1330,10 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                                     ? "El equipo se cubre, el trabajo sigue."
                       : page === "planning"
                                       ? "Cada tarea, en su momento."
-                                      : page === "requests"
+                                    : page === "requests"
                                         ? "Cada pedido, con responsable y seguimiento."
+                                      : page === "quality"
+                                        ? "Mejorar el proceso también es parte del trabajo."
                                       : "Lo próximo, a la vista."}
               </h1>
               <p>
@@ -1337,7 +1346,9 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                       : page === "team"
                         ? "La relación jefe → encargado → empleado define el ámbito de trabajo."
                         : page === "closing"
-                          ? "Consolidá el trabajo mensual de cada persona y conservá una foto del resultado."
+                        ? "Consolidá el trabajo mensual de cada persona y conservá una foto del resultado."
+                        : page === "quality"
+                          ? "Evidencia, acciones correctivas y estándares versionados, sin puntuaciones decorativas."
                           : "Tus empresas, tus prioridades y el contexto que necesitás para decidir."}
               </p>
             </div>
@@ -1347,7 +1358,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
               </button>
             )}
           </div>
-          {page !== "requests" && <div className="filters">
+          {page !== "requests" && page !== "quality" && <div className="filters">
             <label className="company-filter">
               <span>AMBIENTE DE TRABAJO</span>
               <select
@@ -1426,6 +1437,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           </div>}
           <div className="view-content" key={page}>
             {page === "requests" && laboratory && !remoteSave && <InternalRequests state={state} actor={active} onCreate={createRequest} onStatus={updateRequestStatus} onReply={replyRequest} />}
+            {page === "quality" && laboratory && !remoteSave && <ProcessQuality state={state} actor={active} commit={commit} notify={notify} />}
             {(page === "overview" || page === "day") && (
               <>
                 {stats()}
@@ -2240,84 +2252,11 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                     state={state}
                     commit={commit}
                     notify={notify}
+                    versioned={laboratory && !remoteSave}
                   />
                 )}
                 <div className="catalog-grid">
-                  {state.templates.map((t) => (
-                    <section className="catalog-item" key={t.id}>
-                      <span className="badge">
-                        {t.kind === "operativa"
-                          ? "Actividad operativa"
-                          : "Entregable"}
-                      </span>
-                      <h3>{t.title}</h3>
-                      <p>{t.description}</p>
-                      <small>{t.sector}</small>
-                      <div className="catalog-fields">
-                        <label>
-                          Peso de la tarea
-                          <select
-                            disabled={active.role !== "jefe"}
-                            value={t.weight}
-                            onChange={(e) =>
-                              commit(
-                                {
-                                  ...state,
-                                  templates: state.templates.map((x) =>
-                                    x.id === t.id
-                                      ? { ...x, weight: Number(e.target.value) }
-                                      : x,
-                                  ),
-                                },
-                                "Actualizó peso de catálogo",
-                                t.id,
-                              )
-                            }
-                          >
-                            {[1, 2, 3, 5, 8].map((n) => (
-                              <option key={n} value={n}>
-                                {n} puntos
-                              </option>
-                            ))}
-                          </select>
-                        </label>
-                        {t.kind === "operativa" && (
-                          <label>
-                            Meta por ocurrencia
-                            <input
-                              type="number"
-                              min="1"
-                              max="1000000"
-                              disabled={active.role !== "jefe"}
-                              value={t.target}
-                              onChange={(e) => {
-                                const n = Number(e.target.value);
-                                if (n > 0 && n <= 1000000)
-                                  commit(
-                                    {
-                                      ...state,
-                                      templates: state.templates.map((x) =>
-                                        x.id === t.id ? { ...x, target: n } : x,
-                                      ),
-                                    },
-                                    "Actualizó meta de catálogo",
-                                    t.id,
-                                  );
-                              }}
-                            />
-                            <small>{t.unit}</small>
-                          </label>
-                        )}
-                      </div>
-                      {t.steps.length > 0 && (
-                        <ol>
-                          {t.steps.map((s) => (
-                            <li key={s}>{s}</li>
-                          ))}
-                        </ol>
-                      )}
-                    </section>
-                  ))}
+                  {state.templates.map((template) => <CatalogueVersionCard key={template.id} state={state} template={template} actor={active} commit={commit} notify={notify} versioned={laboratory && !remoteSave} />)}
                 </div>
               </Panel>
             )}

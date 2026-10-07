@@ -271,7 +271,75 @@ const assert = (ok, message) => {
   assert((await page.locator('.work-cycle-table-wrap').nth(1).locator('thead th').first().innerText()).toLowerCase() === 'equipo', 'Work-cycle dimension did not switch to teams');
   checks.push({ interaction: 'monthly-work-cycle-day-week-and-team-breakdown', month: analysisMonth, days: daysInAnalysisMonth });
   await page.screenshot({ path: path.join(output, 'work-cycle.png'), fullPage: true, animations: 'disabled' });
+  await page.getByLabel("Vista de usuario").selectOption("e0");
+  await page.locator('[data-nav="quality"]').click();
+  await page.getByRole("heading", { name: "Mejorar un proceso con evidencia", exact: true }).waitFor();
+  await page.getByRole("button", { name: "Proponer mejora", exact: true }).click();
+  await page.getByLabel("Problema observado").fill("Se repiten diferencias por extractos incompletos.");
+  await page.getByRole("spinbutton", { name: "Medición inicial", exact: true }).fill("24");
+  await page.getByLabel("Unidad comparable").fill("minutos por conciliación");
+  await page.getByLabel("Meta numérica").fill("12");
+  await page.getByLabel("Evidencia de la medición inicial").fill("Diez conciliaciones revisadas en la muestra.");
+  await page.getByLabel("Volumen y contexto inicial").fill("Octubre · diez conciliaciones de complejidad media.");
+  await page.getByLabel("Cambio propuesto").fill("Verificar la integridad del extracto antes de conciliar.");
+  await page.getByLabel("Responsable de la prueba").selectOption("e0");
+  await page.getByLabel("Desde").fill("2026-10-06");
+  await page.getByLabel("Hasta").fill("2026-10-31");
+  await page.getByRole("button", { name: "Guardar propuesta", exact: true }).click();
+  const proposalId = await page.evaluate(() => JSON.parse(localStorage.getItem("paris-state-lab")).improvementProposals.at(-1).id);
+  await page.getByLabel("Vista de usuario").selectOption("boss");
+  await page.locator('[data-nav="quality"]').click();
+  await page.getByLabel("Criterio para habilitar la prueba").fill("Muestra y período acotados; mantener el mismo volumen y complejidad.");
+  await page.getByRole("button", { name: "Autorizar prueba", exact: true }).click();
+  await page.getByLabel("Vista de usuario").selectOption("e0");
+  await page.locator('[data-nav="quality"]').click();
+  await page.getByLabel("Valor medido").fill("10");
+  await page.getByLabel("Fecha", { exact: true }).fill("2026-10-25");
+  await page.getByLabel("Evidencia de la medición").fill("Las diez conciliaciones posteriores requirieron menos verificaciones repetidas.");
+  await page.getByLabel("Volumen y contexto comparables").fill("Octubre · diez conciliaciones de complejidad media.");
+  await page.getByRole("button", { name: "Guardar medición", exact: true }).click();
+  await page.getByLabel("Vista de usuario").selectOption("boss");
+  await page.locator('[data-nav="quality"]').click();
+  await page.getByLabel("Objetivo actualizado").fill("Validar integridad del extracto antes de conciliar.");
+  await page.getByLabel("Controles de la nueva versión · uno por línea").fill("Confirmar período y empresa del extracto\nComparar saldos y movimientos\nDocumentar diferencias\nRevisar conciliación");
+  await page.getByLabel("Comparación y criterio de adopción").fill("La medición mejora con volumen y complejidad comparables; se adopta como estándar futuro.");
+  await page.getByRole("button", { name: "Adoptar y versionar", exact: true }).click();
+  const adopted = await page.evaluate((id) => {
+    const state = JSON.parse(localStorage.getItem("paris-state-lab"));
+    const proposal = state.improvementProposals.find((row) => row.id === id);
+    return { status: proposal.status, version: proposal.adoptedVersion, sourceVersion: state.catalogueVersions.find((row) => row.sourceProposalId === id)?.version };
+  }, proposalId);
+  assert(adopted.status === "adopted" && adopted.version === 2 && adopted.sourceVersion === 2, "Kaizen adoption did not create a catalog version: " + JSON.stringify(adopted));
+  await page.getByLabel("Vista de usuario").selectOption("e0");
+  await page.locator('[data-nav="quality"]').click();
+  await page.getByRole("tab", { name: /Revisiones 5S/ }).click();
+  await page.getByRole("button", { name: "Registrar revisión 5S", exact: true }).click();
+  await page.getByLabel("Otro alcance").fill("Archivo de extractos de prueba");
+  await page.getByLabel("Fecha de revisión").fill("2026-10-06");
+  for (const area of ["classify", "order", "clean", "standardize", "sustain"]) {
+    await page.locator(`[name="${area}-result"]`).selectOption("hallazgo");
+    await page.locator(`[name="${area}-evidence"]`).fill(`Evidencia simulada para ${area}.`);
+    await page.locator(`[name="${area}-finding"]`).fill(`Se documenta el hallazgo de ${area}.`);
+    await page.locator(`[name="${area}-action"]`).fill(`Completar la acción y conservar la evidencia de ${area}.`);
+    await page.locator(`[name="${area}-responsible"]`).selectOption("e0");
+    await page.locator(`[name="${area}-dueOn"]`).fill("2026-10-13");
+  }
+  await page.getByRole("button", { name: "Guardar revisión completa", exact: true }).click();
+  await page.getByRole("button", { name: "Registrar verificación" }).first().click();
+  await page.getByLabel("Evidencia de corrección").fill("Índice revisado y ubicación de prueba normalizada.");
+  await page.getByLabel("Fecha de verificación").fill("2026-10-07");
+  await page.getByRole("button", { name: "Cerrar acción", exact: true }).click();
+  assert((await page.locator(".quality-completion").count()) === 1, "5S action closure evidence did not appear");
+  checks.push({ interaction: "kaizen-evidence-test-adoption-and-versioned-catalogue", proposalId, version: adopted.version });
+  checks.push({ interaction: "five-s-review-and-evidence-backed-action-closure", completedActions: 1 });
+  await page.screenshot({ path: path.join(output, "process-quality.png"), fullPage: true, animations: "disabled" });
+  await page.locator('[data-nav="analytics"]').click();
   await page.setViewportSize({ width: 390, height: 844 });
+  await page.locator('[data-nav="quality"]').click();
+  assert(await page.getByRole("heading", { name: "Mejorar el proceso también es parte del trabajo.", exact: true }).count() === 1, "Process quality missing on mobile");
+  assert(!(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)), "Mobile process-quality layout caused page-level horizontal overflow");
+  checks.push({ interaction: "mobile-process-quality-without-page-overflow", viewport: "390x844" });
+  await page.screenshot({ path: path.join(output, "process-quality-mobile.png"), fullPage: true, animations: "disabled" });
   await page.locator('[data-nav="analytics"]').click();
   assert(await page.getByRole('heading', { name: 'Ciclo de trabajo', exact: true }).count() === 1, 'Work cycle missing on mobile');
   assert(!(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)), 'Mobile work-cycle layout caused page-level horizontal overflow');
@@ -308,6 +376,9 @@ const assert = (ok, message) => {
           "boss parameter review",
           "internal request routing, response, resolution and persistence",
           "daily and weekly monthly work-cycle with team breakdown",
+          "Kaizen evidence, controlled trial, manager adoption and catalogue versioning",
+          "five-area 5S review and evidence-backed corrective action closure",
+          "desktop and mobile process-quality layout",
           "persisted review",
           "mobile",
         ],

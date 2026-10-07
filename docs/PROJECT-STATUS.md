@@ -239,3 +239,29 @@ El código quedó publicado como **Site v58**, desde el commit
 final: deployment exitoso, sólo una cuenta owner permitida y cero visitantes
 externos. La corrección documental de este estado no modifica el código de la
 aplicación.
+
+## Mejora Kaizen, revisiones 5S y versiones de catálogo — 06/10/2026
+
+Se agregó `Mejora de procesos` sólo al laboratorio. Kaizen conserva problema,
+base, meta, evidencia y contexto; un encargado o Juan Pablo autoriza una prueba,
+el responsable registra la medición comparable y sólo Juan Pablo adopta el
+cambio. La adopción crea una versión inmutable del catálogo y actualiza sólo
+trabajo futuro todavía intacto; no cambia pesos/KPI ni tareas iniciadas,
+completadas o cerradas. Las versiones históricas sin fecha conocida quedan
+identificadas como vigencia desconocida, sin inventar una fecha.
+
+Las revisiones 5S exigen las cinco áreas, evidencia, hallazgo/fundamento, acción,
+responsable y fecha. El cierre de una acción requiere una evidencia y fecha de
+verificación. Ambas funciones guardan datos ficticios sólo en `paris-state-lab`,
+no llaman a `/api`, no sincronizan navegadores y no usan documentos reales.
+
+Verificación: **385/385 pruebas en 38 archivos**; TypeScript, Vite y Worker
+build aprobados. Edge Chromium recorrió propuesta, autorización, prueba,
+medición, adopción/versionado y cierre de acción 5S; revisó la página en 1440,
+1600, 1280 y 1024 px, y en móvil 390×844. No hubo overflow horizontal, errores
+JavaScript ni solicitudes a la API operativa. Evidencia automatizada:
+`architecture/review-evidence/process-quality-lab-20261006.json`.
+
+La versión privada anterior sigue siendo v58 hasta completar la sincronización y
+publicación de este corte en el mismo Site. El avance global permanece en
+**~45%**; esta función local no satisface aceptación final ni infraestructura.

@@ -50,6 +50,8 @@ export interface Template {
 }
 export interface Assignment {
   retired?: boolean;
+  /** Catalogue snapshot used for future occurrences. Older records may be unversioned. */
+  templateVersion?: number;
   id: string;
   templateId: string | null;
   title: string;
@@ -69,6 +71,8 @@ export interface Assignment {
 }
 export interface Task {
   templateId?: string | null;
+  /** Standard version captured when this occurrence was materialized. */
+  templateVersion?: number;
   scheduledOn?: string;
   /** Actor who performed the latest completion in this local laboratory. */
   completedBy?: string;
@@ -268,6 +272,9 @@ export interface State {
   tour: Record<string, number>;
   tourVersion?: Record<string, number>;
   annotations?: Annotation[];
+  catalogueVersions?: import("./processImprovement").CatalogueVersion[];
+  improvementProposals?: import("./processImprovement").KaizenProposal[];
+  fiveSReviews?: import("./processImprovement").FiveSReview[];
 }
 export const id = () => crypto.randomUUID();
 export const dateART = (iso = new Date().toISOString()) =>
@@ -457,6 +464,7 @@ export function materialize(s: State, month: string): State {
         id: id(),
         assignmentId: a.id,
         templateId: a.templateId,
+        ...(a.templateVersion === undefined ? {} : { templateVersion: a.templateVersion }),
         title: a.title,
         ownerId: a.ownerId,
         companyId: a.companyId,

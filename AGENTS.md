@@ -137,3 +137,13 @@ datos reales ni adjuntos: la colección vive en `paris-state-lab` del navegador,
 no sincroniza dispositivos, no existe una cuenta de soporte conectada y no hay
 entrega por servidor. No portar a API/D1/Supabase sin revisión Sol del contrato
 de almacenamiento, identidad técnica y permisos.
+
+## Mejora de procesos y trabajo desde otra PC — 06/10/2026
+
+Kaizen/5S y versionado de catálogo están implementados sólo en el laboratorio
+local; revisar `docs/PROJECT-STATUS.md` y su evidencia antes de ampliar alcance.
+No portar su almacenamiento/permisos a D1 o Supabase sin revisión arquitectónica.
+El checkout no tiene remoto GitHub propio; hasta la aceptación final no crear
+esa cuenta. Para una PC personal, usar un bundle portable con el mismo historial
+y trabajar una sola copia a la vez; no sincronizar `.git` por carpeta compartida
+ni afirmar sincronización entre dispositivos.

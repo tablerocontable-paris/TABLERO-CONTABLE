@@ -6,6 +6,7 @@ import {
   type State,
   type Onboarding,
 } from "../domain/model";
+import { currentCatalogueVersion, ensureCatalogueVersions, pinMatchingCatalogueAssignments } from "../domain/processImprovement";
 export const KEY = "paris-state-v3";
 export const blankOnboarding = (name = ""): Onboarding => ({
   version: 1,
@@ -280,6 +281,41 @@ const schema = z.object({
   assignments: z.array(z.unknown()),
   teams: z.array(z.unknown()),
   templates: z.array(z.unknown()),
+  catalogueVersions: z.array(z.object({
+    id: z.string(), templateId: z.string(), version: z.number().int().positive(),
+    title: z.string(), sector: z.string(), kind: z.enum(["resultado", "operativa"]),
+    weight: z.number().nonnegative(), unit: z.string(), target: z.number().nonnegative(),
+    steps: z.array(z.string()), description: z.string(), capturedAt: z.string(),
+    effectiveOn: z.string().nullable(), createdBy: z.string().nullable(),
+    source: z.enum(["initial_snapshot", "catalog_change", "kaizen_adoption", "legacy_reconciliation"]),
+    changeReason: z.string().min(1).max(500), sourceProposalId: z.string().optional(),
+  })).optional(),
+  improvementProposals: z.array(z.object({
+    id: z.string(), templateId: z.string(), companyId: z.string(), templateTitle: z.string(),
+    problemObserved: z.string().min(1).max(1200), baselineValue: z.number().nonnegative(),
+    objectiveValue: z.number().nonnegative(), unit: z.string().min(1).max(40),
+    direction: z.enum(["lower", "higher"]), baselineEvidence: z.string().min(1).max(2000),
+    baselineContext: z.string().min(1).max(1200), proposedChange: z.string().min(1).max(1600),
+    responsibleId: z.string(), proposedBy: z.string(), proposedAt: z.string(),
+    trialFrom: z.string(), trialThrough: z.string(),
+    status: z.enum(["proposed", "testing", "measured", "adopted", "rejected"]),
+    reviewNote: z.string().optional(), reviewedBy: z.string().optional(), reviewedAt: z.string().optional(),
+    afterValue: z.number().nonnegative().optional(), afterEvidence: z.string().optional(),
+    afterContext: z.string().optional(), measuredOn: z.string().optional(), measuredBy: z.string().optional(),
+    decisionNote: z.string().optional(), decidedBy: z.string().optional(), decidedAt: z.string().optional(),
+    adoptedVersion: z.number().int().positive().optional(),
+  })).optional(),
+  fiveSReviews: z.array(z.object({
+    id: z.string(), companyId: z.string(), templateId: z.string().nullable(), scopeTitle: z.string().min(1).max(120),
+    reviewedOn: z.string(), createdAt: z.string(), createdBy: z.string(),
+    items: z.array(z.object({
+      id: z.enum(["classify", "order", "clean", "standardize", "sustain"]),
+      result: z.enum(["conforme", "hallazgo", "no_aplica"]),
+      evidence: z.string().min(1).max(1200), finding: z.string().min(1).max(800), action: z.string().min(1).max(800),
+      responsibleId: z.string(), dueOn: z.string(), status: z.enum(["open", "done"]),
+      completionEvidence: z.string().optional(), completedOn: z.string().optional(), completedBy: z.string().optional(),
+    })).length(5),
+  })).optional(),
   closures: z.array(z.unknown()),
   audit: z.array(z.unknown()),
   annotations: z
@@ -435,7 +471,19 @@ export function load(laboratory = isLab()): State {
         );
       }
     }
-    return s;
+    if (!laboratory) return s;
+    const versioned = pinMatchingCatalogueAssignments(ensureCatalogueVersions(s));
+    const assignmentsById = new Map(versioned.assignments.map((assignment) => [assignment.id, assignment]));
+    return {
+      ...versioned,
+      improvementProposals: [],
+      fiveSReviews: [],
+      tasks: versioned.tasks.map((task) => {
+        const assignment = task.assignmentId ? assignmentsById.get(task.assignmentId) : undefined;
+        const version = assignment?.templateVersion || (task.templateId ? currentCatalogueVersion(versioned, task.templateId) : 0);
+        return version && task.templateId ? { ...task, templateVersion: version } : task;
+      }),
+    };
   }
   const parsed = JSON.parse(raw);
   schema.parse(parsed);
@@ -451,7 +499,10 @@ export function load(laboratory = isLab()): State {
   state.annotations ||= [];
   state.internalRequests ||= [];
   state.tourVersion ||= {};
-  return state;
+  if (!laboratory) return state;
+  state.improvementProposals ||= [];
+  state.fiveSReviews ||= [];
+  return pinMatchingCatalogueAssignments(ensureCatalogueVersions(state));
 }
 export function persist(s: State, laboratory = false) {
   localStorage.setItem(laboratory ? "paris-state-lab" : KEY, JSON.stringify(s));
