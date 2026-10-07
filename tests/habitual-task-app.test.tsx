@@ -48,7 +48,7 @@ describe("integración de propuestas en la inducción", () => {
     state.onboarding.e0 = draft;
     render(<App initialState={state as State} laboratoryMode />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Preparar mi tablero/ }));
+    fireEvent.click(await screen.findByRole("button", { name: /Preparar mi tablero/ }));
 
     await waitFor(() => {
       const saved = JSON.parse(localStorage.getItem("paris-state-lab") || "null");

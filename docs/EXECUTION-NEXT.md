@@ -300,3 +300,20 @@ Siguiente paso que requiere revisión de contrato: **GPT-6.1 Sol, esfuerzo alto,
 Standard** para evaluar dependencias, delegación/aceptación y notificaciones de
 servidor. Después, **GPT-6 Luna, esfuerzo medio, Standard** para implementar los
 contratos aprobados en laboratorio antes de conectar infraestructura.
+
+## Estado de rendimiento — 07/10/2026
+
+Se cerró la advertencia del bundle principal mediante carga diferida de rutas.
+Entrada actual: 489,53 kB (148,90 kB gzip), frente a ~593 kB anteriores. El
+chunk de gráficos de 405,70 kB sigue separado y usado por el resumen; no forma
+parte de la próxima decisión de permisos. Evidencia y límites en
+`docs/architecture/review-evidence/route-code-split-lab-20261007.json`.
+
+Próximo paso: **GPT-6.1 Sol, esfuerzo alto, Standard**, revisión acotada de
+contratos de dependencias, delegación/aceptación y avisos entre dispositivos;
+definir el borde de identidad, permisos, idempotencia y entrega antes de portar
+mutaciones del laboratorio al servidor. Después seleccionar **GPT-6 Luna,
+esfuerzo medio, Standard** para implementar sólo el contrato aprobado. En Plus,
+el uso de Work y Codex es compartido y los rangos publicados por cinco horas son
+estimaciones; consultar el panel antes de una revisión extensa. No crear cuentas
+ni activar integraciones reales hasta el 100% aceptado.

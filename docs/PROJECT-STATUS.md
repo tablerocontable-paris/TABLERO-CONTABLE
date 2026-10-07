@@ -472,3 +472,25 @@ visitantes externos. No se cambió la audiencia ni se habilitaron cuentas.
 
 El avance global continúa aproximadamente en **45%**: este cierre funcional no
 incluye aceptación completa, sincronización entre PCs ni infraestructura final.
+
+## Carga de vistas por demanda — laboratorio — 07/10/2026
+
+Las pantallas de administración, planificación, reportes, equipo, ausencias,
+inducción, anotaciones y laboratorio ahora se descargan al abrir su sección.
+Mientras llega el módulo se muestra un estado accesible. La entrada JavaScript
+bajó de ~593 kB a 489,53 kB (−~17,4%) y quedó debajo del umbral de advertencia
+de Vite. El paquete separado de gráficos sigue en 405,70 kB porque el resumen
+lo usa; queda como oportunidad de optimización distinta.
+
+Verificación del estado actual: 412/412 pruebas en 45 archivos, TypeScript,
+build Vite y Worker; Chromium Edge escritorio y móvil pasó los tres recorridos,
+sin errores JavaScript ni llamadas operativas a `/api`. Evidencia:
+`docs/architecture/review-evidence/route-code-split-lab-20261007.json`.
+La suite ejercita la carga diferida en anotaciones, inducción, ausencias,
+invitaciones, reportes y equipo. El cambio no modifica reglas contables,
+identidad, persistencia ni almacenamiento y se mantiene dentro del laboratorio.
+
+El último Site confirmado antes de este cambio sigue siendo v65. El precommit
+pasó; falta registrar el commit y desplegar el candidato en el mismo Site
+privado antes de actualizar ese dato. No se conectaron cuentas, Supabase, D1,
+GitHub ni correo; el avance global sigue orientativamente en **~45%**.

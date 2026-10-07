@@ -158,7 +158,7 @@ describe("UI conectada: recorrido diario sin simulación", () => {
     const company = s.companies.find(
       (c) => c.id === selected().companyId,
     )!.name;
-    const row = screen.getByRole("cell", { name: company }).closest("tr")!;
+    const row = (await screen.findByRole("cell", { name: company })).closest("tr")!;
     fireEvent.click(within(row).getByRole("button", { name: "Abrir tarjeta" }));
     for (const step of selected().checklist) {
       fireEvent.click(screen.getByLabelText(step.text));
@@ -233,7 +233,7 @@ describe("UI conectada: recorrido diario sin simulación", () => {
       />,
     );
     fireEvent.click(document.querySelector('[data-nav="team"]')!);
-    fireEvent.change(screen.getByLabelText("Empresa 1"), {
+    fireEvent.change(await screen.findByLabelText("Empresa 1"), {
       target: { value: "Razón social real" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Guardar empresas" }));
@@ -262,7 +262,7 @@ describe("UI conectada: recorrido diario sin simulación", () => {
     render(<RemoteWorkspace />);
     await screen.findByLabelText("Mi espacio");
     fireEvent.click(document.querySelector('[data-nav="team"]')!);
-    fireEvent.change(screen.getByLabelText("Empresa 1"), {
+    fireEvent.change(await screen.findByLabelText("Empresa 1"), {
       target: { value: "Cambio recuperable" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Guardar empresas" }));

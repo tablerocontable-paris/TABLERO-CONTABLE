@@ -83,22 +83,22 @@ describe("correcciones del laboratorio y las tarjetas", () => {
       ),
     ).toBe(false);
   });
-  it("an invitation simulates the configured first boss without real authentication or a network call", () => {
+  it("an invitation simulates the configured first boss without real authentication or a network call", async () => {
     history.replaceState(null, "", "/?laboratorio=1&invitacion=boss");
     const fetch = vi.fn();
     vi.stubGlobal("fetch", fetch);
     render(<LaboratoryWorkspace />);
-    expect(screen.getByRole("heading", { name: "Hola, Juan." })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "Hola, Juan." })).toBeTruthy();
     expect(location.search).not.toContain("invitacion");
     expect(JSON.parse(localStorage.getItem("paris-state-lab")!).activeId).toBe(
       "boss",
     );
     expect(fetch).not.toHaveBeenCalled();
   });
-  it("offers simulated invitation links on the team page and does not send email", () => {
+  it("offers simulated invitation links on the team page and does not send email", async () => {
     render(<LaboratoryWorkspace />);
     fireEvent.click(document.querySelector('[data-nav="team"]')!);
-    const link = screen.getByRole("link", {
+    const link = await screen.findByRole("link", {
       name: "Probar invitación de Juan Pablo",
     });
     expect(link.getAttribute("href")).toBe("?laboratorio=1&invitacion=boss");

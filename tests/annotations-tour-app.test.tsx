@@ -56,13 +56,15 @@ function prepare(role = "e0") {
   localStorage.setItem(KEY, JSON.stringify(state));
   return state;
 }
-function openNotes() {
+async function openNotes() {
   fireEvent.click(document.querySelector('[data-nav="annotations"]')!);
+  await screen.findByRole("button", { name: "Nueva anotación" });
   const create = screen.queryByRole("button", { name: "Nueva anotación" });
   if (create) fireEvent.click(create);
 }
-function convert() {
-  openNotes();
+async function convert() {
+  await openNotes();
+  await screen.findByRole("button", { name: "Convertir en tarea" });
   fireEvent.click(screen.getByRole("button", { name: "Convertir en tarea" }));
 }
 beforeEach(() => {
@@ -85,7 +87,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 describe("anotaciones y recorrido integrados", () => {
-  it("incluye la tarea y la cuota conjunta del segundo participante en la tabla de cierre", () => {
+  it("incluye la tarea y la cuota conjunta del segundo participante en la tabla de cierre", async () => {
     const state = prepare("boss");
     const example = seed().tasks.find((task) => task.ownerId === "e0" && task.kind === "resultado")!;
     const task = {
@@ -119,6 +121,7 @@ describe("anotaciones y recorrido integrados", () => {
 
     render(<App />);
     fireEvent.click(document.querySelector('[data-nav="closing"]')!);
+    await screen.findByRole("button", { name: "Exportar cierre" });
     const memberName = joint.profiles.find((profile) => profile.id === "e1")!.name;
     const row = screen.getAllByText(memberName)
       .map((element) => element.closest("tr"))
@@ -127,10 +130,10 @@ describe("anotaciones y recorrido integrados", () => {
     expect(row.textContent).toContain("100%");
   });
 
-  it("guarda y vuelve a cargar una categoría libre de anotación", () => {
+  it("guarda y vuelve a cargar una categoría libre de anotación", async () => {
     prepare();
     render(<App />);
-    openNotes();
+    await openNotes();
     fireEvent.change(screen.getByLabelText("Título"), { target: { value: "Criterio de revisión" } });
     fireEvent.change(screen.getByLabelText("Tipo"), { target: { value: "Control interno" } });
     fireEvent.change(screen.getByLabelText("Contenido"), { target: { value: "Validar soporte antes de conciliar." } });
@@ -197,7 +200,7 @@ describe("anotaciones y recorrido integrados", () => {
     expect(screen.getByText(/Tarea de cobertura para Valentino Magni/)).toBeTruthy();
   });
 
-  it("al preparar una cobertura obliga a elegir tareas específicas y las conserva", () => {
+  it("al preparar una cobertura obliga a elegir tareas específicas y las conserva", async () => {
     const state = prepare("m1");
     const examples = seed().tasks.filter((task) => task.ownerId === "e0").slice(0, 2);
     state.tasks = examples.map((task, index) => ({
@@ -208,6 +211,7 @@ describe("anotaciones y recorrido integrados", () => {
     localStorage.setItem(KEY, JSON.stringify(state));
     render(<App />);
     fireEvent.click(document.querySelector('[data-nav="absences"]')!);
+    await screen.findByRole("button", { name: "Registrar ausencia" });
     fireEvent.click(screen.getByRole("button", { name: "Registrar ausencia" }));
     fireEvent.change(screen.getByLabelText("Persona ausente"), { target: { value: "e0" } });
     fireEvent.change(screen.getByLabelText("Quién cubre"), { target: { value: "e1" } });
@@ -222,7 +226,7 @@ describe("anotaciones y recorrido integrados", () => {
     expect(load().absences?.[0].taskIds).toEqual(["selected-coverage-0"]);
   });
 
-  it("previsualiza ocurrencias recurrentes y guarda la regla elegida para cobertura futura", () => {
+  it("previsualiza ocurrencias recurrentes y guarda la regla elegida para cobertura futura", async () => {
     const state = prepare("m1");
     const example = seed().assignments[0]!;
     state.assignments = [{
@@ -233,6 +237,7 @@ describe("anotaciones y recorrido integrados", () => {
     localStorage.setItem(KEY, JSON.stringify(state));
     render(<App />);
     fireEvent.click(document.querySelector('[data-nav="absences"]')!);
+    await screen.findByRole("button", { name: "Registrar ausencia" });
     fireEvent.click(screen.getByRole("button", { name: "Registrar ausencia" }));
     fireEvent.change(screen.getByLabelText("Persona ausente"), { target: { value: "e0" } });
     fireEvent.change(screen.getByLabelText("Quién cubre"), { target: { value: "e1" } });
@@ -293,23 +298,23 @@ describe("anotaciones y recorrido integrados", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  it("permite desplegar una anotación multilineal corta", () => {
+  it("permite desplegar una anotación multilineal corta", async () => {
     const state = prepare();
     state.annotations![0]!.content = "Control uno\nControl dos\nControl tres";
     localStorage.setItem(KEY, JSON.stringify(state));
     render(<App />);
     fireEvent.click(document.querySelector('[data-nav="annotations"]')!);
-    const expand = screen.getByRole("button", { name: "Leer completo" });
+    const expand = await screen.findByRole("button", { name: "Leer completo" });
     expect(expand.getAttribute("aria-expanded")).toBe("false");
     fireEvent.click(expand);
     expect(screen.getByRole("button", { name: "Mostrar menos" }).getAttribute("aria-expanded")).toBe("true");
     expect(screen.getByText(/Control uno/).className).toContain("expanded");
   });
 
-  it("conversión normal conserva texto y crea vínculo", () => {
+  it("conversión normal conserva texto y crea vínculo", async () => {
     prepare();
     render(<App />);
-    convert();
+    await convert();
     fireEvent.click(screen.getByRole("button", { name: "Crear tarea" }));
     const state = stored();
     const note = state.annotations![0];
@@ -326,10 +331,10 @@ describe("anotaciones y recorrido integrados", () => {
       },
     );
   });
-  it("fecha de otro mes no debe dejar asignación sin vínculo", () => {
+  it("fecha de otro mes no debe dejar asignación sin vínculo", async () => {
     prepare();
     render(<App />);
-    convert();
+    await convert();
     fireEvent.change(screen.getByLabelText("Fecha de realización"), {
       target: { value: "2026-11-12" },
     });
@@ -346,7 +351,7 @@ describe("anotaciones y recorrido integrados", () => {
       },
     );
   });
-  it("mes objetivo cerrado rechaza conversión sin modificar la anotación", () => {
+  it("mes objetivo cerrado rechaza conversión sin modificar la anotación", async () => {
     const state = prepare();
     state.closures.push({
       id: "closed-month",
@@ -361,7 +366,7 @@ describe("anotaciones y recorrido integrados", () => {
     });
     localStorage.setItem(KEY, JSON.stringify(state));
     render(<App />);
-    convert();
+    await convert();
     fireEvent.change(screen.getByLabelText("Fecha de realización"), {
       target: { value: "2026-11-12" },
     });
@@ -380,10 +385,10 @@ describe("anotaciones y recorrido integrados", () => {
       },
     );
   });
-  it("fallo al guardar conversión conserva el formulario y se puede reintentar", () => {
+  it("fallo al guardar conversión conserva el formulario y se puede reintentar", async () => {
     prepare();
     render(<App />);
-    convert();
+    await convert();
     const setItem = vi
       .spyOn(Storage.prototype, "setItem")
       .mockImplementationOnce(() => {
@@ -400,10 +405,10 @@ describe("anotaciones y recorrido integrados", () => {
     expect(saved.annotations![0].convertedTaskId).toBe(saved.tasks[0].id);
     expect(saved.annotations![0].reminderOn).toBeNull();
   });
-  it("guardado fallido conserva texto para reintentar", () => {
+  it("guardado fallido conserva texto para reintentar", async () => {
     prepare();
     render(<App />);
-    openNotes();
+    await openNotes();
     const title = screen.getByLabelText("Título") as HTMLInputElement;
     const content = screen.getByLabelText("Contenido") as HTMLTextAreaElement;
     fireEvent.change(title, { target: { value: "No perder" } });
@@ -425,7 +430,7 @@ describe("anotaciones y recorrido integrados", () => {
       },
     );
   });
-  it("recordatorios aparecen en el tablero propio y no se filtran entre perfiles", () => {
+  it("recordatorios aparecen en el tablero propio y no se filtran entre perfiles", async () => {
     const state = prepare("e0");
     state.annotations![0].reminderOn = "2026-10-01";
     state.annotations![0].content = "Contenido privado de prueba";
@@ -439,13 +444,13 @@ describe("anotaciones y recorrido integrados", () => {
     localStorage.setItem(KEY, JSON.stringify(state));
     render(<App />);
     expect(screen.queryByText("Contenido privado de prueba")).toBeNull();
-    openNotes();
+    await openNotes();
     expect(screen.queryByText("Contenido privado de prueba")).toBeNull();
   });
-  it("conversión mantiene una sola vez aunque se elija catálogo", () => {
+  it("conversión mantiene una sola vez aunque se elija catálogo", async () => {
     prepare();
     render(<App />);
-    convert();
+    await convert();
     fireEvent.change(screen.getByLabelText("Elegí del catálogo"), {
       target: { value: "cat1" },
     });
@@ -459,10 +464,10 @@ describe("anotaciones y recorrido integrados", () => {
       { options },
     );
   });
-  it("handler rechaza recurrencia aunque se fuerce en el formulario", () => {
+  it("handler rechaza recurrencia aunque se fuerce en el formulario", async () => {
     prepare();
     render(<App />);
-    convert();
+    await convert();
     fireEvent.change(screen.getByLabelText("Elegí del catálogo"), {
       target: { value: "cat1" },
     });
@@ -476,12 +481,12 @@ describe("anotaciones y recorrido integrados", () => {
     expect(saved.annotations![0].convertedTaskId).toBeNull();
     expect(screen.getByRole("status").textContent).toContain("tarea puntual");
   });
-  it("vínculo sin tarjeta no debe ofrecer reconversión", () => {
+  it("vínculo sin tarjeta no debe ofrecer reconversión", async () => {
     const state = prepare();
     state.annotations![0].convertedTaskId = "missing-task";
     localStorage.setItem(KEY, JSON.stringify(state));
     render(<App />);
-    openNotes();
+    await openNotes();
     const button = screen.queryByRole("button", { name: "Convertir en tarea" });
     record("missing_link_keeps_conversion_lock", button === null, {
       offersConvert: button !== null,
@@ -557,12 +562,13 @@ describe("anotaciones y recorrido integrados", () => {
     fireEvent.click(document.querySelector(".column-toggle")!);
     await waitFor(() => expect(document.querySelector(".heading")?.classList.contains("spotlight")).toBe(true));
   });
-  it("muestra iniciales de encargado en el organigrama", () => {
+  it("muestra iniciales de encargado en el organigrama", async () => {
     const state = prepare("boss");
     state.profiles.find((profile) => profile.id === "m1")!.name = "Lucía Fernández";
     localStorage.setItem(KEY, JSON.stringify(state));
     render(<App />);
     fireEvent.click(document.querySelector('[data-nav="team"]')!);
+    await waitFor(() => expect(document.querySelector(".org-manager .avatar")).not.toBeNull());
     expect(document.querySelector(".org-manager .avatar")?.textContent).toBe("LF");
     expect(document.querySelectorAll(".org-manager .avatar").length).toBeGreaterThan(0);
   });
@@ -672,7 +678,7 @@ describe("anotaciones y recorrido integrados", () => {
       "1/11",
     );
   });
-  it("fin de inducción abre Mi día aunque home sea tablero y no duplica asignaciones", () => {
+  it("fin de inducción abre Mi día aunque home sea tablero y no duplica asignaciones", async () => {
     const state = prepare();
     state.onboarding.e0 = {
       ...state.onboarding.e0,
@@ -685,9 +691,7 @@ describe("anotaciones y recorrido integrados", () => {
     };
     localStorage.setItem(KEY, JSON.stringify(state));
     const view = render(<App />);
-    fireEvent.click(
-      screen.getByRole("button", { name: "Preparar mi tablero" }),
-    );
+    fireEvent.click(await screen.findByRole("button", { name: "Preparar mi tablero" }));
     expect(
       document.querySelector("nav button.active")?.getAttribute("data-nav"),
     ).toBe("day");

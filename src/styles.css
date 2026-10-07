@@ -1064,6 +1064,12 @@ td .text-button {
 .view-content {
   animation: rise 0.35s var(--ease) both;
 }
+.section-loading {
+  min-height: 8rem;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+}
 footer {
   display: flex;
   gap: 20px;

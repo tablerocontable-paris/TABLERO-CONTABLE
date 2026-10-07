@@ -1,24 +1,13 @@
 import NotificationCenter from "./components/NotificationCenter";
 import TaskComments from "./components/TaskComments";
-import InternalRequests from "./components/InternalRequests";
-import ProcessQuality from "./components/ProcessQuality";
-import CatalogueVersionCard from "./components/CatalogueVersionCard";
-import WorkCycle from "./components/WorkCycle";
+import { lazy, Suspense, useState, useEffect, type FormEvent } from "react";
 import JointTaskSetup from "./components/JointTaskSetup";
 import { collectTaskNotifications } from "./domain/notifications";
-import LaboratoryInvitations from "./components/LaboratoryInvitations";
-import Planning from "./components/Planning";
-import WorkspaceSetup from "./components/WorkspaceSetup";
-import DeadlineAgenda from "./components/DeadlineAgenda";
-import { HabitualTaskProposalInbox, MyHabitualTaskProposals } from "./components/HabitualTaskProposals";
 import TaskBoard, { orderTasks, type TaskOrder } from "./components/TaskBoard";
-import PeriodReports from "./components/PeriodReports";
-import CatalogueCreator from "./components/CatalogueCreator";
 import QuickTaskSearch from "./components/QuickTaskSearch";
 import { standardizeAssignment } from "./domain/catalogue";
 import ThemeControl from "./components/ThemeControl";
 import ScheduleEditor from "./components/ScheduleEditor";
-import { Absences, Workforce } from "./components/Workforce";
 import {
   defaultSchedule,
   validateSchedule,
@@ -39,7 +28,6 @@ import {
   expireCoverageClocks,
 } from "./domain/workforce";
 import { enterLab, exitLab, isLab } from "./data/repository";
-import { useState, useEffect, type FormEvent } from "react";
 import {
   LayoutDashboard,
   Columns3,
@@ -109,8 +97,6 @@ import {
 } from "./domain/model";
 import { load, persist, blankOnboarding } from "./data/repository";
 import { Dialog, Panel, Empty, Meter } from "./components/ui";
-import Onboarding from "./components/Onboarding";
-import Annotations from "./components/Annotations";
 import OperationalTaskCard from "./components/OperationalTaskCard";
 import TimelinessBadge from "./components/TimelinessBadge";
 import TimelinessPanel from "./components/TimelinessPanel";
@@ -130,6 +116,40 @@ import {
   type InternalRequest,
   type InternalRequestStatus,
 } from "./domain/internalRequests";
+
+const InternalRequests = lazy(() => import("./components/InternalRequests"));
+const ProcessQuality = lazy(() => import("./components/ProcessQuality"));
+const CatalogueVersionCard = lazy(() => import("./components/CatalogueVersionCard"));
+const WorkCycle = lazy(() => import("./components/WorkCycle"));
+const LaboratoryInvitations = lazy(() => import("./components/LaboratoryInvitations"));
+const Planning = lazy(() => import("./components/Planning"));
+const WorkspaceSetup = lazy(() => import("./components/WorkspaceSetup"));
+const DeadlineAgenda = lazy(() => import("./components/DeadlineAgenda"));
+const HabitualTaskProposalInbox = lazy(() =>
+  import("./components/HabitualTaskProposals").then((module) => ({
+    default: module.HabitualTaskProposalInbox,
+  })),
+);
+const MyHabitualTaskProposals = lazy(() =>
+  import("./components/HabitualTaskProposals").then((module) => ({
+    default: module.MyHabitualTaskProposals,
+  })),
+);
+const PeriodReports = lazy(() => import("./components/PeriodReports"));
+const CatalogueCreator = lazy(() => import("./components/CatalogueCreator"));
+const Absences = lazy(() =>
+  import("./components/Workforce").then((module) => ({
+    default: module.Absences,
+  })),
+);
+const Workforce = lazy(() =>
+  import("./components/Workforce").then((module) => ({
+    default: module.Workforce,
+  })),
+);
+const Onboarding = lazy(() => import("./components/Onboarding"));
+const Annotations = lazy(() => import("./components/Annotations"));
+
 type Page =
   | "overview"
   | "day"
@@ -878,25 +898,27 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
     );
   if ((!draft.completedAt && !paused) || induct)
     return (
-      <Onboarding
-        remote={!!remoteSave}
-        month={month}
-        state={state}
-        profile={active}
-        draft={draft}
-        update={(d) =>
-          commit({
-            ...state,
-            onboarding: { ...state.onboarding, [active.id]: d },
-          })
-        }
-        finish={finishOnboarding}
-        laboratory={laboratory && !remoteSave}
-        pause={() => {
-          setInduct(false);
-          setPaused(true);
-        }}
-      />
+      <Suspense fallback={<div className="section-loading" role="status">Cargando inducción…</div>}>
+        <Onboarding
+          remote={!!remoteSave}
+          month={month}
+          state={state}
+          profile={active}
+          draft={draft}
+          update={(d) =>
+            commit({
+              ...state,
+              onboarding: { ...state.onboarding, [active.id]: d },
+            })
+          }
+          finish={finishOnboarding}
+          laboratory={laboratory && !remoteSave}
+          pause={() => {
+            setInduct(false);
+            setPaused(true);
+          }}
+        />
+      </Suspense>
     );
   const chartGroups = (
     group === "individual"
@@ -1536,6 +1558,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             </button>
           </div>}
           <div className="view-content" key={page}>
+            <Suspense fallback={<div className="section-loading" role="status" aria-live="polite">Cargando sección…</div>}>
             {page === "requests" && laboratory && !remoteSave && <InternalRequests state={state} actor={active} onCreate={createRequest} onStatus={updateRequestStatus} onReply={replyRequest} onConvert={convertRequestToTask} onOpenTask={openRequestTask} />}
             {page === "quality" && laboratory && !remoteSave && <ProcessQuality state={state} actor={active} commit={commit} notify={notify} />}
             {(page === "overview" || page === "day") && (
@@ -2460,6 +2483,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                 </Panel>
               </>
             )}
+            </Suspense>
           </div>
           <footer>
             <b>GRUPO PARÍS</b>

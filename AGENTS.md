@@ -69,6 +69,14 @@ PROJECT-STATUS y EXECUTION-NEXT son el estado vigente; anteriores afirmaciones
 de producto operativo describen el corte histórico superado por este pedido.
 Avance orientativo 45–50%; no 100%.
 
+Corrección técnica del 07/10/2026: los módulos propios de cada sección usan
+`React.lazy` y un estado de carga accesible; los tests de integración esperan a
+que la sección aparezca. El bundle principal bajó de ~593 kB a 489,53 kB. Ver
+`docs/architecture/review-evidence/route-code-split-lab-20261007.json`.
+Validación completa: 412/412, TypeScript, Vite, Worker y Chromium desktop/móvil.
+No cambia el alcance privado ni habilita API o cuentas. Mantener el aviso del
+chunk de gráficos de 405,70 kB como oportunidad separada.
+
 ## Definición final del usuario — 06/10/2026
 100% incluye aplicación aceptada sin correcciones conocidas, GitHub, dos Supabase dev/producción, hosting propio y automatización validada. Seguir docs/ops/FINAL-ACCEPTANCE.md. No crear cuentas ni invitar usuarios durante laboratorio. No confundir CI preparado con CI ejecutado.
 
