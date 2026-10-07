@@ -8,13 +8,13 @@
     "storage": "paris-state-lab fictitious profile data"
   },
   "route": [
-    "Open task board using Tab and Enter",
-    "Select Valentino Magni using browser automation",
-    "Focus a movable result task in Pendiente using browser automation",
+    "Reach the task navigation item with Tab and open it with Enter",
+    "Reach the viewed-profile select with Tab, choose Valentino Magni with ArrowDown and Enter",
+    "Use Tab to reach task cards; skip the task blocked by an external wait and focus the next eligible result",
     "Press Alt+ArrowRight"
   ],
   "interaction": {
-    "task_id": "8e083aa8-486a-4344-bd47-f0250743c1ba",
+    "task_id": "ed0f0702-7d25-433a-8cb5-180ff817f868",
     "before": {
       "persisted_status": "Pendiente",
       "column_count": 2
@@ -27,8 +27,8 @@
     "result": "PASS"
   },
   "notes": [
-    "The focused DOM node is replaced during the move, so querying that stale node after the key press can produce an empty result. Persisted laboratory state and updated column counts confirm the transition.",
-    "This validates the keyboard shortcut action on a focused result task. The card focus and profile selection were set by browser automation, so this does not validate end-to-end keyboard focus traversal, every page/control, assistive technology, concurrent devices, or operational server behavior.",
+    "The navigation, profile selection, card focus and move were performed by keyboard. Persisted laboratory state and updated column counts confirm the transition.",
+    "A task with an external wait remained in Pendiente; the test continued to the next eligible result task. The workflow validates this route only, not every page/control, assistive technology, concurrent devices, or operational server behavior.",
     "No source-code changes, operational API requests, or real accounts were involved."
   ]
 }

@@ -2,6 +2,22 @@
 
 ## Revisión funcional y evidencia publicada — 07/10/2026
 
+### Revalidación completa del laboratorio — commit `a69fbd4` / Site v92
+
+Suite completa: **424/424 pruebas en 48 archivos**; TypeScript y Worker pasan.
+Los cuatro recorridos Edge (general, correcciones, respaldo/restauración y
+coordinación) pasan sin errores JavaScript ni solicitudes a `/api` operativo.
+Se recorrió con teclado Tab/Enter desde la navegación hasta una tarjeta elegible
+y se movió con `Alt+ArrowRight`; estado persistido y columnas cambiaron como se
+esperaba. Evidencia: `docs/architecture/review-evidence/full-review-lab-20261007-a69fbd4.json`.
+
+El sondeo local de 24 perfiles devolvió 24 filas en **491 ms** (línea base
+anterior: 512 ms; mismo volumen y ventana, sin umbral formal). Vite compila,
+pero el punto de entrada quedó en **500,19 kB**, 0,19 kB por encima del aviso
+informativo de 500 kB; los gráficos siguen en un chunk de 423,74 kB. No se
+modificó código para ocultar ese aviso. La auditoría de accesibilidad global,
+el umbral de rendimiento y la concurrencia siguen abiertos.
+
 Los cuatro recorridos de navegador corresponden a la interfaz funcional
 publicada en Site v87 desde el commit `c5222cdc9f0ab364ef1dae29452a805a4a644393`.
 La evidencia y esta revisión se registraron luego en el commit documental
@@ -20,11 +36,10 @@ requiere una decisión de producto antes de tocarla. Evidencia completa:
 
 Las pruebas confirman consistencia de la base del laboratorio para los flujos
 cubiertos; no prueban uso operativo real, concurrencia entre dispositivos ni
-aceptación final. Se verificó el atajo de teclado que mueve una tarjeta
-enfocada entre columnas; la automatización enfocó la tarjeta, por lo que sigue
-pendiente recorrer con teclado el foco desde la navegación hasta la tarjeta y
-auditar tecnologías asistivas. También faltan un umbral formal de rendimiento
-para 20+ perfiles y concurrencia entre pestañas o dispositivos. Auth/MFA/RLS
+aceptación final. Se verificó un recorrido completo con teclado hasta una
+tarjeta elegible y su movimiento; todavía falta auditar todas las páginas y
+tecnologías asistivas. También falta un umbral formal de rendimiento para 20+
+perfiles y concurrencia entre pestañas o dispositivos. Auth/MFA/RLS
 reales, invitaciones, recuperación productiva e infraestructura propia siguen
 pospuestos hasta terminar y aceptar el producto. Evidencia del movimiento:
 `docs/architecture/review-evidence/keyboard-task-move-lab-20261007.json`.
