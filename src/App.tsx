@@ -2136,7 +2136,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
               {remoteSave&&<WorkspaceSetup state={state} commit={commit} presence={presence}/>}
               <Workforce state={state} commit={commit} notify={notify} remote={!!remoteSave}/>
             </>)}
-            {page === "calendar" && <DeadlineAgenda state={state} month={month} company={company} owner={viewedOwner} sector={sector} openTask={setDetail} openNotes={()=>setPage('annotations')}/>}
+            {page === "calendar" && <DeadlineAgenda state={state} month={month} company={company} owner={viewedOwner} sector={sector} openTask={setDetail} openNotes={()=>setPage('annotations')} actor={active} laboratory={laboratory && !remoteSave} commit={commit} notify={notify}/>}
             {page === "team" && (
               <>
                 <div className="section-heading">

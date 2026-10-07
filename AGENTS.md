@@ -148,3 +148,11 @@ esa cuenta. Para una PC personal, usar un bundle portable con el mismo historial
 y trabajar una sola copia a la vez; no sincronizar `.git` por carpeta compartida
 ni afirmar sincronización entre dispositivos. `package-lock.json` es el lockfile
 existente; conservar npm y ejecutar `npm ci` en la copia de otro equipo.
+
+## Agenda fiscal en laboratorio — 07/10/2026
+
+La agenda de obligaciones conserva período fiscal, vencimiento, origen y
+revisiones y sólo usa datos ficticios del laboratorio. No cargar vencimientos
+reales ni consultar ARCA. No sincroniza la simulación entre PCs; para continuar
+en otra PC usar el bundle Git actualizado después de dejar limpio el checkout,
+trabajar una sola copia por vez y transferir commits de vuelta con otro bundle.

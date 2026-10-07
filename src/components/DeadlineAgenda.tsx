@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { type State, dateART, taskQuantity } from "../domain/model";
+import { type Profile, type State, dateART, taskQuantity } from "../domain/model";
 import { Panel, Empty } from "./ui";
 import TimelinessBadge from "./TimelinessBadge";
 import { taskTimeliness } from "../domain/timeliness";
+import FiscalObligations from "./FiscalObligations";
 export default function DeadlineAgenda({
   state,
   month,
@@ -11,6 +12,10 @@ export default function DeadlineAgenda({
   sector,
   openTask,
   openNotes,
+  actor,
+  laboratory = false,
+  commit,
+  notify,
 }: {
   state: State;
   month: string;
@@ -19,6 +24,10 @@ export default function DeadlineAgenda({
   sector: string;
   openTask: (id: string) => void;
   openNotes: () => void;
+  actor?: Profile;
+  laboratory?: boolean;
+  commit?: (next: State, action?: string, entityId?: string) => boolean;
+  notify?: (message: string) => void;
 }) {
   const [completed, setCompleted] = useState(false);
   const matches = state.tasks.filter(
@@ -47,6 +56,7 @@ export default function DeadlineAgenda({
     (t) => t.month === month && !t.due && !done(t),
   );
   return (
+    <>
     <Panel
       title="Agenda y objetivos del mes"
       sub="Incluye entregables, metas operativas y recordatorios. Una fecha muestra el plazo del trabajo; el cumplimiento se registra en su tarjeta."
@@ -151,5 +161,10 @@ export default function DeadlineAgenda({
         </details>
       )}
     </Panel>
+    {laboratory && actor && commit && notify && <FiscalObligations
+      state={state} actor={actor} month={month} company={company}
+      commit={commit} notify={notify} openTask={openTask}
+    />}
+    </>
   );
 }

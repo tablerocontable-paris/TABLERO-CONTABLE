@@ -2494,6 +2494,49 @@ header .notification-trigger span { position: absolute; top: -6px; right: -6px; 
 .quality-lab-note { display: flex; align-items: flex-start; gap: 10px; padding: 13px 15px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-soft); color: var(--muted); font-size: 12px; line-height: 1.55; }
 .quality-lab-note svg { flex: 0 0 auto; color: var(--accent); margin-top: 1px; }
 .quality-lab-note b { display: block; color: var(--ink); margin-bottom: 2px; }
+
+/* Fiscal obligations are lab-only records linked to explicit task IDs. */
+.obligation-lab-note { display: flex; align-items: flex-start; gap: 9px; margin: 14px 18px; padding: 11px 13px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-soft); color: var(--muted); font-size: 12px; }
+.obligation-lab-note svg { flex: 0 0 auto; margin-top: 2px; }
+.fiscal-obligation-form { padding: 0 18px 18px; border-bottom: 1px solid var(--line); }
+.fiscal-obligation-form .form-grid { gap: 0 14px; }
+.fiscal-obligation-form .form-grid label { min-width: 0; }
+.obligation-task-links { display: grid; gap: 7px; margin: 10px 0 16px; padding: 12px; border: 1px solid var(--line); border-radius: 9px; min-width: 0; }
+.obligation-task-links legend { padding: 0 5px; color: var(--ink); font-weight: 600; }
+.obligation-task-links label { display: flex; flex-direction: row; align-items: flex-start; gap: 9px; margin: 3px 0; color: var(--ink); }
+.obligation-task-links input { flex: 0 0 auto; margin-top: 3px; }
+.obligation-task-links span { min-width: 0; overflow-wrap: anywhere; }
+.obligation-task-links small { line-height: 1.5; }
+.obligation-reason { display: grid; }
+.fiscal-obligation-list { display: grid; gap: 12px; padding: 0 18px 18px; }
+.fiscal-obligation-card { min-width: 0; padding: 15px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.fiscal-obligation-topline, .fiscal-obligation-title, .fiscal-obligation-dates, .fiscal-obligation-links, .fiscal-obligation-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.fiscal-obligation-topline { justify-content: space-between; color: var(--muted); font-size: 11px; }
+.fiscal-obligation-title { justify-content: space-between; margin: 8px 0; }
+.fiscal-obligation-title h3 { margin: 0; font-size: 15px; overflow-wrap: anywhere; }
+.fiscal-obligation-title p { margin: 2px 0 0; font-size: 11px; }
+.fiscal-obligation-status { max-width: 100%; padding: 4px 9px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface-soft); color: var(--muted); font-size: 11px; }
+.fiscal-obligation-status--completed_on_time { color: #28734d; }
+.fiscal-obligation-status--completed_late { color: #9a5a18; }
+.fiscal-obligation-status--pending { color: #52667e; }
+.fiscal-obligation-status--unassigned { color: #8b4b45; }
+.fiscal-obligation-dates { gap: 20px; margin: 10px 0; }
+.fiscal-obligation-dates div { display: grid; gap: 1px; }
+.fiscal-obligation-dates small, .fiscal-obligation-source { color: var(--muted); font-size: 11px; }
+.fiscal-obligation-dates strong { font-size: 12px; font-variant-numeric: tabular-nums; }
+.fiscal-obligation-source { margin: 8px 0; overflow-wrap: anywhere; }
+.fiscal-obligation-links { color: var(--muted); font-size: 11px; }
+.fiscal-obligation-links button, .fiscal-obligation-actions button { padding: 5px 8px; font-size: 11px; }
+.fiscal-obligation-actions { margin-top: 10px; }
+.fiscal-obligation-actions details { flex: 1 1 100%; color: var(--muted); font-size: 11px; }
+.fiscal-obligation-actions summary { cursor: pointer; min-height: 32px; display: flex; align-items: center; }
+.fiscal-obligation-actions details p { overflow-wrap: anywhere; font-size: 11px; }
+@media (max-width: 600px) {
+  .fiscal-obligation-form .form-grid { grid-template-columns: minmax(0, 1fr); }
+  .fiscal-obligation-title { align-items: flex-start; flex-direction: column; }
+  .fiscal-obligation-list { padding-inline: 12px; }
+  .fiscal-obligation-form { padding-inline: 12px; }
+}
 .quality-tabs { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .quality-tabs button { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; background: var(--surface); color: var(--ink); }
 .quality-tabs button.active { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 15%, transparent); }

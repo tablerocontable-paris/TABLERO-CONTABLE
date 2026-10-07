@@ -268,3 +268,26 @@ Este corte quedó publicado como **Site v59** desde el commit
 terminó correctamente; el acceso sigue personalizado owner-only, con una sola
 cuenta permitida y cero visitantes externos. El avance global permanece en
 **~45%**; esta función local no satisface aceptación final ni infraestructura.
+
+## Agenda de obligaciones fiscales del laboratorio — 07/10/2026
+
+Se agregó una agenda ficticia por empresa que diferencia período fiscal y fecha
+de vencimiento, permite vincular tareas exactas de la misma empresa y deriva el
+cumplimiento de esas tareas. La carga y cada corrección conservan la referencia
+de origen; las revisiones guardan motivo, fecha, valores anteriores e historial.
+Los datos de ejemplo se crean sólo al cargar una versión de laboratorio que aún
+no tenía esta colección. No se consultan fechas oficiales, ARCA, correo ni
+notificaciones externas, y no se sincroniza entre navegadores.
+
+Verificación: **394/394 pruebas en 40 archivos**, TypeScript, build Vite y build
+Worker aprobados. Chromium Edge completó alta, vínculo a tarea, período separado
+del vencimiento, revisión e historial; revisó escritorio y móvil y no encontró
+errores JavaScript ni llamadas a `/api`. Evidencia del recorrido:
+`architecture/review-evidence/fiscal-obligations-lab-20261007.json`.
+
+La corrección del recorrido de navegador fue necesaria porque su selector estaba
+cambiando el filtro global en lugar de la empresa del formulario. La versión
+privada publicada sigue siendo v59 hasta sincronizar y desplegar este bloque.
+El avance global permanece orientativamente en **~45%**: esto todavía es
+laboratorio local y no implica aceptación final, backend ni colaboración entre
+PCs.

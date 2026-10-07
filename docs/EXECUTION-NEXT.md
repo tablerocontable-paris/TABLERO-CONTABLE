@@ -11,6 +11,22 @@ activar `RemoteWorkspace`, no crear cuentas ni enviar invitaciones reales. SQL
 Supabase 001–011 y Worker/D1 siguen separados. Audiencia actual del Site:
 privada.
 
+La agenda de obligaciones fiscales por empresa ya está implementada en el
+laboratorio: separa período fiscal y vencimiento, registra fuente/revisión,
+vincula tareas exactas y deriva el cumplimiento. No contiene vencimientos
+oficiales ni consulta ARCA. Evidencia y límites en `docs/PROJECT-STATUS.md` y
+`docs/architecture/review-evidence/fiscal-obligations-lab-20261007.json`.
+
+El usuario quiere continuar desde su PC personal antes de crear cuentas. No hay
+remoto GitHub propio y la cuenta sigue pospuesta hasta la aceptación final. Al
+terminar este bloque, dejarlo validado y comprometido, crear un bundle Git
+actualizado junto a `grupo-paris-site-transfer-README.txt` y verificar SHA-256 y
+refs. Transferir el bundle por USB o una carpeta de archivos; clonar en Codex de
+la PC personal y trabajar una sola copia por vez. No sincronizar `.git` con
+OneDrive y recordar que `paris-state-lab` vive en el navegador y no viaja en el
+bundle. La sincronización automática entre PCs requiere configurar el GitHub
+privado previsto para la etapa final.
+
 El bloque Trello-like está implementado en `65ae477`. La responsabilidad
 conjunta está implementada en el laboratorio local; contrato, alcance y límites
 en `docs/architecture/JOINT-LABORATORY-CONTRACT-20261006.md`. No equivale a

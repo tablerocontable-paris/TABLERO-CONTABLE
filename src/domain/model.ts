@@ -275,6 +275,7 @@ export interface State {
   catalogueVersions?: import("./processImprovement").CatalogueVersion[];
   improvementProposals?: import("./processImprovement").KaizenProposal[];
   fiveSReviews?: import("./processImprovement").FiveSReview[];
+  fiscalObligations?: import("./fiscalObligations").FiscalObligation[];
 }
 export const id = () => crypto.randomUUID();
 export const dateART = (iso = new Date().toISOString()) =>

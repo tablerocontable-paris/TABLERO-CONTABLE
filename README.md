@@ -1,34 +1,23 @@
-# Grupo París · versión privada operativa 1.0
+# Grupo París · tablero contable en laboratorio
 
-React, TypeScript y Vite, con API Cloudflare Worker y persistencia D1 administrada por Sites. Se continúa el proyecto existente; el GitHub legacy `Valentinomagni/tablero-contable-grupo-paris` se conserva como referencia de lectura y no recibe cambios ni datos.
+El repositorio continúa el mismo Site privado de Grupo París. La interfaz publicada durante esta etapa entra por `LaboratoryWorkspace` y usa datos ficticios guardados en `localStorage` bajo `paris-state-lab`. No está habilitada para trabajo contable real.
 
-## Recorrido diario
+## Qué se puede probar
 
-1. En **Administrar tablero → Equipo**, renombrar las cuatro empresas y configurar responsables, correos, sectores y empresas autorizadas.
-2. Abrir **Mi tablero · Valentino** y completar la inducción de seis pasos. Los procesos del catálogo conservan nombre, controles y peso; cada empresa tiene asignaciones y ocurrencias independientes.
-3. Crear tareas puntuales o recurrentes. Iniciar trabajo, cronometrar, pausar, completar controles, registrar esperas y cantidades de operativas.
-4. Consultar vencimientos, objetivos con fecha y recordatorios. La última marca del checklist completa el entregable. La meta operativa se alcanza mediante registros fechados, sin atribuir cantidades ficticias.
-5. Revisar cumplimiento, puntos ponderados, anticipación y tiempo por persona, equipo, sector y empresa. Jefatura consolida cada empleado; el servidor calcula el snapshot y bloquea ese período. Reportes y CSV están disponibles inmediatamente.
+- Perfiles, empresas, tareas y procesos de ejemplo; los selectores de perfil simulan usuarios y no autentican personas.
+- Tablero con arrastre, cronómetros, tareas conjuntas, coberturas, cierres y reportes locales.
+- Anotaciones, notificaciones, pedidos internos, ciclo de trabajo, Kaizen/5S y agenda de obligaciones con vínculos explícitos a tareas.
+- La agenda distingue período fiscal de vencimiento, calcula su estado desde las tareas vinculadas y conserva las revisiones. Las fechas de muestra no se consultan ni validan contra ARCA.
 
-Los datos se guardan en el servidor y se actualizan cada 30 segundos. El indicador distingue cambios pendientes, confirmados y fallidos. Un conflicto de revisión exige recargar; no sobrescribe otra sesión. Una propuesta fallida permanece en memoria y puede descargarse o reintentarse. No hay guardado offline definitivo.
+## Datos, acceso y límites
 
-## Acceso y privacidad
+El Site conserva audiencia personalizada owner-only. Los perfiles e invitaciones de la interfaz son simulaciones; no crean cuentas, no envían correo y no conceden acceso al Site. Los datos del laboratorio permanecen en el navegador actual, no se sincronizan entre computadoras y no deben contener información de clientes.
 
-El Site sigue limitado a su propietario. Incorporar un perfil **no** invita personas ni cambia la audiencia. Los demás empleados necesitan aprobación de acceso al Site, además de un perfil activo con correo coincidente y empresas asignadas.
+La ruta de laboratorio no llama a la API operativa. El código Worker/D1 y las migraciones históricas de Supabase permanecen separados: no afirmar que están integrados ni aplicar SQL remoto. No hay autenticación de empleados, notificaciones entre dispositivos, correo, fuente ARCA, hosting propio ni despliegue final. La cuenta de GitHub, los dos proyectos Supabase y la automatización se difieren hasta que el producto se acepte.
 
-La identidad proviene de los encabezados autenticados que entrega Sites, nunca del selector del navegador. El propietario puede alternar solamente entre su perfil de empleado y su administración técnica, separados del KPI. No puede simular otros empleados en la aplicación publicada. Cada solicitud comprueba rol, persona, empresa y período en servidor. Las notas personales se excluyen de las respuestas de otros perfiles, incluso jefatura. Los relojes y cierres usan tiempos del servidor.
+El paquete Git portable conserva fuente e historial, no `localStorage`. Para cambiar de PC antes de crear el remoto privado, transferir un bundle actualizado y trabajar con una sola copia activa. Ver `docs/EXECUTION-NEXT.md`.
 
-D1 guarda cada entidad por separado. Una revisión y un token de escritura condicionan todos los cambios dentro de un `batch` transaccional; una escritura concurrente obsoleta no puede afectar registros. El esquema generado está en `db/schema.ts` y `drizzle/`. Las migraciones Supabase 001–010 se conservan sin aplicar y no son el backend de esta versión.
-
-## Validación y límites
-
-La suite completa pasó **293 pruebas en 28 archivos**. Después del cambio del almacenamiento se verificaron los **20 casos operativos/UI** afectados y la compilación TypeScript/Vite/Worker. Las pruebas de Worker usan SQLite real; las UI usan DOM simulado. No equivalen a una sesión con varios empleados reales ni a QA visual en navegador. El skill de control de navegador no estaba disponible en esta ejecución; no se improvisó otro controlador.
-
-El despliegue privado permite uso por el propietario y preparar el equipo. Antes de incorporar empleados: aprobación de audiencia, piloto de cuentas reales, revisión visual/móvil y volumen, respaldo/restauración y política de MFA de cuentas privilegiadas. No se anuncia una migración masiva ni equivalencia con Supabase Auth/RLS.
-
-Pendientes secundarios: ARCA para cuatro CUIT, correo/notificaciones externas, conjuntas con reparto de contribuciones, coberturas selectivas, jerarquía multiarea, Kaizen/5S e infraestructura dedicada dev/prod. La cobertura básica por ausencia y las métricas existentes se conservan.
-
-## Desarrollo
+## Desarrollo y validación
 
 ```sh
 npm ci
@@ -36,32 +25,4 @@ npm test -- --maxWorkers=1 --testTimeout=60000 --hookTimeout=60000
 npm run build
 ```
 
-El build emite `dist/client`, `dist/server/index.js` y metadatos de hosting. `OWNER_EMAIL` y `SITE_ORIGIN` se configuran en Sites; no se escriben secretos en el código. `npm run dev` es la vista local Vite; las pruebas de API usan el Worker y SQLite, y la funcionalidad compartida se sirve en Sites.
-
-Ver `docs/PROJECT-STATUS.md`, `docs/EXECUTION-NEXT.md` y `docs/runbooks/SITES-PRIVATE-1.md`. La evidencia y los contratos históricos siguen en Git.
-
-
-## Integración de continuidad local — 06/10/2026
-
-Se recuperaron los commits originales cf6fc23/2c60379/54117ea y se completó
-SQL 011 en 65e8391. Evidencia: docs/architecture/COORDINATION-011-CONTINUATION-20261006.md.
-Antes de integrar este backend D1: 300 pruebas aprobadas y 26 carreras PostgreSQL
-aprobadas. El backend D1 recibido del remoto se conserva como ruta activa separada;
-SQL Supabase no se aplica ni se conecta automáticamente a esa UI.
-Este chat autoriza sincronizar fuente, sin desplegar ni ampliar audiencia.
-La documentación remota de publicación describe el trabajo previo; no constituye
-una nueva autorización de despliegue. La estimación histórica 42% corresponde al
-alcance original completo y debe reevaluarse tras aceptar el nuevo alcance D1.
-
-
-## Decisión vigente posterior — laboratorio hasta la versión final
-
-El usuario rechazó expresamente comenzar cuentas e invitaciones antes del 100%
-y pidió recuperar simulación/datos ficticios. La entrada vuelve a ser
-LaboratoryWorkspace, aislada en paris-state-lab y sin llamadas a la API operativa.
-No activar RemoteWorkspace ni enviar invitaciones reales durante esta etapa.
-Las correcciones de la vista privada de pruebas se conservan en el mismo Sites,
-sin ampliar audiencia. Contrato: docs/product/CORRECTIONS-20261006-LABORATORY.md.
-PROJECT-STATUS y EXECUTION-NEXT son el estado vigente; anteriores afirmaciones
-de producto operativo describen el corte histórico superado por este pedido.
-Avance orientativo 45–50%; no 100%.
+`npm run dev` inicia la vista local. El build compila TypeScript, Vite y el Worker separado; que compile no significa que el Worker o Supabase estén conectados a la vista del laboratorio. Para los límites vigentes, comprobaciones y próximo bloque, consultar `docs/PROJECT-STATUS.md`, `docs/EXECUTION-NEXT.md` y `docs/ops/FINAL-ACCEPTANCE.md`.

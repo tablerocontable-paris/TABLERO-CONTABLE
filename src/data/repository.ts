@@ -7,6 +7,7 @@ import {
   type Onboarding,
 } from "../domain/model";
 import { currentCatalogueVersion, ensureCatalogueVersions, pinMatchingCatalogueAssignments } from "../domain/processImprovement";
+import { seedFiscalObligations } from "../domain/fiscalObligations";
 export const KEY = "paris-state-v3";
 export const blankOnboarding = (name = ""): Onboarding => ({
   version: 1,
@@ -316,6 +317,21 @@ const schema = z.object({
       completionEvidence: z.string().optional(), completedOn: z.string().optional(), completedBy: z.string().optional(),
     })).length(5),
   })).optional(),
+  fiscalObligations: z.array(z.object({
+    id: z.string(), companyId: z.string(), obligationCode: z.string().min(2).max(80),
+    title: z.string().min(1).max(120), fiscalPeriod: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/),
+    milestone: z.enum(["presentation", "payment", "closing", "documentation"]),
+    dueOn: z.string(), sourceLabel: z.string().min(1).max(160),
+    sourceRevision: z.string().min(1).max(80), sourceCheckedAt: z.string().nullable(),
+    revision: z.number().int().positive(), requiredTaskIds: z.array(z.string()),
+    createdAt: z.string(), createdBy: z.string().nullable(), updatedAt: z.string(),
+    history: z.array(z.object({
+      revision: z.number().int().positive(), at: z.string(), by: z.string(),
+      reason: z.string().min(5).max(500), dueOn: z.string(),
+      sourceLabel: z.string().min(1).max(160), sourceRevision: z.string().min(1).max(80),
+      sourceCheckedAt: z.string().nullable(), requiredTaskIds: z.array(z.string()),
+    })),
+  })).optional(),
   closures: z.array(z.unknown()),
   audit: z.array(z.unknown()),
   annotations: z
@@ -399,6 +415,16 @@ const schema = z.object({
     if (!state.tasks.some((task) => task.id === receipt.taskId && task.responsibility?.revision === receipt.revision))
       context.addIssue({ code: "custom", path: ["jointReceipts", index], message: "El recibo debe corresponder a una responsabilidad guardada." });
   });
+  const obligations = state.fiscalObligations || [];
+  const obligationKeys = obligations.map((row) => [row.companyId, row.obligationCode.normalize("NFC").trim().replace(/\s+/g, " ").toLocaleLowerCase("es-AR"), row.fiscalPeriod, row.milestone].join("\u001f"));
+  if (new Set(obligationKeys).size !== obligationKeys.length)
+    context.addIssue({ code: "custom", path: ["fiscalObligations"], message: "La agenda no puede repetir el mismo hito de una obligación." });
+  obligations.forEach((row, index) => {
+    if (new Set(row.requiredTaskIds).size !== row.requiredTaskIds.length)
+      context.addIssue({ code: "custom", path: ["fiscalObligations", index, "requiredTaskIds"], message: "Una obligación no puede vincular dos veces la misma tarea." });
+    if (row.history.length !== row.revision - 1 || row.history.some((change, changeIndex) => change.revision !== changeIndex + 2))
+      context.addIssue({ code: "custom", path: ["fiscalObligations", index, "history"], message: "La revisión de la obligación no coincide con su historial." });
+  });
 });
 export const isLab = () => localStorage.getItem("paris-environment") === "lab";
 export function enterLab(state: State) {
@@ -478,6 +504,7 @@ export function load(laboratory = isLab()): State {
       ...versioned,
       improvementProposals: [],
       fiveSReviews: [],
+      fiscalObligations: seedFiscalObligations(versioned),
       tasks: versioned.tasks.map((task) => {
         const assignment = task.assignmentId ? assignmentsById.get(task.assignmentId) : undefined;
         const version = assignment?.templateVersion || (task.templateId ? currentCatalogueVersion(versioned, task.templateId) : 0);
@@ -500,6 +527,7 @@ export function load(laboratory = isLab()): State {
   state.internalRequests ||= [];
   state.tourVersion ||= {};
   if (!laboratory) return state;
+  if (state.fiscalObligations === undefined) state.fiscalObligations = seedFiscalObligations(state);
   state.improvementProposals ||= [];
   state.fiveSReviews ||= [];
   return pinMatchingCatalogueAssignments(ensureCatalogueVersions(state));

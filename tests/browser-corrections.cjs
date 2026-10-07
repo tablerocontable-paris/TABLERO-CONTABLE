@@ -246,10 +246,36 @@ const assert = (ok, message) => {
       .count()) === 0,
     "Pending notice not resolved",
   );
+  if (await page.locator("dialog[open]").count())
+    await page.locator("dialog[open] button[aria-label=\"Cerrar\"]").click();
   await page.screenshot({
     path: path.join(output, "pending-parameters.png"),
     animations: "disabled",
   });
+  await page.locator('[data-nav="calendar"]').click();
+  await page.getByRole("heading", { name: "Obligaciones por empresa" }).waitFor();
+  await page.getByLabel("Empresa", { exact: true }).first().selectOption("");
+  await page.getByRole("button", { name: "Nueva obligación" }).click();
+  await page.locator(".fiscal-obligation-form select").first().selectOption("c2");
+  await page.getByLabel("Obligación").fill("IVA de prueba navegador");
+  await page.getByLabel("Período fiscal").fill("2026-09");
+  await page.getByLabel("Fecha del vencimiento").fill("2026-10-22");
+  await page.locator(".obligation-task-links input[type=checkbox]").first().check();
+  await page.getByRole("button", { name: "Cargar obligación" }).click();
+  const demoObligation = await page.evaluate(() => JSON.parse(localStorage.getItem("paris-state-lab")).fiscalObligations.at(-1));
+  assert(demoObligation.fiscalPeriod === "2026-09" && demoObligation.dueOn === "2026-10-22", "Fiscal period and due date were conflated");
+  assert(demoObligation.requiredTaskIds.length === 1 && demoObligation.sourceLabel.includes("ficticio"), "Explicit task link or fictitious source missing");
+  assert(demoObligation.companyId === "c2", "The obligation was saved to a different company than the form selection");
+  const obligationCard = page.locator(".fiscal-obligation-card").filter({ hasText: "IVA de prueba navegador" });
+  await obligationCard.getByRole("button", { name: "Revisar vencimiento, fuente o vínculos" }).click();
+  await page.getByLabel("Fecha del vencimiento").fill("2026-10-24");
+  await page.getByLabel("Revisión del origen").fill("DEMO-02");
+  await page.getByLabel("Motivo de la revisión").fill("Corrección de prueba del navegador");
+  await page.getByRole("button", { name: "Guardar revisión" }).click();
+  const revisedObligation = await page.evaluate((id) => JSON.parse(localStorage.getItem("paris-state-lab")).fiscalObligations.find((row) => row.id === id), demoObligation.id);
+  assert(revisedObligation.revision === 2 && revisedObligation.history.length === 1 && revisedObligation.dueOn === "2026-10-24", "Obligation revision history did not persist");
+  checks.push({ interaction: "fiscal-obligation-created-linked-and-versioned", id: demoObligation.id, revision: revisedObligation.revision });
+  await page.screenshot({ path: path.join(output, "fiscal-obligations.png"), animations: "disabled" });
   await page.reload();
   await page.locator(".lab-banner").waitFor();
   await page.getByRole('button', { name: /^Notificaciones:/ }).click();
@@ -378,6 +404,7 @@ const assert = (ok, message) => {
           "daily and weekly monthly work-cycle with team breakdown",
           "Kaizen evidence, controlled trial, manager adoption and catalogue versioning",
           "five-area 5S review and evidence-backed corrective action closure",
+          "fiscal obligation linked to exact tasks with separate fiscal period, due date, and revision history",
           "desktop and mobile process-quality layout",
           "persisted review",
           "mobile",

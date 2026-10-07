@@ -1,0 +1,104 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "width": 1440,
+      "height": 900,
+      "overflow": "visible",
+      "bottom": 886,
+      "right": 248,
+      "logoWidth": 102,
+      "logoCenter": 138,
+      "selectorCenter": 138,
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1600,
+      "height": 740,
+      "overflow": "visible",
+      "bottom": 726,
+      "right": 278,
+      "logoWidth": 102,
+      "logoCenter": 153,
+      "selectorCenter": 153,
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "overflow": "visible",
+      "bottom": 716.5,
+      "right": 278,
+      "logoWidth": 102,
+      "logoCenter": 153,
+      "selectorCenter": 153,
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1024,
+      "height": 650,
+      "overflow": "visible",
+      "bottom": 647.5,
+      "right": 278,
+      "logoWidth": 102,
+      "logoCenter": 153,
+      "selectorCenter": 153,
+      "horizontalOverflow": false
+    },
+    {
+      "interaction": "drag-to-progress",
+      "taskId": "c2a4c6b5-455f-469c-b0e3-baf79480d568",
+      "status": "En curso",
+      "actorClockStarted": true
+    },
+    {
+      "interaction": "internal-request-created-without-task-or-KPI-mutation",
+      "requestId": "6d3ae152-4d9a-4dcb-a9fc-746bf4328f1f"
+    },
+    {
+      "interaction": "fiscal-obligation-created-linked-and-versioned",
+      "id": "9d3412b2-ca42-4113-8dbd-6f719e432a52",
+      "revision": 2
+    },
+    {
+      "interaction": "monthly-work-cycle-day-week-and-team-breakdown",
+      "month": "2026-10",
+      "days": 31
+    },
+    {
+      "interaction": "kaizen-evidence-test-adoption-and-versioned-catalogue",
+      "proposalId": "f61232a9-abd1-4b9d-8979-c0c977e249fb",
+      "version": 2
+    },
+    {
+      "interaction": "five-s-review-and-evidence-backed-action-closure",
+      "completedActions": 1
+    },
+    {
+      "interaction": "mobile-process-quality-without-page-overflow",
+      "viewport": "390x844"
+    },
+    {
+      "interaction": "mobile-work-cycle-without-page-overflow",
+      "viewport": "390x844"
+    }
+  ],
+  "apiCalls": [],
+  "errors": [],
+  "flows": [
+    "laboratory users",
+    "simulated invitation",
+    "preconfigured onboarding",
+    "independent icon folds",
+    "drag task and auto-start its actor clock",
+    "boss parameter review",
+    "internal request routing, response, resolution and persistence",
+    "daily and weekly monthly work-cycle with team breakdown",
+    "Kaizen evidence, controlled trial, manager adoption and catalogue versioning",
+    "five-area 5S review and evidence-backed corrective action closure",
+    "fiscal obligation linked to exact tasks with separate fiscal period, due date, and revision history",
+    "desktop and mobile process-quality layout",
+    "persisted review",
+    "mobile"
+  ]
+}
