@@ -287,7 +287,11 @@ errores JavaScript ni llamadas a `/api`. Evidencia del recorrido:
 
 La corrección del recorrido de navegador fue necesaria porque su selector estaba
 cambiando el filtro global en lugar de la empresa del formulario. La versión
-privada publicada sigue siendo v59 hasta sincronizar y desplegar este bloque.
+privada se actualizó como **Site v60** desde el commit
+`85cef4515bebce99c2d829d4a4a1186ab9de8558`, deployment
+`appgdep_6ac5ba96fbf48191bcc1b00d32751b54`, en el mismo URL. El deployment
+terminó correctamente. La relectura del Site confirmó propietario, una sola
+cuenta permitida, cero grupos y cero visitantes externos; no se amplió audiencia.
 El avance global permanece orientativamente en **~45%**: esto todavía es
 laboratorio local y no implica aceptación final, backend ni colaboración entre
 PCs.

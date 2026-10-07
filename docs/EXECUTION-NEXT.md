@@ -19,13 +19,16 @@ oficiales ni consulta ARCA. Evidencia y límites en `docs/PROJECT-STATUS.md` y
 
 El usuario quiere continuar desde su PC personal antes de crear cuentas. No hay
 remoto GitHub propio y la cuenta sigue pospuesta hasta la aceptación final. Al
-terminar este bloque, dejarlo validado y comprometido, crear un bundle Git
-actualizado junto a `grupo-paris-site-transfer-README.txt` y verificar SHA-256 y
-refs. Transferir el bundle por USB o una carpeta de archivos; clonar en Codex de
-la PC personal y trabajar una sola copia por vez. No sincronizar `.git` con
-OneDrive y recordar que `paris-state-lab` vive en el navegador y no viaja en el
-bundle. La sincronización automática entre PCs requiere configurar el GitHub
-privado previsto para la etapa final.
+El bloque se publicó como Site v60 desde el commit
+`85cef4515bebce99c2d829d4a4a1186ab9de8558`; ver `docs/PROJECT-STATUS.md`.
+Después de la publicación sólo se actualiza documentación del repositorio, sin
+cambiar el build que ve el usuario. El checkout local debe quedar comprometido
+y se entrega a la PC personal con el bundle Git verificado y su README ubicado
+junto al repo. Transferir el archivo por USB o una carpeta de archivos; clonar
+en Codex de la PC personal y trabajar una sola copia por vez. No sincronizar
+`.git` con OneDrive y recordar que `paris-state-lab` vive en el navegador y no
+viaja en el bundle. La sincronización automática entre PCs requiere configurar
+el GitHub privado previsto para la etapa final.
 
 El bloque Trello-like está implementado en `65ae477`. La responsabilidad
 conjunta está implementada en el laboratorio local; contrato, alcance y límites
