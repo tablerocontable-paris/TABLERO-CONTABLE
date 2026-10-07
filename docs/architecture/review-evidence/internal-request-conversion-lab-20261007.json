@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-07",
+  "scope": "private laboratory only",
+  "feature": "explicit work-request to one-off task conversion",
+  "rules": [
+    "A request creates no task or KPI change until the manager confirms conversion.",
+    "Only an active manager can convert an unresolved work request; technical errors and suggestions cannot be converted.",
+    "The manager explicitly selects assignee, company, one-time date, checklist, task type, and positive weight.",
+    "The selected assignee must be active, visible to the manager, and authorized for the selected company.",
+    "A closed period, invalid date, missing materialized task, repeat schedule, or existing conversion rejects the operation without saving partial state.",
+    "The request and resulting task store reciprocal identifiers; conversion resolves the request and records the actor and time.",
+    "The assignee receives the existing in-app assignment notification, and authorized task readers see the source request context."
+  ],
+  "verification": {
+    "focusedTests": "tests/internal-requests.test.tsx: 7 passed",
+    "completeSuite": "44 files, 408 passed, 0 failed; vitest run --testTimeout=20000",
+    "typecheck": "passed",
+    "viteBuild": "passed",
+    "workerBuild": "passed",
+    "chromium": {
+      "passed": true,
+      "artifact": "outputs/requests-conversion-browser/browser-validation.json",
+      "screenshot": "outputs/requests-conversion-browser/request-task-conversion.png",
+      "apiCalls": [],
+      "javascriptErrors": [],
+      "assertions": [
+        "request creation does not create a task",
+        "manager assigns one task with selected assignee, company, date and weight",
+        "result is one-off and linked once to the source request",
+        "assignment notification reaches the assignee",
+        "task detail retains source request context"
+      ]
+    },
+    "buildNotes": [
+      "The production JavaScript entry chunk is approximately 589 kB and triggers Vite's informational 500 kB warning.",
+      "Rollup removes two upstream Zod purity comments; the build succeeds."
+    ]
+  },
+  "limitations": [
+    "Data stays in browser-local paris-state-lab and does not synchronize between computers.",
+    "No real customer information, attachments, account, API, D1, or Supabase is used.",
+    "This does not implement server-side authorization or notifications."
+  ]
+}

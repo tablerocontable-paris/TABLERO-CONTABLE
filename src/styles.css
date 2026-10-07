@@ -2604,6 +2604,10 @@ header .notification-trigger span { position: absolute; top: -6px; right: -6px; 
 .internal-request-actions form { display: flex; flex-wrap: wrap; align-items: start; gap: 8px; }
 .internal-request-actions textarea { flex: 1 1 220px; }
 .internal-request-actions button { min-height: 40px; }
+.internal-request-conversion, .internal-request-conversion-actions, .request-origin-context { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-soft); }
+.internal-request-conversion-actions span, .request-origin-context span { flex: 1 1 260px; color: var(--muted); font-size: 13px; }
+.request-origin-context { display: block; }
+.request-origin-context p { margin: 8px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .internal-request-heading { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 14px; }
 
 /* Quality improvements stay separate from operational performance metrics. */

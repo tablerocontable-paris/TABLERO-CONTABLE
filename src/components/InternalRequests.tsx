@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { MessageSquareText, Send, ShieldAlert } from "lucide-react";
-import type { Profile, State } from "../domain/model";
+import { canSee, type Profile, type State } from "../domain/model";
 import {
+  canConvertInternalRequest,
   internalRequestLabels,
   internalRequestRecipients,
   internalRequestStatusLabels,
@@ -19,13 +20,15 @@ const urgencies: InternalRequestUrgency[] = ["low", "medium", "high", "urgent"];
 const statuses: InternalRequestStatus[] = ["new", "review", "responded", "resolved"];
 
 export default function InternalRequests({
-  state, actor, onCreate, onStatus, onReply,
+  state, actor, onCreate, onStatus, onReply, onConvert, onOpenTask,
 }: {
   state: State;
   actor: Profile;
   onCreate: (request: Omit<InternalRequest, "id" | "createdAt" | "updatedAt" | "messages" | "history">) => void;
   onStatus: (id: string, status: InternalRequestStatus) => void;
   onReply: (id: string, body: string) => void;
+  onConvert: (request: InternalRequest) => void;
+  onOpenTask: (id: string) => void;
 }) {
   const [kind, setKind] = useState<InternalRequestKind>("work_request");
   const [urgency, setUrgency] = useState<InternalRequestUrgency>("medium");
@@ -60,7 +63,7 @@ export default function InternalRequests({
   }
 
   return <div className="internal-requests-page">
-    <Panel title="Nuevo pedido" sub="El destinatario y la jefatura pueden ver el seguimiento. No crea tareas ni modifica indicadores.">
+    <Panel title="Nuevo pedido" sub="El destinatario y la jefatura pueden ver el seguimiento. El pedido no afecta indicadores; jefatura puede convertir un pedido de trabajo en tarea de forma explícita.">
       <div className="internal-request-privacy"><ShieldAlert size={17} /> Laboratorio local: los pedidos se guardan en este navegador y no se sincronizan. La cola de soporte es simulada; no hay cuenta técnica conectada. No adjuntes información real de clientes.</div>
       <form className="internal-request-form" onSubmit={submit}>
         <label>Tipo<select value={kind} onChange={(event) => { setKind(event.target.value as InternalRequestKind); setRecipient(""); }}>
@@ -85,12 +88,18 @@ export default function InternalRequests({
       </div>
       {requests.length === 0 ? <Empty text="No hay pedidos para estos filtros." /> : <div className="internal-request-list">{requests.map((request) => {
         const canRespond = actor.active && (request.recipientId === actor.id || actor.role === "jefe") && request.status !== "resolved";
+        const convertedTask = request.convertedTaskId ? state.tasks.find((task) => task.id === request.convertedTaskId) : undefined;
+        const canOpenConvertedTask = convertedTask && actor.active && actor.companyIds.includes(convertedTask.companyId) && canSee(actor, convertedTask.ownerId, state.profiles);
         return <article className="internal-request-card" key={request.id}>
           <div className="internal-request-card-head"><span>{internalRequestLabels[request.kind]}</span><span className={`request-urgency urgency-${request.urgency}`}>{internalRequestUrgencyLabels[request.urgency]}</span><span className={`request-status status-${request.status}`}>{internalRequestStatusLabels[request.status]}</span></div>
           <h3>{request.subject}</h3><p className="internal-request-meta">{request.module} · {state.profiles.find((profile) => profile.id === request.authorId)?.name || "Perfil anterior"} · {new Date(request.createdAt).toLocaleString("es-AR")}</p>
           <p className="internal-request-body">{request.description}</p>
           {request.messages.map((message) => <div className="internal-request-reply" key={message.id}><b>Respuesta · {state.profiles.find((profile) => profile.id === message.actorId)?.name || "Jefatura"} · {new Date(message.createdAt).toLocaleString("es-AR")}</b><p>{message.body}</p></div>)}
+          {request.convertedTaskId && <div className="internal-request-conversion" role="status">
+            {convertedTask ? <><span>Tarea asignada · {state.profiles.find((profile) => profile.id === convertedTask.ownerId)?.name || "Responsable anterior"} · {state.companies.find((company) => company.id === convertedTask.companyId)?.name || "Empresa"} · {convertedTask.scheduledOn || convertedTask.month}</span>{canOpenConvertedTask && <button type="button" onClick={() => onOpenTask(convertedTask.id)}>Abrir tarea</button>}</> : <span>Pedido convertido; la tarea vinculada ya no está disponible.</span>}
+          </div>}
           <details className="internal-request-history"><summary>Historial ({request.history.length})</summary><ol>{[...request.history].reverse().map((item) => <li key={item.id}><span>{internalRequestStatusLabels[item.status]}</span> · {item.note} · {state.profiles.find((profile) => profile.id === item.actorId)?.name || "Perfil anterior"} · {new Date(item.createdAt).toLocaleString("es-AR")}</li>)}</ol></details>
+          {canConvertInternalRequest(request, actor) && <div className="internal-request-conversion-actions"><button className="primary" type="button" onClick={() => onConvert(request)}>Convertir en tarea puntual</button><span>La jefatura definirá responsable, empresa, fecha, controles y peso. No se asigna nada hasta confirmar.</span></div>}
           {canRespond && <div className="internal-request-actions">
             {request.status === "new" && <button type="button" onClick={() => onStatus(request.id, "review")}>Tomar para revisión</button>}
             <form onSubmit={(event) => { event.preventDefault(); const form = new FormData(event.currentTarget); const body = String(form.get("reply") || ""); if (body.trim()) { onReply(request.id, body); event.currentTarget.reset(); } }}><label className="sr-only" htmlFor={`reply-${request.id}`}>Respuesta</label><textarea id={`reply-${request.id}`} name="reply" maxLength={4000} rows={2} placeholder="Escribí una respuesta para el autor" /><button className="primary" type="submit">Responder</button></form>
@@ -99,6 +108,6 @@ export default function InternalRequests({
         </article>;
       })}</div>}
     </Panel>
-    <div className="internal-request-heading"><MessageSquareText size={16} /> Consultas sin impacto en el tablero de desempeño</div>
+    <div className="internal-request-heading"><MessageSquareText size={16} /> Los pedidos por sí solos no alteran el tablero de desempeño</div>
   </div>;
 }

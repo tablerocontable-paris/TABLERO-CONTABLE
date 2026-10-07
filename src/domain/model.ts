@@ -71,6 +71,8 @@ export interface Assignment {
 }
 export interface Task {
   templateId?: string | null;
+  /** Request that explicitly created this one-off assignment in the laboratory. */
+  originRequestId?: string;
   /** Standard version captured when this occurrence was materialized. */
   templateVersion?: number;
   scheduledOn?: string;

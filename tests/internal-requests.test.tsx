@@ -2,9 +2,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { load, persist, seed } from "../src/data/repository";
+import { defaultSchedule } from "../src/domain/schedule";
+import { materialize, type Assignment } from "../src/domain/model";
 import InternalRequests from "../src/components/InternalRequests";
 import {
+  canConvertInternalRequest,
   canViewInternalRequest,
+  completeInternalRequestConversion,
   createInternalRequest,
   replyToInternalRequest,
   setInternalRequestStatus,
@@ -54,12 +58,52 @@ describe("consultas y pedidos internos del laboratorio", () => {
     expect(() => createInternalRequest({ kind: "work_request", authorId: "e0", recipientId: "boss", urgency: "low", module: "", subject: "x", description: "y", now: "", makeId: counter })).toThrow(/módulo/);
   });
 
+  it("convierte un pedido de trabajo sólo con decisión de jefatura y vincula una única tarjeta", () => {
+    const state = seed();
+    const item = request();
+    state.internalRequests = [item];
+    const boss = state.profiles.find((profile) => profile.id === "boss")!;
+    const employee = state.profiles.find((profile) => profile.id === "e0")!;
+    expect(canConvertInternalRequest(item, employee)).toBe(false);
+    expect(canConvertInternalRequest(item, boss)).toBe(true);
+    expect(canConvertInternalRequest(request({ kind: "suggestion" }), boss)).toBe(false);
+    expect(canConvertInternalRequest(request({ kind: "technical_error" }), boss)).toBe(false);
+
+    const assignment: Assignment = {
+      id: "request-assignment", templateId: null, title: item.subject, ownerId: "e0", companyId: "c1",
+      sector: "Tesorería", kind: "resultado", weight: 3, unit: "", target: 0, day: 21,
+      frequency: "única", schedule: defaultSchedule("2026-10-21"), steps: [],
+      startMonth: "2026-10", priority: "Media",
+    };
+    const withTask = materialize({ ...state, assignments: [...state.assignments, assignment] }, "2026-10");
+    const task = withTask.tasks.find((candidate) => candidate.assignmentId === assignment.id)!;
+    const converted = completeInternalRequestConversion(
+      withTask, item.id, boss, assignment, task, "2026-10-07T12:00:00.000Z", counter,
+    );
+    expect(converted).toMatchObject({ status: "resolved", convertedTaskId: task.id, convertedBy: boss.id });
+    expect(converted.history.at(-1)).toMatchObject({ status: "resolved", note: `Convertido en tarea: ${item.subject}` });
+
+    const saved = {
+      ...withTask,
+      tasks: withTask.tasks.map((candidate) => candidate.id === task.id ? { ...candidate, originRequestId: item.id } : candidate),
+      internalRequests: [converted],
+    };
+    expect(() => completeInternalRequestConversion(
+      saved, item.id, boss, assignment, task, "2026-10-07T12:01:00.000Z", counter,
+    )).toThrow(/ya no puede convertirse/);
+    expect(() => completeInternalRequestConversion(
+      withTask, item.id, employee, assignment, task, "2026-10-07T12:00:00.000Z", counter,
+    )).toThrow(/ya no puede convertirse/);
+  });
+
   it("conserva pedidos al recargar y acepta estados guardados anteriores sin esta colección", () => {
     const state = seed();
-    const created = request();
+    const created = request({ status: "resolved", convertedTaskId: "linked-task", convertedBy: "boss", convertedAt: "2026-10-06T15:00:00Z" });
     state.internalRequests = [created];
+    state.tasks[0].originRequestId = created.id;
     persist(state, true);
     expect(load(true).internalRequests).toEqual([created]);
+    expect(load(true).tasks[0].originRequestId).toBe(created.id);
     const older = seed();
     delete older.internalRequests;
     persist(older, true);
@@ -86,7 +130,8 @@ describe("consultas y pedidos internos del laboratorio", () => {
     state.internalRequests = [request({ authorId: "e1", recipientId: "boss", subject: "Privado de un par" })];
     state.internalRequests.push(request({ id: "resolved-mine", status: "resolved", messages: [{ id: "reply1", actorId: "boss", body: "Respuesta visible luego del cierre.", createdAt: "2026-10-06T11:00:00Z" }] }));
     const onCreate = vi.fn();
-    render(<InternalRequests state={state} actor={state.profiles.find((p) => p.id === "e0")!} onCreate={onCreate} onStatus={vi.fn()} onReply={vi.fn()} />);
+    const onConvert = vi.fn();
+    const view = render(<InternalRequests state={state} actor={state.profiles.find((p) => p.id === "e0")!} onCreate={onCreate} onStatus={vi.fn()} onReply={vi.fn()} onConvert={onConvert} onOpenTask={vi.fn()} />);
     expect(screen.queryByText("Privado de un par")).toBeNull();
     expect(screen.getByText("Respuesta visible luego del cierre.")).toBeTruthy();
     fireEvent.change(screen.getAllByLabelText("Tipo")[0], { target: { value: "suggestion" } });
@@ -96,5 +141,13 @@ describe("consultas y pedidos internos del laboratorio", () => {
     fireEvent.change(screen.getByPlaceholderText("Contá qué pasó, qué necesitás o qué proponés…"), { target: { value: "Propongo acortar la etiqueta." } });
     fireEvent.click(screen.getByRole("button", { name: "Registrar pedido" }));
     expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ kind: "suggestion", recipientId: "m1", authorId: "e0", module: "Tablero" }));
+    expect(screen.queryByRole("button", { name: "Convertir en tarea puntual" })).toBeNull();
+    view.unmount();
+
+    const bossState = seed();
+    bossState.internalRequests = [request()];
+    render(<InternalRequests state={bossState} actor={bossState.profiles.find((p) => p.id === "boss")!} onCreate={vi.fn()} onStatus={vi.fn()} onReply={vi.fn()} onConvert={onConvert} onOpenTask={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Convertir en tarea puntual" }));
+    expect(onConvert).toHaveBeenCalledWith(expect.objectContaining({ id: "r1", kind: "work_request" }));
   });
 });

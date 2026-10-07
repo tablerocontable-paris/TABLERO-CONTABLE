@@ -226,3 +226,21 @@ La corrección quedó publicada en el Site privado existente como **v62** desde
 Sites: versión 62, propietario, audiencia personalizada con una persona
 permitida, cero grupos y cero visitantes externos. No cambió el alcance de
 acceso.
+
+## Conversión de pedidos de trabajo — 07/10/2026
+
+El último cambio local implementa conversión opcional y explícita de un pedido
+de trabajo a una única tarea por jefatura. Se eligen responsable, empresa,
+fecha, tipo/controles y peso; se revalidan membresía, jerarquía, período abierto
+e idempotencia. El registro conserva el vínculo en ambos sentidos, cierra el
+pedido y notifica la asignación. Errores técnicos y sugerencias no se convierten.
+
+Verificación vigente: 408/408 pruebas, TypeScript/Vite/Worker y Chromium Edge
+escritorio/móvil; cero errores JS y llamadas a `/api`. Contrato y límites en
+`docs/architecture/review-evidence/internal-request-conversion-lab-20261007.json`.
+La interfaz y el guardado siguen en `paris-state-lab` y no sincronizan equipos.
+
+Seguir con rutas de laboratorio ya definidas en `docs/PRODUCT-ROADMAP.md` y
+`docs/product/CORRECTIONS-20261002.md`. No abrir identidad real, `/api`, Worker,
+D1, Supabase ni GitHub antes de aceptar el producto. Actualizar el bundle de PC
+personal después del commit y conservar una sola copia de trabajo activa.

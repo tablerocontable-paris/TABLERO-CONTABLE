@@ -379,3 +379,33 @@ deployment `appgdep_6ac5d2df02ec8191b861bfcee8d98934`, estado exitoso en el URL
 existente. La verificación posterior confirmó la versión 62 y su commit fuente;
 audiencia personalizada owner-only, una persona permitida, cero grupos y cero
 visitantes externos. No se habilitó el espacio operativo ni se conectó Supabase.
+
+## Conversión explícita de pedidos — laboratorio — 07/10/2026
+
+Jefatura puede convertir un pedido de trabajo abierto en una tarea puntual desde
+su seguimiento. La conversión exige confirmar una vez y definir responsable,
+empresa, fecha, tipo/controles y peso. La autorización vuelve a comprobar perfil
+activo, ámbito visible, pertenencia a empresa y período sin cierre. Errores
+técnicos y sugerencias no se convierten. El pedido resuelto conserva actor,
+fecha e ID de la tarea; la tarea conserva el ID del pedido y presenta su detalle
+en la tarjeta. El responsable recibe la notificación de asignación existente.
+
+El pedido por sí solo sigue sin crear trabajo ni alterar KPI. Conversión,
+asignación y cierre del pedido se guardan en una sola mutación; la repetición se
+rechaza sin duplicar la tarjeta. El alcance continúa local en `paris-state-lab`;
+no se agregan servidor, cuenta, adjuntos ni datos de clientes. La producción
+necesita revisión de identidad, aislamiento y permisos antes de portar el flujo.
+
+Verificación: **408/408 pruebas en 44 archivos** con timeout de 20 s; TypeScript,
+Vite y Worker aprobados. Chromium Edge comprobó que registrar no crea tareas,
+jefatura crea una sola tarjeta con responsable/empresa/fecha/peso seleccionados,
+se genera la notificación y se conserva el detalle del pedido de origen. Cero
+errores JavaScript y cero llamadas a `/api`. Evidencia:
+`architecture/review-evidence/internal-request-conversion-lab-20261007.json`;
+recorrido y captura en `outputs/requests-conversion-browser/`.
+
+Vite mantiene una advertencia informativa por el chunk principal de ~589 kB; el
+build termina correctamente. El avance global permanece orientativamente en
+**~45%**: el laboratorio no cubre aceptación completa ni la infraestructura
+automática del 100%. El código local está listo para commit; el Site publicado
+sigue en v62 hasta que cierre esta entrega.

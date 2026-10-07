@@ -230,6 +230,39 @@ const assert = (ok, message) => {
   await page.getByLabel("Vista de usuario").selectOption("e0");
   await page.locator('[data-nav="requests"]').click();
   assert(await page.getByText('El plazo se conserva en la tarjeta de la tarea.').count() === 1, 'Request author cannot see recipient response');
+  const taskCountBeforeExplicitConversion = await page.evaluate(() => JSON.parse(localStorage.getItem('paris-state-lab')).tasks.length);
+  await page.getByLabel('Módulo').fill('Tablero');
+  await page.getByLabel('Asunto').fill('Asignar conciliación puntual de prueba');
+  await page.getByLabel('Detalle').fill('Comparar el extracto y documentar las diferencias de esta prueba.');
+  await page.getByRole('button', { name: 'Registrar pedido' }).click();
+  const conversionRequestId = await page.evaluate(() => JSON.parse(localStorage.getItem('paris-state-lab')).internalRequests.at(-1).id);
+  assert(await page.evaluate((before) => JSON.parse(localStorage.getItem('paris-state-lab')).tasks.length === before, taskCountBeforeExplicitConversion), 'Request created a task before manager confirmation');
+  await page.getByLabel("Vista de usuario").selectOption("boss");
+  await page.locator('[data-nav="requests"]').click();
+  await page.getByRole('button', { name: 'Convertir en tarea puntual' }).click();
+  await page.getByLabel('Responsable').selectOption('e0');
+  await page.getByLabel('Empresa obligatoria').selectOption('c1');
+  await page.locator('select[name="weight"]').selectOption('3');
+  const convertedDate = await page.locator('input[aria-label="Fecha de realización"]').inputValue();
+  await page.getByRole('button', { name: /Crear tarea/ }).click();
+  const convertedState = await page.evaluate((id) => {
+    const saved = JSON.parse(localStorage.getItem('paris-state-lab'));
+    const request = saved.internalRequests.find((row) => row.id === id);
+    const task = saved.tasks.find((row) => row.id === request?.convertedTaskId);
+    const assignment = saved.assignments.find((row) => row.id === task?.assignmentId);
+    return { request, task, assignment, linkedCount: saved.tasks.filter((row) => row.originRequestId === id).length };
+  }, conversionRequestId);
+  assert(convertedState.request?.status === 'resolved' && convertedState.request.convertedBy === 'boss', 'Explicit conversion did not resolve and attribute the request');
+  assert(convertedState.task?.originRequestId === conversionRequestId && convertedState.task?.ownerId === 'e0' && convertedState.task?.companyId === 'c1', 'Converted task lost its request link or selected assignment');
+  assert(convertedState.task?.weight === 3 && convertedState.task?.scheduledOn === convertedDate && convertedState.assignment?.frequency === 'única', 'Conversion did not preserve explicit weight/date or created recurrence');
+  assert(convertedState.linkedCount === 1, 'Request conversion created duplicate task links');
+  const assignmentNotice = await page.evaluate((taskId) => JSON.parse(localStorage.getItem('paris-state-lab')).notifications.some((notice) => notice.taskId === taskId && notice.kind === 'assigned' && notice.recipientId === 'e0'), convertedState.task.id);
+  assert(assignmentNotice, 'New task assignee did not receive an in-app assignment notification');
+  checks.push({ interaction: 'manager-explicit-one-off-task-conversion', requestId: conversionRequestId, taskId: convertedState.task.id, scheduledOn: convertedDate, assigneeNotification: assignmentNotice });
+  await page.getByRole('button', { name: 'Abrir tarea' }).click();
+  assert(await page.locator('.request-origin-context').getByText('Comparar el extracto y documentar las diferencias de esta prueba.', { exact: true }).count() === 1, 'Converted task did not retain the source request context');
+  await page.screenshot({ path: path.join(output, 'request-task-conversion.png'), fullPage: true, animations: 'disabled' });
+  await page.getByRole('button', { name: 'Cerrar', exact: true }).click();
   await page.getByLabel("Vista de usuario").selectOption("boss");
   await page.getByRole('button', { name: /^Notificaciones:/ }).click();
   assert((await page.getByText('Nuevo comentario en la tarea', { exact: true }).count()) === 1, 'Manager task notification missing');
@@ -401,6 +434,7 @@ const assert = (ok, message) => {
           "drag task and auto-start its actor clock",
           "boss parameter review",
           "internal request routing, response, resolution and persistence",
+          "jefatura-only explicit one-off request-to-task conversion with provenance and no duplicate",
           "daily and weekly monthly work-cycle with team breakdown",
           "Kaizen evidence, controlled trial, manager adoption and catalogue versioning",
           "five-area 5S review and evidence-backed corrective action closure",
@@ -415,7 +449,7 @@ const assert = (ok, message) => {
     ),
   );
   console.log(
-    "PASS: responsive sidebar, logos, laboratory, invitation, card icons, drag-and-drop, review notification, persistence, mobile; zero operational API calls and JS errors.",
+    "PASS: responsive sidebar, logos, laboratory, invitation, drag-and-drop, internal request conversion, review notification, persistence, mobile; zero operational API calls and JS errors.",
   );
 })()
   .catch((e) => {

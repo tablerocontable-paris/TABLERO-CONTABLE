@@ -199,3 +199,17 @@ El arreglo se publicó como Site privado v62 desde el commit
 `appgdep_6ac5d2df02ec8191b861bfcee8d98934`. Relectura confirmada: owner-only,
 una cuenta autorizada, sin grupos ni visitantes externos. No activar APIs ni
 cambiar audiencia.
+
+## Conversión explícita de pedidos — 07/10/2026
+
+En el laboratorio se puede convertir un pedido de trabajo en una tarea puntual,
+pero sólo mediante confirmación explícita de jefatura. El pedido no crea tareas
+ni afecta KPI al registrarse; la jefatura debe elegir responsable, empresa,
+fecha, controles y peso. Errores técnicos y sugerencias no se convierten.
+La tarea y el pedido conservan sus IDs de origen/destino, el historial cierra el
+pedido y el responsable recibe la notificación ya usada para asignaciones.
+
+Mantener validaciones de período abierto, membresía de empresa, perfil activo,
+visibilidad, peso positivo e idempotencia. No trasladar esta ruta a API, D1 o
+Supabase sin revisar identidad y permisos; no usar adjuntos ni datos reales.
+Evidencia y cobertura: `docs/architecture/review-evidence/internal-request-conversion-lab-20261007.json`.

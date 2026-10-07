@@ -120,6 +120,8 @@ import { applyCompletionAttribution } from "./domain/workCycle";
 import { currentCatalogueVersion } from "./domain/processImprovement";
 import { submitHabitualTaskProposal } from "./domain/habitualTaskProposals";
 import {
+  canConvertInternalRequest,
+  completeInternalRequestConversion,
   createInternalRequest,
   replyToInternalRequest,
   setInternalRequestStatus,
@@ -215,6 +217,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
   );
   const [modal, setModal] = useState<"new" | "employee" | "close" | null>(null);
   const [noteToTask, setNoteToTask] = useState<Annotation | null>(null);
+  const [requestToTask, setRequestToTask] = useState<InternalRequest | null>(null);
   const [detail, setDetail] = useState<string | null>(null);
   const [collapsedCards,setCollapsedCards]=useState<Record<string,boolean>>({});
   const [logFor, setLogFor] = useState<string | null>(null);
@@ -370,6 +373,25 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
     } catch (error) {
       notify(error instanceof Error ? error.message : "No se pudo responder el pedido.");
     }
+  }
+  function convertRequestToTask(request: InternalRequest) {
+    if (!laboratory || remoteSave) return;
+    const latest = state.internalRequests?.find((entry) => entry.id === request.id);
+    if (!latest || !canConvertInternalRequest(latest, active)) {
+      notify("Este pedido ya no está disponible para convertir en tarea.");
+      return;
+    }
+    setNoteToTask(null);
+    setRequestToTask(latest);
+    setModal("new");
+  }
+  function openRequestTask(taskId: string) {
+    const task = state.tasks.find((entry) => entry.id === taskId);
+    if (!task || !canWork(state, active, task)) {
+      notify("La tarea vinculada no está disponible en tu ámbito.");
+      return;
+    }
+    setDetail(task.id);
   }
   function deleteAnnotation(annotationId: string) {
     const note = state.annotations?.find(
@@ -1479,7 +1501,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             </button>
           </div>}
           <div className="view-content" key={page}>
-            {page === "requests" && laboratory && !remoteSave && <InternalRequests state={state} actor={active} onCreate={createRequest} onStatus={updateRequestStatus} onReply={replyRequest} />}
+            {page === "requests" && laboratory && !remoteSave && <InternalRequests state={state} actor={active} onCreate={createRequest} onStatus={updateRequestStatus} onReply={replyRequest} onConvert={convertRequestToTask} onOpenTask={openRequestTask} />}
             {page === "quality" && laboratory && !remoteSave && <ProcessQuality state={state} actor={active} commit={commit} notify={notify} />}
             {(page === "overview" || page === "day") && (
               <>
@@ -2473,12 +2495,14 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           active={active}
           month={month}
           company={company}
-          owner={noteToTask ? active.id : ownBoardPages.includes(page) ? viewedOwner : owner || active.id}
+          owner={noteToTask || requestToTask ? active.id : ownBoardPages.includes(page) ? viewedOwner : owner || active.id}
           people={people}
           seedAnnotation={noteToTask}
+          seedRequest={requestToTask}
           close={() => {
             setModal(null);
             setNoteToTask(null);
+            setRequestToTask(null);
           }}
           create={(a) => {
             try {
@@ -2487,14 +2511,19 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
               notify((e as Error).message);
               return;
             }
-            const converting = noteToTask !== null;
+            const convertingNote = noteToTask !== null;
+            const convertingRequest = requestToTask !== null;
+            const converting = convertingNote || convertingRequest;
             const effectiveSchedule =
               a.schedule || defaultSchedule(a.startMonth + "-01", a.frequency);
-            const sourceNote = converting
+            const sourceNote = convertingNote
               ? state.annotations?.find((entry) => entry.id === noteToTask.id)
               : undefined;
+            const sourceRequest = convertingRequest
+              ? state.internalRequests?.find((entry) => entry.id === requestToTask.id)
+              : undefined;
             if (
-              converting &&
+              convertingNote &&
               (!sourceNote ||
                 sourceNote.ownerId !== active.id ||
                 sourceNote.convertedTaskId)
@@ -2505,13 +2534,21 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
               return;
             }
             if (
-              converting &&
+              convertingNote &&
               (a.frequency !== "única" ||
                 effectiveSchedule.frequency !== "única")
             ) {
               notify(
                 "Una anotación se convierte en una tarea puntual; cambiá la frecuencia a una sola vez.",
               );
+              return;
+            }
+            if (convertingRequest && (!sourceRequest || !canConvertInternalRequest(sourceRequest, active))) {
+              notify("Este pedido ya no puede convertirse en tarea.");
+              return;
+            }
+            if (convertingRequest && (a.frequency !== "única" || effectiveSchedule.frequency !== "única")) {
+              notify("Un pedido se convierte en una tarea puntual; no se permiten repeticiones.");
               return;
             }
             const targetPeriod = converting
@@ -2534,7 +2571,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
               notify(`El período ${targetPeriod} de esa persona está cerrado.`);
               return;
             }
-            const next = materialize(
+            let next = materialize(
               {
                 ...state,
                 assignments: [...state.assignments, a],
@@ -2547,9 +2584,28 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             );
             if (converting && created.length !== 1) {
               notify(
-                "No se pudo crear una tarjeta única para esta anotación. No guardé cambios.",
+                "No se pudo crear una única tarjeta para el origen. No guardé cambios.",
               );
               return;
+            }
+            if (convertingRequest && sourceRequest && created.length === 1) {
+              try {
+                const task = created[0];
+                const updatedRequest = completeInternalRequestConversion(
+                  next, sourceRequest.id, active, a, task, new Date().toISOString(), id,
+                );
+                next = {
+                  ...next,
+                  tasks: next.tasks.map((entry) => entry.id === task.id
+                    ? { ...entry, originRequestId: sourceRequest.id }
+                    : entry),
+                  internalRequests: (next.internalRequests || []).map((entry) =>
+                    entry.id === sourceRequest.id ? updatedRequest : entry),
+                };
+              } catch (error) {
+                notify(error instanceof Error ? error.message : "No se pudo vincular la tarea con el pedido.");
+                return;
+              }
             }
             if (converting && sourceNote && created.length === 1)
               next.annotations = (next.annotations || []).map((entry) =>
@@ -2562,11 +2618,12 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                     }
                   : entry,
               );
-            if (commit(next, "Creó asignación", a.id)) {
+            if (commit(next, convertingRequest ? "Convirtió pedido en tarea" : "Creó asignación", convertingRequest && sourceRequest ? sourceRequest.id : a.id)) {
               setModal(null);
               setNoteToTask(null);
+              setRequestToTask(null);
               setMonth(targetPeriod);
-              notify("Tarea creada con empresa y período propios.");
+              notify(convertingRequest ? "Pedido convertido y vinculado a una tarea puntual." : "Tarea creada con empresa y período propios.");
             }
           }}
         />
@@ -2594,6 +2651,10 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
               Estado
             </span>
           </div>
+          {tasksForDetail.originRequestId && (() => {
+            const source = state.internalRequests?.find((entry) => entry.id === tasksForDetail.originRequestId);
+            return source ? <div className="request-origin-context"><b>Pedido de origen · {source.subject}</b><p>{source.description}</p></div> : null;
+          })()}
           <TimelinessBadge value={taskTimeliness(tasksForDetail, state.activity, new Date().toISOString())} />
           {laboratory && <JointTaskSetup state={state} task={tasksForDetail} actor={active} commit={commit} notify={notify} />}
           <div className="timer-panel">
@@ -3056,6 +3117,7 @@ function NewTask({
   owner,
   people,
   seedAnnotation,
+  seedRequest,
   close,
   create,
 }: {
@@ -3066,6 +3128,7 @@ function NewTask({
   owner: string;
   people: Profile[];
   seedAnnotation: Annotation | null;
+  seedRequest: InternalRequest | null;
   close: () => void;
   create: (a: Assignment) => void;
 }) {
@@ -3119,14 +3182,14 @@ function NewTask({
       companyId: String(f.get("company")),
       sector: t?.sector || String(f.get("sector") || active.sector),
       kind: selectedKind,
-      weight: t?.weight || (active.role === "jefe" ? Number(f.get("weight") || 1) : 1),
+      weight: t?.weight || (active.role === "jefe" ? Number(f.get("weight") || 0) : 1),
       unit: selectedKind === "operativa" ? (t?.unit || String(f.get("unit") || "").trim()) : "",
       target: selectedKind === "operativa" ? target : 0,
       day: schedule.monthDay,
       frequency: schedule.frequency,
       steps:
         selectedKind === "resultado" ? checklist : [],
-      startMonth: seedAnnotation ? schedule.startDate.slice(0, 7) : month,
+      startMonth: seedAnnotation || seedRequest ? schedule.startDate.slice(0, 7) : month,
       priority: String(f.get("priority")) as Assignment["priority"],
     });
   }
@@ -3136,6 +3199,7 @@ function NewTask({
         Elegí del catálogo
         <select
           value={template}
+          disabled={!!seedRequest}
           onChange={(e) => {
             setTemplate(e.target.value);
             const selected = state.templates.find((t) => t.id === e.target.value);
@@ -3152,6 +3216,7 @@ function NewTask({
           ))}
         </select>
       </label>
+      {seedRequest && <div className="request-origin-context"><b>Conversión explícita del pedido · {seedRequest.subject}</b><p>{seedRequest.description}</p><span>La conversión crea una sola tarea y cierra el pedido al confirmar. No hay asignaciones hasta guardar.</span></div>}
       <form key={template} onSubmit={submit}>
         <label>
           Título
@@ -3159,7 +3224,7 @@ function NewTask({
             name="title"
             required
             maxLength={120}
-            defaultValue={t?.title || seedAnnotation?.title}
+            defaultValue={t?.title || seedAnnotation?.title || seedRequest?.subject}
             readOnly={!!t}
           />
         </label>
@@ -3225,9 +3290,11 @@ function NewTask({
             Peso · definido por jefe
             <select
               name="weight"
-              defaultValue={t?.weight || 1}
+              defaultValue={t?.weight || (seedRequest ? "" : 1)}
               disabled={!!t || active.role !== "jefe"}
+              required={!!seedRequest && !t}
             >
+              {seedRequest && !t && <option value="">Definí el peso</option>}
               {[1, 2, 3, 5, 8].map((n) => (
                 <option key={n} value={n}>
                   {n} puntos
@@ -3274,7 +3341,7 @@ function NewTask({
           value={schedule}
           onChange={(next) => { setSchedule(next); setScheduleError(""); }}
           month={month}
-          onlyOnce={!!seedAnnotation || !t}
+          onlyOnce={!!seedAnnotation || !!seedRequest || !t}
         />
         {scheduleError && <p role="alert">{scheduleError}</p>}
         {kind === "resultado" && (
@@ -3292,8 +3359,7 @@ function NewTask({
         )}
         {taskError && kind !== "resultado" && <p className="step-list-error" role="alert">{taskError}</p>}
         <div className="note">
-          Se crea una instancia para {monthLabel(month)}. Dos empresas conservan
-          estados e indicadores independientes.
+          {seedRequest ? "Se creará una sola tarea para el período de la fecha elegida, con el peso definido por jefatura." : `Se crea una instancia para ${monthLabel(month)}. Dos empresas conservan estados e indicadores independientes.`}
         </div>
         <div className="modal-actions">
           <button type="button" onClick={close}>

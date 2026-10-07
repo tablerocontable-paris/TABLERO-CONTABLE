@@ -267,6 +267,7 @@ const schema = z.object({
         month: z.string(),
         weight: z.number().nonnegative(),
         completedBy: z.string().optional(),
+        originRequestId: z.string().optional(),
         kind: z.enum(["resultado", "operativa"]),
         checklist: z.array(
           z.object({ id: z.string(), text: z.string(), done: z.boolean() }),
@@ -396,6 +397,7 @@ const schema = z.object({
     createdAt: z.string(), updatedAt: z.string(),
     messages: z.array(z.object({ id: z.string(), actorId: z.string(), body: z.string().min(1).max(4000), createdAt: z.string() })),
     history: z.array(z.object({ id: z.string(), actorId: z.string(), status: z.enum(["new", "review", "responded", "resolved"]), note: z.string().max(200), createdAt: z.string() })),
+    convertedTaskId: z.string().optional(), convertedBy: z.string().optional(), convertedAt: z.string().optional(),
   })).optional(),
   taskComments: z.array(z.object({ id: z.string(), taskId: z.string(), actorId: z.string(),
     content: z.string().max(2000), createdAt: z.string(),

@@ -1,4 +1,6 @@
-import type { Profile, State } from "./model";
+import type { Assignment, Profile, State, Task } from "./model";
+import { canSee } from "./model";
+import { validDate } from "./schedule";
 
 export type InternalRequestKind = "technical_error" | "work_request" | "suggestion";
 export type InternalRequestUrgency = "low" | "medium" | "high" | "urgent";
@@ -30,6 +32,9 @@ export type InternalRequest = {
   updatedAt: string;
   messages: InternalRequestMessage[];
   history: InternalRequestEvent[];
+  convertedTaskId?: string;
+  convertedBy?: string;
+  convertedAt?: string;
 };
 
 export const internalRequestLabels: Record<InternalRequestKind, string> = {
@@ -99,6 +104,55 @@ export function createInternalRequest(input: {
 
 export function canManageInternalRequest(request: InternalRequest, actor: Profile) {
   return actor.active && (actor.id === request.recipientId || actor.role === "jefe");
+}
+
+export function canConvertInternalRequest(request: InternalRequest, actor: Profile) {
+  return request.kind === "work_request" && request.status !== "resolved" &&
+    !request.convertedTaskId && actor.role === "jefe" && canManageInternalRequest(request, actor);
+}
+
+/** Atomically records the explicit request-to-task link after the one-off task is materialized. */
+export function completeInternalRequestConversion(
+  state: State,
+  requestId: string,
+  actor: Profile,
+  assignment: Assignment,
+  task: Task,
+  now: string,
+  makeId: () => string,
+): InternalRequest {
+  const request = state.internalRequests?.find((entry) => entry.id === requestId);
+  if (!request || !canConvertInternalRequest(request, actor))
+    throw new Error("Este pedido ya no puede convertirse en tarea.");
+  if (!validDate(now.slice(0, 10))) throw new Error("La fecha de conversión no es válida.");
+  const responsible = state.profiles.find((profile) => profile.id === assignment.ownerId);
+  if (!responsible?.active || !canSee(actor, responsible.id, state.profiles) ||
+      !responsible.companyIds.includes(assignment.companyId) ||
+      !state.companies.some((company) => company.id === assignment.companyId))
+    throw new Error("Empresa o responsable fuera del ámbito autorizado.");
+  if (!Number.isFinite(assignment.weight) || assignment.weight <= 0 ||
+      assignment.frequency !== "única" || assignment.schedule?.frequency !== "única" ||
+      task.assignmentId !== assignment.id || task.ownerId !== assignment.ownerId ||
+      task.companyId !== assignment.companyId || task.title !== assignment.title ||
+      task.weight !== assignment.weight || task.kind !== assignment.kind ||
+      !task.scheduledOn || task.scheduledOn !== assignment.schedule.startDate ||
+      !validDate(task.scheduledOn) || task.month !== task.scheduledOn.slice(0, 7) ||
+      (task.due && (!validDate(task.due) || task.due < task.scheduledOn)))
+    throw new Error("La conversión requiere una sola tarea con fechas y asignación válidas.");
+  if (state.closures.some((closure) => closure.ownerId === task.ownerId && closure.month === task.month))
+    throw new Error(`El período ${task.month} de esa persona está cerrado.`);
+  const materialized = state.tasks.filter((candidate) => candidate.assignmentId === assignment.id && candidate.month === task.month);
+  if (materialized.length !== 1 || materialized[0].id !== task.id ||
+      state.tasks.some((candidate) => candidate.originRequestId === requestId))
+    throw new Error("No se encontró una única tarea nueva para vincular con el pedido.");
+  const event = {
+    id: makeId(), actorId: actor.id, status: "resolved" as const,
+    note: `Convertido en tarea: ${task.title}`, createdAt: now,
+  };
+  return {
+    ...request, status: "resolved", updatedAt: now, convertedTaskId: task.id,
+    convertedBy: actor.id, convertedAt: now, history: [...request.history, event],
+  };
 }
 
 export function replyToInternalRequest(
