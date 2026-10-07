@@ -31,8 +31,9 @@ No aumentar el porcentaje por escribir un plan o preparar un workflow.
 - Activo localmente: hook pre-commit (tipos, pruebas rápidas y diff staged).
   Instalar en cada checkout con `npm run hooks:install`. Requiere dependencias.
   Valida el árbol de trabajo; no garantiza un snapshot parcialmente staged.
-- Preparado: workflow GitHub con suite completa y build del commit enviado.
-  No ejecutado en GitHub: todavía no existe ese repositorio propio.
+- Preparado: workflow GitHub con suite completa, build y validación del paquete
+  de despliegue Sites del commit enviado. No ejecutado en GitHub: todavía no
+  existe ese repositorio propio.
 - Pendiente: creación automática de PR, promoción dev/main, migraciones
   Supabase por CI y deploy del hosting. No existen secretos/destinos conectados.
 - Sites: fuente y publicación se ejecutan mediante herramientas del asistente;

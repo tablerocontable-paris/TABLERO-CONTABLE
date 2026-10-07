@@ -23,3 +23,5 @@ jobs:
       - run: npm ci
       - run: npm test -- --maxWorkers=1 --testTimeout=60000 --hookTimeout=60000
       - run: npm run build
+      - name: Validar paquete de despliegue Sites
+        run: node scripts/package-site-archive.mjs "$RUNNER_TEMP/grupo-paris-site.tar.gz"

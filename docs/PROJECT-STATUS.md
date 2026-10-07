@@ -683,3 +683,16 @@ tabla de administración mostró las 24 filas en 512 ms desde seleccionar Equipo
 (ventana 1440×900). La medida incluye carga de ruta e interacción, se guarda como
 línea base y no implica aceptación porque no hay umbral acordado. Cero errores
 JS y cero llamadas a `/api`. No prueba concurrencia entre pestañas ni servidor.
+
+## Validación preparada del paquete de Sites en CI — 07/10/2026
+
+El workflow `.github/workflows/validate.yml` quedó ampliado para ejecutar, luego
+del build, `scripts/package-site-archive.mjs` y comprobar que el archivo incluya
+el manifiesto del Site, los artefactos cliente/Worker y las migraciones D1. El
+archivo temporal se valida dentro del runner y no se publica como artefacto.
+Esto reduce el riesgo de que un build verde omita una ruta requerida al guardar
+una versión en Sites.
+
+La validación aún está preparada, no ejecutada: no existe el repositorio GitHub
+propio. No conecta cuentas ni cambia la audiencia del Site. El avance global
+permanece aproximadamente en **45%**.

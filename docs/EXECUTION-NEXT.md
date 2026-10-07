@@ -431,6 +431,11 @@ mismo Site privado y la audiencia owner-only; es sólo sincronización documenta
 El corte funcional vigente continúa siendo el laboratorio de avisos locales,
 con verificación previa de 420/420 pruebas y revisión Edge desktop/móvil.
 
+El workflow preparado para GitHub también valida el paquete de despliegue Sites
+después del build. La verificación local confirma el formato y sus rutas; todavía
+no hay ejecución externa porque el repositorio propio no fue creado. El 100% del
+proyecto y el avance orientativo de ~45% no cambian por preparar esta comprobación.
+
 La transferencia portable vigente está en `outputs/LEEME-PC-PERSONAL.md` y el
 ZIP de igual nombre indicado en la guía. Bundle y JSON del navegador son
 artefactos separados. Para el contrato siguiente, detener implementación y
