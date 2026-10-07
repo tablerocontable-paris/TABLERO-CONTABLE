@@ -233,3 +233,6 @@ TypeScript, Vite/Worker y Chromium; ver
 Antes de implementar dependencias, delegación/aceptación o nuevos avisos,
 revisar contratos de estado y permisos con Sol alto. Mantener la audiencia del
 Site sin cambios y actualizar el bundle personal sólo después del commit.
+La búsqueda quedó publicada en el Site existente v64 desde
+`5ecf94e9439a4d56ceab0990877451b3a5d6ca5a`, deployment
+`appgdep_6ac5e1327d7c8191919a40fbf57b4b96`, sin ampliar la audiencia.

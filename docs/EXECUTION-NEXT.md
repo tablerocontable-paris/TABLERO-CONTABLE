@@ -275,3 +275,5 @@ GPT-6.1 Sol, esfuerzo alto, los contratos pendientes de dependencias,
 delegación/aceptación y avisos; Luna implementa sólo los contratos aprobados.
 La infraestructura de cuentas sigue pospuesta hasta la aceptación final.
 El avance orientativo permanece en ~45%.
+La última versión publicada es la v64 del Site privado, desde el commit
+`5ecf94e9439a4d56ceab0990877451b3a5d6ca5a`; la audiencia permanece sin cambios.

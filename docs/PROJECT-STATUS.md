@@ -436,3 +436,8 @@ La búsqueda sólo lee el `paris-state-lab` local; no sincroniza dispositivos ni
 indexa notas privadas. La advertencia informativa del bundle principal de Vite
 (más de 500 kB) continúa abierta. El avance global no cambia: sigue en torno a
 **45%**, porque esto no cubre aceptación funcional completa ni infraestructura.
+La interfaz se publicó en el mismo Site privado como **v64**, desde el commit
+`5ecf94e9439a4d56ceab0990877451b3a5d6ca5a`; deployment
+`appgdep_6ac5e1327d7c8191919a40fbf57b4b96` terminó correctamente. Relectura:
+propietario, acceso personalizado con una cuenta permitida, cero grupos y cero
+visitantes externos. No se activó el espacio operativo ni se conectaron cuentas.
