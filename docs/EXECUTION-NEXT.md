@@ -17,18 +17,24 @@ vincula tareas exactas y deriva el cumplimiento. No contiene vencimientos
 oficiales ni consulta ARCA. Evidencia y límites en `docs/PROJECT-STATUS.md` y
 `docs/architecture/review-evidence/fiscal-obligations-lab-20261007.json`.
 
+El último bloque funcional es el flujo de propuestas de tareas habituales del
+onboarding: preserva título, empresa y frecuencia; jefatura revisa, pide cambios,
+vincula un estándar compatible o crea una versión y aprueba explícitamente antes
+de asignar tareas independientes por empresa. Sigue aislado en el laboratorio.
+El código quedó en `0ca71bb17da997251155d82d5e83355ab12a5c8c` y se publicó como
+Site v61 en el mismo sitio privado; la audiencia continúa owner-only. Ver
+`docs/PROJECT-STATUS.md`.
+
 El usuario quiere continuar desde su PC personal antes de crear cuentas. No hay
-remoto GitHub propio y la cuenta sigue pospuesta hasta la aceptación final. Al
-El bloque se publicó como Site v60 desde el commit
-`85cef4515bebce99c2d829d4a4a1186ab9de8558`; ver `docs/PROJECT-STATUS.md`.
-Después de la publicación sólo se actualiza documentación del repositorio, sin
-cambiar el build que ve el usuario. El checkout local debe quedar comprometido
-y se entrega a la PC personal con el bundle Git verificado y su README ubicado
-junto al repo. Transferir el archivo por USB o una carpeta de archivos; clonar
-en Codex de la PC personal y trabajar una sola copia por vez. No sincronizar
-`.git` con OneDrive y recordar que `paris-state-lab` vive en el navegador y no
-viaja en el bundle. La sincronización automática entre PCs requiere configurar
-el GitHub privado previsto para la etapa final.
+remoto GitHub propio y la cuenta sigue pospuesta hasta la aceptación final. La
+copia portable vigente se entrega como `outputs/grupo-paris-site-personal.bundle`
+junto con `outputs/LEEME-PC-PERSONAL.md`, generados después de dejar el checkout
+limpio y comprometido. Transferir ambos archivos por USB o una carpeta de
+archivos; clonar el bundle en Codex de la PC personal y trabajar una sola copia
+por vez. No sincronizar `.git` con OneDrive. `paris-state-lab` vive en el
+almacenamiento local del navegador y no viaja en el bundle; la simulación puede
+comenzar con sus datos ficticios iniciales en el otro equipo. La sincronización
+automática entre PCs requiere configurar GitHub privado en la etapa final.
 
 El bloque Trello-like está implementado en `65ae477`. La responsabilidad
 conjunta está implementada en el laboratorio local; contrato, alcance y límites
@@ -159,10 +165,11 @@ Site v59, deployment `appgdep_6ac5b2ff99d481919f73e8cff76d16b5`; el estado owner
 no cambió. `package-lock.json` es el lockfile original del proyecto; mantener
 npm como gestor y usar `npm ci` al clonar en otra PC.
 
-Próxima acción: entregar `outputs/grupo-paris-site-personal.bundle`, abrirlo en
-Codex de la PC personal y trabajar una sola copia a la vez. Para traer commits
-de vuelta, exportar un bundle actualizado desde esa PC e importarlo en el checkout
-principal. No existe sincronización automática entre equipos todavía; GitHub
-privado sigue pospuesto hasta la aceptación final. Para adelantar esa decisión o
-activar colaboración entre equipos, GPT-6.1 Sol, esfuerzo medio/alto; para el
-próximo contrato local ya definido, GPT-6 Luna, esfuerzo medio.
+Próxima acción: copiar `outputs/grupo-paris-site-personal.bundle` y
+`outputs/LEEME-PC-PERSONAL.md` a la PC personal, clonar el bundle y abrir la
+carpeta en Codex. Para traer commits de vuelta, crear allí un bundle actualizado
+e importarlo en este checkout. No existe sincronización automática entre equipos
+todavía; GitHub privado sigue pospuesto hasta la aceptación final. Para el
+próximo bloque de implementación ya definido: **GPT-6 Luna, esfuerzo medio,
+Standard**. Para revisar arquitectura, permisos o decidir sobre GitHub:
+**GPT-6.1 Sol, esfuerzo medio o alto según el riesgo, Standard**.

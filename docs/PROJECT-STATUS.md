@@ -295,3 +295,35 @@ cuenta permitida, cero grupos y cero visitantes externos; no se amplió audienci
 El avance global permanece orientativamente en **~45%**: esto todavía es
 laboratorio local y no implica aceptación final, backend ni colaboración entre
 PCs.
+
+## Propuestas de tareas habituales — laboratorio — 07/10/2026
+
+La inducción conserva las propuestas habituales del empleado con el título
+original y sus empresas, frecuencias y objetivos. La jefatura puede vincular
+cada propuesta con un estándar compatible o crear una versión nueva, definir
+peso/sector/controles y aprobarla de forma explícita. También puede solicitar
+cambios; el empleado ve el estado y el historial y puede volver a enviarla.
+Recién después de la aprobación se generan asignaciones independientes por
+empleado y empresa. Las coincidencias son sugerencias: no se fusionan ni activan
+solas. Todo permanece en el laboratorio ficticio, sin `/api`, cuentas ni
+invitaciones reales.
+
+Verificación: **406/406 pruebas en 94 suites**; pre-commit **96/96 pruebas en 14
+archivos**, TypeScript, comprobación de diff y build Vite/Worker aprobados. Los
+recorridos Chromium generales y de correcciones aprobaron escritorio y móvil,
+incluyendo propuestas, arrastre, persistencia y navegación, sin errores JS ni
+solicitudes a `/api`. El build conserva una advertencia de tamaño de chunk
+principal (584 kB frente al umbral informativo de 500 kB); no impide compilar.
+
+El código `0ca71bb17da997251155d82d5e83355ab12a5c8c` se publicó en el mismo Site
+como **v61**. Confirmación actual: sitio activo, URL existente, usuario actual
+con rol propietario, acceso personalizado con una sola cuenta autorizada y cero
+visitantes externos. No se cambió audiencia ni se activó el espacio operativo.
+El avance global permanece en **~45%**: el laboratorio aún requiere aceptación
+funcional y después infraestructura final.
+
+Para trabajar desde una PC personal se preparó una transferencia Git portable
+con historial completo de `main`. El bundle no incluye `node_modules` ni el
+estado `paris-state-lab` guardado en el navegador; ese estado no sincroniza entre
+equipos. Usar una sola copia por vez hasta configurar el GitHub privado previsto
+para la etapa final. Instrucciones: `outputs/LEEME-PC-PERSONAL.md`.

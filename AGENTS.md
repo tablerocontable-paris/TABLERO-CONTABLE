@@ -156,3 +156,18 @@ revisiones y sólo usa datos ficticios del laboratorio. No cargar vencimientos
 reales ni consultar ARCA. No sincroniza la simulación entre PCs; para continuar
 en otra PC usar el bundle Git actualizado después de dejar limpio el checkout,
 trabajar una sola copia por vez y transferir commits de vuelta con otro bundle.
+
+## Estado y traslado a otra PC — 07/10/2026
+
+El flujo de propuestas de tareas habituales quedó implementado sólo en el
+laboratorio y publicado en el Site privado v61 desde `0ca71bb`. Jefatura aprueba
+de forma explícita antes de materializar asignaciones. No ampliar audiencia,
+activar cuentas ni conectar `/api`, D1 o Supabase.
+
+La PC personal recibe `outputs/grupo-paris-site-personal.bundle` y
+`outputs/LEEME-PC-PERSONAL.md`. El bundle conserva `main` y su historial; no
+incluye el `localStorage` `paris-state-lab`, por lo que no comparte la simulación
+guardada en el navegador. Trabajar con una sola copia por vez y devolver commits
+en otro bundle. No sincronizar la carpeta `.git` con OneDrive. Mantener el
+avance global aproximado en 45%; la transferencia no adelanta aceptación ni
+habilita la infraestructura final.
