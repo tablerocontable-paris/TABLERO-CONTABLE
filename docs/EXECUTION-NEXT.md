@@ -14,9 +14,14 @@ cuatro recorridos Edge pasaron. Tab/Enter, selección del empleado por teclado,
 Tab hasta una tarea elegible y `Alt+ArrowRight` movieron y persistieron la
 tarjeta. Un sondeo local de 24 perfiles mostró 24 filas en 491 ms. Evidencia:
 `docs/architecture/review-evidence/full-review-lab-20261007-a69fbd4.json`.
+La revisión de nombres accesibles en el HEAD documental `3de7f88` recorrió 38
+combinaciones de perfil y sección en Edge: no encontró controles interactivos
+sin nombre. Evidencia:
+`docs/architecture/review-evidence/accessible-names-lab-20261007.json`.
 Vite compila, con aviso informativo: el punto de entrada está en 500,19 kB
 (0,19 kB por encima de 500 kB). Sigue pendiente el umbral de rendimiento,
-auditoría integral de accesibilidad y concurrencia entre pestañas/dispositivos.
+auditoría integral de accesibilidad (incluidos lectores de pantalla) y
+concurrencia entre pestañas/dispositivos.
 
 La inspección visual confirmó que Análisis mensual todavía ocupa demasiado alto
 para un recorrido ágil. Antes de reordenar sus gráficos/tablas, cerrar diseño y

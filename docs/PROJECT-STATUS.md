@@ -18,6 +18,13 @@ informativo de 500 kB; los gráficos siguen en un chunk de 423,74 kB. No se
 modificó código para ocultar ese aviso. La auditoría de accesibilidad global,
 el umbral de rendimiento y la concurrencia siguen abiertos.
 
+En el HEAD documental `3de7f88` se revisaron los nombres accesibles con el árbol
+AX de Edge en **38 combinaciones de sección/perfil** (jefe, encargado y
+empleado): cero controles interactivos sin nombre, errores JavaScript o
+solicitudes `/api`. Es una comprobación de nombres en escritorio, no una
+auditoría WCAG completa ni prueba de lector de pantalla. Evidencia:
+`docs/architecture/review-evidence/accessible-names-lab-20261007.json`.
+
 Los cuatro recorridos de navegador corresponden a la interfaz funcional
 publicada en Site v87 desde el commit `c5222cdc9f0ab364ef1dae29452a805a4a644393`.
 La evidencia y esta revisión se registraron luego en el commit documental

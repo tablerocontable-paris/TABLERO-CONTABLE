@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-07",
+  "browser": "Microsoft Edge headless",
+  "viewport": "1440x900",
+  "profiles": [
+    "jefe",
+    "encargado",
+    "empleado"
+  ],
+  "routesVisited": 38,
+  "unnamedInteractiveElements": [],
+  "pageErrors": [],
+  "operationalApiRequests": []
+}
