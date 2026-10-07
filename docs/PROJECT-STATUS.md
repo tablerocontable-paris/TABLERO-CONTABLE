@@ -1,4 +1,4 @@
-# Estado vigente — 06/10/2026 · laboratorio
+# Estado al inicio del laboratorio — 06/10/2026 · registro histórico
 
 **Avance global orientativo: aproximadamente 45%.** Referencia de planificación; no equivale
 a aceptación ni se calcula a partir de tests. No está al 100% ni lista para

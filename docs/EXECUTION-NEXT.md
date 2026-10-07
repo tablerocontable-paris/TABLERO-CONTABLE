@@ -3,18 +3,23 @@
 Repositorio: `work/site`. Continuar el mismo proyecto y Git. No reconstruir ni
 consultar el chat anterior.
 
-## Próximo bloque vigente — revisión 07/10/2026
+## Próximo bloque vigente — revisión de arquitectura
 
-El corte de avisos está comprometido como `25d1490` y publicado en el mismo Site
-privado como v68 (`appgdep_6ac64381bc288191ad9d5247e4e0b340`). El bundle y la guía
-de PC personal aún apuntan a una versión anterior. Generar ambos desde un commit
-limpio y comprobar la clonación/HEAD antes de dar por lista la transferencia.
-Contrato ejecutable, evidencia y límites:
-`architecture/STATE-REVIEW-20261007.md`.
+El último corte funcional del laboratorio son los avisos locales de vencimiento,
+implementados en `25d1490` y publicados en el mismo Site privado como v68. Las
+publicaciones v69–v71 actualizaron la documentación y la transferencia, sin
+cambiar funcionalidades ni audiencia. El checkout de referencia está en
+`main`; el commit y bundle exactos figuran en `outputs/LEEME-PC-PERSONAL.md`.
+El bundle y el ZIP fueron verificados con una clonación limpia. El JSON de
+`paris-state-lab` viaja por separado desde la interfaz.
 
-Después seleccionar **GPT-6.1 Sol, esfuerzo alto, Standard** para definir
-dependencias entre tareas y delegación con aceptación antes de implementarlas.
-Los apartados siguientes conservan la cronología y se subordinan a este bloque.
+No hay otro cambio funcional local especificado que evite definir reglas nuevas.
+El siguiente paso es seleccionar **GPT-6.1 Sol, esfuerzo alto, Standard** para
+revisar identidad, permisos, idempotencia, historial y entrega en dependencias,
+delegación/aceptación y notificaciones entre dispositivos. No implementar
+escrituras de servidor, no crear cuentas y no conectar servicios en esa revisión.
+Después, **GPT-6 Luna, esfuerzo medio, Standard** para ejecutar el contrato
+aprobado en el laboratorio. Los apartados posteriores conservan la cronología.
 
 ## Estado vigente
 
