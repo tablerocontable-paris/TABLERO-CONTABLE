@@ -89,3 +89,28 @@ formulario puntual/recurrente probado en jsdom. Chromium general escritorio y
 móvil: cero errores JS y cero llamadas operativas a `/api`. Quedan pendientes
 los cierres/exportaciones, traspasos y bajas/reasignaciones. No modifica el
 avance global (~45%) ni habilita usuarios reales.
+
+## Baja y reasignación de laboratorio — 06/10/2026
+
+La jefatura puede registrar una baja con motivo, siempre que primero haya
+resuelto subordinados activos. Se conserva el perfil, tareas cerradas y cierres;
+se pausan reglas recurrentes y los relojes del usuario afectado. Las tareas
+abiertas quedan en una bandeja con snapshot de perfil/empresa/asignación/frecuencia
+y motivo. También se cancelan sus coberturas activas y se detienen los relojes
+de reemplazantes para revocar permisos temporales. Sólo el trabajo futuro pendiente
+sin sesiones, actividad o responsabilidad conjunta permite reasignación directa,
+y se vuelve a validar al confirmar. Las tareas iniciadas quedan como
+`handoff_required`; fechas vencidas/sin fecha requieren revisión manual.
+Rehabilitar un perfil no revive reglas antiguas.
+
+Contrato: `architecture/PROFILE-DEACTIVATION-LAB-CONTRACT-20261006.md`.
+El flujo funciona sólo en `paris-state-lab`; la baja del Worker/D1 no se ofrece
+porque el backend aún no tiene este contrato. Falta implementar el traspaso
+explícito de trabajo iniciado y trasladar la lógica al backend después de la
+revisión de permisos.
+
+Verificación del corte: 358/358 pruebas en 35 archivos con timeout ampliado
+para migraciones históricas; TypeScript, build Worker y Chromium desktop/móvil
+aprobados. En Chromium no hubo errores JS ni llamadas a `/api`. El test de
+interfaz específico recorre motivo, baja, bandeja y reasignación; persistencia
+valida el snapshot de baja. La implementación sigue siendo sólo laboratorio.

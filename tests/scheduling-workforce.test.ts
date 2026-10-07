@@ -23,6 +23,8 @@ import {
   cancelAbsence,
   expireCoverageClocks,
   recurringCoveragePreview,
+  deactivateProfile,
+  reassignOrphanedTask,
   updateProfile,
 } from "../src/domain/workforce";
 import { reviseAssignment } from "../src/domain/planning";
@@ -270,6 +272,68 @@ describe("tiempo y cobertura", () => {
         "boss",
       ).profiles.find((x) => x.id === p.id)?.managerId,
     ).toBe("m2");
+    expect(() => updateProfile(s, { ...p, active: false }, "boss")).toThrow("flujo de baja");
+  });
+  it("desactiva conservando historia, pausa reglas/relojes y prepara sólo el futuro elegible", () => {
+    const at = "2026-10-06T15:00:00.000Z";
+    const base = seed();
+    const [ready, started, closed] = base.tasks.filter((task) => task.ownerId === "e0").slice(0, 3);
+    const tasks = [...base.tasks.filter((task) => task.ownerId !== "e0"), ...base.tasks.filter((task) => task.ownerId === "e0").slice(0, 3).map((task) => task.id === ready.id
+      ? { ...task, status: "Pendiente" as const, due: "2026-11-20", scheduledOn: "2026-11-20", sessions: [], checklist: task.checklist.map((check) => ({ ...check, done: false })), completedAt: null }
+      : task.id === started.id
+        ? { ...task, status: "En curso" as const, due: "2026-11-21", scheduledOn: "2026-11-21", sessions: [{ id: "open-clock", actorId: "e0", start: at, end: null }], completedAt: null }
+        : task.id === closed.id
+          ? { ...task, status: "Completada" as const, completedAt: at }
+          : task)];
+    const state = { ...base, tasks, activity: base.activity.filter((entry) => entry.taskId !== ready.id && entry.taskId !== started.id) };
+    const former = state.profiles.find((person) => person.id === "e0")!;
+    const result = deactivateProfile(state, { ...former, active: false }, "boss", "Cambio de puesto", at);
+    expect(result.profiles.find((person) => person.id === "e0")?.active).toBe(false);
+    expect(result.assignments.filter((assignment) => assignment.ownerId === "e0").every((assignment) => assignment.retired)).toBe(true);
+    expect(result.tasks.find((task) => task.id === started.id)?.sessions?.[0]?.end).toBe(at);
+    expect(result.tasks.find((task) => task.id === closed.id)?.ownerId).toBe("e0");
+    expect(result.orphanedWork).toHaveLength(2);
+    expect(result.orphanedWork?.find((item) => item.taskId === ready.id)).toMatchObject({
+      formerOwnerId: "e0", formerOwnerName: "Valentino Magni", companyId: ready.companyId,
+      resolution: "ready", status: "pending", reason: "Cambio de puesto",
+    });
+    expect(result.orphanedWork?.find((item) => item.taskId === started.id)?.resolution).toBe("handoff_required");
+    const returned = updateProfile(result, { ...former, active: true }, "boss");
+    expect(returned.assignments.filter((assignment) => assignment.ownerId === "e0").every((assignment) => assignment.retired)).toBe(true);
+  });
+  it("reasigna una tarea futura una sola vez y no materializa una segunda ocurrencia", () => {
+    const at = "2026-10-06T15:00:00.000Z";
+    const base = seed();
+    const task = base.tasks.find((row) => row.ownerId === "e0")!;
+    const adjusted = { ...task, status: "Pendiente" as const, due: "2026-11-20", scheduledOn: "2026-11-20", sessions: [], checklist: task.checklist.map((check) => ({ ...check, done: false })), completedAt: null };
+    const before = { ...base, tasks: base.tasks.map((row) => row.id === task.id ? adjusted : row), activity: base.activity.filter((entry) => entry.taskId !== task.id) };
+    const former = before.profiles.find((person) => person.id === "e0")!;
+    const retired = deactivateProfile(before, { ...former, active: false }, "boss", "Baja de equipo", at);
+    const item = retired.orphanedWork?.find((row) => row.taskId === task.id)!;
+    const reassigned = reassignOrphanedTask(retired, item.id, "e1", "boss", at);
+    expect(reassigned.tasks.find((row) => row.id === task.id)).toMatchObject({ ownerId: "e1", teamId: "t1" });
+    expect(reassigned.orphanedWork?.find((row) => row.id === item.id)).toMatchObject({ status: "reassigned", assignedTo: "e1", resolvedBy: "boss" });
+    expect(() => reassignOrphanedTask(reassigned, item.id, "e2", "boss", at)).toThrow("explícito");
+    expect(materialize(reassigned, "2026-11").tasks.filter((row) => row.id === task.id)).toHaveLength(1);
+  });
+  it("requiere reasignar subordinados antes de dar de baja a su encargado", () => {
+    const s = seed();
+    const manager = s.profiles.find((person) => person.id === "m1")!;
+    expect(() => deactivateProfile(s, { ...manager, active: false }, "boss", "Cambio de sector")).toThrow("personas a cargo");
+  });
+  it("revoca coberturas vigentes del perfil dado de baja y corta el reloj del reemplazo", () => {
+    const base = seed();
+    const task = base.tasks.find((row) => row.ownerId === "e0")!;
+    const dated = { ...task, status: "Pendiente" as const, due: "2026-11-20", scheduledOn: "2026-11-20", sessions: [], completedAt: null, blockedBy: "", blockedSince: null, checklist: task.checklist.map((check) => ({ ...check, done: false })) };
+    const clean = { ...base, tasks: base.tasks.map((row) => row.id === task.id ? dated : row), activity: base.activity.filter((entry) => entry.taskId !== task.id) };
+    const absence = { id: "temporary-cover", ownerId: "e0", replacementId: "e1", taskIds: [task.id], from: "2026-11-01", to: "2026-11-30", kind: "Licencia" as const, note: "", createdBy: "boss" };
+    const approved = registerAbsence(clean, absence, "boss");
+    const working = applyClock(approved, task.id, "e1", true, "2026-11-20T10:00:00.000Z");
+    const owner = working.profiles.find((person) => person.id === "e0")!;
+    const retired = deactivateProfile(working, { ...owner, active: false }, "boss", "Baja de equipo", "2026-11-20T13:00:00.000Z");
+    expect(retired.absences?.find((row) => row.id === absence.id)?.cancelledAt).toBe("2026-11-20T13:00:00.000Z");
+    expect(retired.tasks.find((row) => row.id === task.id)?.sessions?.find((session) => session.actorId === "e1")?.end).toBe("2026-11-20T13:00:00.000Z");
+    expect(canWork(retired, retired.profiles.find((person) => person.id === "e1")!, retired.tasks.find((row) => row.id === task.id)!, "2026-11-20")).toBe(false);
   });
 });
 describe("laboratorio aislado", () => {
@@ -283,10 +347,17 @@ describe("laboratorio aislado", () => {
     });
     vi.stubGlobal("location", { reload: vi.fn() });
     const s = seed();
+    s.orphanedWork = [{
+      id: "orphan-persist", taskId: s.tasks[0]!.id, formerOwnerId: "e0",
+      formerOwnerName: "Valentino Magni", companyId: "c1", assignmentSnapshot: null,
+      reason: "Cambio de puesto", createdAt: "2026-10-06T15:00:00.000Z",
+      resolution: "ready", status: "pending",
+    }];
     persist(s);
     const before = data.get(KEY);
     enterLab(s);
     const lab = load();
+    expect(lab.orphanedWork).toEqual(s.orphanedWork);
     lab.tasks = [];
     persist(lab, true);
     expect(data.get(KEY)).toBe(before);

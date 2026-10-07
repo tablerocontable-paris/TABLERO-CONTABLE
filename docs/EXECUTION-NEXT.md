@@ -16,7 +16,7 @@ conjunta está implementada en el laboratorio local; contrato, alcance y límite
 en `docs/architecture/JOINT-LABORATORY-CONTRACT-20261006.md`. No equivale a
 colaboración en línea o a permisos de producción.
 
-## Cobertura local implementada y siguiente trabajo
+## Cobertura y bajas locales implementadas; siguiente trabajo
 
 La cobertura ya incluye tareas puntuales y reglas recurrentes seleccionadas;
 previsualiza ocurrencias y aplica acceso al materializarlas. Mantiene al titular,
@@ -24,9 +24,15 @@ atribuye cronómetros al reemplazante, limita accesos por empresa/equipo y revoc
 relojes al cancelar o vencer. Contrato y evidencia en
 `docs/architecture/COVERAGE-LAB-CONTRACT-20261006.md`.
 
-Siguiente: cerrar traspaso, baja y reasignación sin perder historial ni
-responsabilidad; luego auditar cierres/exportaciones y completar pruebas de
-reglas diarias, semanales y varios meses. Referencias: filas 4, 13 y 14 de
+La baja conserva cierres/historia, detiene relojes propios y pausa reglas
+recurrentes. El trabajo futuro limpio queda en la bandeja para reasignar;
+actividad existente requiere traspaso explícito. Contrato:
+`docs/architecture/PROFILE-DEACTIVATION-LAB-CONTRACT-20261006.md`.
+
+Siguiente: implementar el traspaso explícito de tareas iniciadas, su historia de
+propietario y el control de relojes/contribuciones; luego auditar cierres y
+exportaciones y completar pruebas de reglas diarias, semanales y varios meses.
+Referencias: filas 4, 13 y 14 de
 `docs/product/CORRECTIONS-20261002.md` y regla de cobertura de
 `docs/product/CONSISTENCY-RULES.md`. Mantener el alcance en laboratorio antes de
 alterar relaciones o el backend activo.

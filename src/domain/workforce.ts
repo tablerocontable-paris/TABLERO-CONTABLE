@@ -8,6 +8,7 @@ import {
   type State,
   type Profile,
   type Task,
+  type OrphanedWork,
 } from "./model";
 export interface Absence {
   id: string;
@@ -233,6 +234,99 @@ export function registerAbsence(s: State, a: Absence, actorId: string): State {
     throw Error("Ya existe una ausencia en ese rango.");
   return { ...s, absences: [...(s.absences || []), a] };
 }
+export function deactivateProfile(
+  s: State,
+  profile: Profile,
+  actorId: string,
+  reason: string,
+  at = new Date().toISOString(),
+): State {
+  const actor = s.profiles.find((item) => item.id === actorId && item.active);
+  const current = s.profiles.find((item) => item.id === profile.id);
+  const note = reason.trim();
+  if (actor?.role !== "jefe") throw Error("Sólo Juan Pablo / jefatura administra las bajas.");
+  if (!current?.active || current.id === actor.id) throw Error("Elegí a otra persona con acceso activo.");
+  if (note.length < 5 || note.length > 500) throw Error("Indicá un motivo de baja de entre 5 y 500 caracteres.");
+  if (s.profiles.some((item) => item.active && item.managerId === current.id))
+    throw Error("Reasigná primero las personas a cargo.");
+
+  const configured = updateProfile(s, { ...profile, active: true }, actorId);
+  const futureDate = dateART(at);
+  const work: OrphanedWork[] = (configured.tasks || [])
+    .filter((task) => task.ownerId === current.id && task.status !== "Completada" && !isClosed(configured, task))
+    .map((task) => {
+      const assignment = configured.assignments.find((item) => item.id === task.assignmentId);
+      const hasSessions = (task.sessions || []).length > 0;
+      const hasActivity = configured.activity.some((entry) => entry.taskId === task.id);
+      const scheduledDate = task.scheduledOn || task.due;
+      const ready = task.status === "Pendiente" && !hasSessions && !hasActivity &&
+        !task.responsibility && !!scheduledDate && scheduledDate > futureDate;
+      return {
+        id: id(), taskId: task.id, formerOwnerId: current.id,
+        formerOwnerName: configured.profiles.find((item) => item.id === current.id)?.name || current.name,
+        companyId: task.companyId,
+        assignmentSnapshot: assignment ? {
+          id: assignment.id, title: assignment.title, templateId: assignment.templateId,
+          frequency: assignment.frequency, ...(assignment.schedule ? { schedule: assignment.schedule } : {}),
+        } : null,
+        reason: note, createdAt: at,
+        resolution: ready ? "ready" as const : hasSessions || hasActivity || task.responsibility
+          ? "handoff_required" as const : "review_required" as const,
+        status: "pending" as const,
+      };
+    });
+  const cancelledAbsences = (configured.absences || []).filter((absence) =>
+    absence.ownerId === current.id && !absence.cancelledAt,
+  );
+  const retired = {
+    ...configured,
+    profiles: configured.profiles.map((item) => item.id === current.id ? { ...item, active: false } : item),
+    assignments: configured.assignments.map((item) => item.ownerId === current.id ? { ...item, retired: true } : item),
+    tasks: configured.tasks.map((task) => {
+      let next = task.ownerId === current.id ? stopActorClock(task, current.id, at) : task;
+      for (const absence of cancelledAbsences) {
+        if (isCoveredOccurrence(absence, task)) next = stopActorClock(next, absence.replacementId, at);
+      }
+      return next;
+    }),
+    absences: (configured.absences || []).map((absence) =>
+      cancelledAbsences.some((item) => item.id === absence.id) ? { ...absence, cancelledAt: at } : absence,
+    ),
+    orphanedWork: [...(configured.orphanedWork || []), ...work],
+  };
+  return retired;
+}
+
+export function reassignOrphanedTask(
+  s: State,
+  orphanedId: string,
+  replacementId: string,
+  actorId: string,
+  at = new Date().toISOString(),
+): State {
+  const actor = s.profiles.find((item) => item.id === actorId && item.active);
+  const item = (s.orphanedWork || []).find((row) => row.id === orphanedId && row.status === "pending");
+  const task = item && s.tasks.find((row) => row.id === item.taskId);
+  const replacement = s.profiles.find((row) => row.id === replacementId && row.active);
+  if (actor?.role !== "jefe") throw Error("Sólo jefatura puede reasignar trabajo pendiente.");
+  if (!item || item.resolution !== "ready" || !task || !replacement)
+    throw Error("Este trabajo requiere una revisión o un traspaso explícito antes de reasignarlo.");
+  const scheduledDate = task.scheduledOn || task.due;
+  if (task.status !== "Pendiente" || (task.sessions || []).length ||
+      s.activity.some((entry) => entry.taskId === task.id) || isClosed(s, task) ||
+      !scheduledDate || scheduledDate <= dateART(at))
+    throw Error("La tarea dejó de cumplir las condiciones para una reasignación directa.");
+  if (replacement.id === item.formerOwnerId || !replacement.companyIds.includes(item.companyId))
+    throw Error("Elegí una persona activa autorizada para la empresa de la tarea.");
+  return {
+    ...s,
+    tasks: s.tasks.map((row) => row.id === task.id ? { ...row, ownerId: replacement.id, teamId: replacement.teamId } : row),
+    orphanedWork: (s.orphanedWork || []).map((row) => row.id === item.id
+      ? { ...row, status: "reassigned", assignedTo: replacement.id, resolvedBy: actor.id, resolvedAt: at }
+      : row),
+  };
+}
+
 export function updateProfile(s: State, p: Profile, actorId: string): State {
   if (s.profiles.find((x) => x.id === actorId)?.role !== "jefe")
     throw Error("Sólo Juan Pablo / jefatura administra los perfiles.");
@@ -263,6 +357,8 @@ export function updateProfile(s: State, p: Profile, actorId: string): State {
     throw Error("El equipo y el responsable no coinciden.");
   if (p.id === actorId && !p.active)
     throw Error("No podés desactivar tu propio acceso.");
+  if (s.profiles.some((x) => x.id === p.id && x.active) && !p.active)
+    throw Error("Usá el flujo de baja para pausar tareas y guardar la reasignación pendiente.");
   if (
     (!p.active || p.role !== s.profiles.find((x) => x.id === p.id)?.role) &&
     s.profiles.some((x) => x.active && x.managerId === p.id)

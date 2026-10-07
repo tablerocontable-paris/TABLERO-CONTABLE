@@ -87,3 +87,10 @@ de la vista de laboratorio se pueden sincronizar y publicar en el mismo Site
 privado sin cambiar audiencia. La cobertura selectiva, incluyendo reglas
 recurrentes previstas, está implementada en el laboratorio; la siguiente etapa
 es cerrar bajas/reasignaciones e historial antes de cambiar permisos del backend.
+
+## Continuidad de bajas — 06/10/2026
+La baja/reasignación directa de tareas futuras limpias está implementada sólo
+en el laboratorio. Mantener `docs/architecture/PROFILE-DEACTIVATION-LAB-CONTRACT-20261006.md`
+como contrato vigente. Trabajo iniciado requiere un traspaso explícito con
+historial, aún pendiente; no portar esta mutación a D1/Supabase sin revisión de
+permisos y aceptación.

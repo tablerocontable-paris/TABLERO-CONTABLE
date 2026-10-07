@@ -2279,6 +2279,25 @@ label, .filters select, .sidebar select, .sidebar nav button, .card-bottom,
   .brand img { width: 90px; height: 74px; }
   .induction-side img { width: 120px; height: 120px; margin-bottom: 16px; }
 }
+.panel-section {
+  border-top: 1px solid var(--line, #e1e5eb);
+  margin-top: 24px;
+  padding-top: 20px;
+}
+.orphaned-work-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  border: 1px solid var(--line, #e1e5eb);
+  border-radius: 10px;
+  background: var(--surface, #fff);
+  padding: 14px;
+  margin: 12px 0;
+}
+.orphaned-work-card > span,
+.orphaned-work-card > small {
+  color: var(--muted, #7c8795);
+}
 .task-card[draggable="true"] { cursor: grab; }
 .board-card-grip { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); }
 .task-card[draggable="true"] .board-card-grip svg { opacity: .5; cursor: grab; }

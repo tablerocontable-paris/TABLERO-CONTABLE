@@ -159,6 +159,27 @@ export interface Closure {
   activity: Activity[];
   note: string;
 }
+export interface OrphanedWork {
+  id: string;
+  taskId: string;
+  formerOwnerId: string;
+  formerOwnerName: string;
+  companyId: string;
+  assignmentSnapshot: {
+    id: string;
+    title: string;
+    templateId: string | null;
+    frequency: Frequency;
+    schedule?: Schedule;
+  } | null;
+  reason: string;
+  createdAt: string;
+  resolution: "ready" | "handoff_required" | "review_required";
+  status: "pending" | "reassigned" | "transferred";
+  resolvedAt?: string;
+  resolvedBy?: string;
+  assignedTo?: string;
+}
 export type AnnotationKind = "personal" | "formula" | "reminder";
 export interface Annotation {
   id: string;
@@ -211,6 +232,7 @@ export interface State {
   parameterReviews?: Record<string, ParameterReview>;
   version: 3;
   absences?: Absence[];
+  orphanedWork?: OrphanedWork[];
   companies: Company[];
   teams: Team[];
   profiles: Profile[];

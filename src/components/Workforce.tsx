@@ -5,6 +5,8 @@ import {
   cancelAbsence,
   registerAbsence,
   recurringCoveragePreview,
+  deactivateProfile,
+  reassignOrphanedTask,
   updateProfile,
   type Absence,
 } from "../domain/workforce";
@@ -21,10 +23,13 @@ export function Workforce({
 }) {
   const active = state.profiles.find((p) => p.id === state.activeId)!;
   const [editing, setEditing] = useState<Profile | null>(null);
+  const [retiring, setRetiring] = useState<Profile | null>(null);
+  const [deactivationReason, setDeactivationReason] = useState("");
+  const [reassignmentTargets, setReassignmentTargets] = useState<Record<string, string>>({});
   return (
     <Panel
       title="Administración de perfiles"
-      sub="Juan Pablo define el rol, responsable, equipo, empresas y estado del acceso."
+      sub="Juan Pablo administra perfiles. Las bajas conservan el historial y dejan el trabajo por resolver en una bandeja auditable."
     >
       <div className="table-wrap">
         <table>
@@ -48,9 +53,20 @@ export function Workforce({
                 </td>
                 <td>{p.active ? "Habilitado" : "Suspendido"}</td>
                 <td>
-                  <button onClick={() => setEditing({ ...p })}>
+                  <button onClick={() => { setEditing({ ...p }); setDeactivationReason(""); }}>
                     Configurar perfil
                   </button>
+                  {!remote && p.active && p.id !== active.id && (
+                    <button onClick={() => { setRetiring(p); setDeactivationReason(""); }}>
+                      Dar de baja
+                    </button>
+                  )}
+                  {!remote && !p.active && p.id !== active.id && (
+                    <button onClick={() => {
+                      try { commit(updateProfile(state, { ...p, active: true }, active.id), "Rehabilitó acceso", p.id); }
+                      catch (error) { notify((error as Error).message); }
+                    }}>Rehabilitar acceso</button>
+                  )}
                 </td>
               </tr>
             ))}
@@ -214,18 +230,8 @@ export function Workforce({
                 </label>
               ))}
             </div>
-            <label className="check-line">
-              <input
-                type="checkbox"
-                checked={editing.active}
-                onChange={(e) =>
-                  setEditing({ ...editing, active: e.target.checked })
-                }
-              />
-              Acceso habilitado
-            </label>
             <div className="note">
-              Al convertir un empleado en encargado se prepara su propio equipo.
+              Acceso actual: {editing.active ? "habilitado" : "suspendido"}. Al convertir un empleado en encargado se prepara su propio equipo.
               {remote ? 'El correo debe coincidir con su cuenta de ChatGPT. El acceso al sitio se habilita por separado y requiere aprobación del propietario.' : 'Las invitaciones y el restablecimiento de contraseña se habilitarán al conectar las cuentas reales. En esta demostración no se almacenan contraseñas.'}
             </div>
             <div className="modal-actions">
@@ -233,6 +239,69 @@ export function Workforce({
             </div>
           </form>
         </Dialog>
+      )}
+      {retiring && !remote && (
+        <Dialog title={`Dar de baja · ${retiring.name}`} onClose={() => setRetiring(null)}>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            try {
+              if (commit(deactivateProfile(state, { ...retiring, active: false }, active.id, deactivationReason),
+                "Desactivó perfil y dejó trabajo pendiente de reasignación", retiring.id)) {
+                setRetiring(null);
+                setDeactivationReason("");
+              }
+            } catch (error) { notify((error as Error).message); }
+          }}>
+            <p>El perfil y sus cierres históricos se conservan. Se pausarán sus recurrencias y relojes; el trabajo abierto quedará registrado para reasignación o traspaso.</p>
+            <label>Motivo de baja
+              <textarea value={deactivationReason} minLength={5} maxLength={500} required
+                onChange={(e) => setDeactivationReason(e.target.value)}
+                placeholder="Ej.: cambio de puesto, salida del equipo o licencia prolongada" />
+            </label>
+            <div className="modal-actions">
+              <button type="button" onClick={() => setRetiring(null)}>Cancelar</button>
+              <button className="primary">Confirmar baja</button>
+            </div>
+          </form>
+        </Dialog>
+      )}
+      {active.role === "jefe" && !remote && (
+        <section className="panel-section" aria-label="Trabajo pendiente de reasignar">
+          <h3>Trabajo pendiente de reasignar</h3>
+          <p>Las tareas futuras sin actividad pueden reasignarse directamente. Las iniciadas o con actividad requieren un traspaso explícito para conservar su historial.</p>
+          {(state.orphanedWork || []).filter((item) => item.status === "pending").length === 0
+            ? <p>No hay tareas huérfanas pendientes.</p>
+            : (state.orphanedWork || []).filter((item) => item.status === "pending").map((item) => {
+              const task = state.tasks.find((row) => row.id === item.taskId);
+              const company = state.companies.find((row) => row.id === item.companyId)?.name || item.companyId;
+              const candidates = state.profiles.filter((person) => person.active && person.id !== item.formerOwnerId && person.companyIds.includes(item.companyId));
+              return (
+                <article className="orphaned-work-card" key={item.id}>
+                  <strong>{task?.title || item.assignmentSnapshot?.title || "Tarea sin título"}</strong>
+                  <span>{item.formerOwnerName} · {company} · {item.assignmentSnapshot ? `${item.assignmentSnapshot.title} (${item.assignmentSnapshot.frequency})` : "Tarea puntual"}</span>
+                  <small>Motivo: {item.reason}</small>
+                  {item.resolution === "ready" && task ? (
+                    <div className="form-grid">
+                      <label>Reasignar a
+                        <select aria-label={`Reasignar ${task.title}`} value={reassignmentTargets[item.id] || ""}
+                          onChange={(e) => setReassignmentTargets({ ...reassignmentTargets, [item.id]: e.target.value })}>
+                          <option value="">Elegí una persona activa</option>
+                          {candidates.map((person) => <option key={person.id} value={person.id}>{person.name}</option>)}
+                        </select>
+                      </label>
+                      <button disabled={!reassignmentTargets[item.id] || !candidates.some((person) => person.id === reassignmentTargets[item.id])}
+                        onClick={() => {
+                          try {
+                            if (commit(reassignOrphanedTask(state, item.id, reassignmentTargets[item.id]!, active.id), "Reasignó tarea pendiente", item.taskId))
+                              setReassignmentTargets((targets) => ({ ...targets, [item.id]: "" }));
+                          } catch (error) { notify((error as Error).message); }
+                        }}>Confirmar reasignación</button>
+                    </div>
+                  ) : <span>{item.resolution === "handoff_required" ? "Requiere traspaso con historial" : "Revisión manual requerida"}</span>}
+                </article>
+              );
+            })}
+        </section>
       )}
     </Panel>
   );

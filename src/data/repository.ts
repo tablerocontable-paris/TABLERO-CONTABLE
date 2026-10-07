@@ -318,6 +318,17 @@ const schema = z.object({
     assignmentIds: z.array(z.string()).optional(),
     cancelledAt: z.string().optional(),
   })).optional(),
+  orphanedWork: z.array(z.object({
+    id: z.string(), taskId: z.string(), formerOwnerId: z.string(), formerOwnerName: z.string(),
+    companyId: z.string(), assignmentSnapshot: z.object({
+      id: z.string(), title: z.string(), templateId: z.string().nullable(),
+      frequency: z.enum(["única", "mensual", "semanal", "quincenal"]),
+      schedule: z.unknown().optional(),
+    }).nullable(), reason: z.string().min(5).max(500), createdAt: z.string(),
+    resolution: z.enum(["ready", "handoff_required", "review_required"]),
+    status: z.enum(["pending", "reassigned", "transferred"]), resolvedAt: z.string().optional(),
+    resolvedBy: z.string().optional(), assignedTo: z.string().optional(),
+  })).optional(),
   tour: z.record(z.string(), z.number()),
   tourVersion: z.record(z.string(), z.number()).optional(),
 }).superRefine((state, context) => {
@@ -416,6 +427,7 @@ export function load(laboratory = isLab()): State {
       : p,
   );
   state.absences ||= [];
+  state.orphanedWork ||= [];
   state.annotations ||= [];
   state.tourVersion ||= {};
   return state;
