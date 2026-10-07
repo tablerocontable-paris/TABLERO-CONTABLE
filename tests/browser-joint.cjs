@@ -76,7 +76,65 @@ const assert = (ok, message) => { if (!ok) throw Error(message); };
   task = saved.tasks.find((row) => row.id === "joint-browser-test");
   assert(task.sessions.filter((session) => !session.end).map((session) => session.actorId).join(",") === "e1", "Pausing one member must preserve the partner clock");
   assert((await page.locator('[data-task-id="joint-browser-test"]').count()) === 1, "Joint task duplicated on member board");
+
+  await useProfile("e1");
+  await page.getByRole("dialog").getByRole("button", { name: "Pausar cronómetro" }).click();
+  await page.getByRole("button", { name: "Cerrar" }).click();
+  await useProfile("e0");
+  await page.getByRole("dialog").getByRole("button", { name: "Completar tarea", exact: true }).click();
+  saved = await page.evaluate(() => JSON.parse(localStorage.getItem("paris-state-lab")));
+  task = saved.tasks.find((row) => row.id === "joint-browser-test");
+  assert(task.status === "Completada", "Completing from the task dialog must close the shared occurrence");
+  assert(task.sessions.every((session) => !!session.end), "Completing the shared task must stop all member clocks");
+
+  await page.evaluate(() => {
+    const state = JSON.parse(localStorage.getItem("paris-state-lab"));
+    state.activeId = "boss";
+    localStorage.setItem("paris-state-lab", JSON.stringify(state));
+  });
+  await page.reload();
+  await page.locator(".lab-banner").waitFor();
+  await page.locator('[data-nav="closing"]').click();
+
+  async function closeEmployee(name, note) {
+    await page.getByRole("row").filter({ hasText: name }).getByRole("button", { name: "Revisar y cerrar" }).click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByLabel("Observaciones de cierre").fill(note);
+    await dialog.getByRole("checkbox").check();
+    await dialog.getByRole("button", { name: "Confirmar cierre" }).click();
+    await dialog.waitFor({ state: "detached" });
+  }
+  await closeEmployee("Valentino Magni", "Revisión de cierre A");
+  saved = await page.evaluate(() => JSON.parse(localStorage.getItem("paris-state-lab")));
+  const closureA = saved.closures.find((closure) => closure.ownerId === "e0" && closure.month === task.month);
+  assert(closureA?.report?.schemaVersion === 2, "First participant closure must produce report schema v2");
+  const contributionA = closureA.report.contributions.find((row) => row.taskId === task.id);
+  assert(contributionA?.shareBps === 6000 && contributionA.possiblePoints === 3 && contributionA.earnedPoints === 3, "First report must preserve A's 60% contribution");
+  assert(!JSON.stringify(closureA.report).includes("Lucía Fernández"), "First participant report must not expose the partner's identity");
+  await page.getByRole("row").filter({ hasText: "Lucía Fernández" }).getByRole("button", { name: "Revisar y cerrar" }).waitFor();
+
+  const reportRow = page.getByRole("row").filter({ hasText: "Valentino Magni" }).getByRole("button", { name: "Ver reporte" });
+  await reportRow.click();
+  const reportDialog = page.getByRole("dialog");
+  const reportText = await reportDialog.innerText();
+  assert(reportText.includes("60%") && reportText.includes("3.00"), "On-screen v2 report must show the personal share and points");
+  assert(!reportText.includes("Lucía Fernández"), "On-screen personal report must not name the partner");
+  const downloadReady = page.waitForEvent("download");
+  await reportDialog.getByRole("button", { name: "Descargar reporte CSV" }).click();
+  const csvDownload = await downloadReady;
+  const csvPath = require("node:path").join(output, "joint-member-report.csv");
+  await csvDownload.saveAs(csvPath);
+  const csv = fs.readFileSync(csvPath, "utf8");
+  assert(csv.includes("60") && csv.includes("3") && !csv.includes("Lucía Fernández"), "CSV must preserve A's contribution without the partner's identity");
+  await reportDialog.getByRole("button", { name: "Cerrar" }).click();
+
+  await closeEmployee("Lucía Fernández", "Revisión de cierre B");
+  saved = await page.evaluate(() => JSON.parse(localStorage.getItem("paris-state-lab")));
+  const closureB = saved.closures.find((closure) => closure.ownerId === "e1" && closure.month === task.month);
+  assert(closureB?.report?.schemaVersion === 2, "Second participant must close the same frozen occurrence with report schema v2");
+  const contributionB = closureB.report.contributions.find((row) => row.taskId === task.id);
+  assert(contributionB?.shareBps === 4000 && contributionB.possiblePoints === 2 && contributionB.earnedPoints === 2, "Second report must preserve B's 40% contribution");
   assert(!apiCalls.length, "Laboratory called the operational API");
   assert(!errors.length, "Browser errors: " + errors.join("; "));
-  console.log("PASS: joint task activation UI, snapshot shares, notification, dual clocks, independent pause, single task identity; zero operational API calls or JS errors.");
+  console.log("PASS: joint activation, independent clocks, shared completion, sequential member closures, v2 reports and CSV privacy; zero operational API calls or JS errors.");
 })().catch((error) => { console.error(error); process.exitCode = 1; }).finally(async () => { if (browser) await browser.close(); if (server) server.kill(); });

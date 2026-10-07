@@ -191,3 +191,31 @@ v62 hasta verificar un despliegue de ese commit.
 Próximo paso en la PC personal: extraer el ZIP, clonar el bundle según la guía,
 ejecutar npm ci y abrir la carpeta site en Codex. Luego continuar los
 pendientes documentados del laboratorio sin activar cuentas ni /api.
+
+## Transferencia personal preparada — 07/10/2026
+
+Se corrigió y validó el flujo de cierre secuencial de una tarea conjunta: la
+tabla de jefatura vuelve al ámbito completo después del cierre de una persona,
+y el compañero puede cerrar luego su reporte personal v2. Evidencia actualizada
+en `docs/PROJECT-STATUS.md` y
+`docs/architecture/review-evidence/joint-close-lab-20261007.json`.
+
+La suite aprobó 407/407 con `--testTimeout=20000`; también pasaron TypeScript,
+Vite, Worker y el recorrido Chromium sin errores JS ni llamadas a `/api`. El
+primer intento estándar tuvo tres timeouts, sin fallos de aserciones; por eso el
+timeout ampliado queda explícito en la evidencia.
+
+Para continuar desde la PC personal, copiar `outputs/grupo-paris-site-transfer-20261007.zip`
+por USB o carpeta de archivos, extraerlo, instalar Git for Windows y Node.js,
+clonar el bundle con el comando de `outputs/LEEME-PC-PERSONAL.md`, ejecutar
+`npm ci` y abrir la carpeta `site` en Codex. Trabajar una sola PC por vez; al
+volver, transferir commits con un bundle y aplicar `git merge --ff-only` en
+este checkout. No sincronizar `.git` con OneDrive. No se necesita GitHub ni
+crear cuentas para editar o ejecutar el laboratorio local. Publicar cambios en
+Sites requiere acceder al mismo proyecto privado desde la cuenta dueña; el
+paquete no contiene credenciales.
+
+El bundle incluye el historial hasta el commit documentado en la guía, pero no
+`node_modules` ni el `localStorage` del navegador. SQL 011 y Worker/D1 siguen
+separados; no conectar servicios ni invitar usuarios hasta la aceptación final.
+El avance global permanece aproximadamente en 45%.

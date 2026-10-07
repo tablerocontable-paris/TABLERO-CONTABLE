@@ -347,3 +347,29 @@ El commit está en el repositorio local. No se confirmó una publicación Site v
 la transferencia a otra PC no modifica el Site ni su audiencia. El progreso
 global sigue orientativamente en **~45%** y no equivale a aceptación final.
 La transferencia vigente está descripta en outputs/LEEME-PC-PERSONAL.md.
+
+## Cierre conjunto secuencial y traspaso personal — 07/10/2026
+
+Se corrigió el selector de empleado después de confirmar un cierre mensual:
+al cerrar a una persona, la tabla vuelve a mostrar todo el ámbito autorizado,
+para poder revisar al siguiente integrante. El recorrido Chromium ahora comprueba
+la misma tarea conjunta con cierre A y B por separado, reportes personales v2
+60/40, CSV sin nombre ni sesiones del compañero y cronómetros cerrados al
+completar la tarea. Todo sigue aislado en el laboratorio local.
+
+Verificación: **407/407 pruebas en 44 archivos** (`vitest run --testTimeout=20000`),
+TypeScript, build Vite y build Worker aprobados. Chromium verificó activación,
+relojes simultáneos, pausa individual, finalización compartida, cierre A/B y CSV;
+cero llamadas a `/api` y cero errores JavaScript. La ejecución estándar inicial
+marcó tres límites de 5 segundos en migraciones/UI; los casos pasaron al repetir
+la suite completa con timeout de 20 segundos. El build conserva una advertencia
+informativa por el chunk principal de ~585 kB.
+
+Evidencia: `architecture/review-evidence/joint-close-lab-20261007.json` y
+`outputs/joint-close-acceptance/`. El cambio permanece en `main`; no cambia SQL,
+Worker/D1, el espacio operativo, cuentas ni invitaciones. La transferencia
+portable actualizada se entrega en `outputs/grupo-paris-site-transfer-20261007.zip`,
+con bundle Git e instructivo. El bundle incluye el historial y el commit de este
+corte; el laboratorio guardado en `localStorage` no se transfiere. Para trabajar
+antes de habilitar GitHub, usar una sola PC a la vez y devolver commits mediante
+un bundle de actualización. El avance global sigue alrededor de **45%**.

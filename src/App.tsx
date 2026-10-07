@@ -3013,6 +3013,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                   )
                 ) {
                   setModal(null);
+                  setOwner("");
                   notify(
                     remoteSave ? "Mes consolidado y reporte guardado para jefatura." : "Mes consolidado y reporte emitido para Juan Pablo en esta demostración.",
                   );

@@ -179,3 +179,17 @@ imprimibles y quedó verificado según docs/PROJECT-STATUS.md. No hay confirmaci
 de publicación Site v62. Para la PC personal usar el bundle vigente y la guía
 outputs/LEEME-PC-PERSONAL.md; no usar transferencias antiguas. El bundle
 preserva código e historial, no datos localStorage ni acceso a Sites.
+
+## Continuidad desde PC personal — 07/10/2026
+
+El paquete vigente `outputs/grupo-paris-site-transfer-20261007.zip` incluye el
+bundle Git de `main`, su historial y `outputs/LEEME-PC-PERSONAL.md`. Se puede
+editar/ejecutar el laboratorio local en otra PC sin GitHub ni cuentas nuevas;
+usar una sola copia a la vez y transferir commits de vuelta en otro bundle. El
+estado `paris-state-lab` del navegador no viaja. Para publicar, acceder al mismo
+Site privado desde la cuenta dueña; nunca incluir credenciales en el paquete.
+
+El cierre secuencial A/B de tareas conjuntas se validó en Chromium y en la suite
+completa; evidencia vigente en `docs/PROJECT-STATUS.md` y
+`docs/architecture/review-evidence/joint-close-lab-20261007.json`. No trasladar
+ese contrato local a D1/Supabase sin una revisión de permisos y esquema.
