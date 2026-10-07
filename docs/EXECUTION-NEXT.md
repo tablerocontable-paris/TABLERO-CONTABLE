@@ -219,3 +219,10 @@ El bundle incluye el historial hasta el commit documentado en la guía, pero no
 `node_modules` ni el `localStorage` del navegador. SQL 011 y Worker/D1 siguen
 separados; no conectar servicios ni invitar usuarios hasta la aceptación final.
 El avance global permanece aproximadamente en 45%.
+
+La corrección quedó publicada en el Site privado existente como **v62** desde
+`8d21e3245c6e4ee93aa741b4c3baf3ddc7b8b608`; deployment
+`appgdep_6ac5d2df02ec8191b861bfcee8d98934` terminó exitosamente. Relectura de
+Sites: versión 62, propietario, audiencia personalizada con una persona
+permitida, cero grupos y cero visitantes externos. No cambió el alcance de
+acceso.

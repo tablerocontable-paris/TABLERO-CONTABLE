@@ -193,3 +193,9 @@ El cierre secuencial A/B de tareas conjuntas se validó en Chromium y en la suit
 completa; evidencia vigente en `docs/PROJECT-STATUS.md` y
 `docs/architecture/review-evidence/joint-close-lab-20261007.json`. No trasladar
 ese contrato local a D1/Supabase sin una revisión de permisos y esquema.
+
+El arreglo se publicó como Site privado v62 desde el commit
+`8d21e3245c6e4ee93aa741b4c3baf3ddc7b8b608`; deployment exitoso
+`appgdep_6ac5d2df02ec8191b861bfcee8d98934`. Relectura confirmada: owner-only,
+una cuenta autorizada, sin grupos ni visitantes externos. No activar APIs ni
+cambiar audiencia.

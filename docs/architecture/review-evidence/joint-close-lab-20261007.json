@@ -27,5 +27,13 @@
     "outputs/joint-close-acceptance/joint-task-detail.png",
     "outputs/joint-close-acceptance/joint-member-report.csv"
   ],
-  "deployment": "No Site audience or account changes; this record documents local laboratory validation."
+  "deployment": {
+    "siteVersion": 62,
+    "sourceCommit": "8d21e3245c6e4ee93aa741b4c3baf3ddc7b8b608",
+    "deploymentId": "appgdep_6ac5d2df02ec8191b861bfcee8d98934",
+    "status": "succeeded",
+    "url": "https://grupo-paris-contabilidad.valentino-magni.chatgpt.site",
+    "audience": "custom owner-only; one allowed account, zero groups, zero external visitors",
+    "operationalApiOrAccountChanges": "none"
+  }
 }

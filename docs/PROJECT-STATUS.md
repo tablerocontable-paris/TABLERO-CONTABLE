@@ -373,3 +373,9 @@ con bundle Git e instructivo. El bundle incluye el historial y el commit de este
 corte; el laboratorio guardado en `localStorage` no se transfiere. Para trabajar
 antes de habilitar GitHub, usar una sola PC a la vez y devolver commits mediante
 un bundle de actualización. El avance global sigue alrededor de **45%**.
+
+Publicación confirmada: Site **v62**, commit `8d21e3245c6e4ee93aa741b4c3baf3ddc7b8b608`,
+deployment `appgdep_6ac5d2df02ec8191b861bfcee8d98934`, estado exitoso en el URL
+existente. La verificación posterior confirmó la versión 62 y su commit fuente;
+audiencia personalizada owner-only, una persona permitida, cero grupos y cero
+visitantes externos. No se habilitó el espacio operativo ni se conectó Supabase.
