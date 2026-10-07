@@ -5,18 +5,16 @@ consultar el chat anterior.
 
 ## Próximo bloque vigente — revisión de arquitectura
 
-El checkout limpio está en `main`, HEAD
-`6576f9980c68729e5a2e51b1f3241a7d22ce3d61`, publicado en el mismo Site como
-v78, owner-only. Desde el último corte funcional v68, los cambios v69–v78
-fueron de documentación, valores predeterminados de prueba y transferencia;
-no agregaron comportamiento a la aplicación. Sobre este HEAD pasaron la suite
-420/420, TypeScript, Vite, Worker y los cuatro recorridos Edge de navegador
-(general, correcciones/arrastre, copia/restauración y tareas conjuntas), sin
-errores JS ni llamadas a `/api`. El hook de pre-commit pasó 104/104 al crear el
-commit. El bundle y ZIP se verifican clonando el SHA de entrega. La guía incluye
-`npm run hooks:install`, probado en una clonación nueva: la configuración local
-de Git no viaja en el bundle. El JSON `paris-state-lab` se exporta aparte desde
-la interfaz.
+La última validación integral de producto se ejecutó sobre el código del corte
+v78 (`6576f9980c68729e5a2e51b1f3241a7d22ce3d61`): suite 420/420, TypeScript,
+Vite, Worker y cuatro recorridos Edge de navegador (general,
+correcciones/arrastre, copia/restauración y tareas conjuntas), sin errores JS ni
+llamadas a `/api`. Las publicaciones v79–v80 sólo actualizaron documentación y
+la transferencia; no cambiaron comportamiento. El hook pasó 104/104 en los
+commits documentales. La guía de transferencia incluye `npm run hooks:install`,
+probado en un clon nuevo porque `core.hooksPath` es local a cada checkout. Para
+el SHA/versión exactos de una transferencia, usar el HEAD limpio y el `get_site`
+del momento. El JSON `paris-state-lab` se exporta aparte desde la interfaz.
 
 El último corte funcional del laboratorio son los avisos locales de vencimiento,
 implementados en `25d1490` y publicados en el mismo Site privado como v68. Las

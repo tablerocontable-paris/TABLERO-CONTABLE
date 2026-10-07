@@ -1,6 +1,6 @@
 # Estado al inicio del laboratorio — 06/10/2026 · registro histórico
 
-## Estado verificado — 07/10/2026
+## Verificación del corte funcional v78 — 07/10/2026
 
 El commit `a15448f5fdf47675b8a14f6da881d34892790c12` está publicado en el
 Site existente como v79. La audiencia sigue personalizada y exclusiva del
@@ -26,6 +26,10 @@ checkout y no viaja dentro del bundle. El estado `paris-state-lab` del
 navegador no está en Git ni en el ZIP: exportarlo aparte desde «Vista de
 prueba». El registro v68 está marcado como histórico en
 `docs/architecture/STATE-REVIEW-20261007.md`.
+
+Las publicaciones v79–v80 fueron documentales; la versión viva y el SHA más
+reciente se verifican en Sites y en el `HEAD` limpio del checkout, no en este
+registro del corte funcional.
 
 **Avance global orientativo: aproximadamente 45%.** Referencia de planificación; no equivale
 a aceptación ni se calcula a partir de tests. No está al 100% ni lista para
