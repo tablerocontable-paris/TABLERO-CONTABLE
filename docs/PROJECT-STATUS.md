@@ -567,3 +567,17 @@ La siguiente revisión pendiente sigue siendo de arquitectura: identidad,
 permisos, idempotencia y entrega para dependencias/delegación/aceptación y
 notificaciones entre dispositivos. No llevar estas mutaciones al servidor ni
 crear cuentas antes de la aceptación final. Avance global orientativo: **~45%**.
+
+## Sincronización de continuidad — 07/10/2026
+
+El commit `617536429bd9bcc6d8cb0cfd85eb62948437bdef` actualizó el registro de
+continuidad luego de v69 y se publicó como **Site v70**; deployment
+`appgdep_6ac6465aee508191a879dc794316b54a` terminó correctamente. Relectura del
+Site: activo, acceso personalizado, una cuenta propietaria, cero grupos y cero
+visitantes externos. Fue una sincronización documental; el comportamiento
+funcional sigue siendo el ya validado en el corte de avisos locales.
+
+El bundle de PC personal se debe regenerar desde el `HEAD` documentado en
+`outputs/LEEME-PC-PERSONAL.md`; su transferencia incluye historial Git, no
+credenciales ni el estado del navegador. El avance global sigue orientativamente
+en **~45%**.

@@ -378,3 +378,18 @@ escrituras de servidor ni conectar cuentas en esa revisión. Al cerrar el
 contrato, volver a **GPT-6 Luna, esfuerzo medio, Standard** para implementar y
 validar sólo las decisiones ya acordadas en el laboratorio. El avance total
 permanece orientativamente en **~45%**; no equivale a aceptación final.
+
+## Versión documental actualizada — 07/10/2026
+
+El registro anterior de v69 quedó actualizado por el commit
+`617536429bd9bcc6d8cb0cfd85eb62948437bdef`, publicado como **Site v70** con
+deployment `appgdep_6ac6465aee508191a879dc794316b54a`. La publicación conserva el
+mismo Site privado y la audiencia owner-only; es sólo sincronización documental.
+El corte funcional vigente continúa siendo el laboratorio de avisos locales,
+con verificación previa de 420/420 pruebas y revisión Edge desktop/móvil.
+
+La transferencia portable vigente está en `outputs/LEEME-PC-PERSONAL.md` y el
+ZIP de igual nombre indicado en la guía. Bundle y JSON del navegador son
+artefactos separados. Para el contrato siguiente, detener implementación y
+seleccionar **GPT-6.1 Sol, esfuerzo alto, Standard** según las instrucciones del
+último apartado de este archivo.
