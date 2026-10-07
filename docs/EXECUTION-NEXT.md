@@ -5,6 +5,14 @@ consultar el chat anterior.
 
 ## Próximo bloque vigente — revisión de arquitectura
 
+El estado se revisó el 07/10: HEAD `d3ee37185e1ce2b91e743205ac0bf2573a138fae`
+se publicó en el mismo Site como v76, owner-only. La edición estabilizó los
+timeouts predeterminados de `npm test`; no cambió funcionalidades. Se verificó
+la suite completa 420/420, el pre-commit 104/104, TypeScript, Vite, Worker,
+recorridos Chromium desktop/móvil y un bundle clonado con ese SHA. El ZIP
+transferible más reciente se indica en `outputs/LEEME-PC-PERSONAL.md`; el JSON
+de estado `paris-state-lab` se exporta aparte desde la interfaz.
+
 El último corte funcional del laboratorio son los avisos locales de vencimiento,
 implementados en `25d1490` y publicados en el mismo Site privado como v68. Las
 publicaciones v69–v71 actualizaron la documentación y la transferencia, sin

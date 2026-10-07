@@ -1,4 +1,9 @@
-# Revisión del estado — 07/10/2026
+# Revisión histórica del estado — corte v68 — 07/10/2026
+
+> Este documento conserva la revisión que acompañó el corte funcional v68.
+> Sus referencias a HEAD, versión publicada y transferencia describen ese
+> momento, no el estado vigente. Para la revisión actual consultar
+> `docs/EXECUTION-NEXT.md` y `docs/PROJECT-STATUS.md`.
 
 ## Estado comprobado
 

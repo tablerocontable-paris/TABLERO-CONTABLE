@@ -1,5 +1,28 @@
 # Estado al inicio del laboratorio — 06/10/2026 · registro histórico
 
+## Estado verificado — 07/10/2026
+
+El commit `d3ee37185e1ce2b91e743205ac0bf2573a138fae` está publicado en el
+Site existente como v76. La audiencia sigue personalizada y exclusiva del
+propietario: una cuenta autorizada, cero grupos y cero visitantes externos.
+El cambio estandarizó `npm test` con dos workers y timeouts explícitos; no
+modificó el producto. La suite completa aprobó 420/420 pruebas en 48 archivos;
+el pre-commit pasó 104/104. TypeScript, Vite, Worker y recorridos Chromium
+desktop/móvil también pasaron; esos recorridos no llamaron a `/api`.
+
+La prueba sintética con 24 perfiles mostró 24 filas en 512 ms desde la
+selección de Equipo. Es una línea base, no un criterio de aceptación acordado.
+Siguen pendientes la navegación de teclado de extremo a extremo, el umbral
+formal para 20+ perfiles y la concurrencia entre pestañas/dispositivos. No se
+probó Auth/MFA/RLS real ni recuperación productiva. Avance global orientativo:
+45%, no 100%.
+
+Transferencia actualizada en `outputs/LEEME-PC-PERSONAL.md` y su ZIP; el bundle
+se verificó clonando y comparando HEAD. El estado `paris-state-lab` del
+navegador no está en Git ni en el ZIP: exportarlo aparte desde «Vista de
+prueba». El registro v68 está marcado como histórico en
+`docs/architecture/STATE-REVIEW-20261007.md`.
+
 **Avance global orientativo: aproximadamente 45%.** Referencia de planificación; no equivale
 a aceptación ni se calcula a partir de tests. No está al 100% ni lista para
 migrar empleados. El usuario exige terminar la versión final antes de crear
