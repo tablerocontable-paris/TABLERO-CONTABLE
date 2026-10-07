@@ -1,0 +1,86 @@
+{
+  "date": "2026-10-07",
+  "recordedAtUtc": "2026-10-07T16:35:26Z",
+  "scope": "Local browser regression evidence for existing private Sites laboratory",
+  "sourceCommit": "c5222cdc9f0ab364ef1dae29452a805a4a644393",
+  "publishedSite": {
+    "projectId": "appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85",
+    "version": 87,
+    "url": "https://grupo-paris-contabilidad.valentino-magni.chatgpt.site",
+    "audience": "custom owner-only",
+    "authorizedAccounts": 1,
+    "groups": 0,
+    "externalVisitors": 0
+  },
+  "browser": "Microsoft Edge 154.0.4258.62 headless",
+  "scriptsPassed": [
+    {
+      "script": "tests/browser.cjs",
+      "result": "passed",
+      "coverage": [
+        "laboratory navigation and task actions",
+        "theme, desktop/mobile, onboarding",
+        "monthly analysis, due dates, timers, absences and lab isolation"
+      ]
+    },
+    {
+      "script": "tests/browser-corrections.cjs",
+      "result": "passed",
+      "coverage": [
+        "responsive sidebar at 1024x650, 1280x720, 1440x900 and 1600x740",
+        "logo centered with company selector",
+        "task drag feedback scale 1.04, opacity 0.92 and task-land animation",
+        "employee access-scoped search, simulated requests, fiscal obligations, work cycle, Kaizen and 5S"
+      ]
+    },
+    {
+      "script": "tests/browser-laboratory-backup.cjs",
+      "result": "passed",
+      "coverage": [
+        "laboratory backup and restore",
+        "operational storage unchanged",
+        "mobile dialog fits"
+      ]
+    },
+    {
+      "script": "tests/browser-joint.cjs",
+      "result": "passed",
+      "coverage": [
+        "joint task activation and independent clocks",
+        "shared work completion and sequential member closures",
+        "versioned reports and CSV privacy"
+      ]
+    }
+  ],
+  "aggregate": {
+    "scriptsPassed": 4,
+    "javascriptErrors": 0,
+    "operationalApiCalls": 0,
+    "horizontalOverflow": false,
+    "laboratoryWritesOnly": true
+  },
+  "visualReview": {
+    "monthlyAnalyticsPageStillLong": true,
+    "note": "The current panel folding reduces noise, but the full analysis remains tall; navigation/grouping is a product decision for GPT-6.1 Sol before more redesign."
+  },
+  "notVerified": [
+    "end-to-end keyboard navigation",
+    "formal performance threshold for 20+ profiles",
+    "concurrency across tabs/devices",
+    "real authentication, MFA, Supabase RLS or cross-device notifications",
+    "final user acceptance",
+    "GitHub CI, PR, automated production migration and own hosting account"
+  ],
+  "completionEstimate": "approximately 45 percent; planning estimate, not calculated from test count",
+  "interpretation": "Evidence applies to the isolated fictitious-data laboratory and does not certify operational readiness or 100 percent completion.",
+  "unitTests": {
+    "testFilesPassed": 48,
+    "testsPassed": 424,
+    "testsFailed": 0
+  },
+  "build": {
+    "typescript": "passed",
+    "vite": "passed with known upstream annotation and 500.19 KB main-entry warnings",
+    "worker": "passed"
+  }
+}

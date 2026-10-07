@@ -1,43 +1,29 @@
 # Próxima ejecución del proyecto
 
-## Corte actual — Análisis mensual del laboratorio 07/10/2026
+## Revisión actual — Site v87 · 07/10/2026
 
-Se conservan las correcciones previas de roles, Catálogo/Cierre, tema y arrastre.
-Análisis mensual ahora tiene detalle plegable, explicación bajo el botón de
-ayuda, dos series existentes seleccionables y una torta gris seleccionable por
-estado/tipo/empresa. Las cantidades de la torta no representan puntos. Las reglas
-KPI de tareas operativas siguen provisionales y no se modificaron.
+El mismo Site está en v87, privado y owner-only; la fuente local está limpia en
+`main` y en `c5222cdc9f0ab364ef1dae29452a805a4a644393`. Cuatro recorridos Edge
+headless aprobaron navegación/operaciones, responsive y arrastre, respaldo y
+restauración del laboratorio y colaboración conjunta. Cero errores JS, cero
+llamadas a la API operativa y cero overflow horizontal. Evidencia:
+`docs/architecture/review-evidence/e2e-regression-lab-20261007-v87.json`.
 
-La suite aprobó **424/424 pruebas en 48 archivos**; TypeScript, Vite y Worker
-compilan. Chrome headless pasó los recorridos responsive sin errores JS,
-solicitudes a `/api` ni desborde móvil. Evidencia:
-`docs/architecture/review-evidence/monthly-analytics-lab-20261007.json`.
-El Site existente estaba en v82 antes de este corte y conserva audiencia
-personalizada owner-only: una cuenta autorizada, cero grupos y cero visitantes
-externos. Fuente local `main`; laboratorio ficticio aislado.
+La inspección visual confirmó que Análisis mensual todavía ocupa demasiado alto
+para un recorrido ágil. Antes de reordenar sus gráficos/tablas, cerrar diseño y
+criterios con GPT-6.1 Sol. Quedan también sin contrato final las cantidades y
+KPI de operativas, eventos y permisos del calendario y los cierres por alcance.
+No conectar cuentas ni servicios; el laboratorio conserva datos ficticios.
 
-Paquete de PC personal: `outputs/grupo-paris-site-transfer-20261007.zip`;
-verificá `source.commit` y `bundle.sha256` en el manifiesto del ZIP. La guía en
-`outputs/LEEME-PC-PERSONAL.md` explica clonación, prueba y retorno de cambios por
-bundle sin GitHub ni sincronización de `.git`.
+Siguiente paso: **GPT-6.1 Sol, esfuerzo alto, Standard**, revisar y definir un
+contrato acotado para esos pendientes y la jerarquía de Consultas/Anotaciones.
+Después, **GPT-6 Luna, esfuerzo medio, Standard**, implementa el contrato,
+verifica el bloque y publica en el mismo Site privado. Avance orientativo
+**~45%**, no listo para despliegue operativo. Para 100% aún faltan aceptación,
+cuentas propias, GitHub, Supabase dev y producción, hosting y automatización
+integral comprobada.
 
-Publicación verificada como **Site v83**, deployment
-`appgdep_6ac667c768988191973a05142db88251`, desde el commit
-`9db62fb4cea13037bdf651eac07bea05303a200c`. El hook del commit final pasó
-215/215 pruebas en 34 archivos. El build ahora deja el cliente en
-`dist/client/index.html` y el Worker en `dist/server/index.js`; el empaquetador
-validó la migración D1 incluida. La audiencia continúa owner-only.
-
-Siguiente paso: **GPT-6.1 Sol, esfuerzo alto, Standard**, para definir el
-contrato de cantidades y KPI operativos, eventos del calendario y cierre
-individual/por equipo/empresa con permisos y atomicidad. Consultas y Anotaciones
-requieren otra propuesta visual porque el pedido original las dejó abiertas a
-alternativas. Mantener cuentas, invitaciones, API y Supabase fuera de esa etapa.
-Luego, **GPT-6 Luna, esfuerzo medio, Standard**, implementa los contratos
-aceptados. Los apartados posteriores conservan la cronología.
-
-Repositorio: `work/site`. Continuar el mismo proyecto y Git. No reconstruir ni
-consultar el chat anterior.
+Repositorio: `work/site`. Continuar en el mismo proyecto y Git.
 
 ## Registro previo — correcciones de interfaz verificadas 07/10/2026
 

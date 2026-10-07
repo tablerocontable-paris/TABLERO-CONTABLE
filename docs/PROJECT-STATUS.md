@@ -1,47 +1,41 @@
 # Estado del proyecto Grupo París
 
-## Análisis mensual: corte verificado en laboratorio — 07/10/2026
+## Revisión de continuidad — Site v87 · 07/10/2026
 
-Se conservan las correcciones previas de navegación por rol, Resumen,
-Catálogo/Cierre, avatar, tema y arrastre, documentadas en
-`docs/product/CORRECTIONS-20261007-UI.md`. Análisis mensual ahora permite plegar
-los paneles de detalle, ver la explicación desde un botón de ayuda, elegir las
-series mensuales existentes y cambiar la torta gris entre cantidad de tareas por
-estado, tipo o empresa. La torta cuenta tareas y no puntos ponderados. El cálculo
-operativo conserva su lógica actual de laboratorio y queda señalado como
-provisional hasta definir el contrato.
+Se verificó el mismo repositorio, limpio en `main`, commit
+`c5222cdc9f0ab364ef1dae29452a805a4a644393`, y el mismo Site privado,
+publicado en v87. El acceso sigue limitado a la cuenta propietaria: un usuario,
+cero grupos y cero visitantes externos. No se conectaron servicios ni se
+crearon cuentas.
 
-Suite completa: **424/424 pruebas en 48 archivos**; TypeScript, Vite y Worker
-aprobados. Chrome headless pasó los recorridos responsive: cero errores JS, cero
-solicitudes a `/api` y sin desborde móvil. Evidencia:
-`docs/architecture/review-evidence/monthly-analytics-lab-20261007.json`.
-La compilación advierte que el entry principal alcanza 500,19 KB; la compilación
-completó correctamente.
+Cuatro recorridos Edge headless pasan en el laboratorio ficticio: navegación y
+operaciones, correcciones responsive y arrastre, copia/restauración aislada, y
+tareas conjuntas/reportes. No hubo errores JavaScript, llamadas a la API
+operativa ni desbordes horizontales. La barra de análisis mensual sigue siendo
+larga incluso con detalles plegables; ordenar o agrupar sus gráficos y tablas
+requiere una decisión de producto antes de tocarla. Evidencia completa:
+`docs/architecture/review-evidence/e2e-regression-lab-20261007-v87.json`.
 
-Publicación de este corte verificada: **Site v83**, deployment
-`appgdep_6ac667c768988191973a05142db88251`, desde el commit
-`9db62fb4cea13037bdf651eac07bea05303a200c`. El hook del último commit pasó
-215/215 pruebas en 34 archivos. También se corrigió la estructura de salida del
-build para generar `dist/client/index.html` y `dist/server/index.js`; el archivo
-incluye y valida la migración D1. El Site sigue activo, personalizado y
-owner-only: una cuenta autorizada, cero grupos y cero visitantes externos.
+Las pruebas confirman consistencia de la base del laboratorio para los flujos
+cubiertos; no prueban uso operativo real, concurrencia entre dispositivos ni
+aceptación final. Siguen sin verificarse navegación completa con teclado, un
+umbral formal de rendimiento para 20+ perfiles y concurrencia entre pestañas o
+dispositivos. Auth/MFA/RLS reales, invitaciones, recuperación productiva e
+infraestructura propia siguen pospuestos hasta terminar y aceptar el producto.
 
-Continuidad desde PC personal: se refresca el bundle portable y el ZIP desde el
-`main` sincronizado, con un manifiesto que fija SHA y huella. La guía acompaña al
-paquete en `outputs/LEEME-PC-PERSONAL.md`. Los artefactos de transferencia son
-generados e ignorados por Git para que el bundle no se vuelva a incluir dentro
-de sí mismo. No contienen credenciales ni estado del navegador.
+**Avance global orientativo: ~45%.** Es una estimación de planificación. El
+100% requiere aceptación sin correcciones conocidas, cuentas propias, GitHub,
+dos proyectos Supabase (dev/producción), hosting propio y automatización de
+PR/check/migración/deploy verificada. Hoy no está listo para despliegue
+operativo.
 
-La fuente base previa a este corte corresponde al Site v82, personalizado y
-owner-only: una cuenta autorizada, cero grupos y cero visitantes externos. La
-audiencia no debe ampliarse. Avance global orientativo **~45%**; este bloque no
-completa aceptación funcional ni infraestructura. No configura cuentas,
-invitaciones reales ni Supabase.
-
-Siguiente gate: GPT-6.1 Sol, esfuerzo alto, Standard, para definir métricas y
-permisos de tareas operativas, eventos del calendario y cierres por alcance.
-Consultas y Anotaciones quedan para una propuesta visual aparte. Después,
-GPT-6 Luna, esfuerzo medio, Standard, implementa los contratos aprobados.
+Próximo gate de producto: **GPT-6.1 Sol, esfuerzo alto, Standard** para definir
+los contratos aún abiertos de cantidades/KPI operativos, eventos y permisos del
+calendario, cierre mensual por alcance y jerarquía de Análisis mensual,
+Consultas y Anotaciones. **Después GPT-6 Luna, esfuerzo medio, Standard** para
+implementar ese contrato en el laboratorio y validar el bloque completo. No hay
+más cambios seguros de producto que ejecutar antes de cerrar esas decisiones;
+los recorridos y la documentación sí quedan sincronizados aquí.
 
 ## Registro histórico del laboratorio — 06/10/2026
 
