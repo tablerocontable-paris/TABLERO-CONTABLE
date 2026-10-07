@@ -2412,6 +2412,54 @@ label, .filters select, .sidebar select, .sidebar nav button, .card-bottom,
   .sidebar-bottom { padding-top: 8px; }
   .sidebar-bottom .demo-indicator { margin: 6px 0; }
 }
+.habitual-proposal-form, .habitual-proposal-schedules, .habitual-proposal-schedule { min-width: 0; margin-top: 14px; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-soft); }
+.habitual-proposal-form > summary, .habitual-proposal-group details > summary { cursor: pointer; font-weight: 650; }
+.habitual-proposal-form > p, .habitual-proposal-schedules > p, .habitual-standard-create > p { color: var(--muted); font-size: 12px; line-height: 1.5; }
+.habitual-proposal-form label, .habitual-proposal-schedule label, .habitual-proposal-member label, .habitual-standard-create label, .habitual-proposal-resubmit label { min-width: 0; display: grid; gap: 5px; color: var(--muted); font-size: 11px; }
+.habitual-proposal-form textarea, .habitual-proposal-member textarea, .habitual-standard-create textarea, .habitual-proposal-resubmit textarea { width: 100%; min-width: 0; resize: vertical; }
+.habitual-proposal-form > button, .habitual-proposal-member > button, .habitual-standard-create > button, .habitual-proposal-resubmit > button { display: inline-flex; align-items: center; gap: 7px; }
+.habitual-proposal-row { align-items: center; }
+.habitual-proposal-row span { display: grid; gap: 3px; }
+.habitual-proposal-row small, .preview-proposal small { display: block; color: var(--muted); font-size: 10px; }
+.induction-company-schedule { min-width: 0; display: grid; gap: 10px; margin: 12px 0; padding: 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
+.induction-company-schedule h3, .habitual-proposal-schedule h4 { margin: 0; font-size: 13px; }
+.induction-company-schedule > label { max-width: 360px; display: grid; gap: 5px; color: var(--muted); font-size: 11px; }
+.habitual-proposal-schedules > h3 { margin: 0; font-size: 15px; }
+.habitual-proposal-schedule + .habitual-proposal-schedule { margin-top: 10px; }
+.preview-proposal { border-left: 3px solid var(--accent); padding-left: 10px; }
+.habitual-proposal-groups { display: grid; gap: 14px; }
+.habitual-proposal-group { min-width: 0; padding: 15px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.habitual-proposal-group-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.habitual-proposal-group-heading h3 { margin: 8px 0 3px; font-size: 16px; overflow-wrap: anywhere; }
+.habitual-proposal-group-heading p, .habitual-proposal-group > p { margin: 3px 0; color: var(--muted); font-size: 12px; }
+.habitual-proposal-group-heading > small { color: var(--muted); text-align: right; }
+.habitual-proposal-hint { padding: 9px 11px; border-radius: 8px; background: var(--surface-soft); }
+.habitual-proposal-members { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 10px; margin: 12px 0; }
+.habitual-proposal-member { min-width: 0; display: grid; align-content: start; gap: 8px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-soft); }
+.habitual-proposal-member p { margin: 4px 0; font-size: 12px; overflow-wrap: anywhere; }
+.habitual-proposal-member small { color: var(--muted); font-size: 10px; line-height: 1.45; }
+.habitual-proposal-member details { font-size: 11px; }
+.habitual-proposal-member details ol { padding-left: 20px; color: var(--muted); }
+.habitual-proposal-decision { display: grid; grid-template-columns: minmax(220px, 1fr) auto; align-items: end; gap: 10px; padding: 12px 0; border-top: 1px solid var(--line); }
+.habitual-proposal-decision label { min-width: 0; display: grid; gap: 5px; color: var(--muted); font-size: 11px; }
+.habitual-proposal-decision button { min-height: 38px; }
+.habitual-standard-create { display: grid; gap: 10px; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--line); }
+.habitual-standard-create > summary { cursor: pointer; font-weight: 600; }
+.habitual-standard-create .form-grid { gap: 0 12px; }
+.proposal-notification { margin-bottom: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-soft); }
+.proposal-notification p { margin: 5px 0 9px; color: var(--muted); font-size: 12px; }
+.habitual-proposal-requested-change { margin: 10px 0; padding: 10px 12px; border-left: 3px solid var(--accent); background: var(--surface-soft); }
+.habitual-proposal-requested-change p { margin: 4px 0 0; }
+.habitual-proposal-approved { color: var(--accent); font-weight: 600; }
+.habitual-proposal-resubmit { display: grid; gap: 10px; margin: 12px 0; padding: 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-soft); }
+.habitual-proposal-resubmit .form-grid { gap: 0 12px; }
+@media (max-width: 720px) {
+  .habitual-proposal-group-heading { flex-direction: column; }
+  .habitual-proposal-group-heading > small { text-align: left; }
+  .habitual-proposal-decision { grid-template-columns: 1fr; }
+  .habitual-proposal-decision button { justify-self: start; }
+  .habitual-proposal-schedule { padding: 10px; }
+}
 
 /* Brand and notifications: one aligned identity, compact content heading. */
 .sidebar .brand { justify-content: center; padding-left: 28px; margin: 0 0 12px; }

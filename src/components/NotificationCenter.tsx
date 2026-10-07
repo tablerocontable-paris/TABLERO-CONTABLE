@@ -5,17 +5,20 @@ import { visibleNotifications } from "../domain/notifications";
 import { pendingParameterizations } from "../domain/parameterization";
 import ParameterizationInbox from "./ParameterizationInbox";
 import { Dialog } from "./ui";
+import { pendingHabitualTaskProposals } from "../domain/habitualTaskProposals";
 
 export default function NotificationCenter({
   state,
   commit,
   notify,
   onOpenTask,
+  onOpenProposals,
 }: {
   state: State;
   commit: (s: State, action?: string, id?: string) => boolean;
   notify: (text: string) => void;
   onOpenTask: (id: string) => void;
+  onOpenProposals?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const items = visibleNotifications(state);
@@ -23,25 +26,34 @@ export default function NotificationCenter({
     state.profiles.find((p) => p.id === state.activeId)?.role === "jefe"
       ? pendingParameterizations(state).length
       : 0;
+  const actor = state.profiles.find((p) => p.id === state.activeId);
+  const pendingProposals = actor ? pendingHabitualTaskProposals(state, actor).length : 0;
   const unread = items.filter((n) => !n.readAt).length;
   return (
     <>
       <button
         className="notification-trigger"
-        aria-label={`Notificaciones: ${unread + pending} pendientes`}
+        aria-label={`Notificaciones: ${unread + pending + pendingProposals} pendientes`}
         onClick={() => setOpen(true)}
       >
         <Bell size={19} />
-        {unread + pending > 0 && <span>{unread + pending}</span>}
+        {unread + pending + pendingProposals > 0 && <span>{unread + pending + pendingProposals}</span>}
       </button>
       {open && (
         <Dialog title="Notificaciones" onClose={() => setOpen(false)}>
+          {!!pendingProposals && (
+            <div className="proposal-notification">
+              <strong>{pendingProposals} propuesta{pendingProposals === 1 ? "" : "s"} de tareas habituales para revisar</strong>
+              <p>Las tareas quedan sin activar hasta confirmar un estándar.</p>
+              <button onClick={() => { setOpen(false); onOpenProposals?.(); }}>Revisar propuestas</button>
+            </div>
+          )}
           <ParameterizationInbox
             state={state}
             commit={commit}
             notify={notify}
           />
-          {!items.length && <p>No hay avisos de tareas para tu perfil.</p>}
+          {!items.length && !pendingProposals && !pending && <p>No hay avisos pendientes para tu perfil.</p>}
           {!!unread && (
             <button
               onClick={() =>

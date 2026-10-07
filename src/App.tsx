@@ -10,6 +10,7 @@ import LaboratoryInvitations from "./components/LaboratoryInvitations";
 import Planning from "./components/Planning";
 import WorkspaceSetup from "./components/WorkspaceSetup";
 import DeadlineAgenda from "./components/DeadlineAgenda";
+import { HabitualTaskProposalInbox, MyHabitualTaskProposals } from "./components/HabitualTaskProposals";
 import TaskBoard, { orderTasks, type TaskOrder } from "./components/TaskBoard";
 import PeriodReports from "./components/PeriodReports";
 import CatalogueCreator from "./components/CatalogueCreator";
@@ -117,6 +118,7 @@ import { taskTimeliness } from "./domain/timeliness";
 import { closureCsvRows } from "./domain/reports";
 import { applyCompletionAttribution } from "./domain/workCycle";
 import { currentCatalogueVersion } from "./domain/processImprovement";
+import { submitHabitualTaskProposal } from "./domain/habitualTaskProposals";
 import {
   createInternalRequest,
   replyToInternalRequest,
@@ -564,6 +566,11 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
     try {
       for (const schedule of Object.values(draft.schedules || {}))
         validateSchedule(schedule);
+      for (const schedules of Object.values(draft.companySchedules || {}))
+        for (const schedule of Object.values(schedules)) validateSchedule(schedule);
+      for (const targets of Object.values(draft.companyTargets || {}))
+        for (const target of Object.values(targets))
+          if (!Number.isFinite(target) || target < 0) throw Error("Las metas por empresa deben ser números válidos.");
       for (const task of draft.customTasks || [])
         validateSteps(task.steps.split(/\r?\n/));
       if (draft.customTitle.trim())
@@ -575,8 +582,9 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
       if (
         customIds.some(
           (key) =>
-            draft.schedules?.[key] &&
-            draft.schedules[key].frequency !== "única",
+            [draft.schedules?.[key], ...Object.values(draft.companySchedules?.[key] || {})]
+              .filter((schedule): schedule is Schedule => !!schedule)
+              .some((schedule) => schedule.frequency !== "única"),
         )
       )
         throw Error(
@@ -587,6 +595,11 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
       return;
     }
     const assignments: Assignment[] = [];
+    const scheduleForCompany = (taskId: string, companyId: string) =>
+      (laboratory && !remoteSave ? draft.companySchedules?.[taskId]?.[companyId] : undefined) ||
+      draft.schedules?.[taskId] || defaultSchedule(month + "-25");
+    const targetForCompany = (taskId: string, companyId: string, fallback: number) =>
+      laboratory && !remoteSave ? (draft.companyTargets?.[taskId]?.[companyId] ?? fallback) : fallback;
     for (const cid of draft.selectedCompanyIds) {
       for (const tid of draft.selectedTemplateIds) {
         if (
@@ -596,6 +609,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
         )
           continue;
         const t = state.templates.find((t) => t.id === tid)!;
+        const schedule = scheduleForCompany(tid, cid);
         assignments.push({
           id: `onboard-${active.id}-${cid}-${tid}`,
           templateId: tid,
@@ -607,12 +621,12 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           kind: t.kind,
           weight: t.weight,
           unit: t.unit,
-          target: t.target,
+          target: targetForCompany(tid, cid, t.target),
           day: draft.day,
           frequency: draft.frequency,
           steps: t.steps,
           startMonth: month,
-          schedule: draft.schedules?.[tid] || defaultSchedule(month + "-25"),
+          schedule,
           priority: "Media",
         });
       }
@@ -638,6 +652,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           ).includes(cid)
         )
           continue;
+        const schedule = scheduleForCompany(c.id, cid);
         assignments.push({
           id: `onboard-${active.id}-${cid}-${c.id}`,
           templateId: null,
@@ -648,7 +663,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           kind: c.kind,
           weight: 1,
           unit: c.unit,
-          target: c.target,
+          target: targetForCompany(c.id, cid, c.target),
           day: draft.day,
           frequency: draft.frequency,
           steps: c.steps
@@ -656,9 +671,35 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             .map((s) => s.trim())
             .filter(Boolean),
           startMonth: month,
-          schedule: draft.schedules?.[c.id] || defaultSchedule(month + "-25"),
+          schedule,
           priority: "Media",
         });
+      }
+    }
+    let habitualTaskProposals = [...(state.habitualTaskProposals || [])];
+    if (laboratory && !remoteSave) {
+      try {
+        const now = new Date().toISOString();
+        for (const proposal of draft.habitualTaskProposals || []) {
+          for (const cid of proposal.companyIds.filter((companyId) => draft.selectedCompanyIds.includes(companyId))) {
+            const pending = submitHabitualTaskProposal({ ...state, habitualTaskProposals }, active, {
+              id: `${proposal.id}:${cid}`,
+              companyId: cid,
+              title: proposal.title,
+              process: proposal.process,
+              description: proposal.description,
+              kind: proposal.kind,
+              unit: proposal.unit,
+              target: targetForCompany(proposal.id, cid, 0),
+              schedule: scheduleForCompany(proposal.id, cid),
+              steps: proposal.steps,
+            }, now, id);
+            habitualTaskProposals = pending.habitualTaskProposals || habitualTaskProposals;
+          }
+        }
+      } catch (e) {
+        notify((e as Error).message);
+        return;
       }
     }
     let next: State = {
@@ -672,6 +713,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           (a) => !state.assignments.some((x) => x.id === a.id),
         ),
       ],
+      ...(laboratory && !remoteSave ? { habitualTaskProposals } : {}),
       onboarding: {
         ...state.onboarding,
         [active.id]: {
@@ -810,6 +852,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           })
         }
         finish={finishOnboarding}
+        laboratory={laboratory && !remoteSave}
         pause={() => {
           setInduct(false);
           setPaused(true);
@@ -1247,7 +1290,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             <b>{pages.find((p) => p.id === page)?.name}</b>
           </div>
           <div className="header-right">
-            {!remoteSave && <NotificationCenter key={active.id} state={state} commit={commit} notify={notify} onOpenTask={taskId => {
+            {!remoteSave && <NotificationCenter key={active.id} state={state} commit={commit} notify={notify} onOpenProposals={() => setPage("team")} onOpenTask={taskId => {
               const task = state.tasks.find(t => t.id === taskId);
               if (task && canWork(state, active, task)) { setMonth(task.month); setPage('tasks'); setDetail(taskId); }
             }} />}
@@ -1494,6 +1537,9 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                       </button>
                     </div>
                   )}
+                {page === "day" && laboratory && !remoteSave && (
+                  <MyHabitualTaskProposals state={state} actor={active} month={month} commit={commit} notify={notify} />
+                )}
                 <div className="dashboard-row">
                   <Panel
                     title="Avance ponderado del equipo"
@@ -2133,6 +2179,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             )}
             {page === "team" && active.role === "jefe" && (<>
               {laboratory && <LaboratoryInvitations state={state} />}
+              {laboratory && !remoteSave && <HabitualTaskProposalInbox state={state} actor={active} month={month} commit={commit} notify={notify} />}
               {remoteSave&&<WorkspaceSetup state={state} commit={commit} presence={presence}/>}
               <Workforce state={state} commit={commit} notify={notify} remote={!!remoteSave}/>
             </>)}

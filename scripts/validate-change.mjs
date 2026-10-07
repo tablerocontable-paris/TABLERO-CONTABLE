@@ -15,4 +15,7 @@ run(process.execPath, ['node_modules/vitest/vitest.mjs', 'run',
   'tests/laboratory-corrections.test.tsx', 'tests/notifications.test.ts',
   'tests/fiscal-obligations.test.ts', 'tests/fiscal-obligations-ui.test.tsx',
   'tests/scheduling-workforce.test.ts', 'tests/workforce-retirement.test.tsx',
-  'tests/process-improvement.test.ts', 'tests/site-operational.test.ts', '--maxWorkers=1']);
+  'tests/process-improvement.test.ts', 'tests/site-operational.test.ts',
+  'tests/habitual-task-proposals.test.ts', 'tests/habitual-task-onboarding.test.tsx',
+  'tests/habitual-task-proposals-ui.test.tsx', 'tests/habitual-task-app.test.tsx',
+  '--maxWorkers=1']);

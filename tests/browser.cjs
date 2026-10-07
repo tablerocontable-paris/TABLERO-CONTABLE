@@ -20,6 +20,8 @@ fs.mkdirSync(output, { recursive: true });
     [
       root + "/node_modules/vite/bin/vite.js",
       "preview",
+      "--outDir",
+      "dist/client",
       "--host",
       "127.0.0.1",
       "--port",
@@ -55,14 +57,16 @@ fs.mkdirSync(output, { recursive: true });
       "dark"
     )
       throw Error("dark theme");
+    await page.locator('[data-nav="tasks"]').click();
     await page.waitForFunction(
       () =>
+        !!document.querySelector(".heading .primary") &&
         getComputedStyle(document.querySelector(".heading .primary"))
           .backgroundColor === "rgb(220, 229, 243)",
     );
     await page.screenshot({
       animations: "disabled",
-      path: output + "/dark-overview.png",
+      path: output + "/dark-tasks.png",
       fullPage: false,
     });
     await page.getByLabel("Apariencia").selectOption("system");
@@ -126,7 +130,7 @@ fs.mkdirSync(output, { recursive: true });
       await checks.nth(i).check();
     await dialog.getByRole("button", { name: "Cerrar", exact: true }).click();
     let stored = await page.evaluate(() =>
-      JSON.parse(localStorage.getItem("paris-state-v3")),
+      JSON.parse(localStorage.getItem("paris-state-lab")),
     );
     let mine = stored.tasks.filter(
       (t) => t.ownerId === stored.activeId && t.kind === "resultado",
@@ -147,7 +151,7 @@ fs.mkdirSync(output, { recursive: true });
       .fill("Lote QA");
     await page.getByRole("dialog").locator("button.primary").click();
     stored = await page.evaluate(() =>
-      JSON.parse(localStorage.getItem("paris-state-v3")),
+      JSON.parse(localStorage.getItem("paris-state-lab")),
     );
     if (!stored.activity.some((a) => a.qty === 12 && a.note === "Lote QA"))
       throw Error("activity not saved");
@@ -168,7 +172,7 @@ fs.mkdirSync(output, { recursive: true });
       .getByRole("button", { name: "Confirmar cierre", exact: true })
       .click();
     stored = await page.evaluate(() =>
-      JSON.parse(localStorage.getItem("paris-state-v3")),
+      JSON.parse(localStorage.getItem("paris-state-lab")),
     );
     const closure = stored.closures.find(
       (c) => c.note === "Revisión mensual QA",
@@ -178,8 +182,17 @@ fs.mkdirSync(output, { recursive: true });
       new Set(closure.tasks.map((t) => t.companyId)).size !== 2
     )
       throw Error("closure must include all companies despite filter");
+    const qaId = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem("paris-state-lab")).profiles.find(
+        (profile) => profile.name === "Empleado QA",
+      ).id,
+    );
+    await page.getByLabel("Vista de usuario").selectOption(qaId);
     await page.locator('[data-nav="tasks"]').click();
-    const closedCard = page.locator(".task-card").first();
+    const closedCard = page
+      .locator(".task-card")
+      .filter({ hasText: "Empleado QA" })
+      .first();
     if (
       (await closedCard.locator("button.quick").count()) ||
       !(await closedCard.getByText("Cerrado", { exact: true }).count())
@@ -198,15 +211,22 @@ fs.mkdirSync(output, { recursive: true });
       .getByRole("dialog")
       .getByRole("button", { name: "Cerrar", exact: true })
       .click();
+    await page.getByLabel("Vista de usuario").selectOption("boss");
     await page.getByRole("button", { name: "Limpiar filtros" }).click();
     await page.locator('[data-nav="analytics"]').click();
     await page.screenshot({ path: output + "/analytics.png", fullPage: true });
 
+    await page.locator('[data-nav="tasks"]').click();
     await page.getByLabel("Período", { exact: true }).fill("2026-10");
     await page
       .getByRole("button", { name: "Nueva tarea", exact: true })
       .click();
-    await page.locator('input[name="title"]').fill("E2E semanal");
+    const previousAssignmentIds = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem("paris-state-lab")).assignments.map(
+        (assignment) => assignment.id,
+      ),
+    );
+    await page.getByLabel("Elegí del catálogo").selectOption("cat1");
     await page.locator('select[name="company"]').selectOption("c1");
     await page.locator('select[name="owner"]').selectOption("e0");
     await page.getByLabel("Frecuencia de la tarea").selectOption("semanal");
@@ -217,10 +237,22 @@ fs.mkdirSync(output, { recursive: true });
     await page
       .getByRole("button", { name: "Crear tarea", exact: true })
       .click();
-    let recurring = await page.evaluate(() =>
-      JSON.parse(localStorage.getItem("paris-state-v3")).tasks.filter(
-        (t) => t.title === "E2E semanal",
-      ),
+    const weeklyAssignmentId = await page.evaluate((previousIds) => {
+      const state = JSON.parse(localStorage.getItem("paris-state-lab"));
+      return state.assignments.find(
+        (assignment) =>
+          !previousIds.includes(assignment.id) &&
+          assignment.templateId === "cat1" &&
+          assignment.ownerId === "e0" &&
+          assignment.companyId === "c1",
+      )?.id;
+    }, previousAssignmentIds);
+    if (!weeklyAssignmentId) throw Error("weekly catalogue assignment missing");
+    let recurring = await page.evaluate((assignmentId) =>
+      JSON.parse(localStorage.getItem("paris-state-lab")).tasks
+        .filter((task) => task.assignmentId === assignmentId)
+        .sort((a, b) => a.scheduledOn.localeCompare(b.scheduledOn)),
+      weeklyAssignmentId,
     );
     if (recurring.length !== 4 || recurring[0].due !== "2026-10-07")
       throw Error("weekly actual dates");
@@ -235,39 +267,32 @@ fs.mkdirSync(output, { recursive: true });
       .getByRole("button", { name: "Crear tarea", exact: true })
       .click();
     await page.getByLabel("Período", { exact: true }).fill("2026-11");
-    await page.waitForFunction(() =>
-      JSON.parse(localStorage.getItem("paris-state-v3")).tasks.some(
-        (t) => t.title === "E2E semanal" && t.month === "2026-11",
-      ),
-    );
-    stored = await page.evaluate(() =>
-      JSON.parse(localStorage.getItem("paris-state-v3")),
-    );
+    await page.waitForFunction((assignmentId) =>
+      JSON.parse(localStorage.getItem("paris-state-lab")).tasks.some(
+        (task) => task.assignmentId === assignmentId && task.month === "2026-11",
+      ), weeklyAssignmentId);
+    stored = await page.evaluate(() => JSON.parse(localStorage.getItem("paris-state-lab")));
     if (
-      stored.tasks.some(
-        (t) => t.title === "E2E puntual" && t.month === "2026-11",
+      stored.tasks.some((t) => t.title === "E2E puntual" && t.month === "2026-11")
       )
-    )
       throw Error("one-off repeated");
-    if (
-      stored.tasks.filter(
-        (t) => t.title === "E2E semanal" && t.month === "2026-11",
-      ).length !== 5
-    )
+    if (stored.tasks.filter((t) => t.assignmentId === weeklyAssignmentId && t.month === "2026-11").length !== 5)
       throw Error("november weekly instances");
     await page.getByLabel("Período", { exact: true }).fill("2026-10");
+    const weeklyTaskId = recurring.find((task) => task.month === "2026-10")?.id;
+    if (!weeklyTaskId) throw Error("weekly October task missing");
+    await page.getByLabel("Vista de usuario").selectOption("e0");
     await page.locator('[data-nav="tasks"]').click();
-    const timedCard = page
-      .locator(".task-card")
-      .filter({ hasText: "E2E semanal" })
-      .first();
-    await timedCard.getByRole("button", { name: /Iniciar E2E/ }).click();
+    const timedCard = page.locator(`.task-card[data-task-id="${weeklyTaskId}"]`);
+    await timedCard
+      .getByRole("button", { name: /Iniciar.*Conciliación Banco Nación/ })
+      .click();
     await page.reload();
     stored = await page.evaluate(() =>
-      JSON.parse(localStorage.getItem("paris-state-v3")),
+      JSON.parse(localStorage.getItem("paris-state-lab")),
     );
     let timing = stored.tasks.find(
-      (t) => t.title === "E2E semanal" && t.sessions?.some((e) => !e.end),
+      (task) => task.assignmentId === weeklyAssignmentId && task.sessions?.some((session) => !session.end),
     );
     if (!timing) throw Error("timer persistence");
     await page
@@ -275,14 +300,23 @@ fs.mkdirSync(output, { recursive: true });
       .getByRole("button", { name: "Pausar cronómetro" })
       .click();
     stored = await page.evaluate(() =>
-      JSON.parse(localStorage.getItem("paris-state-v3")),
+      JSON.parse(localStorage.getItem("paris-state-lab")),
     );
     if (stored.tasks.some((t) => t.sessions?.some((e) => !e.end)))
       throw Error("pause did not stop timer");
+    await page.getByLabel("Vista de usuario").selectOption("boss");
     await page.locator('[data-nav="absences"]').click();
     await page.getByRole("button", { name: "Registrar ausencia" }).click();
     await page.getByLabel("Persona ausente").selectOption("e0");
+    await page.getByLabel("Desde").fill("2026-10-05");
+    await page.getByLabel("Hasta").fill("2026-10-31");
     await page.getByLabel("Quién cubre").selectOption("e1");
+    await page
+      .locator(".coverage-task-selection")
+      .filter({ hasText: "Reglas recurrentes incluidas en el rango" })
+      .locator('input[type="checkbox"]')
+      .first()
+      .check();
     await page.getByLabel("Traspaso operativo").fill("Cobertura E2E");
     await page
       .getByRole("button", { name: "Guardar ausencia", exact: true })
@@ -292,10 +326,8 @@ fs.mkdirSync(output, { recursive: true });
     const mainBefore = await page.evaluate(() =>
       localStorage.getItem("paris-state-v3"),
     );
-    await page
-      .getByRole("button", { name: "Laboratorio de pruebas", exact: true })
-      .click();
     await page.locator(".lab-banner").waitFor();
+    await page.locator('[data-nav="tasks"]').click();
     await page
       .getByRole("button", { name: "Nueva tarea", exact: true })
       .click();
@@ -310,12 +342,10 @@ fs.mkdirSync(output, { recursive: true });
     )
       throw Error("lab changed main data");
     await page.screenshot({ path: output + "/lab.png", fullPage: false });
-    await page
-      .getByRole("button", { name: "Volver al tablero", exact: true })
-      .click();
+    await page.locator('[data-nav="overview"]').click();
     await page.locator("h1").waitFor();
-    if (await page.locator(".lab-banner").count())
-      throw Error("lab exit failed");
+    if ((await page.locator(".lab-banner").count()) !== 1)
+      throw Error("isolated lab banner missing");
     await page.getByLabel("Apariencia").selectOption("dark");
     await page.locator('[data-nav="analytics"]').click();
 

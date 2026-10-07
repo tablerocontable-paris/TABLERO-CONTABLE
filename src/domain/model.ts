@@ -219,6 +219,18 @@ export interface Annotation {
 export interface Onboarding {
   assignmentCompanyIds?: Record<string, string[]>;
   schedules?: Record<string, Schedule>;
+  /** New inductions save recurrence and target independently for each company. */
+  companySchedules?: Record<string, Record<string, Schedule>>;
+  companyTargets?: Record<string, Record<string, number>>;
+  habitualTaskProposals?: HabitualTaskProposalDraft[];
+  habitualProposalForm?: {
+    title: string;
+    process: string;
+    description: string;
+    kind: Kind;
+    unit: string;
+    steps: string[];
+  };
   customTasks?: {
     id: string;
     title: string;
@@ -241,6 +253,58 @@ export interface Onboarding {
   customTitle: string;
   customSteps: string;
   customKind: Kind;
+}
+export interface HabitualTaskProposalDraft {
+  id: string;
+  title: string;
+  process: string;
+  description: string;
+  kind: Kind;
+  unit: string;
+  steps: string[];
+  companyIds: string[];
+}
+export interface HabitualTaskProposal {
+  id: string;
+  ownerId: string;
+  companyId: string;
+  originalTitle: string;
+  title: string;
+  process: string;
+  description: string;
+  kind: Kind;
+  unit: string;
+  target: number;
+  schedule: Schedule;
+  steps: string[];
+  revision: number;
+  submittedAt: string;
+  updatedAt: string;
+  status: "pending" | "changes_requested" | "approved";
+  managerNote?: string;
+  templateId?: string;
+  templateVersion?: number;
+  submissions: {
+    revision: number;
+    title: string;
+    process: string;
+    description: string;
+    kind: Kind;
+    unit: string;
+    target: number;
+    schedule: Schedule;
+    steps: string[];
+    submittedAt: string;
+  }[];
+  history: {
+    id: string;
+    by: string;
+    action: "submitted" | "changes_requested" | "resubmitted" | "approved";
+    note: string;
+    at: string;
+    templateId?: string;
+    templateVersion?: number;
+  }[];
 }
 export interface ParameterReview {
   onboardingCompletedAt: string;
@@ -276,6 +340,7 @@ export interface State {
   improvementProposals?: import("./processImprovement").KaizenProposal[];
   fiveSReviews?: import("./processImprovement").FiveSReview[];
   fiscalObligations?: import("./fiscalObligations").FiscalObligation[];
+  habitualTaskProposals?: HabitualTaskProposal[];
 }
 export const id = () => crypto.randomUUID();
 export const dateART = (iso = new Date().toISOString()) =>

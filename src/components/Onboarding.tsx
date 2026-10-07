@@ -16,6 +16,8 @@ import {
   BriefcaseBusiness,
   CalendarDays,
   Sparkles,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import type { State, Profile, Onboarding as Draft } from "../domain/model";
 export default function Onboarding({
@@ -27,6 +29,7 @@ export default function Onboarding({
   finish,
   pause,
   remote=false,
+  laboratory=false,
 }: {
   state: State;
   month: string;
@@ -36,6 +39,7 @@ export default function Onboarding({
   finish: () => void;
   pause: () => void;
   remote?:boolean;
+  laboratory?:boolean;
 }) {
   const steps = [
     "Tu identidad",
@@ -64,6 +68,15 @@ export default function Onboarding({
       return [];
     }
   })();
+  const proposalForm = draft.habitualProposalForm || { title: "", process: "", description: "", kind: "resultado" as const, unit: "", steps: [] };
+  const proposalStepError = (() => {
+    if (!proposalForm.title.trim()) return "";
+    try { validateSteps(proposalForm.steps); return ""; }
+    catch (error) { return (error as Error).message; }
+  })();
+  const proposalStepValues = (() => {
+    try { return validateSteps(proposalForm.steps); } catch { return []; }
+  })();
   const chosen = state.templates.filter((t) =>
     draft.selectedTemplateIds.includes(t.id),
   );
@@ -83,22 +96,48 @@ export default function Onboarding({
       : []),
   ];
   const all = [...chosen, ...custom];
-  const scheduleFor = (tid: string) =>
+  const scheduleFor = (tid: string, cid?: string) =>
+    (laboratory && cid ? draft.companySchedules?.[tid]?.[cid] : undefined) ||
     draft.schedules?.[tid] || defaultSchedule(month + "-25");
+  const targetFor = (tid: string, cid: string, fallback: number) =>
+    laboratory ? (draft.companyTargets?.[tid]?.[cid] ?? fallback) : fallback;
   const companiesFor = (tid: string) =>
     (draft.assignmentCompanyIds?.[tid] || draft.selectedCompanyIds).filter(
       (cid) => draft.selectedCompanyIds.includes(cid),
     );
+  const proposalCompaniesFor = (proposal: NonNullable<Draft["habitualTaskProposals"]>[number]) =>
+    proposal.companyIds.filter((cid) => draft.selectedCompanyIds.includes(cid));
   let validSchedules = true;
   let count = 0;
   for (const t of all) {
-    try {
-      count +=
-        occurrences(scheduleFor(t.id), month).length *
-        companiesFor(t.id).length;
-      if (!companiesFor(t.id).length) validSchedules = false;
-    } catch {
-      validSchedules = false;
+    const companies = companiesFor(t.id);
+    if (!companies.length) validSchedules = false;
+    for (const cid of companies) {
+      try {
+        count += occurrences(scheduleFor(t.id, cid), month).length;
+        const target = targetFor(t.id, cid, "target" in t ? t.target : 0);
+        if (!Number.isFinite(target) || target < 0) validSchedules = false;
+      } catch {
+        validSchedules = false;
+      }
+    }
+  }
+  const proposals = laboratory ? draft.habitualTaskProposals || [] : [];
+  let proposalCount = 0;
+  for (const proposal of proposals) {
+    const companies = proposalCompaniesFor(proposal);
+    if (!companies.length) validSchedules = false;
+    for (const cid of companies) {
+      try {
+        occurrences(scheduleFor(proposal.id, cid), month);
+        if (proposal.kind === "operativa") {
+          const target = targetFor(proposal.id, cid, 0);
+          if (!Number.isFinite(target) || target < 0 || !proposal.unit.trim()) validSchedules = false;
+        }
+        proposalCount++;
+      } catch {
+        validSchedules = false;
+      }
     }
   }
   const valid =
@@ -107,7 +146,7 @@ export default function Onboarding({
       : draft.step === 1
         ? draft.selectedCompanyIds.length > 0
         : draft.step === 2
-          ? all.length > 0 && !customStepError
+          ? (all.length > 0 || proposals.length > 0) && !customStepError && !proposalStepError
           : draft.step === 3
             ? validSchedules
             : true;
@@ -283,10 +322,9 @@ export default function Onboarding({
               <details>
                 <summary>Agregar un trabajo esporádico · una sola vez</summary>
                 <p>
-                  Para una tarea habitual que falta, pedí a Juan Pablo que
-                  incorpore el proceso al catálogo antes de completar la
-                  inducción. Auditorías y correcciones puntuales se registran
-                  aquí.
+                  Este espacio es para auditorías y correcciones puntuales. Si
+                  falta un proceso habitual, cargalo en la propuesta de abajo;
+                  no va a generar tareas ni puntos hasta que lo revise Juan Pablo.
                 </p>
                 <label>
                   Título
@@ -353,13 +391,107 @@ export default function Onboarding({
                   </button>
                 </div>
               ))}
+              {laboratory && (
+                <details className="habitual-proposal-form">
+                  <summary>Proponer una tarea habitual que falta</summary>
+                  <p>
+                    Conservamos tu nombre original y lo mostramos junto a posibles coincidencias.
+                    Juan Pablo decide si usa un estándar existente o crea uno; no se combina nada automáticamente.
+                  </p>
+                  <label>
+                    Nombre de la tarea
+                    <input
+                      value={proposalForm.title}
+                      maxLength={120}
+                      onChange={(e) => patch({ habitualProposalForm: { ...proposalForm, title: e.target.value } })}
+                    />
+                  </label>
+                  <label>
+                    Banco o nombre del proceso · opcional
+                    <input
+                      value={proposalForm.process}
+                      maxLength={160}
+                      placeholder="Banco Nación, IVA, conciliación…"
+                      onChange={(e) => patch({ habitualProposalForm: { ...proposalForm, process: e.target.value } })}
+                    />
+                  </label>
+                  <label>
+                    ¿Qué trabajo realizás?
+                    <textarea
+                      value={proposalForm.description}
+                      maxLength={1000}
+                      rows={3}
+                      onChange={(e) => patch({ habitualProposalForm: { ...proposalForm, description: e.target.value } })}
+                    />
+                  </label>
+                  <div className="form-grid">
+                    <label>
+                      Tipo de tarea
+                      <select
+                        value={proposalForm.kind}
+                        onChange={(e) => patch({ habitualProposalForm: { ...proposalForm, kind: e.target.value as Draft["customKind"], unit: e.target.value === "operativa" ? proposalForm.unit : "" } })}
+                      >
+                        <option value="resultado">Entregable con controles</option>
+                        <option value="operativa">Actividad con cantidad y meta</option>
+                      </select>
+                    </label>
+                    {proposalForm.kind === "operativa" && (
+                      <label>
+                        Unidad
+                        <input
+                          value={proposalForm.unit}
+                          maxLength={40}
+                          placeholder="facturas, trámites…"
+                          onChange={(e) => patch({ habitualProposalForm: { ...proposalForm, unit: e.target.value } })}
+                        />
+                      </label>
+                    )}
+                  </div>
+                  <label>Controles o pasos sugeridos</label>
+                  <StepListEditor
+                    value={proposalForm.steps}
+                    error={proposalStepError}
+                    onChange={(steps) => patch({ habitualProposalForm: { ...proposalForm, steps } })}
+                  />
+                  <button
+                    type="button"
+                    className="primary"
+                    disabled={!proposalForm.title.trim() || !proposalForm.description.trim() || !proposalStepValues.length || !!proposalStepError || (proposalForm.kind === "operativa" && !proposalForm.unit.trim())}
+                    onClick={() => {
+                      patch({
+                        habitualTaskProposals: [...(draft.habitualTaskProposals || []), {
+                          id: id(),
+                          title: proposalForm.title.trim(),
+                          process: proposalForm.process.trim(),
+                          description: proposalForm.description.trim(),
+                          kind: proposalForm.kind,
+                          unit: proposalForm.kind === "operativa" ? proposalForm.unit.trim() : "",
+                          steps: proposalStepValues,
+                          companyIds: [...draft.selectedCompanyIds],
+                        }],
+                        habitualProposalForm: { title: "", process: "", description: "", kind: "resultado", unit: "", steps: [] },
+                      });
+                    }}
+                  >
+                    <Plus size={15} /> Agregar propuesta
+                  </button>
+                </details>
+              )}
+              {proposals.map((proposal) => (
+                <div className="custom-task-row habitual-proposal-row" key={proposal.id}>
+                  <span><b>{proposal.title}</b><small>Propuesta · todavía no crea tareas ni KPI</small></span>
+                  <button type="button" aria-label={`Quitar propuesta ${proposal.title}`} onClick={() => patch({ habitualTaskProposals: proposals.filter((row) => row.id !== proposal.id) })}>
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+              ))}
             </>
           ) : draft.step === 3 ? (
             <>
               <CalendarDays className="intro-icon" />
               <h2>Cada tarea tiene su propio ritmo.</h2>
               <p>
-                Indicá cuándo la hacés, si se repite y si tiene vencimiento. Una
+                Indicá frecuencia, vencimiento y meta para cada empresa. Una
                 tarea puntual no vuelve el mes siguiente.
               </p>
               {all.map((t) => (
@@ -370,18 +502,8 @@ export default function Onboarding({
                 >
                   <summary>
                     <b>{t.title}</b>
-                    <small>{describeSchedule(scheduleFor(t.id))}</small>
+                    <small>{companiesFor(t.id).length} empresas asignadas</small>
                   </summary>
-                  <ScheduleEditor
-                    onlyOnce={!chosen.some((x) => x.id === t.id)}
-                    value={scheduleFor(t.id)}
-                    onChange={(schedule) =>
-                      patch({
-                        schedules: { ...draft.schedules, [t.id]: schedule },
-                      })
-                    }
-                    month={month}
-                  />
                   <fieldset>
                     <legend>¿En qué empresas realizás este proceso?</legend>
                     <div className="company-options">
@@ -410,12 +532,92 @@ export default function Onboarding({
                         ))}
                     </div>
                   </fieldset>
+                  {companiesFor(t.id).map((cid) => {
+                    const companyName = state.companies.find((row) => row.id === cid)?.name || "Empresa";
+                    return (
+                      <section className="induction-company-schedule" key={cid}>
+                        <h3>{companyName}</h3>
+                        {laboratory && t.kind === "operativa" && (
+                          <label>
+                            Meta mensual · {t.unit}
+                            <input
+                              type="number"
+                              min={0}
+                              step="any"
+                              value={targetFor(t.id, cid, t.target)}
+                              onChange={(e) => patch({ companyTargets: { ...draft.companyTargets, [t.id]: { ...draft.companyTargets?.[t.id], [cid]: Number(e.target.value) } } })}
+                            />
+                          </label>
+                        )}
+                        <ScheduleEditor
+                          onlyOnce={!chosen.some((x) => x.id === t.id)}
+                          value={scheduleFor(t.id, cid)}
+                          onChange={(schedule) => laboratory
+                            ? patch({ companySchedules: { ...draft.companySchedules, [t.id]: { ...draft.companySchedules?.[t.id], [cid]: schedule } } })
+                            : patch({ schedules: { ...draft.schedules, [t.id]: schedule } })}
+                          month={month}
+                        />
+                      </section>
+                    );
+                  })}
                 </details>
               ))}
+              {proposals.length > 0 && (
+                <div className="habitual-proposal-schedules">
+                  <h3>Propuestas que revisará Juan Pablo</h3>
+                  <p>La frecuencia y la meta quedan separadas por empresa. No se crearán tareas hasta que la jefatura confirme el estándar.</p>
+                  {proposals.map((proposal) => (
+                    <section className="habitual-proposal-schedule" key={proposal.id}>
+                      <h4>{proposal.title}</h4>
+                      <fieldset>
+                        <legend>Empresas de esta propuesta</legend>
+                        <div className="company-options">
+                          {state.companies.filter((c) => draft.selectedCompanyIds.includes(c.id)).map((c) => (
+                            <label key={c.id}>
+                              <input
+                                type="checkbox"
+                                checked={proposalCompaniesFor(proposal).includes(c.id)}
+                                onChange={(e) => patch({ habitualTaskProposals: proposals.map((row) => row.id !== proposal.id ? row : {
+                                  ...row,
+                                  companyIds: e.target.checked ? [...new Set([...row.companyIds, c.id])] : row.companyIds.filter((companyId) => companyId !== c.id),
+                                }) })}
+                              />
+                              {c.name}
+                            </label>
+                          ))}
+                        </div>
+                      </fieldset>
+                      {proposalCompaniesFor(proposal).map((cid) => (
+                        <section className="induction-company-schedule" key={cid}>
+                          <h3>{state.companies.find((row) => row.id === cid)?.name}</h3>
+                          {proposal.kind === "operativa" && (
+                            <label>
+                              Meta mensual · {proposal.unit}
+                              <input
+                                type="number"
+                                min={0}
+                                step="any"
+                                value={targetFor(proposal.id, cid, 0)}
+                                onChange={(e) => patch({ companyTargets: { ...draft.companyTargets, [proposal.id]: { ...draft.companyTargets?.[proposal.id], [cid]: Number(e.target.value) } } })}
+                              />
+                            </label>
+                          )}
+                          <ScheduleEditor
+                            value={scheduleFor(proposal.id, cid)}
+                            onChange={(schedule) => patch({ companySchedules: { ...draft.companySchedules, [proposal.id]: { ...draft.companySchedules?.[proposal.id], [cid]: schedule } } })}
+                            month={month}
+                          />
+                        </section>
+                      ))}
+                    </section>
+                  ))}
+                </div>
+              )}
               <div className="note">
                 El vencimiento se calcula desde cada nueva ocurrencia. El día 31
-                se ajusta al último día del mes. Un plazo de 2 días genera un
-                vencimiento dos días después de cada realización.
+                se ajusta al último día del mes. Cada empresa conserva su propia
+                regla y meta; un plazo de 2 días vence dos días después de cada
+                realización.
               </div>
             </>
           ) : draft.step === 4 ? (
@@ -458,28 +660,37 @@ export default function Onboarding({
               <h2>Así quedará tu mes de trabajo.</h2>
               <p>
                 {draft.name}, vas a empezar con <strong>{count} tareas</strong>{" "}
-                en {draft.selectedCompanyIds.length} empresas. Podés volver
-                atrás y ajustar.
+                en {draft.selectedCompanyIds.length} empresas
+                {proposalCount ? <> y <strong>{proposalCount} propuestas pendientes</strong> de confirmación</> : null}.
+                {" "}Podés volver atrás y ajustar.
               </p>
               <div className="preview-list">
                 {draft.selectedCompanyIds.map((cid) => (
                   <section key={cid}>
                     <h3>{state.companies.find((c) => c.id === cid)?.name}</h3>
-                    {all.map((t) => (
+                    {all.filter((t) => companiesFor(t.id).includes(cid)).map((t) => (
                       <div key={t.id}>
                         <span>
                           {t.title}
-                          <small>{describeSchedule(scheduleFor(t.id))}</small>
+                          <small>{describeSchedule(scheduleFor(t.id, cid))}</small>
                         </span>
-                        <b>{"weight" in t ? t.weight : 1} pts</b>
+                        <b>{laboratory && t.kind === "operativa" ? `${targetFor(t.id, cid, t.target)} ${t.unit}/mes` : `${"weight" in t ? t.weight : 1} pts`}</b>
+                      </div>
+                    ))}
+                    {proposals.filter((proposal) => proposalCompaniesFor(proposal).includes(cid)).map((proposal) => (
+                      <div className="preview-proposal" key={proposal.id}>
+                        <span>{proposal.title}<small>Propuesta · {describeSchedule(scheduleFor(proposal.id, cid))}</small></span>
+                        <b>{proposal.kind === "operativa" ? `${targetFor(proposal.id, cid, 0)} ${proposal.unit}/mes` : "Pendiente"}</b>
                       </div>
                     ))}
                   </section>
                 ))}
               </div>
               <div className="note">
-                Cada tarea conserva la frecuencia que elegiste. Al confirmar, el
-                tablero tendrá estas tareas y empezará el recorrido guiado.
+                Las tareas del catálogo y los trabajos puntuales se preparan ahora.
+                Las propuestas habituales quedan separadas y no crean tareas ni
+                puntos hasta que Juan Pablo confirme el estándar. Cada empresa
+                conserva su frecuencia y meta.
               </div>
             </>
           )}

@@ -232,6 +232,19 @@ export function seed(): State {
   });
   return result;
 }
+const scheduleSchema = z.object({
+  frequency: z.enum(["única", "diaria", "semanal", "mensual"]),
+  startDate: z.string(), endDate: z.string(), interval: z.number().int(),
+  weekdays: z.array(z.number().int()), monthDay: z.number().int(),
+  hasDeadline: z.boolean(), dueOffsetDays: z.number().int(),
+});
+const proposalSubmissionSchema = z.object({
+  revision: z.number().int().positive(), title: z.string().min(1).max(120),
+  process: z.string().max(160), description: z.string().min(1).max(1000),
+  kind: z.enum(["resultado", "operativa"]), unit: z.string().max(40),
+  target: z.number().nonnegative(), schedule: scheduleSchema,
+  steps: z.array(z.string().min(1).max(300)).max(50), submittedAt: z.string(),
+});
 const schema = z.object({
   version: z.literal(3),
   boardOrder: z.enum(["original", "az", "za"]).optional(),
@@ -330,6 +343,24 @@ const schema = z.object({
       reason: z.string().min(5).max(500), dueOn: z.string(),
       sourceLabel: z.string().min(1).max(160), sourceRevision: z.string().min(1).max(80),
       sourceCheckedAt: z.string().nullable(), requiredTaskIds: z.array(z.string()),
+    })),
+  })).optional(),
+  habitualTaskProposals: z.array(z.object({
+    id: z.string().min(1), ownerId: z.string().min(1), companyId: z.string().min(1),
+    originalTitle: z.string().min(1).max(120), title: z.string().min(1).max(120),
+    process: z.string().max(160), description: z.string().min(1).max(1000),
+    kind: z.enum(["resultado", "operativa"]), unit: z.string().max(40),
+    target: z.number().nonnegative(), schedule: scheduleSchema,
+    steps: z.array(z.string().min(1).max(300)).max(50),
+    revision: z.number().int().positive(), submittedAt: z.string(), updatedAt: z.string(),
+    status: z.enum(["pending", "changes_requested", "approved"]), managerNote: z.string().max(500).optional(),
+    templateId: z.string().optional(), templateVersion: z.number().int().positive().optional(),
+    submissions: z.array(proposalSubmissionSchema).min(1),
+    history: z.array(z.object({
+      id: z.string(), by: z.string(),
+      action: z.enum(["submitted", "changes_requested", "resubmitted", "approved"]),
+      note: z.string().max(500), at: z.string(), templateId: z.string().optional(),
+      templateVersion: z.number().int().positive().optional(),
     })),
   })).optional(),
   closures: z.array(z.unknown()),
