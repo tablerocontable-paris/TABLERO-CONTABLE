@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-07",
+  "source_commit": "05abc76c7b149175de9f1dfff37698b795261efa",
+  "environment": {
+    "browser": "Microsoft Edge 154 headless",
+    "mode": "local Vite preview",
+    "viewport": "1440x900",
+    "storage": "paris-state-lab fictitious profile data"
+  },
+  "route": [
+    "Open task board using Tab and Enter",
+    "Select Valentino Magni using the profile control",
+    "Focus a movable result task in Pendiente",
+    "Press Alt+ArrowRight"
+  ],
+  "interaction": {
+    "task_id": "8e083aa8-486a-4344-bd47-f0250743c1ba",
+    "before": {
+      "persisted_status": "Pendiente",
+      "column_count": 2
+    },
+    "after": {
+      "persisted_status": "En curso",
+      "pending_column_count": 1,
+      "in_progress_column_count": 1
+    },
+    "result": "PASS"
+  },
+  "notes": [
+    "The focused DOM node is replaced during the move, so querying that stale node after the key press can produce an empty result. Persisted laboratory state and updated column counts confirm the transition.",
+    "This validates the keyboard route for moving a result task between columns. It does not validate every page/control, assistive technology, concurrent devices, or operational server behavior.",
+    "No source-code changes, operational API requests, or real accounts were involved."
+  ]
+}

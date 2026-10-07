@@ -9,6 +9,13 @@ revisión documental se publicaron luego en el mismo Site como v88, desde
 siguió owner-only. No hubo errores JS, llamadas a la API operativa ni overflow
 horizontal. Evidencia: `docs/architecture/review-evidence/e2e-regression-lab-20261007-v87.json`.
 
+La verificación adicional de teclado en Edge confirmó el recorrido Tab/Enter
+hasta el tablero y el atajo `Alt+ArrowRight`: una tarea ficticia pasó de
+Pendiente a En curso en el estado persistido y cambió el contador de ambas
+columnas. Evidencia: `docs/architecture/review-evidence/keyboard-task-move-lab-20261007.json`.
+Esto cierra únicamente ese flujo acotado; falta auditoría integral de controles
+y tecnologías asistivas.
+
 La inspección visual confirmó que Análisis mensual todavía ocupa demasiado alto
 para un recorrido ágil. Antes de reordenar sus gráficos/tablas, cerrar diseño y
 criterios con GPT-6.1 Sol. Quedan también sin contrato final las cantidades y
