@@ -9,8 +9,8 @@
   },
   "route": [
     "Open task board using Tab and Enter",
-    "Select Valentino Magni using the profile control",
-    "Focus a movable result task in Pendiente",
+    "Select Valentino Magni using browser automation",
+    "Focus a movable result task in Pendiente using browser automation",
     "Press Alt+ArrowRight"
   ],
   "interaction": {
@@ -28,7 +28,7 @@
   },
   "notes": [
     "The focused DOM node is replaced during the move, so querying that stale node after the key press can produce an empty result. Persisted laboratory state and updated column counts confirm the transition.",
-    "This validates the keyboard route for moving a result task between columns. It does not validate every page/control, assistive technology, concurrent devices, or operational server behavior.",
+    "This validates the keyboard shortcut action on a focused result task. The card focus and profile selection were set by browser automation, so this does not validate end-to-end keyboard focus traversal, every page/control, assistive technology, concurrent devices, or operational server behavior.",
     "No source-code changes, operational API requests, or real accounts were involved."
   ]
 }

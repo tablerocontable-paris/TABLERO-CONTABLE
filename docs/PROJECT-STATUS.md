@@ -20,9 +20,10 @@ requiere una decisión de producto antes de tocarla. Evidencia completa:
 
 Las pruebas confirman consistencia de la base del laboratorio para los flujos
 cubiertos; no prueban uso operativo real, concurrencia entre dispositivos ni
-aceptación final. Se verificó con teclado la navegación hasta una tarjeta y su
-movimiento entre columnas; no equivale a una auditoría de todas las páginas ni
-de tecnologías asistivas. Siguen pendientes un umbral formal de rendimiento
+aceptación final. Se verificó el atajo de teclado que mueve una tarjeta
+enfocada entre columnas; la automatización enfocó la tarjeta, por lo que sigue
+pendiente recorrer con teclado el foco desde la navegación hasta la tarjeta y
+auditar tecnologías asistivas. También faltan un umbral formal de rendimiento
 para 20+ perfiles y concurrencia entre pestañas o dispositivos. Auth/MFA/RLS
 reales, invitaciones, recuperación productiva e infraestructura propia siguen
 pospuestos hasta terminar y aceptar el producto. Evidencia del movimiento:

@@ -9,12 +9,11 @@ revisión documental se publicaron luego en el mismo Site como v88, desde
 siguió owner-only. No hubo errores JS, llamadas a la API operativa ni overflow
 horizontal. Evidencia: `docs/architecture/review-evidence/e2e-regression-lab-20261007-v87.json`.
 
-La verificación adicional de teclado en Edge confirmó el recorrido Tab/Enter
-hasta el tablero y el atajo `Alt+ArrowRight`: una tarea ficticia pasó de
-Pendiente a En curso en el estado persistido y cambió el contador de ambas
-columnas. Evidencia: `docs/architecture/review-evidence/keyboard-task-move-lab-20261007.json`.
-Esto cierra únicamente ese flujo acotado; falta auditoría integral de controles
-y tecnologías asistivas.
+La verificación adicional en Edge confirmó que `Alt+ArrowRight` mueve una
+tarjeta ficticia enfocada: pasó de Pendiente a En curso en el estado persistido
+y cambió el contador de ambas columnas. La automatización enfocó la tarjeta y
+seleccionó el perfil, por lo que queda pendiente recorrer íntegramente el foco
+con teclado. Evidencia: `docs/architecture/review-evidence/keyboard-task-move-lab-20261007.json`.
 
 La inspección visual confirmó que Análisis mensual todavía ocupa demasiado alto
 para un recorrido ágil. Antes de reordenar sus gráficos/tablas, cerrar diseño y
