@@ -93,3 +93,32 @@ describe("CSV de reporte cerrado", () => {
     expect(csv).toContain("Valentino Magni");
   });
 });
+
+describe("impresión del reporte cerrado", () => {
+  it("abre la impresión del reporte seleccionado sin reemplazar la descarga CSV", () => {
+    const state = seed();
+    const base = metrics([], []);
+    const closure: Closure = {
+      id: "print-closure", ownerId: "e0", month: "2026-10", at: "2026-10-31T23:59:59Z", by: "boss",
+      metrics: base, tasks: [], activity: [], note: "Cierre revisado",
+      report: {
+        schemaVersion: 1, generatedAt: "2026-10-31T23:59:59Z", employee: "Valentino Magni",
+        team: "Tesorería", sector: "Contabilidad", recipientIds: ["boss"], recipientNames: ["Juan Pablo"],
+        delivery: "disponible en demostración", recordedSeconds: 0, reopenings: 0,
+        groups: [{ key: "print", company: "San Luis Capital", process: "Conciliación", templateId: null,
+          kind: "resultado", unit: "", metrics: base, recordedSeconds: 0, reopenings: 0 }],
+      },
+    };
+    state.closures = [closure];
+    const print = vi.fn();
+    vi.stubGlobal("print", print);
+    render(<PeriodReports state={state} month="2026-10" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Ver reporte" }));
+    expect(document.querySelector("dialog.period-report-dialog[open]")).not.toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Imprimir reporte" }));
+
+    expect(print).toHaveBeenCalledOnce();
+    expect(screen.getByRole("button", { name: "Descargar reporte CSV" })).toBeTruthy();
+  });
+});

@@ -2226,7 +2226,76 @@ label, .filters select, .sidebar select, .sidebar nav button, .card-bottom,
 .access-note { padding: 12px; background: var(--surface-soft); border-radius: 8px; color: var(--control-muted); }
 [inert] { cursor: wait; }
 @media (max-width: 720px) { .sync-status { position: sticky; top: 0; bottom: auto; right: auto; margin: 8px; max-width: none; }.content { overflow-wrap: anywhere; }.card-bottom { flex-wrap: wrap; } }
-@media print { .sync-status, .sidebar, .header-right, .notice-banner, .card-collapse { display: none!important; } }
+@media print {
+  @page { size: A4 landscape; margin: 12mm; }
+  html, body, #root {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+  .sidebar { display: none !important; }
+  .main { margin-left: 0 !important; }
+  .content { max-width: none !important; margin: 0 !important; padding: 0 !important; }
+  body * { visibility: hidden !important; }
+  dialog.period-report-dialog[open],
+  dialog.period-report-dialog[open] * { visibility: visible !important; }
+  dialog.period-report-dialog[open] {
+    display: block !important;
+    position: static !important;
+    inset: auto !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    animation: none !important;
+    background: #fff !important;
+    color: #111 !important;
+  }
+  dialog.period-report-dialog::backdrop {
+    background: transparent !important;
+    backdrop-filter: none !important;
+  }
+  dialog.period-report-dialog .modal-head {
+    border-bottom: 1px solid #777 !important;
+    padding-bottom: 4mm;
+  }
+  dialog.period-report-dialog .modal-head button,
+  dialog.period-report-dialog .period-report-actions { display: none !important; }
+  dialog.period-report-dialog :is(h2, h3, p, small, b, .note) { color: #111 !important; }
+  dialog.period-report-dialog .note {
+    background: #fff !important;
+    border: 1px solid #999;
+    padding: 3mm;
+    margin: 4mm 0;
+  }
+  dialog.period-report-dialog .table-wrap { overflow: visible !important; }
+  dialog.period-report-dialog table {
+    width: 100% !important;
+    white-space: normal !important;
+    font-size: 8pt !important;
+    page-break-inside: auto;
+  }
+  dialog.period-report-dialog thead { display: table-header-group; }
+  dialog.period-report-dialog tr { break-inside: avoid; page-break-inside: avoid; }
+  dialog.period-report-dialog :is(th, td) {
+    color: #111 !important;
+    background: #fff !important;
+    border: 1px solid #777 !important;
+    padding: 4px 6px !important;
+    font-size: 8pt !important;
+  }
+  dialog.period-report-dialog :is(h2, h3, p, .note) { break-inside: avoid; }
+}
 /* Correction 06/10: one document scroll, no independent sidebar scrollbars. */
 .sidebar { padding: 18px 15px 14px; overflow: visible; height: 100dvh; }
 .brand { margin: 0 7px 14px; gap: 12px; flex: 0 0 auto; }

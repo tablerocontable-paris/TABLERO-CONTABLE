@@ -182,6 +182,34 @@ fs.mkdirSync(output, { recursive: true });
       new Set(closure.tasks.map((t) => t.companyId)).size !== 2
     )
       throw Error("closure must include all companies despite filter");
+    await page.getByRole("button", { name: "Ver reporte" }).first().click();
+    await page.evaluate(() => {
+      window.__reportPrintCalled = false;
+      window.print = () => { window.__reportPrintCalled = true; };
+    });
+    await page.getByRole("button", { name: "Imprimir reporte" }).click();
+    if (!(await page.evaluate(() => window.__reportPrintCalled)))
+      throw Error("print action did not invoke the browser print dialog");
+    await page.emulateMedia({ media: "print" });
+    const printLayout = await page.evaluate(() => ({
+      reportVisible: getComputedStyle(document.querySelector("dialog.period-report-dialog")).visibility,
+      sidebarVisible: getComputedStyle(document.querySelector(".sidebar")).visibility,
+      printActionsDisplay: getComputedStyle(document.querySelector(".period-report-actions")).display,
+      tableOverflow: getComputedStyle(document.querySelector("dialog.period-report-dialog .table-wrap")).overflow,
+      reportWidth: document.querySelector("dialog.period-report-dialog").getBoundingClientRect().width,
+      viewportWidth: innerWidth,
+    }));
+    if (
+      printLayout.reportVisible !== "visible" ||
+      printLayout.sidebarVisible !== "hidden" ||
+      printLayout.printActionsDisplay !== "none" ||
+      printLayout.tableOverflow !== "visible" ||
+      printLayout.reportWidth < printLayout.viewportWidth * 0.85
+    )
+      throw Error(`report print layout is incomplete: ${JSON.stringify(printLayout)}`);
+    await page.screenshot({ path: output + "/period-report-print.png", fullPage: true });
+    await page.emulateMedia({ media: "screen" });
+    await page.getByRole("dialog").getByRole("button", { name: "Cerrar", exact: true }).click();
     const qaId = await page.evaluate(() =>
       JSON.parse(localStorage.getItem("paris-state-lab")).profiles.find(
         (profile) => profile.name === "Empleado QA",

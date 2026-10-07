@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Printer } from "lucide-react";
 import { canSee, csvCell, type State, type Closure } from "../domain/model";
 import { duration } from "../domain/workforce";
 import { Panel, Dialog, Empty } from "./ui";
@@ -138,6 +139,7 @@ export default function PeriodReports({
           title={`Reporte de ${r.employee} · ${selected.month}`}
           onClose={() => setSelected(null)}
           wide
+          className="period-report-dialog"
         >
           <p>
             {r.team} · {r.sector} · generado{" "}
@@ -207,9 +209,14 @@ export default function PeriodReports({
           <p>
             <b>Observaciones de cierre:</b> {selected.note}
           </p>
-          <button onClick={() => exportReport(selected)}>
-            Descargar reporte CSV
-          </button>
+          <div className="period-report-actions">
+            <button type="button" onClick={() => window.print()}>
+              <Printer size={16} /> Imprimir reporte
+            </button>
+            <button type="button" onClick={() => exportReport(selected)}>
+              Descargar reporte CSV
+            </button>
+          </div>
         </Dialog>
       )}
     </Panel>
