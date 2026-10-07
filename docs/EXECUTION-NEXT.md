@@ -1,13 +1,13 @@
 # Próxima ejecución del proyecto
 
-## Revisión actual — Site v87 · 07/10/2026
+## Revisión funcional vigente — 07/10/2026
 
-El mismo Site está en v87, privado y owner-only; la fuente local está limpia en
-`main` y en `c5222cdc9f0ab364ef1dae29452a805a4a644393`. Cuatro recorridos Edge
-headless aprobaron navegación/operaciones, responsive y arrastre, respaldo y
-restauración del laboratorio y colaboración conjunta. Cero errores JS, cero
-llamadas a la API operativa y cero overflow horizontal. Evidencia:
-`docs/architecture/review-evidence/e2e-regression-lab-20261007-v87.json`.
+Los cuatro recorridos Edge headless se ejecutaron sobre la UI funcional del
+Site v87, desde `c5222cdc9f0ab364ef1dae29452a805a4a644393`. Su evidencia y la
+revisión documental se publicaron luego en el mismo Site como v88, desde
+`524b92d234e3cbe48fd34e3e338f968f55a38086`, sin cambios funcionales. El acceso
+siguió owner-only. No hubo errores JS, llamadas a la API operativa ni overflow
+horizontal. Evidencia: `docs/architecture/review-evidence/e2e-regression-lab-20261007-v87.json`.
 
 La inspección visual confirmó que Análisis mensual todavía ocupa demasiado alto
 para un recorrido ágil. Antes de reordenar sus gráficos/tablas, cerrar diseño y

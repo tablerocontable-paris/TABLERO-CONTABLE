@@ -1,12 +1,14 @@
 # Estado del proyecto Grupo París
 
-## Revisión de continuidad — Site v87 · 07/10/2026
+## Revisión funcional y evidencia publicada — 07/10/2026
 
-Se verificó el mismo repositorio, limpio en `main`, commit
-`c5222cdc9f0ab364ef1dae29452a805a4a644393`, y el mismo Site privado,
-publicado en v87. El acceso sigue limitado a la cuenta propietaria: un usuario,
-cero grupos y cero visitantes externos. No se conectaron servicios ni se
-crearon cuentas.
+Los cuatro recorridos de navegador corresponden a la interfaz funcional
+publicada en Site v87 desde el commit `c5222cdc9f0ab364ef1dae29452a805a4a644393`.
+La evidencia y esta revisión se registraron luego en el commit documental
+`524b92d234e3cbe48fd34e3e338f968f55a38086`, publicado como Site v88; ese corte
+no cambió comportamiento de la aplicación. Se mantuvo el acceso privado de la
+cuenta propietaria: un usuario, cero grupos y cero visitantes externos. No se
+conectaron servicios ni se crearon cuentas.
 
 Cuatro recorridos Edge headless pasan en el laboratorio ficticio: navegación y
 operaciones, correcciones responsive y arrastre, copia/restauración aislada, y
