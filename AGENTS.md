@@ -101,4 +101,5 @@ La tabla de cierre incorpora tareas conjuntas con KPI por cuota; el CSV separa
 ponderación global de puntos y tiempo personal. Un actor inactivo no puede cerrar.
 Ver `docs/PROJECT-STATUS.md` para la evidencia del corte y `docs/EXECUTION-NEXT.md`
 para el próximo bloque. Mantener el Site privado y publicar sólo sobre la misma
-identidad ya configurada, sin cambiar la audiencia.
+identidad ya configurada, sin cambiar la audiencia. La versión 54 quedó publicada
+correctamente desde el commit `608fb478bb5b8010c22431451b92fd664f424b65`.

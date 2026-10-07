@@ -158,7 +158,7 @@ inactivo. Sólo afecta al laboratorio local y conserva los snapshots históricos
 Verificación local: **365/365 pruebas en 35 archivos**, TypeScript, build Vite,
 bundle Worker y Chromium de correcciones aprobados. El recorrido Chromium cubrió
 escritorio/móvil, arrastre, notificaciones, persistencia y simulación; cero
-errores JavaScript y cero llamadas a `/api` operativa. Sigue publicado el Site
-privado v53 hasta que se guarde/despliegue este commit. La audiencia continúa
-personalizada y sólo permite al propietario. El avance global sigue cerca de
-**45%**; no aumenta por pasar pruebas.
+errores JavaScript y cero llamadas a `/api` operativa. El Site privado v54 publicó
+el commit `608fb478bb5b8010c22431451b92fd664f424b65`; deployment confirmado como
+exitoso en el mismo URL. La audiencia continúa personalizada y sólo permite al
+propietario. El avance global sigue cerca de **45%**; no aumenta por pasar pruebas.

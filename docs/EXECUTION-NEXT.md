@@ -57,8 +57,9 @@ revisar esa decisión antes de volver a Luna.
 
 Evidencia del bloque más reciente: 365 pruebas en 35 archivos, TypeScript/Vite,
 Worker build y Chromium desktop/móvil aprobados; cero errores JS y solicitudes
-a `/api` operativa. El cambio todavía debe pasar pre-commit, commit y publicación
-en el mismo Site privado. Ver `PROJECT-STATUS.md` para límites y versión actual.
+a `/api` operativa. El Site privado v54 publicó el commit
+`608fb478bb5b8010c22431451b92fd664f424b65`; deployment confirmado. Ver
+`PROJECT-STATUS.md` para límites y versión actual.
 
 ## Entrega
 
