@@ -30,6 +30,7 @@ vi.mock("recharts", () =>
       "ResponsiveContainer",
       "BarChart",
       "Bar",
+      "LabelList",
       "XAxis",
       "YAxis",
       "CartesianGrid",
@@ -38,6 +39,9 @@ vi.mock("recharts", () =>
       "LineChart",
       "Line",
       "ReferenceLine",
+      "PieChart",
+      "Pie",
+      "Cell",
     ].map((k) => [k, () => null]),
   ),
 );
@@ -158,7 +162,9 @@ describe("UI conectada: recorrido diario sin simulación", () => {
     const company = s.companies.find(
       (c) => c.id === selected().companyId,
     )!.name;
-    const row = (await screen.findByRole("cell", { name: company })).closest("tr")!;
+    const row = (await screen.findByRole("cell", { name: company })).closest(
+      "tr",
+    )!;
     fireEvent.click(within(row).getByRole("button", { name: "Abrir tarjeta" }));
     for (const step of selected().checklist) {
       fireEvent.click(screen.getByLabelText(step.text));

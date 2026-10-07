@@ -12,6 +12,7 @@ import LaboratoryWorkspace from "../src/components/LaboratoryWorkspace";
 import App from "../src/App";
 import ParameterizationInbox from "../src/components/ParameterizationInbox";
 import ThemeControl from "../src/components/ThemeControl";
+import { currentMonth } from "../src/domain/model";
 import { seed, KEY, persist } from "../src/data/repository";
 vi.mock("recharts", () =>
   Object.fromEntries(
@@ -19,6 +20,7 @@ vi.mock("recharts", () =>
       "ResponsiveContainer",
       "BarChart",
       "Bar",
+      "LabelList",
       "XAxis",
       "YAxis",
       "CartesianGrid",
@@ -27,6 +29,9 @@ vi.mock("recharts", () =>
       "LineChart",
       "Line",
       "ReferenceLine",
+      "PieChart",
+      "Pie",
+      "Cell",
     ].map((k) => [k, () => null]),
   ),
 );
@@ -51,6 +56,64 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 describe("correcciones del laboratorio y las tarjetas", () => {
+  it("reduce el ruido de Análisis mensual sin mezclar puntos con cantidades", async () => {
+    const state = seed();
+    state.activeId = state.profiles.find(
+      (profile) => profile.role === "jefe",
+    )!.id;
+    const [year, month] = currentMonth().split("-").map(Number);
+    const previousMonth = new Date(Date.UTC(year, month - 2, 1))
+      .toISOString()
+      .slice(0, 7);
+    state.tasks = [
+      ...state.tasks,
+      {
+        ...state.tasks[0]!,
+        id: "analytics-previous-period",
+        month: previousMonth,
+      },
+    ];
+    render(<App initialState={state} laboratoryMode />);
+    fireEvent.click(document.querySelector('[data-nav="analytics"]')!);
+
+    expect(
+      await screen.findByRole("heading", { name: "Evolución mensual" }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { name: "Distribución de tareas" }),
+    ).toBeTruthy();
+    const formula = screen.getByRole("button", {
+      name: "Ver cómo se calcula el cumplimiento ponderado",
+    });
+    expect(formula.getAttribute("aria-expanded")).toBe("false");
+    expect(screen.queryByText(/Cumplimiento = puntos logrados/)).toBeNull();
+    fireEvent.click(formula);
+    expect(
+      screen.getByText(/el cálculo implementado hoy en este laboratorio/),
+    ).toBeTruthy();
+
+    const onTime = screen.getByRole("button", { name: "Entregas en fecha" });
+    fireEvent.click(onTime);
+    expect(onTime.getAttribute("aria-pressed")).toBe("false");
+    const distribution = screen.getByRole("group", {
+      name: "Distribuir tareas por",
+    });
+    fireEvent.click(
+      within(distribution).getByRole("button", { name: "Empresa" }),
+    );
+    expect(
+      within(distribution)
+        .getByRole("button", { name: "Empresa" })
+        .getAttribute("aria-pressed"),
+    ).toBe("true");
+
+    const detailToggle = screen.getByRole("button", {
+      name: "Desplegar Detalle que explica el indicador",
+    });
+    expect(detailToggle.getAttribute("aria-expanded")).toBe("false");
+    fireEvent.click(detailToggle);
+    expect(detailToggle.getAttribute("aria-expanded")).toBe("true");
+  });
   it("opens fictitious users and work without touching operational storage or API", () => {
     localStorage.setItem(KEY, "operational-data-do-not-touch");
     const fetch = vi.fn();
@@ -90,7 +153,9 @@ describe("correcciones del laboratorio y las tarjetas", () => {
     const fetch = vi.fn();
     vi.stubGlobal("fetch", fetch);
     render(<LaboratoryWorkspace />);
-    expect(await screen.findByRole("heading", { name: "Hola, Juan." })).toBeTruthy();
+    expect(
+      await screen.findByRole("heading", { name: "Hola, Juan." }),
+    ).toBeTruthy();
     expect(location.search).not.toContain("invitacion");
     expect(JSON.parse(localStorage.getItem("paris-state-lab")!).activeId).toBe(
       "boss",
@@ -128,20 +193,26 @@ describe("correcciones del laboratorio y las tarjetas", () => {
   });
   it("shows Resumen to employees and reserves Catálogo and Cierre for the boss", () => {
     const employeeState = seed();
-    employeeState.activeId = employeeState.profiles.find((p) => p.role === "empleado")!.id;
+    employeeState.activeId = employeeState.profiles.find(
+      (p) => p.role === "empleado",
+    )!.id;
     render(<App initialState={employeeState} laboratoryMode />);
     expect(document.querySelector('[data-nav="overview"]')).toBeTruthy();
     expect(document.querySelector('[data-nav="catalog"]')).toBeNull();
     expect(document.querySelector('[data-nav="closing"]')).toBeNull();
     fireEvent.click(document.querySelector('[data-nav="overview"]')!);
-    expect(screen.getByRole("heading", { name: "Tu trabajo, en perspectiva." })).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { name: "Tu trabajo, en perspectiva." }),
+    ).toBeTruthy();
     expect(screen.getByText("Tu avance ponderado")).toBeTruthy();
     expect(document.querySelector("header .avatar")).toBeNull();
     expect(document.querySelector(".sidebar .user .avatar")).toBeTruthy();
 
     cleanup();
     const supervisorState = seed();
-    supervisorState.activeId = supervisorState.profiles.find((p) => p.role === "encargado")!.id;
+    supervisorState.activeId = supervisorState.profiles.find(
+      (p) => p.role === "encargado",
+    )!.id;
     render(<App initialState={supervisorState} laboratoryMode />);
     expect(document.querySelector('[data-nav="overview"]')).toBeTruthy();
     expect(document.querySelector('[data-nav="catalog"]')).toBeNull();
@@ -159,20 +230,30 @@ describe("correcciones del laboratorio y las tarjetas", () => {
     state.activeId = state.profiles.find((p) => p.role === "jefe")!.id;
     render(<App initialState={state} laboratoryMode />);
     fireEvent.click(document.querySelector('[data-nav="catalog"]')!);
-    await waitFor(() => expect(document.querySelector("details.catalog-item")).toBeTruthy());
-    const entry = document.querySelector<HTMLDetailsElement>("details.catalog-item")!;
+    await waitFor(() =>
+      expect(document.querySelector("details.catalog-item")).toBeTruthy(),
+    );
+    const entry = document.querySelector<HTMLDetailsElement>(
+      "details.catalog-item",
+    )!;
     expect(entry.open).toBe(false);
-    expect(entry.querySelector(".catalog-summary-title")?.textContent).toBeTruthy();
+    expect(
+      entry.querySelector(".catalog-summary-title")?.textContent,
+    ).toBeTruthy();
     fireEvent.click(entry.querySelector("summary")!);
     expect(entry.open).toBe(true);
   });
   it("cycles the single theme button through automatic, light, and dark", () => {
     render(<ThemeControl />);
-    const button = screen.getByRole("button", { name: "Apariencia automática. Cambiar a clara" });
+    const button = screen.getByRole("button", {
+      name: "Apariencia automática. Cambiar a clara",
+    });
     expect(button.getAttribute("data-theme")).toBe("system");
     fireEvent.click(button);
     expect(button.getAttribute("data-theme")).toBe("light");
-    expect(button.getAttribute("aria-label")).toBe("Apariencia clara. Cambiar a oscura");
+    expect(button.getAttribute("aria-label")).toBe(
+      "Apariencia clara. Cambiar a oscura",
+    );
     fireEvent.click(button);
     expect(button.getAttribute("data-theme")).toBe("dark");
     fireEvent.click(button);

@@ -62,6 +62,8 @@ export default function WorkCycle({
       <Panel
         title="Ciclo de trabajo"
         sub="Carga planificada y ejecución registrada, ubicadas en el día que corresponde. Los filtros superiores mantienen el mismo alcance."
+        collapsible
+        defaultOpen={false}
         action={
           <div
             className="segmented work-cycle-mode"
@@ -170,6 +172,8 @@ export default function WorkCycle({
       <Panel
         title="Comparación por ámbito"
         sub="La vista diaria o semanal sigue el filtro superior; este detalle compara persona, equipo, sector o empresa."
+        collapsible
+        defaultOpen={false}
         action={
           <label className="work-cycle-dimension">
             <span>Desglosar por</span>

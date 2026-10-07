@@ -22,6 +22,7 @@ vi.mock("recharts", () =>
       "ResponsiveContainer",
       "BarChart",
       "Bar",
+      "LabelList",
       "XAxis",
       "YAxis",
       "CartesianGrid",
@@ -30,6 +31,9 @@ vi.mock("recharts", () =>
       "LineChart",
       "Line",
       "ReferenceLine",
+      "PieChart",
+      "Pie",
+      "Cell",
     ].map((key) => [key, () => null]),
   ),
 );
