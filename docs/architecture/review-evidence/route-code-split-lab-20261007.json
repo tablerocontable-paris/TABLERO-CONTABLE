@@ -38,6 +38,23 @@
     },
     "preCommit": "passed: scripts/validate-change.mjs; 96/96 tests in 14 files, TypeScript and cached diff check"
   },
+  "siteDeployment": {
+    "project": "Grupo París · Tablero contable",
+    "version": 66,
+    "commit": "806ff00696434f573ee0542e4710d8b383ab1406",
+    "deployment": "appgdep_6ac5f09cccb48191910a364ef6e8f998",
+    "url": "https://grupo-paris-contabilidad.valentino-magni.chatgpt.site",
+    "audience": {
+      "mode": "custom owner-only",
+      "allowedAccounts": 1,
+      "allowedGroups": 0,
+      "externalVisitors": 0
+    }
+  },
+  "buildNotes": [
+    "The main JavaScript entry is now below the Vite 500 kB warning threshold.",
+    "Rollup reports two upstream Zod purity-comment annotations that it removes; the build succeeds."
+  ],
   "limitations": [
     "The largest chart dependency remains a separate 405.70 kB chunk used by the overview.",
     "Loading is local to the browser; no API, D1, Supabase, email, or cross-device synchronization was added.",

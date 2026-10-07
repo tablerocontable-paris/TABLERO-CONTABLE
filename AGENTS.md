@@ -76,6 +76,8 @@ que la sección aparezca. El bundle principal bajó de ~593 kB a 489,53 kB. Ver
 Validación completa: 412/412, TypeScript, Vite, Worker y Chromium desktop/móvil.
 No cambia el alcance privado ni habilita API o cuentas. Mantener el aviso del
 chunk de gráficos de 405,70 kB como oportunidad separada.
+El corte quedó publicado como Site v66 desde `806ff00696434f573ee0542e4710d8b383ab1406`;
+deployment `appgdep_6ac5f09cccb48191910a364ef6e8f998` exitoso, owner-only.
 
 ## Definición final del usuario — 06/10/2026
 100% incluye aplicación aceptada sin correcciones conocidas, GitHub, dos Supabase dev/producción, hosting propio y automatización validada. Seguir docs/ops/FINAL-ACCEPTANCE.md. No crear cuentas ni invitar usuarios durante laboratorio. No confundir CI preparado con CI ejecutado.

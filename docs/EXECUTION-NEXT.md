@@ -317,3 +317,8 @@ esfuerzo medio, Standard** para implementar sólo el contrato aprobado. En Plus,
 el uso de Work y Codex es compartido y los rangos publicados por cinco horas son
 estimaciones; consultar el panel antes de una revisión extensa. No crear cuentas
 ni activar integraciones reales hasta el 100% aceptado.
+
+Este corte quedó publicado como **Site v66** desde
+`806ff00696434f573ee0542e4710d8b383ab1406`, deployment
+`appgdep_6ac5f09cccb48191910a364ef6e8f998`. La audiencia personalizada sigue
+owner-only: una cuenta autorizada, cero grupos y cero visitantes externos.

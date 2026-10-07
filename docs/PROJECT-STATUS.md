@@ -490,7 +490,9 @@ La suite ejercita la carga diferida en anotaciones, inducción, ausencias,
 invitaciones, reportes y equipo. El cambio no modifica reglas contables,
 identidad, persistencia ni almacenamiento y se mantiene dentro del laboratorio.
 
-El último Site confirmado antes de este cambio sigue siendo v65. El precommit
-pasó; falta registrar el commit y desplegar el candidato en el mismo Site
-privado antes de actualizar ese dato. No se conectaron cuentas, Supabase, D1,
-GitHub ni correo; el avance global sigue orientativamente en **~45%**.
+El corte está comprometido como `806ff00696434f573ee0542e4710d8b383ab1406` y
+publicado en el mismo Site privado como **v66**; deployment
+`appgdep_6ac5f09cccb48191910a364ef6e8f998` terminó correctamente. Relectura:
+propietario, audiencia personalizada, una cuenta permitida, cero grupos y cero
+visitantes externos. No se conectaron cuentas, Supabase, D1, GitHub ni correo.
+El avance global sigue orientativamente en **~45%**.
