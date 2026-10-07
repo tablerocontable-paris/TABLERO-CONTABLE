@@ -190,5 +190,14 @@
     "realAccountsUsed": false,
     "productionDataUsed": false,
     "apiOrBackendModified": false
-  }
+  },
+  "additionalUnitTests": [
+    {
+      "command": "node node_modules/vitest/vitest.mjs run tests/task-board.test.tsx",
+      "exitCode": 0,
+      "testFiles": 1,
+      "testsPassed": 4,
+      "result": "Keyboard route for moving task cards passed."
+    }
+  ]
 }

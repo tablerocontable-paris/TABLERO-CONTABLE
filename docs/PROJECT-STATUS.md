@@ -597,3 +597,7 @@ probarse rendimiento con 20+ perfiles, navegación por teclado de extremo a
 extremo ni concurrencia real entre pestañas/dispositivos. La persistencia local
 no permite inferir entrega/consistencia de servidor. El avance global permanece
 aproximadamente en **45%** y el siguiente gate requiere GPT-6.1 Sol alto.
+
+La prueba unitaria de tablero `tests/task-board.test.tsx` pasó 4/4 casos de
+teclado para mover tarjetas. Esto no sustituye una auditoría por teclado de toda
+la navegación. El alcance y comando se agregaron al JSON de evidencia.

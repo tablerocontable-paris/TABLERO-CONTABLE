@@ -17,9 +17,10 @@ La revisión de navegador de este corte ya pasó por la app general, vistas
 responsivas, arrastre, búsqueda, procesos, obligaciones, copia/restauración del
 laboratorio y cierres conjuntos; sin errores JS ni llamadas a `/api`. Evidencia:
 `docs/architecture/review-evidence/local-browser-audit-20261007.json`.
-Esto no cierra todavía el QA de teclado de extremo a extremo, rendimiento con
-20+ personas ni concurrencia entre pestañas/dispositivos; faltan criterios
-medibles para esos casos.
+El test unitario de teclado del tablero pasó 4/4 casos. Esto no cierra todavía
+el QA de teclado de extremo a extremo, rendimiento con 20+ personas ni
+concurrencia entre pestañas/dispositivos; faltan criterios medibles para esos
+casos.
 
 El siguiente paso es seleccionar **GPT-6.1 Sol, esfuerzo alto, Standard** para
 revisar identidad, permisos, idempotencia, historial y entrega en dependencias,
