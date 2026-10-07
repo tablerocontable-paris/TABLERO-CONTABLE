@@ -146,3 +146,19 @@ para migraciones históricas; TypeScript, build Worker y Chromium desktop/móvil
 aprobados. En Chromium no hubo errores JS ni llamadas a `/api`. El test de
 interfaz específico recorre motivo, baja, bandeja y reasignación; persistencia
 valida el snapshot de baja. La implementación sigue siendo sólo laboratorio.
+
+## Cierres y exportaciones de laboratorio — 07/10/2026
+
+La tabla mensual ahora incluye las tareas conjuntas para cada miembro y usa
+métricas atribuidas a su cuota. El CSV de cierre distingue peso global de cuota,
+puntos posibles/obtenidos y tiempo personal; no replica la ponderación completa
+como si fuera individual. `closeMonth` también rechaza a quien tenga el perfil
+inactivo. Sólo afecta al laboratorio local y conserva los snapshots históricos.
+
+Verificación local: **365/365 pruebas en 35 archivos**, TypeScript, build Vite,
+bundle Worker y Chromium de correcciones aprobados. El recorrido Chromium cubrió
+escritorio/móvil, arrastre, notificaciones, persistencia y simulación; cero
+errores JavaScript y cero llamadas a `/api` operativa. Sigue publicado el Site
+privado v53 hasta que se guarde/despliegue este commit. La audiencia continúa
+personalizada y sólo permite al propietario. El avance global sigue cerca de
+**45%**; no aumenta por pasar pruebas.

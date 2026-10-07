@@ -5,8 +5,9 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import type { ReactNode } from "react";
 import App from "../src/App";
 import { KEY, load, seed } from "../src/data/repository";
-import { currentMonth, dateART, metrics, type State } from "../src/domain/model";
+import { closeMonth, currentMonth, dateART, metrics, type State } from "../src/domain/model";
 import { defaultSchedule } from "../src/domain/schedule";
+import { activateJointTask } from "../src/domain/coordination";
 
 const chartProbe = vi.hoisted(() => ({ cursorProps: [] as Array<Record<string, number>>, rowId: "e0" }));
 vi.mock("recharts", () => ({
@@ -84,6 +85,48 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 describe("anotaciones y recorrido integrados", () => {
+  it("incluye la tarea y la cuota conjunta del segundo participante en la tabla de cierre", () => {
+    const state = prepare("boss");
+    const example = seed().tasks.find((task) => task.ownerId === "e0" && task.kind === "resultado")!;
+    const task = {
+      ...example,
+      id: "joint-close-ui",
+      assignmentId: null,
+      templateId: null,
+      month: currentMonth(),
+      status: "Pendiente" as const,
+      startedAt: null,
+      completedAt: null,
+      blockedBy: "",
+      blockedSince: null,
+      sessions: [],
+      checklist: [],
+    };
+    state.tasks = [task];
+    let joint = activateJointTask(state, {
+      taskId: task.id,
+      secondProfileId: "e1",
+      anchorShareBps: 6000,
+      reason: "Revisión de cierre compartida",
+      expectedRevision: 0,
+      requestId: "joint-close-ui-request",
+    }, "boss");
+    joint.tasks = joint.tasks.map((row) => row.id === task.id
+      ? { ...row, status: "Completada", completedAt: "2026-10-06T15:00:00Z" }
+      : row);
+    joint = closeMonth(joint, "e1", currentMonth(), "boss", "Cierre de participante B");
+    localStorage.setItem(KEY, JSON.stringify(joint));
+
+    render(<App />);
+    fireEvent.click(document.querySelector('[data-nav="closing"]')!);
+    const memberName = joint.profiles.find((profile) => profile.id === "e1")!.name;
+    const row = screen.getAllByText(memberName)
+      .map((element) => element.closest("tr"))
+      .find((candidate) => candidate?.querySelector("button")?.textContent?.includes("Exportar cierre"))!;
+    expect(row.textContent).toContain("1/1");
+    expect(row.textContent).toContain("100%");
+  });
+
   it("guarda y vuelve a cargar una categoría libre de anotación", () => {
     prepare();
     render(<App />);

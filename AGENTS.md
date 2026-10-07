@@ -95,3 +95,10 @@ como contrato vigente. El traspaso explícito de tareas iniciadas también qued�
 implementado sólo en el laboratorio, con historial auditable, reloj por actor,
 reporte y CSV. Las tareas conjuntas requieren revisión manual. No portar estas
 mutaciones a D1/Supabase sin revisión de permisos y aceptación.
+
+## Cierres y exportaciones — 07/10/2026
+La tabla de cierre incorpora tareas conjuntas con KPI por cuota; el CSV separa
+ponderación global de puntos y tiempo personal. Un actor inactivo no puede cerrar.
+Ver `docs/PROJECT-STATUS.md` para la evidencia del corte y `docs/EXECUTION-NEXT.md`
+para el próximo bloque. Mantener el Site privado y publicar sólo sobre la misma
+identidad ya configurada, sin cambiar la audiencia.

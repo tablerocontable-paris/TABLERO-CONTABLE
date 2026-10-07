@@ -35,10 +35,16 @@ misma tarea y aparece en la bandeja, cierres, informes y CSV. No acredita el
 tiempo anterior al nuevo responsable. Las tareas conjuntas quedan para revisión
 manual porque modificar cuotas necesita un contrato separado.
 
-Siguiente: auditar los circuitos de cierre y sus exportaciones, y ampliar las
-pruebas de materialización diaria, semanal y de varios meses. Luego revisar con
-Sol el contrato conjunto de transferencias/retenciones antes de portar cualquier
-regla al backend activo.
+Auditoría de cierres y exportaciones completada en el laboratorio: las tareas
+conjuntas aparecen en el cierre de cada miembro, el cálculo respeta la cuota y
+el CSV separa contribución personal de peso global. También se impide cerrar con
+un perfil actor inactivo. Evidencia reciente en `docs/PROJECT-STATUS.md`.
+
+Continuar revisando las rutas operativas restantes del laboratorio contra
+`docs/PRODUCT-ROADMAP.md` y los contratos vigentes, implementando sólo cambios ya
+definidos. Mantener fuera del alcance Auth, cuentas, `/api`, Worker/D1 y SQL
+remoto. Antes de portar al backend reglas nuevas sobre transferencia conjunta
+o retenciones, volver a GPT-6.1 Sol alto para revisar el contrato.
 Referencias: filas 4, 13 y 14 de
 `docs/product/CORRECTIONS-20261002.md` y regla de cobertura de
 `docs/product/CONSISTENCY-RULES.md`. Mantener el alcance en laboratorio antes de
@@ -49,10 +55,10 @@ medio, velocidad Standard, para implementar y verificar. Si aparece una decisió
 nueva de permisos/jerarquía, usar GPT-6.1 Sol, esfuerzo alto, Standard, sólo para
 revisar esa decisión antes de volver a Luna.
 
-Evidencia del bloque de traspaso y auditoría diaria: 362 pruebas en 35 archivos, TypeScript/Vite y
-Worker build, Chromium de correcciones desktop/móvil y flujo conjunto aprobados;
-sin errores JS ni solicitudes a `/api` operativa. Ver el estado para límites y
-publicación vigente.
+Evidencia del bloque más reciente: 365 pruebas en 35 archivos, TypeScript/Vite,
+Worker build y Chromium desktop/móvil aprobados; cero errores JS y solicitudes
+a `/api` operativa. El cambio todavía debe pasar pre-commit, commit y publicación
+en el mismo Site privado. Ver `PROJECT-STATUS.md` para límites y versión actual.
 
 ## Entrega
 

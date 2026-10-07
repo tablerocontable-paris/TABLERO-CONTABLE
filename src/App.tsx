@@ -108,6 +108,7 @@ import TimelinessBadge from "./components/TimelinessBadge";
 import TimelinessPanel from "./components/TimelinessPanel";
 import StepListEditor, { parseSteps, validateSteps } from "./components/StepListEditor";
 import { taskTimeliness } from "./domain/timeliness";
+import { closureCsvRows } from "./domain/reports";
 type Page =
   | "overview"
   | "day"
@@ -2287,14 +2288,14 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                             (p) =>
                               p.role !== "jefe" && (!owner || owner === p.id),
                           )
-                          .map((p) => {
+                            .map((p) => {
                             const ts = state.tasks.filter(
-                              (t) => t.ownerId === p.id && t.month === month,
+                              (t) => t.month === month && isResponsible(t, p.id),
                             );
                             const c = state.closures.find(
                               (c) => c.ownerId === p.id && c.month === month,
                             );
-                            const x = c?.metrics || metrics(ts, state.activity);
+                            const x = c?.metrics || metricsForProfile(ts, state.activity, p.id);
                             return (
                               <tr key={p.id}>
                                 <td>{p.name}</td>
@@ -2317,28 +2318,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                                     <button
                                       onClick={() =>
                                         download(
-                                          [
-                                            [
-                                              "Tarea",
-                                              "Empresa",
-                                              "Tipo",
-                                              "Peso",
-                                              "Estado",
-                                              "Cantidad",
-                                              "Unidad",
-                                              "Meta",
-                                            ],
-                                            ...c.tasks.map((t) => [
-                                              t.title,
-                                              companyOf(t.companyId),
-                                              t.kind,
-                                              t.weight,
-                                              t.status,
-                                              taskQuantity(t, c.activity),
-                                              t.unit,
-                                              t.target,
-                                            ]),
-                                          ],
+                                          closureCsvRows(c, companyOf),
                                           `cierre-${p.name}-${month}.csv`,
                                         )
                                       }

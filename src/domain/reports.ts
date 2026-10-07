@@ -1,5 +1,5 @@
-import { dateART, metrics, metricsForProfile, isResponsible, responsibilityShare, type State, type Closure, type Metrics } from "./model";
-import { actorElapsedSeconds } from "./workforce";
+import { dateART, metrics, metricsForProfile, isResponsible, responsibilityShare, taskQuantity, type State, type Closure, type Metrics } from "./model";
+import { actorElapsedSeconds, duration } from "./workforce";
 export interface ReportContribution {
   taskId: string;
   title: string;
@@ -44,6 +44,50 @@ export interface PeriodReport {
   contributions?: ReportContribution[];
   transfers?: ReportTransfer[];
   algorithm?: "joint-lab-v1";
+}
+export function closureCsvRows(
+  c: Closure,
+  companyName: (companyId: string) => string,
+) {
+  return [
+    [
+      "Tarea",
+      "Empresa",
+      "Tipo",
+      "Peso global",
+      "Participación personal %",
+      "Puntos posibles personales",
+      "Puntos obtenidos personales",
+      "Tiempo personal",
+      "Estado",
+      "Cantidad",
+      "Unidad",
+      "Meta",
+    ],
+    ...c.tasks
+      .filter((task) => isResponsible(task, c.ownerId))
+      .map((task) => {
+        const shareBps = responsibilityShare(task, c.ownerId);
+        const quantity = taskQuantity(task, c.activity);
+        const globalEarned = task.weight * (task.kind === "resultado"
+          ? task.status === "Completada" ? 1 : 0
+          : task.target > 0 ? Math.min(quantity / task.target, 1) : 0);
+        return [
+          task.title,
+          companyName(task.companyId),
+          task.kind,
+          task.weight,
+          shareBps / 100,
+          task.weight * shareBps / 10000,
+          globalEarned * shareBps / 10000,
+          duration(actorElapsedSeconds(task, c.ownerId, c.at)),
+          task.status,
+          quantity,
+          task.unit,
+          task.target,
+        ];
+      }),
+  ];
 }
 export function generatePeriodReport(s: State, c: Closure): PeriodReport {
   const p = s.profiles.find((p) => p.id === c.ownerId)!;

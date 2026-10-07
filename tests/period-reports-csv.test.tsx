@@ -3,7 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import PeriodReports from "../src/components/PeriodReports";
 import { seed } from "../src/data/repository";
-import { metrics, type Closure, type Metrics } from "../src/domain/model";
+import { metrics, type Closure, type Metrics, type Task } from "../src/domain/model";
+import { closureCsvRows } from "../src/domain/reports";
 
 let csvExports: string[] = [];
 beforeEach(() => {
@@ -17,6 +18,39 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe("CSV de reporte cerrado", () => {
+  it("exporta cuota, puntos y tiempo propios para una tarea conjunta", () => {
+    const state = seed();
+    const task: Task = {
+      ...state.tasks[0]!,
+      id: "shared-close-export",
+      ownerId: "e0",
+      weight: 5,
+      status: "Completada" as const,
+      responsibility: {
+        version: 1 as const,
+        revision: 1 as const,
+        mode: "joint" as const,
+        activatedAt: "2026-10-06T10:00:00Z",
+        activatedBy: "boss",
+        reason: "Revisión conjunta",
+        members: [
+          { profileId: "e0", shareBps: 6000, name: "A", teamId: "t1", sector: "Tesorería" },
+          { profileId: "e1", shareBps: 4000, name: "B", teamId: "t1", sector: "Tesorería" },
+        ],
+      },
+      sessions: [
+        { id: "a", actorId: "e0", start: "2026-10-06T10:00:00Z", end: "2026-10-06T10:10:00Z" },
+        { id: "b", actorId: "e1", start: "2026-10-06T10:00:00Z", end: "2026-10-06T10:20:00Z" },
+      ],
+    };
+    const closure = {
+      id: "closure-e1", ownerId: "e1", month: "2026-10", at: "2026-10-31T23:59:59Z", by: "boss",
+      metrics: metrics([task], []), tasks: [task], activity: [], note: "Validado",
+    } satisfies Closure;
+    const rows = closureCsvRows(closure, () => "Empresa de prueba");
+    expect(rows[0]).toContain("Participación personal %");
+    expect(rows[1]).toEqual(expect.arrayContaining([5, 40, 2, 2, "00:20:00", "Completada"]));
+  });
   it("distingue falta de snapshot histórico y resumen nuevo sin muestra", async () => {
     const state = seed();
     const base = metrics([], []);

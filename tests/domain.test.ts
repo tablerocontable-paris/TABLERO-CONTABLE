@@ -140,6 +140,12 @@ describe("reglas independientes de las pantallas", () => {
     expect(s.closures[0].tasks[0].title).toBe(before);
     expect(() => closeMonth(s, "e0", month, "boss", "")).toThrow();
   });
+  it("rechaza que una jefatura dada de baja cierre un período", () => {
+    const s = seed();
+    s.profiles = s.profiles.map((p) => p.id === "boss" ? { ...p, active: false } : p);
+    expect(() => closeMonth(s, "e0", currentMonth(), "boss", "Revisado"))
+      .toThrow("El cierre requiere un responsable de este empleado.");
+  });
   it("ámbito jerárquico de demostración", () => {
     const s = seed();
     const manager = s.profiles.find((p) => p.id === "m1")!;

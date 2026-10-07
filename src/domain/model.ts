@@ -490,6 +490,7 @@ export function closeMonth(
   const actor = s.profiles.find((p) => p.id === actorId);
   if (
     !actor ||
+    !actor.active ||
     actor.role === "empleado" ||
     !canSee(actor, ownerId, s.profiles)
   )
