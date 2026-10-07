@@ -18,6 +18,14 @@ solicitudes a `/api` y sin desborde móvil. Evidencia:
 La compilación advierte que el entry principal alcanza 500,19 KB; la compilación
 completó correctamente.
 
+Publicación de este corte verificada: **Site v83**, deployment
+`appgdep_6ac667c768988191973a05142db88251`, desde el commit
+`9db62fb4cea13037bdf651eac07bea05303a200c`. El hook del último commit pasó
+215/215 pruebas en 34 archivos. También se corrigió la estructura de salida del
+build para generar `dist/client/index.html` y `dist/server/index.js`; el archivo
+incluye y valida la migración D1. El Site sigue activo, personalizado y
+owner-only: una cuenta autorizada, cero grupos y cero visitantes externos.
+
 La fuente base previa a este corte corresponde al Site v82, personalizado y
 owner-only: una cuenta autorizada, cero grupos y cero visitantes externos. La
 audiencia no debe ampliarse. Avance global orientativo **~45%**; este bloque no

@@ -21,8 +21,14 @@
     "typescript": "passed",
     "vite": "passed with upstream annotation warnings and a 500.19 KB entry chunk warning",
     "worker": "passed",
+    "archive": "passed; dist/client/index.html, dist/server/index.js and one D1 migration validated",
     "mainEntryRawKB": 500.19,
     "chartsChunkRawKB": 423.74
+  },
+  "finalCommitHook": {
+    "passed": 215,
+    "failed": 0,
+    "filesPassed": 34
   },
   "browser": {
     "browser": "Google Chrome headless through repository Playwright Core harness",
@@ -42,6 +48,16 @@
   },
   "siteBefore": {
     "version": 82,
+    "audience": "custom owner-only",
+    "authorizedAccounts": 1,
+    "groups": 0,
+    "externalVisitors": 0
+  },
+  "siteAfter": {
+    "version": 83,
+    "commit": "9db62fb4cea13037bdf651eac07bea05303a200c",
+    "deployment": "appgdep_6ac667c768988191973a05142db88251",
+    "status": "succeeded",
     "audience": "custom owner-only",
     "authorizedAccounts": 1,
     "groups": 0,

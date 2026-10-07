@@ -16,6 +16,13 @@ El Site existente estaba en v82 antes de este corte y conserva audiencia
 personalizada owner-only: una cuenta autorizada, cero grupos y cero visitantes
 externos. Fuente local `main`; laboratorio ficticio aislado.
 
+Publicación verificada como **Site v83**, deployment
+`appgdep_6ac667c768988191973a05142db88251`, desde el commit
+`9db62fb4cea13037bdf651eac07bea05303a200c`. El hook del commit final pasó
+215/215 pruebas en 34 archivos. El build ahora deja el cliente en
+`dist/client/index.html` y el Worker en `dist/server/index.js`; el empaquetador
+validó la migración D1 incluida. La audiencia continúa owner-only.
+
 Siguiente paso: **GPT-6.1 Sol, esfuerzo alto, Standard**, para definir el
 contrato de cantidades y KPI operativos, eventos del calendario y cierre
 individual/por equipo/empresa con permisos y atomicidad. Consultas y Anotaciones
