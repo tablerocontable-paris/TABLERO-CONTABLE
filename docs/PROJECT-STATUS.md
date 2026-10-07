@@ -693,6 +693,10 @@ archivo temporal se valida dentro del runner y no se publica como artefacto.
 Esto reduce el riesgo de que un build verde omita una ruta requerida al guardar
 una versión en Sites.
 
+`npm test` y el pre-commit también excluyen `tmp/**`, donde se guardan clones
+locales ignorados por Git; así los resultados no duplican los mismos tests ni
+incorporan copias que no forman parte del commit.
+
 La validación aún está preparada, no ejecutada: no existe el repositorio GitHub
 propio. No conecta cuentas ni cambia la audiencia del Site. El avance global
 permanece aproximadamente en **45%**.

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc --noEmit && vite build --outDir dist/client && node scripts/build-worker.mjs",
-    "test": "vitest run --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+    "test": "vitest run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
     "preview": "vite preview --host 0.0.0.0",
     "test:browser": "node tests/browser.cjs",
     "package:site": "node scripts/package-site-archive.mjs",

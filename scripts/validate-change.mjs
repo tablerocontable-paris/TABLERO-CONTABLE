@@ -20,4 +20,4 @@ run(process.execPath, ['node_modules/vitest/vitest.mjs', 'run',
   'tests/habitual-task-proposals.test.ts', 'tests/habitual-task-onboarding.test.tsx',
   'tests/habitual-task-proposals-ui.test.tsx', 'tests/habitual-task-app.test.tsx',
   'tests/deadline-notifications.test.ts', 'tests/deadline-notifications-ui.test.tsx',
-  '--maxWorkers=1']);
+  '--maxWorkers=1', '--exclude', 'tmp/**']);
