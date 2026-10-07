@@ -389,6 +389,7 @@ const schema = z.object({
     title: z.string(), kind: z.enum(['assigned', 'completed', 'changed', 'comment', 'joint']),
     createdAt: z.string(), readAt: z.string().nullable(),
   })).optional(),
+  deadlineReminderReads: z.record(z.string(), z.string()).optional(),
   internalRequests: z.array(z.object({
     id: z.string(), kind: z.enum(["technical_error", "work_request", "suggestion"]),
     authorId: z.string(), recipientId: z.string(), urgency: z.enum(["low", "medium", "high", "urgent"]),

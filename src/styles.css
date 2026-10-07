@@ -2600,6 +2600,10 @@ header .notification-trigger span { position: absolute; top: -6px; right: -6px; 
 .notification-list li.unread { border-left: 3px solid #495c78; background: var(--surface-soft); }
 .notification-list li p { margin: 8px 0; }
 .notification-list li small { display: block; margin-bottom: 12px; }
+.deadline-reminder-tasks { display: grid; gap: 8px; padding: 0; list-style: none; }
+.deadline-reminder-tasks li { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0; padding: 8px 0 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; }
+.deadline-reminder-tasks li span { min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 520px) { .deadline-reminder-tasks li { align-items: flex-start; flex-direction: column; } }
 .task-comments { margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--line); }
 .task-comments article { padding: 12px; background: var(--surface-soft); border-radius: 8px; margin-bottom: 10px; overflow-wrap: anywhere; }
 .task-comments article p { white-space: pre-wrap; }

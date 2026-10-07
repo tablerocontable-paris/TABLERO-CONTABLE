@@ -3,6 +3,19 @@
 Repositorio: `work/site`. Continuar el mismo proyecto y Git. No reconstruir ni
 consultar el chat anterior.
 
+## Próximo bloque vigente — revisión 07/10/2026
+
+El corte local de avisos ya pasó la comprobación móvil, las pruebas nuevas están
+incluidas en el hook y la evidencia quedó registrada. Completar ahora el
+pre-commit y commit, sincronizar y publicar el mismo Site privado, actualizar la
+guía/bundle para PC personal y validar la clonación. La versión publicada
+comprobada es 67; los avisos nuevos siguen sin commit. Contrato ejecutable,
+hallazgos y límites: `architecture/STATE-REVIEW-20261007.md`.
+
+Después seleccionar **GPT-6.1 Sol, esfuerzo alto, Standard** para definir
+dependencias entre tareas y delegación con aceptación antes de implementarlas.
+Los apartados siguientes conservan la cronología y se subordinan a este bloque.
+
 ## Estado vigente
 
 El laboratorio privado conserva simulación y datos ficticios en

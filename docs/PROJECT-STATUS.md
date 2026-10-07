@@ -517,3 +517,30 @@ publicado en el mismo Site privado como **v66**; deployment
 propietario, audiencia personalizada, una cuenta permitida, cero grupos y cero
 visitantes externos. No se conectaron cuentas, Supabase, D1, GitHub ni correo.
 El avance global sigue orientativamente en **~45%**.
+
+## Avisos locales de vencimiento — corte en preparación — 07/10/2026
+
+La campana del laboratorio agrupa tareas autorizadas que vencen en tres días,
+vencen hoy o están atrasadas. Al abrirla recalcula las ventanas; permite abrir
+la tarea y guarda lectura por perfil, regla y día ART. Omite tareas cerradas,
+completadas y fechas inválidas. Durante ausencia pausa el aviso personal del
+titular; el reemplazante sólo lo recibe si mantiene la cobertura y el acceso.
+
+El alcance es local y a demanda dentro de `paris-state-lab`: no hay proceso en
+segundo plano, correo, servidor ni sincronización entre equipos. No prueba
+entrega entre dispositivos ni permisos de Auth/RLS. La ruta operativa conectada
+no muestra estos avisos locales.
+
+Verificación del árbol actual: **420/420 pruebas en 48 archivos**; TypeScript,
+Vite y bundle Worker aprobados. Chromium Edge recorrió la campana en escritorio
+y móvil, abrió una tarea, guardó y releyó su recibo; cero errores JS, cero
+solicitudes locales a `/api` y sin desborde horizontal. El diálogo se inspeccionó
+en ambas capturas. Evidencia:
+`architecture/review-evidence/deadline-notifications-lab-20261007.json`;
+capturas de revisión bajo `outputs/deadline-notifications-browser/` en el
+workspace.
+
+Al redactar este corte, el código seguía sin commit y la versión publicada era
+Site v67. Actualizar aquí el commit, versión y deployment sólo después de
+verificar cada uno. Avance global estimado **~45%**; no implica aceptación final
+ni sincronización entre computadoras.

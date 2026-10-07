@@ -72,17 +72,19 @@ export function startClock(
     ],
   };
 }
-export function coverageFor(s: State, t: Task, at = dateART()) {
+export function absenceForTask(s: State, t: Task, at = dateART()) {
   return (s.absences || []).find(
     (a) =>
       !a.cancelledAt &&
       a.ownerId === t.ownerId &&
       a.from <= at &&
       a.to >= at &&
-      !!a.replacementId &&
-      isCoveredOccurrence(a, t) &&
-      !isClosed(s, t),
+      isCoveredOccurrence(a, t),
   );
+}
+export function coverageFor(s: State, t: Task, at = dateART()) {
+  const absence = absenceForTask(s, t, at);
+  return absence?.replacementId && !isClosed(s, t) ? absence : undefined;
 }
 function isCoveredOccurrence(absence: Absence, task: Task) {
   const occursOn = task.scheduledOn || task.due;

@@ -252,3 +252,19 @@ La búsqueda quedó publicada en el Site existente v64 desde
 La interfaz de «Vista de prueba» ofrece exportar/restaurar estado ficticio para trasladarlo manualmente entre navegadores/PCs. La función sólo escribe `paris-state-lab`; mantiene prohibido leer/escribir la clave operativa al restaurar y no habilita cuentas, sincronización ni llamadas API. El JSON no está cifrado; debe guardarse de forma privada. Contrato, pruebas y límites en `docs/architecture/LABORATORY-BACKUP-CONTRACT-20261007.md`, `docs/PROJECT-STATUS.md` y `docs/EXECUTION-NEXT.md`.
 
 La transferencia de código sigue requiriendo bundle Git. Para llevar también el estado ficticio, descargar la copia desde la banda del laboratorio y, en la otra PC, elegirla desde el mismo control y confirmar la restauración. Trabajar una sola copia de código a la vez; no sincronizar `.git` por OneDrive.
+
+## Estado vigente de entrega — 07/10/2026
+
+El Site privado comprobado está en v67, propietario y audiencia personalizada
+con una cuenta autorizada, sin grupos ni visitantes externos. Los avisos locales
+de vencimiento se implementaron en `paris-state-lab`: agrupación a tres días,
+hoy y atrasadas; apertura de tarea y lectura persistente por perfil/regla/día
+ART. Se calculan al abrir la campana; no hay scheduler, correo ni entrega entre
+equipos. Contrato y evidencia: `docs/architecture/STATE-REVIEW-20261007.md` y
+`docs/architecture/review-evidence/deadline-notifications-lab-20261007.json`.
+
+El árbol actual pasó 420/420 pruebas, TypeScript, Vite/Worker y Edge
+escritorio/móvil; no llamó a `/api`. Antes de dar el corte por entregado,
+ejecutar pre-commit, crear commit, publicar el mismo Site preservando audiencia
+y generar/verificar bundle y guía vigentes para PC personal. No conectar cuentas
+reales durante la aceptación del laboratorio.

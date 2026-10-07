@@ -46,7 +46,13 @@ fs.mkdirSync(output, { recursive: true });
       viewport: { width: 1440, height: 1000 },
     });
     const errors = [];
+    const apiRequests = [];
     page.on("pageerror", (e) => errors.push(e.message));
+    page.on("request", (request) => {
+      const url = new URL(request.url());
+      if (url.origin === "http://127.0.0.1:8090" && url.pathname.startsWith("/api/"))
+        apiRequests.push(url.pathname);
+    });
     await page.goto("http://127.0.0.1:8090");
     await page.locator("h1").waitFor();
     await page.screenshot({ path: output + "/overview.png", fullPage: true });
@@ -370,6 +376,55 @@ fs.mkdirSync(output, { recursive: true });
     )
       throw Error("lab changed main data");
     await page.screenshot({ path: output + "/lab.png", fullPage: false });
+
+    const reminderId = await page.evaluate(() => {
+      const state = JSON.parse(localStorage.getItem("paris-state-lab"));
+      const today = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Argentina/Buenos_Aires",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(new Date());
+      const [year, month, day] = today.split("-").map(Number);
+      const due = new Date(Date.UTC(year, month - 1, day + 3)).toISOString().slice(0, 10);
+      const source = state.tasks.find((task) => task.ownerId === "e0" && task.kind === "resultado");
+      if (!source) throw Error("deadline reminder fixture missing");
+      state.activeId = "boss";
+      state.tasks = [{
+        ...source,
+        id: "browser-deadline-reminder",
+        month: due.slice(0, 7),
+        due,
+        scheduledOn: due,
+        status: "Pendiente",
+        completedAt: null,
+        sessions: [],
+      }];
+      state.notifications = [];
+      localStorage.setItem("paris-state-lab", JSON.stringify(state));
+      return { id: `deadline:boss:due-in-three-days:${today}`, title: source.title };
+    });
+    await page.reload();
+    await page.getByRole("button", { name: /Notificaciones:/ }).click();
+    await page.getByText("1 tarea vence en 3 días").waitFor();
+    await page.screenshot({ path: output + "/deadline-reminders.png", fullPage: false });
+    await page.locator(".deadline-reminder-list > li")
+      .filter({ hasText: "1 tarea vence en 3 días" })
+      .getByRole("button", { name: `Abrir tarea: ${reminderId.title}` })
+      .click();
+    const reminderReadAt = await page.evaluate((id) =>
+      JSON.parse(localStorage.getItem("paris-state-lab")).deadlineReminderReads?.[id],
+      reminderId.id,
+    );
+    if (!reminderReadAt) throw Error("deadline reminder read receipt not persisted");
+    await page.getByRole("dialog").getByRole("button", { name: "Cerrar", exact: true }).click();
+    await page.getByRole("button", { name: /Notificaciones:/ }).click();
+    const reminderClass = await page.locator(".deadline-reminder-list > li")
+      .filter({ hasText: "1 tarea vence en 3 días" })
+      .getAttribute("class");
+    if (reminderClass?.includes("unread")) throw Error("deadline reminder remained unread");
+    await page.getByRole("button", { name: "Cerrar", exact: true }).click();
+
     await page.locator('[data-nav="overview"]').click();
     await page.locator("h1").waitFor();
     if ((await page.locator(".lab-banner").count()) !== 1)
@@ -378,14 +433,22 @@ fs.mkdirSync(output, { recursive: true });
     await page.locator('[data-nav="analytics"]').click();
 
     await page.setViewportSize({ width: 390, height: 844 });
+    await page.getByRole("heading", { name: "Cumplimiento ponderado" }).waitFor();
     await page.screenshot({ path: output + "/mobile.png", fullPage: true });
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth > innerWidth + 1,
     );
     if (overflow) throw Error("mobile viewport overflow");
+    await page.getByRole("button", { name: /Notificaciones:/ }).click();
+    await page.getByText("1 tarea vence en 3 días").waitFor();
+    await page.screenshot({ path: output + "/deadline-reminders-mobile.png", fullPage: false });
+    const dialogWidth = await page.getByRole("dialog").evaluate((dialog) => dialog.getBoundingClientRect().width);
+    if (dialogWidth > 390) throw Error(`mobile notification dialog overflows viewport: ${dialogWidth}`);
+    await page.getByRole("button", { name: "Cerrar", exact: true }).click();
     if (errors.length) throw Error(errors.join("\n"));
+    if (apiRequests.length) throw Error(`isolated lab requested API routes: ${apiRequests.join(", ")}`);
     console.log(
-      "PASS induction, resume, company isolation, auto-checklist, activity, analysis grouping, complete monthly closure, write lock, recurrence dates, timers, absences, isolated lab, system/light/dark themes, mobile. No JS errors.",
+      "PASS induction, resume, company isolation, auto-checklist, activity, analysis grouping, complete monthly closure, write lock, recurrence dates, timers, absences, isolated lab, due reminders and persisted read receipt, system/light/dark themes, mobile. No JS errors or API requests.",
     );
   } finally {
     if (browser) await browser.close();

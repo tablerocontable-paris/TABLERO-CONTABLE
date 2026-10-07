@@ -1370,7 +1370,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           </div>
           <div className="header-right">
             {laboratory && !remoteSave && <button type="button" className="quick-search-trigger" aria-label="Buscar tareas" title="Buscar tareas · Ctrl+K" onClick={() => setQuickTaskSearchOpen(true)}><Search size={16} aria-hidden="true" /><span>Buscar</span><kbd>Ctrl K</kbd></button>}
-            {!remoteSave && <NotificationCenter key={active.id} state={state} commit={commit} notify={notify} onOpenProposals={() => setPage("team")} onOpenTask={taskId => {
+            {!remoteSave && <NotificationCenter key={active.id} state={state} commit={commit} notify={notify} laboratory={laboratory} onOpenProposals={() => setPage("team")} onOpenTask={taskId => {
               const task = state.tasks.find(t => t.id === taskId);
               if (task && canWork(state, active, task)) { setMonth(task.month); setPage('tasks'); setDetail(taskId); }
             }} />}

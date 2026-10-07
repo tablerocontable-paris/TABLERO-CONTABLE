@@ -316,6 +316,7 @@ export interface ParameterReview {
 export interface State {
   boardOrder?: "original" | "az" | "za";
   notifications?: import('./notifications').WorkNotification[];
+  deadlineReminderReads?: Record<string, string>;
   internalRequests?: import('./internalRequests').InternalRequest[];
   taskComments?: import('./notifications').TaskComment[];
   jointReceipts?: JointReceipt[];
