@@ -1,40 +1,42 @@
 # Grupo París en tu PC personal
 
-Esta copia contiene el código y el historial Git del proyecto en el commit
-d7e3fabee35594c4a002717430cb4ade217a5387. No incluye claves, tokens,
-credenciales, node_modules ni el estado del laboratorio guardado en el navegador.
+Este instructivo acompaña el bundle `grupo-paris-site-personal.bundle` del ZIP
+de transferencia vigente. Ese bundle contiene el mismo repositorio Git e
+historial; no incluye claves, tokens, credenciales, `node_modules` ni los datos
+del laboratorio guardados en el navegador.
 
 ## Pasar el código
 
-1. Copiá juntos grupo-paris-site-personal.bundle y este instructivo a un USB o
-   una carpeta privada.
+1. Extraé el ZIP en una carpeta privada. Deben quedar juntos este instructivo y
+   `grupo-paris-site-personal.bundle`.
 2. En la PC personal instalá Git y Node.js LTS si todavía no los tenés.
-3. Abrí PowerShell en la carpeta donde dejaste el bundle y ejecutá:
+3. Abrí PowerShell en esa carpeta y ejecutá:
 
     git clone .\grupo-paris-site-personal.bundle .\grupo-paris-contabilidad
     cd .\grupo-paris-contabilidad
     npm ci
+    npm test
     npm run dev -- --host 127.0.0.1
 
-4. Abrí la carpeta grupo-paris-contabilidad en Codex para continuar el código.
-   El sitio local queda disponible en http://127.0.0.1:5173.
+4. Abrí `grupo-paris-contabilidad` en Codex para continuar. El laboratorio
+   local queda en http://127.0.0.1:5173.
 
-No sincronices la carpeta activa ni su carpeta .git mediante OneDrive. Trabajá
-desde una sola PC a la vez. El bundle es un punto de partida; sin una cuenta
-propia de GitHub todavía no hay sincronización automática de Git entre
-computadoras.
+Trabajá desde una sola PC a la vez. No sincronices la carpeta activa ni `.git`
+con OneDrive/Dropbox. GitHub todavía no está conectado; por eso los cambios
+entre PCs se pasan con bundles nuevos, no automáticamente.
 
 ## Pasar la simulación del navegador
 
-El código y los datos de prueba viajan por separado. En la PC actual, entrá al
-Site privado con la misma cuenta propietaria y descargá la copia desde la banda
-«Vista de prueba». Transferí ese JSON junto con el bundle y, en la otra PC,
-abrí el mismo Site y usá «Restaurar copia». Confirmá el reemplazo cuando la
-vista previa muestre los datos correctos.
+El código y los datos ficticios viajan por separado. En el Site privado,
+descargá la copia desde la banda «Vista de prueba». Transferí ese JSON junto con
+el ZIP; en la otra PC, abrí el mismo Site con la cuenta propietaria y elegí
+«Restaurar copia». Revisá la vista previa antes de confirmar.
 
-El JSON no está cifrado y puede contener anotaciones ficticias: guardalo en un
+El JSON no está cifrado y puede contener anotaciones ficticias. Guardalo en un
 medio privado y borrá copias temporales después de importarlo. No incluye datos
-reales de clientes.
+reales de clientes. La simulación no se sincroniza con el bundle Git.
 
 Site existente: https://grupo-paris-contabilidad.valentino-magni.chatgpt.site
 Proyecto Sites: appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85
+
+La audiencia del Site debe seguir siendo privada y exclusiva del propietario.

@@ -17,8 +17,9 @@ formal para 20+ perfiles y la concurrencia entre pestañas/dispositivos. No se
 probó Auth/MFA/RLS real ni recuperación productiva. Avance global orientativo:
 45%, no 100%.
 
-Transferencia actualizada en `outputs/LEEME-PC-PERSONAL.md` y su ZIP; el bundle
-se verificó clonando y comparando HEAD. El estado `paris-state-lab` del
+La guía de transferencia está en `outputs/LEEME-PC-PERSONAL.md`; el bundle y
+ZIP vigentes se entregan junto al checkout, generados desde el SHA final. El
+bundle se verificó clonando y comparando HEAD. El estado `paris-state-lab` del
 navegador no está en Git ni en el ZIP: exportarlo aparte desde «Vista de
 prueba». El registro v68 está marcado como histórico en
 `docs/architecture/STATE-REVIEW-20261007.md`.

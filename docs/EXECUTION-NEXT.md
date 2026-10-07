@@ -5,21 +5,22 @@ consultar el chat anterior.
 
 ## Próximo bloque vigente — revisión de arquitectura
 
-El estado se revisó el 07/10: HEAD `d3ee37185e1ce2b91e743205ac0bf2573a138fae`
-se publicó en el mismo Site como v76, owner-only. La edición estabilizó los
+El último corte funcional se revisó el 07/10: HEAD
+`d3ee37185e1ce2b91e743205ac0bf2573a138fae` se publicó en el mismo Site como
+v76, owner-only. La edición estabilizó los
 timeouts predeterminados de `npm test`; no cambió funcionalidades. Se verificó
 la suite completa 420/420, el pre-commit 104/104, TypeScript, Vite, Worker,
-recorridos Chromium desktop/móvil y un bundle clonado con ese SHA. El ZIP
-transferible más reciente se indica en `outputs/LEEME-PC-PERSONAL.md`; el JSON
-de estado `paris-state-lab` se exporta aparte desde la interfaz.
+recorridos Chromium desktop/móvil y un bundle clonado con ese SHA. El paquete
+transferible actualizado se entrega junto al checkout, generado desde el SHA
+final; `outputs/LEEME-PC-PERSONAL.md` contiene las instrucciones. El JSON de
+estado `paris-state-lab` se exporta aparte desde la interfaz.
 
 El último corte funcional del laboratorio son los avisos locales de vencimiento,
 implementados en `25d1490` y publicados en el mismo Site privado como v68. Las
 publicaciones v69–v71 actualizaron la documentación y la transferencia, sin
 cambiar funcionalidades ni audiencia. El checkout de referencia está en
-`main`; el commit y bundle exactos figuran en `outputs/LEEME-PC-PERSONAL.md`.
-El bundle y el ZIP fueron verificados con una clonación limpia. El JSON de
-`paris-state-lab` viaja por separado desde la interfaz.
+`main`; el bundle final debe corresponder al SHA de cierre de cada transferencia.
+El JSON de `paris-state-lab` viaja por separado desde la interfaz.
 
 La suite completa pasó **420/420 pruebas en 48 archivos** con dos workers y
 timeouts explícitos de 20/30 s. `npm test` conserva esos parámetros como
