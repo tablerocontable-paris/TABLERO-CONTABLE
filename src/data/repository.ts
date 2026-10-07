@@ -304,6 +304,15 @@ const schema = z.object({
     title: z.string(), kind: z.enum(['assigned', 'completed', 'changed', 'comment', 'joint']),
     createdAt: z.string(), readAt: z.string().nullable(),
   })).optional(),
+  internalRequests: z.array(z.object({
+    id: z.string(), kind: z.enum(["technical_error", "work_request", "suggestion"]),
+    authorId: z.string(), recipientId: z.string(), urgency: z.enum(["low", "medium", "high", "urgent"]),
+    module: z.string().min(1).max(80), subject: z.string().min(1).max(120),
+    description: z.string().min(1).max(4000), status: z.enum(["new", "review", "responded", "resolved"]),
+    createdAt: z.string(), updatedAt: z.string(),
+    messages: z.array(z.object({ id: z.string(), actorId: z.string(), body: z.string().min(1).max(4000), createdAt: z.string() })),
+    history: z.array(z.object({ id: z.string(), actorId: z.string(), status: z.enum(["new", "review", "responded", "resolved"]), note: z.string().max(200), createdAt: z.string() })),
+  })).optional(),
   taskComments: z.array(z.object({ id: z.string(), taskId: z.string(), actorId: z.string(),
     content: z.string().max(2000), createdAt: z.string(),
   })).optional(),
@@ -439,6 +448,7 @@ export function load(laboratory = isLab()): State {
   state.orphanedWork ||= [];
   state.taskTransfers ||= [];
   state.annotations ||= [];
+  state.internalRequests ||= [];
   state.tourVersion ||= {};
   return state;
 }

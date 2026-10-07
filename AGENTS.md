@@ -109,3 +109,15 @@ El empaquetador del plugin de Sites usa Bash y puede fallar en Windows. Para
 crear/validar el archivo Worker desde el build, usar
 `node scripts/package-site-archive.mjs <ruta-absoluta>` o `npm run package:site`;
 después verificar por separado que push, versión y deployment terminaron bien.
+
+## Consultas y pedidos internos — laboratorio local
+
+La interfaz local separa error técnico (cola de soporte simulada), pedido de
+trabajo (Juan Pablo) y sugerencia (destino explícito). Autor, destinatario y
+jefatura pueden ver el seguimiento; los destinatarios actualizan estado y
+responden. Urgencia/antigüedad ordenan los abiertos; el historial permanece
+visible aun cuando se resuelven. No se crean tareas ni se alteran KPI. No usar
+datos reales ni adjuntos: la colección vive en `paris-state-lab` del navegador,
+no sincroniza dispositivos, no existe una cuenta de soporte conectada y no hay
+entrega por servidor. No portar a API/D1/Supabase sin revisión Sol del contrato
+de almacenamiento, identidad técnica y permisos.

@@ -1,5 +1,6 @@
 import NotificationCenter from "./components/NotificationCenter";
 import TaskComments from "./components/TaskComments";
+import InternalRequests from "./components/InternalRequests";
 import JointTaskSetup from "./components/JointTaskSetup";
 import { collectTaskNotifications } from "./domain/notifications";
 import LaboratoryInvitations from "./components/LaboratoryInvitations";
@@ -62,6 +63,7 @@ import {
   HelpCircle,
   RotateCcw,
   GripVertical,
+  MessageSquareText,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -109,6 +111,14 @@ import TimelinessPanel from "./components/TimelinessPanel";
 import StepListEditor, { parseSteps, validateSteps } from "./components/StepListEditor";
 import { taskTimeliness } from "./domain/timeliness";
 import { closureCsvRows } from "./domain/reports";
+import {
+  createInternalRequest,
+  replyToInternalRequest,
+  setInternalRequestStatus,
+  internalRequestRecipients,
+  type InternalRequest,
+  type InternalRequestStatus,
+} from "./domain/internalRequests";
 type Page =
   | "overview"
   | "day"
@@ -121,7 +131,8 @@ type Page =
   | "calendar"
   | "absences"
   | "planning"
-  | "annotations";
+  | "annotations"
+  | "requests";
 const pages: { id: Page; name: string; icon: typeof Users }[] = [
   { id: "overview", name: "Resumen", icon: LayoutDashboard },
   { id: "day", name: "Mi día", icon: Flag },
@@ -135,6 +146,7 @@ const pages: { id: Page; name: string; icon: typeof Users }[] = [
   { id: "planning", name: "Planificación", icon: CalendarDays },
   { id: "absences", name: "Ausencias y cobertura", icon: CalendarDays },
   { id: "annotations", name: "Anotaciones", icon: BookOpen },
+  { id: "requests", name: "Consultas y pedidos", icon: MessageSquareText },
 ];
 const fmt = (date: string) =>
   !date
@@ -307,6 +319,41 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
       return true;
     }
     return false;
+  }
+  function createRequest(input: Omit<InternalRequest, "id" | "createdAt" | "updatedAt" | "messages" | "history">) {
+    if (!laboratory || remoteSave) return;
+    try {
+      const available = internalRequestRecipients(state, active, input.kind).some((target) => target.id === input.recipientId);
+      if (!available) throw new Error("El destino seleccionado ya no está disponible.");
+      const request = createInternalRequest({ ...input, now: new Date().toISOString(), makeId: id });
+      if (commit({ ...state, internalRequests: [...(state.internalRequests || []), request] }, "Creó una consulta o pedido", request.id)) {
+        notify("Pedido registrado en el laboratorio.");
+      }
+    } catch (error) {
+      notify(error instanceof Error ? error.message : "No se pudo registrar el pedido.");
+    }
+  }
+  function updateRequestStatus(requestId: string, status: InternalRequestStatus) {
+    if (!laboratory || remoteSave) return;
+    const request = state.internalRequests?.find((entry) => entry.id === requestId);
+    if (!request) return;
+    try {
+      const updated = setInternalRequestStatus(request, active, status, new Date().toISOString(), id);
+      if (updated !== request) commit({ ...state, internalRequests: state.internalRequests!.map((entry) => entry.id === requestId ? updated : entry) }, "Actualizó estado de consulta", requestId);
+    } catch (error) {
+      notify(error instanceof Error ? error.message : "No se pudo actualizar el pedido.");
+    }
+  }
+  function replyRequest(requestId: string, body: string) {
+    if (!laboratory || remoteSave) return;
+    const request = state.internalRequests?.find((entry) => entry.id === requestId);
+    if (!request) return;
+    try {
+      const updated = replyToInternalRequest(request, active, body, new Date().toISOString(), id);
+      commit({ ...state, internalRequests: state.internalRequests!.map((entry) => entry.id === requestId ? updated : entry) }, "Respondió una consulta interna", requestId);
+    } catch (error) {
+      notify(error instanceof Error ? error.message : "No se pudo responder el pedido.");
+    }
   }
   function deleteAnnotation(annotationId: string) {
     const note = state.annotations?.find(
@@ -1105,7 +1152,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
         <span className="nav-label">TU ESPACIO DE TRABAJO</span>
         <nav>
           {pages
-            .filter((p) => manager || !["overview", "catalog", "closing"].includes(p.id))
+            .filter((p) => (manager || !["overview", "catalog", "closing"].includes(p.id)) && (p.id !== "requests" || (laboratory && !remoteSave)))
             .map((p) => (
               <button
                 data-nav={p.id}
@@ -1266,8 +1313,10 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                                   ? "Un cierre con evidencia."
                                   : page === "absences"
                                     ? "El equipo se cubre, el trabajo sigue."
-                                    : page === "planning"
+                      : page === "planning"
                                       ? "Cada tarea, en su momento."
+                                      : page === "requests"
+                                        ? "Cada pedido, con responsable y seguimiento."
                                       : "Lo próximo, a la vista."}
               </h1>
               <p>
@@ -1290,7 +1339,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
               </button>
             )}
           </div>
-          <div className="filters">
+          {page !== "requests" && <div className="filters">
             <label className="company-filter">
               <span>AMBIENTE DE TRABAJO</span>
               <select
@@ -1366,8 +1415,9 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             >
               <RotateCcw size={16} />
             </button>
-          </div>
+          </div>}
           <div className="view-content" key={page}>
+            {page === "requests" && laboratory && !remoteSave && <InternalRequests state={state} actor={active} onCreate={createRequest} onStatus={updateRequestStatus} onReply={replyRequest} />}
             {(page === "overview" || page === "day") && (
               <>
                 {stats()}

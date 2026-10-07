@@ -40,6 +40,17 @@ conjuntas aparecen en el cierre de cada miembro, el cálculo respeta la cuota y
 el CSV separa contribución personal de peso global. También se impide cerrar con
 un perfil actor inactivo. Evidencia reciente en `docs/PROJECT-STATUS.md`.
 
+## Consultas y pedidos: alcance actual y revisión necesaria
+
+La interfaz local quedó implementada según el criterio funcional del bloque D:
+tipos separados, urgencia, módulo, destinatario explícito para sugerencias,
+visibilidad, estados, respuesta e historial. Evidencia y límites en
+`docs/PROJECT-STATUS.md` y
+`docs/architecture/review-evidence/internal-requests-lab-20261006.json`.
+No integrar su esquema en D1/Supabase todavía: la cola de soporte no tiene una
+cuenta de identidad, y persistencia/entrega entre dispositivos requiere revisión
+de permisos y diseño de servidor.
+
 Continuar revisando las rutas operativas restantes del laboratorio contra
 `docs/PRODUCT-ROADMAP.md` y los contratos vigentes, implementando sólo cambios ya
 definidos. Mantener fuera del alcance Auth, cuentas, `/api`, Worker/D1 y SQL
@@ -54,6 +65,12 @@ Si los criterios existentes de baja/reasignación bastan: GPT-6 Luna, esfuerzo
 medio, velocidad Standard, para implementar y verificar. Si aparece una decisión
 nueva de permisos/jerarquía, usar GPT-6.1 Sol, esfuerzo alto, Standard, sólo para
 revisar esa decisión antes de volver a Luna.
+
+Próximo cambio de modelo: **GPT-6.1 Sol, esfuerzo medio, Standard** para revisar
+el módulo de consultas local y definir qué funcionalidades pendientes pueden
+cerrarse en laboratorio sin crear un contrato de producción prematuro. Cualquier
+esquema/backend o identidad de soporte exige **esfuerzo alto** antes de volver a
+Luna.
 
 Evidencia del bloque más reciente: 365 pruebas en 35 archivos, TypeScript/Vite,
 Worker build y Chromium desktop/móvil aprobados; cero errores JS y solicitudes

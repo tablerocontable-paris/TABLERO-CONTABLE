@@ -172,3 +172,31 @@ del helper: archivo de 745.693 bytes, SHA-256
 `f49a7f519ce0f48968e61ca0e27ff47a1474c73fe842a3097fd418b722bbc8f7`, una
 migración y `project_id` correcto. Es tooling de entrega; no altera lógica de la
 aplicación ni crea cuentas. La versión de aplicación al validar el helper era v55.
+
+## Consultas y pedidos internos — laboratorio local — 06/10/2026
+
+Se agregó `Consultas y pedidos` sólo a la vista privada de laboratorio. Los
+errores técnicos van a una cola de soporte simulada; los pedidos de trabajo a
+Juan Pablo; las sugerencias exigen elegir un jefe o encargado. Autor, destinatario
+y perfiles con rol jefe pueden consultar; sólo destinatario/jefatura responde o
+cambia estados. Se guardan mensajes e historial completo con estado nuevo, en
+revisión, respondido o resuelto; los abiertos se ordenan por urgencia y fecha, y
+el filtro “Abiertos primero” conserva también los resueltos para que el autor
+pueda leer la respuesta. Filtros de tipo, autor y estado.
+
+La colección opcional es compatible con datos de laboratorio anteriores. Los
+pedidos no generan tareas, actividad ni KPI. No se implementaron capturas,
+notificaciones entre dispositivos, correo, cuenta de soporte ni conversión en
+tarea; esta función no sincroniza entre equipos ni acepta información real de
+clientes. Backend y permisos productivos requieren revisión Sol antes de portar.
+
+Verificación del corte: **371/371 pruebas en 36 archivos**; TypeScript, Vite y
+bundle Worker compilados. Chromium Edge recorrió creación por empleado,
+seguimiento/respuesta/resolución por jefatura y lectura posterior por el autor;
+probó anchos de 1440×900, 1600×740, 1280×720, 1024×650 y móvil, con cero
+errores JS, cero solicitudes a `/api` y sin recorte del menú. Durante QA se
+corrigieron el espacio de la barra y la visibilidad de casos resueltos.
+Evidencia: `architecture/review-evidence/internal-requests-lab-20261006.json`.
+
+El avance global se mantiene en **~45%**; una función local aprobada no satisface
+la aceptación completa ni la infraestructura del 100%.

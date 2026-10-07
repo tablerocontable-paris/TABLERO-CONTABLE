@@ -209,6 +209,27 @@ const assert = (ok, message) => {
   await page.getByLabel('Nuevo comentario').fill('Nota de prueba para el superior');
   await page.getByRole('button', { name: 'Publicar comentario', exact: true }).click();
   await page.getByRole('button', { name: 'Cerrar', exact: true }).click();
+  const taskCountBeforeRequest = await page.evaluate(() => JSON.parse(localStorage.getItem('paris-state-lab')).tasks.length);
+  await page.locator('[data-nav="requests"]').click();
+  await page.getByLabel('Módulo').fill('Vencimientos');
+  await page.getByLabel('Asunto').fill('Aclarar vencimiento de prueba');
+  await page.getByLabel('Detalle').fill('Necesito confirmar el criterio del vencimiento en la demostración.');
+  await page.getByRole('button', { name: 'Registrar pedido' }).click();
+  const requestId = await page.evaluate(() => JSON.parse(localStorage.getItem('paris-state-lab')).internalRequests.at(-1).id);
+  assert(await page.evaluate((before) => JSON.parse(localStorage.getItem('paris-state-lab')).tasks.length === before, taskCountBeforeRequest), 'Internal request altered task KPI source rows');
+  checks.push({ interaction: 'internal-request-created-without-task-or-KPI-mutation', requestId });
+  await page.getByLabel("Vista de usuario").selectOption("boss");
+  await page.locator('[data-nav="requests"]').click();
+  await page.getByRole('heading', { name: 'Aclarar vencimiento de prueba' }).waitFor();
+  await page.getByRole('button', { name: 'Tomar para revisión' }).click();
+  await page.getByLabel('Respuesta').fill('El plazo se conserva en la tarjeta de la tarea.');
+  await page.getByRole('button', { name: 'Responder' }).click();
+  await page.getByRole('button', { name: 'Marcar resuelto' }).click();
+  const closedRequest = await page.evaluate((id) => JSON.parse(localStorage.getItem('paris-state-lab')).internalRequests.find((row) => row.id === id), requestId);
+  assert(closedRequest.status === 'resolved' && closedRequest.messages.length === 1 && closedRequest.history.length === 4, 'Internal request response or transition history did not persist');
+  await page.getByLabel("Vista de usuario").selectOption("e0");
+  await page.locator('[data-nav="requests"]').click();
+  assert(await page.getByText('El plazo se conserva en la tarjeta de la tarea.').count() === 1, 'Request author cannot see recipient response');
   await page.getByLabel("Vista de usuario").selectOption("boss");
   await page.getByRole('button', { name: /^Notificaciones:/ }).click();
   assert((await page.getByText('Nuevo comentario en la tarea', { exact: true }).count()) === 1, 'Manager task notification missing');
@@ -270,6 +291,7 @@ const assert = (ok, message) => {
           "independent icon folds",
           "drag task and auto-start its actor clock",
           "boss parameter review",
+          "internal request routing, response, resolution and persistence",
           "persisted review",
           "mobile",
         ],
