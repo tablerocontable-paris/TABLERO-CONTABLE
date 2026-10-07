@@ -13,8 +13,10 @@ no agregaron comportamiento a la aplicación. Sobre este HEAD pasaron la suite
 420/420, TypeScript, Vite, Worker y los cuatro recorridos Edge de navegador
 (general, correcciones/arrastre, copia/restauración y tareas conjuntas), sin
 errores JS ni llamadas a `/api`. El hook de pre-commit pasó 104/104 al crear el
-commit. El bundle y ZIP se verifican clonando el SHA de entrega. El JSON
-`paris-state-lab` se exporta aparte desde la interfaz.
+commit. El bundle y ZIP se verifican clonando el SHA de entrega. La guía incluye
+`npm run hooks:install`, probado en una clonación nueva: la configuración local
+de Git no viaja en el bundle. El JSON `paris-state-lab` se exporta aparte desde
+la interfaz.
 
 El último corte funcional del laboratorio son los avisos locales de vencimiento,
 implementados en `25d1490` y publicados en el mismo Site privado como v68. Las

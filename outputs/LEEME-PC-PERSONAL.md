@@ -15,13 +15,16 @@ del laboratorio guardados en el navegador.
     git clone .\grupo-paris-site-personal.bundle .\grupo-paris-contabilidad
     cd .\grupo-paris-contabilidad
     npm ci
+    npm run hooks:install
     npm test
     npm run dev -- --host 127.0.0.1
 
 4. Abrí `grupo-paris-contabilidad` en Codex para continuar. El laboratorio
    local queda en http://127.0.0.1:5173.
 
-Trabajá desde una sola PC a la vez. No sincronices la carpeta activa ni `.git`
+La configuración local del hook no forma parte del bundle: `npm run
+hooks:install` activa `.githooks` en este clon. Trabajá desde una sola PC a la
+vez. No sincronices la carpeta activa ni `.git`
 con OneDrive/Dropbox. GitHub todavía no está conectado; por eso los cambios
 entre PCs se pasan con bundles nuevos, no automáticamente.
 

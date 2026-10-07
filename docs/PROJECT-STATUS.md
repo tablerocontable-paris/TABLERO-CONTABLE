@@ -2,13 +2,14 @@
 
 ## Estado verificado — 07/10/2026
 
-El commit `d3ee37185e1ce2b91e743205ac0bf2573a138fae` está publicado en el
-Site existente como v76. La audiencia sigue personalizada y exclusiva del
+El commit `a15448f5fdf47675b8a14f6da881d34892790c12` está publicado en el
+Site existente como v79. La audiencia sigue personalizada y exclusiva del
 propietario: una cuenta autorizada, cero grupos y cero visitantes externos.
-El cambio estandarizó `npm test` con dos workers y timeouts explícitos; no
-modificó el producto. La suite completa aprobó 420/420 pruebas en 48 archivos;
-el pre-commit pasó 104/104. TypeScript, Vite, Worker y recorridos Chromium
-desktop/móvil también pasaron; esos recorridos no llamaron a `/api`.
+Los cambios v76–v79 fueron de configuración de pruebas, documentación y
+transferencia; no modificaron funcionalidades. Sobre el mismo código pasaron
+420/420 pruebas en 48 archivos, pre-commit 104/104, TypeScript, Vite, Worker y
+cuatro recorridos Edge desktop/móvil sin errores JS ni llamadas a `/api`.
+Prettier pudo parsear `.github/workflows/validate.yml` como YAML.
 
 La prueba sintética con 24 perfiles mostró 24 filas en 512 ms desde la
 selección de Equipo. Es una línea base, no un criterio de aceptación acordado.
@@ -19,7 +20,9 @@ probó Auth/MFA/RLS real ni recuperación productiva. Avance global orientativo:
 
 La guía de transferencia está en `outputs/LEEME-PC-PERSONAL.md`; el bundle y
 ZIP vigentes se entregan junto al checkout, generados desde el SHA final. El
-bundle se verificó clonando y comparando HEAD. El estado `paris-state-lab` del
+bundle se verificó clonando y comparando HEAD. `npm run hooks:install` se probó
+en un clon temporal y activó `.githooks`, ya que `core.hooksPath` es local al
+checkout y no viaja dentro del bundle. El estado `paris-state-lab` del
 navegador no está en Git ni en el ZIP: exportarlo aparte desde «Vista de
 prueba». El registro v68 está marcado como histórico en
 `docs/architecture/STATE-REVIEW-20261007.md`.
