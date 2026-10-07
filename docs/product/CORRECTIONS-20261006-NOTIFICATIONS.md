@@ -28,10 +28,12 @@ En producción los eventos y permisos deben validarse en servidor y guardarse
 en la transacción del cambio, no aceptar destinatarios elegidos por el cliente.
 El backend Worker/D1 existente no se modifica ni se anuncia como integrado.
 
-El contrato admite «tarea conjunta activada» con destinatarios filtrados,
-pero su disparador queda pendiente de completar la coordinación conjunta
-en el recorrido funcional. No se presenta un evento simulado como coordinación
-real ni se alteran cuotas/KPI para aparentar su cierre.
+«Tarea conjunta activada» se genera desde el cambio efectivo de responsabilidad
+en el recorrido de laboratorio. El flujo de interfaz quedó verificado de punta
+a punta: una persona incorporada recibe un aviso, lo abre hacia la tarea y la
+lectura persiste al recargar. Los destinatarios siguen filtrados por acceso y
+empresa; el actor no recibe su propio aviso. Esto no representa entrega remota ni
+habilita coordinación entre dispositivos.
 
 ## Comprobación
 
@@ -39,6 +41,20 @@ Pruebas de destinatarios, persistencia, aislamiento, comentarios y contrato conj
 Chromium: escritorio/móvil, alineación de logo, campana, comentario a superior,
 revisión de parámetros, recarga, campos y ausencia de API operativa/errores JS.
 Suite completa y build se ejecutan antes de publicar el mismo Site privado.
+
+## Verificación posterior — 07/10/2026
+
+La aceptación de activación conjunta quedó extendida para comprobar exactamente
+un aviso por cada otra persona autorizada, acceso desde la campana, apertura de
+la tarea y persistencia del estado leído tras recargar. El componente común de
+diálogos ahora enlaza cada título con `aria-labelledby`, para que el nombre del
+diálogo se exponga a tecnologías de asistencia. Ver
+`docs/architecture/review-evidence/joint-notification-lab-20261007.json`.
+
+La entrega local continúa en `paris-state-lab`. No se implementó correo,
+notificación del sistema operativo ni sincronización entre dispositivos; eso
+requiere identidad y permisos de servidor revisados antes de integrar el
+backend.
 
 ## Continuidad
 

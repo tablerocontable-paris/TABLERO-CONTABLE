@@ -73,7 +73,7 @@ Avance orientativo 45–50%; no 100%.
 100% incluye aplicación aceptada sin correcciones conocidas, GitHub, dos Supabase dev/producción, hosting propio y automatización validada. Seguir docs/ops/FINAL-ACCEPTANCE.md. No crear cuentas ni invitar usuarios durante laboratorio. No confundir CI preparado con CI ejecutado.
 
 ## Correcciones posteriores — notificaciones
-Seguir docs/product/CORRECTIONS-20261006-NOTIFICATIONS.md. Continuar sin conexiones hasta imposibilidad técnica concreta. La campana y los comentarios funcionan sólo en laboratorio; entrega transaccional en servidor y activación conjunta siguen pendientes de integración.
+Seguir docs/product/CORRECTIONS-20261006-NOTIFICATIONS.md. La activación conjunta ya genera un aviso local y se verificó desde la interfaz hasta abrir la tarea y persistir su lectura; evidencia en `docs/architecture/review-evidence/joint-notification-lab-20261007.json`. Campana y comentarios siguen aislados al laboratorio. Entrega transaccional entre dispositivos requiere revisión de identidad y permisos antes de implementarse en servidor; no conectar cuentas durante esta etapa.
 
 ## Contrato conjunto — 06/10/2026
 La implementación local de docs/architecture/JOINT-LABORATORY-CONTRACT-20261006.md está completada y publicada; ver el estado y sus límites más abajo.

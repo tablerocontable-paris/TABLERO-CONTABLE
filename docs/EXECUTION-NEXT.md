@@ -277,3 +277,23 @@ La infraestructura de cuentas sigue pospuesta hasta la aceptación final.
 El avance orientativo permanece en ~45%.
 La última versión publicada es la v64 del Site privado, desde el commit
 `5ecf94e9439a4d56ceab0990877451b3a5d6ca5a`; la audiencia permanece sin cambios.
+
+## Aviso conjunto validado y accesibilidad — 07/10/2026
+
+El disparador de activación conjunta ya está cerrado en el recorrido del
+laboratorio: una única notificación para cada otro perfil autorizado, apertura
+de la tarea desde la campana y lectura persistente tras recargar. El componente
+común `Dialog` vincula su título con `aria-labelledby`. Evidencia y límites en
+`docs/architecture/review-evidence/joint-notification-lab-20261007.json`.
+
+Validación: 412/412 pruebas en 45 archivos; TypeScript, Vite, Worker y Chromium
+Edge escritorio/móvil aprobados, cero errores JS y cero llamadas a `/api`.
+Vite conserva la advertencia informativa por un chunk principal de ~593 kB.
+El alcance continúa local en `paris-state-lab`; no se conectaron cuentas ni
+servicios. Verificar publicación nativa en el mismo Site y mantener la audiencia
+actual.
+
+Siguiente paso que requiere revisión de contrato: **GPT-6.1 Sol, esfuerzo alto,
+Standard** para evaluar dependencias, delegación/aceptación y notificaciones de
+servidor. Después, **GPT-6 Luna, esfuerzo medio, Standard** para implementar los
+contratos aprobados en laboratorio antes de conectar infraestructura.

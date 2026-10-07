@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-07",
+  "scope": "private laboratory only",
+  "feature": "joint-task activation notifications and accessible dialog names",
+  "rules": [
+    "Activating a joint task through the interface creates one event per other authorized participant and superior, filtered by active profile, company, and canWork access.",
+    "The task participant can open the notification from the header bell and reach the exact task.",
+    "Opening the notice marks only that recipient's event as read, and the state survives reload without generating duplicate events.",
+    "Shared dialogs expose their visible heading through aria-labelledby so assistive technology receives the dialog name."
+  ],
+  "verification": {
+    "completeSuite": "45 files, 412 passed, 0 failed; vitest run --testTimeout=20000 --hookTimeout=30000 --maxWorkers=2",
+    "typecheck": "passed",
+    "viteBuild": "passed",
+    "workerBuild": "passed",
+    "chromium": {
+      "passed": true,
+      "scripts": [
+        "tests/browser-joint.cjs",
+        "tests/browser.cjs",
+        "tests/browser-corrections.cjs"
+      ],
+      "artifacts": [
+        "outputs/joint-notification-acceptance/joint-task-detail.png",
+        "outputs/joint-notification-acceptance/joint-member-report.csv",
+        "outputs/site-acceptance-20261007/overview.png",
+        "outputs/site-acceptance-20261007/mobile.png"
+      ],
+      "apiCalls": [],
+      "javascriptErrors": [],
+      "assertions": [
+        "The 60/40 joint allocation persists from the setup UI.",
+        "Exactly the other authorized participants and superior receive one activation notice.",
+        "The invited participant sees the notice, opens the task, and its read status persists after reload.",
+        "Two member clocks remain independent; completion and sequential closures preserve personal reports and CSV privacy.",
+        "The existing desktop and mobile laboratory workflows, drag-and-drop, and correction flows pass."
+      ]
+    },
+    "preCommit": "passed: scripts/validate-change.mjs; 96/96 tests in 14 files, TypeScript and cached diff check"
+  },
+  "buildNotes": [
+    "Vite succeeds with the existing informational main JavaScript chunk warning at approximately 593 kB, above 500 kB.",
+    "Rollup removes two upstream Zod purity comments; this does not prevent the build."
+  ],
+  "limitations": [
+    "Notifications remain in browser-local paris-state-lab and do not synchronize between devices.",
+    "No email, account, operational API, D1, or Supabase was used.",
+    "Server-side event delivery and authorization need a separate architecture review before implementation."
+  ]
+}

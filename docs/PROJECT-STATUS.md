@@ -441,3 +441,31 @@ La interfaz se publicó en el mismo Site privado como **v64**, desde el commit
 `appgdep_6ac5e1327d7c8191919a40fbf57b4b96` terminó correctamente. Relectura:
 propietario, acceso personalizado con una cuenta permitida, cero grupos y cero
 visitantes externos. No se activó el espacio operativo ni se conectaron cuentas.
+
+## Aviso de tarea conjunta y accesibilidad de diálogos — laboratorio — 07/10/2026
+
+La activación desde la interfaz ahora queda aceptada de punta a punta: cada
+persona autorizada distinta del actor recibe un solo aviso; el nuevo integrante
+lo ve en la campana, abre la tarea correcta y conserva el estado leído tras
+recargar. Los diálogos comunes asocian su título visible mediante
+`aria-labelledby`, de modo que lectores de pantalla y automatización puedan
+identificarlos por nombre.
+
+Verificación: **412/412 pruebas en 45 archivos**, TypeScript, build Vite y
+Worker; Chromium Edge recorrió coordinación conjunta, notificación, apertura,
+lectura persistente, cierre secuencial y reportes, además de los recorridos
+generales y móviles. Cero errores JavaScript y cero solicitudes a `/api`.
+Evidencia: `architecture/review-evidence/joint-notification-lab-20261007.json`
+y capturas/CSV bajo `outputs/joint-notification-acceptance/` y
+`outputs/site-acceptance-20261007/`.
+
+El build conserva el aviso informativo de Vite por el chunk principal de ~593 kB
+y avisos de comentarios de pureza en Zod; no impiden compilar. El aviso y su
+lectura siguen guardados en `paris-state-lab`: no hay correo ni sincronización
+entre equipos. La entrega en servidor requiere revisar identidad, permisos y
+transacciones antes de integrar API/D1/Supabase. Publicación en el mismo Site
+privado: pendiente de la verificación nativa de esta ejecución; no cambiar la
+audiencia ni habilitar cuentas.
+
+El avance global continúa aproximadamente en **45%**: este cierre funcional no
+incluye aceptación completa, sincronización entre PCs ni infraestructura final.

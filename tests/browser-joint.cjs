@@ -49,9 +49,34 @@ const assert = (ok, message) => { if (!ok) throw Error(message); };
   let saved = await page.evaluate(() => JSON.parse(localStorage.getItem("paris-state-lab")));
   let task = saved.tasks.find((row) => row.id === "joint-browser-test");
   assert(task.responsibility?.members.map((member) => member.shareBps).join(",") === "6000,4000", "UI did not persist the 60/40 allocation");
-  assert(saved.notifications.some((notice) => notice.taskId === task.id && notice.recipientId === "e1" && notice.kind === "joint"), "Joint assignment notification missing");
+  const jointRecipients = saved.notifications.filter((notice) => notice.taskId === task.id && notice.kind === "joint").map((notice) => notice.recipientId).sort();
+  assert(jointRecipients.join(",") === "boss,e0,e1", "The activation must notify exactly the other authorized participants and their superior once");
   await page.screenshot({ path: require("node:path").join(output, "joint-task-detail.png"), animations: "disabled" });
   await page.getByRole("button", { name: "Cerrar" }).click();
+
+  await page.evaluate(() => {
+    const state = JSON.parse(localStorage.getItem("paris-state-lab"));
+    state.activeId = "e1";
+    localStorage.setItem("paris-state-lab", JSON.stringify(state));
+  });
+  await page.reload(); await page.locator(".lab-banner").waitFor();
+  await page.getByRole("button", { name: /Notificaciones:/ }).click();
+  const jointNotice = page.locator(".notification-list li").filter({ hasText: "Tarea de prueba conjunta" });
+  await jointNotice.waitFor();
+  assert(await jointNotice.count() === 1, "The new member must see exactly one joint activation notice");
+  assert(await jointNotice.locator("strong").innerText() === "Tarea compartida con vos", "Joint activation notice title is incorrect");
+  await jointNotice.getByRole("button", { name: "Abrir tarea" }).click();
+  await page.getByRole("dialog", { name: "Tarea de prueba conjunta" }).waitFor();
+  saved = await page.evaluate(() => JSON.parse(localStorage.getItem("paris-state-lab")));
+  const openedNotice = saved.notifications.find((notice) => notice.taskId === "joint-browser-test" && notice.recipientId === "e1" && notice.kind === "joint");
+  assert(openedNotice?.readAt, "Opening the joint notice must persist its read status");
+  await page.getByRole("dialog", { name: "Tarea de prueba conjunta" }).getByRole("button", { name: "Cerrar" }).click();
+  await page.reload(); await page.locator(".lab-banner").waitFor();
+  await page.getByRole("button", { name: /Notificaciones:/ }).click();
+  const persistedNotice = page.locator(".notification-list li").filter({ hasText: "Tarea de prueba conjunta" });
+  await persistedNotice.waitFor();
+  assert(!(await persistedNotice.evaluate((element) => element.classList.contains("unread"))), "The read status must survive a reload");
+  await page.getByRole("dialog", { name: "Notificaciones" }).getByRole("button", { name: "Cerrar" }).click();
 
   async function useProfile(id) {
     await page.evaluate((profileId) => { const state = JSON.parse(localStorage.getItem("paris-state-lab")); state.activeId = profileId; localStorage.setItem("paris-state-lab", JSON.stringify(state)); }, id);
