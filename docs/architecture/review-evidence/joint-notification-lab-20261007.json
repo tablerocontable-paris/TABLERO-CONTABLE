@@ -38,6 +38,19 @@
     },
     "preCommit": "passed: scripts/validate-change.mjs; 96/96 tests in 14 files, TypeScript and cached diff check"
   },
+  "siteDeployment": {
+    "project": "Grupo París · Tablero contable",
+    "version": 65,
+    "commit": "8d221ca4da4b32220fd1e49e176c7f01bc248e17",
+    "deployment": "appgdep_6ac5e81f55448191bf732b8f58d73147",
+    "url": "https://grupo-paris-contabilidad.valentino-magni.chatgpt.site",
+    "audience": {
+      "mode": "custom owner-only",
+      "allowedAccounts": 1,
+      "allowedGroups": 0,
+      "externalVisitors": 0
+    }
+  },
   "buildNotes": [
     "Vite succeeds with the existing informational main JavaScript chunk warning at approximately 593 kB, above 500 kB.",
     "Rollup removes two upstream Zod purity comments; this does not prevent the build."

@@ -463,9 +463,12 @@ El build conserva el aviso informativo de Vite por el chunk principal de ~593 kB
 y avisos de comentarios de pureza en Zod; no impiden compilar. El aviso y su
 lectura siguen guardados en `paris-state-lab`: no hay correo ni sincronización
 entre equipos. La entrega en servidor requiere revisar identidad, permisos y
-transacciones antes de integrar API/D1/Supabase. Publicación en el mismo Site
-privado: pendiente de la verificación nativa de esta ejecución; no cambiar la
-audiencia ni habilitar cuentas.
+transacciones antes de integrar API/D1/Supabase. Publicación confirmada en el
+mismo Site privado como **v65**, desde el commit
+`8d221ca4da4b32220fd1e49e176c7f01bc248e17`; deployment
+`appgdep_6ac5e81f55448191bf732b8f58d73147` terminó correctamente. La relectura
+confirmó rol propietario, acceso personalizado a una cuenta, cero grupos y cero
+visitantes externos. No se cambió la audiencia ni se habilitaron cuentas.
 
 El avance global continúa aproximadamente en **45%**: este cierre funcional no
 incluye aceptación completa, sincronización entre PCs ni infraestructura final.

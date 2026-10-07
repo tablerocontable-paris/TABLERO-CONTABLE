@@ -290,8 +290,11 @@ Validación: 412/412 pruebas en 45 archivos; TypeScript, Vite, Worker y Chromium
 Edge escritorio/móvil aprobados, cero errores JS y cero llamadas a `/api`.
 Vite conserva la advertencia informativa por un chunk principal de ~593 kB.
 El alcance continúa local en `paris-state-lab`; no se conectaron cuentas ni
-servicios. Verificar publicación nativa en el mismo Site y mantener la audiencia
-actual.
+servicios. Publicación confirmada como Site **v65** desde
+`8d221ca4da4b32220fd1e49e176c7f01bc248e17`; deployment
+`appgdep_6ac5e81f55448191bf732b8f58d73147` exitoso. La audiencia siguió
+personalizada owner-only: una cuenta permitida, cero grupos y cero visitantes
+externos.
 
 Siguiente paso que requiere revisión de contrato: **GPT-6.1 Sol, esfuerzo alto,
 Standard** para evaluar dependencias, delegación/aceptación y notificaciones de
