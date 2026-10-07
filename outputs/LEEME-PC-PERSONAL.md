@@ -5,6 +5,11 @@ de transferencia vigente. Ese bundle contiene el mismo repositorio Git e
 historial; no incluye claves, tokens, credenciales, `node_modules` ni los datos
 del laboratorio guardados en el navegador.
 
+Transferencia regenerada el 07/10/2026 desde el commit de aplicación
+`bbff6148fc1c82b861d661a2a27dd6ad610da925`. Al clonar, verificá que `git rev-parse
+HEAD` devuelva ese SHA. El proyecto sigue en laboratorio privado; no se crearon
+cuentas ni servicios propios.
+
 ## Pasar el código
 
 1. Extraé el ZIP en una carpeta privada. Deben quedar juntos este instructivo y
@@ -12,7 +17,7 @@ del laboratorio guardados en el navegador.
 2. En la PC personal instalá Git y Node.js LTS si todavía no los tenés.
 3. Abrí PowerShell en esa carpeta y ejecutá:
 
-    git clone .\grupo-paris-site-personal.bundle .\grupo-paris-contabilidad
+    git clone --branch main .\grupo-paris-site-personal.bundle .\grupo-paris-contabilidad
     cd .\grupo-paris-contabilidad
     npm ci
     npm run hooks:install
@@ -27,6 +32,10 @@ hooks:install` activa `.githooks` en este clon. Trabajá desde una sola PC a la
 vez. No sincronices la carpeta activa ni `.git`
 con OneDrive/Dropbox. GitHub todavía no está conectado; por eso los cambios
 entre PCs se pasan con bundles nuevos, no automáticamente.
+
+Se indica `--branch main` porque el bundle transporta la rama, pero no define
+una rama remota por defecto. La copia de transferencia fue clonada y verificada
+en una carpeta nueva antes de entregarse.
 
 ## Pasar la simulación del navegador
 
