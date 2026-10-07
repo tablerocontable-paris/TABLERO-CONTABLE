@@ -199,5 +199,21 @@
       "testsPassed": 4,
       "result": "Keyboard route for moving task cards passed."
     }
-  ]
+  ],
+  "volumeProbe": {
+    "source": "paris-state-lab browser seed",
+    "baseProfiles": 13,
+    "syntheticProfilesAdded": 11,
+    "totalProfiles": 24,
+    "profileTableRows": 24,
+    "page": "Equipo",
+    "viewport": "1440x900",
+    "elapsedMs": 512,
+    "measurement": "from selecting Equipo until the profile table contained all 24 rows; includes lazy route loading and browser interaction",
+    "overviewReloadMs": 301,
+    "pageErrors": [],
+    "apiRequests": [],
+    "exitCode": 0,
+    "acceptance": "baseline only; no performance threshold specified; not production or multitab evidence"
+  }
 }

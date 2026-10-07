@@ -601,3 +601,9 @@ aproximadamente en **45%** y el siguiente gate requiere GPT-6.1 Sol alto.
 La prueba unitaria de tablero `tests/task-board.test.tsx` pasó 4/4 casos de
 teclado para mover tarjetas. Esto no sustituye una auditoría por teclado de toda
 la navegación. El alcance y comando se agregaron al JSON de evidencia.
+
+Sondeo sintético de volumen: 13 perfiles base + 11 ficticios = 24 perfiles; la
+tabla de administración mostró las 24 filas en 512 ms desde seleccionar Equipo
+(ventana 1440×900). La medida incluye carga de ruta e interacción, se guarda como
+línea base y no implica aceptación porque no hay umbral acordado. Cero errores
+JS y cero llamadas a `/api`. No prueba concurrencia entre pestañas ni servidor.
