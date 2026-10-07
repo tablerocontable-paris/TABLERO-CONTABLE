@@ -36,6 +36,16 @@ describe("CSV de reporte cerrado", () => {
     const historic = makeClosure("Histórico", old);
     const current = makeClosure("Nuevo", noSample);
     current.report!.groups.unshift(historic.report!.groups[0]!);
+    current.report!.transfers = [{
+      taskId: "task-transfer", title: "Conciliación iniciada", formerOwner: "Valentino Magni",
+      newOwner: "Lucía Fernández", reason: "Continuidad del cierre mensual", transferredAt: "2026-10-06T15:00:00.000Z",
+    }];
+    current.taskTransfers = [{
+      id: "transfer-1", taskId: "task-transfer", formerOwnerId: "e0", formerOwnerName: "Valentino Magni",
+      newOwnerId: "e1", newOwnerName: "Lucía Fernández", companyId: "c1", reason: "Continuidad del cierre mensual",
+      transferredAt: "2026-10-06T15:00:00.000Z", transferredBy: "boss",
+      taskSnapshot: { ...state.tasks[0]!, id: "task-transfer", title: "Conciliación iniciada" }, sessions: [], activity: [], comments: [],
+    }];
     state.closures = [current];
     render(<PeriodReports state={state} month="2026-10" />);
     fireEvent.click(screen.getAllByRole("button", { name: "Ver reporte" })[0]!);
@@ -45,5 +55,7 @@ describe("CSV de reporte cerrado", () => {
     expect(csv).toContain("Sin medición histórica");
     expect(csv).toContain("Sin muestra");
     expect(csv).toContain("Promedio días anticipación metas");
+    expect(csv).toContain("Continuidad del cierre mensual");
+    expect(csv).toContain("Valentino Magni");
   });
 });

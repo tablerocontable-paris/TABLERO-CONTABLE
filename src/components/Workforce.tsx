@@ -7,6 +7,7 @@ import {
   recurringCoveragePreview,
   deactivateProfile,
   reassignOrphanedTask,
+  transferOrphanedTask,
   updateProfile,
   type Absence,
 } from "../domain/workforce";
@@ -26,6 +27,8 @@ export function Workforce({
   const [retiring, setRetiring] = useState<Profile | null>(null);
   const [deactivationReason, setDeactivationReason] = useState("");
   const [reassignmentTargets, setReassignmentTargets] = useState<Record<string, string>>({});
+  const [transferTargets, setTransferTargets] = useState<Record<string, string>>({});
+  const [transferReasons, setTransferReasons] = useState<Record<string, string>>({});
   return (
     <Panel
       title="Administración de perfiles"
@@ -297,10 +300,47 @@ export function Workforce({
                           } catch (error) { notify((error as Error).message); }
                         }}>Confirmar reasignación</button>
                     </div>
-                  ) : <span>{item.resolution === "handoff_required" ? "Requiere traspaso con historial" : "Revisión manual requerida"}</span>}
+                  ) : item.resolution === "handoff_required" && task && !task.responsibility ? (
+                    <div className="form-grid">
+                      <label>Traspasar con historial a
+                        <select aria-label={`Traspasar ${task.title}`} value={transferTargets[item.id] || ""}
+                          onChange={(e) => setTransferTargets({ ...transferTargets, [item.id]: e.target.value })}>
+                          <option value="">Elegí una persona activa</option>
+                          {candidates.map((person) => <option key={person.id} value={person.id}>{person.name}</option>)}
+                        </select>
+                      </label>
+                      <label>Motivo del traspaso
+                        <textarea aria-label={`Motivo para ${task.title}`} minLength={5} maxLength={500} required
+                          value={transferReasons[item.id] || ""}
+                          onChange={(e) => setTransferReasons({ ...transferReasons, [item.id]: e.target.value })}
+                          placeholder="Explicá por qué se transfiere el trabajo iniciado" />
+                      </label>
+                      <button disabled={!transferTargets[item.id] || (transferReasons[item.id] || "").trim().length < 5}
+                        onClick={() => {
+                          try {
+                            if (commit(transferOrphanedTask(state, item.id, transferTargets[item.id]!, active.id, transferReasons[item.id]!), "Traspasó tarea iniciada conservando historial", item.taskId)) {
+                              setTransferTargets((targets) => ({ ...targets, [item.id]: "" }));
+                              setTransferReasons((reasons) => ({ ...reasons, [item.id]: "" }));
+                            }
+                          } catch (error) { notify((error as Error).message); }
+                        }}>Registrar traspaso</button>
+                    </div>
+                  ) : <span>{item.resolution === "handoff_required"
+                    ? "Responsabilidad conjunta: revisar participaciones y cierres antes de resolver."
+                    : "Revisión manual requerida"}</span>}
                 </article>
               );
-            })}
+              })}
+          {!!state.taskTransfers?.length && <>
+            <h3>Historial de traspasos</h3>
+            <div className="table-wrap"><table><thead><tr><th>Tarea</th><th>De</th><th>A</th><th>Motivo</th><th>Fecha</th></tr></thead>
+              <tbody>{[...state.taskTransfers].reverse().map((transfer) => <tr key={transfer.id}>
+                <td>{transfer.taskSnapshot.title} · {state.companies.find((company) => company.id === transfer.companyId)?.name || transfer.companyId}</td>
+                <td>{transfer.formerOwnerName}</td><td>{transfer.newOwnerName}</td><td>{transfer.reason}</td>
+                <td>{new Date(transfer.transferredAt).toLocaleString("es-AR")}</td>
+              </tr>)}</tbody>
+            </table></div>
+          </>}
         </section>
       )}
     </Panel>

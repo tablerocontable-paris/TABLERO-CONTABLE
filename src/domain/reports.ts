@@ -1,5 +1,5 @@
 import { dateART, metrics, metricsForProfile, isResponsible, responsibilityShare, type State, type Closure, type Metrics } from "./model";
-import { actorElapsedSeconds, elapsedSeconds } from "./workforce";
+import { actorElapsedSeconds } from "./workforce";
 export interface ReportContribution {
   taskId: string;
   title: string;
@@ -7,6 +7,14 @@ export interface ReportContribution {
   possiblePoints: number;
   earnedPoints: number;
   recordedSeconds: number;
+}
+export interface ReportTransfer {
+  taskId: string;
+  title: string;
+  formerOwner: string;
+  newOwner: string;
+  reason: string;
+  transferredAt: string;
 }
 export interface ReportGroup {
   key: string;
@@ -34,6 +42,7 @@ export interface PeriodReport {
   reopenings: number;
   profileId?: string;
   contributions?: ReportContribution[];
+  transfers?: ReportTransfer[];
   algorithm?: "joint-lab-v1";
 }
 export function generatePeriodReport(s: State, c: Closure): PeriodReport {
@@ -69,6 +78,17 @@ export function generatePeriodReport(s: State, c: Closure): PeriodReport {
       recordedSeconds: actorElapsedSeconds(task, c.ownerId, c.at),
     };
   });
+  const taskIds = new Set(personalTasks.map((task) => task.id));
+  const transfers = (c.taskTransfers || [])
+    .filter((transfer) => taskIds.has(transfer.taskId))
+    .map((transfer) => ({
+      taskId: transfer.taskId,
+      title: c.tasks.find((task) => task.id === transfer.taskId)?.title || transfer.taskId,
+      formerOwner: transfer.formerOwnerName,
+      newOwner: transfer.newOwnerName,
+      reason: transfer.reason,
+      transferredAt: transfer.transferredAt,
+    }));
   return {
     schemaVersion: hasJointTasks ? 2 : 1,
     ...(hasJointTasks ? { profileId: c.ownerId, algorithm: "joint-lab-v1" as const } : {}),
@@ -79,9 +99,10 @@ export function generatePeriodReport(s: State, c: Closure): PeriodReport {
     recipientIds: recipients.map((p) => p.id),
     recipientNames: recipients.map((p) => p.name),
     delivery: "disponible en demostración",
-    recordedSeconds: personalTasks.reduce((n, t) => n + (hasJointTasks ? actorElapsedSeconds(t, c.ownerId, c.at) : elapsedSeconds(t, c.at)), 0),
+    recordedSeconds: personalTasks.reduce((n, t) => n + actorElapsedSeconds(t, c.ownerId, c.at), 0),
     reopenings: personalTasks.reduce((n, t) => n + (t.reopenCount || 0), 0),
     ...(hasJointTasks ? { contributions } : {}),
+    ...(transfers.length ? { transfers } : {}),
     groups: [...grouped.entries()].map(([key, tasks]) => ({
       key,
       company:
@@ -95,7 +116,7 @@ export function generatePeriodReport(s: State, c: Closure): PeriodReport {
       kind: tasks[0].kind,
       unit: tasks[0].unit,
       metrics: hasJointTasks ? metricsForProfile(tasks, c.activity, c.ownerId, dateART(c.at), c.at) : metrics(tasks, c.activity, dateART(c.at), c.at),
-      recordedSeconds: tasks.reduce((n, t) => n + (hasJointTasks ? actorElapsedSeconds(t, c.ownerId, c.at) : elapsedSeconds(t, c.at)), 0),
+      recordedSeconds: tasks.reduce((n, t) => n + actorElapsedSeconds(t, c.ownerId, c.at), 0),
       reopenings: tasks.reduce((n, t) => n + (t.reopenCount || 0), 0),
       ...(hasJointTasks ? { contributions: contributions.filter((row) => tasks.some((task) => task.id === row.taskId)) } : {}),
     })),

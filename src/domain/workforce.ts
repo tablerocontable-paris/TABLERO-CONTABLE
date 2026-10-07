@@ -9,6 +9,7 @@ import {
   type Profile,
   type Task,
   type OrphanedWork,
+  type TaskTransfer,
 } from "./model";
 export interface Absence {
   id: string;
@@ -258,8 +259,10 @@ export function deactivateProfile(
       const assignment = configured.assignments.find((item) => item.id === task.assignmentId);
       const hasSessions = (task.sessions || []).length > 0;
       const hasActivity = configured.activity.some((entry) => entry.taskId === task.id);
+      const hasComments = (configured.taskComments || []).some((comment) => comment.taskId === task.id);
+      const hasStarted = task.status === "En curso" || !!task.startedAt || task.checklist.some((check) => check.done);
       const scheduledDate = task.scheduledOn || task.due;
-      const ready = task.status === "Pendiente" && !hasSessions && !hasActivity &&
+      const ready = task.status === "Pendiente" && !hasStarted && !hasSessions && !hasActivity && !hasComments &&
         !task.responsibility && !!scheduledDate && scheduledDate > futureDate;
       return {
         id: id(), taskId: task.id, formerOwnerId: current.id,
@@ -270,7 +273,7 @@ export function deactivateProfile(
           frequency: assignment.frequency, ...(assignment.schedule ? { schedule: assignment.schedule } : {}),
         } : null,
         reason: note, createdAt: at,
-        resolution: ready ? "ready" as const : hasSessions || hasActivity || task.responsibility
+        resolution: ready ? "ready" as const : hasStarted || hasSessions || hasActivity || hasComments || task.responsibility
           ? "handoff_required" as const : "review_required" as const,
         status: "pending" as const,
       };
@@ -323,6 +326,59 @@ export function reassignOrphanedTask(
     tasks: s.tasks.map((row) => row.id === task.id ? { ...row, ownerId: replacement.id, teamId: replacement.teamId } : row),
     orphanedWork: (s.orphanedWork || []).map((row) => row.id === item.id
       ? { ...row, status: "reassigned", assignedTo: replacement.id, resolvedBy: actor.id, resolvedAt: at }
+      : row),
+  };
+}
+
+export function transferOrphanedTask(
+  s: State,
+  orphanedId: string,
+  replacementId: string,
+  actorId: string,
+  reason: string,
+  at = new Date().toISOString(),
+): State {
+  const actor = s.profiles.find((item) => item.id === actorId && item.active);
+  const item = (s.orphanedWork || []).find((row) => row.id === orphanedId && row.status === "pending");
+  const task = item && s.tasks.find((row) => row.id === item.taskId);
+  const replacement = s.profiles.find((row) => row.id === replacementId && row.active);
+  const note = reason.trim();
+  if (actor?.role !== "jefe") throw Error("Sólo jefatura puede autorizar el traspaso.");
+  if (!item || item.resolution !== "handoff_required" || !task || !replacement)
+    throw Error("La tarea ya no está pendiente de un traspaso explícito.");
+  if (task.responsibility)
+    throw Error("La tarea conjunta requiere revisar primero sus participaciones y cierres.");
+  if (!canSee(actor, item.formerOwnerId, s.profiles))
+    throw Error("No tenés alcance para resolver el trabajo de esta persona.");
+  if (item.formerOwnerId !== task.ownerId || task.status === "Completada" || isClosed(s, task))
+    throw Error("La tarea cambió o su período ya está cerrado; no se puede traspasar.");
+  if (s.closures.some((closure) => closure.ownerId === replacement.id && closure.month === task.month))
+    throw Error("El período de la persona receptora ya está cerrado.");
+  if ((task.sessions || []).some((session) => !session.end))
+    throw Error("Pausá todos los cronómetros antes de confirmar el traspaso.");
+  if (replacement.id === item.formerOwnerId || !replacement.companyIds.includes(item.companyId))
+    throw Error("Elegí una persona activa autorizada para la empresa de la tarea.");
+  if (note.length < 5 || note.length > 500)
+    throw Error("Indicá el motivo del traspaso (entre 5 y 500 caracteres).");
+  const former = s.profiles.find((profile) => profile.id === item.formerOwnerId);
+  const record: TaskTransfer = {
+    id: id(), taskId: task.id, formerOwnerId: item.formerOwnerId,
+    formerOwnerName: former?.name || item.formerOwnerName,
+    newOwnerId: replacement.id, newOwnerName: replacement.name,
+    companyId: task.companyId, reason: note, transferredAt: at, transferredBy: actor.id,
+    taskSnapshot: structuredClone(task),
+    sessions: structuredClone(task.sessions || []),
+    activity: structuredClone(s.activity.filter((entry) => entry.taskId === task.id)),
+    comments: structuredClone((s.taskComments || []).filter((comment) => comment.taskId === task.id)),
+  };
+  return {
+    ...s,
+    tasks: s.tasks.map((row) => row.id === task.id
+      ? { ...row, ownerId: replacement.id, teamId: replacement.teamId }
+      : row),
+    taskTransfers: [...(s.taskTransfers || []), record],
+    orphanedWork: (s.orphanedWork || []).map((row) => row.id === item.id
+      ? { ...row, status: "transferred", assignedTo: replacement.id, resolvedBy: actor.id, resolvedAt: at }
       : row),
   };
 }

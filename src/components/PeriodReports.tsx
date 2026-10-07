@@ -72,6 +72,10 @@ export default function PeriodReports({
         ["Contribuciones personales", "Período", "Proceso", "Participación %", "Puntos posibles", "Puntos obtenidos", "Tiempo propio"],
         ...r.contributions.map((item) => [r.employee, c.month, item.title, item.shareBps / 100, item.possiblePoints, item.earnedPoints, duration(item.recordedSeconds)]),
       ] : []),
+      ...(r.transfers?.length ? [
+        ["Tarea", "ID tarea", "Responsable anterior", "Responsable nuevo", "Motivo", "Fecha"],
+        ...r.transfers.map((item) => [item.title, item.taskId, item.formerOwner, item.newOwner, item.reason, item.transferredAt]),
+      ] : []),
     ];
     const url = URL.createObjectURL(
       new Blob(
@@ -192,6 +196,12 @@ export default function PeriodReports({
             <h3>Contribución de {r.employee}</h3>
             <div className="table-wrap"><table><thead><tr><th>Proceso</th><th>Participación</th><th>Puntos posibles</th><th>Puntos logrados</th><th>Tiempo propio</th></tr></thead>
               <tbody>{r.contributions.map((item) => <tr key={item.taskId}><td>{item.title}</td><td>{(item.shareBps / 100).toFixed(2).replace(/\.00$/, "")}%</td><td>{item.possiblePoints.toFixed(2)}</td><td>{item.earnedPoints.toFixed(2)}</td><td>{duration(item.recordedSeconds)}</td></tr>)}</tbody>
+            </table></div>
+          </>}
+          {!!r.transfers?.length && <>
+            <h3>Historial de traspasos</h3>
+            <div className="table-wrap"><table><thead><tr><th>Tarea</th><th>Responsable anterior</th><th>Responsable nuevo</th><th>Motivo</th><th>Fecha</th></tr></thead>
+              <tbody>{r.transfers.map((item, index) => <tr key={`${item.taskId}-${index}`}><td>{item.title}</td><td>{item.formerOwner}</td><td>{item.newOwner}</td><td>{item.reason}</td><td>{new Date(item.transferredAt).toLocaleString("es-AR")}</td></tr>)}</tbody>
             </table></div>
           </>}
           <p>

@@ -329,6 +329,15 @@ const schema = z.object({
     status: z.enum(["pending", "reassigned", "transferred"]), resolvedAt: z.string().optional(),
     resolvedBy: z.string().optional(), assignedTo: z.string().optional(),
   })).optional(),
+  taskTransfers: z.array(z.object({
+    id: z.string(), taskId: z.string(), formerOwnerId: z.string(), formerOwnerName: z.string(),
+    newOwnerId: z.string(), newOwnerName: z.string(), companyId: z.string(),
+    reason: z.string().min(5).max(500), transferredAt: z.string(), transferredBy: z.string(),
+    taskSnapshot: z.object({ id: z.string(), ownerId: z.string(), companyId: z.string(), status: z.enum(["Pendiente", "En curso", "Completada"]) }).passthrough(),
+    sessions: z.array(z.object({ id: z.string(), actorId: z.string(), start: z.string(), end: z.string().nullable() })),
+    activity: z.array(z.object({ id: z.string(), taskId: z.string(), actorId: z.string(), date: z.string(), qty: z.number(), note: z.string(), createdAt: z.string() })),
+    comments: z.array(z.object({ id: z.string(), taskId: z.string(), actorId: z.string(), content: z.string().max(2000), createdAt: z.string() })),
+  })).optional(),
   tour: z.record(z.string(), z.number()),
   tourVersion: z.record(z.string(), z.number()).optional(),
 }).superRefine((state, context) => {
@@ -428,6 +437,7 @@ export function load(laboratory = isLab()): State {
   );
   state.absences ||= [];
   state.orphanedWork ||= [];
+  state.taskTransfers ||= [];
   state.annotations ||= [];
   state.tourVersion ||= {};
   return state;

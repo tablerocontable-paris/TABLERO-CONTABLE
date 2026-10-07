@@ -105,9 +105,31 @@ Rehabilitar un perfil no revive reglas antiguas.
 
 Contrato: `architecture/PROFILE-DEACTIVATION-LAB-CONTRACT-20261006.md`.
 El flujo funciona sólo en `paris-state-lab`; la baja del Worker/D1 no se ofrece
-porque el backend aún no tiene este contrato. Falta implementar el traspaso
-explícito de trabajo iniciado y trasladar la lógica al backend después de la
-revisión de permisos.
+porque el backend aún no tiene este contrato. La implementación local del
+traspaso explícito de trabajo iniciado se documenta en la sección siguiente;
+portarla al backend exige revisión de permisos.
+
+## Traspaso de tarea iniciada — 06/10/2026
+
+Jefatura puede transferir una tarea no conjunta desde la bandeja de bajas a una
+persona activa con acceso a la empresa. El formulario exige motivo y vuelve a
+validar estado, alcance y cierres. Se conserva la misma tarea, el estado previo
+completo, sesiones, actividad y comentarios; el reloj del perfil dado de baja se
+cierra antes de transferir. El informe de cierre y CSV muestran la cadena de
+responsables y el motivo. El tiempo queda atribuido al actor de cada sesión, sin
+heredar horas. Tareas conjuntas requieren revisión manual por sus cuotas y
+cierres separados.
+
+Verificación: **360/360 pruebas en 35 archivos**; TypeScript, Vite y bundle
+Worker aprobados. Chromium de correcciones desktop/móvil y recorrido conjunto
+aprobados; ambos con cero errores JavaScript y cero solicitudes a `/api`.
+Persistencia local validada. Esto no sincroniza computadoras ni implementa el
+traspaso en D1/Supabase.
+
+El avance global orientativo sigue en **45%**: las pruebas aprobadas no equivalen
+a aceptación final. La próxima fase es auditar cierres/exportaciones y probar
+reglas diarias, semanales y en varios meses. La publicación debe confirmarse con
+el commit de esta fase; no cambia la audiencia privada.
 
 Verificación del corte: 358/358 pruebas en 35 archivos con timeout ampliado
 para migraciones históricas; TypeScript, build Worker y Chromium desktop/móvil

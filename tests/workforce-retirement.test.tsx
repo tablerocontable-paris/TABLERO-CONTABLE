@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Workforce } from "../src/components/Workforce";
 import { seed } from "../src/data/repository";
@@ -10,6 +10,7 @@ beforeEach(() => {
   HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
   HTMLDialogElement.prototype.close = function () { this.removeAttribute("open"); };
 });
+afterEach(() => cleanup());
 
 describe("baja y reasignación auditada en el laboratorio", () => {
   it("solicita motivo, conserva el perfil y permite reasignar trabajo futuro", async () => {
@@ -22,7 +23,7 @@ describe("baja y reasignación auditada en el laboratorio", () => {
     state = {
       ...state,
       tasks: state.tasks.map((row) => row.id === task.id
-        ? { ...row, status: "Pendiente", due, scheduledOn: due, sessions: [], completedAt: null,
+        ? { ...row, status: "Pendiente", due, scheduledOn: due, sessions: [], startedAt: null, completedAt: null,
             checklist: row.checklist.map((check) => ({ ...check, done: false })) }
         : row),
       activity: state.activity.filter((entry) => entry.taskId !== task.id),
@@ -32,7 +33,7 @@ describe("baja y reasignación auditada en el laboratorio", () => {
     const user = userEvent.setup();
     const view = render(<Workforce state={state} commit={commit} notify={notify} />);
 
-    fireEvent.click(within(screen.getByRole("row", { name: /Valentino Magni/ })).getByRole("button", { name: "Dar de baja" }));
+    fireEvent.click(within(screen.getAllByRole("row", { name: /Valentino Magni/ })[0]!).getByRole("button", { name: "Dar de baja" }));
     fireEvent.change(screen.getByLabelText("Motivo de baja"), { target: { value: "Cambio de puesto" } });
     fireEvent.click(screen.getByRole("button", { name: "Confirmar baja" }));
 
@@ -48,6 +49,41 @@ describe("baja y reasignación auditada en el laboratorio", () => {
     fireEvent.click(within(card).getByRole("button", { name: "Confirmar reasignación" }));
     expect(state.tasks.find((row) => row.id === task.id)).toMatchObject({ ownerId: "e1", teamId: "t1" });
     expect(state.orphanedWork?.find((item) => item.id === orphan?.id)?.status).toBe("reassigned");
+    expect(notify).not.toHaveBeenCalled();
+  });
+
+  it("registra desde la bandeja el traspaso de una tarea iniciada con su motivo", async () => {
+    let state = seed();
+    const employee = state.profiles.find((person) => person.id === "e0")!;
+    const task = state.tasks.find((row) => row.ownerId === employee.id && row.kind === "resultado")!;
+    state = {
+      ...state,
+      tasks: state.tasks.map((row) => row.id === task.id
+        ? { ...row, status: "En curso", startedAt: "2026-10-05T10:00:00.000Z", sessions: [], completedAt: null }
+        : row),
+    };
+    const commit = vi.fn((next: typeof state) => { state = next; return true; });
+    const notify = vi.fn();
+    const user = userEvent.setup();
+    const view = render(<Workforce state={state} commit={commit} notify={notify} />);
+
+    fireEvent.click(within(screen.getAllByRole("row", { name: /Valentino Magni/ })[0]!).getByRole("button", { name: "Dar de baja" }));
+    fireEvent.change(screen.getByLabelText("Motivo de baja"), { target: { value: "Cambio de puesto" } });
+    fireEvent.click(screen.getByRole("button", { name: "Confirmar baja" }));
+    expect(state.orphanedWork?.find((item) => item.taskId === task.id)?.resolution).toBe("handoff_required");
+
+    view.rerender(<Workforce state={state} commit={commit} notify={notify} />);
+    const card = screen.getAllByText(task.title).map((element) => element.closest(".orphaned-work-card"))
+      .find((element) => element?.querySelector("textarea")) as HTMLElement;
+    await user.selectOptions(within(card).getByLabelText(`Traspasar ${task.title}`), "e1");
+    fireEvent.change(within(card).getByLabelText(`Motivo para ${task.title}`), { target: { value: "Continuidad del cierre mensual" } });
+    fireEvent.click(within(card).getByRole("button", { name: "Registrar traspaso" }));
+
+    expect(state.tasks.find((row) => row.id === task.id)?.ownerId).toBe("e1");
+    expect(state.taskTransfers?.[0]).toMatchObject({ formerOwnerName: employee.name, newOwnerName: "Lucía Fernández", reason: "Continuidad del cierre mensual" });
+    view.rerender(<Workforce state={state} commit={commit} notify={notify} />);
+    expect(screen.getByRole("heading", { name: "Historial de traspasos" })).toBeTruthy();
+    expect(screen.getByText("Continuidad del cierre mensual")).toBeTruthy();
     expect(notify).not.toHaveBeenCalled();
   });
 });

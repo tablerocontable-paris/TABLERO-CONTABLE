@@ -134,6 +134,22 @@ export interface Audit {
   action: string;
   entityId: string;
 }
+export interface TaskTransfer {
+  id: string;
+  taskId: string;
+  formerOwnerId: string;
+  formerOwnerName: string;
+  newOwnerId: string;
+  newOwnerName: string;
+  companyId: string;
+  reason: string;
+  transferredAt: string;
+  transferredBy: string;
+  taskSnapshot: Task;
+  sessions: TimeSession[];
+  activity: Activity[];
+  comments: import('./notifications').TaskComment[];
+}
 export interface Metrics {
   assigned: number;
   done: number;
@@ -149,6 +165,7 @@ export interface Metrics {
 }
 export interface Closure {
   report?: PeriodReport;
+  taskTransfers?: TaskTransfer[];
   id: string;
   ownerId: string;
   month: string;
@@ -233,6 +250,7 @@ export interface State {
   version: 3;
   absences?: Absence[];
   orphanedWork?: OrphanedWork[];
+  taskTransfers?: TaskTransfer[];
   companies: Company[];
   teams: Team[];
   profiles: Profile[];
@@ -507,6 +525,7 @@ export function closeMonth(
     metrics: metricsForProfile(tasks, logs, ownerId, dateART(at), at),
     tasks: structuredClone(tasks),
     activity: structuredClone(logs),
+    taskTransfers: structuredClone((s.taskTransfers || []).filter((transfer) => tasks.some((task) => task.id === transfer.taskId))),
   };
   c.report = generatePeriodReport(s, c);
   return { ...s, closures: [...s.closures, c] };
