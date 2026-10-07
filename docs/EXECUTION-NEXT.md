@@ -75,3 +75,9 @@ pruebas. El 100% requiere producto aceptado sin correcciones conocidas, GitHub
 propio, dos proyectos Supabase dev/producción, hosting propio y automatización
 validada según `docs/ops/FINAL-ACCEPTANCE.md`. No conectar cuentas hasta aceptar
 el producto final.
+
+El empaquetado portable está disponible en `scripts/package-site-archive.mjs`
+(`node scripts/package-site-archive.mjs <ruta-absoluta>` o `npm run package:site
+-- <ruta>`). En esta PC el script del plugin puede fallar al invocar `bash`
+después de sincronizar la fuente; el helper resuelve la generación/validación del
+tar, no reemplaza la comprobación de push, commit ni despliegue nativo.

@@ -103,3 +103,9 @@ Ver `docs/PROJECT-STATUS.md` para la evidencia del corte y `docs/EXECUTION-NEXT.
 para el próximo bloque. Mantener el Site privado y publicar sólo sobre la misma
 identidad ya configurada, sin cambiar la audiencia. La versión 54 quedó publicada
 correctamente desde el commit `608fb478bb5b8010c22431451b92fd664f424b65`.
+
+## Empaquetado portable — 07/10/2026
+El empaquetador del plugin de Sites usa Bash y puede fallar en Windows. Para
+crear/validar el archivo Worker desde el build, usar
+`node scripts/package-site-archive.mjs <ruta-absoluta>` o `npm run package:site`;
+después verificar por separado que push, versión y deployment terminaron bien.

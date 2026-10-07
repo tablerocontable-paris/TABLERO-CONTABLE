@@ -162,3 +162,13 @@ errores JavaScript y cero llamadas a `/api` operativa. El Site privado v54 publi
 el commit `608fb478bb5b8010c22431451b92fd664f424b65`; deployment confirmado como
 exitoso en el mismo URL. La audiencia continúa personalizada y sólo permite al
 propietario. El avance global sigue cerca de **45%**; no aumenta por pasar pruebas.
+
+## Empaquetado portable de Sites — 07/10/2026
+
+Se agregó `scripts/package-site-archive.mjs` y el comando `package:site` para
+evitar depender de Bash en Windows. Verifica identidad del Site, Worker,
+cliente y migraciones D1 dentro de `dist/` antes de entregar el tar. Prueba local
+del helper: archivo de 745.693 bytes, SHA-256
+`f49a7f519ce0f48968e61ca0e27ff47a1474c73fe842a3097fd418b722bbc8f7`, una
+migración y `project_id` correcto. Es tooling de entrega; no altera lógica de la
+aplicación ni crea cuentas. La versión de aplicación al validar el helper era v55.

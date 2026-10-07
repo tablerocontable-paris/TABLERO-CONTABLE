@@ -27,3 +27,14 @@ Crear perfil no cambia audiencia ni envía correo. Habilitar espectadores extern
 ## Evidencia de esta entrega
 
 293 pruebas completas;20 operativas/UI después del refactor del almacenamiento. Incluyen SQLite real, transacciones, pérdida de carrera, privacidad, permisos, timer y cierre. UI en jsdom. Control-browser no disponible; no se ejecutó una sesión visual del sitio publicado ni pruebas de carga. Supabase/PostgreSQL real no se ejecutó y no pertenece al backend activo de esta versión.
+
+## Empaquetado portable
+
+El empaquetador incluido por Sites invoca `bash`; en Windows puede no existir.
+Después de sincronizar la fuente con el flujo de Sites y completar el build,
+generar y validar el archivo con `node scripts/package-site-archive.mjs
+<ruta-absoluta-del-archivo.tar.gz>` (o `npm run package:site -- <ruta>`).
+El script verifica que el build tenga el mismo `project_id`, incluya Worker y
+cliente y copie las migraciones D1 a `dist/.openai/drizzle`. Usar el archivo con
+la operación privada de guardado y despliegue; comprobar commit, versión y estado
+final. El archivo contiene `dist/`, no el código fuente, y no cambia la audiencia.

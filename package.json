@@ -9,6 +9,7 @@
     "test": "vitest run",
     "preview": "vite preview --host 0.0.0.0",
     "test:browser": "node tests/browser.cjs",
+    "package:site": "node scripts/package-site-archive.mjs",
     "hooks:install": "node scripts/install-hooks.mjs",
     "check:commit": "node scripts/validate-change.mjs"
   },
