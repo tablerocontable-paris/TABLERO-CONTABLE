@@ -1,0 +1,194 @@
+{
+  "date": "2026-10-07",
+  "source_commit_before_documentation": "84f14265cbdc7be647ce39ef71483d2b44db5d5d",
+  "environment": {
+    "node": "v24.19.0",
+    "browser": "Microsoft Edge via installed msedge.exe",
+    "mode": "headless local preview"
+  },
+  "build": {
+    "typecheck": {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "exitCode": 0
+    },
+    "vite": {
+      "command": "node node_modules/vite/bin/vite.js build",
+      "exitCode": 0,
+      "entryBytes": 496560,
+      "chartChunkBytes": 405700,
+      "warnings": [
+        "Zod pure-annotation comments; informational, build succeeds"
+      ]
+    },
+    "worker": {
+      "command": "node scripts/build-worker.mjs",
+      "exitCode": 0
+    }
+  },
+  "browserRuns": [
+    {
+      "script": "tests/browser.cjs",
+      "exitCode": 0,
+      "result": "PASS induction/resume, company isolation, checklist, activity, analytics, monthly close, recurrence, timers, absences, isolated lab, due reminders, persisted read receipt, themes and mobile; zero JS errors/API requests."
+    },
+    {
+      "script": "tests/browser-corrections.cjs",
+      "exitCode": 0,
+      "result": "PASS responsive sidebar/logo alignment, laboratory onboarding, drag and drop, scoped search, internal requests, task conversion, work cycle, Kaizen/5S, fiscal obligations, persistence and mobile; zero JS errors/API requests.",
+      "detailedResult": {
+        "passed": true,
+        "checks": [
+          {
+            "width": 1440,
+            "height": 900,
+            "overflow": "visible",
+            "bottom": 886,
+            "right": 248,
+            "logoWidth": 102,
+            "logoCenter": 138,
+            "selectorCenter": 138,
+            "horizontalOverflow": false
+          },
+          {
+            "width": 1600,
+            "height": 740,
+            "overflow": "visible",
+            "bottom": 726,
+            "right": 278,
+            "logoWidth": 102,
+            "logoCenter": 153,
+            "selectorCenter": 153,
+            "horizontalOverflow": false
+          },
+          {
+            "width": 1280,
+            "height": 720,
+            "overflow": "visible",
+            "bottom": 716.5,
+            "right": 278,
+            "logoWidth": 102,
+            "logoCenter": 153,
+            "selectorCenter": 153,
+            "horizontalOverflow": false
+          },
+          {
+            "width": 1024,
+            "height": 650,
+            "overflow": "visible",
+            "bottom": 647.5,
+            "right": 278,
+            "logoWidth": 102,
+            "logoCenter": 153,
+            "selectorCenter": 153,
+            "horizontalOverflow": false
+          },
+          {
+            "interaction": "drag-to-progress",
+            "taskId": "0776c0dc-fbe1-4773-8dc0-1ce6a2a6a997",
+            "status": "En curso",
+            "actorClockStarted": true
+          },
+          {
+            "interaction": "quick-task-search-accent-insensitive-access-scoped",
+            "results": 2
+          },
+          {
+            "interaction": "internal-request-created-without-task-or-KPI-mutation",
+            "requestId": "013e0edb-265a-4cbd-8b7e-6201991b7204"
+          },
+          {
+            "interaction": "manager-explicit-one-off-task-conversion",
+            "requestId": "650ed580-59dc-4da5-9944-c0eda9ff8850",
+            "taskId": "78eaa5d3-434d-483f-b98c-2141ffce3997",
+            "scheduledOn": "2026-10-25",
+            "assigneeNotification": true
+          },
+          {
+            "interaction": "fiscal-obligation-created-linked-and-versioned",
+            "id": "4bc429da-a7f9-4949-b09f-a82f004cf9b3",
+            "revision": 2
+          },
+          {
+            "interaction": "monthly-work-cycle-day-week-and-team-breakdown",
+            "month": "2026-10",
+            "days": 31
+          },
+          {
+            "interaction": "kaizen-evidence-test-adoption-and-versioned-catalogue",
+            "proposalId": "3505d604-b56b-4d7a-b992-f29ec4e48e5f",
+            "version": 2
+          },
+          {
+            "interaction": "five-s-review-and-evidence-backed-action-closure",
+            "completedActions": 1
+          },
+          {
+            "interaction": "mobile-process-quality-without-page-overflow",
+            "viewport": "390x844"
+          },
+          {
+            "interaction": "mobile-work-cycle-without-page-overflow",
+            "viewport": "390x844"
+          }
+        ],
+        "apiCalls": [],
+        "errors": [],
+        "flows": [
+          "laboratory users",
+          "simulated invitation",
+          "preconfigured onboarding",
+          "independent icon folds",
+          "drag task and auto-start its actor clock",
+          "boss parameter review",
+          "internal request routing, response, resolution and persistence",
+          "jefatura-only explicit one-off request-to-task conversion with provenance and no duplicate",
+          "daily and weekly monthly work-cycle with team breakdown",
+          "accent-insensitive global quick task search scoped to employee access",
+          "Kaizen evidence, controlled trial, manager adoption and catalogue versioning",
+          "five-area 5S review and evidence-backed corrective action closure",
+          "fiscal obligation linked to exact tasks with separate fiscal period, due date, and revision history",
+          "desktop and mobile process-quality layout",
+          "persisted review",
+          "mobile"
+        ]
+      }
+    },
+    {
+      "script": "tests/browser-laboratory-backup.cjs",
+      "exitCode": 0,
+      "result": "PASS downloaded, inspected, confirmed and restored lab backup; operational storage unchanged; mobile dialog fits; zero JS errors/API requests.",
+      "detailedResult": {
+        "passed": true,
+        "backupVersion": 1,
+        "restoredBossName": "Juan Pablo",
+        "operationalStorageUnchanged": true,
+        "mobileDialogFits": true,
+        "apiCalls": [],
+        "errors": []
+      }
+    },
+    {
+      "script": "tests/browser-joint.cjs",
+      "exitCode": 0,
+      "result": "PASS joint activation, independent clocks, shared completion, sequential member closures, v2 reports and CSV privacy; zero JS errors/API requests."
+    }
+  ],
+  "verifiedViewports": [
+    "1440x900",
+    "1600x740",
+    "1280x720",
+    "1024x650",
+    "390x844"
+  ],
+  "explicitRemainingRoadmapChecks": [
+    "The route-level keyboard audit is not covered end-to-end by these browser runs.",
+    "The UI regression run checks more than 10 simulated users, not 20 or more; no performance threshold was specified or measured.",
+    "Concurrent writes across multiple tabs/devices were not exercised; the browser laboratory uses localStorage and does not represent server coordination."
+  ],
+  "isolation": {
+    "operationalApiCalls": 0,
+    "realAccountsUsed": false,
+    "productionDataUsed": false,
+    "apiOrBackendModified": false
+  }
+}

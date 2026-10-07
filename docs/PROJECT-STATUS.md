@@ -581,3 +581,19 @@ El bundle de PC personal se debe regenerar desde el `HEAD` documentado en
 `outputs/LEEME-PC-PERSONAL.md`; su transferencia incluye historial Git, no
 credenciales ni el estado del navegador. El avance global sigue orientativamente
 en **~45%**.
+
+## QA local antes de revisión de arquitectura — 07/10/2026
+
+Build del checkout: TypeScript, Vite y Worker pasaron. El bundle de entrada fue
+496,56 kB; los dos avisos de anotaciones de pureza de Zod son informativos. Los
+recorridos Edge existentes `browser.cjs`, `browser-corrections.cjs`,
+`browser-laboratory-backup.cjs` y `browser-joint.cjs` pasaron en las ventanas
+registradas, incluyendo móvil 390×844. Ver
+`docs/architecture/review-evidence/local-browser-audit-20261007.json`.
+Todos reportaron cero errores JS y cero llamadas a `/api` operativo.
+
+Esta evidencia valida flujos locales del laboratorio, no producción. Sigue sin
+probarse rendimiento con 20+ perfiles, navegación por teclado de extremo a
+extremo ni concurrencia real entre pestañas/dispositivos. La persistencia local
+no permite inferir entrega/consistencia de servidor. El avance global permanece
+aproximadamente en **45%** y el siguiente gate requiere GPT-6.1 Sol alto.

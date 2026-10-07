@@ -13,13 +13,21 @@ cambiar funcionalidades ni audiencia. El checkout de referencia está en
 El bundle y el ZIP fueron verificados con una clonación limpia. El JSON de
 `paris-state-lab` viaja por separado desde la interfaz.
 
-No hay otro cambio funcional local especificado que evite definir reglas nuevas.
+La revisión de navegador de este corte ya pasó por la app general, vistas
+responsivas, arrastre, búsqueda, procesos, obligaciones, copia/restauración del
+laboratorio y cierres conjuntos; sin errores JS ni llamadas a `/api`. Evidencia:
+`docs/architecture/review-evidence/local-browser-audit-20261007.json`.
+Esto no cierra todavía el QA de teclado de extremo a extremo, rendimiento con
+20+ personas ni concurrencia entre pestañas/dispositivos; faltan criterios
+medibles para esos casos.
+
 El siguiente paso es seleccionar **GPT-6.1 Sol, esfuerzo alto, Standard** para
 revisar identidad, permisos, idempotencia, historial y entrega en dependencias,
-delegación/aceptación y notificaciones entre dispositivos. No implementar
-escrituras de servidor, no crear cuentas y no conectar servicios en esa revisión.
-Después, **GPT-6 Luna, esfuerzo medio, Standard** para ejecutar el contrato
-aprobado en el laboratorio. Los apartados posteriores conservan la cronología.
+delegación/aceptación y notificaciones entre dispositivos, y acordar criterios
+de aceptación para el QA de volumen/concurrencia. No implementar escrituras de
+servidor, no crear cuentas y no conectar servicios en esa revisión. Después,
+**GPT-6 Luna, esfuerzo medio, Standard** para ejecutar el contrato aprobado en
+el laboratorio. Los apartados posteriores conservan la cronología.
 
 ## Estado vigente
 
