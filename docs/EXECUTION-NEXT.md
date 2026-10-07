@@ -5,20 +5,21 @@ consultar el chat anterior.
 
 ## Próximo bloque vigente — revisión de arquitectura
 
-El último corte funcional se revisó el 07/10: HEAD
-`d3ee37185e1ce2b91e743205ac0bf2573a138fae` se publicó en el mismo Site como
-v76, owner-only. La edición estabilizó los
-timeouts predeterminados de `npm test`; no cambió funcionalidades. Se verificó
-la suite completa 420/420, el pre-commit 104/104, TypeScript, Vite, Worker,
-recorridos Chromium desktop/móvil y un bundle clonado con ese SHA. El paquete
-transferible actualizado se entrega junto al checkout, generado desde el SHA
-final; `outputs/LEEME-PC-PERSONAL.md` contiene las instrucciones. El JSON de
-estado `paris-state-lab` se exporta aparte desde la interfaz.
+El checkout limpio está en `main`, HEAD
+`6576f9980c68729e5a2e51b1f3241a7d22ce3d61`, publicado en el mismo Site como
+v78, owner-only. Desde el último corte funcional v68, los cambios v69–v78
+fueron de documentación, valores predeterminados de prueba y transferencia;
+no agregaron comportamiento a la aplicación. Sobre este HEAD pasaron la suite
+420/420, TypeScript, Vite, Worker y los cuatro recorridos Edge de navegador
+(general, correcciones/arrastre, copia/restauración y tareas conjuntas), sin
+errores JS ni llamadas a `/api`. El hook de pre-commit pasó 104/104 al crear el
+commit. El bundle y ZIP se verifican clonando el SHA de entrega. El JSON
+`paris-state-lab` se exporta aparte desde la interfaz.
 
 El último corte funcional del laboratorio son los avisos locales de vencimiento,
 implementados en `25d1490` y publicados en el mismo Site privado como v68. Las
-publicaciones v69–v71 actualizaron la documentación y la transferencia, sin
-cambiar funcionalidades ni audiencia. El checkout de referencia está en
+publicaciones v69–v78 actualizaron la documentación, configuración de pruebas y
+transferencia, sin cambiar funcionalidades ni audiencia. El checkout de referencia está en
 `main`; el bundle final debe corresponder al SHA de cierre de cada transferencia.
 El JSON de `paris-state-lab` viaja por separado desde la interfaz.
 

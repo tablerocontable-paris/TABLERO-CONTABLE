@@ -35,8 +35,9 @@ El objetivo es que el pedido de cambio sea la única tarea rutinaria de Valentin
 
 - Git y deploy del prototipo siguen dentro de Sites; el sitio actual es privado. No existe aún el remoto GitHub ni los entornos Supabase dev/prod de la cuenta dedicada.
 - La infraestructura y secretos no están configurados; por eso el flujo descrito es plan, no una capacidad activa.
-- SQL011 tiene evidencia local de 26 carreras PostgreSQL; última suite de laboratorio: 334 pruebas aprobadas. Falta integración real de frontend, Auth/MFA/RLS, reportes, correo y recuperación.
-- Pre-commit local instalado. Workflow GitHub preparado para suite/build; no ejecutado allí. Automatización de PR, migraciones y hosting aún pendiente de cuentas propias.
+- SQL011 tiene evidencia local de 26 escenarios de carrera PostgreSQL. La suite vigente pasó 420/420 en 48 archivos; TypeScript, Vite, Worker y cuatro recorridos Edge desktop/móvil también pasaron. Esta evidencia corresponde al laboratorio, no a Auth/MFA/RLS real, correo ni recuperación productiva.
+- El hook `.githooks/pre-commit` ejecuta `node scripts/validate-change.mjs`; pasó 104/104 en el último commit. `.github/workflows/validate.yml` configura CI para `pull_request` y pushes a `main`/`dev`; ejecuta `npm ci`, la suite completa y el build. No se ejecutó en GitHub porque el repositorio propio aún no existe.
+- La automatización de apertura de PR, promoción `dev`/`main`, migraciones Supabase y hosting sigue pendiente de cuentas y configuración propias. No hay secretos ni destinos remotos conectados.
 - Definición del 100% y puertas: FINAL-ACCEPTANCE.md. Avance global orientativo: aproximadamente 45%.
 
 ## Evaluación gratuita y puertas — 02/10/2026
