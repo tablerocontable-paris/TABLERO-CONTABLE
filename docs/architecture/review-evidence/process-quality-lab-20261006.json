@@ -35,9 +35,15 @@
   "site": {
     "project_id": "appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85",
     "previous_published_version": 58,
+    "published_version": 59,
+    "source_commit": "27918d3f7b311e2a596fa6961fb240b4fdf7b8ee",
+    "deployment_id": "appgdep_6ac5b2ff99d481919f73e8cff76d16b5",
+    "deployment_status": "succeeded",
+    "url": "https://grupo-paris-contabilidad.valentino-magni.chatgpt.site",
     "access_before_update": "custom owner-only",
     "external_visitor_count_before_update": 0,
-    "deployment_of_this_cut": "pending"
+    "access_after_update": "custom owner-only",
+    "external_visitor_count_after_update": 0
   },
   "limitations": [
     "Data remains in paris-state-lab in one browser and does not synchronize across devices.",

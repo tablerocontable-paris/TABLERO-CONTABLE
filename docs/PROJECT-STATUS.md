@@ -262,6 +262,9 @@ medición, adopción/versionado y cierre de acción 5S; revisó la página en 14
 JavaScript ni solicitudes a la API operativa. Evidencia automatizada:
 `architecture/review-evidence/process-quality-lab-20261006.json`.
 
-La versión privada anterior sigue siendo v58 hasta completar la sincronización y
-publicación de este corte en el mismo Site. El avance global permanece en
+Este corte quedó publicado como **Site v59** desde el commit
+`27918d3f7b311e2a596fa6961fb240b4fdf7b8ee`, deployment
+`appgdep_6ac5b2ff99d481919f73e8cff76d16b5`, en el mismo URL. La publicación
+terminó correctamente; el acceso sigue personalizado owner-only, con una sola
+cuenta permitida y cero visitantes externos. El avance global permanece en
 **~45%**; esta función local no satisface aceptación final ni infraestructura.

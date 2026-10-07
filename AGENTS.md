@@ -146,4 +146,5 @@ No portar su almacenamiento/permisos a D1 o Supabase sin revisión arquitectóni
 El checkout no tiene remoto GitHub propio; hasta la aceptación final no crear
 esa cuenta. Para una PC personal, usar un bundle portable con el mismo historial
 y trabajar una sola copia a la vez; no sincronizar `.git` por carpeta compartida
-ni afirmar sincronización entre dispositivos.
+ni afirmar sincronización entre dispositivos. `package-lock.json` es el lockfile
+existente; conservar npm y ejecutar `npm ci` en la copia de otro equipo.

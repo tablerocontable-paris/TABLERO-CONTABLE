@@ -135,8 +135,15 @@ finalizar. No sincronizar la carpeta `.git` con OneDrive ni editar dos copias en
 paralelo. La sincronización automática permanente entre PCs queda para el
 remoto privado de GitHub previsto en `docs/ops/FINAL-ACCEPTANCE.md`.
 
-Próxima acción: cerrar el commit y publicación privada de este corte, preparar
-el bundle portable y dar instrucciones de apertura en Codex para la PC personal.
-Para decisiones sobre adelantar GitHub o sincronización/backend, GPT-6.1 Sol,
-esfuerzo medio/alto según alcance; para implementar un contrato ya aceptado,
-GPT-6 Luna, esfuerzo medio.
+El código quedó en `27918d3f7b311e2a596fa6961fb240b4fdf7b8ee` y publicado como
+Site v59, deployment `appgdep_6ac5b2ff99d481919f73e8cff76d16b5`; el estado owner-only
+no cambió. `package-lock.json` es el lockfile original del proyecto; mantener
+npm como gestor y usar `npm ci` al clonar en otra PC.
+
+Próxima acción: entregar `outputs/grupo-paris-site-personal.bundle`, abrirlo en
+Codex de la PC personal y trabajar una sola copia a la vez. Para traer commits
+de vuelta, exportar un bundle actualizado desde esa PC e importarlo en el checkout
+principal. No existe sincronización automática entre equipos todavía; GitHub
+privado sigue pospuesto hasta la aceptación final. Para adelantar esa decisión o
+activar colaboración entre equipos, GPT-6.1 Sol, esfuerzo medio/alto; para el
+próximo contrato local ya definido, GPT-6 Luna, esfuerzo medio.
