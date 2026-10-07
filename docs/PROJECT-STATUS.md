@@ -540,7 +540,9 @@ en ambas capturas. Evidencia:
 capturas de revisión bajo `outputs/deadline-notifications-browser/` en el
 workspace.
 
-Al redactar este corte, el código seguía sin commit y la versión publicada era
-Site v67. Actualizar aquí el commit, versión y deployment sólo después de
-verificar cada uno. Avance global estimado **~45%**; no implica aceptación final
-ni sincronización entre computadoras.
+Este corte quedó comprometido como `25d1490b88bddeb349328053774acbe99cb7b042`
+y publicado en el mismo Site privado como **v68**; deployment
+`appgdep_6ac64381bc288191ad9d5247e4e0b340` terminó correctamente. Relectura
+confirmó propietario, audiencia personalizada, una cuenta autorizada, cero
+grupos y cero visitantes externos. Avance global estimado **~45%**; no implica
+aceptación final ni sincronización entre computadoras.

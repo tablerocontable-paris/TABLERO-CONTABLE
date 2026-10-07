@@ -255,16 +255,16 @@ La transferencia de código sigue requiriendo bundle Git. Para llevar también e
 
 ## Estado vigente de entrega — 07/10/2026
 
-El Site privado comprobado está en v67, propietario y audiencia personalizada
-con una cuenta autorizada, sin grupos ni visitantes externos. Los avisos locales
+El corte funcional de avisos se publicó como v68 desde `25d1490`. La audiencia
+verificada es personalizada, propietario, una cuenta autorizada, sin grupos ni visitantes externos. Los avisos locales
 de vencimiento se implementaron en `paris-state-lab`: agrupación a tres días,
 hoy y atrasadas; apertura de tarea y lectura persistente por perfil/regla/día
 ART. Se calculan al abrir la campana; no hay scheduler, correo ni entrega entre
 equipos. Contrato y evidencia: `docs/architecture/STATE-REVIEW-20261007.md` y
 `docs/architecture/review-evidence/deadline-notifications-lab-20261007.json`.
 
-El árbol actual pasó 420/420 pruebas, TypeScript, Vite/Worker y Edge
-escritorio/móvil; no llamó a `/api`. Antes de dar el corte por entregado,
-ejecutar pre-commit, crear commit, publicar el mismo Site preservando audiencia
-y generar/verificar bundle y guía vigentes para PC personal. No conectar cuentas
-reales durante la aceptación del laboratorio.
+El árbol actual pasó 420/420 pruebas completas, 104/104 del pre-commit,
+TypeScript, Vite/Worker y Edge escritorio/móvil; no llamó a `/api`. La tarea
+pendiente de continuidad inmediata es generar/verificar bundle y guía vigentes
+para PC personal. No conectar cuentas reales durante la aceptación del
+laboratorio.

@@ -5,12 +5,12 @@ consultar el chat anterior.
 
 ## Próximo bloque vigente — revisión 07/10/2026
 
-El corte local de avisos ya pasó la comprobación móvil, las pruebas nuevas están
-incluidas en el hook y la evidencia quedó registrada. Completar ahora el
-pre-commit y commit, sincronizar y publicar el mismo Site privado, actualizar la
-guía/bundle para PC personal y validar la clonación. La versión publicada
-comprobada es 67; los avisos nuevos siguen sin commit. Contrato ejecutable,
-hallazgos y límites: `architecture/STATE-REVIEW-20261007.md`.
+El corte de avisos está comprometido como `25d1490` y publicado en el mismo Site
+privado como v68 (`appgdep_6ac64381bc288191ad9d5247e4e0b340`). El bundle y la guía
+de PC personal aún apuntan a una versión anterior. Generar ambos desde un commit
+limpio y comprobar la clonación/HEAD antes de dar por lista la transferencia.
+Contrato ejecutable, evidencia y límites:
+`architecture/STATE-REVIEW-20261007.md`.
 
 Después seleccionar **GPT-6.1 Sol, esfuerzo alto, Standard** para definir
 dependencias entre tareas y delegación con aceptación antes de implementarlas.
