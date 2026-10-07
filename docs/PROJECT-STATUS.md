@@ -198,5 +198,38 @@ errores JS, cero solicitudes a `/api` y sin recorte del menú. Durante QA se
 corrigieron el espacio de la barra y la visibilidad de casos resueltos.
 Evidencia: `architecture/review-evidence/internal-requests-lab-20261006.json`.
 
+El código de este corte se publicó correctamente como **Site v57** desde el
+commit `c080a52ce5ca6b6d949be7fa3888e7bf85f1b8a0` en el mismo URL privado. La
+audiencia sigue owner-only (cero visitantes externos). El empaquetador del
+plugin falló en Windows, pero se verificó HEAD remoto y se publicó el archivo
+Worker generado por `scripts/package-site-archive.mjs`.
+
 El avance global se mantiene en **~45%**; una función local aprobada no satisface
 la aceptación completa ni la infraestructura del 100%.
+
+## Ciclo de trabajo mensual — laboratorio local — 06/10/2026
+
+Se implementó en Análisis mensual una vista diaria/semanal de carga planificada
+y ejecución registrada, con filtros existentes y desglose por persona, equipo,
+sector o empresa. La planificación usa `scheduledOn`; no sustituye esa fecha por
+el vencimiento. Las tareas conjuntas cuentan una ocurrencia global y reparten
+puntos previstos por su cuota. Las sesiones se dividen por día calendario de
+Argentina; las actividades operativas se atribuyen a quien las registró y sus
+cantidades se muestran separadas por unidad.
+
+Las nuevas finalizaciones del laboratorio guardan `completedBy`, sin cambiar la
+versión del esquema local ni reconstruir actores de cierres históricos. Los
+cierres antiguos sin actor quedan expresamente sin atribución. Los días sin
+registros se identifican como falta de evidencia: no se deduce tiempo libre ni
+capacidad laboral. El módulo aparece sólo en laboratorio privado, lee los datos
+ficticios/locales existentes y no hace llamadas al API operativo.
+
+Verificación: **378/378 pruebas en 37 archivos**, TypeScript, Vite y bundle
+Worker aprobados. Chromium Edge verificó agrupación día/semana, los 31 días de
+octubre, cambio a equipo, escritorio y móvil 390×844; cero errores JS, cero
+llamadas a `/api` y sin desbordamiento horizontal de página. Test focal:
+`tests/work-cycle.test.ts`; recorrido: `tests/browser-corrections.cjs`; evidencia:
+`architecture/review-evidence/work-cycle-lab-20261006.json`.
+
+La función no activa colaboración entre computadoras, Auth, D1 ni Supabase. El
+avance global sigue orientativamente en **~45%**; no equivale a aceptación final.

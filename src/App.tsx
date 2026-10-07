@@ -1,6 +1,7 @@
 import NotificationCenter from "./components/NotificationCenter";
 import TaskComments from "./components/TaskComments";
 import InternalRequests from "./components/InternalRequests";
+import WorkCycle from "./components/WorkCycle";
 import JointTaskSetup from "./components/JointTaskSetup";
 import { collectTaskNotifications } from "./domain/notifications";
 import LaboratoryInvitations from "./components/LaboratoryInvitations";
@@ -111,6 +112,7 @@ import TimelinessPanel from "./components/TimelinessPanel";
 import StepListEditor, { parseSteps, validateSteps } from "./components/StepListEditor";
 import { taskTimeliness } from "./domain/timeliness";
 import { closureCsvRows } from "./domain/reports";
+import { applyCompletionAttribution } from "./domain/workCycle";
 import {
   createInternalRequest,
   replyToInternalRequest,
@@ -249,7 +251,13 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
       void remoteSave(next,action,entityId).then(setState).catch((e:Error)=>notify(e.message));
       return true;
     }
-    if (laboratory) next = collectTaskNotifications(state, next, active.id);
+    if (laboratory) {
+      next = {
+        ...next,
+        tasks: applyCompletionAttribution(state.tasks, next.tasks, active.id),
+      };
+      next = collectTaskNotifications(state, next, active.id);
+    }
     const s = action
       ? {
           ...next,
@@ -1830,6 +1838,14 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                     timeliness: g.timeliness,
                   }))}
                 />
+                {laboratory && !remoteSave && (
+                  <WorkCycle
+                    tasks={filtered}
+                    activity={state.activity}
+                    state={state}
+                    month={month}
+                  />
+                )}
                 <div className="dashboard-row">
                   <Panel
                     title="Cumplimiento ponderado"

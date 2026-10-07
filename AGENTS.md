@@ -88,6 +88,19 @@ privado sin cambiar audiencia. La cobertura selectiva, incluyendo reglas
 recurrentes previstas, está implementada en el laboratorio; la siguiente etapa
 es cerrar bajas/reasignaciones e historial antes de cambiar permisos del backend.
 
+## Ciclo de trabajo mensual — 06/10/2026
+
+El ciclo día/semana se muestra sólo en Análisis del laboratorio local. No
+conectarlo al backend ni compartir datos entre navegadores en esta fase. Carga
+planificada usa `scheduledOn`; carga real usa sesiones repartidas por fecha
+Argentina, registros operativos con unidades separadas y cierres fechados. No
+deducir capacidad/tiempo libre. Las tareas compartidas suman una sola vez al
+total y sus puntos planificados se distribuyen por cuotas. `completedBy` es
+opcional y sólo se captura para nuevas finalizaciones de esta simulación; no
+inventar actor para cierres históricos. Evidencia actual en
+`docs/PROJECT-STATUS.md` y
+`docs/architecture/review-evidence/work-cycle-lab-20261006.json`.
+
 ## Continuidad de bajas — 06/10/2026
 La baja/reasignación directa de tareas futuras limpias está implementada sólo
 en el laboratorio. Mantener `docs/architecture/PROFILE-DEACTIVATION-LAB-CONTRACT-20261006.md`

@@ -2282,6 +2282,73 @@ label, .filters select, .sidebar select, .sidebar nav button, .card-bottom,
   .brand img { width: 90px; height: 74px; }
   .induction-side img { width: 120px; height: 120px; margin-bottom: 16px; }
 }
+
+.work-cycle-mode {
+  flex: 0 0 auto;
+}
+.work-cycle-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 0 16px;
+}
+.work-cycle-summary > div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-muted, var(--surface));
+}
+.work-cycle-summary span,
+.work-cycle-dimension span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.work-cycle-summary b {
+  font-size: 19px;
+  font-variant-numeric: tabular-nums;
+}
+.work-cycle-table-wrap {
+  overflow-x: auto;
+}
+.work-cycle-table {
+  min-width: 820px;
+}
+.work-cycle-table th,
+.work-cycle-table td {
+  font-variant-numeric: tabular-nums;
+  vertical-align: top;
+}
+.work-cycle-table td small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  white-space: normal;
+}
+.work-cycle-note {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.work-cycle-dimension {
+  display: grid;
+  gap: 4px;
+}
+.work-cycle-dimension select {
+  min-width: 130px;
+}
+
+@media (max-width: 760px) {
+  .work-cycle-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .work-cycle-mode button {
+    padding-inline: 9px;
+  }
+}
 .panel-section {
   border-top: 1px solid var(--line, #e1e5eb);
   margin-top: 24px;

@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-06",
+  "scope": "private local laboratory only",
+  "feature": {
+    "route": "monthly analytics",
+    "modes": ["day", "week"],
+    "dimensions": ["person", "team", "sector", "company"],
+    "planned_date": "Task.scheduledOn only; due date is not a substitute",
+    "joint_tasks": "one global occurrence; planned points distributed by responsibility shares",
+    "sessions": "elapsed duration split at America/Argentina/Buenos_Aires calendar-day boundaries",
+    "operational_activity": "attributed to activity.actorId; quantities remain separate by unit",
+    "completion_actor": "optional completedBy recorded for new laboratory completions; historic closures remain unattributed"
+  },
+  "validation": {
+    "unit_tests": {
+      "command": "node node_modules/vitest/vitest.mjs run --maxWorkers=1",
+      "passed": 378,
+      "failed": 0,
+      "test_files": 37
+    },
+    "build": {
+      "typescript": "passed",
+      "vite": "passed",
+      "worker_bundle": "passed",
+      "note": "Vite reports the main chunk above 500 kB and dependency annotation warnings; build exits successfully."
+    },
+    "browser": {
+      "runner": "tests/browser-corrections.cjs",
+      "browser": "Microsoft Edge headless",
+      "desktop_viewports": ["1440x900", "1600x740", "1280x720", "1024x650"],
+      "mobile_viewport": "390x844",
+      "daily_buckets": 31,
+      "checks": ["week view", "day view", "team breakdown", "mobile page has no horizontal overflow"],
+      "javascript_errors": 0,
+      "operational_api_calls": 0,
+      "result": "passed",
+      "report": "C:/Users/Vmagni/AppData/Local/Temp/grupo-paris-workcycle-final-e2e-20261006/browser-validation.json"
+    },
+    "database_migrations_changed": false,
+    "cross_device_sync": false,
+    "external_services_connected": false,
+    "site_deployment": "pending"
+  },
+  "known_limits": [
+    "Laboratory data remains in the current browser and does not synchronize between PCs.",
+    "The work-cycle view does not infer free time, configured capacity, presence, or productivity.",
+    "Historical completed tasks do not acquire a fabricated completion actor.",
+    "No Auth, D1, Supabase, API, email, or account was enabled by this implementation."
+  ]
+}

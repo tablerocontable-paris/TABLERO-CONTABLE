@@ -163,3 +163,11 @@ Se implementó en el laboratorio una ocurrencia compartida con dos personas,
 cuotas snapshot, tiempo propio paralelo, atribución individual y notificación.
 Ver `docs/architecture/JOINT-LABORATORY-CONTRACT-20261006.md` y evidencia actual
 en `docs/PROJECT-STATUS.md`. No es colaboración en línea ni cambia SQL/D1.
+
+## Estado posterior — ciclo de trabajo — 06/10/2026
+
+La corrección 18 se implementó en el laboratorio como vistas diaria/semanal y
+desglose por dimensión, con sesiones partidas por día ART, cantidades separadas
+por unidad y atribución explícita de cierres nuevos. Cierres históricos sin actor
+no se reconstruyen. Esto no reemplaza el análisis/aceptación de producto ni
+habilita APIs. Evidencia y límites en `docs/PROJECT-STATUS.md`.

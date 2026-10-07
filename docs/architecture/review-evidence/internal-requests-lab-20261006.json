@@ -23,7 +23,15 @@
     },
     "database_migrations_changed": false,
     "remote_services_connected": false,
-    "site_deployment": "pending for this source change"
+    "site_deployment": {
+      "status": "succeeded",
+      "version_number": 57,
+      "commit_sha": "c080a52ce5ca6b6d949be7fa3888e7bf85f1b8a0",
+      "deployment_id": "appgdep_6ac5a7a6e618819180aa2a118849fa40",
+      "url": "https://grupo-paris-contabilidad.valentino-magni.chatgpt.site",
+      "audience": "owner-only",
+      "external_visitors": 0
+    }
   },
   "known_limits": [
     "Browser-local laboratory storage only; no cross-device sync",

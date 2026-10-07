@@ -261,7 +261,22 @@ const assert = (ok, message) => {
     "Review lost on reload",
   );
   await page.getByRole('button', { name: 'Cerrar', exact: true }).click();
+  await page.locator('[data-nav="analytics"]').click();
+  await page.getByRole('heading', { name: 'Ciclo de trabajo', exact: true }).waitFor();
+  await page.getByLabel('Agrupar período').getByRole('button', { name: 'Día', exact: true }).click();
+  const analysisMonth = await page.locator('input[type="month"][aria-label="Período"]').inputValue();
+  const daysInAnalysisMonth = new Date(Number(analysisMonth.slice(0, 4)), Number(analysisMonth.slice(5, 7)), 0).getDate();
+  assert((await page.locator('.work-cycle-table-wrap').first().locator('tbody tr').count()) === daysInAnalysisMonth, 'Daily work-cycle view omitted a date');
+  await page.getByLabel('Desglosar ciclo por').selectOption('team');
+  assert((await page.locator('.work-cycle-table-wrap').nth(1).locator('thead th').first().innerText()).toLowerCase() === 'equipo', 'Work-cycle dimension did not switch to teams');
+  checks.push({ interaction: 'monthly-work-cycle-day-week-and-team-breakdown', month: analysisMonth, days: daysInAnalysisMonth });
+  await page.screenshot({ path: path.join(output, 'work-cycle.png'), fullPage: true, animations: 'disabled' });
   await page.setViewportSize({ width: 390, height: 844 });
+  await page.locator('[data-nav="analytics"]').click();
+  assert(await page.getByRole('heading', { name: 'Ciclo de trabajo', exact: true }).count() === 1, 'Work cycle missing on mobile');
+  assert(!(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)), 'Mobile work-cycle layout caused page-level horizontal overflow');
+  checks.push({ interaction: 'mobile-work-cycle-without-page-overflow', viewport: '390x844' });
+  await page.screenshot({ path: path.join(output, 'work-cycle-mobile.png'), animations: 'disabled' });
   await page.locator('[data-nav="day"]').click();
   await page.locator('[data-nav="operations"]').click();
   assert((await page.locator('.operational-intro').count()) === 0, 'Operational banner remains');
@@ -292,6 +307,7 @@ const assert = (ok, message) => {
           "drag task and auto-start its actor clock",
           "boss parameter review",
           "internal request routing, response, resolution and persistence",
+          "daily and weekly monthly work-cycle with team breakdown",
           "persisted review",
           "mobile",
         ],

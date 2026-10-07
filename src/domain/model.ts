@@ -70,6 +70,8 @@ export interface Assignment {
 export interface Task {
   templateId?: string | null;
   scheduledOn?: string;
+  /** Actor who performed the latest completion in this local laboratory. */
+  completedBy?: string;
   sessions?: TimeSession[];
   reopenCount?: number;
   id: string;

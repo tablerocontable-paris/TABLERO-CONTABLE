@@ -251,6 +251,7 @@ const schema = z.object({
         ownerId: z.string(),
         month: z.string(),
         weight: z.number().nonnegative(),
+        completedBy: z.string().optional(),
         kind: z.enum(["resultado", "operativa"]),
         checklist: z.array(
           z.object({ id: z.string(), text: z.string(), done: z.boolean() }),

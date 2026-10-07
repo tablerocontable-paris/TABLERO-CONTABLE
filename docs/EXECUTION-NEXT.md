@@ -72,11 +72,11 @@ cerrarse en laboratorio sin crear un contrato de producción prematuro. Cualquie
 esquema/backend o identidad de soporte exige **esfuerzo alto** antes de volver a
 Luna.
 
-Evidencia del bloque más reciente: 365 pruebas en 35 archivos, TypeScript/Vite,
-Worker build y Chromium desktop/móvil aprobados; cero errores JS y solicitudes
-a `/api` operativa. El Site privado v54 publicó el commit
-`608fb478bb5b8010c22431451b92fd664f424b65`; deployment confirmado. Ver
-`PROJECT-STATUS.md` para límites y versión actual.
+Evidencia del bloque más reciente: 371 pruebas en 36 archivos, TypeScript/Vite,
+Worker build, pre-commit 53/53 y Chromium desktop/móvil aprobados; cero errores
+JS y solicitudes a `/api` operativa. El Site privado v57 publicó el commit
+`c080a52ce5ca6b6d949be7fa3888e7bf85f1b8a0`; deployment confirmado y acceso
+owner-only. Ver `PROJECT-STATUS.md` para límites y avance.
 
 ## Entrega
 
@@ -98,3 +98,23 @@ El empaquetado portable está disponible en `scripts/package-site-archive.mjs`
 -- <ruta>`). En esta PC el script del plugin puede fallar al invocar `bash`
 después de sincronizar la fuente; el helper resuelve la generación/validación del
 tar, no reemplaza la comprobación de push, commit ni despliegue nativo.
+
+## Ciclo de trabajo mensual — 06/10/2026
+
+Implementado sólo en el laboratorio local: vistas de día y semana, planificación
+por fecha de ocurrencia, ejecución por fecha real, tiempo repartido entre días
+ART, registros/cantidades operativas separados por unidad y desglose por persona,
+equipo, sector o empresa. Las cuotas conjuntas conservan una ocurrencia global;
+los nuevos cierres guardan actor y cierres históricos sin ese dato quedan sin
+atribución. No infiere capacidad ni tiempo libre, no activa API o sincronización.
+
+Evidencia: 378/378 pruebas en 37 archivos; TypeScript, Vite y Worker; Chromium
+Edge escritorio/móvil 390×844, 31 días del período y desglose de equipo; cero
+errores JS y llamadas a `/api`. Ver
+`architecture/review-evidence/work-cycle-lab-20261006.json`.
+
+Después de publicar este corte, siguiente paso: **GPT-6.1 Sol, esfuerzo medio,
+Standard** para revisar atribución, cortes de fecha y límites del ciclo, y
+contrastar el contrato local de Kaizen/5S con la versionación actual del catálogo.
+Luego, si no aparece una decisión de permisos/esquema, volver a **GPT-6 Luna,
+esfuerzo medio, Standard** para implementar el contrato que quede confirmado.
