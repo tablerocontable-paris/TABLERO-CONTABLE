@@ -327,3 +327,23 @@ con historial completo de `main`. El bundle no incluye `node_modules` ni el
 estado `paris-state-lab` guardado en el navegador; ese estado no sincroniza entre
 equipos. Usar una sola copia por vez hasta configurar el GitHub privado previsto
 para la etapa final. Instrucciones: `outputs/LEEME-PC-PERSONAL.md`.
+
+## Reportes imprimibles del período — laboratorio local — 07/10/2026
+
+El diálogo de reportes ahora permite imprimir una versión de lectura en A4
+horizontal. La impresión muestra sólo el reporte, oculta navegación y controles,
+repite encabezados y evita cortar filas entre páginas. La exportación CSV sigue
+disponible.
+
+Verificación del commit 389528cbbd6ae1af668931f6bfdd05d499953d13:
+**407/407 pruebas en 44 archivos**, TypeScript, build Vite/Worker, pre-commit
+**96/96 pruebas en 14 archivos** y los recorridos Chromium generales y de
+correcciones aprobados. La comprobación de impresión confirmó el área imprimible
+y dejó captura en outputs/period-report-print-browser/period-report-print.png.
+No hubo errores JavaScript ni llamadas a /api. Persiste el aviso informativo
+del bundle JavaScript principal de aproximadamente 585 kB.
+
+El commit está en el repositorio local. No se confirmó una publicación Site v62;
+la transferencia a otra PC no modifica el Site ni su audiencia. El progreso
+global sigue orientativamente en **~45%** y no equivale a aceptación final.
+La transferencia vigente está descripta en outputs/LEEME-PC-PERSONAL.md.

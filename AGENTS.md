@@ -171,3 +171,11 @@ guardada en el navegador. Trabajar con una sola copia por vez y devolver commits
 en otro bundle. No sincronizar la carpeta `.git` con OneDrive. Mantener el
 avance global aproximado en 45%; la transferencia no adelanta aceptación ni
 habilita la infraestructura final.
+
+### Actualización local y traslado — 07/10/2026
+
+El commit local 389528cbbd6ae1af668931f6bfdd05d499953d13 agrega reportes
+imprimibles y quedó verificado según docs/PROJECT-STATUS.md. No hay confirmación
+de publicación Site v62. Para la PC personal usar el bundle vigente y la guía
+outputs/LEEME-PC-PERSONAL.md; no usar transferencias antiguas. El bundle
+preserva código e historial, no datos localStorage ni acceso a Sites.

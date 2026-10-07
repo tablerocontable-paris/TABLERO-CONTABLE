@@ -173,3 +173,21 @@ todavía; GitHub privado sigue pospuesto hasta la aceptación final. Para el
 próximo bloque de implementación ya definido: **GPT-6 Luna, esfuerzo medio,
 Standard**. Para revisar arquitectura, permisos o decidir sobre GitHub:
 **GPT-6.1 Sol, esfuerzo medio o alto según el riesgo, Standard**.
+
+## Transferencia actualizada — 07/10/2026
+
+El laboratorio local avanzó al commit 389528cbbd6ae1af668931f6bfdd05d499953d13,
+que agrega reportes imprimibles. La última transferencia anterior terminaba en
+c8db26d; fue reemplazada por el bundle completo descrito en
+outputs/LEEME-PC-PERSONAL.md y su ZIP contenedor. El checkout estaba limpio
+antes de documentar esta actualización.
+
+La transferencia incluye el historial Git y el código comprometido, pero no el
+estado ficticio guardado en el navegador ni dependencias instaladas. El usuario
+debe trabajar en una sola PC por vez. Clonar no publica ni conecta cuentas.
+La última publicación confirmada en el estado previo sigue siendo v61; no afirmar
+v62 hasta verificar un despliegue de ese commit.
+
+Próximo paso en la PC personal: extraer el ZIP, clonar el bundle según la guía,
+ejecutar npm ci y abrir la carpeta site en Codex. Luego continuar los
+pendientes documentados del laboratorio sin activar cuentas ni /api.
