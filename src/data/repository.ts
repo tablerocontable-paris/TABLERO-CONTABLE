@@ -322,7 +322,7 @@ const schema = z.object({
     id: z.string(), taskId: z.string(), formerOwnerId: z.string(), formerOwnerName: z.string(),
     companyId: z.string(), assignmentSnapshot: z.object({
       id: z.string(), title: z.string(), templateId: z.string().nullable(),
-      frequency: z.enum(["única", "mensual", "semanal", "quincenal"]),
+      frequency: z.enum(["única", "diaria", "mensual", "semanal", "quincenal"]),
       schedule: z.unknown().optional(),
     }).nullable(), reason: z.string().min(5).max(500), createdAt: z.string(),
     resolution: z.enum(["ready", "handoff_required", "review_required"]),

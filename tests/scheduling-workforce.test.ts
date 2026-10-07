@@ -70,6 +70,24 @@ describe("fechas de cada ocurrencia", () => {
     expect(occurrences(monthly, "2027-02")[0].due).toBe("2027-02-28");
     expect(occurrences(monthly, "2027-03")[0].due).toBe("2027-03-31");
   });
+  it("materializa frecuencia diaria a través de varios meses sin duplicar ni perder plazos", () => {
+    const base = seed();
+    const assignment = {
+      ...base.assignments[0]!, id: "daily-cross-month", frequency: "diaria" as const,
+      startMonth: "2026-10", schedule: {
+        ...defaultSchedule("2026-10-30", "diaria"), interval: 2, dueOffsetDays: 2,
+      },
+    };
+    const state = { ...base, assignments: [assignment], tasks: [] };
+    const october = materialize(state, "2026-10");
+    expect(october.tasks.map((task) => task.scheduledOn)).toEqual(["2026-10-30"]);
+    const november = materialize(october, "2026-11");
+    const daily = november.tasks.filter((task) => task.assignmentId === assignment.id && task.month === "2026-11");
+    expect(daily).toHaveLength(15);
+    expect(daily[0]).toMatchObject({ scheduledOn: "2026-11-01", due: "2026-11-03" });
+    expect(daily.at(-1)).toMatchObject({ scheduledOn: "2026-11-29", due: "2026-12-01" });
+    expect(materialize(november, "2026-11").tasks.filter((task) => task.assignmentId === assignment.id)).toHaveLength(16);
+  });
   it("sin vencimiento y fechas inválidas no se confunden", () => {
     expect(
       occurrences(
@@ -373,6 +391,33 @@ describe("tiempo y cobertura", () => {
     expect(retired.absences?.find((row) => row.id === absence.id)?.cancelledAt).toBe("2026-11-20T13:00:00.000Z");
     expect(retired.tasks.find((row) => row.id === task.id)?.sessions?.find((session) => session.actorId === "e1")?.end).toBe("2026-11-20T13:00:00.000Z");
     expect(canWork(retired, retired.profiles.find((person) => person.id === "e1")!, retired.tasks.find((row) => row.id === task.id)!, "2026-11-20")).toBe(false);
+  });
+  it("persiste y vuelve a cargar bajas cuya asignación original era diaria", () => {
+    const data = new Map<string, string>();
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => data.get(key) || null,
+      setItem: (key: string, value: string) => data.set(key, value),
+      removeItem: (key: string) => data.delete(key),
+    });
+    const base = seed();
+    const assignment = base.assignments.find((row) => row.ownerId === "e0")!;
+    const dailyAssignment = {
+      ...assignment, frequency: "diaria" as const,
+      schedule: { ...defaultSchedule(base.tasks[0]!.month + "-01", "diaria"), interval: 1 },
+    };
+    const task = base.tasks.find((row) => row.assignmentId === assignment.id)!;
+    const state = {
+      ...base,
+      assignments: base.assignments.map((row) => row.id === assignment.id ? dailyAssignment : row),
+      tasks: base.tasks.map((row) => row.id === task.id
+        ? { ...row, status: "En curso" as const, startedAt: "2026-10-05T10:00:00.000Z", completedAt: null }
+        : row),
+    };
+    const former = state.profiles.find((person) => person.id === "e0")!;
+    const retired = deactivateProfile(state, { ...former, active: false }, "boss", "Cambio de puesto", "2026-10-06T15:00:00.000Z");
+    expect(retired.orphanedWork?.find((row) => row.taskId === task.id)?.assignmentSnapshot?.frequency).toBe("diaria");
+    persist(retired);
+    expect(load().orphanedWork?.find((row) => row.taskId === task.id)?.assignmentSnapshot?.frequency).toBe("diaria");
   });
 });
 describe("laboratorio aislado", () => {

@@ -49,7 +49,7 @@ medio, velocidad Standard, para implementar y verificar. Si aparece una decisió
 nueva de permisos/jerarquía, usar GPT-6.1 Sol, esfuerzo alto, Standard, sólo para
 revisar esa decisión antes de volver a Luna.
 
-Evidencia del bloque de traspaso: 360 pruebas en 35 archivos, TypeScript/Vite y
+Evidencia del bloque de traspaso y auditoría diaria: 362 pruebas en 35 archivos, TypeScript/Vite y
 Worker build, Chromium de correcciones desktop/móvil y flujo conjunto aprobados;
 sin errores JS ni solicitudes a `/api` operativa. Ver el estado para límites y
 publicación vigente.

@@ -129,7 +129,14 @@ traspaso en D1/Supabase.
 El avance global orientativo sigue en **45%**: las pruebas aprobadas no equivalen
 a aceptación final. La próxima fase es auditar cierres/exportaciones y probar
 reglas diarias, semanales y en varios meses. La publicación debe confirmarse con
-el commit de esta fase; no cambia la audiencia privada.
+el siguiente commit. La fase de traspasos ya está en el Site privado versión 52,
+con fuente `c7fb09ac0b4875079b3bea30c2ec60c42745d323`. La auditoría posterior
+detectó y corrigió que la validación de la bandeja de bajas no aceptaba la
+frecuencia diaria aunque el planificador la admite. Se añadieron pruebas de
+persistencia diaria y materialización a través de dos meses. Verificación del
+cambio pendiente de publicación: **362/362 pruebas en 35 archivos**, TypeScript,
+Vite y Worker build aprobados. El bundle local de prueba refleja este cambio;
+falta confirmar la nueva versión Sites.
 
 Verificación del corte: 358/358 pruebas en 35 archivos con timeout ampliado
 para migraciones históricas; TypeScript, build Worker y Chromium desktop/móvil
