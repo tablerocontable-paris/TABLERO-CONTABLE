@@ -26,6 +26,12 @@ build para generar `dist/client/index.html` y `dist/server/index.js`; el archivo
 incluye y valida la migración D1. El Site sigue activo, personalizado y
 owner-only: una cuenta autorizada, cero grupos y cero visitantes externos.
 
+Continuidad desde PC personal: se refresca el bundle portable y el ZIP desde el
+`main` sincronizado, con un manifiesto que fija SHA y huella. La guía acompaña al
+paquete en `outputs/LEEME-PC-PERSONAL.md`. Los artefactos de transferencia son
+generados e ignorados por Git para que el bundle no se vuelva a incluir dentro
+de sí mismo. No contienen credenciales ni estado del navegador.
+
 La fuente base previa a este corte corresponde al Site v82, personalizado y
 owner-only: una cuenta autorizada, cero grupos y cero visitantes externos. La
 audiencia no debe ampliarse. Avance global orientativo **~45%**; este bloque no

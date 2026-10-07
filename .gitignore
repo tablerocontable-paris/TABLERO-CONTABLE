@@ -6,3 +6,7 @@ dist/
 coverage/
 /outputs/browser-*-acceptance-*/
 /outputs/laboratory-backup-acceptance-*/
+# Git bundles, manifests and ZIPs are generated transfer artifacts, not app source.
+/outputs/grupo-paris-site-personal.bundle
+/outputs/grupo-paris-site-transfer-manifest.json
+/outputs/grupo-paris-site-transfer-*.zip

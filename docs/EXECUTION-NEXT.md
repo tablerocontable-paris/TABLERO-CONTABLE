@@ -16,6 +16,11 @@ El Site existente estaba en v82 antes de este corte y conserva audiencia
 personalizada owner-only: una cuenta autorizada, cero grupos y cero visitantes
 externos. Fuente local `main`; laboratorio ficticio aislado.
 
+Paquete de PC personal: `outputs/grupo-paris-site-transfer-20261007.zip`;
+verificá `source.commit` y `bundle.sha256` en el manifiesto del ZIP. La guía en
+`outputs/LEEME-PC-PERSONAL.md` explica clonación, prueba y retorno de cambios por
+bundle sin GitHub ni sincronización de `.git`.
+
 Publicación verificada como **Site v83**, deployment
 `appgdep_6ac667c768988191973a05142db88251`, desde el commit
 `9db62fb4cea13037bdf651eac07bea05303a200c`. El hook del commit final pasó
