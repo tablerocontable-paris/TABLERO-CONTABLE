@@ -14,6 +14,7 @@ import { HabitualTaskProposalInbox, MyHabitualTaskProposals } from "./components
 import TaskBoard, { orderTasks, type TaskOrder } from "./components/TaskBoard";
 import PeriodReports from "./components/PeriodReports";
 import CatalogueCreator from "./components/CatalogueCreator";
+import QuickTaskSearch from "./components/QuickTaskSearch";
 import { standardizeAssignment } from "./domain/catalogue";
 import ThemeControl from "./components/ThemeControl";
 import ScheduleEditor from "./components/ScheduleEditor";
@@ -210,6 +211,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
   const [sector, setSector] = useState("");
   const [team, setTeam] = useState("");
   const [query, setQuery] = useState("");
+  const [quickTaskSearchOpen, setQuickTaskSearchOpen] = useState(false);
   const [taskOrder, setTaskOrder] = useState<TaskOrder>(() => state.boardOrder || "az");
   const [view, setView] = useState<"board" | "list">("board");
   const [group, setGroup] = useState<"individual" | "team" | "sector">(
@@ -242,6 +244,21 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
   function notify(s: string) {
     setNotice(s);
   }
+  useEffect(() => {
+    if (!laboratory || remoteSave) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const editing = target?.isContentEditable || !!target?.closest("input, textarea, select, [contenteditable='true']");
+      if (editing || event.altKey) return;
+      const commandShortcut = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k";
+      const slashShortcut = event.key === "/" && !event.ctrlKey && !event.metaKey;
+      if (!commandShortcut && !slashShortcut) return;
+      event.preventDefault();
+      setQuickTaskSearchOpen(true);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [laboratory, remoteSave]);
   useEffect(() => {
     if (!notice) return;
     const timer = setTimeout(() => setNotice(""), 4500);
@@ -1212,6 +1229,23 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
   }
   const tasksForDetail = state.tasks.find((t) => t.id === detail && canWork(state, active, t));
   const logTask = state.tasks.find((t) => t.id === logFor && canWork(state, active, t));
+  function openSearchResult(task: Task) {
+    if (!canWork(state, active, task)) {
+      notify("La tarea ya no está disponible en tu ámbito.");
+      setQuickTaskSearchOpen(false);
+      return;
+    }
+    setQuickTaskSearchOpen(false);
+    setCompany("");
+    setOwner("");
+    setSector("");
+    setTeam("");
+    setQuery("");
+    setBoardOwner(active.role === "empleado" ? active.id : task.ownerId);
+    setMonth(task.month);
+    setPage("tasks");
+    setDetail(task.id);
+  }
 
   return (
     <>
@@ -1312,6 +1346,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             <b>{pages.find((p) => p.id === page)?.name}</b>
           </div>
           <div className="header-right">
+            {laboratory && !remoteSave && <button type="button" className="quick-search-trigger" aria-label="Buscar tareas" title="Buscar tareas · Ctrl+K" onClick={() => setQuickTaskSearchOpen(true)}><Search size={16} aria-hidden="true" /><span>Buscar</span><kbd>Ctrl K</kbd></button>}
             {!remoteSave && <NotificationCenter key={active.id} state={state} commit={commit} notify={notify} onOpenProposals={() => setPage("team")} onOpenTask={taskId => {
               const task = state.tasks.find(t => t.id === taskId);
               if (task && canWork(state, active, task)) { setMonth(task.month); setPage('tasks'); setDetail(taskId); }
@@ -3105,6 +3140,15 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             </div>
           </form>
         </Dialog>
+      )}
+      {quickTaskSearchOpen && laboratory && !remoteSave && (
+        <QuickTaskSearch
+          state={state}
+          active={active}
+          currentMonth={month}
+          onClose={() => setQuickTaskSearchOpen(false)}
+          onSelect={openSearchResult}
+        />
       )}
     </>
   );

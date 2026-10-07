@@ -220,3 +220,16 @@ v63 desde `f7b4c661d32a753b0ab34f4120c692c880efb8b0`; deployment
 sin cambios. Para continuar en la PC personal usar el ZIP y el bundle vigentes
 indicados en `docs/EXECUTION-NEXT.md` y `outputs/LEEME-PC-PERSONAL.md`. El estado
 `paris-state-lab` del navegador no forma parte del repositorio ni se transfiere.
+
+### Búsqueda rápida de tareas — 07/10/2026
+
+Implementada en el laboratorio con atajo Ctrl+K o `/`; busca tarea, empresa,
+responsable, sector, estado, período y vencimiento sin distinguir tildes y
+limita cada consulta a tareas autorizadas por `canWork`. Abrir un resultado
+vuelve a validar el permiso y conserva el actor activo. No buscar comentarios
+privados ni conectar `/api`, D1 o Supabase. Aceptación: 412/412 tests,
+TypeScript, Vite/Worker y Chromium; ver
+`docs/architecture/review-evidence/quick-task-search-lab-20261007.json`.
+Antes de implementar dependencias, delegación/aceptación o nuevos avisos,
+revisar contratos de estado y permisos con Sol alto. Mantener la audiencia del
+Site sin cambios y actualizar el bundle personal sólo después del commit.

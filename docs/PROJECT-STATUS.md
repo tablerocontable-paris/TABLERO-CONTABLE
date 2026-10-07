@@ -414,3 +414,25 @@ estado exitoso. Relectura posterior: rol propietario, acceso personalizado con
 una cuenta permitida, cero grupos y cero visitantes externos. El código sigue
 siendo sólo de laboratorio; no se activó el espacio operativo ni se conectaron
 cuentas de usuarios.
+
+## Búsqueda rápida de tareas — laboratorio — 07/10/2026
+
+El encabezado del laboratorio abre una búsqueda rápida por tarea, empresa,
+responsable, sector, estado, período o vencimiento. Ignora tildes y permite
+escribir términos en cualquier orden; prioriza trabajo abierto del período
+actual y limita la lista inicial a diez resultados. Ctrl+K y `/` abren el mismo
+diálogo fuera de campos de escritura. Cada resultado vuelve a verificar
+`canWork`; al abrirlo se conserva el perfil que actúa y se ajustan período y
+tablero a la tarjeta encontrada.
+
+Verificación: **412/412 pruebas en 45 archivos**, TypeScript, Vite y Worker
+aprobados. Chromium Edge recorrió la búsqueda con dos coincidencias accesibles
+para un empleado y abrió una de ellas. El recorrido general de escritorio/móvil
+terminó sin errores JavaScript ni llamadas a `/api`. Evidencia:
+`architecture/review-evidence/quick-task-search-lab-20261007.json` y captura
+`outputs/quick-task-search-browser/quick-task-search.png`.
+
+La búsqueda sólo lee el `paris-state-lab` local; no sincroniza dispositivos ni
+indexa notas privadas. La advertencia informativa del bundle principal de Vite
+(más de 500 kB) continúa abierta. El avance global no cambia: sigue en torno a
+**45%**, porque esto no cubre aceptación funcional completa ni infraestructura.

@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-07",
+  "scope": "private laboratory only",
+  "feature": "global quick task search",
+  "rules": [
+    "The header button, Ctrl+K, and / open a task search dialog in the local laboratory.",
+    "Search is accent-insensitive and matches terms in any order across task title, company, owner, sector, status, month, and due date.",
+    "Every result is filtered through canWork for the active profile; selecting it rechecks access before opening the task.",
+    "Opening a result changes the task page and period while preserving the active actor identity.",
+    "The result list is capped at ten and prioritizes current-period, open work."
+  ],
+  "verification": {
+    "focusedTests": "tests/quick-task-search.test.tsx: 4 passed",
+    "completeSuite": "45 files, 412 passed, 0 failed; vitest run --maxWorkers=1 --minWorkers=1",
+    "typecheck": "passed",
+    "viteBuild": "passed",
+    "workerBuild": "passed",
+    "chromium": {
+      "passed": true,
+      "artifact": "outputs/quick-task-search-browser/browser-validation.json",
+      "screenshot": "outputs/quick-task-search-browser/quick-task-search.png",
+      "apiCalls": [],
+      "javascriptErrors": [],
+      "assertions": [
+        "accent-insensitive query returns both matching tasks in the active employee scope",
+        "selecting a result opens its task detail",
+        "existing desktop/mobile correction flows still pass"
+      ]
+    },
+    "buildNotes": [
+      "Vite reports the existing informational main JavaScript chunk warning above 500 kB; build succeeds."
+    ]
+  },
+  "limitations": [
+    "Task data remains in browser-local paris-state-lab and does not synchronize between devices.",
+    "No customer data, account, operational API, D1, or Supabase is used.",
+    "This does not add server-side search or alter authorization rules."
+  ]
+}

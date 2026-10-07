@@ -261,3 +261,17 @@ Windows y Node.js, extraer el ZIP, clonar el bundle, ejecutar `npm ci` y abrir
 `site` en Codex. Trabajar una sola copia a la vez; devolver commits por otro
 bundle hasta configurar GitHub en la aceptación final. No sincronizar `.git`
 con OneDrive. El progreso global sigue aproximadamente en **45%**.
+
+## Búsqueda rápida y próximo corte — 07/10/2026
+
+Se implementó la búsqueda rápida de tareas del laboratorio. Revisa el alcance
+del perfil antes de mostrar y antes de abrir resultados; no agrega acceso a
+datos de compañeros. La suite completa aprobó 412/412, TypeScript, Vite, Worker
+y Chromium Edge escritorio/móvil, sin llamadas a `/api`. Evidencia en
+`docs/architecture/review-evidence/quick-task-search-lab-20261007.json`.
+
+Conservar el Site privado y el laboratorio local. Próximo corte: revisar con
+GPT-6.1 Sol, esfuerzo alto, los contratos pendientes de dependencias,
+delegación/aceptación y avisos; Luna implementa sólo los contratos aprobados.
+La infraestructura de cuentas sigue pospuesta hasta la aceptación final.
+El avance orientativo permanece en ~45%.

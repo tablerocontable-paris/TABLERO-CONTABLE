@@ -205,6 +205,16 @@ const assert = (ok, message) => {
     assert(bounds.x >= 4 && bounds.x + bounds.width <= 1596, 'Search focus frame clipped');
     await page.screenshot({ path: path.join(output, 'search-focus.png'), animations: 'disabled' });
   }
+  await page.getByRole('button', { name: 'Buscar tareas' }).click();
+  await page.getByRole('searchbox', { name: 'Buscar tareas por nombre, empresa, persona o período' }).fill('conciliacion banco nacion');
+  const quickSearchResults = page.locator('.quick-task-search-result');
+  assert(await quickSearchResults.count() === 2, 'Quick search did not find the two accessible matching tasks: ' + await page.locator('.quick-task-search-dialog').innerText());
+  assert((await quickSearchResults.allTextContents()).every((text) => text.includes('Conciliación Banco Nación')), 'Quick search returned an unexpected task');
+  await page.screenshot({ path: path.join(output, 'quick-task-search.png'), animations: 'disabled' });
+  await quickSearchResults.first().click();
+  await page.getByRole('heading', { name: 'Conciliación Banco Nación', exact: true }).waitFor();
+  await page.getByRole('button', { name: 'Cerrar', exact: true }).click();
+  checks.push({ interaction: 'quick-task-search-accent-insensitive-access-scoped', results: 2 });
   await first.locator('.card-title').click();
   await page.getByLabel('Nuevo comentario').fill('Nota de prueba para el superior');
   await page.getByRole('button', { name: 'Publicar comentario', exact: true }).click();
@@ -436,6 +446,7 @@ const assert = (ok, message) => {
           "internal request routing, response, resolution and persistence",
           "jefatura-only explicit one-off request-to-task conversion with provenance and no duplicate",
           "daily and weekly monthly work-cycle with team breakdown",
+          "accent-insensitive global quick task search scoped to employee access",
           "Kaizen evidence, controlled trial, manager adoption and catalogue versioning",
           "five-area 5S review and evidence-backed corrective action closure",
           "fiscal obligation linked to exact tasks with separate fiscal period, due date, and revision history",
@@ -449,7 +460,7 @@ const assert = (ok, message) => {
     ),
   );
   console.log(
-    "PASS: responsive sidebar, logos, laboratory, invitation, drag-and-drop, internal request conversion, review notification, persistence, mobile; zero operational API calls and JS errors.",
+    "PASS: responsive sidebar, logos, laboratory, invitation, drag-and-drop, access-scoped quick task search, internal request conversion, review notification, persistence, mobile; zero operational API calls and JS errors.",
   );
 })()
   .catch((e) => {
