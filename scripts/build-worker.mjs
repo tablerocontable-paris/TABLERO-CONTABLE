@@ -1,8 +1,6 @@
 import { build } from "esbuild";
-import { mkdir, rename, writeFile } from "node:fs/promises";
-await rename("dist", "dist-client");
-await mkdir("dist", { recursive: true });
-await rename("dist-client", "dist/client");
+import { mkdir, writeFile } from "node:fs/promises";
+await mkdir("dist/client", { recursive: true });
 await build({
   entryPoints: ["src/server/site-worker.ts"],
   outfile: "dist/server/index.js",
