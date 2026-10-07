@@ -1,7 +1,8 @@
 # Contrato ejecutable — tareas conjuntas del laboratorio
 
-Estado: implementado en el laboratorio privado; pendiente aceptación visual y
-de la ruta completa de cierre en Chromium.
+Estado: implementado en el laboratorio privado. La ruta completa de activación,
+relojes, avisos, cierre e informes pasó recorridos de navegador; sigue pendiente
+la aceptación final del usuario y la integración con un backend autenticado.
 Base de diseño: commit 8ca6933, Site privado v46. No depende del chat anterior.
 Conservar el laboratorio, Git y SQL001–011. No conectar Auth, D1 o Supabase.
 
@@ -12,7 +13,8 @@ cuotas que suman 100%, relojes independientes y cierre sin doble KPI.
 SQL011 ya implementa responsabilidad versionada/cierre v4 y tiene evidencia
 local previa. Ese motor no está conectado al laboratorio.
 
-Hallazgos en código vigente:
+Brechas registradas al inicio del bloque, antes de la implementación (históricas;
+no usar esta tabla como estado vigente):
 
 | Archivo / función | Brecha que debe resolver la implementación |
 | --- | --- |
@@ -203,7 +205,7 @@ No ampliar cobertura recurrente o jerarquía multiarea en este mismo cambio.
   cero avisos al autor, duplicados de replay o filtración por pérdida de acceso.
 - Regresión individual, SQL011 y backend D1; cero API operativa en laboratorio.
 
-## Handoff
+## Handoff original — sustituido por la implementación posterior
 
 Próximo modelo: GPT-6 Luna, esfuerzo medio, velocidad Standard, para implementar
 este contrato completo y comprobarlo. Si descubre contradicción material entre
@@ -211,7 +213,10 @@ reglas o necesidad de nuevo esquema remoto, preservar trabajo y volver a Sol6.1
 alto con evidencia concreta; no inventar autorización ni cambiar cuentas.
 Diseño cerrado no incrementa el avance funcional: global aproximado45%.
 
-Estado actualizado 06/10: el tablero ahora conserva orden manual entre columnas, incluye soporte teclado y activa el reloj al mover a En curso. Suite de regresión posterior reportada por proyecto: 341/341. Esto no implementa todavía activación conjunta, responsabilidad/cuotas o cierre.
+Estado actualizado 06/10: el tablero conserva orden manual entre columnas,
+incluye soporte teclado y activa el reloj al mover a En curso. La nota original
+decía que aún faltaban activación conjunta, cuotas y cierres; la implementación
+posterior documentada debajo reemplaza ese estado.
 
 ## Implementación de laboratorio — 06/10/2026
 
@@ -236,3 +241,19 @@ Estado actualizado 06/10: el tablero ahora conserva orden manual entre columnas,
   autenticada o concurrente entre PCs. No se aplicó SQL, no se conectó D1,
   Supabase o Auth y no se amplió la audiencia del Site. La cobertura no otorga
   cuota conjunta; la coordinación entre equipos sigue sin ampliarse para encargados.
+
+## Verificación de continuidad — 07/10/2026
+
+La suite actual pasó 424/424 pruebas en 48 archivos; TypeScript, Vite y Worker
+compilaron. Cuatro recorridos Edge headless cubrieron la activación conjunta,
+avisos y lectura, relojes independientes, cierres secuenciales, informes/CSV,
+restauración de laboratorio y recorridos desktop/móvil. Cero errores JavaScript,
+cero llamadas a la API operativa y cero desbordes horizontales. Evidencia:
+`docs/architecture/review-evidence/e2e-regression-lab-20261007-v87.json`.
+
+La evidencia de navegador corresponde a la interfaz funcional publicada en
+Site v87; las publicaciones v88 y v89 sólo actualizaron documentación. No
+equivale a aceptación final ni verifica concurrencia entre dispositivos,
+autenticación real o entrega remota de notificaciones. El contrato de servidor
+y permisos multiusuario sigue siendo una etapa posterior, después de aceptar el
+producto y habilitar las cuentas propias.
