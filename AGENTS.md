@@ -75,8 +75,8 @@ Avance orientativo 45–50%; no 100%.
 ## Correcciones posteriores — notificaciones
 Seguir docs/product/CORRECTIONS-20261006-NOTIFICATIONS.md. Continuar sin conexiones hasta imposibilidad técnica concreta. La campana y los comentarios funcionan sólo en laboratorio; entrega transaccional en servidor y activación conjunta siguen pendientes de integración.
 
-## Contrato conjunto listo — 06/10/2026
-Próxima implementación: docs/architecture/JOINT-LABORATORY-CONTRACT-20261006.md. Luna6 medio Standard ejecuta el bloque completo y pruebas; Sol6.1 alto sólo si surge contradicción material. Diseño cerrado, sin nueva implementación ni aumento del avance global.
+## Contrato conjunto — 06/10/2026
+La implementación local de docs/architecture/JOINT-LABORATORY-CONTRACT-20261006.md está completada y publicada; ver el estado y sus límites más abajo.
 
 ## Estado vigente posterior — 06/10/2026
 El contrato de tareas conjuntas ya está implementado en el laboratorio local;
@@ -84,5 +84,7 @@ ver evidencias y límites en PROJECT-STATUS.md y
 architecture/JOINT-LABORATORY-CONTRACT-20261006.md. Continúan fuera de alcance
 Auth, API/D1, Supabase y colaboración entre computadoras. Los cambios aprobados
 de la vista de laboratorio se pueden sincronizar y publicar en el mismo Site
-privado sin cambiar audiencia. La próxima decisión abierta es cobertura,
-jerarquía y atribución; revisar permisos antes de implementarla.
+privado sin cambiar audiencia. La cobertura selectiva ya está implementada en
+el laboratorio para ocurrencias materializadas; la siguiente etapa es cubrir
+ocurrencias recurrentes previstas y revisar bajas/reasignaciones antes de
+cambiar permisos del backend.

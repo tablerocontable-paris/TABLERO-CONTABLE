@@ -20,6 +20,8 @@ import {
   elapsedSeconds,
   registerAbsence,
   canWork,
+  cancelAbsence,
+  expireCoverageClocks,
   updateProfile,
 } from "../src/domain/workforce";
 import { reviseAssignment } from "../src/domain/planning";
@@ -173,16 +175,54 @@ describe("tiempo y cobertura", () => {
       note: "Control pendiente",
       createdBy: "boss",
     };
-    s = registerAbsence(s, a, "boss");
     const t = s.tasks.find((t) => t.ownerId === "e0")!;
+    const other = s.tasks.find((x) => x.ownerId === "e0" && x.id !== t.id && x.companyId === t.companyId)!;
+    s = registerAbsence(s, { ...a, taskIds: [t.id] }, "boss");
     const p = s.profiles.find((p) => p.id === "e1")!;
     expect(canWork(s, p, t, currentMonth() + "-15")).toBe(true);
+    expect(canWork(s, p, other, currentMonth() + "-15")).toBe(false);
     expect(canWork(s, p, t, "2027-01-01")).toBe(false);
     expect(t.ownerId).toBe("e0");
-    expect(() => registerAbsence(s, { ...a, id: "duplicate" }, "boss")).toThrow(
+    expect(() => registerAbsence(s, { ...a, id: "duplicate", taskIds: [t.id] }, "boss")).toThrow(
       "rango",
     );
     expect(() => registerAbsence(seed(), a, "e0")).toThrow("responsable");
+  });
+  it("revoca acceso y detiene sólo el reloj del reemplazo al cancelar o vencer", () => {
+    const base = seed();
+    const task = base.tasks.find((item) => item.ownerId === "e0" && item.status !== "Completada" && !item.blockedBy)!;
+    const day = task.due || task.scheduledOn || currentMonth() + "-15";
+    const absence = {
+      id: "clock-coverage", ownerId: "e0", replacementId: "e1", taskIds: [task.id],
+      from: currentMonth() + "-01", to: currentMonth() + "-31",
+      kind: "Vacaciones" as const, note: "", createdBy: "boss",
+    };
+    let s = registerAbsence(base, absence, "boss");
+    s = applyClock(s, task.id, "e0", true, `${day}T11:00:00-03:00`);
+    s = applyClock(s, task.id, "e1", true, `${day}T12:00:00-03:00`);
+    s = cancelAbsence(s, absence.id, "boss", `${day}T14:00:00-03:00`);
+    const sessions = s.tasks.find((item) => item.id === task.id)?.sessions || [];
+    expect(sessions.find((session) => session.actorId === "e1")?.end).toBe(`${day}T14:00:00-03:00`);
+    expect(sessions.find((session) => session.actorId === "e0")?.end).toBeNull();
+    expect(canWork(s, s.profiles.find((profile) => profile.id === "e1")!, task, day)).toBe(false);
+
+    const future = { ...absence, id: "expired-clock", from: "2026-10-01", to: "2026-10-31" };
+    let expired = registerAbsence(base, future, "boss");
+    expired = applyClock(expired, task.id, "e1", true, "2026-10-31T18:00:00-03:00");
+    expired = expireCoverageClocks(expired, "2026-11-01");
+    expect(expired.tasks.find((item) => item.id === task.id)?.sessions?.at(-1)?.end).toBe("2026-11-01T02:59:59.999Z");
+  });
+  it("un encargado cubre tareas elegidas sólo dentro de su equipo", () => {
+    const s = seed();
+    const task = s.tasks.find((t) => t.ownerId === "e0" && t.status !== "Completada")!;
+    const absence = {
+      id: "team-coverage", ownerId: "e0", replacementId: "e6",
+      from: currentMonth() + "-01", to: currentMonth() + "-31",
+      kind: "Licencia" as const, note: "", createdBy: "m1", taskIds: [task.id],
+    };
+    expect(() => registerAbsence(s, absence, "m1")).toThrow("ámbito");
+    expect(registerAbsence(s, { ...absence, replacementId: "e1" }, "m1").absences).toHaveLength(1);
+    expect(() => registerAbsence(s, { ...absence, replacementId: "e1", taskIds: [] }, "m1")).toThrow("al menos una tarea");
   });
   it("empleado no administra, jefe debe mantener relación válida", () => {
     const s = seed(),

@@ -53,19 +53,17 @@ Cada devolución final: resultado, verificación/límites y **Próximo modelo:
 [modelo y esfuerzo] — [acción]**. Si la próxima fase usa el mismo modelo, seguir
 sin pedir otro «continuá».
 
-## Próximo bloque — actualizado06/10/2026
+## Referencia histórica — handoff de migration-011
 
-Implementación 011 quedó parcial el06/10. **Próximo: GPT-6.1 Sol alto,
-Standard**, revisar el corte local y cerrar cómo completar todos los writers,
-la cobertura recurrente y reporte4 antes de otra ejecución. Luego **GPT-6 Luna
-medio, Standard** ejecuta el bloque cerrado, pruebas y commit local. El usuario
-pidió que esta reanudación sea sólo local: sin push, Sites save/deploy ni SQL
-remoto. Preservar SQL001–010 y live v43. PostgreSQL real sigue pendiente.
+Este estado fue reemplazado por las decisiones posteriores del usuario: se
+autorizó commit, sincronización de la fuente del mismo Site y publicación
+privada. No habilita cuentas reales, cambios de audiencia ni migraciones.
 
-## Próximo paso vigente — después de Site v47
-La interacción de tarjetas y el contrato conjunto están implementados en el
-laboratorio local. El próximo bloque deriva de las reglas de cobertura,
-jerarquía y bajas en `docs/product/CORRECTIONS-20261002.md`; por el cruce de
-permisos debe revisarse con GPT-6.1 Sol alto, Standard. Luego GPT-6 Luna medio,
-Standard implementa el contrato cerrado. Cada devolución indica la siguiente
-acción, modelo y esfuerzo, y avance global; no repetir sólo la pareja genérica.
+## Próximo paso vigente — después de Site v49
+Las tareas conjuntas y la cobertura de ocurrencias existentes están
+implementadas y publicadas en el laboratorio. Falta integrar ocurrencias que se
+materialicen por recurrencias durante la ausencia y revisar traspaso,
+reasignación y exportaciones. Si las reglas de `docs/product/` cierran esos
+casos, GPT-6 Luna medio, Standard, para implementación. Si aparece una decisión
+nueva sobre permisos o jerarquía, GPT-6.1 Sol alto, Standard, para revisar sólo
+ese contrato primero. Mantener infraestructura productiva fuera del laboratorio.

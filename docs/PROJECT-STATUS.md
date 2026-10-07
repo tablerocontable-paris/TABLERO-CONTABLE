@@ -46,12 +46,12 @@ implementarlos. No simular cambio de modelo ni delegación.
 Avance global aproximado: 45%. El 100% incluye GitHub propio, Supabase dev/producción y hosting funcionando, con entrega automática verificada y todas las correcciones conocidas cerradas. Ver ops/FINAL-ACCEPTANCE.md. Primero aceptación funcional del laboratorio; después configuración e integración de infraestructura. No enviar invitaciones reales ahora.
 
 ## Correcciones de marca y notificaciones
-Logo alineado y centrado sin leyenda, cabecera compacta, campana para todos los perfiles y comentarios de tareas en laboratorio. Avisos de asignación, cambios, finalización y comentarios; lectura persistente por destinatario. Contrato conjunto preparado pero disparador funcional aún pendiente. Ver product/CORRECTIONS-20261006-NOTIFICATIONS.md. No se necesitan cuentas/conexiones para continuar estos bloques.
+Logo alineado y centrado sin leyenda, cabecera compacta, campana para todos los perfiles y comentarios de tareas en laboratorio. Avisos de asignación, cambios, finalización, comentarios y activación conjunta; lectura persistente por destinatario. La entrega transaccional y los avisos entre computadoras siguen pendientes de servidor. Ver product/CORRECTIONS-20261006-NOTIFICATIONS.md.
 
 Verificación de este bloque: 339/339 pruebas en 33 archivos, build aprobado y Chromium escritorio/móvil aprobado con cero errores JS y cero llamadas a /api. Fuente y publicación privada del mismo Site; sin cambiar audiencia.
 
-## Contrato conjunto listo para implementación
-Revisado el desacople SQL011/laboratorio y cerrado architecture/JOINT-LABORATORY-CONTRACT-20261006.md. Define cambios de permisos, filtros, relojes, cuotas, cierre, reportes y avisos. Todavía no implementado; próximo Luna6 medio Standard. No suma avance funcional ni requiere conexiones.
+## Contrato conjunto — estado histórico actualizado
+El contrato de architecture/JOINT-LABORATORY-CONTRACT-20261006.md ya está implementado en el laboratorio local, con límites y validaciones vigentes descritos en la sección posterior «Tareas conjuntas del laboratorio». No modifica SQL011 ni el backend.
 
 ## Tablero movible — 06/10/2026
 Entregables arrastrables entre estados, orden antes/después y persistencia de orden manual. Cambio respeta transition(): iniciar abre sólo cronómetro del actor, completar requiere pasos y espera liberada, reapertura aumenta contador. Teclado Alt+flecha izquierda/derecha. Evidencia suite 341/341, build y Chromium con cero llamadas API operativa/errores JS.
@@ -73,3 +73,18 @@ La simulación usa localStorage de un navegador; no prueba colaboración entre
 computadoras ni aislamiento Auth/RLS. No se conectó cuenta/API ni se aplicó
 migración. El avance global orientativo permanece alrededor de45%; esto no
 completa la aceptación funcional total ni la infraestructura del 100%.
+
+## Cobertura selectiva en laboratorio — 06/10/2026
+
+La vista de ausencias ahora limita acceso a ocurrencias abiertas que el
+responsable selecciona. La persistencia local conserva ese alcance; encargados
+quedan restringidos a su equipo y jefatura puede coordinar cruces. Cancelación
+y vencimiento revocan acceso y cierran sólo el reloj del reemplazante. Contrato
+y límites: `architecture/COVERAGE-LAB-CONTRACT-20261006.md`.
+
+Validación de esta etapa: 351/351 pruebas en 34 archivos, build y Chromium
+general escritorio/móvil aprobados; formulario probado en jsdom. Cero errores
+JS y cero llamadas operativas a `/api`. Quedan pendientes las ocurrencias
+recurrentes aún no materializadas, su traspaso/aprobación y aceptación de
+cancelaciones con cierres/exportaciones. No modifica el avance global (~45%) ni
+habilita usuarios reales.

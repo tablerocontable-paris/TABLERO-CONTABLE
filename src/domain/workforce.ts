@@ -13,6 +13,7 @@ export interface Absence {
   id: string;
   ownerId: string;
   replacementId: string;
+  taskIds?: string[];
   from: string;
   to: string;
   kind: "Vacaciones" | "Licencia";
@@ -76,8 +77,41 @@ export function coverageFor(s: State, t: Task, at = dateART()) {
       a.from <= at &&
       a.to >= at &&
       t.month >= a.from.slice(0, 7) &&
-      t.month <= a.to.slice(0, 7),
+      t.month <= a.to.slice(0, 7) &&
+      !!a.replacementId &&
+      (a.taskIds || []).includes(t.id),
   );
+}
+export function cancelAbsence(s: State, absenceId: string, actorId: string, at = new Date().toISOString()): State {
+  const actor = s.profiles.find((p) => p.id === actorId);
+  const absence = s.absences?.find((item) => item.id === absenceId && !item.cancelledAt);
+  if (!actor?.active || actor.role === "empleado" || !absence || !canSee(actor, absence.ownerId, s.profiles))
+    throw Error("Sólo un responsable autorizado puede cancelar esta cobertura.");
+  const taskIds = new Set(absence.taskIds || []);
+  return {
+    ...s,
+    absences: s.absences!.map((item) => item.id === absenceId ? { ...item, cancelledAt: at } : item),
+    tasks: s.tasks.map((task) => taskIds.has(task.id) ? stopActorClock(task, absence.replacementId, at) : task),
+  };
+}
+export function expireCoverageClocks(s: State, at = dateART()): State {
+  const expired = (s.absences || []).filter((absence) => !absence.cancelledAt && absence.replacementId && absence.to < at);
+  if (!expired.length) return s;
+  let changed = false;
+  const tasks = s.tasks.map((task) => {
+    let next = task;
+    for (const absence of expired) {
+      if (absence.ownerId !== task.ownerId || !(absence.taskIds || []).includes(task.id)) continue;
+      const cutoff = new Date(`${absence.to}T23:59:59.999-03:00`).toISOString();
+      next = { ...next, sessions: (next.sessions || []).map((session) => {
+        if (session.end || session.actorId !== absence.replacementId) return session;
+        changed = true;
+        return { ...session, end: Date.parse(session.start) > Date.parse(cutoff) ? session.start : cutoff };
+      }) };
+    }
+    return next;
+  });
+  return changed ? { ...s, tasks } : s;
 }
 export function canWork(s: State, p: Profile, t: Task, at = dateART()) {
   if (!p.active || (p.role !== "jefe" && !p.companyIds.includes(t.companyId)))
@@ -93,7 +127,7 @@ export function registerAbsence(s: State, a: Absence, actorId: string): State {
   const owner = s.profiles.find((p) => p.id === a.ownerId);
   const replacement = s.profiles.find((p) => p.id === a.replacementId);
   if (
-    !p ||
+    !p || !p.active ||
     p.role === "empleado" ||
     !canSee(p, a.ownerId, s.profiles) ||
     !owner?.active
@@ -108,11 +142,25 @@ export function registerAbsence(s: State, a: Absence, actorId: string): State {
     (!replacement?.active ||
       replacement.id === a.ownerId ||
       !canSee(p, replacement.id, s.profiles) ||
-      owner.companyIds.some((c) => !replacement.companyIds.includes(c)))
+      !a.taskIds?.length)
   )
     throw Error(
-      "El reemplazante debe pertenecer a tu ámbito y tener acceso a las empresas del titular.",
+      "Elegí al menos una tarea y un reemplazante activo de tu ámbito.",
     );
+  if (p.role === "encargado" &&
+    (owner.managerId !== p.id || replacement?.managerId !== p.id))
+    throw Error("Un encargado sólo puede aprobar coberturas dentro de su equipo.");
+  const selected = new Set(a.taskIds || []);
+  if (selected.size !== (a.taskIds || []).length)
+    throw Error("No repitas tareas en la cobertura.");
+  const selectedTasks = s.tasks.filter((t) => selected.has(t.id));
+  if (selectedTasks.length !== selected.size || selectedTasks.some((t) =>
+    t.ownerId !== owner.id || t.status === "Completada" ||
+    (t.due || t.scheduledOn || "") < a.from || (t.due || t.scheduledOn || "") > a.to ||
+    !owner.companyIds.includes(t.companyId) ||
+    (!!replacement && !replacement.companyIds.includes(t.companyId)) ||
+    isClosed(s, t)))
+    throw Error("La cobertura sólo puede incluir tareas abiertas del titular, dentro del rango y en empresas autorizadas.");
   if (
     (s.absences || []).some(
       (x) =>

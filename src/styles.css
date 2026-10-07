@@ -1267,6 +1267,11 @@ summary {
 .step-editor-row button { min-height: 34px; padding: 6px; }
 .step-add { justify-self: start; display: inline-flex; align-items: center; gap: 6px; margin-top: 2px; }
 .coverage-task-badge { display: inline-flex; margin: 2px 0 8px; padding: 4px 7px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 11px; }
+.coverage-task-selection { display: grid; gap: 10px; margin: 14px 0; padding: 14px; border: 1px solid var(--line); border-radius: 12px; }
+.coverage-task-selection legend { padding: 0 6px; color: var(--ink); font-weight: 650; }
+.coverage-task-selection label { display: flex; align-items: flex-start; gap: 9px; color: var(--ink); }
+.coverage-task-selection input { width: auto; margin-top: 4px; }
+.coverage-task-selection small { color: var(--muted); }
 .workspace-count { display: block; margin-top: 5px; color: var(--muted); font-size: 10px; }
 .task-owner-section { margin-top: 20px; }
 .task-owner-section > h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; font-size: 16px; }

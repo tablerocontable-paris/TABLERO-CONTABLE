@@ -16,20 +16,25 @@ conjunta está implementada en el laboratorio local; contrato, alcance y límite
 en `docs/architecture/JOINT-LABORATORY-CONTRACT-20261006.md`. No equivale a
 colaboración en línea o a permisos de producción.
 
-## Próximo trabajo
+## Cobertura local implementada y siguiente trabajo
 
-Revisar y extender en el laboratorio la cobertura que conserva la identidad y
-responsabilidad del titular, pero atribuye la actividad y el tiempo propios al
-reemplazo. Antes de tocar relaciones entre equipos, bajas/reasignaciones o el
-backend activo, cerrar un contrato de permisos y regresión. Referencias: filas
-4, 13 y 14 de `docs/product/CORRECTIONS-20261002.md` y regla de cobertura de
-`docs/product/CONSISTENCY-RULES.md`.
+La cobertura ahora enumera ocurrencias ya materializadas, mantiene al titular,
+atribuye cronómetros al reemplazante, limita accesos por empresa/equipo y revoca
+relojes al cancelar o vencer. Contrato y evidencia en
+`docs/architecture/COVERAGE-LAB-CONTRACT-20261006.md`.
 
-Modelo para esa revisión: GPT-6.1 Sol, esfuerzo alto, velocidad Standard, por
-el cruce de permisos, jerarquía y atribución histórica. Cerrado el contrato,
-GPT-6 Luna, esfuerzo medio, Standard, para implementarlo y verificarlo. Si se
-mantiene un alcance sólo local y aparece una decisión nueva, detenerse antes de
-alterar D1 o una migración.
+Siguiente: cubrir también las ocurrencias que se materialicen por reglas
+recurrentes durante la ausencia, con vista previa para evitar duplicados;
+después cerrar el circuito de baja/reasignación y auditar cierres e
+exportaciones. Referencias: filas 4, 13 y 14 de
+`docs/product/CORRECTIONS-20261002.md` y regla de cobertura de
+`docs/product/CONSISTENCY-RULES.md`. Mantener el alcance en laboratorio antes de
+alterar relaciones o el backend activo.
+
+Para una decisión nueva de permisos/jerarquía: GPT-6.1 Sol, esfuerzo alto,
+velocidad Standard, revisión breve del contrato; luego GPT-6 Luna, esfuerzo
+medio, Standard, para implementar y verificar. Si los criterios existentes
+bastan, continuar directamente con Luna medio y no gastar el bloque Sol.
 
 ## Entrega
 

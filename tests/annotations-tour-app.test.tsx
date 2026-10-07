@@ -138,6 +138,7 @@ describe("anotaciones y recorrido integrados", () => {
       id: "coverage-absence",
       ownerId: "e0",
       replacementId: "e1",
+      taskIds: ["coverage-task"],
       from: dateART(),
       to: dateART(),
       kind: "Vacaciones",
@@ -145,11 +146,37 @@ describe("anotaciones y recorrido integrados", () => {
       createdBy: "m1",
     }];
     localStorage.setItem(KEY, JSON.stringify(state));
+    expect(load().absences?.[0].taskIds).toEqual(["coverage-task"]);
     render(<App />);
     fireEvent.click(document.querySelector('[data-nav="tasks"]')!);
     expect(screen.getByText(/Tareas que cubrís/)).toBeTruthy();
     expect(document.querySelectorAll('[data-task-id="coverage-task"]')).toHaveLength(1);
     expect(screen.getByText(/Tarea de cobertura para Valentino Magni/)).toBeTruthy();
+  });
+
+  it("al preparar una cobertura obliga a elegir tareas específicas y las conserva", () => {
+    const state = prepare("m1");
+    const examples = seed().tasks.filter((task) => task.ownerId === "e0").slice(0, 2);
+    state.tasks = examples.map((task, index) => ({
+      ...task, id: `selected-coverage-${index}`, title: `Cobertura ${index + 1}`,
+      month: currentMonth(), due: `${currentMonth()}-15`, scheduledOn: `${currentMonth()}-10`,
+      status: "Pendiente" as const, blockedBy: "", sessions: [],
+    }));
+    localStorage.setItem(KEY, JSON.stringify(state));
+    render(<App />);
+    fireEvent.click(document.querySelector('[data-nav="absences"]')!);
+    fireEvent.click(screen.getByRole("button", { name: "Registrar ausencia" }));
+    fireEvent.change(screen.getByLabelText("Persona ausente"), { target: { value: "e0" } });
+    fireEvent.change(screen.getByLabelText("Quién cubre"), { target: { value: "e1" } });
+    fireEvent.change(screen.getByLabelText("Desde"), { target: { value: `${currentMonth()}-01` } });
+    fireEvent.change(screen.getByLabelText("Hasta"), { target: { value: `${currentMonth()}-31` } });
+    const selected = screen.getByLabelText(/Cobertura 1/);
+    const unselected = screen.getByLabelText(/Cobertura 2/);
+    fireEvent.click(selected);
+    fireEvent.click(screen.getByRole("button", { name: "Guardar ausencia" }));
+    expect((selected as HTMLInputElement).checked).toBe(true);
+    expect((unselected as HTMLInputElement).checked).toBe(false);
+    expect(load().absences?.[0].taskIds).toEqual(["selected-coverage-0"]);
   });
 
   it("asigna una tarea nueva al perfil consultado y respeta la meta editada", () => {

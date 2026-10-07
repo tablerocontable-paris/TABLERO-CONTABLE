@@ -30,6 +30,7 @@ import {
   applyClock,
   canWork,
   coverageFor,
+  expireCoverageClocks,
 } from "./domain/workforce";
 import { enterLab, exitLab, isLab } from "./data/repository";
 import { useState, useEffect, type FormEvent } from "react";
@@ -167,6 +168,11 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
     const timer = setInterval(() => setTick(Date.now()), 1000);
     return () => clearInterval(timer);
   }, [hasRunningClock]);
+  useEffect(() => {
+    if (!hasRunningClock) return;
+    const next = expireCoverageClocks(state, dateART(new Date(tick).toISOString()));
+    if (next !== state) commit(next, "Venció el período de cobertura");
+  }, [tick]);
   const [page, setPage] = useState<Page>(() =>
     state.activeId === "boss"
       ? "overview"

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Panel, Dialog } from "./ui";
-import { canSee, dateART, id, type State, type Profile } from "../domain/model";
+import { canSee, dateART, id, isClosed, type State, type Profile } from "../domain/model";
 import {
+  cancelAbsence,
   registerAbsence,
   updateProfile,
   type Absence,
@@ -253,6 +254,7 @@ export function Absences({
     to: dateART(),
     kind: "Vacaciones" as Absence["kind"],
     note: "",
+    taskIds: [] as string[],
   });
   const people = state.profiles.filter(
     (p) =>
@@ -268,6 +270,8 @@ export function Absences({
     (t) =>
       t.ownerId === form.ownerId &&
       t.status !== "Completada" &&
+      !isClosed(state, t) &&
+      (!form.replacementId || !!state.profiles.find((profile) => profile.id === form.replacementId)?.companyIds.includes(t.companyId)) &&
       (t.due || t.scheduledOn || "") >= form.from &&
       (t.due || t.scheduledOn || "") <= form.to,
   );
@@ -275,7 +279,7 @@ export function Absences({
     <>
       <Panel
         title="Vacaciones, licencias y cobertura"
-        sub="Se conserva el titular de la tarea. El reemplazante recibe acceso temporal a las tareas abiertas; cada sesión de trabajo conserva quién la realizó."
+        sub="Se conserva el titular y sólo se habilitan las tareas elegidas. El responsable aprueba la cobertura dentro de su equipo; jefatura puede coordinar entre equipos."
         action={
           active.role !== "empleado" ? (
             <button className="primary" onClick={() => setAdding(true)}>
@@ -325,17 +329,7 @@ export function Absences({
                         <button
                           onClick={() =>
                             commit(
-                              {
-                                ...state,
-                                absences: dates.map((x) =>
-                                  x.id === a.id
-                                    ? {
-                                        ...x,
-                                        cancelledAt: new Date().toISOString(),
-                                      }
-                                    : x,
-                                ),
-                              },
+                              cancelAbsence(state, a.id, active.id),
                               "Canceló ausencia",
                               a.id,
                             )
@@ -380,7 +374,7 @@ export function Absences({
               <select
                 required
                 value={form.ownerId}
-                onChange={(e) => setForm({ ...form, ownerId: e.target.value })}
+                onChange={(e) => setForm({ ...form, ownerId: e.target.value, taskIds: [] })}
               >
                 <option value="">Seleccioná una persona</option>
                 {people.map((p) => (
@@ -397,7 +391,7 @@ export function Absences({
                   type="date"
                   required
                   value={form.from}
-                  onChange={(e) => setForm({ ...form, from: e.target.value })}
+                  onChange={(e) => setForm({ ...form, from: e.target.value, taskIds: [] })}
                 />
               </label>
               <label>
@@ -407,7 +401,7 @@ export function Absences({
                   required
                   min={form.from}
                   value={form.to}
-                  onChange={(e) => setForm({ ...form, to: e.target.value })}
+                  onChange={(e) => setForm({ ...form, to: e.target.value, taskIds: [] })}
                 />
               </label>
             </div>
@@ -450,8 +444,29 @@ export function Absences({
                 onChange={(e) => setForm({ ...form, note: e.target.value })}
               />
             </label>
+            {form.replacementId && (
+              <fieldset className="coverage-task-selection">
+                <legend>Tareas que puede cubrir</legend>
+                {affected.length ? affected.map((task) => (
+                  <label key={task.id}>
+                    <input
+                      type="checkbox"
+                      checked={form.taskIds.includes(task.id)}
+                      onChange={(e) => setForm({
+                        ...form,
+                        taskIds: e.target.checked
+                          ? [...form.taskIds, task.id]
+                          : form.taskIds.filter((id) => id !== task.id),
+                      })}
+                    />
+                    {task.title} · {state.companies.find((company) => company.id === task.companyId)?.name || "Empresa"}
+                  </label>
+                )) : <p>No hay tareas abiertas del titular con fecha dentro del rango.</p>}
+                <small>La cobertura exige una tarea seleccionada; cada sesión conserva al reemplazante como ejecutor. En este laboratorio aparecen las ocurrencias ya materializadas dentro del rango.</small>
+              </fieldset>
+            )}
             <div className="note">
-              {affected.length} tareas abiertas con fecha en el rango. Los
+              {form.replacementId ? form.taskIds.length : affected.length} tareas autorizadas de {affected.length} abiertas en el rango. Los
               vencimientos no se postergan automáticamente.
             </div>
             <div className="modal-actions">
