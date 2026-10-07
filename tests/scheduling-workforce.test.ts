@@ -29,6 +29,7 @@ import {
   updateProfile,
 } from "../src/domain/workforce";
 import { reviseAssignment } from "../src/domain/planning";
+import { collectTaskNotifications } from "../src/domain/notifications";
 describe("fechas de cada ocurrencia", () => {
   it("puntual no reaparece al cambiar el mes", () => {
     const r = defaultSchedule("2026-10-09");
@@ -365,6 +366,8 @@ describe("tiempo y cobertura", () => {
     expect(record.activity).toEqual([activity]);
     expect(record.comments).toEqual([comment]);
     expect(() => transferOrphanedTask(transferred, item.id, "e2", "boss", "Segundo traspaso")).toThrow("explícito");
+    const notified = collectTaskNotifications(retired, transferred, "boss");
+    expect(notified.notifications?.filter((notice) => notice.taskId === task.id && notice.kind === "assigned").map((notice) => notice.recipientId).sort()).toEqual(["e1", "m1"]);
 
     const closure = closeMonth(transferred, "e1", task.month, "boss", "Controlado por jefatura");
     const report = closure.closures.at(-1)?.report!;

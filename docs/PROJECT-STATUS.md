@@ -128,15 +128,18 @@ traspaso en D1/Supabase.
 
 El avance global orientativo sigue en **45%**: las pruebas aprobadas no equivalen
 a aceptación final. La próxima fase es auditar cierres/exportaciones y probar
-reglas diarias, semanales y en varios meses. La publicación debe confirmarse con
-el siguiente commit. La fase de traspasos ya está en el Site privado versión 52,
-con fuente `c7fb09ac0b4875079b3bea30c2ec60c42745d323`. La auditoría posterior
+reglas diarias, semanales y en varios meses. La fase de traspasos ya está en el
+Site privado versión 52, con fuente
+`c7fb09ac0b4875079b3bea30c2ec60c42745d323`. La auditoría posterior
 detectó y corrigió que la validación de la bandeja de bajas no aceptaba la
 frecuencia diaria aunque el planificador la admite. Se añadieron pruebas de
-persistencia diaria y materialización a través de dos meses. Verificación del
-cambio pendiente de publicación: **362/362 pruebas en 35 archivos**, TypeScript,
-Vite y Worker build aprobados. El bundle local de prueba refleja este cambio;
-falta confirmar la nueva versión Sites.
+persistencia diaria, materialización a través de dos meses y aviso de nueva
+asignación al receptor y su encargado. El Site privado versión **53** publicó
+el commit `e7fc01334dc8b8aaab261d0cb52ba97401830935`; fuente y versión se
+confirmaron en Sites. Verificación local del código: **362/362 pruebas en 35
+archivos**, TypeScript, Vite y Worker build aprobados. Chromium desktop/móvil
+aprobado con cero errores JS y cero solicitudes a `/api`. La audiencia se
+mantiene personalizada y sólo incluye al propietario.
 
 Verificación del corte: 358/358 pruebas en 35 archivos con timeout ampliado
 para migraciones históricas; TypeScript, build Worker y Chromium desktop/móvil
