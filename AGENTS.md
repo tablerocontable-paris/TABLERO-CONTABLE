@@ -98,6 +98,14 @@ privado sin cambiar audiencia. La cobertura selectiva, incluyendo reglas
 recurrentes previstas, está implementada en el laboratorio; la siguiente etapa
 es cerrar bajas/reasignaciones e historial antes de cambiar permisos del backend.
 
+Correcciones de interfaz 07/10: revisar
+`docs/product/CORRECTIONS-20261007-UI.md` y
+`docs/architecture/review-evidence/ui-corrections-lab-20261007.json`. Resumen,
+Catálogo/Cierre por rol, tarjetas compactas, tema y arrastre están verificados.
+Operativas, calendario/eventos, cierres de alcance múltiple y analítica necesitan
+contrato GPT-6.1 Sol alto antes de implementar. Avance sigue ~45%; no crear
+cuentas ni cambiar la audiencia hasta la aceptación final.
+
 ## Ciclo de trabajo mensual — 06/10/2026
 
 El ciclo día/semana se muestra sólo en Análisis del laboratorio local. No

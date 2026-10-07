@@ -467,7 +467,9 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
   );
   const ownBoardPages: Page[] = ["day", "tasks", "operations", "calendar"];
   const viewedOwner = boardOwner || active.id;
-  const ownerFilter = ownBoardPages.includes(page) ? viewedOwner : owner;
+  const personalOverview = page === "overview" && active.role === "empleado";
+  const profileScopedPage = ownBoardPages.includes(page) || personalOverview;
+  const ownerFilter = profileScopedPage ? viewedOwner : owner;
   const filtered = monthTasks.filter(
     (t) =>
       (!company || t.companyId === company) &&
@@ -483,7 +485,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           .includes(query.toLowerCase())),
   );
   const metricAsOf = new Date().toISOString();
-  const m = ["day", "tasks", "operations", "calendar"].includes(page)
+  const m = profileScopedPage
     ? metricsForProfile(filtered, state.activity, viewedOwner, dateART(metricAsOf), metricAsOf)
     : metrics(filtered, state.activity, dateART(metricAsOf), metricAsOf);
   const resultTasks = filtered.filter((t) => t.kind === "resultado");
@@ -1289,7 +1291,11 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
         <span className="nav-label">TU ESPACIO DE TRABAJO</span>
         <nav>
           {pages
-            .filter((p) => (manager || !["overview", "catalog", "closing"].includes(p.id)) && (p.id !== "requests" || (laboratory && !remoteSave)) && (p.id !== "quality" || (laboratory && !remoteSave)))
+            .filter((p) =>
+              ((p.id !== "catalog" && p.id !== "closing") || active.role === "jefe") &&
+              (p.id !== "requests" || (laboratory && !remoteSave)) &&
+              (p.id !== "quality" || (laboratory && !remoteSave)),
+            )
             .map((p) => (
               <button
                 data-nav={p.id}
@@ -1375,8 +1381,6 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
               if (task && canWork(state, active, task)) { setMonth(task.month); setPage('tasks'); setDetail(taskId); }
             }} />}
             <ThemeControl />
-            <span className="version">{remoteSave ? 'Versión privada · 1.0' : 'Nueva generación · 0.4'}</span>
-            <span className="avatar">{ini(active.name)}</span>
           </div>
         </header>
         <div className="content">
@@ -1431,7 +1435,11 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
               <span className="eyebrow">CONTABILIDAD · GRUPO PARÍS</span>
               <h1>
                 {page === "overview"
-                  ? "Todo el equipo, en perspectiva."
+                  ? active.role === "empleado"
+                    ? "Tu trabajo, en perspectiva."
+                    : active.role === "encargado"
+                      ? "Tu equipo, en perspectiva."
+                      : "Todo el equipo, en perspectiva."
                   : page === "day"
                     ? viewedOwner === active.id
                       ? `Buen día, ${active.name.split(" ")[0]}.`
@@ -1461,7 +1469,9 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                                       : "Lo próximo, a la vista."}
               </h1>
               <p>
-                {page === "operations"
+                  {page === "overview" && active.role === "empleado"
+                    ? "Tus tareas, prioridades y resultados del período."
+                    : page === "operations"
                   ? "Facturas, trámites y pagos: cantidades, referencias y metas por mes."
                   : page === "annotations"
                     ? "Guardá fórmulas y recordatorios personales; convertí una anotación en tarea cuando necesite seguimiento."
@@ -1624,7 +1634,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                 )}
                 <div className="dashboard-row">
                   <Panel
-                    title="Avance ponderado del equipo"
+                    title={active.role === "empleado" ? "Tu avance ponderado" : "Avance ponderado del equipo"}
                     sub="Puntos completados y pendientes · mismo período"
                     action={
                       <button
@@ -2371,7 +2381,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                 </Panel>
               </>
             )}
-            {page === "catalog" && (
+            {page === "catalog" && active.role === "jefe" && (
               <Panel
                 title="Catálogo estándar y pesos"
                 sub="El jefe define el peso. Los cambios se aplican a nuevas asignaciones; no reescriben meses anteriores."
@@ -2389,7 +2399,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                 </div>
               </Panel>
             )}
-            {page === "closing" && manager && (
+            {page === "closing" && active.role === "jefe" && (
               <>
                 <div className="notice-banner">
                   <LockKeyhole size={18} />
@@ -3105,7 +3115,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           </form>
         </Dialog>
       )}
-      {modal === "close" && (remoteSave ? active.role==='jefe' : manager) &&
+      {modal === "close" && active.role === "jefe" &&
         !!state.profiles.find((p) => p.id === owner && p.active) &&
         canSee(active, owner, state.profiles) && (
         <Dialog

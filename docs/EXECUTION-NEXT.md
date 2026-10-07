@@ -3,46 +3,25 @@
 Repositorio: `work/site`. Continuar el mismo proyecto y Git. No reconstruir ni
 consultar el chat anterior.
 
-## Próximo bloque vigente — revisión de arquitectura
+## Corte vigente — correcciones de interfaz verificadas 07/10/2026
 
-La última validación integral de producto se ejecutó sobre el código del corte
-v78 (`6576f9980c68729e5a2e51b1f3241a7d22ce3d61`): suite 420/420, TypeScript,
-Vite, Worker y cuatro recorridos Edge de navegador (general,
-correcciones/arrastre, copia/restauración y tareas conjuntas), sin errores JS ni
-llamadas a `/api`. Las publicaciones v79–v80 sólo actualizaron documentación y
-la transferencia; no cambiaron comportamiento. El hook pasó 104/104 en los
-commits documentales. La guía de transferencia incluye `npm run hooks:install`,
-probado en un clon nuevo porque `core.hooksPath` es local a cada checkout. Para
-el SHA/versión exactos de una transferencia, usar el HEAD limpio y el `get_site`
-del momento. El JSON `paris-state-lab` se exporta aparte desde la interfaz.
-
-El último corte funcional del laboratorio son los avisos locales de vencimiento,
-implementados en `25d1490` y publicados en el mismo Site privado como v68. Las
-publicaciones v69–v78 actualizaron la documentación, configuración de pruebas y
-transferencia, sin cambiar funcionalidades ni audiencia. El checkout de referencia está en
-`main`; el bundle final debe corresponder al SHA de cierre de cada transferencia.
-El JSON de `paris-state-lab` viaja por separado desde la interfaz.
-
-La suite completa pasó **420/420 pruebas en 48 archivos** con dos workers y
-timeouts explícitos de 20/30 s. `npm test` conserva esos parámetros como
-comando estándar. La revisión de navegador de este corte ya pasó por la app
-general, vistas responsivas, arrastre, búsqueda, procesos, obligaciones,
-copia/restauración del laboratorio y cierres conjuntos; sin errores JS ni
+Se corrigieron roles del Resumen/Catálogo/Cierre, el catálogo plegable, la
+duplicación del avatar, el selector de tema y el tamaño/animación de arrastre.
+La suite completa aprobó **423/423 pruebas en 48 archivos**; TypeScript, Vite y
+Worker compilan. Cuatro recorridos Edge aprobaron y no registraron errores JS ni
 llamadas a `/api`. Evidencia:
-`docs/architecture/review-evidence/local-browser-audit-20261007.json`.
-El test unitario de teclado del tablero pasó 4/4 casos. El sondeo sintético con
-24 perfiles mostró la tabla de perfiles en 512 ms desde la selección de Equipo;
-incluye carga de la ruta y no tiene un umbral de aceptación acordado. Esto no
-cierra el QA de teclado de extremo a extremo ni la concurrencia entre
-pestañas/dispositivos. Evidencia del sondeo en el JSON indicado arriba.
+`docs/architecture/review-evidence/ui-corrections-lab-20261007.json`.
+El Site existente está en v81 antes de este corte, owner-only y sin cambios de
+audiencia. Fuente local `main`; el checkout conserva el laboratorio aislado.
 
-El siguiente paso es seleccionar **GPT-6.1 Sol, esfuerzo alto, Standard** para
-revisar identidad, permisos, idempotencia, historial y entrega en dependencias,
-delegación/aceptación y notificaciones entre dispositivos, y acordar criterios
-de aceptación para el QA de volumen/concurrencia. No implementar escrituras de
-servidor, no crear cuentas y no conectar servicios en esa revisión. Después,
-**GPT-6 Luna, esfuerzo medio, Standard** para ejecutar el contrato aprobado en
-el laboratorio. Los apartados posteriores conservan la cronología.
+Siguiente paso de modelo: **GPT-6.1 Sol, esfuerzo alto, Standard**, para resolver
+los contratos que las correcciones dejan abiertos: cantidades operativas y KPI,
+agenda de eventos/ausencias, permisos y atomicidad de cierres por alcance,
+definiciones de series/gráficos mensuales y organización compacta de Consultas y
+Anotaciones. Mantener cuentas, invitaciones, API y Supabase fuera de esa etapa.
+Después del contrato, **GPT-6 Luna, esfuerzo medio, Standard**, implementa sólo
+las decisiones aprobadas en el laboratorio. Los apartados posteriores conservan
+la cronología.
 
 ## Estado vigente
 

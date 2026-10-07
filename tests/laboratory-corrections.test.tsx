@@ -6,10 +6,12 @@ import {
   render,
   screen,
   within,
+  waitFor,
 } from "@testing-library/react";
 import LaboratoryWorkspace from "../src/components/LaboratoryWorkspace";
 import App from "../src/App";
 import ParameterizationInbox from "../src/components/ParameterizationInbox";
+import ThemeControl from "../src/components/ThemeControl";
 import { seed, KEY, persist } from "../src/data/repository";
 vi.mock("recharts", () =>
   Object.fromEntries(
@@ -123,6 +125,59 @@ describe("correcciones del laboratorio y las tarjetas", () => {
     expect(
       cards[1].querySelector(".card-collapse")?.getAttribute("aria-expanded"),
     ).toBe("true");
+  });
+  it("shows Resumen to employees and reserves Catálogo and Cierre for the boss", () => {
+    const employeeState = seed();
+    employeeState.activeId = employeeState.profiles.find((p) => p.role === "empleado")!.id;
+    render(<App initialState={employeeState} laboratoryMode />);
+    expect(document.querySelector('[data-nav="overview"]')).toBeTruthy();
+    expect(document.querySelector('[data-nav="catalog"]')).toBeNull();
+    expect(document.querySelector('[data-nav="closing"]')).toBeNull();
+    fireEvent.click(document.querySelector('[data-nav="overview"]')!);
+    expect(screen.getByRole("heading", { name: "Tu trabajo, en perspectiva." })).toBeTruthy();
+    expect(screen.getByText("Tu avance ponderado")).toBeTruthy();
+    expect(document.querySelector("header .avatar")).toBeNull();
+    expect(document.querySelector(".sidebar .user .avatar")).toBeTruthy();
+
+    cleanup();
+    const supervisorState = seed();
+    supervisorState.activeId = supervisorState.profiles.find((p) => p.role === "encargado")!.id;
+    render(<App initialState={supervisorState} laboratoryMode />);
+    expect(document.querySelector('[data-nav="overview"]')).toBeTruthy();
+    expect(document.querySelector('[data-nav="catalog"]')).toBeNull();
+    expect(document.querySelector('[data-nav="closing"]')).toBeNull();
+
+    cleanup();
+    const bossState = seed();
+    bossState.activeId = bossState.profiles.find((p) => p.role === "jefe")!.id;
+    render(<App initialState={bossState} laboratoryMode />);
+    expect(document.querySelector('[data-nav="catalog"]')).toBeTruthy();
+    expect(document.querySelector('[data-nav="closing"]')).toBeTruthy();
+  });
+  it("keeps catalogue entries compact until their details are opened", async () => {
+    const state = seed();
+    state.activeId = state.profiles.find((p) => p.role === "jefe")!.id;
+    render(<App initialState={state} laboratoryMode />);
+    fireEvent.click(document.querySelector('[data-nav="catalog"]')!);
+    await waitFor(() => expect(document.querySelector("details.catalog-item")).toBeTruthy());
+    const entry = document.querySelector<HTMLDetailsElement>("details.catalog-item")!;
+    expect(entry.open).toBe(false);
+    expect(entry.querySelector(".catalog-summary-title")?.textContent).toBeTruthy();
+    fireEvent.click(entry.querySelector("summary")!);
+    expect(entry.open).toBe(true);
+  });
+  it("cycles the single theme button through automatic, light, and dark", () => {
+    render(<ThemeControl />);
+    const button = screen.getByRole("button", { name: "Apariencia automática. Cambiar a clara" });
+    expect(button.getAttribute("data-theme")).toBe("system");
+    fireEvent.click(button);
+    expect(button.getAttribute("data-theme")).toBe("light");
+    expect(button.getAttribute("aria-label")).toBe("Apariencia clara. Cambiar a oscura");
+    fireEvent.click(button);
+    expect(button.getAttribute("data-theme")).toBe("dark");
+    fireEvent.click(button);
+    expect(button.getAttribute("data-theme")).toBe("system");
+    expect(localStorage.getItem("paris-theme")).toBe("system");
   });
   it("only the boss sees pending profile notifications and confirmation resolves that one", () => {
     const s = seed();

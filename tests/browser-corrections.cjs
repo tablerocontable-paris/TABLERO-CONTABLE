@@ -17,6 +17,14 @@ const checks = [],
 const assert = (ok, message) => {
   if (!ok) throw Error(message);
 };
+async function setTheme(page, target) {
+  const toggle = page.locator(".theme-toggle");
+  for (let step = 0; step < 3; step++) {
+    if ((await toggle.getAttribute("data-theme")) === target) return;
+    await toggle.click();
+  }
+  throw Error(`theme cycle did not reach ${target}`);
+}
 (async () => {
   server = spawn(
     process.execPath,
@@ -62,7 +70,7 @@ const assert = (ok, message) => {
     (await page.getByLabel("Vista de usuario").locator("option").count()) > 10,
     "Simulation users missing",
   );
-  await page.getByLabel("Apariencia").selectOption("light");
+  await setTheme(page, "light");
   for (const [width, height] of [
     [1440, 900],
     [1600, 740],
@@ -193,11 +201,26 @@ const assert = (ok, message) => {
   const origin = page.locator(`[data-task-id="${moveTaskId}"]`).first();
   const destination = page.locator('.column').nth(1).locator('[role="region"]');
   assert((await origin.getAttribute('draggable')) === 'true', 'Task card does not expose drag and drop');
+  const dragFeedback = await origin.evaluate(card => {
+    card.getAnimations().forEach(animation => animation.cancel());
+    card.classList.add('is-dragging');
+    const style = getComputedStyle(card);
+    const transform = style.transform;
+    const opacity = Number(style.opacity);
+    card.classList.remove('is-dragging');
+    const matrix = new DOMMatrixReadOnly(transform);
+    return { scale: Math.hypot(matrix.a, matrix.b), opacity };
+  });
+  assert(Math.abs(dragFeedback.scale - 1.04) < 0.01 && dragFeedback.opacity >= 0.9, 'Drag preview should enlarge the card and keep it visible: ' + JSON.stringify(dragFeedback));
   await origin.dragTo(destination);
   const afterMove = await page.evaluate(id => JSON.parse(localStorage.getItem('paris-state-lab')).tasks.find(t => t.id === id), moveTaskId);
   assert(afterMove.status === 'En curso' && afterMove.sessions.some(s => !s.end && s.actorId === 'e0'), 'Dragging to in progress must move and start own clock: ' + JSON.stringify(afterMove));
+  const landedCard = page.locator(`[data-task-id="${moveTaskId}"][data-landed="true"]`).first();
+  await landedCard.waitFor({ state: 'visible' });
+  const landingAnimation = await landedCard.evaluate(card => getComputedStyle(card).animationName);
+  assert(landingAnimation === 'task-land', 'Dropped card did not play its landing animation: ' + landingAnimation);
   assert((await page.evaluate(() => JSON.parse(localStorage.getItem('paris-state-lab')).boardOrder)) === 'original', 'Manual board ordering must persist after drag');
-  checks.push({ interaction: 'drag-to-progress', taskId: moveTaskId, status: afterMove.status, actorClockStarted: true });
+  checks.push({ interaction: 'drag-to-progress', taskId: moveTaskId, status: afterMove.status, actorClockStarted: true, dragFeedback, landingAnimation });
   const search = page.locator('.search input').first();
   if (await search.count()) {
     await search.focus();

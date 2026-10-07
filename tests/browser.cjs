@@ -4,6 +4,14 @@ const fs = require("node:fs"),
   { spawn } = require("node:child_process"),
   pw = require("playwright-core");
 const root = path.resolve(__dirname, "..");
+async function setTheme(page, target) {
+  const toggle = page.locator(".theme-toggle");
+  for (let step = 0; step < 3; step++) {
+    if ((await toggle.getAttribute("data-theme")) === target) return;
+    await toggle.click();
+  }
+  throw Error(`theme cycle did not reach ${target}`);
+}
 const binary = process.env.CHROMIUM_PATH;
 if (!binary)
   throw Error(
@@ -57,7 +65,7 @@ fs.mkdirSync(output, { recursive: true });
     await page.locator("h1").waitFor();
     await page.screenshot({ path: output + "/overview.png", fullPage: true });
     console.log("overview", await page.locator("h1").innerText());
-    await page.getByLabel("Apariencia").selectOption("dark");
+    await setTheme(page, "dark");
     if (
       (await page.evaluate(() => document.documentElement.dataset.theme)) !==
       "dark"
@@ -75,7 +83,7 @@ fs.mkdirSync(output, { recursive: true });
       path: output + "/dark-tasks.png",
       fullPage: false,
     });
-    await page.getByLabel("Apariencia").selectOption("system");
+    await setTheme(page, "system");
     await page.emulateMedia({ colorScheme: "light" });
     await page.waitForFunction(
       () => document.documentElement.dataset.theme === "light",
@@ -84,7 +92,7 @@ fs.mkdirSync(output, { recursive: true });
     await page.waitForFunction(
       () => document.documentElement.dataset.theme === "dark",
     );
-    await page.getByLabel("Apariencia").selectOption("light");
+    await setTheme(page, "light");
 
     await page.locator('[data-nav="team"]').click();
     await page.getByRole("button", { name: "Alta de demostración" }).click();
@@ -429,7 +437,7 @@ fs.mkdirSync(output, { recursive: true });
     await page.locator("h1").waitFor();
     if ((await page.locator(".lab-banner").count()) !== 1)
       throw Error("isolated lab banner missing");
-    await page.getByLabel("Apariencia").selectOption("dark");
+    await setTheme(page, "dark");
     await page.locator('[data-nav="analytics"]').click();
 
     await page.setViewportSize({ width: 390, height: 844 });
