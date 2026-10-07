@@ -407,5 +407,10 @@ recorrido y captura en `outputs/requests-conversion-browser/`.
 Vite mantiene una advertencia informativa por el chunk principal de ~589 kB; el
 build termina correctamente. El avance global permanece orientativamente en
 **~45%**: el laboratorio no cubre aceptación completa ni la infraestructura
-automática del 100%. El código local está listo para commit; el Site publicado
-sigue en v62 hasta que cierre esta entrega.
+automática del 100%. El código quedó comprometido en
+`f7b4c661d32a753b0ab34f4120c692c880efb8b0` y publicado como **Site v63** en el
+mismo proyecto privado; deployment `appgdep_6ac5db13c9608191bd4ab52ee27f33b2`,
+estado exitoso. Relectura posterior: rol propietario, acceso personalizado con
+una cuenta permitida, cero grupos y cero visitantes externos. El código sigue
+siendo sólo de laboratorio; no se activó el espacio operativo ni se conectaron
+cuentas de usuarios.

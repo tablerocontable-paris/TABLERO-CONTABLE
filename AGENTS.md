@@ -213,3 +213,10 @@ Mantener validaciones de período abierto, membresía de empresa, perfil activo,
 visibilidad, peso positivo e idempotencia. No trasladar esta ruta a API, D1 o
 Supabase sin revisar identidad y permisos; no usar adjuntos ni datos reales.
 Evidencia y cobertura: `docs/architecture/review-evidence/internal-request-conversion-lab-20261007.json`.
+
+Actualización del 07/10/2026: la conversión de pedidos se publicó como Site
+v63 desde `f7b4c661d32a753b0ab34f4120c692c880efb8b0`; deployment
+`appgdep_6ac5db13c9608191bd4ab52ee27f33b2`, exitoso y con la audiencia privada
+sin cambios. Para continuar en la PC personal usar el ZIP y el bundle vigentes
+indicados en `docs/EXECUTION-NEXT.md` y `outputs/LEEME-PC-PERSONAL.md`. El estado
+`paris-state-lab` del navegador no forma parte del repositorio ni se transfiere.

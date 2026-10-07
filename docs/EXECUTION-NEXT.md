@@ -244,3 +244,20 @@ Seguir con rutas de laboratorio ya definidas en `docs/PRODUCT-ROADMAP.md` y
 `docs/product/CORRECTIONS-20261002.md`. No abrir identidad real, `/api`, Worker,
 D1, Supabase ni GitHub antes de aceptar el producto. Actualizar el bundle de PC
 personal después del commit y conservar una sola copia de trabajo activa.
+
+## Continuidad desde PC personal — 07/10/2026
+
+El bloque de conversión explícita de pedidos se comprometió en
+`f7b4c661d32a753b0ab34f4120c692c880efb8b0` y se publicó como Site v63 en el
+mismo proyecto privado. El deployment `appgdep_6ac5db13c9608191bd4ab52ee27f33b2`
+terminó correctamente; se confirmó acceso propietario, una cuenta permitida y
+cero visitantes externos.
+
+La transferencia vigente está en `outputs/grupo-paris-site-transfer-20261007-f7b4c66.zip`
+y `outputs/LEEME-PC-PERSONAL.md`. Incluye un bundle Git completo con los cambios
+comprometidos y el historial de `main`; no lleva dependencias ni el estado
+`paris-state-lab` guardado en el navegador. En la PC personal, instalar Git for
+Windows y Node.js, extraer el ZIP, clonar el bundle, ejecutar `npm ci` y abrir
+`site` en Codex. Trabajar una sola copia a la vez; devolver commits por otro
+bundle hasta configurar GitHub en la aceptación final. No sincronizar `.git`
+con OneDrive. El progreso global sigue aproximadamente en **45%**.
