@@ -2067,6 +2067,26 @@ summary {
   background: #fff;
   color: #3e2865;
 }
+.lab-backup-trigger,
+.lab-backup-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.lab-backup-dialog { width: min(560px, calc(100vw - 28px)); }
+.lab-backup-intro { margin: 2px 0 16px; color: var(--muted); }
+.lab-backup-actions { display: flex; flex-wrap: wrap; gap: 9px; }
+.lab-backup-note,
+.lab-backup-boundary { color: var(--muted); font-size: 12px; line-height: 1.55; }
+.lab-backup-note { margin: 14px 0; }
+.lab-backup-boundary { border-top: 1px solid var(--line); padding-top: 12px; margin: 18px 0 0; }
+.lab-backup-preview { display: grid; gap: 10px; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-soft); }
+.lab-backup-preview p { margin: 0; color: var(--muted); }
+.lab-backup-preview label { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; }
+.lab-backup-preview input[type="checkbox"] { margin-top: 2px; }
+.lab-backup-preview button { justify-self: start; }
+.lab-backup-error { padding: 10px 12px; border: 1px solid #e5a9a9; border-radius: 8px; color: #9b2929; background: #fff3f3; font-size: 13px; }
 .active-clock {
   display: flex;
   justify-content: space-between;

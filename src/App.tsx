@@ -1,4 +1,5 @@
 import NotificationCenter from "./components/NotificationCenter";
+import LaboratoryBackup from "./components/LaboratoryBackup";
 import TaskComments from "./components/TaskComments";
 import { lazy, Suspense, useState, useEffect, type FormEvent } from "react";
 import JointTaskSetup from "./components/JointTaskSetup";
@@ -1386,6 +1387,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                 Podés probar todos los perfiles. Los cambios y KPI de este
                 entorno no afectan el tablero principal.
               </span>
+              {!remoteSave && <LaboratoryBackup state={state} />}
               {!laboratoryMode && <button onClick={exitLab}>Volver al tablero</button>}
             </div>
           )}

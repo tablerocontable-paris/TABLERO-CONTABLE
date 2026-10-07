@@ -246,3 +246,9 @@ Site sin cambios y actualizar el bundle personal sólo después del commit.
 La búsqueda quedó publicada en el Site existente v64 desde
 `5ecf94e9439a4d56ceab0990877451b3a5d6ca5a`, deployment
 `appgdep_6ac5e1327d7c8191919a40fbf57b4b96`, sin ampliar la audiencia.
+
+## Copia portable del laboratorio — 07/10/2026
+
+La interfaz de «Vista de prueba» ofrece exportar/restaurar estado ficticio para trasladarlo manualmente entre navegadores/PCs. La función sólo escribe `paris-state-lab`; mantiene prohibido leer/escribir la clave operativa al restaurar y no habilita cuentas, sincronización ni llamadas API. El JSON no está cifrado; debe guardarse de forma privada. Contrato, pruebas y límites en `docs/architecture/LABORATORY-BACKUP-CONTRACT-20261007.md`, `docs/PROJECT-STATUS.md` y `docs/EXECUTION-NEXT.md`.
+
+La transferencia de código sigue requiriendo bundle Git. Para llevar también el estado ficticio, descargar la copia desde la banda del laboratorio y, en la otra PC, elegirla desde el mismo control y confirmar la restauración. Trabajar una sola copia de código a la vez; no sincronizar `.git` por OneDrive.

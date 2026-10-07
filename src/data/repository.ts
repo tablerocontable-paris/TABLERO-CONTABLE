@@ -459,6 +459,71 @@ const schema = z.object({
       context.addIssue({ code: "custom", path: ["fiscalObligations", index, "history"], message: "La revisión de la obligación no coincide con su historial." });
   });
 });
+const laboratoryBackupSchema = z.object({
+  format: z.literal("grupo-paris-lab-backup"),
+  formatVersion: z.literal(1),
+  createdAt: z.string().min(1).max(40),
+  state: schema,
+});
+const LAB_BACKUP_MAX_BYTES = 10 * 1024 * 1024;
+
+export interface LaboratoryBackup {
+  createdAt: string;
+  state: State;
+  counts: { companies: number; profiles: number; tasks: number; notes: number };
+}
+
+export function createLaboratoryBackup(state: State, createdAt = new Date().toISOString()) {
+  return JSON.stringify({
+    format: "grupo-paris-lab-backup",
+    formatVersion: 1,
+    createdAt,
+    state,
+  }, null, 2);
+}
+
+export function inspectLaboratoryBackup(contents: string): LaboratoryBackup {
+  if (new TextEncoder().encode(contents).byteLength > LAB_BACKUP_MAX_BYTES)
+    throw new Error("La copia supera el límite de 10 MB.");
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(contents);
+  } catch {
+    throw new Error("El archivo no contiene una copia JSON válida.");
+  }
+
+  const result = laboratoryBackupSchema.safeParse(parsed);
+  if (!result.success)
+    throw new Error("El archivo no es una copia compatible del laboratorio.");
+
+  const state = result.data.state as unknown as State;
+  if (!state.profiles.some((profile) => profile.id === state.activeId))
+    throw new Error("La copia no identifica un perfil activo válido.");
+
+  // Return the original parsed state to preserve fields added by compatible app
+  // versions; the schema above validates it without rewriting the payload.
+  const originalState = (parsed as { state: unknown }).state as State;
+  return {
+    createdAt: result.data.createdAt,
+    state: originalState,
+    counts: {
+      companies: originalState.companies.length,
+      profiles: originalState.profiles.length,
+      tasks: originalState.tasks.length,
+      notes: (originalState.annotations || []).length + (originalState.taskComments || []).length,
+    },
+  };
+}
+
+export function restoreLaboratoryBackup(contents: string) {
+  const backup = inspectLaboratoryBackup(contents);
+  // Keep restoration confined to the isolated demo key. The operational key and
+  // environment selector are intentionally untouched.
+  localStorage.setItem("paris-state-lab", JSON.stringify(backup.state));
+  return backup;
+}
+
 export const isLab = () => localStorage.getItem("paris-environment") === "lab";
 export function enterLab(state: State) {
   persist(state);

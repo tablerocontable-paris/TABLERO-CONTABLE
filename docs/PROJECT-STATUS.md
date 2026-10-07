@@ -31,8 +31,9 @@ SQL 011 conserva su evidencia local previa: 26 carreras PostgreSQL aprobadas.
   agenda/cumplimiento, consultas y procesos operativos pendientes.
 - Revisar equivalencia de frontend, reglas, snapshots y privacidad al elegir
   la ruta definitiva D1 o Supabase. No mezclar sus esquemas o KPI.
-- QA visual y funcional del producto completo, volumen, recuperación/respaldo,
-  seguridad y ensayo controlado del circuito final.
+- QA visual y funcional del producto completo, volumen, recuperación productiva
+  y ensayo controlado del circuito final. Hay copia/restauración local del
+  laboratorio; no cubre respaldo remoto ni recuperación de producción.
 - Sólo tras aceptar versión final: configurar cuentas e invitaciones reales,
   MFA y servicios; piloto autenticado e infraestructura dedicada/migración.
 
@@ -472,6 +473,26 @@ visitantes externos. No se cambió la audiencia ni se habilitaron cuentas.
 
 El avance global continúa aproximadamente en **45%**: este cierre funcional no
 incluye aceptación completa, sincronización entre PCs ni infraestructura final.
+
+## Copia portable del laboratorio — 07/10/2026
+
+La banda de prueba ofrece descargar una copia JSON versionada y restaurarla en
+otro navegador/PC. Antes de reemplazar datos muestra cantidades y exige una
+confirmación. La importación valida tamaño/formato/estado y escribe sólo
+`paris-state-lab`; una copia inválida deja intacta la simulación actual y el
+espacio operativo permanece aislado. El archivo no está cifrado y puede incluir
+notas y comentarios: guardarlo de forma privada.
+
+Verificación: 416/416 pruebas en 46 archivos; TypeScript, Vite y Worker build;
+pre-commit 100/100 en 15 archivos; Chromium Edge validó descarga, lectura,
+confirmación y restauración; sin errores JS ni llamadas a `/api`. Evidencia:
+`architecture/review-evidence/laboratory-backup-lab-20261007.json`.
+Contrato y límites: `architecture/LABORATORY-BACKUP-CONTRACT-20261007.md`.
+
+Esto facilita mover también la simulación junto al bundle de código, pero no
+sincroniza PCs automáticamente ni demuestra backup/restore de GitHub, D1 o
+Supabase. Avance global: **~45%**, sin cambios. No se conectaron cuentas ni se
+modificó la audiencia del Site.
 
 ## Carga de vistas por demanda — laboratorio — 07/10/2026
 

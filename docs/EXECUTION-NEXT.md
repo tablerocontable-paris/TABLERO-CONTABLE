@@ -322,3 +322,23 @@ Este corte quedó publicado como **Site v66** desde
 `806ff00696434f573ee0542e4710d8b383ab1406`, deployment
 `appgdep_6ac5f09cccb48191910a364ef6e8f998`. La audiencia personalizada sigue
 owner-only: una cuenta autorizada, cero grupos y cero visitantes externos.
+
+## Copia portable de la simulación — 07/10/2026
+
+La banda «Vista de prueba» permite descargar una copia JSON versionada del
+laboratorio y restaurarla en otra PC. La lectura valida formato, estado activo y
+tamaño (máximo 10 MB); muestra cantidades y requiere confirmación antes de
+reemplazar `paris-state-lab`. El espacio operativo queda intacto. El archivo no
+está cifrado; guardarlo de forma privada.
+
+Contrato: `docs/architecture/LABORATORY-BACKUP-CONTRACT-20261007.md`. Evidencia:
+`docs/architecture/review-evidence/laboratory-backup-lab-20261007.json`.
+416/416 pruebas, pre-commit 100/100, TypeScript, Vite/Worker y Chromium Edge de
+descarga/restauración aprobados; cero errores JS y solicitudes a `/api`.
+
+Para el próximo cambio usar **GPT-6 Luna, esfuerzo medio, Standard** en contratos
+locales ya definidos y revisión funcional. Cuentas, sincronización, respaldo de
+producción, permisos entre dispositivos y migraciones siguen pendientes para la
+aceptación final; si el próximo cambio define alguno de esos contratos, revisar
+primero con **GPT-6.1 Sol, esfuerzo alto, Standard**. Avance global continúa en
+~45%.
