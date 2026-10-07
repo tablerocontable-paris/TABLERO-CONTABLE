@@ -233,3 +233,9 @@ llamadas a `/api` y sin desbordamiento horizontal de página. Test focal:
 
 La función no activa colaboración entre computadoras, Auth, D1 ni Supabase. El
 avance global sigue orientativamente en **~45%**; no equivale a aceptación final.
+El código quedó publicado como **Site v58**, desde el commit
+`c41bb7a9f9dcee2408b1b714af440f89914814dd`, deployment
+`appgdep_6ac5ab6391708191a3df327efb304ac2`, en el mismo URL privado. Confirmación
+final: deployment exitoso, sólo una cuenta owner permitida y cero visitantes
+externos. La corrección documental de este estado no modifica el código de la
+aplicación.

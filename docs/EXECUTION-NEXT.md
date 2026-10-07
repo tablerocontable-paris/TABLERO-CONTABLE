@@ -113,8 +113,9 @@ Edge escritorio/móvil 390×844, 31 días del período y desglose de equipo; cer
 errores JS y llamadas a `/api`. Ver
 `architecture/review-evidence/work-cycle-lab-20261006.json`.
 
-Después de publicar este corte, siguiente paso: **GPT-6.1 Sol, esfuerzo medio,
-Standard** para revisar atribución, cortes de fecha y límites del ciclo, y
+Este corte se publicó como **Site v58** desde `c41bb7a9f9dcee2408b1b714af440f89914814dd`;
+el deployment privado terminó correctamente y sigue owner-only. Siguiente paso:
+**GPT-6.1 Sol, esfuerzo medio, Standard** para revisar atribución, cortes de fecha y límites del ciclo, y
 contrastar el contrato local de Kaizen/5S con la versionación actual del catálogo.
 Luego, si no aparece una decisión de permisos/esquema, volver a **GPT-6 Luna,
 esfuerzo medio, Standard** para implementar el contrato que quede confirmado.

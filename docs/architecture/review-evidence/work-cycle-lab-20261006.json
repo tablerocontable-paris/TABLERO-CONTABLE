@@ -39,7 +39,16 @@
     "database_migrations_changed": false,
     "cross_device_sync": false,
     "external_services_connected": false,
-    "site_deployment": "pending"
+    "site_deployment": {
+      "status": "succeeded",
+      "version_number": 58,
+      "commit_sha": "c41bb7a9f9dcee2408b1b714af440f89914814dd",
+      "deployment_id": "appgdep_6ac5ab6391708191a3df327efb304ac2",
+      "url": "https://grupo-paris-contabilidad.valentino-magni.chatgpt.site",
+      "audience": "owner-only",
+      "allowed_user_count": 1,
+      "external_visitors": 0
+    }
   },
   "known_limits": [
     "Laboratory data remains in the current browser and does not synchronize between PCs.",

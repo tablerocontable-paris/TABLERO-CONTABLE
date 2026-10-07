@@ -100,6 +100,9 @@ opcional y sólo se captura para nuevas finalizaciones de esta simulación; no
 inventar actor para cierres históricos. Evidencia actual en
 `docs/PROJECT-STATUS.md` y
 `docs/architecture/review-evidence/work-cycle-lab-20261006.json`.
+El corte funcional se publicó en el mismo Site privado como v58 desde el commit
+`c41bb7a9f9dcee2408b1b714af440f89914814dd`; confirmar fuente, versión y
+audiencia antes de anunciar posteriores actualizaciones.
 
 ## Continuidad de bajas — 06/10/2026
 La baja/reasignación directa de tareas futuras limpias está implementada sólo
