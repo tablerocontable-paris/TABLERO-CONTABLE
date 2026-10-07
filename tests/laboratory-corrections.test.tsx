@@ -12,6 +12,7 @@ import LaboratoryWorkspace from "../src/components/LaboratoryWorkspace";
 import App from "../src/App";
 import ParameterizationInbox from "../src/components/ParameterizationInbox";
 import ThemeControl from "../src/components/ThemeControl";
+import { currentMonth } from "../src/domain/model";
 import { seed, KEY, persist } from "../src/data/repository";
 vi.mock("recharts", () =>
   Object.fromEntries(
@@ -19,6 +20,7 @@ vi.mock("recharts", () =>
       "ResponsiveContainer",
       "BarChart",
       "Bar",
+      "LabelList",
       "XAxis",
       "YAxis",
       "CartesianGrid",
@@ -27,6 +29,9 @@ vi.mock("recharts", () =>
       "LineChart",
       "Line",
       "ReferenceLine",
+      "PieChart",
+      "Pie",
+      "Cell",
     ].map((k) => [k, () => null]),
   ),
 );
@@ -51,6 +56,42 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 describe("correcciones del laboratorio y las tarjetas", () => {
+  it("reduce el ruido de Análisis mensual sin mezclar puntos con cantidades", async () => {
+    const state = seed();
+    state.activeId = state.profiles.find((profile) => profile.role === "jefe")!.id;
+    const [year, month] = currentMonth().split("-").map(Number);
+    const previousMonth = new Date(Date.UTC(year, month - 2, 1)).toISOString().slice(0, 7);
+    state.tasks = [
+      ...state.tasks,
+      { ...state.tasks[0]!, id: "analytics-previous-period", month: previousMonth },
+    ];
+    render(<App initialState={state} laboratoryMode />);
+    fireEvent.click(document.querySelector('[data-nav="analytics"]')!);
+
+    expect(await screen.findByRole("heading", { name: "Evolución mensual" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Distribución de tareas" })).toBeTruthy();
+    const formula = screen.getByRole("button", {
+      name: "Ver cómo se calcula el cumplimiento ponderado",
+    });
+    expect(formula.getAttribute("aria-expanded")).toBe("false");
+    expect(screen.queryByText(/el indicador refleja el cálculo implementado hoy en este laboratorio/i)).toBeNull();
+    fireEvent.click(formula);
+    expect(screen.getByText(/el indicador refleja el cálculo implementado hoy en este laboratorio/i)).toBeTruthy();
+
+    const onTime = screen.getByRole("button", { name: "Entregas en fecha" });
+    fireEvent.click(onTime);
+    expect(onTime.getAttribute("aria-pressed")).toBe("false");
+    const distribution = screen.getByRole("group", { name: "Distribuir tareas por" });
+    fireEvent.click(within(distribution).getByRole("button", { name: "Empresa" }));
+    expect(within(distribution).getByRole("button", { name: "Empresa" }).getAttribute("aria-pressed")).toBe("true");
+
+    const detailToggle = screen.getByRole("button", {
+      name: "Desplegar Detalle que explica el indicador",
+    });
+    expect(detailToggle.getAttribute("aria-expanded")).toBe("false");
+    fireEvent.click(detailToggle);
+    expect(detailToggle.getAttribute("aria-expanded")).toBe("true");
+  });
   it("opens fictitious users and work without touching operational storage or API", () => {
     localStorage.setItem(KEY, "operational-data-do-not-touch");
     const fetch = vi.fn();

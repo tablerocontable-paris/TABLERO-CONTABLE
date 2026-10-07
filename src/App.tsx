@@ -64,6 +64,7 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
+  LabelList,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -72,6 +73,9 @@ import {
   LineChart,
   Line,
   ReferenceLine,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts";
 import {
   type State,
@@ -238,6 +242,12 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
   const [group, setGroup] = useState<"individual" | "team" | "sector">(
     "individual",
   );
+  const [historySeries, setHistorySeries] = useState<Array<"weighted" | "onTime">>([
+    "weighted",
+    "onTime",
+  ]);
+  const [distributionBy, setDistributionBy] = useState<"status" | "kind" | "company">("status");
+  const [formulaOpen, setFormulaOpen] = useState(false);
   const [modal, setModal] = useState<"new" | "employee" | "close" | null>(null);
   const [noteToTask, setNoteToTask] = useState<Annotation | null>(null);
   const [requestToTask, setRequestToTask] = useState<InternalRequest | null>(null);
@@ -948,6 +958,18 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
     })
     .filter((g) => g.points > 0)
     .sort((a, b) => b.points - a.points);
+  const distributionData = (() => {
+    const counts = new Map<string, number>();
+    for (const task of filtered) {
+      const label = distributionBy === "status"
+        ? task.status
+        : distributionBy === "kind"
+          ? task.kind === "operativa" ? "Operativa" : "Entregable"
+          : companyOf(task.companyId);
+      counts.set(label, (counts.get(label) || 0) + 1);
+    }
+    return [...counts].map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  })();
   const history = [...new Set(state.tasks.map((t) => t.month))]
     .filter((p) => p <= month)
     .sort()
@@ -1996,10 +2018,21 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                     month={month}
                   />
                 )}
-                <div className="dashboard-row">
+                <div className="dashboard-row analytics-score-row">
                   <Panel
                     title="Cumplimiento ponderado"
                     sub="Porcentaje de puntos logrados sobre puntos asignados"
+                    action={
+                      <button
+                        type="button"
+                        className="icon-button analytics-help"
+                        aria-label={`${formulaOpen ? "Ocultar" : "Ver"} cómo se calcula el cumplimiento ponderado`}
+                        aria-expanded={formulaOpen}
+                        onClick={() => setFormulaOpen((value) => !value)}
+                      >
+                        <HelpCircle size={16} aria-hidden="true" />
+                      </button>
+                    }
                   >
                     <div className="chart">
                       <ResponsiveContainer
@@ -2009,7 +2042,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                         <BarChart
                           layout="vertical"
                           data={chartGroups}
-                          margin={{ right: 30, left: 5 }}
+                          margin={{ right: 42, left: 5 }}
                         >
                           <CartesianGrid
                             horizontal={false}
@@ -2047,14 +2080,41 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                                 setPage("tasks");
                               }
                             }}
-                          />
+                          >
+                            <LabelList
+                              dataKey="weighted"
+                              position="right"
+                              fill="var(--muted)"
+                              formatter={(value) => `${Math.round(Number(value) || 0)}%`}
+                            />
+                          </Bar>
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
+                    {formulaOpen && (
+                      <div className="metric-explainer">
+                        <b>Método actual del laboratorio</b>
+                        <p>
+                          El indicador refleja el cálculo implementado hoy en
+                          este laboratorio. Un entregable aporta su peso al
+                          completarse. Las operativas todavía se calculan contra
+                          una meta ficticia; la regla final está pendiente de
+                          redefinición y validación. La puntualidad considera sólo
+                          entregables completados y usa fecha argentina.
+                        </p>
+                        <p>
+                          Los pesos expresan complejidad relativa; este indicador
+                          no sustituye una evaluación del desempeño ni explica
+                          por sí solo demoras externas.
+                        </p>
+                      </div>
+                    )}
                   </Panel>
                   <Panel
                     title="Carga asignada y lograda"
                     sub="Puntos · comparar el porcentaje junto con la carga"
+                    collapsible
+                    defaultOpen={false}
                   >
                     <div className="performance-list">
                       {chartGroups.map((g) => (
@@ -2079,6 +2139,8 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                 <Panel
                   title="Tiempo registrado y reaperturas"
                   sub="Trabajo cronometrado por quien lo realizó. No equivale a presencia ni se usa como penalización automática."
+                  collapsible
+                  defaultOpen={false}
                 >
                   <div className="table-wrap">
                     <table>
@@ -2145,59 +2207,135 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                     ejecutor en cada sesión.
                   </p>
                 </Panel>
-                <Panel
-                  title="Evolución mensual"
-                  sub="Últimos seis períodos con trabajo registrado · se respetan los filtros"
-                >
-                  {history.length > 1 ? (
-                    <div className="chart">
-                      <ResponsiveContainer width="100%" height={230}>
-                        <LineChart
-                          data={history}
-                          margin={{ top: 15, right: 25, left: 0, bottom: 5 }}
+                <div className="dashboard-row analytics-trend-row">
+                  <Panel
+                    title="Evolución mensual"
+                    sub="Últimos seis períodos con trabajo registrado · se respetan los filtros"
+                  >
+                    {history.length > 1 ? (
+                      <>
+                        <div className="chart">
+                          <ResponsiveContainer width="100%" height={230}>
+                            <LineChart
+                              data={history}
+                              margin={{ top: 15, right: 25, left: 0, bottom: 5 }}
+                            >
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="period" tick={{ fontSize: 11 }} />
+                              <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 11 }} />
+                              <Tooltip
+                                labelFormatter={(label) => monthLabel(String(label))}
+                                formatter={(value) => `${value}%`}
+                              />
+                              {historySeries.length > 1 && <Legend />}
+                              {historySeries.includes("weighted") && (
+                                <Line
+                                  dataKey="weighted"
+                                  name="Cumplimiento ponderado"
+                                  stroke="var(--chart-ink)"
+                                  strokeWidth={3}
+                                  dot={{ r: 4 }}
+                                  connectNulls={false}
+                                />
+                              )}
+                              {historySeries.includes("onTime") && (
+                                <Line
+                                  dataKey="onTime"
+                                  name="Entregas en fecha"
+                                  stroke="var(--chart-slice-4)"
+                                  strokeDasharray="5 4"
+                                  connectNulls={false}
+                                />
+                              )}
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </div>
+                        <div className="analytics-series" role="group" aria-label="Series del gráfico de evolución mensual">
+                          <button
+                            type="button"
+                            className={historySeries.includes("weighted") ? "selected" : ""}
+                            aria-pressed={historySeries.includes("weighted")}
+                            disabled={historySeries.length === 1 && historySeries.includes("weighted")}
+                            onClick={() => setHistorySeries((current) => current.includes("weighted")
+                              ? current.filter((series) => series !== "weighted")
+                              : [...current, "weighted"])}
+                          >
+                            <span className="series-dot series-dot-weighted" />Cumplimiento ponderado
+                          </button>
+                          <button
+                            type="button"
+                            className={historySeries.includes("onTime") ? "selected" : ""}
+                            aria-pressed={historySeries.includes("onTime")}
+                            disabled={historySeries.length === 1 && historySeries.includes("onTime")}
+                            onClick={() => setHistorySeries((current) => current.includes("onTime")
+                              ? current.filter((series) => series !== "onTime")
+                              : [...current, "onTime"])}
+                          >
+                            <span className="series-dot series-dot-ontime" />Entregas en fecha
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="note">
+                        La evolución aparece al registrar trabajo en al menos dos
+                        períodos. No se inventan datos históricos.
+                      </div>
+                    )}
+                  </Panel>
+                  <Panel
+                    title="Distribución de tareas"
+                    sub="Cantidad de tareas del filtro actual · no representa puntos ni cumplimiento"
+                  >
+                    <div className="analytics-series analytics-distribution-picker" role="group" aria-label="Distribuir tareas por">
+                      {([
+                        ["status", "Estado"],
+                        ["kind", "Tipo"],
+                        ["company", "Empresa"],
+                      ] as const).map(([value, label]) => (
+                        <button
+                          type="button"
+                          key={value}
+                          className={distributionBy === value ? "selected" : ""}
+                          aria-pressed={distributionBy === value}
+                          onClick={() => setDistributionBy(value)}
                         >
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="period" tick={{ fontSize: 11 }} />
-                          <YAxis
-                            domain={[0, 100]}
-                            unit="%"
-                            tick={{ fontSize: 11 }}
-                          />
-                          <Tooltip
-                            labelFormatter={(label) =>
-                              monthLabel(String(label))
-                            }
-                            formatter={(value) => `${value}%`}
-                          />
-                          <Legend />
-                          <Line
-                            dataKey="weighted"
-                            name="Cumplimiento ponderado"
-                            stroke="var(--chart-ink)"
-                            strokeWidth={3}
-                            dot={{ r: 4 }}
-                            connectNulls={false}
-                          />
-                          <Line
-                            dataKey="onTime"
-                            name="Entregas en fecha"
-                            stroke="#8c96a6"
-                            strokeDasharray="5 4"
-                            connectNulls={false}
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
+                          {label}
+                        </button>
+                      ))}
                     </div>
-                  ) : (
-                    <div className="note">
-                      La evolución aparece al registrar trabajo en al menos dos
-                      períodos. No se inventan datos históricos.
-                    </div>
-                  )}
-                </Panel>
+                    {distributionData.length ? (
+                      <div className="chart analytics-pie-chart">
+                        <ResponsiveContainer width="100%" height={250}>
+                          <PieChart>
+                            <Pie
+                              data={distributionData}
+                              dataKey="value"
+                              nameKey="name"
+                              innerRadius={42}
+                              outerRadius={83}
+                              paddingAngle={2}
+                              stroke="var(--surface)"
+                              strokeWidth={2}
+                            >
+                              {distributionData.map((entry, index) => (
+                                <Cell key={`${entry.name}-${index}`} fill={`var(--chart-slice-${(index % 7) + 1})`} />
+                              ))}
+                            </Pie>
+                            <Tooltip formatter={(value) => [`${value} tareas`, "Cantidad"]} />
+                            <Legend wrapperStyle={{ fontSize: 11 }} />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+                    ) : (
+                      <Empty text="No hay tareas para distribuir con estos filtros." />
+                    )}
+                  </Panel>
+                </div>
                 <Panel
                   title="Detalle que explica el indicador"
-                  sub="Las operativas aportan peso × avance contra meta, con un máximo del 100%"
+                  sub="Aportes del cálculo vigente en el laboratorio; la regla final para operativas está pendiente de redefinición"
+                  collapsible
+                  defaultOpen={false}
                 >
                   <div className="table-wrap">
                     <table>
@@ -2240,22 +2378,6 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                     </table>
                   </div>
                 </Panel>
-                <div className="metric-explainer">
-                  <b>Cómo se calcula</b>
-                  <p>
-                    Cumplimiento = puntos logrados / puntos asignados. Un
-                    entregable aporta su peso al completarse. Una operativa
-                    aporta proporcionalmente hasta su meta. La puntualidad
-                    considera sólo entregables completados y usa fecha
-                    argentina. Facturas, pagos y trámites se muestran por
-                    separado; no se suman como si fueran una misma unidad.
-                  </p>
-                  <p>
-                    Los pesos expresan complejidad relativa; este indicador no
-                    sustituye una evaluación del desempeño ni explica por sí
-                    solo las demoras externas.
-                  </p>
-                </div>
               </>
             )}
             {page === "planning" && (

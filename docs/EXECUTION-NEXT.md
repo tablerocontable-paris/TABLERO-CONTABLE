@@ -1,9 +1,33 @@
 # Próxima ejecución del proyecto
 
+## Corte actual — Análisis mensual del laboratorio 07/10/2026
+
+Se conservan las correcciones previas de roles, Catálogo/Cierre, tema y arrastre.
+Análisis mensual ahora tiene detalle plegable, explicación bajo el botón de
+ayuda, dos series existentes seleccionables y una torta gris seleccionable por
+estado/tipo/empresa. Las cantidades de la torta no representan puntos. Las reglas
+KPI de tareas operativas siguen provisionales y no se modificaron.
+
+La suite aprobó **424/424 pruebas en 48 archivos**; TypeScript, Vite y Worker
+compilan. Chrome headless pasó los recorridos responsive sin errores JS,
+solicitudes a `/api` ni desborde móvil. Evidencia:
+`docs/architecture/review-evidence/monthly-analytics-lab-20261007.json`.
+El Site existente estaba en v82 antes de este corte y conserva audiencia
+personalizada owner-only: una cuenta autorizada, cero grupos y cero visitantes
+externos. Fuente local `main`; laboratorio ficticio aislado.
+
+Siguiente paso: **GPT-6.1 Sol, esfuerzo alto, Standard**, para definir el
+contrato de cantidades y KPI operativos, eventos del calendario y cierre
+individual/por equipo/empresa con permisos y atomicidad. Consultas y Anotaciones
+requieren otra propuesta visual porque el pedido original las dejó abiertas a
+alternativas. Mantener cuentas, invitaciones, API y Supabase fuera de esa etapa.
+Luego, **GPT-6 Luna, esfuerzo medio, Standard**, implementa los contratos
+aceptados. Los apartados posteriores conservan la cronología.
+
 Repositorio: `work/site`. Continuar el mismo proyecto y Git. No reconstruir ni
 consultar el chat anterior.
 
-## Corte vigente — correcciones de interfaz verificadas 07/10/2026
+## Registro previo — correcciones de interfaz verificadas 07/10/2026
 
 Se corrigieron roles del Resumen/Catálogo/Cierre, el catálogo plegable, la
 duplicación del avatar, el selector de tema y el tamaño/animación de arrastre.

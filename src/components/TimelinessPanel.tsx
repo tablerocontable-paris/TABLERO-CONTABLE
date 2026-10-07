@@ -51,6 +51,8 @@ export default function TimelinessPanel({
     <Panel
       title="Anticipación de plazos"
       sub="Días calendario antes del vencimiento. En metas operativas cuenta cuándo se registró la cantidad que alcanzó la meta. No suma puntos al KPI ponderado."
+      collapsible
+      defaultOpen={false}
     >
       <TimelinessNumbers value={value} />
       {rows?.length ? (

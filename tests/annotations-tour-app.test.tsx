@@ -13,6 +13,7 @@ const chartProbe = vi.hoisted(() => ({ cursorProps: [] as Array<Record<string, n
 vi.mock("recharts", () => ({
   ResponsiveContainer: ({ children }: { children: ReactNode }) => children,
   BarChart: ({ children }: { children: ReactNode }) => children,
+  LabelList: () => null,
   Bar: ({ name, dataKey, onClick }: { name: string; dataKey: string; onClick?: (row: { id: string }) => void }) =>
     <button aria-label={`chart ${dataKey}`} onClick={() => onClick?.({ id: chartProbe.rowId })}>{name}</button>,
   Tooltip: ({ cursor = {} }: { cursor?: Record<string, number> }) => {
@@ -26,6 +27,9 @@ vi.mock("recharts", () => ({
   LineChart: () => null,
   Line: () => null,
   ReferenceLine: () => null,
+  PieChart: () => null,
+  Pie: () => null,
+  Cell: () => null,
 }));
 
 const record = (id: string, passes: boolean, observed: unknown) =>

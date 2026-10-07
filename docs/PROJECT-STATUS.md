@@ -1,26 +1,33 @@
 # Estado del proyecto Grupo París
 
-## Correcciones de interfaz verificadas — 07/10/2026
+## Análisis mensual: corte verificado en laboratorio — 07/10/2026
 
-En el laboratorio privado quedaron aplicadas las reglas de navegación por rol,
-Resumen personal para empleado, Catálogo y Cierre exclusivos de jefatura,
-catálogo plegable, avatar sólo en la barra lateral, control de tema con un icono
-y mayor escala de arrastre con animación al soltar. Suite completa: **423/423**
-pruebas en 48 archivos; TypeScript, Vite y Worker aprobados; cuatro recorridos
-Edge, sin errores JS ni solicitudes a `/api`. Evidencia y límites:
-`docs/product/CORRECTIONS-20261007-UI.md` y
-`docs/architecture/review-evidence/ui-corrections-lab-20261007.json`.
+Se conservan las correcciones previas de navegación por rol, Resumen,
+Catálogo/Cierre, avatar, tema y arrastre, documentadas en
+`docs/product/CORRECTIONS-20261007-UI.md`. Análisis mensual ahora permite plegar
+los paneles de detalle, ver la explicación desde un botón de ayuda, elegir las
+series mensuales existentes y cambiar la torta gris entre cantidad de tareas por
+estado, tipo o empresa. La torta cuenta tareas y no puntos ponderados. El cálculo
+operativo conserva su lógica actual de laboratorio y queda señalado como
+provisional hasta definir el contrato.
 
-El Site anterior a publicar este corte es v81. Su acceso se verificó como
-personalizado y owner-only: una cuenta autorizada, cero grupos y cero visitantes
-externos. La audiencia no debe ampliarse. Avance global orientativo **~45%**;
-estas correcciones no completan aceptación funcional ni infraestructura. No se
-crearon cuentas o invitaciones reales y no se conectó Supabase.
+Suite completa: **424/424 pruebas en 48 archivos**; TypeScript, Vite y Worker
+aprobados. Chrome headless pasó los recorridos responsive: cero errores JS, cero
+solicitudes a `/api` y sin desborde móvil. Evidencia:
+`docs/architecture/review-evidence/monthly-analytics-lab-20261007.json`.
+La compilación advierte que el entry principal alcanza 500,19 KB; la compilación
+completó correctamente.
+
+La fuente base previa a este corte corresponde al Site v82, personalizado y
+owner-only: una cuenta autorizada, cero grupos y cero visitantes externos. La
+audiencia no debe ampliarse. Avance global orientativo **~45%**; este bloque no
+completa aceptación funcional ni infraestructura. No configura cuentas,
+invitaciones reales ni Supabase.
 
 Siguiente gate: GPT-6.1 Sol, esfuerzo alto, Standard, para definir métricas y
-permisos de tareas operativas, agenda/calendario, cierres por equipo/empresa,
-análisis mensual, consultas y anotaciones. Después GPT-6 Luna, esfuerzo medio,
-Standard, para implementar los contratos aprobados en el laboratorio.
+permisos de tareas operativas, eventos del calendario y cierres por alcance.
+Consultas y Anotaciones quedan para una propuesta visual aparte. Después,
+GPT-6 Luna, esfuerzo medio, Standard, implementa los contratos aprobados.
 
 ## Registro histórico del laboratorio — 06/10/2026
 

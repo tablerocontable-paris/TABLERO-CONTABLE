@@ -1,0 +1,61 @@
+{
+  "date": "2026-10-07",
+  "scope": "Monthly analytics interface in the existing private laboratory",
+  "baseCommit": "e39f33187d81cf7eecee506ef0b341d9a329855b",
+  "siteVersionBefore": 82,
+  "acceptance": false,
+  "changes": [
+    "Collapsible detail panels for timeliness, work cycle, assigned workload, recorded time and indicator detail",
+    "Calculation explanation is hidden behind an accessible help icon and labels the current operational-target logic as provisional",
+    "Selectable existing monthly percentage series: weighted compliance and on-time delivery",
+    "Selectable grayscale task-count pie by status, task type or company; counts are explicitly separated from weighted points",
+    "Visible rounded labels for zero and non-zero weighted compliance bars; analytics rows align to their own content"
+  ],
+  "unitTests": {
+    "passed": 424,
+    "failed": 0,
+    "filesPassed": 48,
+    "temporaryTransferCheckoutExcluded": true
+  },
+  "build": {
+    "typescript": "passed",
+    "vite": "passed with upstream annotation warnings and a 500.19 KB entry chunk warning",
+    "worker": "passed",
+    "mainEntryRawKB": 500.19,
+    "chartsChunkRawKB": 423.74
+  },
+  "browser": {
+    "browser": "Google Chrome headless through repository Playwright Core harness",
+    "passed": true,
+    "responsiveSidebarWidths": [1024, 1280, 1440, 1600],
+    "mobileViewport": "390x844",
+    "javascriptErrors": [],
+    "operationalApiCalls": [],
+    "mobileOverflow": false,
+    "flows": [
+      "Laboratory navigation and task operations",
+      "Monthly work-cycle and detail panels at mobile width",
+      "Drag animation and actor clock",
+      "Task search, request conversion, obligations and process quality",
+      "Persistent review and simulated invitations"
+    ]
+  },
+  "siteBefore": {
+    "version": 82,
+    "audience": "custom owner-only",
+    "authorizedAccounts": 1,
+    "groups": 0,
+    "externalVisitors": 0
+  },
+  "notChanged": [
+    "Operational task KPI and target semantics; pending GPT-6.1 Sol contract",
+    "Calendar event permissions, multi-scope month close and production integrations",
+    "Real users, authentication, invitations, Supabase, GitHub or hosting account setup"
+  ],
+  "notVerified": [
+    "Real users, authentication, MFA or Supabase RLS",
+    "Cross-device notification delivery",
+    "Production backup and recovery",
+    "Final product acceptance or 100 percent completion"
+  ]
+}

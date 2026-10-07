@@ -23,6 +23,13 @@
   --chart-cursor-border: #354052;
   --chart-active: #233d64;
   --chart-active-border: #16263d;
+  --chart-slice-1: #373a40;
+  --chart-slice-2: #555a62;
+  --chart-slice-3: #727881;
+  --chart-slice-4: #8e949c;
+  --chart-slice-5: #a7adb5;
+  --chart-slice-6: #c0c5cc;
+  --chart-slice-7: #d8dce1;
   --line: #e4e6eb;
   --side: #101113;
   --green: #278260;
@@ -495,6 +502,28 @@ header span {
 .panel-head button {
   font-size: 10px;
 }
+.panel-head-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.panel-head .panel-collapse,
+.panel-head .analytics-help {
+  min-width: 32px;
+  min-height: 32px;
+  padding: 6px;
+  color: var(--muted);
+}
+.panel-collapse svg {
+  transition: transform 0.18s var(--ease);
+}
+.panel-collapse[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+.panel-body[hidden] {
+  display: none;
+}
 .chart {
   padding: 19px 16px 12px;
 }
@@ -887,6 +916,54 @@ td .text-button {
 .analytics-toolbar {
   justify-content: space-between;
 }
+.analytics-score-row,
+.analytics-trend-row {
+  align-items: start;
+}
+.analytics-trend-row {
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+}
+.analytics-series {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  padding: 0 16px 16px;
+}
+.analytics-series button {
+  min-height: 31px;
+  padding: 6px 9px;
+  color: var(--muted);
+  font-size: 10px;
+}
+.analytics-series button.selected {
+  color: var(--ink);
+  background: var(--surface-soft);
+  border-color: var(--line);
+}
+.analytics-series button:disabled {
+  opacity: 0.75;
+}
+.series-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+.series-dot-weighted {
+  background: var(--chart-ink);
+}
+.series-dot-ontime {
+  background: var(--chart-slice-4);
+}
+.analytics-distribution-picker {
+  padding-top: 12px;
+  padding-bottom: 0;
+}
+.analytics-pie-chart {
+  min-width: 0;
+  padding-top: 6px;
+}
 .performance-list {
   padding: 8px 23px;
 }
@@ -914,15 +991,16 @@ td .text-button {
   margin-top: 7px;
 }
 .metric-explainer {
-  background: #ebeff4;
-  padding: 18px 23px;
+  margin: 0 16px 16px;
+  padding: 13px 16px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
   border-radius: 8px;
-  margin-top: 20px;
-  color: #657286;
+  color: var(--muted);
 }
 .metric-explainer p {
   font-size: 11px;
-  color: #738096;
+  color: var(--muted);
 }
 .metric-explainer b {
   font-size: 12px;
@@ -1970,7 +2048,19 @@ summary {
   border-color: #536075 !important;
   color: #fff;
 }
-[data-theme="dark"] { --chart-cursor: #ffffff; --chart-cursor-border: #edf2f8; --chart-active: #dbeafe; --chart-active-border: #ffffff; }
+[data-theme="dark"] {
+  --chart-cursor: #ffffff;
+  --chart-cursor-border: #edf2f8;
+  --chart-active: #dbeafe;
+  --chart-active-border: #ffffff;
+  --chart-slice-1: #d8dce1;
+  --chart-slice-2: #c0c5cc;
+  --chart-slice-3: #a7adb5;
+  --chart-slice-4: #8e949c;
+  --chart-slice-5: #727881;
+  --chart-slice-6: #555a62;
+  --chart-slice-7: #373a40;
+}
 [data-theme="dark"] .recharts-cartesian-axis-tick-value {
   fill: #bec8d6;
 }

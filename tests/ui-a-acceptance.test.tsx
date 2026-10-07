@@ -11,7 +11,7 @@ import { currentMonth } from "../src/domain/model";
 import type { State } from "../src/domain/model";
 import * as domain from "../src/domain/model";
 
-vi.mock("recharts", () => Object.fromEntries(["ResponsiveContainer", "BarChart", "Bar", "XAxis", "YAxis", "CartesianGrid", "Tooltip", "Legend", "LineChart", "Line", "ReferenceLine"].map(key => [key, () => null])));
+vi.mock("recharts", () => Object.fromEntries(["ResponsiveContainer", "BarChart", "Bar", "LabelList", "XAxis", "YAxis", "CartesianGrid", "Tooltip", "Legend", "LineChart", "Line", "ReferenceLine", "PieChart", "Pie", "Cell"].map(key => [key, () => null])));
 function prepare(activeId = "e0") {
   const state = seed();
   state.activeId = activeId;

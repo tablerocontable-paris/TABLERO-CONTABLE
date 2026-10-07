@@ -1,5 +1,5 @@
-import { useEffect, useId, useRef, type ReactNode } from "react";
-import { X } from "lucide-react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { ChevronDown, X } from "lucide-react";
 export function Dialog({
   title,
   onClose,
@@ -45,22 +45,46 @@ export function Panel({
   sub,
   children,
   action,
+  collapsible = false,
+  defaultOpen = true,
 }: {
   title: string;
   sub?: string;
   children: ReactNode;
   action?: ReactNode;
+  collapsible?: boolean;
+  defaultOpen?: boolean;
 }) {
+  const bodyId = useId();
+  const [open, setOpen] = useState(defaultOpen);
   return (
-    <section className="panel">
+    <section className={`panel${collapsible ? " panel-collapsible" : ""}`}>
       <div className="panel-head">
         <div>
           <h2>{title}</h2>
           {sub && <p>{sub}</p>}
         </div>
-        {action}
+        {collapsible ? (
+          <div className="panel-head-actions">
+            {action}
+            <button
+              type="button"
+              className="icon-button panel-collapse"
+              aria-label={`${open ? "Plegar" : "Desplegar"} ${title}`}
+              aria-expanded={open}
+              aria-controls={bodyId}
+              onClick={() => setOpen((value) => !value)}
+            >
+              <ChevronDown size={16} aria-hidden="true" />
+            </button>
+          </div>
+        ) : action}
       </div>
-      {children}
+      {collapsible ? (
+        <div id={bodyId} className="panel-body" hidden={!open}>
+          {children}
+        </div>
+      ) : children}
     </section>
   );
 }
