@@ -13,9 +13,12 @@ cambiar funcionalidades ni audiencia. El checkout de referencia está en
 El bundle y el ZIP fueron verificados con una clonación limpia. El JSON de
 `paris-state-lab` viaja por separado desde la interfaz.
 
-La revisión de navegador de este corte ya pasó por la app general, vistas
-responsivas, arrastre, búsqueda, procesos, obligaciones, copia/restauración del
-laboratorio y cierres conjuntos; sin errores JS ni llamadas a `/api`. Evidencia:
+La suite completa pasó **420/420 pruebas en 48 archivos** con dos workers y
+timeouts explícitos de 20/30 s. `npm test` conserva esos parámetros como
+comando estándar. La revisión de navegador de este corte ya pasó por la app
+general, vistas responsivas, arrastre, búsqueda, procesos, obligaciones,
+copia/restauración del laboratorio y cierres conjuntos; sin errores JS ni
+llamadas a `/api`. Evidencia:
 `docs/architecture/review-evidence/local-browser-audit-20261007.json`.
 El test unitario de teclado del tablero pasó 4/4 casos. El sondeo sintético con
 24 perfiles mostró la tabla de perfiles en 512 ms desde la selección de Equipo;
