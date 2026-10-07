@@ -355,3 +355,26 @@ producción, permisos entre dispositivos y migraciones siguen pendientes para la
 aceptación final; si el próximo cambio define alguno de esos contratos, revisar
 primero con **GPT-6.1 Sol, esfuerzo alto, Standard**. Avance global continúa en
 ~45%.
+
+## Corte vigente y siguiente revisión — 07/10/2026
+
+La documentación del laboratorio y los avisos locales quedó sincronizada en el
+commit `e9fd3f8b33b16366143d2bff413ff5b1fc939b90`, publicado en el mismo Site
+privado como **v69** (`appgdep_6ac6458abaec81919944f70b0530a8f6`). El Site sigue
+owner-only: una cuenta permitida, cero grupos y cero visitantes externos. Este
+corte no agrega funcionalidad ni cambia audiencia.
+
+La transferencia para PC personal se genera a partir del `HEAD` limpio actual,
+se valida clonando el bundle en una carpeta nueva y se entrega en
+`outputs/LEEME-PC-PERSONAL.md` junto con su ZIP. Pasar el JSON del laboratorio
+por separado desde la interfaz; no está cifrado. Trabajar en una sola PC a la
+vez y no sincronizar `.git` con OneDrive.
+
+Próximo paso que necesita razonamiento de arquitectura: seleccionar **GPT-6.1
+Sol, esfuerzo alto, Standard** para revisar los contratos de dependencias,
+delegación/aceptación y avisos entre dispositivos, con foco en identidad,
+permisos, idempotencia, historial y límites de notificación. No implementar
+escrituras de servidor ni conectar cuentas en esa revisión. Al cerrar el
+contrato, volver a **GPT-6 Luna, esfuerzo medio, Standard** para implementar y
+validar sólo las decisiones ya acordadas en el laboratorio. El avance total
+permanece orientativamente en **~45%**; no equivale a aceptación final.

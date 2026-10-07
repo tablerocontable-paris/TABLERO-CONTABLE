@@ -546,3 +546,24 @@ y publicado en el mismo Site privado como **v68**; deployment
 confirmó propietario, audiencia personalizada, una cuenta autorizada, cero
 grupos y cero visitantes externos. Avance global estimado **~45%**; no implica
 aceptación final ni sincronización entre computadoras.
+
+## Sincronización documental y transferencia personal — 07/10/2026
+
+El commit `e9fd3f8b33b16366143d2bff413ff5b1fc939b90` sincronizó los documentos
+del corte de avisos locales y se publicó como **Site v69**, deployment
+`appgdep_6ac6458abaec81919944f70b0530a8f6`. El archivo publicado se generó desde
+el build del mismo checkout. La relectura confirmó estado activo y acceso
+personalizado con una sola cuenta propietaria, sin grupos ni visitantes
+externos. No hubo cambios funcionales ni de audiencia en v69.
+
+La transferencia portable de este commit se verificó con `git bundle verify`,
+`git bundle list-heads` y una clonación temporal cuyo `HEAD` coincide exactamente
+con el bundle. El paquete excluye credenciales, `node_modules` y estado del
+navegador. La simulación `paris-state-lab` debe exportarse/importarse aparte desde
+la interfaz del laboratorio; el JSON no está cifrado. No hay sincronización
+automática entre computadoras sin GitHub propio.
+
+La siguiente revisión pendiente sigue siendo de arquitectura: identidad,
+permisos, idempotencia y entrega para dependencias/delegación/aceptación y
+notificaciones entre dispositivos. No llevar estas mutaciones al servidor ni
+crear cuentas antes de la aceptación final. Avance global orientativo: **~45%**.
