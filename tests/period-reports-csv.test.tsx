@@ -51,6 +51,90 @@ describe("CSV de reporte cerrado", () => {
     expect(rows[0]).toContain("Participación personal %");
     expect(rows[1]).toEqual(expect.arrayContaining([5, 40, 2, 2, "00:20:00", "Completada"]));
   });
+  it("no exporta puntos de cuota para una operativa de un reporte nuevo", () => {
+    const state = seed();
+    const task = { ...state.tasks.find((row) => row.kind === "operativa")!, target: 10, weight: 4 };
+    const closure = {
+      id: "new-lab-operative-export", ownerId: task.ownerId, month: task.month, at: `${task.month}-30T23:59:59Z`, by: "boss",
+      metrics: metrics([], []), tasks: [task], activity: [], note: "Cierre de prueba", report: { schemaVersion: 3 },
+    } as unknown as Closure;
+    const row = closureCsvRows(closure, () => "Empresa de prueba")[1]!;
+    expect(row.slice(3, 7)).toEqual(["No aplica", "No aplica", "No aplica", "No aplica"]);
+    expect(row[11]).toBe("No aplica");
+  });
+  it("conserva la columna meta en los reportes históricos", () => {
+    const state = seed();
+    const task = { ...state.tasks.find((row) => row.kind === "operativa")!, target: 18 };
+    const closure = {
+      id: "legacy-operative-export", ownerId: task.ownerId, month: task.month, at: `${task.month}-30T23:59:59Z`, by: "boss",
+      metrics: metrics([], []), tasks: [task], activity: [], note: "Cierre anterior",
+      report: { schemaVersion: 2 },
+    } as unknown as Closure;
+    expect(closureCsvRows(closure, () => "Empresa de prueba")[1]![11]).toBe(18);
+  });
+  it("separa operativas de entregables en el reporte nuevo", () => {
+    const state = seed();
+    const base = metrics([], []);
+    const summary = {
+      movementCount: 0, quantityByUnit: [], weightedLoad: null, unweightedQuantity: 0,
+      recordedSeconds: 0, quality: null, order: null, timeliness: null, evaluations: 0,
+    };
+    const closure: Closure = {
+      id: "lab-report-without-operations", ownerId: "e0", month: "2026-10", at: "2026-10-31T23:59:59Z", by: "boss",
+      metrics: base, tasks: [], activity: [], note: "",
+      report: {
+        schemaVersion: 3, generatedAt: "2026-10-31T23:59:59Z", employee: "Valentino Magni",
+        team: "Tesorería", sector: "Contabilidad", recipientIds: ["boss"], recipientNames: ["Juan Pablo"],
+        delivery: "disponible en demostración", recordedSeconds: 0, reopenings: 0,
+        groups: [{ key: "deliverables", company: "San Luis Capital", process: "Conciliación", templateId: null,
+          kind: "resultado", unit: "", metrics: base, recordedSeconds: 0, reopenings: 0 }],
+        laboratorySummary: { operational: summary, covered: { ...summary, quantityByUnit: [] } },
+      },
+    };
+    state.closures = [closure];
+    render(<PeriodReports state={state} month="2026-10" laboratory />);
+    fireEvent.click(screen.getByRole("button", { name: "Desplegar Reportes emitidos al cierre" }));
+    expect(screen.getByText("Sin operativas")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Ver reporte" }));
+    fireEvent.click(screen.getByRole("button", { name: "Descargar reporte CSV" }));
+    expect(csvExports[0]).toContain("No aplica");
+  });
+  it("exporta trabajo de cobertura separado sin asignar puntos al reemplazo", () => {
+    const state = seed();
+    state.activeId = "m1";
+    const base = metrics([], []);
+    const closure: Closure = {
+      id: "coverage-report-export", ownerId: "e1", month: "2026-10", at: "2026-10-31T23:59:59Z", by: "boss",
+      metrics: base, tasks: [], activity: [], note: "",
+      report: {
+        schemaVersion: 3, generatedAt: "2026-10-31T23:59:59Z", employee: "Reemplazo",
+        team: "Tesorería", sector: "Contabilidad", recipientIds: ["boss"], recipientNames: ["Jefatura"],
+        delivery: "disponible en demostración", groups: [], recordedSeconds: 60, reopenings: 0,
+        laboratorySummary: { operational: {
+          movementCount: 0, quantityByUnit: [], weightedLoad: null, unweightedQuantity: 0,
+          recordedSeconds: 0, quality: null, order: null, timeliness: null, evaluations: 0,
+        }, covered: { movementCount: 1, quantityByUnit: [{ unit: "factura", quantity: 3 }], weightedLoad: null, unweightedQuantity: 3, recordedSeconds: 60 } },
+        coverageContributions: [{ taskId: "covered-task", title: "Carga de facturas", companyId: "c1", company: "San Luis Capital",
+          originalOwnerId: "e6", originalOwner: "Titular fuera del equipo", executorId: "e1", executor: "Reemplazo", executorTeamId: "t1",
+          sector: "Contabilidad", kind: "operativa", unit: "facturas", sessions: [{ id: "covered-session", start: "2026-10-10T10:00:00Z", end: "2026-10-10T10:01:00Z" }],
+          activity: [{ id: "covered-movement", date: "2026-10-10", qty: 3, note: "Lote A" }], completionAt: null }],
+      },
+    };
+    const rows = closureCsvRows(closure, (companyId) => state.companies.find((company) => company.id === companyId)?.name || companyId);
+    expect(rows).toHaveLength(2);
+    expect(rows[1]).toEqual(expect.arrayContaining(["Carga de facturas · titular Titular fuera del equipo · ejecutor Reemplazo", "Cobertura ejecutada", "00:01:00", 3, "facturas", "No aplica"]));
+    expect(rows[1]?.[3]).toBe("No aplica");
+    expect(rows[1]?.[6]).toBe("No aplica");
+    expect(closureCsvRows(closure, (id) => id, (item) => item.executorId === "another-user")).toHaveLength(1);
+    state.closures = [closure];
+    render(<PeriodReports state={state} month="2026-10" laboratory />);
+    fireEvent.click(screen.getByRole("button", { name: "Desplegar Reportes emitidos al cierre" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ver reporte" }));
+    expect(screen.queryByText("Titular fuera del equipo")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Descargar reporte CSV" }));
+    expect(csvExports[0]).not.toContain("Titular fuera del equipo");
+    expect(csvExports[0]).not.toContain("Reemplazo");
+  });
   it("distingue falta de snapshot histórico y resumen nuevo sin muestra", async () => {
     const state = seed();
     const base = metrics([], []);
@@ -82,6 +166,7 @@ describe("CSV de reporte cerrado", () => {
     }];
     state.closures = [current];
     render(<PeriodReports state={state} month="2026-10" />);
+    fireEvent.click(screen.getByRole("button", { name: "Desplegar Reportes emitidos al cierre" }));
     fireEvent.click(screen.getAllByRole("button", { name: "Ver reporte" })[0]!);
     fireEvent.click(screen.getByRole("button", { name: "Descargar reporte CSV" }));
     expect(csvExports).toHaveLength(1);
@@ -114,6 +199,7 @@ describe("impresión del reporte cerrado", () => {
     vi.stubGlobal("print", print);
     render(<PeriodReports state={state} month="2026-10" />);
 
+    fireEvent.click(screen.getByRole("button", { name: "Desplegar Reportes emitidos al cierre" }));
     fireEvent.click(screen.getByRole("button", { name: "Ver reporte" }));
     expect(document.querySelector("dialog.period-report-dialog[open]")).not.toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Imprimir reporte" }));

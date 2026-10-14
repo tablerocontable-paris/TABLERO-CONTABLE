@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { useState } from "react";
 import TaskBoard, { orderTasks } from "../src/components/TaskBoard";
 import { seed } from "../src/data/repository";
 import type { Task } from "../src/domain/model";
@@ -66,7 +67,7 @@ describe("columnas independientes y orden de tareas", () => {
     render(<TaskBoard tasks={[task("p", "Trabajo pendiente", "Pendiente"), task("w", "Trabajo en curso", "En curso")]} onMove={onMove} renderCard={t => <article key={t.id} className="task-card" data-task-id={t.id}>{t.title}</article>} />);
     fireEvent.click(screen.getByRole("button", { name: "En curso 1" }));
     const card = screen.getByText("Trabajo pendiente").closest("article")!;
-    const target = document.getElementById("task-column-1")!;
+    const target = document.querySelectorAll<HTMLElement>('[role="region"]')[1]!;
     const dataTransfer = { effectAllowed: "", dropEffect: "", setData: vi.fn(), getData: vi.fn(() => "p") };
     fireEvent.dragStart(card, { dataTransfer });
     expect(card.getAttribute("data-dragging")).toBe("true");
@@ -76,11 +77,51 @@ describe("columnas independientes y orden de tareas", () => {
     expect(onMove).toHaveBeenCalledWith("p", "En curso", undefined);
     expect(card.getAttribute("data-landed")).toBe("true");
   });
-  it("offers a keyboard route for changing columns", () => {
-    const onMove = vi.fn();
+  it("does not show a landed animation when the guarded move is rejected", () => {
+    const onMove = vi.fn(() => false);
     render(<TaskBoard tasks={[task("p", "Trabajo pendiente", "Pendiente")]} onMove={onMove} renderCard={t => <article key={t.id}>{t.title}</article>} />);
     const card = screen.getByRole("article", { name: /Arrastrá para cambiar/ });
-    fireEvent.keyDown(card, { altKey: true, key: "ArrowRight" });
+    const target = document.querySelectorAll<HTMLElement>("[role=region]")[1]!;
+    const dataTransfer = { effectAllowed: "", dropEffect: "", setData: vi.fn(), getData: vi.fn(() => "p") };
+    fireEvent.dragStart(card, { dataTransfer });
+    fireEvent.drop(target, { dataTransfer });
     expect(onMove).toHaveBeenCalledWith("p", "En curso", undefined);
+    expect(card.hasAttribute("data-landed")).toBe(false);
+  });
+  it("moves by keyboard and restores focus to the moved card after it remounts", async () => {
+    function StatefulBoard() {
+      const [tasks, setTasks] = useState([task("p", "Trabajo pendiente", "Pendiente")]);
+      const onMove = (taskId: string, status: Task["status"]) => {
+        setTasks((current) => current.map((row) => row.id === taskId ? { ...row, status } : row));
+        return true;
+      };
+      return <TaskBoard tasks={tasks} onMove={onMove} renderCard={t => <article key={t.id} className="task-card" data-task-id={t.id}>{t.title}</article>} />;
+    }
+    render(<StatefulBoard />);
+    fireEvent.click(screen.getByRole("button", { name: "En curso 0" }));
+    const card = screen.getByRole("article", { name: /Arrastrá para cambiar/ });
+    card.focus();
+    fireEvent.keyDown(card, { altKey: true, key: "ArrowRight" });
+    await waitFor(() => expect(screen.getByRole("button", { name: "En curso 1" }).getAttribute("aria-expanded")).toBe("true"));
+    await waitFor(() => {
+      const moved = screen.getByRole("article", { name: /Arrastrá para cambiar/ });
+      expect(moved.closest('[role="region"]')?.getAttribute("aria-labelledby")).toContain("task-column-");
+      expect(document.activeElement).toBe(moved);
+    });
+  });
+  it("prefixes ARIA regions per board and animates only an accepted move", () => {
+    const onMove = vi.fn(() => false);
+    const tasks = [task("p", "Trabajo pendiente", "Pendiente")];
+    const board = (key: string) => <TaskBoard key={key} tasks={tasks} onMove={onMove} renderCard={t => <article key={t.id}>{t.title}</article>} />;
+    const { container } = render(<>{board("own")}{board("coverage")}{<TaskBoard key="empty" tasks={[]} renderCard={t => <article key={t.id}>{t.title}</article>} />}</>);
+    const ids = Array.from(container.querySelectorAll<HTMLElement>("[role=region]"), node => node.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(Array.from(container.querySelectorAll<HTMLButtonElement>("[aria-controls]"), node => node.getAttribute("aria-controls")).every(id => !!id && document.getElementById(id))).toBe(true);
+    const firstToggle = container.querySelector<HTMLButtonElement>(".column-toggle")!;
+    const controls = firstToggle.getAttribute("aria-controls")!;
+    fireEvent.click(firstToggle);
+    expect(document.getElementById(controls)?.hidden).toBe(true);
+    fireEvent.click(firstToggle);
+    expect(document.getElementById(controls)?.hidden).toBe(false);
   });
 });

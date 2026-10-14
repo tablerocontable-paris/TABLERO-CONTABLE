@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-08",
+  "scope": "Re-run computed text contrast checks on the current built private laboratory.",
+  "command": "node tests/browser-contrast-audit.cjs",
+  "result": "passed",
+  "profiles": ["jefe", "encargado", "empleado"],
+  "themes": ["light", "dark"],
+  "routesAudited": 76,
+  "checkedTextElements": 5943,
+  "skippedTextElements": 0,
+  "contrastFailures": 0,
+  "cappedGradientSampleSets": 0,
+  "javascriptErrors": 0,
+  "operationalApiCalls": 0,
+  "rawEvidence": "outputs/plan-validation-20261008/contrast-current-after-key-fix/contrast-audit.json",
+  "limitations": [
+    "This automated computed-color sampling is not a manual visual review or WCAG certification.",
+    "The check covers the rendered text and states visited in the script."
+  ]
+}

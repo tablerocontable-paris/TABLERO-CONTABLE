@@ -1,4 +1,21 @@
 import type { State } from "../domain/model";
+import { z } from "zod";
+import { stateSchema } from "../server/site-schema";
+
+const workspaceResponseSchema = z.strictObject({
+  state: stateSchema,
+  revision: z.number().refine((value) => Number.isSafeInteger(value) && value >= 0),
+  isOwner: z.boolean(),
+  presence: z.record(z.string().min(1), z.string().datetime({ offset: true })),
+}).superRefine((workspace, context) => {
+  if (!workspace.state.profiles.some((profile) => profile.id === workspace.state.activeId && profile.active)) {
+    context.addIssue({
+      code: "custom",
+      path: ["state", "activeId"],
+      message: "El perfil activo no existe en el tablero recibido.",
+    });
+  }
+});
 export interface WorkspaceResponse {
   state: State;
   revision: number;
@@ -9,11 +26,12 @@ export class WorkspaceError extends Error {
   constructor(
     message: string,
     public status: number,
+    public kind: "http" | "transport" | "protocol" = "http",
   ) {
     super(message);
   }
 }
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+async function request(path: string, init?: RequestInit): Promise<WorkspaceResponse> {
   let response: Response;
   try {
     response = await fetch(path, {
@@ -25,20 +43,36 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new WorkspaceError(
       "No hay conexión con el servidor. Conservamos el cambio para reintentar.",
       0,
+      "transport",
     );
   }
-  const body = await response
-    .json()
-    .catch(() => ({ error: "El servidor no respondió correctamente." }));
-  if (!response.ok)
+  let body: unknown;
+  try {
+    body = await response.json();
+  } catch {
+    body = null;
+  }
+  if (!response.ok) {
+    const message = typeof body === "object" && body !== null && "error" in body && typeof body.error === "string"
+      ? body.error
+      : "No se pudo completar la solicitud.";
     throw new WorkspaceError(
-      body.error || "No se pudo guardar.",
+      message,
       response.status,
+      "http",
     );
-  return body;
+  }
+  const parsed = workspaceResponseSchema.safeParse(body);
+  if (!parsed.success)
+    throw new WorkspaceError(
+      "El servidor devolvió un tablero con formato inválido. Conservamos el cambio para reintentar.",
+      502,
+      "protocol",
+    );
+  return parsed.data as unknown as WorkspaceResponse;
 }
 export function readWorkspace(view = "") {
-  return request<WorkspaceResponse>(
+  return request(
     "/api/workspace" + (view ? "?view=" + encodeURIComponent(view) : ""),
   );
 }
@@ -48,7 +82,7 @@ export function saveWorkspace(
   action = "Actualizó trabajo",
   entityId = "",
 ) {
-  return request<WorkspaceResponse>("/api/workspace", {
+  return request("/api/workspace", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ state, revision, action, entityId }),

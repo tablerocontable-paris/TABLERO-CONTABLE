@@ -34,6 +34,13 @@ export interface TimelinessSummary {
   total: TimelinessBucket;
 }
 
+const argentinaDateFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "America/Argentina/Buenos_Aires",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
 const emptyBucket = (): TimelinessBucket => ({
   evaluated: 0,
   early: 0,
@@ -87,12 +94,7 @@ export function endOfARTDate(today: string): string | null {
 function dateART(instant: string): string | null {
   const parsed = timestampMs(instant);
   if (parsed === null) return null;
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Argentina/Buenos_Aires",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(parsed);
+  const parts = argentinaDateFormatter.formatToParts(parsed);
   const part = (type: string) => parts.find((p) => p.type === type)?.value;
   const result = `${part("year")}-${part("month")}-${part("day")}`;
   return validDate(result) ? result : null;

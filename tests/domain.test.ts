@@ -133,6 +133,8 @@ describe("reglas independientes de las pantallas", () => {
   it("cierre conserva foto y no se duplica", () => {
     let s = seed();
     const month = currentMonth();
+    expect(() => closeMonth(s, "e0", month, "m1", "Revisión del encargado"))
+      .toThrow("El cierre requiere jefatura activa y autorizada.");
     s = closeMonth(s, "e0", month, "boss", "Revisado");
     const before = s.closures[0].tasks[0].title;
     const t = s.tasks.find((t) => t.id === s.closures[0].tasks[0].id)!;
@@ -144,7 +146,7 @@ describe("reglas independientes de las pantallas", () => {
     const s = seed();
     s.profiles = s.profiles.map((p) => p.id === "boss" ? { ...p, active: false } : p);
     expect(() => closeMonth(s, "e0", currentMonth(), "boss", "Revisado"))
-      .toThrow("El cierre requiere un responsable de este empleado.");
+      .toThrow("El cierre requiere jefatura activa y autorizada.");
   });
   it("ámbito jerárquico de demostración", () => {
     const s = seed();

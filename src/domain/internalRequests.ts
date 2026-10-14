@@ -163,6 +163,7 @@ export function replyToInternalRequest(
   makeId: () => string,
 ): InternalRequest {
   if (!canManageInternalRequest(request, actor)) throw new Error("Sólo el destinatario puede responder este pedido.");
+  if (request.status === "resolved") throw new Error("El pedido ya está resuelto y no admite nuevas respuestas.");
   const text = body.trim();
   if (!text || text.length > 4000) throw new Error("La respuesta es obligatoria y admite hasta 4.000 caracteres.");
   const message = { id: makeId(), actorId: actor.id, body: text, createdAt: now };

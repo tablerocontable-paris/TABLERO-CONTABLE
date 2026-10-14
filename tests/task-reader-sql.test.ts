@@ -8,7 +8,7 @@ import {
   it,
   vi,
 } from "vitest";
-import { AccountingLab, ids } from "./helpers/accounting-lab";
+import { AccountingLab, ids, stages } from "./helpers/accounting-lab";
 import {
   createTaskReader,
   type TaskReadQuery,
@@ -78,9 +78,9 @@ const rpcStatements: Record<TaskRpcName, { sql: string; keys: string[] }> = {
     sql: "select public.pause_task_timer($1,$2) value",
     keys: ["p_session", "p_operation_id"],
   },
-  set_task_wait: {
-    sql: "select public.set_task_wait($1,$2,$3,$4) value",
-    keys: ["p_instance", "p_note", "p_expected_revision", "p_operation_id"],
+  set_task_wait_reviewed: {
+    sql: "select public.set_task_wait_reviewed($1,$2,$3,$4,$5) value",
+    keys: ["p_instance", "p_note", "p_reason", "p_expected_revision", "p_operation_id"],
   },
   transition_task_reviewed: {
     sql: "select public.transition_task_reviewed($1,$2,$3,$4,$5) value",
@@ -139,7 +139,7 @@ const command = (
 ) => prepareTaskCommand({ ...input, operationId: lab.next() });
 
 beforeAll(async () => {
-  lab = await new AccountingLab().init();
+  lab = await new AccountingLab().init(stages.m012);
 }, 20000);
 beforeEach(async () => {
   await lab.admin();

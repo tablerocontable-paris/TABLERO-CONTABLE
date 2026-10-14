@@ -1,6 +1,7 @@
 const { spawn } = require("node:child_process");
 const fs = require("node:fs");
 const { chromium } = require("playwright-core");
+const { selectProfile } = require("./browser-helpers.cjs");
 const root = require("node:path").resolve(__dirname, "..");
 const binary = process.env.CHROMIUM_PATH;
 const output = process.env.E2E_OUTPUT;
@@ -37,7 +38,7 @@ const assert = (ok, message) => { if (!ok) throw Error(message); };
   });
   await page.reload(); await page.locator(".lab-banner").waitFor();
   await page.locator('[data-nav="tasks"]').click();
-  await page.getByLabel("Perfil que estás viendo").selectOption("e0");
+  await selectProfile(page, "Perfil que estás viendo", "Tareas de", "e0");
   const card = page.locator('[data-task-id="joint-browser-test"]');
   await card.waitFor(); await card.locator(".card-title").click();
   await page.getByRole("button", { name: "Compartir tarea" }).click();
@@ -120,24 +121,29 @@ const assert = (ok, message) => { if (!ok) throw Error(message); };
   await page.reload();
   await page.locator(".lab-banner").waitFor();
   await page.locator('[data-nav="closing"]').click();
+  await page.getByRole("heading", { name: /Cierres por empresa/ }).waitFor();
 
-  async function closeEmployee(name, note) {
-    await page.getByRole("row").filter({ hasText: name }).getByRole("button", { name: "Revisar y cerrar" }).click();
-    const dialog = page.getByRole("dialog");
-    await dialog.getByLabel("Observaciones de cierre").fill(note);
-    await dialog.getByRole("checkbox").check();
-    await dialog.getByRole("button", { name: "Confirmar cierre" }).click();
-    await dialog.waitFor({ state: "detached" });
+  async function closeEmployee(profileId, note, expectedUnits) {
+    await page.locator(".lab-close-controls select").nth(0).selectOption("person");
+    await page.locator(".lab-close-controls select").nth(1).selectOption(profileId);
+    const closeButton = page.locator(".lab-close-form button.primary");
+    await closeButton.waitFor();
+    assert((await closeButton.innerText()) === `Cerrar ${expectedUnits} unidades listas`, `Unexpected ready company units for ${profileId}: ${await closeButton.innerText()}`);
+    await page.locator(".lab-close-form textarea").fill(note);
+    await page.locator(".lab-close-form input[type=checkbox]").check();
+    await closeButton.click();
+    await page.getByText(`${expectedUnits} cerradas`, { exact: false }).waitFor();
   }
-  await closeEmployee("Valentino Magni", "Revisión de cierre A");
+  await closeEmployee("e0", "Revisión de cierre A", 5);
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem("paris-state-lab")));
   const closureA = saved.closures.find((closure) => closure.ownerId === "e0" && closure.month === task.month);
-  assert(closureA?.report?.schemaVersion === 2, "First participant closure must produce report schema v2");
+  assert(closureA?.report?.schemaVersion === 3, "First participant closure must produce report schema v3");
   const contributionA = closureA.report.contributions.find((row) => row.taskId === task.id);
   assert(contributionA?.shareBps === 6000 && contributionA.possiblePoints === 3 && contributionA.earnedPoints === 3, "First report must preserve A's 60% contribution");
   assert(!JSON.stringify(closureA.report).includes("Lucía Fernández"), "First participant report must not expose the partner's identity");
-  await page.getByRole("row").filter({ hasText: "Lucía Fernández" }).getByRole("button", { name: "Revisar y cerrar" }).waitFor();
+  assert(saved.companyClosures.some((entry) => entry.ownerId === "e1" && entry.companyId === task.companyId && entry.month === task.month), "Closing a shared task must capture the partner's unit atomically");
 
+  await page.getByRole("button", { name: "Desplegar Reportes emitidos al cierre" }).click();
   const reportRow = page.getByRole("row").filter({ hasText: "Valentino Magni" }).getByRole("button", { name: "Ver reporte" });
   await reportRow.click();
   const reportDialog = page.getByRole("dialog");
@@ -153,13 +159,13 @@ const assert = (ok, message) => { if (!ok) throw Error(message); };
   assert(csv.includes("60") && csv.includes("3") && !csv.includes("Lucía Fernández"), "CSV must preserve A's contribution without the partner's identity");
   await reportDialog.getByRole("button", { name: "Cerrar" }).click();
 
-  await closeEmployee("Lucía Fernández", "Revisión de cierre B");
+  await closeEmployee("e1", "Revisión de cierre B", 3);
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem("paris-state-lab")));
   const closureB = saved.closures.find((closure) => closure.ownerId === "e1" && closure.month === task.month);
-  assert(closureB?.report?.schemaVersion === 2, "Second participant must close the same frozen occurrence with report schema v2");
+  assert(closureB?.report?.schemaVersion === 3, "Second participant must close the remaining company and consolidate report schema v3");
   const contributionB = closureB.report.contributions.find((row) => row.taskId === task.id);
   assert(contributionB?.shareBps === 4000 && contributionB.possiblePoints === 2 && contributionB.earnedPoints === 2, "Second report must preserve B's 40% contribution");
   assert(!apiCalls.length, "Laboratory called the operational API");
   assert(!errors.length, "Browser errors: " + errors.join("; "));
-  console.log("PASS: joint activation, independent clocks, shared completion, sequential member closures, v2 reports and CSV privacy; zero operational API calls or JS errors.");
+  console.log("PASS: joint activation, independent clocks, shared completion, atomic participant company closure, v3 reports and CSV privacy; zero operational API calls or JS errors.");
 })().catch((error) => { console.error(error); process.exitCode = 1; }).finally(async () => { if (browser) await browser.close(); if (server) server.kill(); });

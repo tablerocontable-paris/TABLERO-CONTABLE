@@ -31,6 +31,7 @@ const commandSchema = z.discriminatedUnion("kind", [
     ...instance,
     kind: z.literal("wait"),
     note: nonBlankTextSchema.nullable(),
+    reason: z.string().nullable(),
   }),
   z.strictObject({
     ...common,
@@ -80,11 +81,12 @@ const preparedSchema = z
     z.strictObject({
       ...common,
       kind: z.literal("wait"),
-      rpc: z.literal("set_task_wait"),
+      rpc: z.literal("set_task_wait_reviewed"),
       args: z.strictObject({
         ...operation,
         ...task,
         p_note: nonBlankTextSchema.nullable(),
+        p_reason: z.string().nullable(),
       }),
     }),
     z.strictObject({
@@ -212,12 +214,13 @@ export function prepareTaskCommand(input: unknown): PreparedTaskCommand {
       prepared = {
         kind: command.kind,
         operationId: command.operationId,
-        rpc: "set_task_wait",
+        rpc: "set_task_wait_reviewed",
         args: {
           ...shared,
           p_instance: command.instanceId,
           p_expected_revision: command.expectedRevision,
           p_note: command.note,
+          p_reason: command.reason,
         },
       };
       break;

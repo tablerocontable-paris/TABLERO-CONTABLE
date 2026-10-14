@@ -1,3 +1,5 @@
+> PRECEDENCIA VIGENTE 14/10/2026: el usuario autorizo iniciar infraestructura propia y continuidad PC; GitHub sera cuenta NUEVA, no usar conexiones anteriores. Seguir docs/ops/MIGRATION-BOOTSTRAP-20261014.md. M0 Sol prepara inventario/respaldo; M1 Luna medio Standard consolida Git/paquete. Se permite iniciar cuentas/dev aunque siga pendiente lector humano; produccion, datos reales e invitaciones conservan gates. No activar D1/Sites como adaptador Supabase. Esta nota reemplaza las prohibiciones historicas de iniciar cuentas para este alcance.
+
 # Grupo París
 
 - Trabajar exclusivamente en este proyecto nuevo. El repositorio y los servicios legacy son referencias de lectura.
@@ -276,3 +278,28 @@ TypeScript, Vite/Worker y Edge escritorio/móvil; no llamó a `/api`. La tarea
 pendiente de continuidad inmediata es generar/verificar bundle y guía vigentes
 para PC personal. No conectar cuentas reales durante la aceptación del
 laboratorio.
+
+## Estado vigente posterior: revisión del plan — 07/10/2026
+
+La revisión actual encontró once discrepancias reproducidas y requisitos
+incompletos; la implementación no está aceptada. Seguir la matriz y evidencia
+en `docs/architecture/PLAN-REVIEW-20261007.md` y el contrato de correcciones
+`docs/architecture/PLAN-CORRECTIONS-NEXT-20261007.md` con Luna medio Standard.
+Después revisar con Sol alto Standard. El código está sin commit ni nueva
+publicación. No conectar cuentas/servicios ni actualizar el Site mientras estos
+defectos sigan abiertos. PROJECT-STATUS y EXECUTION-NEXT contienen el estado
+vigente; los números de pruebas/publicaciones previos son registros históricos.
+
+
+## Correcciones del plan — estado local 08/10/2026
+
+### Precedencia de auditoría integral — 11/10/2026
+
+La auditoría integral Sol sigue abierta: 60 hallazgos y 90 casos reproducidos,
+con instrucciones en `docs/architecture/SOL-AUDIT-20261008.md`. Las cifras y
+afirmaciones de verificación de cortes anteriores son evidencia histórica;
+no acreditan aceptación actual ni autorizan commit/publicación con defectos
+abiertos. Completar la revisión pendiente antes del cambio manual a Luna.
+La lectura completa de migraciones no acredita Auth/RLS real ni concurrencia.
+
+Hay correcciones locales desde la auditoría 07/10; el estado vigente y los límites están en `docs/PROJECT-STATUS.md` y `docs/EXECUTION-NEXT.md`. La suite completa más reciente pasó 494/494 en 57 archivos; TypeScript, build cliente/Worker y recorridos Edge pasaron. El cierre por empresa cuenta y confirma grupos conjuntos completos; activación, reasignación y traspaso revisan cierres parciales de todos los responsables. Edición de perfiles, recurrencias y cierre mensual exigen jefatura activa. Jefatura conserva consulta y avisos de tareas conjuntas en todo su ámbito sin membresía empresarial directa. Encargados autorizados pueden reprogramar tareas puntuales pendientes con motivo, preservando vencimiento, período y recurrencia. Evidencias en `docs/architecture/review-evidence/company-closure-group-readiness-lab-20261008.json`, `joint-task-partial-close-guard-lab-20261008.json`, `orphan-transfer-recipient-closure-guard-lab-20261008.json`, `inactive-manager-write-guard-lab-20261008.json`, `monthly-close-role-guard-lab-20261008.json`, `boss-joint-notification-access-lab-20261008.json` y `punctual-task-rescheduling-lab-20261008.json`. La auditoría de contraste ampliada evaluó 5.943 textos en 76 combinaciones, con cero fallos y cero omitidos; evidencia en `docs/architecture/review-evidence/contrast-audit-gradient-lab-20261008.json`. El flujo de evidencia aplica atómicamente el límite por tarea/movimiento, conserva ese alcance al restaurar respaldos v2, sigue aceptando respaldos v2 anteriores y preserva blobs existentes al actualizar IndexedDB v1 a v2; evidencia en `outputs/plan-validation-20261008/evidence-record-limit-final3/` y `edge-evidence-concurrency-final3/`. La historia desde cierres inmutables y los filtros de Mi día ya están implementados; evidencia en `docs/architecture/review-evidence/closed-history-lab-20261008.json` y `mi-dia-route-filters-lab-20261008.json`. Un inventario TypeScript confirma que no quedan llamadas a Panel sin control de plegado; el seguimiento está en `docs/architecture/review-evidence/cross-module-panel-folding-followup-lab-20261008.json`. La auditoría accesible con árbol de Chromium cubre 38 rutas/2.124 controles sin nombres faltantes; su script y salida están en `tests/browser-accessibility-audit.cjs` y `outputs/plan-validation-20261008/accessibility-panel-folding-final/accessibility-audit.json`. Aún faltan aceptación total y lector de pantalla. El corte sigue sin commit/PR/publicación; mantener datos ficticios, Site privado y cuentas/servicios desconectados.

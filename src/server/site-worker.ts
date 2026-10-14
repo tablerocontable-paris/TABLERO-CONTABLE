@@ -127,22 +127,30 @@ async function handle(request: Request, env: Env): Promise<Response> {
     row.revision++;
     auth = identify(s, email, env.OWNER_EMAIL, auth.actor.id);
   }
-  const now = new Date().toISOString();
-  await env.DB.prepare(
-    "INSERT INTO paris_presence (profile_id,last_seen) VALUES (?,?) ON CONFLICT(profile_id) DO UPDATE SET last_seen = excluded.last_seen",
-  )
-    .bind(auth.actor.id, now)
-    .run();
-  const presence = await env.DB.prepare(
-    "SELECT profile_id, last_seen FROM paris_presence",
-  ).all<{ profile_id: string; last_seen: string }>();
+  let presenceResults: { profile_id: string; last_seen: string }[] = [];
+  try {
+    const now = new Date().toISOString();
+    await env.DB.prepare(
+      "INSERT INTO paris_presence (profile_id,last_seen) VALUES (?,?) ON CONFLICT(profile_id) DO UPDATE SET last_seen = excluded.last_seen",
+    )
+      .bind(auth.actor.id, now)
+      .run();
+    const presence = await env.DB.prepare(
+      "SELECT profile_id, last_seen FROM paris_presence",
+    ).all<{ profile_id: string; last_seen: string }>();
+    presenceResults = presence.results;
+  } catch {
+    // Presence is advisory. A committed workspace write remains committed.
+    console.warn("Workspace presence unavailable");
+    presenceResults = [];
+  }
   const projected = projectState(s, auth.actor);
   return json({
     state: projected,
     revision: row.revision,
     isOwner: auth.isOwner,
     presence: Object.fromEntries(
-      presence.results
+      presenceResults
         .filter((r) => projected.profiles.some((p) => p.id === r.profile_id))
         .map((r) => [r.profile_id, r.last_seen]),
     ),

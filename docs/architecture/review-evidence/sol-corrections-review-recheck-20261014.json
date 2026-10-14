@@ -1,0 +1,64 @@
+{
+  "date": "2026-10-14",
+  "scope": "Reconciliation and implementation of explicit corrections in the Sol review package; no feature scope added.",
+  "reviewedDocuments": [
+    "docs/architecture/PLAN-REVIEW-20261007.md",
+    "docs/architecture/PLAN-CORRECTIONS-NEXT-20261007.md",
+    "docs/architecture/SOL-AUDIT-20261008.md",
+    "docs/architecture/SOL-REQUIREMENT-COVERAGE-20261008.md",
+    "docs/architecture/SOL-LUNA-CONTRACTS-20261011.md",
+    "docs/PROJECT-STATUS.md",
+    "docs/EXECUTION-NEXT.md"
+  ],
+  "findingCoverage": {
+    "auditHeadings": 65,
+    "uniqueAuditFindings": 65,
+    "uniqueFindingsInCurrentReconciliation": 65,
+    "missingFindings": [],
+    "duplicateFindings": [],
+    "status": "all findings assigned to the seven stages; stages 1-3 accepted by Sol, S52 and stages 5-7 locally implemented with independent review or human/environment acceptance gates still open"
+  },
+  "correction": {
+    "planReference": "PLAN-CORRECTIONS-NEXT-20261007.md, section 5: resolve the bundle warning through coherent separation without hiding the threshold",
+    "finding": "The current client build emitted a >500 kB entry warning and a mixed static/dynamic import warning for laboratoryEvidence.",
+    "change": [
+      "Moved App's evidence reconciliation calls to its existing dynamic-import boundary so laboratoryEvidence remains lazy with evidence flows.",
+      "Split React, ReactDOM client and scheduler into an explicit framework chunk; retained Vite's default 500 kB warning limit and existing chart/icon/validation chunks."
+    ],
+    "result": {
+      "beforeEntryBytes": 548960,
+      "afterEntryBytes": 328290,
+      "frameworkChunkBytes": 208980,
+      "chartsChunkBytes": 423740,
+      "entryOver500kBWarning": false,
+      "mixedLaboratoryEvidenceImportWarning": false,
+      "remainingBuildWarnings": "Zod PURE-comment annotations only"
+    },
+    "sourceSha256": {
+      "src/App.tsx": "9c97db92d21831dae532be6c5357c6c5fde2839abb62aa009749ae27312f321c",
+      "vite.config.ts": "578b0866b90349a2ccfebce6a2aa0dd6839fb3b02959d44e6b233a622d35463b"
+    }
+  },
+  "validation": {
+    "focusedEvidenceTests": { "passed": 17, "total": 17, "files": 5 },
+    "fullSuite": {
+      "command": "node node_modules/vitest/vitest.mjs run --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000 --reporter=dot",
+      "exitCode": 0,
+      "passed": 661,
+      "total": 661,
+      "files": 67,
+      "durationSeconds": 163.96
+    },
+    "typescript": { "command": "node node_modules/typescript/bin/tsc --noEmit", "exitCode": 0 },
+    "clientBuild": { "command": "node node_modules/vite/bin/vite.js build --outDir dist/client", "exitCode": 0 },
+    "workerBuild": { "command": "node scripts/build-worker.mjs", "exitCode": 0 },
+    "diffCheck": { "command": "git diff --check", "exitCode": 0, "note": "Git emitted line-ending conversion notices only." }
+  },
+  "openAcceptanceGates": [
+    "The earlier browser limitation is resolved using repository-local playwright-core and Edge; see sol-corrections-runtime-recheck-20261014.json.",
+    "Human screen-reader acceptance remains pending.",
+    "Independent Sol review of S52 and stages 5-7 remains pending.",
+    "Real PostgreSQL/MVCC concurrency validation remains pending; no local PostgreSQL or Docker was available in the recorded environment."
+  ],
+  "noExternalActions": "No commit, PR, Site update, account connection, operational API call, migration, or deployment."
+}

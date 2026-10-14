@@ -73,15 +73,13 @@ export default function Annotations({
 
   return (
     <div className="annotations-page">
-      <Panel title="Anotaciones personales" sub="Fórmulas, recordatorios y referencias útiles. Convertí una anotación en tarea cuando necesite seguimiento.">
+      <Panel title="Anotaciones personales" sub="Fórmulas, recordatorios y referencias útiles. Convertí una anotación en tarea cuando necesite seguimiento." collapsible defaultOpen action={!formOpen ? <button data-tour="annotations-create-action" type="button" className="primary annotation-new" onClick={() => { setEditing(null); setFormCategory("Nota personal"); setFormOpen(true); }}><Plus size={15} /> Nueva anotación</button> : undefined}>
         <div className="annotation-privacy">
           <FileText size={16} /> {remote ? 'Estas anotaciones se guardan en el servidor y sólo se entregan a tu perfil. Si convertís una en tarea, el título y los controles de esa tarea pasan al ámbito de trabajo autorizado.' : 'Demo local: estas anotaciones quedan en este navegador y asociadas al perfil seleccionado. Aún no hay cuentas privadas ni sincronización.'}
         </div>
         {due.length > 0 && <div className="annotation-due"><Bell size={16} /> Tenés {due.length} recordatorio{due.length === 1 ? "" : "s"} para revisar.</div>}
-        {!formOpen ? (
-          <button className="primary annotation-new" onClick={() => { setEditing(null); setFormCategory("Nota personal"); setFormOpen(true); }}><Plus size={15} /> Nueva anotación</button>
-        ) : (
-          <form key={editing || "new"} className="annotation-form" onSubmit={submit}>
+        {formOpen && (
+          <form key={editing || "new"} className="annotation-form" data-tour="annotations-form" onSubmit={submit}>
             <label>Título<input name="title" required maxLength={100} placeholder="Ej. Fórmula para diferencias" defaultValue={source?.title || ""} /></label>
             <label>Tipo o categoría<input aria-label="Tipo" name="category" required list="annotation-categories" maxLength={40} placeholder="Nota personal, fórmula, recordatorio u otra" value={formCategory} onChange={(e) => setFormCategory(e.target.value)} /><datalist id="annotation-categories">{[...new Set(["Nota personal", "Fórmula de Excel", "Recordatorio", ...categories])].map((name) => <option key={name} value={name} />)}</datalist></label>
             <label className="annotation-date">Recordarme el<input name="reminderOn" type="date" required={categoryKind(formCategory) === "reminder"} defaultValue={source?.reminderOn || ""} /></label>
@@ -90,12 +88,12 @@ export default function Annotations({
           </form>
         )}
       </Panel>
-      <Panel title="Tu biblioteca" sub={`${rows.length} anotación${rows.length === 1 ? "" : "es"}`}>
-        <div className="annotation-tools">
+      <Panel title="Tu biblioteca" sub={`${rows.length} anotación${rows.length === 1 ? "" : "es"}`} collapsible defaultOpen>
+        <div className="annotation-tools" data-tour="private-annotations">
           <label className="annotation-search"><Search size={16} /><input aria-label="Buscar anotaciones" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar en tus anotaciones" /></label>
           <select aria-label="Filtrar tipo de anotación" value={filter} onChange={(e) => setFilter(e.target.value)}><option value="all">Todos los tipos</option>{categories.map((name) => <option key={name} value={name}>{name}</option>)}</select>
         </div>
-        {visible.length === 0 ? <Empty text={rows.length ? "No hay resultados con estos filtros." : "Todavía no guardaste anotaciones."} /> : (
+        {visible.length === 0 ? <div className="annotation-empty-state"><Empty text={rows.length ? "No hay resultados con estos filtros." : "Todavía no guardaste anotaciones."} /></div> : (
           <div className="annotation-list">
             {visible.map((entry) => {
               const linked = entry.convertedTaskId ? tasks.find((t) => t.id === entry.convertedTaskId) : undefined;

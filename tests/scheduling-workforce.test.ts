@@ -14,6 +14,8 @@ import {
   dateART,
   transition,
   closeMonth,
+  isClosed,
+  metrics,
 } from "../src/domain/model";
 import {
   applyClock,
@@ -27,6 +29,8 @@ import {
   reassignOrphanedTask,
   transferOrphanedTask,
   updateProfile,
+  presenceStatus,
+  canViewPresence,
 } from "../src/domain/workforce";
 import { reviseAssignment } from "../src/domain/planning";
 import { collectTaskNotifications } from "../src/domain/notifications";
@@ -143,13 +147,77 @@ describe("fechas de cada ocurrencia", () => {
     );
     expect(updated.tasks.some((t) => t.id === oldId)).toBe(true);
     expect(updated.tasks.filter((t) => t.month === "2026-11")).toHaveLength(5);
+    const inactiveBoss = { ...s, profiles: s.profiles.map((profile) => profile.id === "boss" ? { ...profile, active: false } : profile) };
+    expect(() => reviseAssignment(inactiveBoss, a.id, defaultSchedule("2026-12-01"), "boss")).toThrow(/jefatura/i);
     s.tasks[1].status = "En curso";
     expect(() =>
       reviseAssignment(s, a.id, defaultSchedule("2026-11-01"), "boss"),
     ).toThrow("trabajo iniciado");
   });
+
+  it("no elimina tareas alcanzadas por dependencias o referencias aunque sigan pendientes", () => {
+    let state = seed();
+    const assignment = { ...state.assignments[0], id: "referenced-rule", schedule: { ...defaultSchedule("2026-10-01", "mensual"), monthDay: 5 } };
+    state = materialize(materialize({ ...state, assignments: [assignment], tasks: [] }, "2026-10"), "2026-11");
+    const affected = state.tasks.find((task) => task.month === "2026-11")!;
+    const linked = { ...state, taskComments: [{ id: "comment-1", taskId: affected.id, actorId: "boss", content: "Seguimiento", createdAt: "2026-10-10T00:00:00Z" }] };
+    expect(() => reviseAssignment(linked, assignment.id, defaultSchedule("2026-11-01"), "boss")).toThrow(/referencias, progreso comercial o dependencias/);
+    expect(linked.tasks.some((task) => task.id === affected.id)).toBe(true);
+    const dependent = { ...state, tasks: state.tasks.map((task) => task.month === "2026-10" ? { ...task, dependsOnTaskIds: [affected.id] } : task) };
+    expect(() => reviseAssignment(dependent, assignment.id, defaultSchedule("2026-11-01"), "boss")).toThrow(/referencias, progreso comercial o dependencias/);
+  });
+
+  it("conserva tareas pendientes con fecha explícita de disponibilidad al reemplazar una recurrencia", () => {
+    let state = seed();
+    const assignment = { ...state.assignments[0], id: "available-from-rule", schedule: { ...defaultSchedule("2026-10-01", "mensual"), monthDay: 5 } };
+    state = materialize(materialize({ ...state, assignments: [assignment], tasks: [] }, "2026-10"), "2026-11");
+    const affected = state.tasks.find((task) => task.month === "2026-11")!;
+    const withExplicitAvailability = { ...state, tasks: state.tasks.map((task) => task.id === affected.id ? { ...task, availableFrom: "2026-11-10" } : task) };
+
+    expect(() => reviseAssignment(withExplicitAvailability, assignment.id, defaultSchedule("2026-11-01"), "boss")).toThrow(/referencias, progreso comercial o dependencias/);
+    expect(withExplicitAvailability.tasks.some((task) => task.id === affected.id)).toBe(true);
+    expect(reviseAssignment(state, assignment.id, defaultSchedule("2026-11-01"), "boss").tasks.some((task) => task.id === affected.id)).toBe(false);
+  });
+
+  it("protege operativas vinculadas a coeficientes o evaluaciones y conserva respaldo válido", () => {
+    let state = seed();
+    const assignment = state.assignments.find((row) => state.templates.find((template) => template.id === row.templateId)?.kind === "operativa")!;
+    const recurring = { ...assignment, id: "rate-linked-rule", schedule: { ...defaultSchedule("2026-10-01", "mensual"), monthDay: 5 } };
+    state = materialize(materialize({ ...state, assignments: [recurring], tasks: [] }, "2026-10"), "2026-11");
+    const affected = state.tasks.find((task) => task.month === "2026-11")!;
+    const rate = { id: "rate-linked", templateId: null, taskId: affected.id, companyId: affected.companyId, effectiveOn: "2026-11-01", unitWeight: 1, version: 1, createdAt: "2026-10-01T12:00:00.000Z", createdBy: "boss" };
+    const linked = { ...state, operationalRates: [rate] };
+
+    expect(() => reviseAssignment(linked, recurring.id, defaultSchedule("2026-11-01"), "boss")).toThrow(/referencias, progreso comercial o dependencias/);
+    expect(linked.tasks.some((task) => task.id === affected.id)).toBe(true);
+    expect(linked.operationalRates).toEqual([rate]);
+  });
 });
 describe("tiempo y cobertura", () => {
+  it("expira la presencia real a los 90 segundos y distingue la señal simulada", () => {
+    const now = Date.parse("2026-10-08T15:00:00.000Z");
+    expect(presenceStatus("e0", "boss", false, "2026-10-08T14:58:30.000Z", now)).toMatchObject({ online: true, label: "En línea" });
+    expect(presenceStatus("e0", "boss", false, "2026-10-08T14:58:29.999Z", now)).toMatchObject({ online: false });
+    expect(presenceStatus("e0", "boss", false, undefined, now)).toEqual({ online: false, label: "Sin señal registrada" });
+    expect(presenceStatus("boss", "boss", true, undefined, now)).toEqual({ online: true, label: "En línea · simulación" });
+    expect(presenceStatus("e0", "boss", true, undefined, now)).toEqual({ online: false, label: "Sin sesión · simulación" });
+  });
+
+  it("el reloj rechaza una tarea dependiente y permite pausar un reloj que ya estaba activo", () => {
+    const base = seed();
+    const month = currentMonth();
+    const source = base.tasks.find((task) => task.ownerId === "e0" && task.companyId === "c1" && task.kind === "resultado")!;
+    const prerequisite = { ...source, status: "Pendiente" as const, blockedBy: "", sessions: [] };
+    const dependent = { ...prerequisite, id: "clock-dependent", title: "Cierre posterior", dependsOnTaskIds: [prerequisite.id] };
+    const state = { ...base, tasks: [...base.tasks.filter((task) => task.id !== source.id), prerequisite, dependent] };
+    expect(() => applyClock(state, dependent.id, "e0", true, `${month}-08T12:00:00.000Z`)).toThrow(/Espera/i);
+    expect(() => applyClock(state, prerequisite.id, "boss", true, `${month}-08T12:00:00.000Z`)).toThrow(/fuera de tu ámbito/i);
+    const running = { ...dependent, status: "En curso" as const, sessions: [{ id: "existing-clock", actorId: "e0", start: `${month}-08T11:00:00.000Z`, end: null }] };
+    const runningState = { ...state, tasks: state.tasks.map((task) => task.id === dependent.id ? running : task) };
+    const paused = applyClock(runningState, dependent.id, "e0", false, `${month}-08T12:00:00.000Z`);
+    expect(paused.tasks.find((task) => task.id === dependent.id)?.sessions?.[0]?.end).toBe(`${month}-08T12:00:00.000Z`);
+  });
+
   it("un ejecutor cronometra una tarea a la vez, pausa y completa sin seguir sumando", () => {
     let s = seed();
     const tasks = s.tasks
@@ -247,6 +315,52 @@ describe("tiempo y cobertura", () => {
     expect(registerAbsence(s, { ...absence, replacementId: "e1" }, "m1").absences).toHaveLength(1);
     expect(() => registerAbsence(s, { ...absence, replacementId: "e1", taskIds: [] }, "m1")).toThrow("regla recurrente");
   });
+  it("permite registrar ausencia sin cobertura y limita presencia a jefatura/equipo autorizado", () => {
+    const state = seed();
+    const manager = state.profiles.find((profile) => profile.id === "m1")!;
+    const employee = state.profiles.find((profile) => profile.id === "e0")!;
+    const peerManager = state.profiles.find((profile) => profile.id === "m2")!;
+    const absence = {
+      id: "absence-without-replacement", ownerId: employee.id, replacementId: "", taskIds: [], assignmentIds: [],
+      from: "2026-11-10", to: "2026-11-12", kind: "Licencia" as const, note: "", createdBy: manager.id,
+    };
+    expect(registerAbsence(state, absence, manager.id).absences).toContainEqual(absence);
+    expect(canViewPresence(state, manager, employee.id)).toBe(true);
+    expect(canViewPresence(state, peerManager, employee.id)).toBe(false);
+    expect(canViewPresence(state, employee, manager.id)).toBe(false);
+    const revokedManager = { ...manager, companyIds: [] };
+    const revoked = { ...state, profiles: state.profiles.map((profile) => profile.id === manager.id ? revokedManager : profile) };
+    expect(canViewPresence(revoked, manager, employee.id)).toBe(false);
+    expect(canViewPresence({ ...state, profiles: state.profiles.map((profile) => profile.id === employee.id ? { ...profile, active: false } : profile) }, manager, employee.id)).toBe(false);
+  });
+  it("rechaza cobertura de tareas y reglas en empresas revocadas al encargado", () => {
+    const state = seed();
+    const manager = state.profiles.find((profile) => profile.id === "m1")!;
+    const employee = state.profiles.find((profile) => profile.id === "e0")!;
+    const task = state.tasks.find((row) => row.ownerId === employee.id && row.companyId === "c1" && row.status !== "Completada")!;
+    const revokedManager = { ...manager, companyIds: manager.companyIds.filter((companyId) => companyId !== "c1") };
+    const revoked = {
+      ...state,
+      profiles: state.profiles.map((profile) => profile.id === manager.id ? revokedManager : profile),
+      tasks: state.tasks.map((row) => row.id === task.id ? { ...row, scheduledOn: dateART(), due: dateART() } : row),
+    };
+    const absence = {
+      id: "revoked-company-task-coverage", ownerId: employee.id, replacementId: "e1",
+      taskIds: [task.id], assignmentIds: [], from: dateART(), to: dateART(),
+      kind: "Vacaciones" as const, note: "", createdBy: manager.id,
+    };
+    expect(canWork(revoked, revokedManager, { ...task, scheduledOn: dateART(), due: dateART() })).toBe(false);
+    expect(() => registerAbsence(revoked, absence, manager.id)).toThrow(/empresas autorizadas/i);
+    expect(registerAbsence(revoked, { ...absence, id: "scope-only-absence", replacementId: "", taskIds: [] }, manager.id).absences).toHaveLength(1);
+
+    const recurring = {
+      ...state.assignments.find((assignment) => assignment.ownerId === employee.id && assignment.companyId === "c1")!,
+      id: "revoked-company-rule", frequency: "mensual" as const, startMonth: currentMonth(), day: 15,
+      schedule: { ...defaultSchedule(`${currentMonth()}-01`, "mensual"), monthDay: 15, hasDeadline: false },
+    };
+    const withRule = { ...revoked, assignments: [...revoked.assignments, recurring] };
+    expect(() => registerAbsence(withRule, { ...absence, id: "revoked-company-rule-coverage", taskIds: [], assignmentIds: [recurring.id] }, manager.id)).toThrow(/reglas recurrentes activas/i);
+  });
   it("incluye ocurrencias futuras de una regla seleccionada y no duplica su acceso al materializar", () => {
     const base = seed();
     const assignment = {
@@ -282,6 +396,8 @@ describe("tiempo y cobertura", () => {
     expect(() => updateProfile(s, { ...p, name: "Editado" }, "e0")).toThrow(
       "Sólo",
     );
+    const inactiveBoss = { ...s, profiles: s.profiles.map((profile) => profile.id === "boss" ? { ...profile, active: false } : profile) };
+    expect(() => updateProfile(inactiveBoss, { ...p, name: "No autorizado" }, "boss")).toThrow(/jefatura/i);
     expect(() => updateProfile(s, { ...p, managerId: "e1" }, "boss")).toThrow(
       "encargado",
     );
@@ -293,6 +409,9 @@ describe("tiempo y cobertura", () => {
       ).profiles.find((x) => x.id === p.id)?.managerId,
     ).toBe("m2");
     expect(() => updateProfile(s, { ...p, active: false }, "boss")).toThrow("flujo de baja");
+    expect(() => updateProfile(s, { ...p, companyIds: [...p.companyIds, "unknown-company"] }, "boss")).toThrow(/empresas existentes/i);
+    expect(() => updateProfile(s, { ...p, companyIds: [p.companyIds[0]!, p.companyIds[0]!] }, "boss")).toThrow(/sin repetir/i);
+    expect(updateProfile(s, { ...p, name: "Valentino válido" }, "boss").profiles.find((row) => row.id === p.id)?.name).toBe("Valentino válido");
   });
   it("desactiva conservando historia, pausa reglas/relojes y prepara sólo el futuro elegible", () => {
     const at = "2026-10-06T15:00:00.000Z";
@@ -330,6 +449,13 @@ describe("tiempo y cobertura", () => {
     const former = before.profiles.find((person) => person.id === "e0")!;
     const retired = deactivateProfile(before, { ...former, active: false }, "boss", "Baja de equipo", at);
     const item = retired.orphanedWork?.find((row) => row.taskId === task.id)!;
+    const closedForReplacement = {
+      ...retired,
+      companyClosures: [{ id: "recipient-company-close", ownerId: "e1", companyId: task.companyId, month: task.month,
+        at, by: "boss", note: "Cierre parcial", metrics: metrics([], []), tasks: [], activity: [], coveredActivity: [], schemaVersion: 1 as const }],
+    };
+    expect(() => reassignOrphanedTask(closedForReplacement, item.id, "e1", "boss", at)).toThrow(/cerrados para la persona receptora/i);
+    expect(closedForReplacement.tasks.find((row) => row.id === task.id)?.ownerId).toBe("e0");
     const reassigned = reassignOrphanedTask(retired, item.id, "e1", "boss", at);
     expect(reassigned.tasks.find((row) => row.id === task.id)).toMatchObject({ ownerId: "e1", teamId: "t1" });
     expect(reassigned.orphanedWork?.find((row) => row.id === item.id)).toMatchObject({ status: "reassigned", assignedTo: "e1", resolvedBy: "boss" });
@@ -354,6 +480,14 @@ describe("tiempo y cobertura", () => {
     const item = retired.orphanedWork?.find((row) => row.taskId === task.id)!;
     expect(item.resolution).toBe("handoff_required");
     expect(retired.tasks.find((row) => row.id === task.id)?.sessions?.[0]?.end).toBe(at);
+    const closedForReplacement = {
+      ...retired,
+      companyClosures: [{ id: "transfer-recipient-company-close", ownerId: "e1", companyId: task.companyId, month: task.month,
+        at, by: "boss", note: "Cierre parcial", metrics: metrics([], []), tasks: [], activity: [], coveredActivity: [], schemaVersion: 1 as const }],
+    };
+    expect(() => transferOrphanedTask(closedForReplacement, item.id, "e1", "boss", "Continuidad del cierre mensual", at)).toThrow(/cerrados para la persona receptora/i);
+    expect(closedForReplacement.tasks.find((row) => row.id === task.id)?.ownerId).toBe("e0");
+    expect(closedForReplacement.taskTransfers).toBeUndefined();
     const transferred = transferOrphanedTask(retired, item.id, "e1", "boss", "Continuidad del cierre mensual", at);
     const moved = transferred.tasks.find((row) => row.id === task.id)!;
     const record = transferred.taskTransfers?.[0]!;
@@ -395,6 +529,55 @@ describe("tiempo y cobertura", () => {
     expect(retired.tasks.find((row) => row.id === task.id)?.sessions?.find((session) => session.actorId === "e1")?.end).toBe("2026-11-20T13:00:00.000Z");
     expect(canWork(retired, retired.profiles.find((person) => person.id === "e1")!, retired.tasks.find((row) => row.id === task.id)!, "2026-11-20")).toBe(false);
   });
+  it("da de baja al reemplazo, corta sólo sus relojes, cancela la cobertura y avisa al titular/superior", () => {
+    const at = "2026-11-20T13:00:00.000Z";
+    const base = seed();
+    const task = base.tasks.find((row) => row.ownerId === "e0" && row.kind === "resultado")!;
+    const month = task.month;
+    const day = task.due.slice(8, 10);
+    const targetDay = `${month}-${day}`;
+    const lastDay = new Date(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0).getDate();
+    const prepared = {
+      ...base,
+      tasks: base.tasks.map((row) => row.id === task.id ? {
+        ...row, sessions: [
+          { id: "replacement-open", actorId: "e1", start: `${targetDay}T09:00:00.000Z`, end: null },
+          { id: "other-open", actorId: "e2", start: `${targetDay}T09:30:00.000Z`, end: null },
+        ],
+      } : row),
+    };
+    const absence = { id: "replacement-retirement", ownerId: "e0", replacementId: "e1", taskIds: [task.id], from: `${month}-01`, to: `${month}-${String(lastDay).padStart(2, "0")}`, kind: "Licencia" as const, note: "", createdBy: "boss" };
+    const working = registerAbsence(prepared, absence, "boss");
+    const replacement = working.profiles.find((profile) => profile.id === "e1")!;
+    const retired = deactivateProfile(working, { ...replacement, active: false }, "boss", "Fin de cobertura", at);
+    const updatedTask = retired.tasks.find((row) => row.id === task.id)!;
+    expect(updatedTask.sessions).toEqual([
+      { id: "replacement-open", actorId: "e1", start: `${targetDay}T09:00:00.000Z`, end: at },
+      { id: "other-open", actorId: "e2", start: `${targetDay}T09:30:00.000Z`, end: null },
+    ]);
+    expect(retired.absences?.find((row) => row.id === absence.id)?.cancelledAt).toBe(at);
+    expect(retired.notifications?.filter((row) => row.taskId === task.id && row.title.includes("Cobertura cancelada"))
+      .map((row) => row.recipientId).sort()).toEqual(["e0", "m1"]);
+    expect(() => deactivateProfile(retired, { ...replacement, active: false }, "boss", "Baja repetida", at)).toThrow(/acceso activo/i);
+    expect(retired.notifications?.filter((row) => row.taskId === task.id && row.title.includes("Cobertura cancelada"))).toHaveLength(2);
+  });
+
+  it("no altera relojes de una unidad del reemplazo que ya está congelada", () => {
+    const base = seed();
+    const task = base.tasks.find((row) => row.ownerId === "e0" && row.companyId === "c1" && row.kind === "resultado")!;
+    const month = task.month;
+    const at = `${month}-28T13:00:00.000Z`;
+    const lastDay = new Date(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0).getDate();
+    const session = { id: "frozen-open-clock", actorId: "e1", start: `${month}-20T09:00:00.000Z`, end: null };
+    const withTask = { ...base, tasks: base.tasks.map((row) => row.id === task.id ? { ...row, sessions: [session] } : row) };
+    const absence = { id: "frozen-replacement", ownerId: "e0", replacementId: "e1", taskIds: [task.id], from: `${month}-01`, to: `${month}-${String(lastDay).padStart(2, "0")}`, kind: "Licencia" as const, note: "", createdBy: "boss" };
+    const working = registerAbsence(withTask, absence, "boss");
+    const closedUnit = { ...working, companyClosures: [{ id: "replacement-frozen-unit", ownerId: "e1", companyId: task.companyId, month: task.month,
+      at, by: "boss", note: "Cierre", metrics: metrics([], []), tasks: [], activity: [], coveredActivity: [], schemaVersion: 1 as const }] };
+    const replacement = closedUnit.profiles.find((profile) => profile.id === "e1")!;
+    const retired = deactivateProfile(closedUnit, { ...replacement, active: false }, "boss", "Fin de cobertura", at);
+    expect(retired.tasks.find((row) => row.id === task.id)?.sessions).toEqual([session]);
+  });
   it("persiste y vuelve a cargar bajas cuya asignación original era diaria", () => {
     const data = new Map<string, string>();
     vi.stubGlobal("localStorage", {
@@ -421,6 +604,44 @@ describe("tiempo y cobertura", () => {
     expect(retired.orphanedWork?.find((row) => row.taskId === task.id)?.assignmentSnapshot?.frequency).toBe("diaria");
     persist(retired);
     expect(load().orphanedWork?.find((row) => row.taskId === task.id)?.assignmentSnapshot?.frequency).toBe("diaria");
+  });
+  it("preserva tareas de una empresa cerrada y materializa sólo las unidades abiertas", () => {
+    const state = seed();
+    const task = state.tasks.find((row) => row.assignmentId && row.kind === "resultado")!;
+    const assignment = state.assignments.find((row) => row.id === task.assignmentId)!;
+    const closedUnit = {
+      id: "closed-company-unit",
+      ownerId: task.ownerId,
+      companyId: task.companyId,
+      month: task.month,
+      at: `${task.month}-28T15:00:00.000Z`,
+      by: "boss",
+      note: "Cierre de prueba",
+      metrics: metrics([], []),
+      tasks: [],
+      activity: [],
+      coveredActivity: [],
+      schemaVersion: 1 as const,
+    };
+    const closedState = { ...state, tasks: [task], assignments: [assignment], companyClosures: [closedUnit] };
+    expect(isClosed(closedState, task)).toBe(true);
+    const openUnitState = { ...closedState, tasks: [], companyClosures: undefined };
+    expect(materialize(openUnitState, task.month).tasks).not.toHaveLength(0);
+    expect(materialize({ ...closedState, tasks: [] }, task.month).tasks).toHaveLength(0);
+    const revised = reviseAssignment(closedState, assignment.id, defaultSchedule(task.scheduledOn || task.due), "boss");
+    expect(revised.tasks.some((row) => row.id === task.id)).toBe(true);
+  });
+  it("impide que un reemplazo ejecute una cobertura si su propia unidad empresa/mes está cerrada", () => {
+    const state = seed();
+    const task = state.tasks.find((row) => row.ownerId === "e0" && row.companyId === "c1" && row.kind === "resultado" && row.status !== "Completada")!;
+    const month = task.month;
+    const lastDay = new Date(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0).getDate();
+    const absence = { id: "coverage-actor-close", ownerId: "e0", replacementId: "e1", taskIds: [task.id], from: `${month}-01`, to: `${month}-${String(lastDay).padStart(2, "0")}`, kind: "Licencia" as const, note: "", createdBy: "boss" };
+    const coveredState = registerAbsence(state, absence, "boss");
+    const replacement = coveredState.profiles.find((profile) => profile.id === "e1")!;
+    const closure = { id: "replacement-unit-closed", ownerId: replacement.id, companyId: task.companyId, month, at: `${month}-28T15:00:00.000Z`, by: "boss", note: "Cierre", metrics: metrics([], []), tasks: [], activity: [], coveredActivity: [], schemaVersion: 1 as const };
+    const closedState = { ...coveredState, companyClosures: [closure] };
+    expect(() => applyClock(closedState, task.id, replacement.id, true, `${month}-08T12:00:00.000Z`)).toThrow(/ámbito o mes cerrado/i);
   });
 });
 describe("laboratorio aislado", () => {

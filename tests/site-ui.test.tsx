@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
+import { useState } from "react";
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -9,6 +11,7 @@ import {
   within,
 } from "@testing-library/react";
 import App from "../src/App";
+import { Dialog } from "../src/components/ui";
 import DeadlineAgenda from "../src/components/DeadlineAgenda";
 import RemoteWorkspace from "../src/components/RemoteWorkspace";
 import {
@@ -91,6 +94,20 @@ afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
+});
+describe("restauración de foco en diálogos compartidos", () => {
+  it("devuelve el foco al control que abrió el diálogo después de cerrarlo", async () => {
+    function Harness() {
+      const [open, setOpen] = useState(false);
+      return <><button type="button" onClick={() => setOpen(true)}>Abrir diálogo</button>{open && <Dialog title="Prueba" onClose={() => setOpen(false)}><p>Contenido</p></Dialog>}</>;
+    }
+    render(<Harness />);
+    const opener = screen.getByRole("button", { name: "Abrir diálogo" });
+    opener.focus();
+    fireEvent.click(opener);
+    fireEvent.click(screen.getByRole("button", { name: "Cerrar" }));
+    await waitFor(() => expect(document.activeElement).toBe(opener));
+  });
 });
 describe("UI conectada: recorrido diario sin simulación", () => {
   it("abre Mi tablero con identidad fija y pliega tarjetas independientemente", () => {
@@ -275,5 +292,318 @@ describe("UI conectada: recorrido diario sin simulación", () => {
       screen.getByRole("button", { name: "Descargar cambio pendiente" }),
     ).toBeTruthy();
     expect(localStorage.getItem("paris-state-v3")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Cargar versión guardada" }));
+  });
+  it("S45: conserva la propuesta cuando el servidor responde 200 con un DTO inválido", async () => {
+    const s = prepared("admin");
+    const initial = {
+      state: projectState(s, s.profiles.find((p) => p.id === "admin")!),
+      revision: 0,
+      isOwner: true,
+      presence: {},
+    };
+    const fetch = vi.fn(async (_path: unknown, init?: RequestInit) =>
+      init?.method === "POST"
+        ? Response.json({ state: initial.state, revision: -1, isOwner: true, presence: {} })
+        : Response.json(initial),
+    );
+    vi.stubGlobal("fetch", fetch);
+    render(<RemoteWorkspace />);
+    await screen.findByLabelText("Mi espacio");
+    fireEvent.click(document.querySelector('[data-nav="team"]')!);
+    fireEvent.change(await screen.findByLabelText("Empresa 1"), { target: { value: "Cambio no confirmado" } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar empresas" }));
+    await screen.findByRole("button", { name: "Reintentar guardado" });
+    expect(screen.getByRole("button", { name: "Descargar cambio pendiente" })).toBeTruthy();
+    expect(screen.getAllByText("El servidor devolvió un tablero con formato inválido. Conservamos el cambio para reintentar.").length).toBeGreaterThan(0);
+    expect(localStorage.getItem("paris-state-v3")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Cargar versión guardada" }));
+  });
+  it("S45: rechaza un DTO GET inválido sin fabricar estado inicial", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => Response.json({ state: {}, revision: "0", presence: {} })));
+    render(<RemoteWorkspace />);
+    expect((await screen.findByRole("alert")).textContent).toContain("formato inválido");
+    expect(screen.queryByLabelText("Mi espacio")).toBeNull();
+    expect(localStorage.getItem("paris-state-v3")).toBeNull();
+  });
+  it("S45: rechaza un perfil activo que no existe en el DTO GET", async () => {
+    const s = prepared("admin");
+    const state = projectState(s, s.profiles.find((p) => p.id === "admin")!);
+    state.activeId = "perfil-ausente";
+    vi.stubGlobal("fetch", vi.fn(async () => Response.json({ state, revision: 0, isOwner: true, presence: {} })));
+    render(<RemoteWorkspace />);
+    expect((await screen.findByRole("alert")).textContent).toContain("formato inválido");
+    expect(screen.queryByLabelText("Mi espacio")).toBeNull();
+    expect(localStorage.getItem("paris-state-v3")).toBeNull();
+  });
+  it("S45: rechaza un activeId que resuelve a un perfil inactivo", async () => {
+    const s = prepared("admin");
+    const state = projectState(s, s.profiles.find((p) => p.id === "admin")!);
+    state.profiles.find((profile) => profile.id === state.activeId)!.active = false;
+    vi.stubGlobal("fetch", vi.fn(async () => Response.json({ state, revision: 0, isOwner: true, presence: {} })));
+    render(<RemoteWorkspace />);
+    expect((await screen.findByRole("alert")).textContent).toContain("formato inválido");
+    expect(screen.queryByLabelText("Mi espacio")).toBeNull();
+  });
+  it("S45: conserva la propuesta ante un POST cuyo perfil activo no existe", async () => {
+    const s = prepared("admin");
+    const initial = {
+      state: projectState(s, s.profiles.find((p) => p.id === "admin")!),
+      revision: 0,
+      isOwner: true,
+      presence: {},
+    };
+    const fetch = vi.fn(async (_path: unknown, init?: RequestInit) =>
+      init?.method === "POST"
+        ? Response.json({ ...initial, state: { ...initial.state, activeId: "perfil-ausente" }, revision: 1 })
+        : Response.json(initial),
+    );
+    vi.stubGlobal("fetch", fetch);
+    render(<RemoteWorkspace />);
+    await screen.findByLabelText("Mi espacio");
+    fireEvent.click(document.querySelector('[data-nav="team"]')!);
+    fireEvent.change(await screen.findByLabelText("Empresa 1"), { target: { value: "Propuesta no confirmada" } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar empresas" }));
+    await screen.findByRole("button", { name: "Reintentar guardado" });
+    expect(screen.getByRole("button", { name: "Descargar cambio pendiente" })).toBeTruthy();
+    expect(screen.getAllByText("El servidor devolvió un tablero con formato inválido. Conservamos el cambio para reintentar.").length).toBeGreaterThan(0);
+    expect(localStorage.getItem("paris-state-v3")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Cargar versión guardada" }));
+    await screen.findByLabelText("Mi espacio");
+  });
+  it("S44: descarta una lectura de empleado que llega después de cambiar de vista", async () => {
+    const source = prepared("admin");
+    const responseFor = (profileId: string, companyName: string) => {
+      const state = projectState(source, source.profiles.find((p) => p.id === profileId)!);
+      state.companies[0]!.name = companyName;
+      return { state, revision: 0, isOwner: true, presence: {} };
+    };
+    let resolveEmployee!: (response: Response) => void;
+    let adminReads = 0;
+    const fetch = vi.fn(async (path: unknown) => {
+      const url = new URL(String(path), "https://paris.test");
+      const requested = url.searchParams.get("view") || "admin";
+      if (requested === "e0") return new Promise<Response>((resolve) => { resolveEmployee = resolve; });
+      if (requested === "admin") adminReads += 1;
+      return Response.json(responseFor(requested, requested === "admin" && adminReads > 1 ? "Vista actual" : "Datos iniciales"));
+    });
+    vi.stubGlobal("fetch", fetch);
+    render(<RemoteWorkspace />);
+    const selector = await screen.findByLabelText("Vista de usuario") as HTMLSelectElement;
+    fireEvent.change(selector, { target: { value: "e0" } });
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
+    fireEvent.change(screen.getByLabelText("Vista de usuario"), { target: { value: "admin" } });
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(3));
+    await waitFor(() => expect((screen.getByLabelText("Vista de usuario") as HTMLSelectElement).value).toBe("admin"));
+    resolveEmployee(Response.json(responseFor("e0", "Respuesta obsoleta")));
+    await waitFor(() => expect((screen.getByLabelText("Vista de usuario") as HTMLSelectElement).value).toBe("admin"));
+    expect(screen.getAllByText("Vista actual").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Respuesta obsoleta")).toBeNull();
+  });
+  it("S44: descarta un polling iniciado antes del guardado y conserva la propuesta en App", async () => {
+    const source = prepared("admin");
+    const initial = {
+      state: projectState(source, source.profiles.find((p) => p.id === "admin")!),
+      revision: 4,
+      isOwner: true,
+      presence: {},
+    };
+    let pollResolve!: (response: Response) => void;
+    let postResolve!: (response: Response) => void;
+    let postBody: { state: State; revision: number } | undefined;
+    let reads = 0;
+    const fetch = vi.fn(async (_path: unknown, init?: RequestInit) => {
+      if (init?.method === "POST") {
+        postBody = JSON.parse(String(init.body)) as { state: State; revision: number };
+        return new Promise<Response>((resolve) => { postResolve = resolve; });
+      }
+      reads += 1;
+      if (reads === 1) return Response.json(initial);
+      if (reads === 2)
+        return new Promise<Response>((resolve) => { pollResolve = resolve; });
+      return Response.json({
+        ...initial,
+        state: postBody?.state ?? initial.state,
+        revision: postBody ? 5 : initial.revision,
+      });
+    });
+    vi.stubGlobal("fetch", fetch);
+    const interval = vi.spyOn(window, "setInterval");
+    render(<RemoteWorkspace />);
+    await screen.findByLabelText("Mi espacio");
+
+    const pollCallback = interval.mock.calls.find(([, delay]) => delay === 30000)?.[0] as
+      | (() => Promise<void>)
+      | undefined;
+    expect(pollCallback).toBeDefined();
+    let polling!: Promise<void>;
+    await act(async () => {
+      polling = pollCallback!();
+      await Promise.resolve();
+    });
+    await waitFor(() => expect(reads).toBe(2));
+
+    fireEvent.click(document.querySelector('[data-nav="team"]')!);
+    fireEvent.change(await screen.findByLabelText("Empresa 1"), {
+      target: { value: "Cambio propio pendiente" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar empresas" }));
+    await waitFor(() => expect(postBody?.state.companies[0]?.name).toBe("Cambio propio pendiente"));
+
+    const stale = structuredClone(initial);
+    stale.revision = 5;
+    stale.state.companies[0]!.name = "Respuesta vieja del polling";
+    await act(async () => {
+      pollResolve(Response.json(stale));
+      await polling;
+    });
+    expect(screen.getAllByText("Cambio propio pendiente").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Respuesta vieja del polling")).toBeNull();
+
+    await act(async () => {
+      postResolve(Response.json({
+        state: postBody!.state,
+        revision: 5,
+        isOwner: true,
+        presence: {},
+      }));
+    });
+    await waitFor(() => expect(screen.getByText(/Guardado en el servidor/)).toBeTruthy());
+    expect(screen.getAllByText("Cambio propio pendiente").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Respuesta vieja del polling")).toBeNull();
+  });
+  it("S44: ignora la respuesta anterior cuando dos sondeos contestan fuera de orden y conserva la revisión nueva", async () => {
+    const source = prepared("admin");
+    const initial = {
+      state: projectState(source, source.profiles.find((p) => p.id === "admin")!),
+      revision: 0,
+      isOwner: true,
+      presence: {},
+    };
+    const pendingReads: ((response: Response) => void)[] = [];
+    let reads = 0;
+    let postBody: { state: State; revision: number } | undefined;
+    let finishPost!: (response: Response) => void;
+    let refreshResponse = initial;
+    const fetch = vi.fn(async (_path: unknown, init?: RequestInit) => {
+      if (init?.method === "POST") {
+        postBody = JSON.parse(String(init.body)) as { state: State; revision: number };
+        return new Promise<Response>((resolve) => { finishPost = resolve; });
+      }
+      reads += 1;
+      if (reads === 1) return Response.json(initial);
+      if (reads === 4) return Response.json(refreshResponse);
+      return new Promise<Response>((resolve) => pendingReads.push(resolve));
+    });
+    vi.stubGlobal("fetch", fetch);
+    const interval = vi.spyOn(window, "setInterval");
+    render(<RemoteWorkspace />);
+    await screen.findByLabelText("Mi espacio");
+    const poll = interval.mock.calls.find(([, delay]) => delay === 30000)?.[0] as
+      | (() => Promise<void>)
+      | undefined;
+    expect(poll).toBeDefined();
+
+    let first!: Promise<void>;
+    let second!: Promise<void>;
+    await act(async () => {
+      first = poll!();
+      second = poll!();
+      await Promise.resolve();
+    });
+    await waitFor(() => expect(pendingReads).toHaveLength(2));
+
+    const newer = structuredClone(initial);
+    newer.revision = 2;
+    newer.state.companies[0]!.name = "Empresa versión nueva";
+    await act(async () => {
+      pendingReads[1]!(Response.json(newer));
+      await second;
+    });
+    expect(screen.getAllByText("Empresa versión nueva").length).toBeGreaterThan(0);
+
+    const older = structuredClone(initial);
+    older.revision = 1;
+    older.state.companies[0]!.name = "Empresa versión antigua";
+    await act(async () => {
+      pendingReads[0]!(Response.json(older));
+      await first;
+    });
+    expect(screen.queryByText("Empresa versión antigua")).toBeNull();
+    expect(screen.getAllByText("Empresa versión nueva").length).toBeGreaterThan(0);
+
+    fireEvent.click(document.querySelector('[data-nav="team"]')!);
+    fireEvent.change(await screen.findByLabelText("Empresa 1"), { target: { value: "Cambio propio" } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar empresas" }));
+    await waitFor(() => expect(postBody?.state.companies[0]?.name).toBe("Cambio propio"));
+    expect(postBody?.revision).toBe(2);
+    refreshResponse = { ...newer, state: postBody!.state, revision: 3 };
+    await act(async () => {
+      finishPost(Response.json(refreshResponse));
+    });
+    await waitFor(() => expect(screen.getByText(/Guardado en el servidor/)).toBeTruthy());
+  });
+  it("S44: la apertura explícita prevalece sobre un sondeo pendiente y recupera el estado guardado", async () => {
+    const source = prepared("admin");
+    const responseFor = (profileId: string, companyName: string) => {
+      const state = projectState(source, source.profiles.find((profile) => profile.id === profileId)!);
+      state.onboarding[profileId]!.completedAt = new Date().toISOString();
+      state.onboarding[profileId]!.step = 5;
+      state.companies[0]!.name = companyName;
+      return { state, revision: profileId === "e0" ? 7 : 5, isOwner: true, presence: {} };
+    };
+    let resolvePoll!: (response: Response) => void;
+    let reads = 0;
+    const fetch = vi.fn(async (path: unknown) => {
+      const view = new URL(String(path), "https://paris.test").searchParams.get("view") || "admin";
+      reads += 1;
+      if (reads === 1) return Response.json(responseFor("admin", "Empresa inicial"));
+      if (view === "e0") return Response.json(responseFor("e0", "Empresa del perfil abierto"));
+      return new Promise<Response>((resolve) => { resolvePoll = resolve; });
+    });
+    vi.stubGlobal("fetch", fetch);
+    const interval = vi.spyOn(window, "setInterval");
+    render(<RemoteWorkspace />);
+    await screen.findByLabelText("Mi espacio");
+    const poll = interval.mock.calls.find(([, delay]) => delay === 30000)?.[0] as
+      | (() => Promise<void>)
+      | undefined;
+    let polling!: Promise<void>;
+    await act(async () => {
+      polling = poll!();
+      await Promise.resolve();
+    });
+    await waitFor(() => expect(reads).toBe(2));
+
+    fireEvent.change(screen.getByLabelText("Vista de usuario"), { target: { value: "e0" } });
+    await waitFor(() => expect((screen.getByLabelText("Vista de usuario") as HTMLSelectElement).value).toBe("e0"));
+    expect(screen.getAllByText("Empresa del perfil abierto").length).toBeGreaterThan(0);
+    expect(screen.getByText(/Guardado en el servidor/)).toBeTruthy();
+
+    const stale = responseFor("admin", "Respuesta vieja del sondeo");
+    await act(async () => {
+      resolvePoll(Response.json(stale));
+      await polling;
+    });
+    expect(screen.getAllByText("Empresa del perfil abierto").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Respuesta vieja del sondeo")).toBeNull();
+    expect(screen.getByText(/Guardado en el servidor/)).toBeTruthy();
+  });
+  it("S44: conserva la propuesta y permite recuperarla tras desmontar durante la espera del guardado", async () => {
+    const s = prepared("admin");
+    const initial = { state: projectState(s, s.profiles.find((p) => p.id === "admin")!), revision: 0, isOwner: true, presence: {} };
+    const fetch = vi.fn(async () => Response.json(initial));
+    vi.stubGlobal("fetch", fetch);
+    const firstRender = render(<RemoteWorkspace />);
+    await screen.findByLabelText("Mi espacio");
+    fireEvent.click(document.querySelector('[data-nav="team"]')!);
+    fireEvent.change(await screen.findByLabelText("Empresa 1"), { target: { value: "Propuesta conservada" } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar empresas" }));
+    firstRender.unmount();
+    render(<RemoteWorkspace />);
+    expect(await screen.findByRole("button", { name: "Descargar cambio pendiente" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Reintentar guardado" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Descartar cambio y cargar versión guardada" }));
+    await screen.findByLabelText("Mi espacio");
   });
 });

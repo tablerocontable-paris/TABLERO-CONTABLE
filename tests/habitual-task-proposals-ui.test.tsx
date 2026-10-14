@@ -53,6 +53,7 @@ describe("interfaz de propuestas de tareas habituales", () => {
       notify={notify}
     />);
 
+    expect(screen.getByRole("button", { name: "Plegar Propuestas de tareas habituales" }).getAttribute("aria-expanded")).toBe("true");
     expect(screen.getByText("Posible coincidencia · 2")).toBeTruthy();
     expect(screen.getByText(/No se fusionaron nombres, empresas ni asignaciones/)).toBeTruthy();
     const approve = screen.getByRole("button", { name: "Vincular y activar 2 asignaciones" });

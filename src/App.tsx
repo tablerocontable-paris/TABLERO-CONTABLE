@@ -1,7 +1,8 @@
 import NotificationCenter from "./components/NotificationCenter";
 import LaboratoryBackup from "./components/LaboratoryBackup";
 import TaskComments from "./components/TaskComments";
-import { lazy, Suspense, useState, useEffect, type FormEvent } from "react";
+import EmployeePicker from "./components/EmployeePicker";
+import { lazy, Suspense, useState, useEffect, useMemo, useRef, type FormEvent } from "react";
 import JointTaskSetup from "./components/JointTaskSetup";
 import { collectTaskNotifications } from "./domain/notifications";
 import TaskBoard, { orderTasks, type TaskOrder } from "./components/TaskBoard";
@@ -27,6 +28,8 @@ import {
   canWork,
   coverageFor,
   expireCoverageClocks,
+  presenceStatus,
+  canViewPresence,
 } from "./domain/workforce";
 import { enterLab, exitLab, isLab } from "./data/repository";
 import {
@@ -97,18 +100,36 @@ import {
   canSee,
   isClosed,
   materialize,
+  taskReadiness,
   closeMonth,
   csvCell,
 } from "./domain/model";
-import { load, persist, blankOnboarding } from "./data/repository";
+import { classifyCommitStorageFailure, isLaboratoryStateCurrent, load, persist, blankOnboarding, KEY, StaleLaboratoryStateError, type CommitOutcome } from "./data/repository";
 import { Dialog, Panel, Empty, Meter } from "./components/ui";
 import OperationalTaskCard from "./components/OperationalTaskCard";
+import OperationalRatePanel from "./components/OperationalRatePanel";
+import OperationalQualityReview from "./components/OperationalQualityReview";
+import CompanyClosureManager from "./components/CompanyClosureManager";
+import SuggestedRoutePanel from "./components/SuggestedRoutePanel";
 import TimelinessBadge from "./components/TimelinessBadge";
 import TimelinessPanel from "./components/TimelinessPanel";
 import StepListEditor, { parseSteps, validateSteps } from "./components/StepListEditor";
 import { taskTimeliness } from "./domain/timeliness";
 import { closureCsvRows } from "./domain/reports";
-import { applyCompletionAttribution } from "./domain/workCycle";
+import { closedPeriodHistory } from "./domain/closedHistory";
+import type { TaskEvidence } from "./domain/laboratory-work";
+import {
+  activitySnapshotsForLog,
+  canExecuteLab,
+  canAssignLabTask,
+  calendarCanAccessTask,
+  isLabCompanyClosed,
+  isLabTaskLocked,
+  operationalLoad,
+  suggestedRoute,
+  updateTaskWeight,
+} from "./domain/laboratory-work";
+import { applyCompletionAttribution, linkEvidenceToCompletions } from "./domain/workCycle";
 import { currentCatalogueVersion } from "./domain/processImprovement";
 import { submitHabitualTaskProposal } from "./domain/habitualTaskProposals";
 import {
@@ -154,6 +175,11 @@ const Workforce = lazy(() =>
 );
 const Onboarding = lazy(() => import("./components/Onboarding"));
 const Annotations = lazy(() => import("./components/Annotations"));
+const TaskReadinessPanel = lazy(() => import("./components/TaskReadinessPanel"));
+const TaskSchedulePanel = lazy(() => import("./components/TaskSchedulePanel"));
+const CommercialProgressPanel = lazy(() => import("./components/CommercialProgressPanel"));
+const TaskEvidencePanel = lazy(() => import("./components/TaskEvidencePanel"));
+const EvidenceLinks = lazy(() => import("./components/TaskEvidencePanel").then((module) => ({ default: module.EvidenceLinks })));
 
 type Page =
   | "overview"
@@ -205,11 +231,13 @@ const ini = (s: string) =>
     .map((x) => x[0])
     .join("");
 const pct = (n: number | null) => (n === null ? "—" : n + "%");
-const TOUR_VERSION = 4;
-export default function App({initialState, remoteSave, remoteOwner=false, presence={}, onView, laboratoryMode=false}: {laboratoryMode?:boolean;initialState?:State;remoteSave?:(state:State,action?:string,entityId?:string)=>Promise<State>;remoteOwner?:boolean;presence?:Record<string,string>;onView?:(view:string)=>void} = {}) {
+const TOUR_VERSION = 6;
+export default function App({initialState, remoteSave, remoteOwner=false, presence={}, onView, laboratoryMode=false, persistenceUnavailable=false}: {laboratoryMode?:boolean;persistenceUnavailable?:boolean;initialState?:State;remoteSave?:(state:State,action?:string,entityId?:string)=>Promise<State>;remoteOwner?:boolean;presence?:Record<string,string>;onView?:(view:string)=>void} = {}) {
   const [laboratory] = useState(() => laboratoryMode || (remoteSave ? false : isLab()));
   const [state, setState] = useState<State>(() => initialState || load(laboratory));
-  useEffect(()=>{if(initialState)setState(initialState)},[initialState]);
+  const latestStateRef = useRef(state);
+  latestStateRef.current = state;
+  useEffect(()=>{if(initialState){latestStateRef.current=initialState;setState(initialState)}},[initialState]);
   const [tick, setTick] = useState(Date.now());
   const hasRunningClock = state.tasks.some((t) =>
     t.sessions?.some((e) => !e.end),
@@ -236,17 +264,20 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
   const [sector, setSector] = useState("");
   const [team, setTeam] = useState("");
   const [query, setQuery] = useState("");
+  const [catalogSearch, setCatalogSearch] = useState("");
+  const [catalogKind, setCatalogKind] = useState<"all" | "resultado" | "operativa">("all");
+  const [catalogSector, setCatalogSector] = useState("");
   const [quickTaskSearchOpen, setQuickTaskSearchOpen] = useState(false);
   const [taskOrder, setTaskOrder] = useState<TaskOrder>(() => state.boardOrder || "az");
   const [view, setView] = useState<"board" | "list">("board");
   const [group, setGroup] = useState<"individual" | "team" | "sector">(
     "individual",
   );
-  const [historySeries, setHistorySeries] = useState<Array<"weighted" | "onTime">>([
+  const [historySeries, setHistorySeries] = useState<Array<"weighted" | "onTime" | "operationalLoad" | "recordedSeconds">>([
     "weighted",
     "onTime",
   ]);
-  const [distributionBy, setDistributionBy] = useState<"status" | "kind" | "company">("status");
+  const [distributionBy, setDistributionBy] = useState<"status" | "kind" | "company" | "team">("status");
   const [formulaOpen, setFormulaOpen] = useState(false);
   const [modal, setModal] = useState<"new" | "employee" | "close" | null>(null);
   const [noteToTask, setNoteToTask] = useState<Annotation | null>(null);
@@ -254,15 +285,33 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
   const [detail, setDetail] = useState<string | null>(null);
   const [collapsedCards,setCollapsedCards]=useState<Record<string,boolean>>({});
   const [logFor, setLogFor] = useState<string | null>(null);
+  const [activitySaving, setActivitySaving] = useState(false);
+  const activitySubmitLock = useRef(false);
   const [induct, setInduct] = useState(false);
   const [paused, setPaused] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
+  const [tourResetNotice, setTourResetNotice] = useState(false);
+  const tourOpenerRef = useRef<HTMLElement | null>(null);
+  const tourActorRef = useRef("");
+  const tourWasOpenRef = useRef(false);
+  const tourPrimaryRef = useRef<HTMLButtonElement>(null);
   const [notice, setNotice] = useState("");
   const [offline, setOffline] = useState(!navigator.onLine);
   const active = state.profiles.find((p) => p.id === state.activeId)!;
+  const labOnly = laboratory && !remoteSave;
+  const catalogNeedle = catalogSearch.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLocaleLowerCase("es");
+  const catalogEntries = state.templates.filter((template) => {
+    const haystack = `${template.title} ${template.description} ${template.sector} ${template.unit}`.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es");
+    return (!catalogNeedle || haystack.includes(catalogNeedle)) &&
+      (catalogKind === "all" || template.kind === catalogKind) &&
+      (!catalogSector || template.sector === catalogSector);
+  });
+  const taskLocked = (task: Task) => labOnly ? isLabTaskLocked(state, task) : isClosed(state, task);
+  const canExecute = (task: Task) => !labOnly || canExecuteLab(state, active, task);
   const manager = active.role !== "empleado";
-  const people = state.profiles.filter(
-    (p) => p.active && canSee(active, p.id, state.profiles),
+  const people = useMemo(
+    () => state.profiles.filter((p) => p.active && canSee(active, p.id, state.profiles)),
+    [state.profiles, active],
   );
   const nameOf = (pid: string) =>
     state.profiles.find((p) => p.id === pid)?.name || "Sin responsable";
@@ -272,11 +321,13 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
     const selectedTeam = state.teams.find((t) => t.id === teamId);
     return selectedTeam ? `Equipo de ${nameOf(selectedTeam.managerId)}` : "Sin equipo";
   };
+  const personPresence = (profileId: string) => canViewPresence(state, active, profileId)
+    ? presenceStatus(profileId, active.id, labOnly, presence[profileId], tick)
+    : null;
   function notify(s: string) {
     setNotice(s);
   }
   useEffect(() => {
-    if (!laboratory || remoteSave) return;
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
       const editing = target?.isContentEditable || !!target?.closest("input, textarea, select, [contenteditable='true']");
@@ -304,44 +355,113 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
       window.removeEventListener("offline", on);
     };
   }, []);
-  function commit(next: State, action?: string, entityId = "") {
+  function commitAgainstResult(current: State, next: State, action?: string, entityId = ""): CommitOutcome {
+    if (laboratory && persistenceUnavailable) {
+      notify("El almacenamiento local no está disponible. Podés consultar o exportar este estado; las modificaciones quedan deshabilitadas hasta recuperar el almacenamiento.");
+      return { status: "rejected", reason: "storage" };
+    }
+    if (laboratory && !isLaboratoryStateCurrent(current)) {
+      notify("El laboratorio cambió en otra pestaña. Recargá la página antes de guardar para evitar sobrescribir la versión restaurada.");
+      return { status: "rejected", reason: "validation" };
+    }
     if(remoteSave){
+      latestStateRef.current=next;
       setState(next);
-      void remoteSave(next,action,entityId).then(setState).catch((e:Error)=>notify(e.message));
-      return true;
+      void remoteSave(next,action,entityId).then((saved)=>{latestStateRef.current=saved;setState(saved)}).catch((e:Error)=>notify(e.message));
+      return { status: "committed" };
     }
-    if (laboratory) {
-      next = {
-        ...next,
-        tasks: applyCompletionAttribution(state.tasks, next.tasks, active.id),
-      };
-      next = collectTaskNotifications(state, next, active.id);
-    }
-    const s = action
-      ? {
-          ...next,
-          audit: [
-            ...next.audit,
-            {
-              id: id(),
-              at: new Date().toISOString(),
-              actorId: active.id,
-              action,
-              entityId,
-            },
-          ],
-        }
-      : next;
+    let s: State;
     try {
-      persist(s, laboratory);
-      setState(s);
-      return true;
+      if (laboratory) {
+        const previousTasks = current.tasks;
+        const attributedTasks = applyCompletionAttribution(previousTasks, next.tasks, current.activeId);
+        next = {
+          ...next,
+          tasks: attributedTasks,
+          taskEvidence: linkEvidenceToCompletions(previousTasks, attributedTasks, next.taskEvidence || []),
+        };
+        next = collectTaskNotifications(current, next, current.activeId);
+      }
+      s = action
+        ? {
+            ...next,
+            audit: [
+              ...next.audit,
+              {
+                id: id(),
+                at: new Date().toISOString(),
+                actorId: current.activeId,
+                action,
+                entityId,
+              },
+            ],
+          }
+        : next;
+      if (laboratory) s.labRevision = id();
     } catch {
+      notify("No se pudo preparar el cambio. El estado y los archivos siguen sin vincularse; podés volver a intentar.");
+      return { status: "rejected", reason: "preparation" };
+    }
+    const storageKey = laboratory ? "paris-state-lab" : KEY;
+    let previousRaw: string | null = null;
+    let previousRead = false;
+    try { previousRaw = localStorage.getItem(storageKey); previousRead = true; }
+    catch { /* A successful write can still be confirmed from the stored candidate. */ }
+    let expected: string;
+    try { expected = JSON.stringify(s); }
+    catch {
       notify(
         "No se pudo guardar. Liberá espacio del navegador y volvé a intentar.",
       );
-      return false;
+      return { status: "rejected", reason: "storage" };
     }
+    try { persist(s, laboratory, current.labRevision); }
+    catch (error) {
+      if (laboratory && error instanceof StaleLaboratoryStateError) {
+        notify("El laboratorio cambió en otra pestaña. Recargá la página antes de guardar para evitar sobrescribir la versión actual.");
+        return { status: "rejected", reason: "validation" };
+      }
+      let actual: string | null | undefined;
+      let actualRead = false;
+      try { actual = localStorage.getItem(storageKey); actualRead = true; }
+      catch { /* Keep attached files if storage cannot establish the outcome. */ }
+      const outcome = classifyCommitStorageFailure({ expected, previousRaw, previousRead, actualRaw: actual, actualRead });
+      if (outcome.status === "committed") {
+          latestStateRef.current = s;
+          setState(s);
+          return outcome;
+      }
+      if (outcome.status === "rejected") {
+        notify("No se pudo guardar. Liberá espacio del navegador y volvé a intentar.");
+        return { ...outcome, reason: "storage" };
+      }
+      notify("No se pudo confirmar el resultado del guardado. Revisá el trabajo antes de volver a intentar.");
+      return outcome;
+    }
+    latestStateRef.current = s;
+    setState(s);
+    return { status: "committed" };
+  }
+  function commitAgainst(current: State, next: State, action?: string, entityId = "") {
+    return commitAgainstResult(current, next, action, entityId).status === "committed";
+  }
+  function commit(next: State, action?: string, entityId = "") {
+    return commitAgainst(latestStateRef.current, next, action, entityId);
+  }
+  function commitLatest(update: (current: State) => State | null, action?: string, entityId = "") {
+    const current = latestStateRef.current;
+    const next = update(current);
+    return next ? commitAgainst(current, next, action, entityId) : false;
+  }
+  function commitLatestWithResult(update: (current: State) => State | null, action?: string, entityId = ""): CommitOutcome {
+    const current = latestStateRef.current;
+    let next: State | null;
+    try { next = update(current); }
+    catch {
+      notify("No se pudo validar el cambio. No se guardó y podés volver a intentar.");
+      return { status: "rejected", reason: "preparation" };
+    }
+    return next ? commitAgainstResult(current, next, action, entityId) : { status: "rejected", reason: "validation" };
   }
   function saveAnnotation(
     input: Pick<Annotation, "id" | "title" | "content" | "kind" | "category" | "reminderOn">,
@@ -388,16 +508,19 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
     return false;
   }
   function createRequest(input: Omit<InternalRequest, "id" | "createdAt" | "updatedAt" | "messages" | "history">) {
-    if (!laboratory || remoteSave) return;
+    if (!laboratory || remoteSave) return false;
     try {
       const available = internalRequestRecipients(state, active, input.kind).some((target) => target.id === input.recipientId);
       if (!available) throw new Error("El destino seleccionado ya no está disponible.");
       const request = createInternalRequest({ ...input, now: new Date().toISOString(), makeId: id });
       if (commit({ ...state, internalRequests: [...(state.internalRequests || []), request] }, "Creó una consulta o pedido", request.id)) {
         notify("Pedido registrado en el laboratorio.");
+        return true;
       }
+      return false;
     } catch (error) {
       notify(error instanceof Error ? error.message : "No se pudo registrar el pedido.");
+      return false;
     }
   }
   function updateRequestStatus(requestId: string, status: InternalRequestStatus) {
@@ -412,14 +535,16 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
     }
   }
   function replyRequest(requestId: string, body: string) {
-    if (!laboratory || remoteSave) return;
+    if (!laboratory || remoteSave) return false;
     const request = state.internalRequests?.find((entry) => entry.id === requestId);
-    if (!request) return;
+    if (!request) return false;
     try {
       const updated = replyToInternalRequest(request, active, body, new Date().toISOString(), id);
-      commit({ ...state, internalRequests: state.internalRequests!.map((entry) => entry.id === requestId ? updated : entry) }, "Respondió una consulta interna", requestId);
+      if (commit({ ...state, internalRequests: state.internalRequests!.map((entry) => entry.id === requestId ? updated : entry) }, "Respondió una consulta interna", requestId)) return true;
+      return false;
     } catch (error) {
       notify(error instanceof Error ? error.message : "No se pudo responder el pedido.");
+      return false;
     }
   }
   function convertRequestToTask(request: InternalRequest) {
@@ -435,7 +560,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
   }
   function openRequestTask(taskId: string) {
     const task = state.tasks.find((entry) => entry.id === taskId);
-    if (!task || !canWork(state, active, task)) {
+    if (!task || (labOnly ? !calendarCanAccessTask(state, active, task) : !canWork(state, active, task))) {
       notify("La tarea vinculada no está disponible en tu ámbito.");
       return;
     }
@@ -472,20 +597,23 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
     const next = materialize(state, month);
     if (next.tasks.length !== state.tasks.length) commit(next);
   }, [month]);
-  const monthTasks = state.tasks.filter(
-    (t) => t.month === month && canWork(state, active, t),
+  const monthTasks = useMemo(
+    () => state.tasks.filter(
+      (t) => t.month === month && (labOnly ? calendarCanAccessTask(state, active, t) : canWork(state, active, t)),
+    ),
+    [state, month, labOnly, active],
   );
-  const ownBoardPages: Page[] = ["day", "tasks", "operations", "calendar"];
+  const isOwnBoardPage = page === "day" || page === "tasks" || page === "operations" || page === "calendar";
   const viewedOwner = boardOwner || active.id;
   const personalOverview = page === "overview" && active.role === "empleado";
-  const profileScopedPage = ownBoardPages.includes(page) || personalOverview;
+  const profileScopedPage = isOwnBoardPage || personalOverview;
   const ownerFilter = profileScopedPage ? viewedOwner : owner;
-  const filtered = monthTasks.filter(
+  const filtered = useMemo(() => monthTasks.filter(
     (t) =>
       (!company || t.companyId === company) &&
       (!ownerFilter ||
         isResponsible(t, ownerFilter) ||
-        (ownBoardPages.includes(page) && viewedOwner === active.id &&
+        (isOwnBoardPage && viewedOwner === active.id &&
           coverageFor(state, t)?.replacementId === active.id)) &&
       (!sector || t.sector === sector) &&
       (!team || t.teamId === team) &&
@@ -493,13 +621,41 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
         `${t.title} ${nameOf(t.ownerId)} ${companyOf(t.companyId)}`
           .toLowerCase()
           .includes(query.toLowerCase())),
-  );
-  const metricAsOf = new Date().toISOString();
-  const m = profileScopedPage
-    ? metricsForProfile(filtered, state.activity, viewedOwner, dateART(metricAsOf), metricAsOf)
-    : metrics(filtered, state.activity, dateART(metricAsOf), metricAsOf);
-  const resultTasks = filtered.filter((t) => t.kind === "resultado");
-  const operations = filtered.filter((t) => t.kind === "operativa");
+  ), [monthTasks, company, ownerFilter, isOwnBoardPage, viewedOwner, active, sector, team, query, state]);
+  const summaryOwnerFilter = active.role === "empleado" ? viewedOwner : owner;
+  const summaryFiltered = useMemo(() => monthTasks.filter(
+    (t) =>
+      (!company || t.companyId === company) &&
+      (!summaryOwnerFilter || isResponsible(t, summaryOwnerFilter)) &&
+      (!sector || t.sector === sector) &&
+      (!team || t.teamId === team) &&
+      (!query || `${t.title} ${nameOf(t.ownerId)} ${companyOf(t.companyId)}`.toLowerCase().includes(query.toLowerCase())),
+  ), [monthTasks, company, summaryOwnerFilter, sector, team, query, state]);
+  const metricDay = dateART();
+  const metricAsOf = useMemo(() => new Date().toISOString(), [state.tasks, state.activity, metricDay]);
+  const metricTasks = useMemo(() => labOnly ? filtered.filter((task) => task.kind === "resultado") : filtered, [labOnly, filtered]);
+  const summaryMetricTasks = useMemo(() => labOnly ? summaryFiltered.filter((task) => task.kind === "resultado") : summaryFiltered, [labOnly, summaryFiltered]);
+  const m = useMemo(() => {
+    if (page !== "overview" && page !== "analytics" && page !== "day") return metrics([], state.activity, metricDay, metricAsOf);
+    return profileScopedPage
+      ? metricsForProfile(metricTasks, state.activity, viewedOwner, metricDay, metricAsOf)
+      : metrics(summaryMetricTasks, state.activity, metricDay, metricAsOf);
+  }, [page, profileScopedPage, metricTasks, summaryMetricTasks, state.activity, viewedOwner, metricDay, metricAsOf]);
+  const resultTasks = useMemo(() => filtered.filter((t) => t.kind === "resultado"), [filtered]);
+  const operations = useMemo(() => filtered.filter((t) => t.kind === "operativa"), [filtered]);
+  const operationalSummary = useMemo(() => labOnly ? operationalLoad(state, operations.map((task) => task.id), profileScopedPage ? viewedOwner : undefined, metricAsOf) : null, [labOnly, state, operations, profileScopedPage, viewedOwner, metricAsOf]);
+  const operationalUnits = [...new Set(operations.map((task) => task.unit || "movimientos"))]
+    .map((unit) => {
+      const ids = operations.filter((task) => (task.unit || "movimientos") === unit).map((task) => task.id);
+      const quantity = operationalLoad(state, ids, profileScopedPage ? viewedOwner : undefined, metricAsOf).quantity;
+      return quantity ? `${quantity.toLocaleString("es-AR")} ${unit}` : null;
+    })
+    .filter((value): value is string => !!value)
+    .join(" · ") || "Sin movimientos registrados";
+  const operationAssessments = useMemo(() => (state.operationalAssessments || []).filter((assessment) => operations.some((task) => task.id === assessment.taskId)), [state.operationalAssessments, operations]);
+  const operationQuality = (key: "quality" | "order" | "timeliness") => operationAssessments.length
+    ? Math.round(operationAssessments.reduce((sum, assessment) => sum + assessment[key], 0) / operationAssessments.length)
+    : null;
   const coverageTasks = viewedOwner === active.id
     ? filtered.filter((t) => t.ownerId !== active.id && !isResponsible(t, active.id) && coverageFor(state, t)?.replacementId === active.id)
     : [];
@@ -531,16 +687,22 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
     try {
       if (!canWork(state, active, t))
         throw Error("Esta tarea está fuera de tu ámbito.");
-      if (isClosed(state, t))
+      if (taskLocked(t))
         throw Error("El mes está cerrado y conserva su historial.");
+      if (!canExecute(t)) throw Error("Podés consultar esta tarea, pero sólo su responsable o cobertura autorizada puede ejecutarla.");
       let next = fn(t);
       if (next === t) return;
+      const readiness = taskReadiness(state, t, undefined, active);
+      const startsOrFinishes = next.status !== t.status && (next.status === "En curso" || next.status === "Completada");
+      const changesChecklist = next.checklist !== t.checklist;
+      if ((startsOrFinishes || changesChecklist) && !readiness.ready)
+        throw Error(readiness.reason);
       if (
         next.status === "En curso" &&
         t.status !== "En curso" &&
         !next.blockedBy
       )
-        next = startClock(next, active.id);
+        next = startClock(next, active.id, new Date().toISOString(), state);
       if (next.blockedBy) next = stopClock(next);
       const running = next.sessions?.some(
         (e) => !e.end && e.actorId === active.id,
@@ -566,6 +728,9 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
   }
   function clock(t: Task, running: boolean) {
     try {
+      if (taskLocked(t)) throw Error("La unidad empresa/persona ya está cerrada.");
+      if (!canExecute(t)) throw Error("Sólo su responsable, participante o reemplazo autorizado puede usar el cronómetro.");
+      if (running && !taskReadiness(state, t, undefined, active).ready) throw Error(taskReadiness(state, t, undefined, active).reason);
       commit(
         applyClock(state, t.id, active.id, running),
         running ? "Inició cronómetro" : "Pausó cronómetro",
@@ -575,7 +740,15 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
       notify((e as Error).message);
     }
   }
-  function advance(t: Task) {
+  function advance(t: Task, commercialConfirmed = false) {
+    const completingCommercial = t.commercialTrackingEnabled && t.status === "En curso";
+    if (completingCommercial && !commercialConfirmed) {
+      if (t.commercialProgress?.throughDay !== 30 || t.checklist.some((check) => !check.done)) {
+        notify("Para cerrar esta conciliación, registrá el día comercial 30 y completá todos los controles.");
+        return;
+      }
+      if (!window.confirm("¿Confirmás que esta conciliación está completa hasta el día comercial 30 y que todos sus controles están verificados?")) return;
+    }
     mutateTask(
       t,
       (x) =>
@@ -590,20 +763,31 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
       "Cambió estado",
     );
   }
-  function moveBoardTask(taskId: string, nextStatus: Status, beforeTaskId?: string) {
+  function moveBoardTask(taskId: string, nextStatus: Status, beforeTaskId?: string): boolean {
     const task = state.tasks.find(t => t.id === taskId);
-    if (!laboratory || !task || task.kind !== "resultado") return;
+    if (!laboratory || !task || task.kind !== "resultado") return false;
     if (task.blockedBy && nextStatus === "En curso") {
       notify("Liberá la espera externa antes de iniciar esta tarea.");
-      return;
+      return false;
     }
     try {
       if (!canWork(state, active, task)) throw Error("Esta tarea está fuera de tu ámbito.");
-      if (isClosed(state, task)) throw Error("El mes está cerrado y conserva su historial.");
+      if (taskLocked(task)) throw Error("El mes está cerrado y conserva su historial.");
+      if (!canExecute(task)) throw Error("Sólo el responsable o cobertura autorizada puede mover la tarjeta.");
+      if (task.commercialTrackingEnabled && nextStatus === "Completada" && task.status !== "Completada") {
+        if (task.commercialProgress?.throughDay !== 30 || task.checklist.some((check) => !check.done)) {
+          throw Error("Para cerrar esta conciliación, registrá el día comercial 30 y completá todos los controles.");
+        }
+        if (!window.confirm("¿Confirmás que esta conciliación está completa hasta el día comercial 30 y que todos sus controles están verificados?")) return false;
+      }
+      if ((nextStatus === "En curso" || nextStatus === "Completada") && nextStatus !== task.status) {
+        const readiness = taskReadiness(state, task, undefined, active);
+        if (!readiness.ready) throw Error(readiness.reason);
+      }
       if (task.responsibility && nextStatus === "Pendiente" && task.sessions?.some((session) => !session.end && session.actorId !== active.id))
         throw Error("La tarea compartida tiene el reloj del compañero activo. No podés devolverla a Pendiente mientras sigue trabajando.");
       let moved = nextStatus === task.status ? task : transition(task, nextStatus);
-      if (nextStatus === "En curso" && task.status !== "En curso") moved = startClock(moved, active.id);
+      if (nextStatus === "En curso" && task.status !== "En curso") moved = startClock(moved, active.id, new Date().toISOString(), state);
       const tasks = state.tasks.filter(row => row.id !== taskId);
       let insertAt = beforeTaskId ? tasks.findIndex(row => row.id === beforeTaskId) : -1;
       if (insertAt < 0) {
@@ -616,9 +800,10 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
       const stopsOtherClock = moved.sessions?.some(session => !session.end && session.actorId === active.id);
       const orderedTasks = stopsOtherClock ? tasks.map(row => row.id === taskId ? moved : row.sessions?.some(session => !session.end && session.actorId === active.id) ? stopActorClock(row, active.id) : row) : tasks;
       setTaskOrder("original");
-      commit({ ...state, boardOrder: "original", tasks: orderedTasks }, nextStatus === task.status ? undefined : "Movió tarea a " + nextStatus, taskId);
+      return commit({ ...state, boardOrder: "original", tasks: orderedTasks }, nextStatus === task.status ? undefined : "Movió tarea a " + nextStatus, taskId);
     } catch (error) {
       notify((error as Error).message);
+      return false;
     }
   }
   function download(rows: unknown[][], filename: string) {
@@ -635,33 +820,36 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
   }
   const draft = state.onboarding[active.id] || blankOnboarding(active.name);
   function finishOnboarding() {
+    const preparesPersonalTasks = active.role !== "jefe";
     try {
-      for (const schedule of Object.values(draft.schedules || {}))
-        validateSchedule(schedule);
-      for (const schedules of Object.values(draft.companySchedules || {}))
-        for (const schedule of Object.values(schedules)) validateSchedule(schedule);
-      for (const targets of Object.values(draft.companyTargets || {}))
-        for (const target of Object.values(targets))
-          if (!Number.isFinite(target) || target < 0) throw Error("Las metas por empresa deben ser números válidos.");
-      for (const task of draft.customTasks || [])
-        validateSteps(task.steps.split(/\r?\n/));
-      if (draft.customTitle.trim())
-        validateSteps(String(draft.customSteps || "").split(/\r?\n/));
-      const customIds = [
-        ...(draft.customTasks || []).map((t) => t.id),
-        "custom",
-      ];
-      if (
-        customIds.some(
-          (key) =>
-            [draft.schedules?.[key], ...Object.values(draft.companySchedules?.[key] || {})]
-              .filter((schedule): schedule is Schedule => !!schedule)
-              .some((schedule) => schedule.frequency !== "única"),
+      if (preparesPersonalTasks) {
+        for (const schedule of Object.values(draft.schedules || {}))
+          validateSchedule(schedule);
+        for (const schedules of Object.values(draft.companySchedules || {}))
+          for (const schedule of Object.values(schedules)) validateSchedule(schedule);
+        for (const targets of Object.values(draft.companyTargets || {}))
+          for (const target of Object.values(targets))
+            if (!Number.isFinite(target) || target < 0) throw Error("Las metas por empresa deben ser números válidos.");
+        for (const task of draft.customTasks || [])
+          validateSteps(task.steps.split(/\r?\n/));
+        if (draft.customTitle.trim())
+          validateSteps(String(draft.customSteps || "").split(/\r?\n/));
+        const customIds = [
+          ...(draft.customTasks || []).map((t) => t.id),
+          "custom",
+        ];
+        if (
+          customIds.some(
+            (key) =>
+              [draft.schedules?.[key], ...Object.values(draft.companySchedules?.[key] || {})]
+                .filter((schedule): schedule is Schedule => !!schedule)
+                .some((schedule) => schedule.frequency !== "única"),
+          )
         )
-      )
-        throw Error(
-          "Los trabajos particulares son puntuales. Para repetirlos, Juan Pablo debe incorporar el proceso al catálogo.",
-        );
+          throw Error(
+            "Los trabajos particulares son puntuales. Para repetirlos, Juan Pablo debe incorporar el proceso al catálogo.",
+          );
+      }
     } catch (e) {
       notify((e as Error).message);
       return;
@@ -672,7 +860,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
       draft.schedules?.[taskId] || defaultSchedule(month + "-25");
     const targetForCompany = (taskId: string, companyId: string, fallback: number) =>
       laboratory && !remoteSave ? (draft.companyTargets?.[taskId]?.[companyId] ?? fallback) : fallback;
-    for (const cid of draft.selectedCompanyIds) {
+    for (const cid of preparesPersonalTasks ? draft.selectedCompanyIds : []) {
       for (const tid of draft.selectedTemplateIds) {
         if (
           !(
@@ -693,7 +881,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           kind: t.kind,
           weight: t.weight,
           unit: t.unit,
-          target: targetForCompany(tid, cid, t.target),
+          target: laboratory && !remoteSave && t.kind === "operativa" ? 0 : targetForCompany(tid, cid, t.target),
           day: draft.day,
           frequency: draft.frequency,
           steps: t.steps,
@@ -735,7 +923,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           kind: c.kind,
           weight: 1,
           unit: c.unit,
-          target: targetForCompany(c.id, cid, c.target),
+          target: laboratory && !remoteSave && c.kind === "operativa" ? 0 : targetForCompany(c.id, cid, c.target),
           day: draft.day,
           frequency: draft.frequency,
           steps: c.steps
@@ -749,7 +937,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
       }
     }
     let habitualTaskProposals = [...(state.habitualTaskProposals || [])];
-    if (laboratory && !remoteSave) {
+    if (laboratory && !remoteSave && preparesPersonalTasks) {
       try {
         const now = new Date().toISOString();
         for (const proposal of draft.habitualTaskProposals || []) {
@@ -790,11 +978,23 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
         ...state.onboarding,
         [active.id]: {
           ...draft,
+          ...(preparesPersonalTasks ? {} : {
+            selectedTemplateIds: [],
+            assignmentCompanyIds: {},
+            schedules: {},
+            companySchedules: {},
+            companyTargets: {},
+            customTitle: "",
+            customSteps: "",
+            customTasks: [],
+            habitualTaskProposals: [],
+          }),
           completedAt: new Date().toISOString(),
           step: 5,
         },
       },
       tour: { ...state.tour, [active.id]: 0 },
+      tourStepId: { ...state.tourStepId, [active.id]: "day-route" },
       tourVersion: { ...state.tourVersion, [active.id]: TOUR_VERSION },
     };
     next = materialize(next, month);
@@ -802,35 +1002,39 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
       setInduct(false);
       setPage("day");
       setOwner(active.id);
+      tourOpenerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      tourActorRef.current = active.id;
       setTourOpen(true);
     }
   }
-  const tours: { page: Page; selector: string; title: string; text: string }[] = [
-    { page: "day", selector: ".heading", title: "Tu punto de partida", text: "Mi día reúne prioridades y vencimientos del perfil consultado para empezar el período." },
-    { page: "day", selector: ".sidebar-workspace", title: "Elegí el ambiente", text: "Filtrá las empresas autorizadas. La misma conciliación en dos empresas conserva estados independientes." },
-    { page: "tasks", selector: ".board-owner-filter", title: "Elegí el perfil", text: active.role === "empleado" ? "Este es tu espacio personal. El encargado y Juan Pablo consultan otros perfiles desde su selector." : "Tu tablero abre con tus tareas. Podés consultar a una persona autorizada sin cambiar quién realiza las acciones." },
-    { page: "tasks", selector: ".task-order", title: "Ordená el tablero", text: "Plegá cada estado por separado y ordená por nombre para encontrar una tarjeta rápido." },
-    { page: "tasks", selector: '[data-tour="task-actions"]', title: "Cargá una tarea", text: "Elegí una tarea puntual o un proceso del catálogo; revisá su empresa, frecuencia y vencimiento." },
-    { page: "tasks", selector: '[data-tour="task-timers"]', title: "Medí el tiempo", text: "Iniciá, pausá o reanudá el cronómetro desde la tarjeta. El tiempo queda asociado a quien acciona." },
-    { page: "tasks", selector: '[data-tour="task-controls"]', title: "Avanzá los controles", text: "Abrí la tarjeta y completá cada paso. El último control mueve el entregable a terminado automáticamente." },
-    { page: "operations", selector: '[data-nav="operations"]', title: "Cargá la actividad", text: "Registrá cantidades y referencias de facturas, trámites o pagos para el cierre del período." },
-    { page: "calendar", selector: '[data-nav="calendar"]', title: "Revisá las fechas", text: "Consultá los vencimientos de las tareas del período y atendé primero lo próximo." },
-    { page: "absences", selector: '[data-nav="absences"]', title: "Coordiná cobertura", text: "Registrá vacaciones o licencias y organizá con el encargado quién cubre las tareas abiertas." },
-    { page: "annotations", selector: '[data-nav="annotations"]', title: "Guardá referencias", text: "Conservá fórmulas y recordatorios personales. Convertí una anotación en una tarea puntual si necesitás seguimiento." },
+  const tours: { id: string; page: Page; selector: string; fallbackSelector?: string; title: string; text: string }[] = [
+    { id: "day-route", page: "day", selector: '[data-tour="day-route"]', fallbackSelector: '[data-tour="day-overview"]', title: "Tu jornada", text: "Revisá tus prioridades y pendientes. Cuando está disponible, la hoja de ruta explica qué tareas están habilitadas y cuáles esperan una dependencia; la sugerencia no inicia tareas ni cronómetros." },
+    { id: "board-movement", page: "tasks", selector: '[data-tour="board-movement"]', title: "Organizá y mové el tablero", text: "Mové una tarjeta con arrastre o Alt y las flechas. La sugerencia de orden no reemplaza tus decisiones; sólo responsables o coberturas vigentes pueden ejecutar." },
+    { id: "board-checks", page: "tasks", selector: '[data-tour="task-controls"]', fallbackSelector: '[data-tour="task-column-open"], [data-tour="task-column-empty"]', title: "Controles y evidencia", text: "Abrí una columna con tareas y desplegá la tarjeta para revisar controles y evidencia opcional. Si no hay tarjetas visibles, el tablero muestra columnas vacías; el recorrido no crea tareas de ejemplo." },
+    { id: "board-timer", page: "tasks", selector: '[data-tour="task-timers"]', fallbackSelector: '[data-tour="task-column-open"], [data-tour="task-column-empty"]', title: "Tiempo registrado", text: "El cronómetro de una tarjeta conserva quién lo inició; consultar el trabajo de otra persona no cambia el actor. Abrí una columna con tareas para llegar al control." },
+    { id: "operations-movements", page: "operations", selector: '[data-tour="operations-movements"]', title: "Movimientos operativos", text: "Registrá cantidad y unidad por movimiento. La referencia y evidencia son opcionales; no hay una meta mensual que completar." },
+    { id: "calendar-agenda", page: "calendar", selector: '[data-tour="calendar-day-detail"]', fallbackSelector: '[data-tour="calendar-grid"], [data-tour="calendar-agenda-basic"]', title: "Calendario y agenda", text: "Elegí un día y revisá su agenda; las tareas y obligaciones se abren desde su módulo de origen. Las fechas compartidas no amplían permisos sobre el trabajo vinculado." },
+    { id: "absence-coverage", page: "absences", selector: '[data-tour="absence-coverage"]', title: "Ausencias y cobertura", text: "Consultá los intervalos y la cobertura autorizada. Las observaciones privadas no se exponen a quienes revisan disponibilidad." },
+    { id: "private-annotations", page: "annotations", selector: '[data-tour="annotations-create-action"]', fallbackSelector: '[data-tour="private-annotations"]', title: "Anotaciones personales", text: "Esta acción abre el formulario de tu biblioteca personal. Podés buscar y filtrar tus notas; el recorrido no lee ni muestra su contenido." },
+    { id: "planning-rules", page: "planning", selector: '[data-tour="planning-list"]', fallbackSelector: '[data-tour="planning-empty"]', title: "Planificación y reglas", text: "Consultá reglas vigentes y sus instancias; la jefatura puede reprogramar con una nueva vigencia, sin reescribir el trabajo anterior." },
+    ...(labOnly ? [
+      { id: "requests-followup", page: "requests" as Page, selector: '[data-tour="requests-list"]', fallbackSelector: '[data-tour="requests-empty"]', title: "Consultas y pedidos", text: "Revisá la bandeja de seguimiento. La acción Nuevo pedido abre el formulario cuando quieras usarlo; sólo roles autorizados convierten pedidos en trabajo." },
+      { id: "process-quality", page: "quality" as Page, selector: '[data-tour="quality-kaizen-content"]', fallbackSelector: '[data-tour="quality-kaizen-action"]', title: "Mejora de procesos", text: "Consultá propuestas y su estado de revisión. La acción de propuesta inicia una carga sólo si la elegís; el recorrido no crea ni revisa casos." },
+    ] : []),
     ...(manager ? [
-      { page: "analytics" as Page, selector: '[data-nav="analytics"]', title: "Analizá resultados", text: "Compará cumplimiento, tiempos y pesos por persona, equipo o sector." },
-      { page: "team" as Page, selector: '[data-nav="team"]', title: "Acompañá a tu equipo", text: "La relación jerárquica define los perfiles que podés consultar." },
-      { page: "closing" as Page, selector: '[data-nav="closing"]', title: "Revisá el período", text: "El cierre mensual consolida la actividad de cada persona para revisión." },
+      { id: "analytics-series", page: "analytics" as Page, selector: '[data-tour="analytics-distribution"]', fallbackSelector: '[data-tour="analytics-series"]', title: "Análisis y series", text: "Elegí la distribución por estado, tipo, empresa o equipo, y las series compatibles bajo el gráfico. Los bloques de detalle se despliegan cuando los necesitás; “Sin base” es distinto de cero." },
+      { id: "team-consultation", page: "team" as Page, selector: '[data-tour="team-consultation"]', fallbackSelector: ".org-root", title: "Organigrama y consulta", text: "Abrí las tareas de una persona desde su equipo sin cambiar quién actúa. La presencia de esta demostración es simulada y no incluye notas personales." },
     ] : []),
     ...(active.role === "jefe" ? [
-      { page: "catalog" as Page, selector: '[data-nav="catalog"]', title: "Estandarizá procesos", text: "Configurá controles y pesos comunes para las tareas habituales." },
-      { page: "team" as Page, selector: '[data-nav="team"]', title: "Administrá perfiles", text: "Configurá accesos, responsables, equipos y empresas del organigrama." },
+      { id: "monthly-close", page: "closing" as Page, selector: '[data-tour="closure-preview"]', fallbackSelector: '[data-tour="monthly-close-basic"]', title: "Cierre de mes", text: "Revisá el alcance elegido y la vista previa de unidades listas o pendientes. La confirmación exige volver a verificar; el recorrido nunca cierra unidades." },
+      { id: "task-catalogue", page: "catalog" as Page, selector: '[data-tour="catalogue-row"]', fallbackSelector: '[data-tour="task-catalogue"]', title: "Catálogo y versiones", text: "Buscá una fila compacta y desplegá la tarea para consultar configuración e historial versionado. La jefatura administra los cambios según su vigencia." },
     ] : []),
   ];
-  const savedTourValue =
-    state.tourVersion?.[active.id] === TOUR_VERSION
-      ? state.tour[active.id] || 0
-      : 0;
+  const storedTourId = state.tourVersion?.[active.id] === TOUR_VERSION ? state.tourStepId?.[active.id] : undefined;
+  const storedTourIndex = storedTourId === "__complete__" ? tours.length : tours.findIndex((step) => step.id === storedTourId);
+  const savedTourValue = state.tourVersion?.[active.id] === TOUR_VERSION
+    ? storedTourId ? Math.max(0, storedTourIndex) : state.tour[active.id] || 0
+    : 0;
   const savedTour = Number.isSafeInteger(savedTourValue)
     ? Math.min(Math.max(savedTourValue, 0), tours.length)
     : 0;
@@ -838,11 +1042,63 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
     ? Math.min(Math.max(savedTour, 0), tours.length - 1)
     : 0;
   const [tourFallback, setTourFallback] = useState(false);
+  const [tourPosition, setTourPosition] = useState<{ top: number; left: number } | null>(null);
+  const tourDialog = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (tourOpen) {
+      tourWasOpenRef.current = true;
+      return;
+    }
+    if (!tourWasOpenRef.current) return;
+    tourWasOpenRef.current = false;
+    const frame = requestAnimationFrame(() => {
+      const source = tourActorRef.current === active.id ? tourOpenerRef.current : null;
+      const visible = (node: HTMLElement | null): node is HTMLElement => {
+        if (!node?.isConnected || node.matches(":disabled") || node.closest("[hidden]")) return false;
+        for (let current: HTMLElement | null = node; current; current = current.parentElement) {
+          const style = getComputedStyle(current);
+          if (style.display === "none" || style.visibility === "hidden") return false;
+        }
+        return true;
+      };
+      const fallback = document.querySelector<HTMLElement>('[data-tour-trigger="true"]');
+      const target = visible(source) ? source : fallback;
+      if (visible(target)) target.focus();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [tourOpen, active.id]);
   useEffect(() => {
     let highlighted: Element | null = null;
+    let scrolledTarget: Element | null = null;
     let observer: MutationObserver | undefined;
+    const automaticToggles: { button: HTMLButtonElement; wasExpanded: boolean; changedByUser: boolean }[] = [];
+    const automaticDetails: { details: HTMLDetailsElement; wasOpen: boolean; changedByUser: boolean }[] = [];
+    const automaticButtons = new WeakSet<HTMLButtonElement>();
+    const openAutomatically = (button: HTMLButtonElement) => {
+      if (automaticToggles.some((entry) => entry.button === button)) return;
+      const wasExpanded = button.getAttribute("aria-expanded") === "true";
+      automaticToggles.push({ button, wasExpanded, changedByUser: false });
+      automaticButtons.add(button);
+      button.click();
+      automaticButtons.delete(button);
+    };
+    const markManualToggle = (event: Event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const button = target.closest<HTMLButtonElement>(".panel-collapse, .card-collapse, .column-toggle");
+      if (button && !automaticButtons.has(button)) {
+        const entry = automaticToggles.find((item) => item.button === button);
+        if (entry) entry.changedByUser = true;
+      }
+      const details = target.closest<HTMLDetailsElement>("details");
+      if (details) {
+        const entry = automaticDetails.find((item) => item.details === details);
+        if (entry) entry.changedByUser = true;
+      }
+    };
     const isVisible = (element: HTMLElement) => {
       for (let node: HTMLElement | null = element; node; node = node.parentElement) {
+        if (node.hidden) return false;
         const style = getComputedStyle(node);
         if (style.display === "none" || style.visibility === "hidden") return false;
       }
@@ -853,18 +1109,59 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
       highlighted = null;
       let fallback = false;
       if (tourOpen && page === tours[tourStep].page) {
-        const candidates = Array.from(
-          document.querySelectorAll<HTMLElement>(tours[tourStep].selector),
-        );
-        const target = candidates.find(
-          (candidate) =>
-            !candidate.closest("[hidden], .column.folded") &&
-            !candidate.matches(":disabled") &&
-            isVisible(candidate),
-        );
-        highlighted = target || document.querySelector(".heading");
-        fallback = !target && tours[tourStep].selector !== ".heading";
+        const step = tours[tourStep];
+        const candidates = Array.from(document.querySelectorAll<HTMLElement>(step.selector));
+        const candidate = candidates.find((item) => !item.matches(":disabled"));
+        const closedDetails: HTMLDetailsElement[] = [];
+        for (let node = candidate || null; node; node = node.parentElement) {
+          if (node instanceof HTMLDetailsElement && !node.open) closedDetails.unshift(node);
+        }
+        const nextDetails = closedDetails[0];
+        if (nextDetails) {
+          if (!automaticDetails.some((entry) => entry.details === nextDetails)) automaticDetails.push({ details: nextDetails, wasOpen: nextDetails.open, changedByUser: false });
+          nextDetails.open = true;
+          return;
+        }
+        const hiddenPanel = candidate?.closest<HTMLElement>(".panel-body[hidden]");
+        const panelToggle = hiddenPanel?.parentElement?.querySelector<HTMLButtonElement>(":scope > .panel-head .panel-collapse");
+        if (panelToggle && panelToggle.getAttribute("aria-expanded") !== "true") {
+          openAutomatically(panelToggle);
+          return;
+        }
+        const card = candidate?.closest<HTMLElement>(".task-card");
+        const hiddenCardBody = candidate?.closest<HTMLElement>(".task-card [hidden]");
+        const cardToggle = hiddenCardBody ? card?.querySelector<HTMLButtonElement>(".card-collapse") : null;
+        if (cardToggle && cardToggle.getAttribute("aria-expanded") !== "true") {
+          openAutomatically(cardToggle);
+          return;
+        }
+        let target = candidates.find((item) => isVisible(item) && !item.closest(".column.folded"));
+        if (!target && step.fallbackSelector) {
+          target = Array.from(document.querySelectorAll<HTMLElement>(step.fallbackSelector)).find(isVisible);
+          fallback = !!target;
+        }
+        highlighted = target || null;
         highlighted?.classList.add("spotlight");
+      }
+      if (tourOpen && highlighted instanceof HTMLElement) {
+        const targetRect = highlighted.getBoundingClientRect();
+        const targetOutsideViewport = targetRect.top < 12 || targetRect.bottom > window.innerHeight - 12;
+        if ((scrolledTarget !== highlighted || targetOutsideViewport) && typeof highlighted.scrollIntoView === "function") {
+          const reducedMotion = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          highlighted.scrollIntoView({ block: "center", behavior: reducedMotion || targetOutsideViewport ? "auto" : "smooth" });
+          scrolledTarget = highlighted;
+        }
+        const rect = highlighted.getBoundingClientRect();
+        const coachWidth = Math.min(390, window.innerWidth - 24);
+        const coachHeight = Math.min(300, window.innerHeight - 24);
+        const left = Math.max(12, Math.min(rect.left, window.innerWidth - coachWidth - 12));
+        const below = rect.bottom + 16;
+        const top = below + coachHeight <= window.innerHeight - 12
+          ? below
+          : Math.max(12, Math.min(rect.top - coachHeight - 16, window.innerHeight - coachHeight - 12));
+        setTourPosition({ top, left });
+      } else {
+        setTourPosition(null);
       }
       setTourFallback((current) => (current === fallback ? current : fallback));
     };
@@ -876,14 +1173,146 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
         childList: true,
         subtree: true,
         attributes: true,
-        attributeFilter: ["aria-expanded", "hidden"],
+        attributeFilter: ["aria-expanded", "hidden", "open"],
       });
+      main.addEventListener("click", markManualToggle, true);
+      resolveTarget();
     }
+    window.addEventListener("resize", resolveTarget);
+    window.addEventListener("scroll", resolveTarget, true);
     return () => {
       observer?.disconnect();
+      main?.removeEventListener("click", markManualToggle, true);
+      window.removeEventListener("resize", resolveTarget);
+      window.removeEventListener("scroll", resolveTarget, true);
       highlighted?.classList.remove("spotlight");
+      for (const entry of [...automaticToggles].reverse()) {
+        if (!entry.changedByUser && entry.button.isConnected && (entry.button.getAttribute("aria-expanded") === "true") !== entry.wasExpanded) entry.button.click();
+      }
+      for (const entry of [...automaticDetails].reverse()) {
+        if (!entry.changedByUser && entry.details.isConnected && entry.details.open !== entry.wasOpen) entry.details.open = entry.wasOpen;
+      }
     };
   }, [tourOpen, tourStep, page, active.id]);
+  useEffect(() => {
+    if (!tourOpen) return;
+    const dialog = tourDialog.current;
+    const focusable = () => Array.from(dialog?.querySelectorAll<HTMLElement>(
+      'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
+    ) || []).filter((node) => {
+      if (!node.isConnected || node.closest("[hidden]")) return false;
+      for (let current: HTMLElement | null = node; current; current = current.parentElement) {
+        const style = getComputedStyle(current);
+        if (style.display === "none" || style.visibility === "hidden") return false;
+      }
+      return true;
+    });
+    focusable()[0]?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setTourOpen(false);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const items = focusable();
+      if (!items.length) return;
+      const first = items[0]!;
+      const last = items[items.length - 1]!;
+      if (event.shiftKey && (document.activeElement === first || !items.includes(document.activeElement as HTMLElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !items.includes(document.activeElement as HTMLElement))) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [tourOpen]);
+  const workspaceReady = !!draft.completedAt && !induct;
+  const chartGroups = useMemo(() => !workspaceReady ? [] : (
+    group === "individual"
+      ? people.map((p) => ({ id: p.id, name: p.name }))
+      : group === "team"
+        ? state.teams.map((t) => ({ ...t, name: teamName(t.id) }))
+        : [...new Set(summaryFiltered.map((t) => t.sector))].map((s) => ({
+            id: s,
+            name: s,
+          }))
+  )
+    .map((g) => {
+      const ts = summaryFiltered.filter((t) =>
+        group === "individual"
+          ? isResponsible(t, g.id)
+          : group === "team"
+            ? t.teamId === g.id
+            : t.sector === g.id,
+      );
+      const metricRows = labOnly ? ts.filter((task) => task.kind === "resultado") : ts;
+      const x = group === "individual"
+        ? metricsForProfile(metricRows, state.activity, g.id, dateART(metricAsOf), metricAsOf)
+        : metrics(metricRows, state.activity, dateART(metricAsOf), metricAsOf);
+      const operationIds = new Set(ts.filter((task) => task.kind === "operativa").map((task) => task.id));
+      const assessments = (state.operationalAssessments || []).filter((assessment) => operationIds.has(assessment.taskId));
+      const averageAssessment = (key: "quality" | "order" | "timeliness") => assessments.length
+        ? Math.round(assessments.reduce((sum, assessment) => sum + assessment[key], 0) / assessments.length)
+        : null;
+      return { ...g, ...x, pendingPoints: Math.max(0, x.points - x.earned), operationalQuality: averageAssessment("quality"), operationalOrder: averageAssessment("order"), operationalTimeliness: averageAssessment("timeliness"), operationalEvaluations: assessments.length };
+    })
+    .filter((g) => labOnly ? summaryFiltered.some((task) => group === "individual"
+      ? isResponsible(task, g.id)
+      : group === "team"
+        ? task.teamId === g.id
+        : task.sector === g.id) : g.points > 0)
+    .sort((a, b) => b.points - a.points), [workspaceReady, group, people, summaryFiltered, state.activity, state.operationalAssessments, state.teams, state.profiles, metricDay, metricAsOf, labOnly]);
+  const distributionData = useMemo(() => !workspaceReady ? [] : (() => {
+    const counts = new Map<string, number>();
+    for (const task of summaryFiltered) {
+      const label = distributionBy === "status"
+        ? task.status
+        : distributionBy === "kind"
+          ? task.kind === "operativa" ? "Operativa" : "Entregable"
+          : distributionBy === "company" ? companyOf(task.companyId) : teamName(task.teamId);
+      counts.set(label, (counts.get(label) || 0) + 1);
+    }
+
+    return [...counts].map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  })(), [workspaceReady, summaryFiltered, distributionBy, state.teams, state.profiles]);
+  const history = useMemo(() => !workspaceReady ? [] : labOnly
+    ? closedPeriodHistory(state, { viewerId: active.id, throughMonth: month, ownerId: owner || undefined, companyId: company || undefined, sector: sector || undefined, teamId: team || undefined, query })
+      .map((row) => ({ ...row, label: monthLabel(row.period) }))
+    : [...new Set(state.tasks.map((t) => t.month))]
+    .filter((p) => p <= month)
+    .sort()
+    .slice(-6)
+    .map((period) => {
+      const periodRows = state.tasks.filter(
+        (t) =>
+          t.month === period &&
+          (labOnly ? calendarCanAccessTask(state, active, t) : canWork(state, active, t)) &&
+          (!company || t.companyId === company) &&
+          (!owner || isResponsible(t, owner)) &&
+          (!sector || t.sector === sector) &&
+          (!team || t.teamId === team) &&
+          (!query ||
+            `${t.title} ${nameOf(t.ownerId)} ${companyOf(t.companyId)}`
+              .toLowerCase()
+              .includes(query.toLowerCase())),
+      );
+      const tasks = labOnly ? periodRows.filter((task) => task.kind === "resultado") : periodRows;
+      const periodMetrics = metrics(tasks, state.activity);
+      const periodOperational = labOnly ? operationalLoad(state, periodRows.filter((task) => task.kind === "operativa").map((task) => task.id)) : null;
+      const recordedSeconds = periodRows.reduce((sum, task) => sum + (task.sessions || []).reduce((elapsed, session) => elapsed + Math.max(0, (Date.parse(session.end || metricAsOf) - Date.parse(session.start)) / 1000), 0), 0);
+      return {
+        period,
+        label: monthLabel(period),
+        ...periodMetrics,
+        operationalLoad: periodOperational?.activities ? periodOperational.weightedLoad : null,
+        recordedSeconds,
+      };
+    })
+    .filter((p) => p.points > 0), [workspaceReady, state.tasks, state.activity, state.closures, month, labOnly, active, state, company, owner, sector, team, query, metricAsOf]);
   if (!draft.completedAt && paused && !induct)
     return (
       <div className="induction-pause">
@@ -933,68 +1362,15 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
         />
       </Suspense>
     );
-  const chartGroups = (
-    group === "individual"
-      ? people.map((p) => ({ id: p.id, name: p.name }))
-      : group === "team"
-        ? state.teams.map((t) => ({ ...t, name: teamName(t.id) }))
-        : [...new Set(filtered.map((t) => t.sector))].map((s) => ({
-            id: s,
-            name: s,
-          }))
-  )
-    .map((g) => {
-      const ts = filtered.filter((t) =>
-        group === "individual"
-          ? isResponsible(t, g.id)
-          : group === "team"
-            ? t.teamId === g.id
-            : t.sector === g.id,
-      );
-      const x = group === "individual"
-        ? metricsForProfile(ts, state.activity, g.id, dateART(metricAsOf), metricAsOf)
-        : metrics(ts, state.activity, dateART(metricAsOf), metricAsOf);
-      return { ...g, ...x, pendingPoints: Math.max(0, x.points - x.earned) };
-    })
-    .filter((g) => g.points > 0)
-    .sort((a, b) => b.points - a.points);
-  const distributionData = (() => {
-    const counts = new Map<string, number>();
-    for (const task of filtered) {
-      const label = distributionBy === "status"
-        ? task.status
-        : distributionBy === "kind"
-          ? task.kind === "operativa" ? "Operativa" : "Entregable"
-          : companyOf(task.companyId);
-      counts.set(label, (counts.get(label) || 0) + 1);
-    }
-    return [...counts].map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
-  })();
-  const history = [...new Set(state.tasks.map((t) => t.month))]
-    .filter((p) => p <= month)
-    .sort()
-    .slice(-6)
-    .map((period) => {
-      const tasks = state.tasks.filter(
-        (t) =>
-          t.month === period &&
-          canWork(state, active, t) &&
-          (!company || t.companyId === company) &&
-          (!owner || isResponsible(t, owner)) &&
-          (!sector || t.sector === sector) &&
-          (!team || t.teamId === team) &&
-          (!query ||
-            `${t.title} ${nameOf(t.ownerId)} ${companyOf(t.companyId)}`
-              .toLowerCase()
-              .includes(query.toLowerCase())),
-      );
-      return {
-        period,
-        label: monthLabel(period),
-        ...metrics(tasks, state.activity),
-      };
-    })
-    .filter((p) => p.points > 0);
+  function toggleHistorySeries(series: "weighted" | "onTime" | "operationalLoad" | "recordedSeconds") {
+    setHistorySeries((current) => {
+      if (current.includes(series)) return current.length === 1 ? current : current.filter((item) => item !== series);
+      const dimension = (item: string) => item === "weighted" || item === "onTime" ? "percent" : item;
+      const currentDimension = dimension(current[0] || "weighted");
+      if (dimension(series) !== currentDimension) return [series];
+      return [...current, series];
+    });
+  }
   function stats() {
     return (
       <div className="stats">
@@ -1017,7 +1393,12 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             hint: "Sobre entregables completados",
             icon: Clock,
           },
-          {
+          labOnly ? {
+            label: "Movimientos gestionados",
+            value: operationalSummary?.activities.toLocaleString("es-AR") || "0",
+            hint: `${operationalUnits} · Calidad ${operationQuality("quality") ?? "sin evaluar"} · Orden ${operationQuality("order") ?? "sin evaluar"} · Oportunidad ${operationQuality("timeliness") ?? "sin evaluar"}`,
+            icon: ActivityIcon,
+          } : {
             label: "Operativas en meta",
             value: `${m.operationalTarget} / ${m.operational}`,
             hint: `${m.late} vencidas · ${m.blocked} en espera`,
@@ -1041,7 +1422,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
     );
   }
   function taskCard(t: Task) {
-    const closed = isClosed(state, t);
+    const closed = taskLocked(t);
     const timeliness = taskTimeliness(t, state.activity, new Date().toISOString());
     return (
       <article
@@ -1205,14 +1586,14 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                   {t.kind === "operativa" ? (
                     <button
                       onClick={() => setLogFor(t.id)}
-                      disabled={isClosed(state, t)}
+                      disabled={taskLocked(t) || !canExecute(t)}
                     >
                       Registrar
                     </button>
                   ) : (
                     <button
                       onClick={() => advance(t)}
-                      disabled={isClosed(state, t)}
+                      disabled={taskLocked(t) || !canExecute(t)}
                     >
                       {t.status === "Pendiente"
                         ? "Iniciar"
@@ -1235,6 +1616,8 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
       <Panel
         title="Dónde está el trabajo"
         sub="Entregables del período seleccionado"
+        collapsible
+        defaultOpen
       >
         <div className="distribution">
           {(["Pendiente", "En curso", "Completada"] as Status[]).map((s) => {
@@ -1274,10 +1657,10 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
       </Panel>
     );
   }
-  const tasksForDetail = state.tasks.find((t) => t.id === detail && canWork(state, active, t));
-  const logTask = state.tasks.find((t) => t.id === logFor && canWork(state, active, t));
+  const tasksForDetail = state.tasks.find((t) => t.id === detail && (labOnly ? calendarCanAccessTask(state, active, t) : canWork(state, active, t)));
+  const logTask = state.tasks.find((t) => t.id === logFor && (labOnly ? calendarCanAccessTask(state, active, t) : canWork(state, active, t)) && (!labOnly || canExecute(t)));
   function openSearchResult(task: Task) {
-    if (!canWork(state, active, task)) {
+    if (labOnly ? !calendarCanAccessTask(state, active, task) : !canWork(state, active, task)) {
       notify("La tarea ya no está disponible en tu ámbito.");
       setQuickTaskSearchOpen(false);
       return;
@@ -1292,11 +1675,16 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
     setMonth(task.month);
     setPage("tasks");
     setDetail(task.id);
+    requestAnimationFrame(() => {
+      const detailDialog = Array.from(document.querySelectorAll<HTMLElement>('dialog[open]')).find((dialog) => dialog.getAttribute("aria-labelledby") && document.getElementById(dialog.getAttribute("aria-labelledby")!)?.textContent === task.title);
+      const title = detailDialog?.querySelector<HTMLElement>("h2") || Array.from(document.querySelectorAll<HTMLElement>("[data-task-id] .card-title")).find((button) => button.textContent?.trim() === task.title);
+      title?.focus();
+    });
   }
 
   return (
     <>
-      <aside className="sidebar">
+      <aside className={`sidebar${labOnly ? " sidebar-lab" : ""}`}>
         <div className="brand">
           <img src="/logo-grupo-paris.svg" alt="Grupo París" />
         </div>
@@ -1332,20 +1720,45 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                 {p.name}
                 {p.id === "tasks" && <span>{resultTasks.length}</span>}
               </button>
-            ))}
+          ))}
         </nav>
+        {(() => {
+          const personalTasks = state.tasks.filter((task) =>
+            task.status !== "Completada" && !taskLocked(task) &&
+            (labOnly ? calendarCanAccessTask(state, active, task) : canWork(state, active, task)) &&
+            (isResponsible(task, active.id) || coverageFor(state, task)?.replacementId === active.id),
+          );
+          const datedTasks = personalTasks.filter((task) => task.due);
+          const upcoming = datedTasks.filter((task) => task.due >= dateART()).sort((a, b) => a.due.localeCompare(b.due) || a.title.localeCompare(b.title, "es"))[0]
+            || datedTasks.sort((a, b) => b.due.localeCompare(a.due))[0];
+          const running = personalTasks.find((task) => task.sessions?.some((session) => !session.end && session.actorId === active.id));
+          return (personalTasks.length > 0 || running) ? <section className="sidebar-day-summary" aria-label="Mi jornada">
+            <div><b>Mi jornada</b><span>{personalTasks.length} pendiente{personalTasks.length === 1 ? "" : "s"}</span></div>
+            {upcoming && <button type="button" onClick={() => { setMonth(upcoming.month); setBoardOwner(active.id); setPage("tasks"); setDetail(upcoming.id); }}>
+              <CalendarDays size={13} /><span>Próxima · {upcoming.title}</span><small>{fmt(upcoming.due)}</small>
+            </button>}
+            {running && <button type="button" className="sidebar-running-task" onClick={() => { setMonth(running.month); setBoardOwner(active.id); setPage("tasks"); setDetail(running.id); }}>
+              <ActivityIcon size={13} /><span>Cronómetro en curso</span>
+            </button>}
+          </section> : null;
+        })()}
         <div className="sidebar-bottom">
           {!remoteSave && !laboratoryMode && <button onClick={() => (laboratory ? exitLab() : enterLab(state))}>
             {laboratory ? "Salir del laboratorio" : "Laboratorio de pruebas"}
           </button>}
           <button
+            data-tour-trigger="true"
             onClick={() => {
               const progress = savedTour;
               const start = progress >= tours.length ? 0 : progress;
+              const resetOutdatedProgress =
+                (state.tour[active.id] || 0) > 0 &&
+                state.tourVersion?.[active.id] !== TOUR_VERSION;
               if (
                 !commit({
                   ...state,
                   tour: { ...state.tour, [active.id]: start },
+                  tourStepId: { ...state.tourStepId, [active.id]: tours[start]?.id || "__complete__" },
                   tourVersion: {
                     ...state.tourVersion,
                     [active.id]: TOUR_VERSION,
@@ -1353,6 +1766,9 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                 })
               )
                 return;
+              tourOpenerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+              tourActorRef.current = active.id;
+              setTourResetNotice(resetOutdatedProgress);
               setPage(tours[start].page);
               setTourOpen(true);
             }}
@@ -1364,23 +1780,13 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             <i />
             {remoteSave ? "ESPACIO PRIVADO" : "DEMOSTRACIÓN INTERACTIVA"}
           </div>
-          <label>
+          {labOnly ? <EmployeePicker label="Vista de prueba · actor simulado" selectLabel="Vista de usuario" profiles={state.profiles.filter((profile) => profile.active)} teams={state.teams} value={active.id} onChange={changeProfile} compact /> : <label>
             {remoteSave ? "Mi espacio" : "Vista de usuario · simulación"}
-            <select
-              aria-label="Vista de usuario"
-              value={active.id}
-              onChange={(e) => changeProfile(e.target.value)}
-            >
-              {state.profiles
-                .filter((p) => p.active && (!remoteSave || (remoteOwner && ['admin','e0'].includes(p.id)) || p.id===active.id))
-                .map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.id==='admin'&&remoteSave ? 'Administrar tablero' : p.id==='e0'&&remoteSave ? 'Mi tablero · Valentino' : `${p.name} · ${p.role}`}
-                  </option>
-                ))}
+            <select aria-label="Vista de usuario" value={active.id} onChange={(e) => changeProfile(e.target.value)}>
+              {state.profiles.filter((p) => p.active && (!remoteSave || (remoteOwner && ['admin','e0'].includes(p.id)) || p.id===active.id)).map((p) => <option key={p.id} value={p.id}>{p.id==='admin'&&remoteSave ? 'Administrar tablero' : p.id==='e0'&&remoteSave ? 'Mi tablero · Valentino' : `${p.name} · ${p.role}`}</option>)}
               {remoteSave&&remoteOwner&&!state.profiles.some(p=>p.id==='admin')&&<option value="admin">Administrar tablero</option>}
             </select>
-          </label>
+          </label>}
           <div className="user">
             <span className="avatar">{ini(active.name)}</span>
             <div>
@@ -1392,20 +1798,18 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
       </aside>
       <main className="main">
         <header>
-          <div>
-            Espacio de trabajo <span>/</span>
-            <b>{pages.find((p) => p.id === page)?.name}</b>
-          </div>
+          <div className="header-spacer" aria-hidden="true" />
           <div className="header-right">
-            {laboratory && !remoteSave && <button type="button" className="quick-search-trigger" aria-label="Buscar tareas" title="Buscar tareas · Ctrl+K" onClick={() => setQuickTaskSearchOpen(true)}><Search size={16} aria-hidden="true" /><span>Buscar</span><kbd>Ctrl K</kbd></button>}
-            {!remoteSave && <NotificationCenter key={active.id} state={state} commit={commit} notify={notify} laboratory={laboratory} onOpenProposals={() => setPage("team")} onOpenTask={taskId => {
+            <button type="button" className="quick-search-trigger" aria-label="Abrir búsqueda de tareas" title="Buscar tareas · Ctrl+K" onClick={() => setQuickTaskSearchOpen(true)}><Search size={16} aria-hidden="true" /><span>Buscar</span><kbd>Ctrl K</kbd></button>
+            {!remoteSave && <NotificationCenter key={active.id} state={state} commit={commit} notify={notify} laboratory={laboratory} onOpenProposals={() => setPage("team")} onOpenCalendar={() => setPage("calendar")} onOpenTask={taskId => {
               const task = state.tasks.find(t => t.id === taskId);
-              if (task && canWork(state, active, task)) { setMonth(task.month); setPage('tasks'); setDetail(taskId); }
+              if (task && (labOnly ? calendarCanAccessTask(state, active, task) : canWork(state, active, task))) { setMonth(task.month); setPage('tasks'); setDetail(taskId); }
             }} />}
             <ThemeControl />
           </div>
         </header>
         <div className="content">
+          <div className="content-breadcrumb">Espacio de trabajo <span>/</span> <b>{pages.find((p) => p.id === page)?.name}</b></div>
           {laboratory && (
             <div className="lab-banner">
               <b>Vista de prueba</b>
@@ -1494,7 +1898,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                   {page === "overview" && active.role === "empleado"
                     ? "Tus tareas, prioridades y resultados del período."
                     : page === "operations"
-                  ? "Facturas, trámites y pagos: cantidades, referencias y metas por mes."
+                  ? labOnly ? "Facturas, trámites y pagos: cantidades, carga ponderada y tiempo registrado." : "Facturas, trámites y pagos: cantidades, referencias y metas por mes."
                   : page === "annotations"
                     ? "Guardá fórmulas y recordatorios personales; convertí una anotación en tarea cuando necesite seguimiento."
                     : page === "analytics"
@@ -1553,14 +1957,11 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                 </option>
               ))}
             </select>
-            {ownBoardPages.includes(page) ? (
-              <label className="board-owner-filter">
-                <span>PERFIL QUE ESTÁS VIENDO</span>
-                <select aria-label="Perfil que estás viendo" value={viewedOwner} onChange={(e) => setBoardOwner(e.target.value)}>
-                  <option value={active.id}>Mis tareas · {active.name}</option>
-                  {people.filter((p) => p.id !== active.id).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
-              </label>
+            {isOwnBoardPage ? (
+              <div className="board-owner-filter">
+                <EmployeePicker label="Tareas de" selectLabel="Perfil que estás viendo" profiles={people} teams={state.teams} value={viewedOwner} onChange={setBoardOwner} emptyLabel="Elegí una persona" compact />
+                <small>Consultar este tablero no cambia tu identidad ni habilita acciones por esa persona.</small>
+              </div>
             ) : (
               <select aria-label="Empleado" value={owner} onChange={(e) => setOwner(e.target.value)}>
                 <option value="">{manager ? "Todo mi ámbito" : "Mis tareas"}</option>
@@ -1598,6 +1999,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             {(page === "overview" || page === "day") && (
               <>
                 {stats()}
+                {page === "day" && labOnly && <SuggestedRoutePanel state={state} actor={active} profileId={viewedOwner} month={month} companyId={company || undefined} teamId={team || undefined} sector={sector || undefined} companyOf={companyOf} onOpen={(taskId) => { setPage("tasks"); setDetail(taskId); }} />}
                 {page === "day" && draft.reminders && (
                   <div className="reminder">
                     <Clock size={18} />
@@ -1654,10 +2056,12 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                 {page === "day" && laboratory && !remoteSave && (
                   <MyHabitualTaskProposals state={state} actor={active} month={month} commit={commit} notify={notify} />
                 )}
-                <div className="dashboard-row">
+                <div className="dashboard-row" data-tour="day-overview">
                   <Panel
                     title={active.role === "empleado" ? "Tu avance ponderado" : "Avance ponderado del equipo"}
                     sub="Puntos completados y pendientes · mismo período"
+                    collapsible
+                    defaultOpen
                     action={
                       <button
                         className="text-button"
@@ -1686,7 +2090,22 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                             height={56}
                           />
                           <YAxis tick={{ fontSize: 11 }} />
-                          <Tooltip cursor={{ fill: "var(--chart-cursor)", fillOpacity: 0.12, stroke: "var(--chart-cursor-border)", strokeOpacity: 0.55 }} contentStyle={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 9, color: "var(--ink)" }} labelStyle={{ color: "var(--ink)", fontWeight: 600 }} itemStyle={{ color: "var(--ink)" }} />
+                          <Tooltip
+                            allowEscapeViewBox={{ x: true, y: true }}
+                            wrapperStyle={{ zIndex: 30, pointerEvents: "none" }}
+                            cursor={{ fill: "var(--chart-cursor)", fillOpacity: 0.12, stroke: "var(--chart-cursor-border)", strokeOpacity: 0.55 }}
+                            content={({ active: tooltipActive, payload }) => {
+                              const row = payload?.[0]?.payload as (typeof chartGroups)[number] | undefined;
+                              if (!tooltipActive || !row) return null;
+                              return <div className="analytics-score-tooltip">
+                                <b>{row.name}</b>
+                                <span>Puntos logrados <strong>{row.earned.toLocaleString("es-AR", { maximumFractionDigits: 1 })}</strong></span>
+                                <span>Puntos pendientes <strong>{row.pendingPoints.toLocaleString("es-AR", { maximumFractionDigits: 1 })}</strong></span>
+                                <span>Total asignado <strong>{row.points.toLocaleString("es-AR", { maximumFractionDigits: 1 })} pts</strong></span>
+                                <span>Entregables <strong>{row.done} de {row.assigned}</strong></span>
+                              </div>;
+                            }}
+                          />
                           <Legend />
                           <Bar
                             dataKey="earned"
@@ -1797,7 +2216,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                 <section className="task-owner-section">
                   <h2>{viewedOwner === active.id ? "Mis entregables" : `Entregables de ${nameOf(viewedOwner)}`}</h2>
                   {view === "list" ? (
-                    <Panel title="Entregables" sub="Una instancia independiente por empresa y mes">
+                    <Panel title="Entregables" sub="Una instancia independiente por empresa y mes" collapsible defaultOpen>
                       {table(ownBoardResults)}
                     </Panel>
                   ) : (
@@ -1809,11 +2228,11 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                     <h2>Tareas que cubrís <span>{coveredResults.length}</span></h2>
                     <p>Estas tarjetas conservan a su responsable y el mismo historial de la tarea.</p>
                     {view === "list" ? (
-                      <Panel title="Entregables cubiertos" sub="La cobertura no crea una tarea duplicada">
+                      <Panel title="Entregables cubiertos" sub="La cobertura no crea una tarea duplicada" collapsible defaultOpen>
                         {table(coveredResults)}
                       </Panel>
                     ) : (
-                      <TaskBoard tasks={coveredResults} renderCard={taskCard} />
+                      <TaskBoard tasks={coveredResults} renderCard={taskCard} onMove={moveBoardTask} />
                     )}
                   </section>
                 )}
@@ -1831,7 +2250,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                 onConvert={convertAnnotation}
                 onOpenTask={(taskId) => {
                   const task = state.tasks.find((t) => t.id === taskId);
-                  if (!task || !canWork(state, active, task)) return;
+                  if (!task || (labOnly ? !calendarCanAccessTask(state, active, task) : !canWork(state, active, task))) return;
                   setMonth(task.month);
                   setPage("tasks");
                   setDetail(taskId);
@@ -1840,7 +2259,8 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             )}
             {page === "operations" && (
               <>
-                <section className="task-owner-section">
+                {labOnly && active.role === "jefe" && <OperationalRatePanel state={state} actor={active} commit={commit} notify={notify} company={company || undefined} />}
+                <section className="task-owner-section" data-tour="operations-movements">
                   <h2>{viewedOwner === active.id ? "Mis operativas" : `Operativas de ${nameOf(viewedOwner)}`}</h2>
                   <div className="operations-grid">
                     {ownBoardOperations.map((t) => (
@@ -1853,7 +2273,10 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                         quantity={taskQuantity(t, state.activity)}
                         time={duration(actorElapsedSeconds(t, active.id, new Date(tick).toISOString()))}
                         actorId={active.id}
-                        closed={isClosed(state, t)}
+                        closed={taskLocked(t) || !canExecute(t)}
+                        laboratory={labOnly}
+                        weightedLoad={labOnly ? operationalLoad(state, [t.id]).weightedLoad : undefined}
+                        unweightedQuantity={labOnly ? operationalLoad(state, [t.id]).unweightedQuantity : undefined}
                         timeliness={taskTimeliness(t, state.activity, new Date().toISOString())}
                         onClock={() => clock(t, !t.sessions?.some((session) => !session.end && session.actorId === active.id))}
                         onLog={() => setLogFor(t.id)}
@@ -1878,7 +2301,10 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                           quantity={taskQuantity(t, state.activity)}
                           time={duration(actorElapsedSeconds(t, active.id, new Date(tick).toISOString()))}
                           actorId={active.id}
-                          closed={isClosed(state, t)}
+                          closed={taskLocked(t) || !canExecute(t)}
+                          laboratory={labOnly}
+                          weightedLoad={labOnly ? operationalLoad(state, [t.id]).weightedLoad : undefined}
+                          unweightedQuantity={labOnly ? operationalLoad(state, [t.id]).unweightedQuantity : undefined}
                           timeliness={taskTimeliness(t, state.activity, new Date().toISOString())}
                           onClock={() => clock(t, !t.sessions?.some((session) => !session.end && session.actorId === active.id))}
                           onLog={() => setLogFor(t.id)}
@@ -1888,12 +2314,15 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                     </div>
                   </section>
                 )}
+                {labOnly && active.role === "jefe" && <OperationalQualityReview state={state} actor={active} tasks={operations} commit={commit} notify={notify} companyOf={companyOf} nameOf={nameOf} />}
                 {!ownBoardOperations.length && !coveredOperations.length && (
                   <Empty text="No hay operativas. Podés crear una desde Nueva tarea." />
                 )}
                 <Panel
                   title="Últimos registros"
-                  sub="Cada registro conserva fecha, cantidad, unidad, empresa y referencia"
+                  sub={`${state.activity.filter((activity) => visibleOperations.some((task) => task.id === activity.taskId) && activity.date.startsWith(month)).length} movimientos · cada registro conserva cantidad, unidad, empresa y referencia`}
+                  collapsible
+                  defaultOpen={false}
                 >
                   <div className="table-wrap">
                     <table>
@@ -1972,15 +2401,13 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                             "Entregables antes / evaluables",
                             "Entregables antes %",
                             "Promedio días de anticipación",
-                            "Metas operativas antes / evaluables",
-                            "Metas operativas antes %",
-                            "Promedio días meta anticipada",
+                            ...(!labOnly ? ["Metas operativas antes / evaluables", "Metas operativas antes %", "Promedio días meta anticipada"] : ["Calidad operativa", "Orden operativo", "Oportunidad operativa", "Evaluaciones operativas"]),
                           ],
                           ...chartGroups.map((g) => [
                             g.name,
                             g.points,
                             g.earned,
-                            g.weighted,
+                            g.weighted ?? (labOnly ? "Sin base" : ""),
                             g.onTime,
                             g.assigned,
                             g.done,
@@ -1988,9 +2415,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                             `${g.timeliness?.results.early ?? 0}/${g.timeliness?.results.evaluated ?? 0}`,
                             g.timeliness?.results.earlyRate ?? "Sin muestra",
                             g.timeliness?.results.averageDaysAhead ?? "Sin muestra",
-                            `${g.timeliness?.operational.early ?? 0}/${g.timeliness?.operational.evaluated ?? 0}`,
-                            g.timeliness?.operational.earlyRate ?? "Sin muestra",
-                            g.timeliness?.operational.averageDaysAhead ?? "Sin muestra",
+                            ...(labOnly ? [g.operationalQuality ?? "Sin evaluar", g.operationalOrder ?? "Sin evaluar", g.operationalTimeliness ?? "Sin evaluar", g.operationalEvaluations] : [`${g.timeliness?.operational.early ?? 0}/${g.timeliness?.operational.evaluated ?? 0}`, g.timeliness?.operational.earlyRate ?? "Sin muestra", g.timeliness?.operational.averageDaysAhead ?? "Sin muestra"]),
                           ]),
                         ],
                         `analisis-${month}.csv`,
@@ -2004,6 +2429,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                 {stats()}
                 <TimelinessPanel
                   value={m.timeliness!}
+                  includeOperational={!labOnly}
                   rows={chartGroups.map((g) => ({
                     id: g.id,
                     name: g.name,
@@ -2021,7 +2447,9 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                 <div className="dashboard-row analytics-score-row">
                   <Panel
                     title="Cumplimiento ponderado"
-                    sub="Porcentaje de puntos logrados sobre puntos asignados"
+                    sub="Puntos logrados sobre asignados · un 0% es distinto de un ámbito sin base"
+                    collapsible
+                    defaultOpen
                     action={
                       <button
                         type="button"
@@ -2035,10 +2463,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                     }
                   >
                     <div className="chart">
-                      <ResponsiveContainer
-                        width="100%"
-                        height={Math.max(260, chartGroups.length * 43)}
-                      >
+                      <ResponsiveContainer width="100%" height={Math.max(220, chartGroups.length * 39)}>
                         <BarChart
                           layout="vertical"
                           data={chartGroups}
@@ -2060,7 +2485,23 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                             width={135}
                             tick={{ fontSize: 11 }}
                           />
-                          <Tooltip cursor={{ fill: "var(--chart-cursor)", fillOpacity: 0.12, stroke: "var(--chart-cursor-border)", strokeOpacity: 0.55 }} contentStyle={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 9, color: "var(--ink)" }} labelStyle={{ color: "var(--ink)", fontWeight: 600 }} itemStyle={{ color: "var(--ink)" }} formatter={(v) => `${v}%`} />
+                          <Tooltip
+                            allowEscapeViewBox={{ x: true, y: true }}
+                            wrapperStyle={{ zIndex: 30, pointerEvents: "none" }}
+                            cursor={{ fill: "var(--chart-cursor)", fillOpacity: 0.12, stroke: "var(--chart-cursor-border)", strokeOpacity: 0.55 }}
+                            content={({ active: tooltipActive, payload }) => {
+                              const row = payload?.[0]?.payload as (typeof chartGroups)[number] | undefined;
+                              if (!tooltipActive || !row) return null;
+                              return <div className="analytics-score-tooltip">
+                                <b>{row.name}</b>
+                                <span>Puntos logrados <strong>{row.earned.toLocaleString("es-AR", { maximumFractionDigits: 1 })}</strong></span>
+                                <span>Puntos pendientes <strong>{row.pendingPoints.toLocaleString("es-AR", { maximumFractionDigits: 1 })}</strong></span>
+                                <span>Total asignado <strong>{row.points.toLocaleString("es-AR", { maximumFractionDigits: 1 })} pts</strong></span>
+                                <span>Entregables <strong>{row.done} de {row.assigned}</strong></span>
+                                <b>Cumplimiento {row.weighted === null ? "Sin base" : `${Math.round(row.weighted)}%`}</b>
+                              </div>;
+                            }}
+                          />
                           <ReferenceLine x={100} stroke="#a4a8b0" />
                           <Bar
                             dataKey="weighted"
@@ -2085,22 +2526,23 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                               dataKey="weighted"
                               position="right"
                               fill="var(--muted)"
-                              formatter={(value) => `${Math.round(Number(value) || 0)}%`}
+                              formatter={(value) => value == null ? "Sin base" : `${Math.round(Number(value))}%`}
                             />
                           </Bar>
                         </BarChart>
                       </ResponsiveContainer>
+                      {labOnly && (chartGroups.some((row) => row.weighted === null) || chartGroups.some((row) => row.weighted === 0)) && (
+                        <p className="muted analytics-no-base" role="note">
+                          {chartGroups.some((row) => row.weighted === null) && <>Sin base de entregables: {chartGroups.filter((row) => row.weighted === null).map((row) => row.name).join(", ")}.</>}
+                          {chartGroups.some((row) => row.weighted === 0) && <> {chartGroups.some((row) => row.weighted === null) ? " " : ""}Cumplimiento 0%: {chartGroups.filter((row) => row.weighted === 0).map((row) => row.name).join(", ")}.</>}
+                        </p>
+                      )}
                     </div>
                     {formulaOpen && (
                       <div className="metric-explainer">
                         <b>Método actual del laboratorio</b>
                         <p>
-                          El indicador refleja el cálculo implementado hoy en
-                          este laboratorio. Un entregable aporta su peso al
-                          completarse. Las operativas todavía se calculan contra
-                          una meta ficticia; la regla final está pendiente de
-                          redefinición y validación. La puntualidad considera sólo
-                          entregables completados y usa fecha argentina.
+                          {labOnly ? "El laboratorio separa los indicadores: los entregables aportan puntos al completarse; las operativas informan cantidad, carga versionada y tiempo; la revisión de calidad se conserva como evaluación independiente. La puntualidad considera entregables completados y usa fecha argentina." : "El indicador refleja el cálculo implementado hoy en este entorno. Un entregable aporta su peso al completarse y las operativas mantienen la medición configurada para la cuenta."}
                         </p>
                         <p>
                           Los pesos expresan complejidad relativa; este indicador
@@ -2111,8 +2553,8 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                     )}
                   </Panel>
                   <Panel
-                    title="Carga asignada y lograda"
-                    sub="Puntos · comparar el porcentaje junto con la carga"
+                    title={labOnly ? "Puntos por entregables" : "Carga asignada y lograda"}
+                    sub={labOnly ? "Cumplimiento de entregables; calidad operativa se informa por separado" : "Puntos · comparar el porcentaje junto con la carga"}
                     collapsible
                     defaultOpen={false}
                   >
@@ -2121,15 +2563,13 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                         <div key={g.id}>
                           <div>
                             <b>{g.name}</b>
-                            <span>
-                              {g.earned.toFixed(1)} / {g.points} pts
-                            </span>
+                            <span>{g.weighted === null ? "Sin base" : `${g.earned.toFixed(1)} / ${g.points} pts`}</span>
                           </div>
-                          <Meter value={g.weighted || 0} />
+                          {g.weighted !== null && <Meter value={g.weighted} />}
                           <small>
-                            {g.done}/{g.assigned} entregables · {g.blocked} en
-                            espera · {g.operationalTarget}/{g.operational}{" "}
-                            operativas en meta
+                            {g.done}/{g.assigned} entregables · {g.blocked} en espera{labOnly
+                              ? ` · Calidad ${g.operationalQuality ?? "sin evaluar"} · Orden ${g.operationalOrder ?? "sin evaluar"} · Oportunidad ${g.operationalTimeliness ?? "sin evaluar"}`
+                              : ` · ${g.operationalTarget}/${g.operational} operativas en meta`}
                           </small>
                         </div>
                       ))}
@@ -2211,6 +2651,8 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                   <Panel
                     title="Evolución mensual"
                     sub="Últimos seis períodos con trabajo registrado · se respetan los filtros"
+                    collapsible
+                    defaultOpen
                   >
                     {history.length > 1 ? (
                       <>
@@ -2222,10 +2664,16 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                             >
                               <CartesianGrid strokeDasharray="3 3" />
                               <XAxis dataKey="period" tick={{ fontSize: 11 }} />
-                              <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 11 }} />
+                              <YAxis domain={historySeries.every((series) => series === "weighted" || series === "onTime") ? [0, 100] : ["auto", "auto"]} tickFormatter={(value) => historySeries[0] === "recordedSeconds" ? duration(Number(value)) : historySeries.every((series) => series === "weighted" || series === "onTime") ? `${value}%` : Number(value).toLocaleString("es-AR")} tick={{ fontSize: 11 }} />
                               <Tooltip
                                 labelFormatter={(label) => monthLabel(String(label))}
-                                formatter={(value) => `${value}%`}
+                                formatter={(value, name) => {
+                                  if (value == null) return ["Sin base", name];
+                                  const seriesName = String(name);
+                                  if (seriesName.includes("Tiempo")) return [duration(Number(value)), name];
+                                  if (seriesName.includes("Carga")) return [`${Number(value).toLocaleString("es-AR")} puntos de carga`, name];
+                                  return [`${value}%`, name];
+                                }}
                               />
                               {historySeries.length > 1 && <Legend />}
                               {historySeries.includes("weighted") && (
@@ -2247,18 +2695,18 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                                   connectNulls={false}
                                 />
                               )}
+                              {historySeries.includes("operationalLoad") && <Line dataKey="operationalLoad" name="Carga operativa ponderada" stroke="var(--chart-slice-2)" strokeWidth={3} dot={{ r: 4 }} connectNulls={false} />}
+                              {historySeries.includes("recordedSeconds") && <Line dataKey="recordedSeconds" name="Tiempo registrado" stroke="var(--chart-slice-5)" strokeWidth={3} dot={{ r: 4 }} connectNulls={false} />}
                             </LineChart>
                           </ResponsiveContainer>
                         </div>
-                        <div className="analytics-series" role="group" aria-label="Series del gráfico de evolución mensual">
+                        <div className="analytics-series" data-tour="analytics-series" role="group" aria-label="Series del gráfico de evolución mensual">
                           <button
                             type="button"
                             className={historySeries.includes("weighted") ? "selected" : ""}
                             aria-pressed={historySeries.includes("weighted")}
                             disabled={historySeries.length === 1 && historySeries.includes("weighted")}
-                            onClick={() => setHistorySeries((current) => current.includes("weighted")
-                              ? current.filter((series) => series !== "weighted")
-                              : [...current, "weighted"])}
+                            onClick={() => toggleHistorySeries("weighted")}
                           >
                             <span className="series-dot series-dot-weighted" />Cumplimiento ponderado
                           </button>
@@ -2267,30 +2715,41 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                             className={historySeries.includes("onTime") ? "selected" : ""}
                             aria-pressed={historySeries.includes("onTime")}
                             disabled={historySeries.length === 1 && historySeries.includes("onTime")}
-                            onClick={() => setHistorySeries((current) => current.includes("onTime")
-                              ? current.filter((series) => series !== "onTime")
-                              : [...current, "onTime"])}
+                            onClick={() => toggleHistorySeries("onTime")}
                           >
                             <span className="series-dot series-dot-ontime" />Entregas en fecha
                           </button>
+                          {labOnly && <button type="button" className={historySeries.includes("operationalLoad") ? "selected" : ""} aria-pressed={historySeries.includes("operationalLoad")} disabled={historySeries.length === 1 && historySeries.includes("operationalLoad")} onClick={() => toggleHistorySeries("operationalLoad")}><span className="series-dot series-dot-load" />Carga operativa</button>}
+                          {labOnly && <button type="button" className={historySeries.includes("recordedSeconds") ? "selected" : ""} aria-pressed={historySeries.includes("recordedSeconds")} disabled={historySeries.length === 1 && historySeries.includes("recordedSeconds")} onClick={() => toggleHistorySeries("recordedSeconds")}><span className="series-dot series-dot-time" />Tiempo registrado</button>}
                         </div>
+                        {labOnly && history.some((row) => "coverageHistory" in row && row.coverageHistory === "legacy-not-preserved") && <p className="note">Los cierres anteriores a la versión 3 no conservan el detalle de las coberturas. Ese trabajo no se reconstruye desde tareas actuales.</p>}
                       </>
                     ) : (
-                      <div className="note">
-                        La evolución aparece al registrar trabajo en al menos dos
-                        períodos. No se inventan datos históricos.
-                      </div>
+                      <>
+                        <div className="note">
+                          Para comparar meses, cerrá al menos dos períodos completos. Los períodos abiertos no se incluyen.
+                        </div>
+                        <div className="analytics-series" data-tour="analytics-series" role="group" aria-label="Series del gráfico de evolución mensual">
+                          <button type="button" className={historySeries.includes("weighted") ? "selected" : ""} aria-pressed={historySeries.includes("weighted")} disabled={historySeries.length === 1 && historySeries.includes("weighted")} onClick={() => toggleHistorySeries("weighted")}><span className="series-dot series-dot-weighted" />Cumplimiento ponderado</button>
+                          <button type="button" className={historySeries.includes("onTime") ? "selected" : ""} aria-pressed={historySeries.includes("onTime")} disabled={historySeries.length === 1 && historySeries.includes("onTime")} onClick={() => toggleHistorySeries("onTime")}><span className="series-dot series-dot-ontime" />Entregas en fecha</button>
+                          {labOnly && <button type="button" className={historySeries.includes("operationalLoad") ? "selected" : ""} aria-pressed={historySeries.includes("operationalLoad")} disabled={historySeries.length === 1 && historySeries.includes("operationalLoad")} onClick={() => toggleHistorySeries("operationalLoad")}><span className="series-dot series-dot-load" />Carga operativa</button>}
+                          {labOnly && <button type="button" className={historySeries.includes("recordedSeconds") ? "selected" : ""} aria-pressed={historySeries.includes("recordedSeconds")} disabled={historySeries.length === 1 && historySeries.includes("recordedSeconds")} onClick={() => toggleHistorySeries("recordedSeconds")}><span className="series-dot series-dot-time" />Tiempo registrado</button>}
+                        </div>
+                      </>
                     )}
                   </Panel>
                   <Panel
                     title="Distribución de tareas"
                     sub="Cantidad de tareas del filtro actual · no representa puntos ni cumplimiento"
+                    collapsible
+                    defaultOpen
                   >
-                    <div className="analytics-series analytics-distribution-picker" role="group" aria-label="Distribuir tareas por">
+                    <div className="analytics-series analytics-distribution-picker" data-tour="analytics-distribution" role="group" aria-label="Distribuir tareas por">
                       {([
                         ["status", "Estado"],
                         ["kind", "Tipo"],
                         ["company", "Empresa"],
+                        ["team", "Equipo"],
                       ] as const).map(([value, label]) => (
                         <button
                           type="button"
@@ -2327,13 +2786,13 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                         </ResponsiveContainer>
                       </div>
                     ) : (
-                      <Empty text="No hay tareas para distribuir con estos filtros." />
+                      <div data-tour="analytics-distribution-empty"><Empty text="No hay tareas para distribuir con estos filtros." /></div>
                     )}
                   </Panel>
                 </div>
                 <Panel
                   title="Detalle que explica el indicador"
-                  sub="Aportes del cálculo vigente en el laboratorio; la regla final para operativas está pendiente de redefinición"
+                  sub="Puntos de entregables, con empresa y responsable. Las operativas se analizan por separado según cantidad, peso y tiempo."
                   collapsible
                   defaultOpen={false}
                 >
@@ -2350,7 +2809,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                         </tr>
                       </thead>
                       <tbody>
-                        {filtered.map((t) => (
+                        {metricTasks.map((t) => (
                           <tr key={t.id}>
                             <td>
                               <button
@@ -2364,11 +2823,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                             <td>{companyOf(t.companyId)}</td>
                             <td>{t.kind}</td>
                             <td>{t.weight}</td>
-                            <td>
-                              {t.kind === "operativa"
-                                ? `${taskQuantity(t, state.activity)} / ${t.target} ${t.unit}`
-                                : t.status}
-                            </td>
+                            <td>{t.status}</td>
                             <td>
                               {metrics([t], state.activity).earned.toFixed(1)}
                             </td>
@@ -2395,7 +2850,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
               {laboratory && <LaboratoryInvitations state={state} />}
               {laboratory && !remoteSave && <HabitualTaskProposalInbox state={state} actor={active} month={month} commit={commit} notify={notify} />}
               {remoteSave&&<WorkspaceSetup state={state} commit={commit} presence={presence}/>}
-              <Workforce state={state} commit={commit} notify={notify} remote={!!remoteSave}/>
+              <Workforce state={state} commit={commit} notify={notify} remote={!!remoteSave} laboratory={labOnly} presence={presence} now={tick}/>
             </>)}
             {page === "calendar" && <DeadlineAgenda state={state} month={month} company={company} owner={viewedOwner} sector={sector} openTask={setDetail} openNotes={()=>setPage('annotations')} actor={active} laboratory={laboratory && !remoteSave} commit={commit} notify={notify}/>}
             {page === "team" && (
@@ -2435,6 +2890,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                           <div>
                             <b>{nameOf(t.managerId)}</b>
                             <small>Encargado · {teamName(t.id)}</small>
+                            {(labOnly || remoteSave) && personPresence(t.managerId) && <small className={`lab-presence-text ${personPresence(t.managerId)!.online ? "is-online" : "is-offline"}`}>{personPresence(t.managerId)!.label}</small>}
                           </div>
                         </div>
                         {people
@@ -2452,8 +2908,10 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                                     ? "Inducción completada"
                                     : "Inducción pendiente"}
                                 </small>
+                                {(labOnly || remoteSave) && personPresence(p.id) && <small className={`lab-presence-text ${personPresence(p.id)!.online ? "is-online" : "is-offline"}`}>{personPresence(p.id)!.label}</small>}
                               </div>
                               <button
+                                data-tour="team-consultation"
                                 aria-label={`Ver tareas de ${p.name}`}
                                 onClick={() => {
                                   setBoardOwner(p.id);
@@ -2469,7 +2927,9 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                 </div>
                 <Panel
                   title="Relaciones del equipo"
-                  sub={remoteSave ? 'Los permisos de cada persona se comprueban en el servidor.' : 'Ámbitos de la demostración; los permisos definitivos deben ejecutarse en la base'}
+                  sub={`${people.length} perfiles · ${remoteSave ? 'los permisos se comprueban en el servidor.' : 'ámbitos de la demostración.'}`}
+                  collapsible
+                  defaultOpen={false}
                 >
                   <div className="table-wrap">
                     <table>
@@ -2506,7 +2966,9 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             {page === "catalog" && active.role === "jefe" && (
               <Panel
                 title="Catálogo estándar y pesos"
-                sub="El jefe define el peso. Los cambios se aplican a nuevas asignaciones; no reescriben meses anteriores."
+                sub={`${catalogEntries.length} de ${state.templates.length} procesos · el jefe define el peso. Los cambios se aplican a nuevas asignaciones; no reescriben meses anteriores.`}
+                collapsible
+                defaultOpen
               >
                 {active.role === "jefe" && (
                   <CatalogueCreator
@@ -2516,8 +2978,15 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                     versioned={laboratory && !remoteSave}
                   />
                 )}
+                <div className="catalog-filter-bar">
+                  <label><span>Buscar proceso</span><input data-tour="task-catalogue" aria-label="Buscar en el catálogo" value={catalogSearch} onChange={(event) => setCatalogSearch(event.target.value)} placeholder="Nombre, descripción, sector o unidad" /></label>
+                  <label><span>Tipo</span><select aria-label="Filtrar tipo de proceso" value={catalogKind} onChange={(event) => setCatalogKind(event.target.value as typeof catalogKind)}><option value="all">Todos</option><option value="resultado">Entregables</option><option value="operativa">Operativas</option></select></label>
+                  <label><span>Sector</span><select aria-label="Filtrar sector del catálogo" value={catalogSector} onChange={(event) => setCatalogSector(event.target.value)}><option value="">Todos los sectores</option>{[...new Set(state.templates.map((template) => template.sector))].sort((a, b) => a.localeCompare(b, "es")).map((name) => <option key={name} value={name}>{name}</option>)}</select></label>
+                  {(catalogSearch || catalogKind !== "all" || catalogSector) && <button type="button" onClick={() => { setCatalogSearch(""); setCatalogKind("all"); setCatalogSector(""); }}>Limpiar filtros</button>}
+                </div>
                 <div className="catalog-grid">
-                  {state.templates.map((template) => <CatalogueVersionCard key={template.id} state={state} template={template} actor={active} commit={commit} notify={notify} versioned={laboratory && !remoteSave} />)}
+                  {catalogEntries.map((template) => <CatalogueVersionCard key={template.id} state={state} template={template} actor={active} commit={commit} notify={notify} versioned={laboratory && !remoteSave} />)}
+                  {!catalogEntries.length && <Empty text="No hay procesos que coincidan con estos filtros." />}
                 </div>
               </Panel>
             )}
@@ -2526,17 +2995,20 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                 <div className="notice-banner">
                   <LockKeyhole size={18} />
                   <span>
-                    El cierre abarca todas las empresas de cada empleado. Guarda
-                    tareas, registros y métricas del mes; después bloquea sus
-                    cambios {remoteSave?'en el servidor.':'en esta demostración.'}
+                    Cada cierre corresponde a una persona, empresa y período.
+                    Cuando quedan cerradas todas las empresas con trabajo, se
+                    consolida el mes y se bloquean sus cambios {remoteSave?'en el servidor.':'en esta demostración.'}
                   </span>
                 </div>
-                <PeriodReports state={state} month={month} />
-                <Panel
+                <PeriodReports state={state} month={month} laboratory={labOnly} />
+                {labOnly && <CompanyClosureManager state={state} actor={active} month={month} commit={commit} companyOf={companyOf} nameOf={nameOf} teamName={teamName} notify={notify} />}
+                {!labOnly && <Panel
                   title={`Cierre de ${monthLabel(month)}`}
                   sub="Cada persona tiene su propia consolidación"
+                  collapsible
+                  defaultOpen
                 >
-                  <div className="table-wrap">
+                  <div className="table-wrap" data-tour="monthly-close-basic">
                     <table>
                       <thead>
                         <tr>
@@ -2584,7 +3056,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                                     <button
                                       onClick={() =>
                                         download(
-                                          closureCsvRows(c, companyOf),
+                                          closureCsvRows(c, companyOf, (item) => active.role === "jefe" || active.id === item.executorId || canSee(active, item.originalOwnerId, state.profiles)),
                                           `cierre-${p.name}-${month}.csv`,
                                         )
                                       }
@@ -2614,7 +3086,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                       </tbody>
                     </table>
                   </div>
-                </Panel>
+                </Panel>}
               </>
             )}
             </Suspense>
@@ -2632,22 +3104,37 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
         </div>
       )}
       {tourOpen && (
-        <div className="tour-coach" role="dialog" aria-label="Recorrido guiado">
+        <div className="tour-backdrop" aria-hidden="true" />
+      )}
+      {tourOpen && (
+        <div
+          className="tour-coach"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Recorrido guiado"
+          ref={tourDialog}
+          style={tourPosition ? { top: tourPosition.top, left: tourPosition.left } : undefined}
+        >
           <small>
             RECORRIDO · {tourStep + 1}/{tours.length}
           </small>
           <h3>{tours[tourStep].title}</h3>
-          <p>{tours[tourStep].text}{tourFallback ? " Este elemento no está visible con estos filtros o el tablero está vacío; podés seguir con el recorrido." : ""}</p>
+          <p>{tours[tourStep].text}{tourFallback ? " Se muestra el bloque equivalente disponible en esta modalidad; el recorrido no crea datos de ejemplo." : !tourPosition ? " El contenido de esta sección todavía no está disponible; podés continuar." : ""}</p>
+          {tourResetNotice && <p role="status">El recorrido se actualizó y comienza de nuevo. Tus otros datos siguen guardados.</p>}
           <div>
             <button
               disabled={tourStep === 0}
               onClick={() => {
                 const previous = Math.max(0, tourStep - 1);
-                if (commit({ ...state, tour: { ...state.tour, [active.id]: previous }, tourVersion: { ...state.tourVersion, [active.id]: TOUR_VERSION } })) setPage(tours[previous].page);
+                if (commit({ ...state, tour: { ...state.tour, [active.id]: previous }, tourStepId: { ...state.tourStepId, [active.id]: tours[previous]?.id || "__complete__" }, tourVersion: { ...state.tourVersion, [active.id]: TOUR_VERSION } })) {
+                  setPage(tours[previous].page);
+                  if (previous === 0) requestAnimationFrame(() => tourPrimaryRef.current?.focus());
+                }
               }}
             >Anterior</button>
             <button onClick={() => setTourOpen(false)}>Pausar</button>
             <button
+              ref={tourPrimaryRef}
               className="primary"
               onClick={() => {
                 if (tourStep === tours.length - 1) {
@@ -2655,6 +3142,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                     commit({
                       ...state,
                       tour: { ...state.tour, [active.id]: tours.length },
+                      tourStepId: { ...state.tourStepId, [active.id]: "__complete__" },
                       tourVersion: {
                         ...state.tourVersion,
                         [active.id]: TOUR_VERSION,
@@ -2666,6 +3154,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                   commit({
                     ...state,
                     tour: { ...state.tour, [active.id]: tourStep + 1 },
+                  tourStepId: { ...state.tourStepId, [active.id]: tours[tourStep + 1]!.id },
                     tourVersion: {
                       ...state.tourVersion,
                       [active.id]: TOUR_VERSION,
@@ -2686,9 +3175,10 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
         <NewTask
           state={state}
           active={active}
+          laboratory={labOnly}
           month={month}
           company={company}
-          owner={noteToTask || requestToTask ? active.id : ownBoardPages.includes(page) ? viewedOwner : owner || active.id}
+          owner={noteToTask || requestToTask ? active.id : isOwnBoardPage ? viewedOwner : owner || active.id}
           people={people}
           seedAnnotation={noteToTask}
           seedRequest={requestToTask}
@@ -2700,6 +3190,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           create={(a) => {
             try {
               a = standardizeAssignment(state, a);
+              if (labOnly && a.kind === "operativa") a.target = 0;
             } catch (e) {
               notify((e as Error).message);
               return;
@@ -2744,24 +3235,26 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
               notify("Un pedido se convierte en una tarea puntual; no se permiten repeticiones.");
               return;
             }
+            if (!converting && active.role !== "jefe" && (a.frequency !== "única" || effectiveSchedule.frequency !== "única")) {
+              notify("Sólo jefatura puede definir recurrencias. Elegí una tarea de una sola vez.");
+              return;
+            }
             const targetPeriod = converting
               ? effectiveSchedule.startDate.slice(0, 7)
               : month;
             const responsible = state.profiles.find((p) => p.id === a.ownerId);
             if (
               !responsible?.active ||
+              !responsible.teamId ||
+              !state.teams.some((team) => team.id === responsible.teamId) ||
               !responsible.companyIds.includes(a.companyId) ||
-              !canSee(active, a.ownerId, state.profiles)
+              !(labOnly ? canAssignLabTask(state, active, a.ownerId, a.companyId) : canSee(active, a.ownerId, state.profiles))
             ) {
               notify("Empresa o responsable fuera del ámbito autorizado.");
               return;
             }
-            if (
-              state.closures.some(
-                (c) => c.ownerId === a.ownerId && c.month === targetPeriod,
-              )
-            ) {
-              notify(`El período ${targetPeriod} de esa persona está cerrado.`);
+            if (isLabCompanyClosed(state, a.ownerId, a.companyId, targetPeriod)) {
+              notify(`La unidad ${companyOf(a.companyId)} · ${targetPeriod} de esa persona está cerrada.`);
               return;
             }
             let next = materialize(
@@ -2822,6 +3315,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
         />
       )}
       {tasksForDetail && (
+        <Suspense fallback={<div className="section-loading" role="status">Cargando detalle de tarea…</div>}>
         <Dialog title={tasksForDetail.title} onClose={() => setDetail(null)}>
           <div className="detail-meta">
             <span className="badge">{companyOf(tasksForDetail.companyId)}</span>
@@ -2848,8 +3342,12 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             const source = state.internalRequests?.find((entry) => entry.id === tasksForDetail.originRequestId);
             return source ? <div className="request-origin-context"><b>Pedido de origen · {source.subject}</b><p>{source.description}</p></div> : null;
           })()}
-          <TimelinessBadge value={taskTimeliness(tasksForDetail, state.activity, new Date().toISOString())} />
-          {laboratory && <JointTaskSetup state={state} task={tasksForDetail} actor={active} commit={commit} notify={notify} />}
+          {(!labOnly || tasksForDetail.kind !== "operativa") && <TimelinessBadge value={taskTimeliness(tasksForDetail, state.activity, new Date().toISOString())} />}
+          {laboratory && <JointTaskSetup state={state} task={tasksForDetail} actor={active} commit={commit} notify={notify} laboratory={labOnly} />}
+          {labOnly && tasksForDetail.kind === "resultado" && <CommercialProgressPanel state={state} task={tasksForDetail} actor={active} commit={commit} notify={notify} canUpdate={canExecute(tasksForDetail)} canComplete={canExecute(tasksForDetail) && tasksForDetail.checklist.every((check) => check.done)} onComplete={() => advance(tasksForDetail, true)} />}
+          {labOnly && active.role === "jefe" && tasksForDetail.kind === "resultado" && !taskLocked(tasksForDetail) && <TaskReadinessPanel state={state} task={tasksForDetail} actor={active} commit={commit} notify={notify} />}
+          {labOnly && <TaskSchedulePanel key={`schedule-${tasksForDetail.id}`} state={state} task={tasksForDetail} actor={active} commit={commit} notify={notify} />}
+          {labOnly && tasksForDetail.kind === "resultado" && <TaskEvidencePanel state={state} task={tasksForDetail} actor={active} commitLatest={commitLatestWithResult} notify={notify} canAdd={canExecute(tasksForDetail) && !taskLocked(tasksForDetail)} />}
           <div className="timer-panel">
             <div>
               <small>TIEMPO PROPIO · {active.name.toUpperCase()}</small>
@@ -2866,9 +3364,10 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             </div>
             <button
               disabled={
-                isClosed(state, tasksForDetail) ||
-                !!tasksForDetail.blockedBy ||
-                tasksForDetail.status === "Completada"
+                taskLocked(tasksForDetail) || !canExecute(tasksForDetail) ||
+                tasksForDetail.status === "Completada" ||
+                (!tasksForDetail.sessions?.some((e) => !e.end && e.actorId === active.id) &&
+                  !taskReadiness(state, tasksForDetail, undefined, active).ready)
               }
               onClick={() =>
                 clock(
@@ -2911,7 +3410,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                   <input
                     type="checkbox"
                     checked={c.done}
-                    disabled={isClosed(state, tasksForDetail)}
+                    disabled={taskLocked(tasksForDetail) || !canExecute(tasksForDetail) || !taskReadiness(state, tasksForDetail, undefined, active).ready}
                     onChange={(e) =>
                       mutateTask(
                         tasksForDetail,
@@ -2931,7 +3430,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                 <select
                   value={tasksForDetail.blockedBy}
                   disabled={
-                    isClosed(state, tasksForDetail) ||
+                    taskLocked(tasksForDetail) || !canExecute(tasksForDetail) ||
                     tasksForDetail.status === "Completada"
                   }
                   onChange={(e) =>
@@ -2960,9 +3459,9 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                 </select>
               </label>
               <div className="modal-actions">
-                <button
-                  className="primary"
-                  disabled={isClosed(state, tasksForDetail)}
+            <button
+              className="primary"
+                  disabled={taskLocked(tasksForDetail) || !canExecute(tasksForDetail) || !taskReadiness(state, tasksForDetail, undefined, active).ready}
                   onClick={() => advance(tasksForDetail)}
                 >
                   {tasksForDetail.status === "Pendiente"
@@ -2976,17 +3475,9 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             </>
           ) : (
             <>
-              <h3>
-                {taskQuantity(tasksForDetail, state.activity)} /{" "}
-                {tasksForDetail.target} {tasksForDetail.unit}
-              </h3>
-              <Meter
-                value={
-                  (taskQuantity(tasksForDetail, state.activity) /
-                    tasksForDetail.target) *
-                  100
-                }
-              />
+              {labOnly
+                ? <h3>{taskQuantity(tasksForDetail, state.activity)} {tasksForDetail.unit || "movimientos"} registrados</h3>
+                : <><h3>{taskQuantity(tasksForDetail, state.activity)} / {tasksForDetail.target} {tasksForDetail.unit}</h3><Meter value={(taskQuantity(tasksForDetail, state.activity) / tasksForDetail.target) * 100} /></>}
               <div className="activity-history">
                 {state.activity
                   .filter((a) => a.taskId === tasksForDetail.id && (active.role !== "empleado" || !tasksForDetail.responsibility || a.actorId === active.id))
@@ -2998,33 +3489,38 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                       <span>
                         {fmt(a.date)} · {a.note}
                       </span>
+                      {labOnly && <EvidenceLinks records={(state.taskEvidence || []).filter((evidence) => evidence.activityId === a.id)} />}
                     </div>
                   ))}
               </div>
               <button
                 className="primary"
-                disabled={isClosed(state, tasksForDetail)}
+                disabled={taskLocked(tasksForDetail) || !canExecute(tasksForDetail)}
                 onClick={() => setLogFor(tasksForDetail.id)}
               >
                 Registrar actividad
               </button>
             </>
           )}
-          {laboratory && <TaskComments key={tasksForDetail.id} state={state} taskId={tasksForDetail.id} commit={commit} notify={notify} />}
-          {active.role === "jefe" && !isClosed(state, tasksForDetail) && (
+          {laboratory && <TaskComments key={`comments-${tasksForDetail.id}`} state={state} taskId={tasksForDetail.id} commit={commit} notify={notify} />}
+          {active.role === "jefe" && !taskLocked(tasksForDetail) && (
             <details>
               <summary>Configuración del jefe · este período</summary>
               <label>
                 Peso
                 <select
                   value={tasksForDetail.weight}
-                  onChange={(e) =>
-                    mutateTask(
-                      tasksForDetail,
-                      (t) => ({ ...t, weight: Number(e.target.value) }),
-                      "Ajustó peso del período",
-                    )
-                  }
+                  onChange={(e) => {
+                    if (!labOnly) {
+                      mutateTask(tasksForDetail, (task) => ({ ...task, weight: Number(e.target.value) }), "Ajustó peso del período");
+                      return;
+                    }
+                    try {
+                      commit(updateTaskWeight(state, tasksForDetail.id, Number(e.target.value), active.id), "Ajustó peso del período", tasksForDetail.id);
+                    } catch (error) {
+                      notify(error instanceof Error ? error.message : "No se pudo ajustar el peso.");
+                    }
+                  }}
                 >
                   {[1, 2, 3, 5, 8].map((n) => (
                     <option key={n}>{n}</option>
@@ -3038,6 +3534,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             </details>
           )}
         </Dialog>
+        </Suspense>
       )}
       {logTask && (
         <Dialog title="Registrar actividad" onClose={() => setLogFor(null)}>
@@ -3046,8 +3543,15 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             {nameOf(logTask.ownerId)}
           </p>
           <form
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
+              if (activitySubmitLock.current) return;
+              activitySubmitLock.current = true;
+              setActivitySaving(true);
+              let activityOutcome: CommitOutcome | null = null;
+              let evidence: TaskEvidence[] = [];
+              let releaseEvidenceLock: (() => void) | null = null;
+              try {
               const f = new FormData(e.currentTarget);
               const qty = Number(f.get("qty"));
               const date = String(f.get("date"));
@@ -3059,35 +3563,87 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                 notify("La fecha debe pertenecer al período y no ser futura.");
                 return;
               }
-              if (isClosed(state, logTask)) {
-                notify("Este mes está cerrado.");
+              if (taskLocked(logTask) || !canExecute(logTask)) {
+                notify(taskLocked(logTask) ? "La unidad empresa/persona está cerrada." : "Sólo el responsable o la cobertura autorizada puede registrar movimientos.");
                 return;
               }
-              if (
-                commit(
-                  {
-                    ...state,
-                    activity: [
-                      ...state.activity,
-                      {
-                        id: id(),
-                        taskId: logTask.id,
-                        qty,
-                        date,
-                        note: String(f.get("note")).trim(),
-                        actorId: active.id,
-                        createdAt: new Date().toISOString(),
-                      },
-                    ],
-                  },
-                  "Registró actividad",
-                  logTask.id,
-                )
-              ) {
+              if (labOnly && logTask.responsibility && logTask.kind === "operativa") { notify("No se habilitan nuevas operativas conjuntas en esta versión."); return; }
+              const activityId = id();
+              const files = labOnly ? (f.getAll("evidenceFiles") as File[]).filter((file) => file.size > 0) : [];
+              try {
+                if (files.length) {
+                  const evidenceStorage = await import("./data/laboratoryEvidence");
+                  releaseEvidenceLock = await evidenceStorage.acquireEvidenceMutationLock();
+                  if (!isLaboratoryStateCurrent(latestStateRef.current) || !await evidenceStorage.reconcileEvidenceAgainstDurableState(latestStateRef.current)) {
+                    notify("El laboratorio cambió en otra pestaña. Recargá la página antes de registrar la actividad.");
+                    return;
+                  }
+                  evidence = await evidenceStorage.storeTaskEvidence(files, { taskId: logTask.id, activityId, profileId: active.id }, 0);
+                }
+              } catch (error) {
+                notify(error instanceof Error ? error.message : "No se pudo guardar la evidencia.");
+                return;
+              }
+              activityOutcome = commitLatestWithResult((current) => {
+                const currentActor = current.profiles.find((profile) => profile.id === active.id);
+                const currentTask = current.tasks.find((task) => task.id === logTask.id);
+                if (current.activeId !== active.id || !currentActor?.active || !currentTask || currentTask.month !== logTask.month ||
+                  date < `${currentTask.month}-01` || !date.startsWith(currentTask.month) || date > dateART() ||
+                  (labOnly && (isLabTaskLocked(current, currentTask) || !canExecuteLab(current, currentActor, currentTask, date))) ||
+                  evidence.some((row) => row.taskId !== currentTask.id || row.activityId !== activityId || row.profileId !== active.id) ||
+                  evidence.some((row) => (current.taskEvidence || []).some((existingRow) => existingRow.id === row.id))) return null;
+                if (labOnly && currentTask.responsibility && currentTask.kind === "operativa") return null;
+                const snapshots = labOnly ? activitySnapshotsForLog(current, currentTask, date) : {};
+                return {
+                  ...current,
+                  activity: [...current.activity, {
+                    id: activityId,
+                    taskId: currentTask.id,
+                    qty,
+                    date,
+                    note: String(f.get("note")).trim(),
+                    actorId: active.id,
+                    createdAt: new Date().toISOString(),
+                    ...(evidence.length ? { evidenceIds: evidence.map((row) => row.id) } : {}),
+                    ...snapshots,
+                  }],
+                  taskEvidence: [...(current.taskEvidence || []), ...evidence],
+                };
+              }, "Registró actividad", logTask.id);
+              if (activityOutcome.status === "committed") {
                 setLogFor(null);
                 notify(
-                  "Actividad registrada. Los indicadores se actualizaron.",
+                  evidence.length ? "Actividad y evidencia guardadas. Los indicadores se actualizaron." : "Actividad registrada. Los indicadores se actualizaron.",
                 );
+              } else if (activityOutcome.status === "rejected" && evidence.length) {
+                const evidenceStorage = await import("./data/laboratoryEvidence");
+                try {
+                  await evidenceStorage.removeStoredEvidence(evidence.map((row) => row.id));
+                  if (activityOutcome.reason === "preparation")
+                    notify("No se pudo preparar la actividad. El archivo temporal se retiró y no quedó adjuntado. Podés volver a intentar.");
+                  else if (activityOutcome.reason !== "storage")
+                    notify("El usuario, el permiso o el estado de la tarea cambió durante la carga. La actividad y sus archivos no se guardaron.");
+                } catch {
+                  try {
+                    await evidenceStorage.reconcileEvidenceFromDurableState();
+                    notify("La actividad no se guardó. El archivo temporal quedó conservado para recuperación, pero ya no ocupa el cupo de adjuntos.");
+                  } catch {
+                    notify("La actividad no se guardó. El archivo temporal quedó conservado para recuperación; no se pudo actualizar su cupo local.");
+                  }
+                }
+              } else if (activityOutcome.status === "rejected") {
+                notify("El usuario, el permiso o el estado de la tarea cambió. No se registró la actividad.");
+              } else {
+                notify("No se pudo confirmar si la actividad quedó guardada. Los archivos se conservaron; revisá el historial antes de reintentar.");
+              }
+              } catch (error) {
+                notify(evidence.length && activityOutcome === null
+                  ? "No se pudo determinar si la actividad quedó guardada. Los archivos se conservaron; revisá el historial antes de reintentar."
+                  : activityOutcome?.status === "committed" ? "La actividad quedó registrada, pero falló la confirmación visual. Revisá el historial antes de reintentar." : activityOutcome?.status === "unknown" ? "No se pudo confirmar si la actividad quedó guardada. Los archivos se conservaron; revisá el historial antes de reintentar." : error instanceof Error ? `No se pudo confirmar el registro: ${error.message}` : "No se pudo confirmar el registro.");
+              } finally {
+                releaseEvidenceLock?.();
+                activitySubmitLock.current = false;
+                setActivitySaving(false);
               }
             }}
           >
@@ -3120,16 +3676,16 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
               </label>
             </div>
             <label>
-              Referencia / lote / trabajo realizado
+              Detalle / referencia (opcional, sugerido)
               <textarea
                 name="note"
-                required
                 maxLength={500}
                 placeholder="Ej. Lote de facturas de proveedores del 30/09"
               />
             </label>
+            {labOnly && <label className="lab-evidence-upload">Evidencia opcional · hasta 3 archivos<input name="evidenceFiles" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" multiple /><small>Imágenes de hasta 5 MB y PDF de hasta 10 MB; se guardan en este navegador.</small></label>}
             <div className="modal-actions">
-              <button className="primary">Guardar registro</button>
+              <button className="primary" disabled={activitySaving} aria-busy={activitySaving}>{activitySaving ? "Guardando…" : "Guardar registro"}</button>
             </div>
           </form>
         </Dialog>
@@ -3299,10 +3855,11 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           </form>
         </Dialog>
       )}
-      {quickTaskSearchOpen && laboratory && !remoteSave && (
+      {quickTaskSearchOpen && (
         <QuickTaskSearch
           state={state}
           active={active}
+          laboratory={labOnly}
           currentMonth={month}
           onClose={() => setQuickTaskSearchOpen(false)}
           onSelect={openSearchResult}
@@ -3314,6 +3871,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
 function NewTask({
   state,
   active,
+  laboratory,
   month,
   company,
   owner,
@@ -3325,6 +3883,7 @@ function NewTask({
 }: {
   state: State;
   active: Profile;
+  laboratory: boolean;
   month: string;
   company: string;
   owner: string;
@@ -3335,6 +3894,20 @@ function NewTask({
   create: (a: Assignment) => void;
 }) {
   const [template, setTemplate] = useState("");
+  const assignablePeople = people.filter((profile) =>
+    !!profile.teamId && state.teams.some((team) => team.id === profile.teamId),
+  );
+  const initialOwner = assignablePeople.some((profile) => profile.id === owner)
+    ? owner
+    : assignablePeople[0]?.id || "";
+  const [selectedOwner, setSelectedOwner] = useState(initialOwner);
+  const [selectedCompany, setSelectedCompany] = useState(() => {
+    const selectedProfile = state.profiles.find((profile) => profile.id === initialOwner);
+    const allowed = state.companies.filter((candidate) => selectedProfile?.companyIds.includes(candidate.id) &&
+      (active.role === "jefe" || active.companyIds.includes(candidate.id)));
+    return allowed.some((candidate) => candidate.id === company) ? company : allowed[0]?.id || "";
+  });
+  const [companyScopeRevoked, setCompanyScopeRevoked] = useState(false);
   const [steps, setSteps] = useState<string[]>(() => seedAnnotation ? parseSteps(seedAnnotation.content) : []);
   const [schedule, setSchedule] = useState<Schedule>(() =>
     defaultSchedule(seedAnnotation?.reminderOn || month + "-25"),
@@ -3343,6 +3916,16 @@ function NewTask({
   const [taskError, setTaskError] = useState("");
   const [kind, setKind] = useState<"resultado" | "operativa">("resultado");
   const t = state.templates.find((t) => t.id === template);
+  const selectedOwnerProfile = state.profiles.find((profile) => profile.id === selectedOwner);
+  const allowedCompanies = state.companies.filter((candidate) => selectedOwnerProfile?.companyIds.includes(candidate.id) &&
+    (active.role === "jefe" || active.companyIds.includes(candidate.id)));
+  const selectedCompanyAvailable = allowedCompanies.some((candidate) => candidate.id === selectedCompany);
+  useEffect(() => {
+    if (selectedCompany && !selectedCompanyAvailable) {
+      setSelectedCompany("");
+      setCompanyScopeRevoked(true);
+    }
+  }, [selectedCompany, selectedCompanyAvailable]);
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
@@ -3365,12 +3948,16 @@ function NewTask({
       if (selectedKind === "resultado")
         checklist = validateSteps(t?.steps || parseSteps(String(f.get("steps") || "")));
       if (selectedKind === "operativa") {
-        target = Number(f.get("target") || t?.target || 0);
-        if (!Number.isSafeInteger(target) || target < 1 || target > 1000000)
+        target = laboratory ? 0 : Number(f.get("target") || t?.target || 0);
+        if (!laboratory && (!Number.isSafeInteger(target) || target < 1 || target > 1000000))
           throw Error("La meta debe ser un número entero entre 1 y 1.000.000.");
       }
     } catch (e) {
       setTaskError((e as Error).message);
+      return;
+    }
+    if (!selectedCompany || !selectedCompanyAvailable) {
+      setTaskError("Empresa o responsable fuera del ámbito autorizado. Elegí una empresa vigente para continuar.");
       return;
     }
     setScheduleError("");
@@ -3380,8 +3967,8 @@ function NewTask({
       id: id(),
       templateId: template || null,
       title,
-      ownerId: String(f.get("owner")),
-      companyId: String(f.get("company")),
+      ownerId: selectedOwner,
+      companyId: selectedCompany,
       sector: t?.sector || String(f.get("sector") || active.sector),
       kind: selectedKind,
       weight: t?.weight || (active.role === "jefe" ? Number(f.get("weight") || 0) : 1),
@@ -3431,27 +4018,43 @@ function NewTask({
           />
         </label>
         <div className="form-grid">
-          <label>
-            Empresa obligatoria
-            <select
-              name="company"
-              defaultValue={company || active.companyIds[0] || ""}
-              required
-            >
-              <option value="" disabled>
-                Seleccioná una empresa
-              </option>
-              {state.companies.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
+          <div>
+            <label>
+              Empresa obligatoria
+              <select
+                name="company"
+                value={selectedCompany}
+                aria-describedby={companyScopeRevoked ? "new-task-company-revoked" : undefined}
+                onChange={(event) => {
+                  setSelectedCompany(event.target.value);
+                  setCompanyScopeRevoked(false);
+                }}
+                required
+              >
+                <option value="" disabled>
+                  Seleccioná una empresa
                 </option>
-              ))}
-            </select>
-          </label>
+                {allowedCompanies.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {companyScopeRevoked && !selectedCompany && <small id="new-task-company-revoked" className="field-note">La empresa seleccionada dejó de estar autorizada. Elegí una empresa vigente para continuar.</small>}
+          </div>
           <label>
             Responsable
-            <select name="owner" defaultValue={owner}>
-              {people.map((p) => (
+            <select name="owner" value={selectedOwner} onChange={(event) => {
+              const nextOwner = event.target.value;
+              const nextProfile = state.profiles.find((profile) => profile.id === nextOwner);
+              const nextAllowed = state.companies.filter((candidate) => nextProfile?.companyIds.includes(candidate.id) &&
+                (active.role === "jefe" || active.companyIds.includes(candidate.id)));
+              setSelectedOwner(nextOwner);
+              if (!nextAllowed.some((candidate) => candidate.id === selectedCompany)) setSelectedCompany(nextAllowed[0]?.id || "");
+            }} required>
+              {!assignablePeople.length && <option value="">No hay personas con equipo disponible</option>}
+              {assignablePeople.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
                 </option>
@@ -3525,17 +4128,10 @@ function NewTask({
                   maxLength={30}
                 />
               </label>
-              <label>
+              {!laboratory && <label>
                 Meta por ocurrencia
-                <input
-                  name="target"
-                  type="number"
-                  min="1"
-                  max="1000000"
-                  required
-                  defaultValue={t?.target || 50}
-                />
-              </label>
+                <input name="target" type="number" min="1" max="1000000" required defaultValue={t?.target || 50} />
+              </label>}
             </>
           )}
         </div>
@@ -3543,7 +4139,7 @@ function NewTask({
           value={schedule}
           onChange={(next) => { setSchedule(next); setScheduleError(""); }}
           month={month}
-          onlyOnce={!!seedAnnotation || !!seedRequest || !t}
+          onlyOnce={active.role !== "jefe" || !!seedAnnotation || !!seedRequest || !t}
         />
         {scheduleError && <p role="alert">{scheduleError}</p>}
         {kind === "resultado" && (
@@ -3567,7 +4163,7 @@ function NewTask({
           <button type="button" onClick={close}>
             Cancelar
           </button>
-          <button className="primary">
+          <button className="primary" disabled={!selectedOwnerProfile || !allowedCompanies.some((candidate) => candidate.id === selectedCompany)}>
             Crear tarea <Plus size={15} />
           </button>
         </div>

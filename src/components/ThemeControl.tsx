@@ -12,20 +12,22 @@ const themeIcons = { system: Monitor, light: Sun, dark: Moon };
 
 export default function ThemeControl() {
   const [theme, setTheme] = useState<Theme>(() => {
-    const stored = localStorage.getItem("paris-theme");
-    return stored === "light" || stored === "dark" ? stored : "system";
+    try {
+      const stored = localStorage.getItem("paris-theme");
+      return stored === "light" || stored === "dark" ? stored : "system";
+    } catch { return "system"; }
   });
 
   useEffect(() => {
-    const mq = matchMedia("(prefers-color-scheme: dark)");
+    const mq = typeof matchMedia === "function" ? matchMedia("(prefers-color-scheme: dark)") : null;
     const apply = () => {
       document.documentElement.dataset.theme =
-        theme === "system" ? (mq.matches ? "dark" : "light") : theme;
+        theme === "system" ? (mq?.matches ? "dark" : "light") : theme;
     };
     apply();
-    localStorage.setItem("paris-theme", theme);
-    mq.addEventListener("change", apply);
-    return () => mq.removeEventListener("change", apply);
+    try { localStorage.setItem("paris-theme", theme); } catch { /* appearance still works for this session */ }
+    mq?.addEventListener("change", apply);
+    return () => mq?.removeEventListener("change", apply);
   }, [theme]);
 
   const Icon = themeIcons[theme];

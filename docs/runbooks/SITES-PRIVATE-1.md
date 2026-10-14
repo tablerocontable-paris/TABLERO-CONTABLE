@@ -1,5 +1,12 @@
 # Operación privada en Sites 1.0
 
+> **Estado vigente — auditoría 11/10/2026:** este documento describe la ruta
+> Worker/D1 histórica, conservada pero no activada por el laboratorio actual.
+> La entrada vigente es LaboratoryWorkspace, con perfiles ficticios y sin /api.
+> No ejecutar Primer uso ni Incorporación del equipo durante esta etapa.
+> Seguir PROJECT-STATUS y EXECUTION-NEXT; cuentas e invitaciones reales se
+> posponen hasta la aceptación funcional. Las afirmaciones de permisos de esta
+> entrega no cierran los hallazgos de la auditoría actual.
 ## Configuración y publicación
 
 Mantener `project_id` existente, `d1: DB`, sin `static` (hay Worker). Variables de servidor `OWNER_EMAIL` y `SITE_ORIGIN` se gestionan mediante Sites. La identidad de los usuarios llega de Sites en `oai-authenticated-user-id` y `oai-authenticated-user-email`.

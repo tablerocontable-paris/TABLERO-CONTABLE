@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-08",
+  "project": "Grupo Paris private laboratory",
+  "scope": "Require an active manager account for profile administration and recurrence changes.",
+  "finding": "The domain checked the manager role for profile edits and recurrence revisions but did not verify that the manager account remained active.",
+  "changes": [
+    "Profile updates now require an active manager.",
+    "Recurring assignment revisions now require an active manager.",
+    "Regression checks reject both operations when the manager profile is inactive."
+  ],
+  "validation": {
+    "regression": {
+      "file": "tests/scheduling-workforce.test.ts",
+      "result": "passed",
+      "cases": [
+        "Inactive manager cannot revise a recurring assignment.",
+        "Inactive manager cannot update an employee profile."
+      ]
+    },
+    "focusedTests": { "result": "passed", "tests": 46, "files": 2 },
+    "typescript": "passed",
+    "fullSuite": { "result": "passed", "tests": 488, "files": 56 },
+    "clientBuild": { "result": "passed", "mainEntryKb": 485.41, "chartChunkKb": 423.74 },
+    "workerBuild": "passed",
+    "gitDiffCheck": "passed; informational LF-to-CRLF notices only"
+  },
+  "releaseState": {
+    "commitCreated": false,
+    "siteUpdated": false,
+    "externalAccountsConnected": false,
+    "estimatedGlobalProgress": "~45%"
+  }
+}

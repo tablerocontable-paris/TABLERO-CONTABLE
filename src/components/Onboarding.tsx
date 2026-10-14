@@ -115,8 +115,10 @@ export default function Onboarding({
     for (const cid of companies) {
       try {
         count += occurrences(scheduleFor(t.id, cid), month).length;
-        const target = targetFor(t.id, cid, "target" in t ? t.target : 0);
-        if (!Number.isFinite(target) || target < 0) validSchedules = false;
+        if (!laboratory) {
+          const target = targetFor(t.id, cid, "target" in t ? t.target : 0);
+          if (!Number.isFinite(target) || target < 0) validSchedules = false;
+        }
       } catch {
         validSchedules = false;
       }
@@ -130,7 +132,7 @@ export default function Onboarding({
     for (const cid of companies) {
       try {
         occurrences(scheduleFor(proposal.id, cid), month);
-        if (proposal.kind === "operativa") {
+        if (!laboratory && proposal.kind === "operativa") {
           const target = targetFor(proposal.id, cid, 0);
           if (!Number.isFinite(target) || target < 0 || !proposal.unit.trim()) validSchedules = false;
         }
@@ -146,7 +148,7 @@ export default function Onboarding({
       : draft.step === 1
         ? draft.selectedCompanyIds.length > 0
         : draft.step === 2
-          ? (all.length > 0 || proposals.length > 0) && !customStepError && !proposalStepError
+          ? profile.role === "jefe" || ((all.length > 0 || proposals.length > 0) && !customStepError && !proposalStepError)
           : draft.step === 3
             ? validSchedules
             : true;
@@ -267,12 +269,20 @@ export default function Onboarding({
           ) : draft.step === 2 ? (
             <>
               <BriefcaseBusiness className="intro-icon" />
-              <h2>Contanos qué hacés habitualmente.</h2>
+              <h2>{profile.role === "jefe" ? "Prepará la gestión de tu equipo." : "Contanos qué hacés habitualmente."}</h2>
               <p>
-                Elegí del catálogo. Los pesos y las metas son definidos por el
-                jefe. El nombre, proceso y controles son iguales para todas las
-                empresas; la empresa, fecha y meta corresponden a tu asignación.
+                {profile.role === "jefe"
+                  ? "Este perfil administra personas, empresas y parámetros. Las tareas de ejecución se asignan a los equipos desde sus perfiles."
+                  : laboratory
+                    ? "Elegí del catálogo. Los entregables se evalúan por controles y puntos; las operativas se registran por unidad, movimientos y tiempo. El coeficiente vigente de cada operativa lo configura la jefatura. La frecuencia y el vencimiento se conservan por empresa."
+                    : "Elegí del catálogo. Los pesos y las metas son definidos por el jefe. El nombre, proceso y controles son iguales para todas las empresas; la empresa, fecha y meta corresponden a tu asignación."}
               </p>
+              {profile.role === "jefe" ? (
+                <div className="note">
+                  La inducción de jefatura no crea tareas personales. Podés continuar y luego configurar el organigrama y el catálogo.
+                </div>
+              ) : (
+                <>
               <div className="catalog-options">
                 {[...state.templates]
                   .sort(
@@ -308,9 +318,8 @@ export default function Onboarding({
                         <p>{t.description}</p>
                         <small>
                           {t.kind === "operativa"
-                            ? `${t.target} ${t.unit}/mes`
-                            : `${t.steps.length} pasos`}{" "}
-                          · {t.weight} pts{" "}
+                            ? laboratory ? `${t.unit || "Movimientos"} · sin cuota` : `${t.target} ${t.unit}/mes · ${t.weight} pts`
+                            : `${t.steps.length} pasos · ${t.weight} pts`}{" "}
                           {t.sector === profile.sector
                             ? "· Sugerida para tu sector"
                             : ""}
@@ -432,7 +441,7 @@ export default function Onboarding({
                         onChange={(e) => patch({ habitualProposalForm: { ...proposalForm, kind: e.target.value as Draft["customKind"], unit: e.target.value === "operativa" ? proposalForm.unit : "" } })}
                       >
                         <option value="resultado">Entregable con controles</option>
-                        <option value="operativa">Actividad con cantidad y meta</option>
+                        <option value="operativa">{laboratory ? "Actividad con cantidad" : "Actividad con cantidad y meta"}</option>
                       </select>
                     </label>
                     {proposalForm.kind === "operativa" && (
@@ -485,14 +494,17 @@ export default function Onboarding({
                   </button>
                 </div>
               ))}
+                </>
+              )}
             </>
           ) : draft.step === 3 ? (
             <>
               <CalendarDays className="intro-icon" />
               <h2>Cada tarea tiene su propio ritmo.</h2>
               <p>
-                Indicá frecuencia, vencimiento y meta para cada empresa. Una
-                tarea puntual no vuelve el mes siguiente.
+                {laboratory
+                  ? "Programá cada proceso por empresa y definí si tiene vencimiento. Los entregables conservan sus controles y puntos; las operativas se miden por movimientos registrados y tiempo, sin meta mensual. Una tarea puntual no vuelve el mes siguiente."
+                  : "Indicá frecuencia, vencimiento y meta para cada empresa. Una tarea puntual no vuelve el mes siguiente."}
               </p>
               {all.map((t) => (
                 <details
@@ -538,16 +550,7 @@ export default function Onboarding({
                       <section className="induction-company-schedule" key={cid}>
                         <h3>{companyName}</h3>
                         {laboratory && t.kind === "operativa" && (
-                          <label>
-                            Meta mensual · {t.unit}
-                            <input
-                              type="number"
-                              min={0}
-                              step="any"
-                              value={targetFor(t.id, cid, t.target)}
-                              onChange={(e) => patch({ companyTargets: { ...draft.companyTargets, [t.id]: { ...draft.companyTargets?.[t.id], [cid]: Number(e.target.value) } } })}
-                            />
-                          </label>
+                          <p className="note">Se registran movimientos y tiempo, sin cuota mensual. La jefatura puede configurar el peso por movimiento.</p>
                         )}
                         <ScheduleEditor
                           onlyOnce={!chosen.some((x) => x.id === t.id)}
@@ -565,7 +568,7 @@ export default function Onboarding({
               {proposals.length > 0 && (
                 <div className="habitual-proposal-schedules">
                   <h3>Propuestas que revisará Juan Pablo</h3>
-                  <p>La frecuencia y la meta quedan separadas por empresa. No se crearán tareas hasta que la jefatura confirme el estándar.</p>
+                  <p>La frecuencia queda separada por empresa. No se crearán tareas hasta que la jefatura confirme el estándar.</p>
                   {proposals.map((proposal) => (
                     <section className="habitual-proposal-schedule" key={proposal.id}>
                       <h4>{proposal.title}</h4>
@@ -591,16 +594,7 @@ export default function Onboarding({
                         <section className="induction-company-schedule" key={cid}>
                           <h3>{state.companies.find((row) => row.id === cid)?.name}</h3>
                           {proposal.kind === "operativa" && (
-                            <label>
-                              Meta mensual · {proposal.unit}
-                              <input
-                                type="number"
-                                min={0}
-                                step="any"
-                                value={targetFor(proposal.id, cid, 0)}
-                                onChange={(e) => patch({ companyTargets: { ...draft.companyTargets, [proposal.id]: { ...draft.companyTargets?.[proposal.id], [cid]: Number(e.target.value) } } })}
-                              />
-                            </label>
+                            <p className="note">Actividad por movimientos, sin meta. La jefatura configura el coeficiente por empresa y vigencia en Coeficientes por movimiento; hasta entonces la carga queda pendiente de parametrizar.</p>
                           )}
                           <ScheduleEditor
                             value={scheduleFor(proposal.id, cid)}
@@ -616,7 +610,7 @@ export default function Onboarding({
               <div className="note">
                 El vencimiento se calcula desde cada nueva ocurrencia. El día 31
                 se ajusta al último día del mes. Cada empresa conserva su propia
-                regla y meta; un plazo de 2 días vence dos días después de cada
+                regla; un plazo de 2 días vence dos días después de cada
                 realización.
               </div>
             </>
@@ -674,13 +668,13 @@ export default function Onboarding({
                           {t.title}
                           <small>{describeSchedule(scheduleFor(t.id, cid))}</small>
                         </span>
-                        <b>{laboratory && t.kind === "operativa" ? `${targetFor(t.id, cid, t.target)} ${t.unit}/mes` : `${"weight" in t ? t.weight : 1} pts`}</b>
+                        <b>{laboratory && t.kind === "operativa" ? `${t.unit || "Movimientos"} · sin cuota` : `${"weight" in t ? t.weight : 1} pts`}</b>
                       </div>
                     ))}
                     {proposals.filter((proposal) => proposalCompaniesFor(proposal).includes(cid)).map((proposal) => (
                       <div className="preview-proposal" key={proposal.id}>
                         <span>{proposal.title}<small>Propuesta · {describeSchedule(scheduleFor(proposal.id, cid))}</small></span>
-                        <b>{proposal.kind === "operativa" ? `${targetFor(proposal.id, cid, 0)} ${proposal.unit}/mes` : "Pendiente"}</b>
+                        <b>{proposal.kind === "operativa" ? `${proposal.unit || "Movimientos"} · sin cuota` : "Pendiente"}</b>
                       </div>
                     ))}
                   </section>
@@ -690,7 +684,7 @@ export default function Onboarding({
                 Las tareas del catálogo y los trabajos puntuales se preparan ahora.
                 Las propuestas habituales quedan separadas y no crean tareas ni
                 puntos hasta que Juan Pablo confirme el estándar. Cada empresa
-                conserva su frecuencia y meta.
+                conserva su frecuencia. Las tareas operativas se miden por movimientos registrados, no por una meta mensual.
               </div>
             </>
           )}

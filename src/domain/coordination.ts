@@ -1,4 +1,4 @@
-import { canSee, id, isClosed, type JointMemberSnapshot, type State, type Task } from "./model";
+import { canSee, id, isClosed, isCompanyClosed, type JointMemberSnapshot, type State, type Task } from "./model";
 
 export interface ActivateJointTaskInput {
   taskId: string;
@@ -30,7 +30,8 @@ export function activateJointTask(
   }
   if (input.expectedRevision !== 0 || task.responsibility)
     throw Error("La tarea cambió desde que abriste la configuración.");
-  if (!actor.companyIds.includes(task.companyId) || !canSee(actor, task.ownerId, state.profiles))
+  if (!state.companies.some((company) => company.id === task.companyId) ||
+      (actor.role !== "jefe" && !actor.companyIds.includes(task.companyId)) || !canSee(actor, task.ownerId, state.profiles))
     throw Error("La tarea está fuera de tu ámbito.");
   if (isClosed(state, task)) throw Error("El período ya está cerrado para uno de los responsables.");
   if (task.status !== "Pendiente" || task.startedAt || task.completedAt || task.blockedBy || task.checklist.some((check) => check.done))
@@ -52,7 +53,7 @@ export function activateJointTask(
   if (!anchor?.active || !second?.active || second.id === anchor.id ||
       !["empleado", "encargado"].includes(anchor.role) || !["empleado", "encargado"].includes(second.role))
     throw Error("Elegí dos responsables operativos distintos y activos.");
-  if (state.closures.some((closure) => closure.ownerId === second.id && closure.month === task.month))
+  if (isCompanyClosed(state, second.id, task.companyId, task.month))
     throw Error("El período del segundo responsable ya está cerrado.");
   if (!anchor.companyIds.includes(task.companyId) || !second.companyIds.includes(task.companyId))
     throw Error("Ambos responsables deben tener acceso a la empresa de la tarea.");

@@ -37,6 +37,8 @@ export default function WorkspaceSetup({
     <Panel
       title="Empresas y acceso"
       sub="Renombrá las cuatro empresas antes de asignar trabajo. Cada tarjeta conserva su empresa y período."
+      collapsible
+      defaultOpen
     >
       <form
         onSubmit={(e) => {

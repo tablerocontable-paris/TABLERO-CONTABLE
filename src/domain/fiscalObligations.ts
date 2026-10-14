@@ -1,5 +1,5 @@
 import { currentMonth, id, responsibleMembers, type State, type Task } from "./model";
-import { canWork } from "./workforce";
+import { calendarCanAccessTask } from "./laboratory-work";
 import { taskTimeliness } from "./timeliness";
 
 export type ObligationMilestone = "presentation" | "payment" | "closing" | "documentation";
@@ -7,6 +7,7 @@ export type FiscalObligationStatus = "pending" | "completed_on_time" | "complete
 
 export interface FiscalObligationRevision {
   revision: number;
+  evaluationVersion?: 1 | 2;
   at: string;
   by: string;
   reason: string;
@@ -29,6 +30,8 @@ export interface FiscalObligation {
   sourceRevision: string;
   sourceCheckedAt: string | null;
   revision: number;
+  /** Missing/1 preserves the historical target-based interpretation; new laboratory obligations use v2 deliverables. */
+  evaluationVersion?: 1 | 2;
   requiredTaskIds: string[];
   createdAt: string;
   createdBy: string | null;
@@ -79,7 +82,11 @@ function identityKey(row: Pick<FiscalObligation, "companyId" | "obligationCode" 
   return [row.companyId, canonicalObligationCode(row.obligationCode), row.fiscalPeriod, row.milestone].join("\u001f");
 }
 
-function checkedInput(input: FiscalObligationInput | (FiscalObligationUpdate & { companyId: string; fiscalPeriod?: string }), state: State) {
+function checkedInput(
+  input: FiscalObligationInput | (FiscalObligationUpdate & { companyId: string; fiscalPeriod?: string }),
+  state: State,
+  allowedHistoricalOperationalIds: ReadonlySet<string> = new Set(),
+) {
   const company = state.companies.find((row) => row.id === input.companyId);
   if (!company) throw Error("Elegí una empresa válida.");
   if (input.fiscalPeriod !== undefined && !validPeriod(input.fiscalPeriod)) throw Error("Revisá el período fiscal.");
@@ -94,6 +101,8 @@ function checkedInput(input: FiscalObligationInput | (FiscalObligationUpdate & {
   const linked = state.tasks.filter((task) => selected.has(task.id));
   if (linked.length !== selected.size || linked.some((task) => task.companyId !== company.id))
     throw Error("Vinculá tareas existentes de la misma empresa.");
+  if (linked.some((task) => task.kind !== "resultado" && !allowedHistoricalOperationalIds.has(task.id)))
+    throw Error("Los hitos nuevos sólo pueden vincular entregables verificables de la misma empresa.");
   return { company, sourceLabel, sourceRevision, linked };
 }
 
@@ -104,13 +113,14 @@ export function canManageFiscalObligation(
   taskIds: string[],
 ): boolean {
   const actor = state.profiles.find((profile) => profile.id === actorId);
-  if (!actor?.active || !actor.companyIds.includes(companyId)) return false;
+  if (!actor?.active || !state.companies.some((company) => company.id === companyId)) return false;
   if (actor.role === "jefe") return true;
+  if (!actor.companyIds.includes(companyId)) return false;
   const linked = state.tasks.filter((task) => taskIds.includes(task.id));
   if (linked.length !== taskIds.length || linked.some((task) => task.companyId !== companyId)) return false;
-  if (linked.length) return linked.every((task) => canWork(state, actor, task));
+  if (linked.length) return linked.every((task) => calendarCanAccessTask(state, actor, task));
   if (actor.role === "empleado") return false;
-  return state.tasks.some((task) => task.companyId === companyId && canWork(state, actor, task));
+  return state.tasks.some((task) => task.companyId === companyId && calendarCanAccessTask(state, actor, task));
 }
 
 export function createFiscalObligation(
@@ -132,7 +142,7 @@ export function createFiscalObligation(
     id: id(), companyId: input.companyId, obligationCode: code, title,
     fiscalPeriod: input.fiscalPeriod, milestone: input.milestone, dueOn: input.dueOn,
     sourceLabel, sourceRevision, sourceCheckedAt: input.sourceCheckedAt,
-    revision: 1, requiredTaskIds: [...input.requiredTaskIds], createdAt: at,
+    revision: 1, evaluationVersion: 2, requiredTaskIds: [...input.requiredTaskIds], createdAt: at,
     createdBy: actorId, updatedAt: at, history: [],
   };
   if ((state.fiscalObligations || []).some((row) => identityKey(row) === identityKey(event)))
@@ -150,7 +160,15 @@ export function updateFiscalObligation(
   const event = (state.fiscalObligations || []).find((row) => row.id === eventId);
   if (!event) throw Error("La obligación ya no está disponible.");
   const actor = state.profiles.find((profile) => profile.id === actorId);
-  const { sourceLabel, sourceRevision } = checkedInput({ ...update, companyId: event.companyId }, state);
+  const { sourceLabel, sourceRevision } = checkedInput(
+    { ...update, companyId: event.companyId },
+    state,
+    event.evaluationVersion === 2
+      ? new Set()
+      : new Set(event.requiredTaskIds.filter((taskId) =>
+          state.tasks.some((task) => task.id === taskId && task.kind === "operativa"),
+        )),
+  );
   if (!actor?.active ||
     !canManageFiscalObligation(state, actorId, event.companyId, event.requiredTaskIds) ||
     !canManageFiscalObligation(state, actorId, event.companyId, update.requiredTaskIds))
@@ -164,7 +182,7 @@ export function updateFiscalObligation(
   if (!changed) throw Error("No hay cambios para guardar.");
   const revision = event.revision + 1;
   const history: FiscalObligationRevision = {
-    revision, at, by: actorId, reason, dueOn: update.dueOn,
+    revision, evaluationVersion: event.evaluationVersion ?? 1, at, by: actorId, reason, dueOn: update.dueOn,
     sourceLabel, sourceRevision, sourceCheckedAt: update.sourceCheckedAt,
     requiredTaskIds: [...update.requiredTaskIds],
   };
@@ -192,6 +210,8 @@ export function fiscalObligationStatus(
   const tasks = event.requiredTaskIds.map((taskId) => state.tasks.find((task) => task.id === taskId));
   if (tasks.some((task) => !task || task.companyId !== event.companyId)) return "unassigned";
   const linked = tasks as Task[];
+  if ((event.evaluationVersion ?? 1) === 2 && linked.some((task) => task.kind !== "resultado"))
+    return "pending";
   if (linked.some((task) => !taskHasActiveResponsible(state, task))) return "unassigned";
   const evidence = linked.map((task) => taskTimeliness({ ...task, due: event.dueOn }, state.activity, asOfISO));
   if (evidence.some((item) => item.achievementAt === null || !["early", "on-date", "late"].includes(item.status)))
@@ -208,12 +228,13 @@ export function visibleFiscalObligations(
   const actor = state.profiles.find((profile) => profile.id === actorId);
   if (!actor?.active) return [];
   return (state.fiscalObligations || []).filter((event) => {
-    if (!actor.companyIds.includes(event.companyId) || (companyId && event.companyId !== companyId)) return false;
+    if (!state.companies.some((company) => company.id === event.companyId)) return false;
+    if ((actor.role !== "jefe" && !actor.companyIds.includes(event.companyId)) || (companyId && event.companyId !== companyId)) return false;
     if (event.fiscalPeriod !== dueOrFiscalMonth && !event.dueOn.startsWith(dueOrFiscalMonth)) return false;
     if (actor.role === "jefe") return true;
     return event.requiredTaskIds.some((taskId) => {
       const task = state.tasks.find((row) => row.id === taskId);
-      return !!task && canWork(state, actor, task);
+      return !!task && calendarCanAccessTask(state, actor, task);
     });
   }).sort((a, b) => a.dueOn.localeCompare(b.dueOn) || a.title.localeCompare(b.title, "es"));
 }
@@ -225,12 +246,12 @@ function previousMonth(month: string): string {
 }
 
 export function seedFiscalObligations(state: State, month = currentMonth()): FiscalObligation[] {
-  const sampleTask = state.tasks.find((task) => task.companyId === "c2" && task.ownerId === "e0" && task.title === "Liquidación y control de IVA");
+  const sampleTask = state.tasks.find((task) => task.companyId === "c2" && task.ownerId === "e0" && task.title === "Liquidación y control de IVA" && task.kind === "resultado");
   const createdAt = `${month}-01T12:00:00.000Z`;
   const base = {
     companyId: "c2", obligationCode: "iva-mensual", fiscalPeriod: previousMonth(month),
     sourceLabel: "Ejemplo ficticio de laboratorio · sin consulta oficial",
-    sourceRevision: "DEMO-01", sourceCheckedAt: null, revision: 1,
+    sourceRevision: "DEMO-01", sourceCheckedAt: null, revision: 1, evaluationVersion: 2 as const,
     createdAt, createdBy: null, updatedAt: createdAt, history: [] as FiscalObligationRevision[],
   };
   return [

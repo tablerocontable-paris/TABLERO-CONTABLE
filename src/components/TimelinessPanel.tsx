@@ -11,9 +11,11 @@ const average = (bucket?: TimelinessBucket) =>
 export function TimelinessNumbers({
   value,
   historical = false,
+  includeOperational = true,
 }: {
   value?: TimelinessSummary;
   historical?: boolean;
+  includeOperational?: boolean;
 }) {
   if (!value)
     return <div className="note">{historical ? "Sin medición histórica" : "Sin medición disponible"}</div>;
@@ -21,7 +23,7 @@ export function TimelinessNumbers({
     <div className="timeliness-grid">
       {[
         ["Entregables", value.results],
-        ["Metas operativas", value.operational],
+        ...(includeOperational ? [["Metas operativas", value.operational] as const] : []),
       ].map(([name, raw]) => {
         const bucket = raw as TimelinessBucket;
         return (
@@ -43,29 +45,33 @@ export function TimelinessNumbers({
 export default function TimelinessPanel({
   value,
   rows,
+  includeOperational = true,
 }: {
   value: TimelinessSummary;
   rows?: { id: string; name: string; timeliness?: TimelinessSummary }[];
+  includeOperational?: boolean;
 }) {
   return (
     <Panel
       title="Anticipación de plazos"
-      sub="Días calendario antes del vencimiento. En metas operativas cuenta cuándo se registró la cantidad que alcanzó la meta. No suma puntos al KPI ponderado."
+      sub={includeOperational ? "Días calendario antes del vencimiento. En metas operativas cuenta cuándo se registró la cantidad que alcanzó la meta. No suma puntos al KPI ponderado." : "Días calendario antes del vencimiento de entregables completados. La actividad operativa se informa por cantidad, carga y tiempo."}
       collapsible
       defaultOpen={false}
     >
-      <TimelinessNumbers value={value} />
+      <TimelinessNumbers value={value} includeOperational={includeOperational} />
       {rows?.length ? (
         <div className="table-wrap timeliness-table">
           <table>
-            <thead><tr><th>Ámbito</th><th>Entregables antes / evaluables</th><th>Anticipación media</th><th>Metas operativas antes / evaluables</th><th>Anticipación media de metas</th></tr></thead>
+            <thead><tr><th>Ámbito</th><th>Entregables antes / evaluables</th><th>Anticipación media</th>{includeOperational && <><th>Metas operativas antes / evaluables</th><th>Anticipación media de metas</th></>}</tr></thead>
             <tbody>{rows.map((row) => (
               <tr key={row.id}>
                 <td>{row.name}</td>
                 <td>{row.timeliness?.results.early ?? 0}/{row.timeliness?.results.evaluated ?? 0} · {percent(row.timeliness?.results.earlyRate ?? null)}</td>
                 <td>{average(row.timeliness?.results)}</td>
-                <td>{row.timeliness?.operational.early ?? 0}/{row.timeliness?.operational.evaluated ?? 0} · {percent(row.timeliness?.operational.earlyRate ?? null)}</td>
-                <td>{average(row.timeliness?.operational)}</td>
+                {includeOperational && <>
+                  <td>{row.timeliness?.operational.early ?? 0}/{row.timeliness?.operational.evaluated ?? 0} · {percent(row.timeliness?.operational.earlyRate ?? null)}</td>
+                  <td>{average(row.timeliness?.operational)}</td>
+                </>}
               </tr>
             ))}</tbody>
           </table>

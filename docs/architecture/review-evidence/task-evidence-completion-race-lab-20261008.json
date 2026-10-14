@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-08",
+  "scope": "Reconcile task evidence metadata with the latest task state when an attachment upload overlaps task completion.",
+  "defect": "An upload started before completion could commit after the task was completed and keep a null completion timestamp from stale component props.",
+  "change": "At final state commit, read the current task and stamp each new evidence row with its current completedAt value; retain current actor, permission, closed-period, duplicate-ID, and three-file guards.",
+  "regression": {
+    "file": "tests/task-evidence-concurrency.test.tsx",
+    "scenario": "Complete a task while the mocked IndexedDB write is pending, then resolve the write and assert the evidence row and task reference use the completion timestamp from the current task state.",
+    "focusedTests": 4,
+    "result": "passed"
+  },
+  "validation": {
+    "fullSuite": { "result": "passed", "files": 58, "tests": 500 },
+    "typescript": { "result": "passed", "command": "tsc --noEmit" },
+    "clientBuild": { "result": "passed", "entryBytes": 486515 },
+    "workerBuild": { "result": "passed" },
+    "preCommitValidator": { "result": "passed", "files": 19, "tests": 130 },
+    "browserRaceReproduction": "Not run; the asynchronous overlap is covered by the focused component regression. Existing Edge backup and evidence quota journeys predate this small reconciliation change."
+  },
+  "releaseState": {
+    "commitCreated": false,
+    "sitePublished": false,
+    "accountsConnected": false,
+    "operationalApiCalls": 0
+  }
+}

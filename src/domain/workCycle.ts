@@ -1,4 +1,5 @@
 import type { Activity, Profile, State, Task } from "./model";
+import type { TaskEvidence } from "./laboratory-work";
 
 export type WorkCycleMode = "day" | "week";
 export type WorkCycleDimension = "company" | "person" | "team" | "sector";
@@ -47,6 +48,23 @@ export function applyCompletionAttribution(
       return reopened;
     }
     return task;
+  });
+}
+
+/** Link task evidence to a newly completed task without changing prior or activity evidence. */
+export function linkEvidenceToCompletions(previous: Task[], next: Task[], evidence: TaskEvidence[]): TaskEvidence[] {
+  const completedAtByTask = new Map<string, string>();
+  for (const task of next) {
+    const old = previous.find((entry) => entry.id === task.id);
+    if (old && old.status !== "Completada" && task.status === "Completada" && task.completedAt)
+      completedAtByTask.set(task.id, task.completedAt);
+  }
+  if (!completedAtByTask.size) return evidence;
+  const taskById = new Map(next.map((task) => [task.id, task]));
+  return evidence.map((row) => {
+    const completionAt = completedAtByTask.get(row.taskId);
+    if (row.activityId || row.completionAt || !completionAt || !taskById.get(row.taskId)?.evidenceIds?.includes(row.id)) return row;
+    return { ...row, completionAt };
   });
 }
 
@@ -296,7 +314,7 @@ export function buildWorkCycle(input: {
       const bucket = bucketForDate(buckets, task.scheduledOn);
       if (bucket) {
         bucket.plannedOccurrences += 1;
-        bucket.plannedPoints += task.weight;
+        if (task.kind === "resultado") bucket.plannedPoints += task.weight;
         bucket.hasExecutionEvidence ||= false;
         const targets =
           input.dimension === "company"
@@ -318,7 +336,7 @@ export function buildWorkCycle(input: {
         for (const target of targets)
           addToGroup(groups, target, (group) => {
             group.plannedOccurrences += target.share;
-            group.plannedPoints += task.weight * target.share;
+            if (task.kind === "resultado") group.plannedPoints += task.weight * target.share;
           });
       }
     }
@@ -330,7 +348,7 @@ export function buildWorkCycle(input: {
       const bucket = bucketForDate(buckets, completedDate);
       if (bucket) {
         bucket.completedTasks += 1;
-        bucket.completedPoints += task.weight;
+        if (task.kind === "resultado") bucket.completedPoints += task.weight;
         bucket.hasExecutionEvidence = true;
         const ref =
           input.dimension === "company"
@@ -346,7 +364,7 @@ export function buildWorkCycle(input: {
         if (!task.completedBy) unattributedClosures += 1;
         addToGroup(groups, ref, (group) => {
           group.completedTasks += 1;
-          group.completedPoints += task.weight;
+          if (task.kind === "resultado") group.completedPoints += task.weight;
         });
       }
     }

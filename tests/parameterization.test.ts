@@ -17,10 +17,10 @@ function prepared() {
 function values(s: State) {
   return s.assignments
     .filter((a) => a.ownerId === "e0" && !a.retired)
+    .filter((a) => a.kind !== "operativa")
     .map((a) => ({
       id: a.id,
       weight: 7,
-      target: a.kind === "operativa" ? 90 : a.target,
     }));
 }
 describe("perfil, invitación de laboratorio y parametrización", () => {
@@ -60,7 +60,7 @@ describe("perfil, invitación de laboratorio y parametrización", () => {
     expect(next.tasks).toEqual(historical);
     expect(
       next.assignments
-        .filter((a) => a.ownerId === "e0")
+        .filter((a) => a.ownerId === "e0" && a.kind !== "operativa")
         .every((a) => a.weight === 7),
     ).toBe(true);
     expect(pendingParameterizations(next).some((p) => p.id === "e0")).toBe(
@@ -84,6 +84,25 @@ describe("perfil, invitación de laboratorio y parametrización", () => {
         (x) => x.id === t.id,
       )?.weight,
     ).toBe(7);
+  });
+  it("reviews an operational-only profile without quotas and preserves legacy targets and weights", () => {
+    const s = prepared();
+    const operational = s.assignments.filter((a) => a.kind === "operativa");
+    s.assignments = operational.map((a) => ({ ...a, target: 0, weight: 13 }));
+    const before = structuredClone(s.assignments);
+    const next = confirmParameters(s, "e0", "boss", [], stamp);
+    expect(next.parameterReviews?.e0.reviewedAt).toBe(stamp);
+    expect(next.assignments).toEqual(before);
+  });
+  it("changes deliverable weights only in a mixed profile and leaves operational history intact", () => {
+    const s = prepared();
+    const op = s.assignments.find((a) => a.ownerId === "e0" && a.kind === "operativa")!;
+    op.target = 0;
+    op.weight = 19;
+    const before = { ...op };
+    const next = confirmParameters(s, "e0", "boss", values(s), stamp);
+    expect(next.assignments.find((a) => a.id === op.id)).toEqual(before);
+    expect(next.assignments.find((a) => a.id === values(s)[0]?.id)?.weight).toBe(7);
   });
   it("employees cannot confirm parameters and invalid/partial values fail", () => {
     const s = prepared();
@@ -122,7 +141,7 @@ describe("perfil, invitación de laboratorio y parametrización", () => {
       s,
       proposal,
       boss,
-      "Confirmó pesos",
+      "Confirmó revisión",
       "e0",
       stamp,
     );

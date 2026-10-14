@@ -90,7 +90,7 @@ export default function WorkCycle({
       >
         <div className="work-cycle-summary" aria-label="Totales del período">
           <div>
-            <span>Puntos planificados</span>
+            <span>Puntos de entregables previstos</span>
             <b>{points(totals.plannedPoints)}</b>
           </div>
           <div>
@@ -115,9 +115,9 @@ export default function WorkCycle({
                 <tr>
                   <th>{mode === "day" ? "Día" : "Semana"}</th>
                   <th>Ocurrencias previstas</th>
-                  <th>Puntos previstos</th>
+                  <th>Puntos de entregables previstos</th>
                   <th>Tareas cerradas</th>
-                  <th>Puntos de cierres</th>
+                  <th>Puntos de entregables cerrados</th>
                   <th>Tiempo registrado</th>
                   <th>Operativas registradas</th>
                 </tr>
@@ -206,10 +206,10 @@ export default function WorkCycle({
                           ? "Sector"
                           : "Empresa"}
                   </th>
-                  <th>Ocurrencias / cuota</th>
-                  <th>Puntos planificados</th>
+                  <th>Ocurrencias planificadas</th>
+                  <th>Puntos de entregables previstos</th>
                   <th>Tareas cerradas</th>
-                  <th>Puntos de cierres</th>
+                  <th>Puntos de entregables cerrados</th>
                   <th>Tiempo registrado</th>
                   <th>Registros operativos</th>
                   <th>Cantidades por unidad</th>

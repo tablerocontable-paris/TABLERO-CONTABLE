@@ -7,6 +7,7 @@ import {
   currentMonth,
   dateART,
   canSee,
+  isResponsible,
   materialize,
   isClosed,
   transition,
@@ -15,6 +16,7 @@ import {
 } from "../domain/model";
 import {
   canWork,
+  coverageFor,
   updateProfile,
   registerAbsence,
   stopClock,
@@ -145,12 +147,16 @@ export function projectState(s: State, p: Profile): State {
       x.id === "boss",
   );
   const allowedIds = new Set(profiles.map((x) => x.id));
+  // Keep this projection aligned with the explicit schema understood by the
+  // legacy remote client. New laboratory fields must not cross this boundary
+  // until a server contract and its authorization rules exist.
   return structuredClone({
-    ...s,
+    version: s.version,
     activeId: p.id,
     companies: s.companies.filter((c) => p.companyIds.includes(c.id)),
     profiles,
     teams: s.teams.filter((t) => allowedIds.has(t.managerId)),
+    templates: s.templates,
     tasks,
     assignments: s.assignments.filter(
       (a) =>
@@ -180,7 +186,15 @@ export function projectState(s: State, p: Profile): State {
     ),
     tour: { [p.id]: s.tour[p.id] || 0 },
     tourVersion: { [p.id]: s.tourVersion?.[p.id] || 0 },
-  });
+  } as State);
+}
+
+function canExecuteRemote(s: State, actor: Profile, task: Task, at: string) {
+  if (!actor.active || !canWork(s, actor, task, dateART(at))) return false;
+  return (
+    isResponsible(task, actor.id) ||
+    coverageFor(s, task, dateART(at))?.replacementId === actor.id
+  );
 }
 
 // The browser proposes the visible delta. Every mutable row is checked here;
@@ -385,6 +399,17 @@ export function applyProposal(
       equal(immutable(old), immutable(t)),
       "La identidad y condiciones de una tarjeta iniciada se conservan.",
     );
+    const executionChanged =
+      old.status !== t.status ||
+      !equal(old.checklist, t.checklist) ||
+      old.startedAt !== t.startedAt ||
+      old.completedAt !== t.completedAt ||
+      !equal(old.sessions || [], t.sessions || []);
+    if (executionChanged)
+      requireRule(
+        canExecuteRemote(current, actor, old, now),
+        "Consultar una tarea no autoriza a ejecutarla; debe ser responsable o reemplazo autorizado.",
+      );
     requireRule(
       equal(
         old.checklist.map((c) => ({ id: c.id, text: c.text })),
@@ -480,7 +505,7 @@ export function applyProposal(
     const t = next.tasks.find((t) => t.id === a.taskId);
     requireRule(
       t &&
-        canWork(current, actor, t) &&
+        canExecuteRemote(current, actor, t, now) &&
         t.kind === "operativa" &&
         !isClosed(current, t) &&
         a.actorId === actor.id &&
@@ -665,6 +690,9 @@ export function applyProposal(
     },
   ];
   next.activeId = current.activeId;
-  stateSchema.parse(next);
+  // Validate the contract that can actually be returned to this actor. The
+  // persisted state may contain newer server-owned collections; keep those
+  // hidden rows intact without accepting them from this older client.
+  stateSchema.parse(projectState(next, actor));
   return next;
 }

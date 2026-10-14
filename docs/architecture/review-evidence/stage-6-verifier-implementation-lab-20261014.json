@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-14",
+  "stage": 6,
+  "status": "implemented_and_locally_validated_pending_independent_sol_review",
+  "requirements": ["S57", "S58"],
+  "source_at_validation": {
+    "head": "2c3fbfe29770d358cad545e24cb0a7aa0236f1d3",
+    "effective_tree_sha256": "bd7d45c01a1c1cf20711d3ce170698da1d93277e78df2c48a8923c26d2655f64",
+    "hashed_file_count": 418,
+    "algorithm": "SHA-256 over sorted Git tracked and non-ignored untracked paths plus contents; generated outputs, dist and node_modules excluded."
+  },
+  "implementation": {
+    "S57": "The benchmark now validates an exact 24-profile/2,000-task fixture and owner/company/team/assignment/dependency references; waits for route-specific content and two animation frames; performs two warm-up cycles and ten measured cycles across analytics, tasks and overview; computes finite nearest-rank p95 and fails at >=1,000 ms, bad fixture, JavaScript errors or operational API calls. It records machine, browser, samples, source hash and a JSON report on failure or success in a unique output directory.",
+    "S58": "The isolated runner uses current exact test names, excludes the historical tmp mirror, starts a separate Vitest process per expected test, reads the JSON reporter, and rejects null process status, nonzero exit, missing/zero passed tests, all-skipped results, missing/ambiguous expected pattern, or a failed expected assertion. It records executed/passed/skipped/failed counts, command, process outcome and effective-tree hash. Each run has a timestamp/PID output directory; prior outputs are never overwritten."
+  },
+  "validation": {
+    "contract_tests": "tests/verification-contract.test.ts: 9/9 passed; includes p95 999/1000/1500 ms, empty/non-finite samples, JS/API errors, zero tests, all skipped, pattern missing, failed assertion and fixture reference checks.",
+    "isolated_acceptance": "Latest current-tree rerun: 7/7 selected expectations passed (7 executed, 7 passed, 0 failed, 209 skipped by the explicit test-name filters). Output: outputs/time-coverage-008-isolation-2026-10-14T14-32-44-729Z-17492/isolation-run.json. Prior rerun remains preserved under outputs/time-coverage-008-isolation-2026-10-14T12-46-21-619Z-17528/.",
+    "benchmark": "Latest current-tree run passed 30/30 hot-navigation samples with 24 profiles and 2,000 tasks; p95 502.95 ms (<1,000 ms), Microsoft Edge 155.0.4283.45, win32 10.0.26200, Intel Core i3-N305; zero JavaScript errors and zero operational API calls. Report: outputs/performance-lab-2026-10-14-post-tour-2026-10-14/navigation-benchmark.json. Previous run (368.07 ms) remains in its historical report.",
+    "full_suite": "Latest post-correction run: 658/658 passed in 67 files; command: node node_modules/vitest/vitest.mjs run --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000 --reporter=dot; exit 0, Vitest duration 128.56 s.",
+    "typescript": "Passed: node node_modules/typescript/bin/tsc --noEmit; exit 0.",
+    "client_build": "Passed: node node_modules/vite/bin/vite.js build --outDir dist/client; exit 0. Existing warnings remain: mixed static/dynamic laboratoryEvidence import, Zod comment annotations and 546.23 kB entry chunk (>500 kB); charts chunk 423.74 kB.",
+    "worker_build": "Passed: node scripts/build-worker.mjs; exit 0.",
+    "diff_check": "git diff --check exit 0; only LF-to-CRLF working-copy notices."
+  },
+  "acceptance_gaps": [
+    "Independent GPT-6.1 Sol review of S57/S58 implementation and evidence is pending.",
+    "Stage 5 human screen-reader acceptance and independent Sol review are pending; stage 4 S52 independent Sol review remains pending.",
+    "The benchmark measures hot local navigation only; it does not establish cold start, concurrent-user, production-host or service performance."
+  ],
+  "no_external_actions": "No commit, PR, Site update, account connection, operational API call or deployment.",
+  "global_progress": "approximately 45%; unchanged"
+}

@@ -71,7 +71,20 @@ describe("propuestas de tareas habituales del laboratorio", () => {
     expect(state.habitualTaskProposals?.[0].history.map((entry) => entry.action)).toEqual(["submitted", "changes_requested", "resubmitted"]);
   });
 
-  it("aprueba el grupo en asignaciones separadas con frecuencia y meta por empresa", () => {
+  it("rechaza reenviar una propuesta si la empresa fue revocada y no altera su historial", () => {
+    let state = seed();
+    const employee = state.profiles.find((profile) => profile.id === "e0")!;
+    const boss = state.profiles.find((profile) => profile.id === "boss")!;
+    state = submitHabitualTaskProposal(state, employee, proposalInput(), fixedNow);
+    state = requestHabitualProposalChanges(state, boss, "proposal-a", "Aclarar el alcance del control.", fixedNow);
+    const revokedActor = { ...employee, companyIds: employee.companyIds.filter((companyId) => companyId !== "c1") };
+    const revoked = { ...state, profiles: state.profiles.map((profile) => profile.id === employee.id ? revokedActor : profile) };
+    expect(() => resubmitHabitualTaskProposal(revoked, revokedActor, "proposal-a", proposalInput({ title: "Título corregido" }), fixedNow)).toThrow(/empresa.*ya no está asignada/i);
+    expect(() => resubmitHabitualTaskProposal(revoked, employee, "proposal-a", proposalInput({ title: "Título corregido" }), fixedNow)).toThrow(/empresa.*ya no está asignada/i);
+    expect(revoked.habitualTaskProposals).toEqual(state.habitualTaskProposals);
+  });
+
+  it("aprueba operativas en asignaciones separadas sin metas mensuales", () => {
     let state = seed();
     state.assignments = [];
     state.tasks = [];
@@ -84,7 +97,7 @@ describe("propuestas de tareas habituales del laboratorio", () => {
     state = approveHabitualTaskProposals(state, manager, ["invoice-c1", "invoice-c2"], { kind: "link", templateId: "cat3" }, month, fixedNow, () => "version-snapshot");
     expect(state.assignments).toHaveLength(2);
     expect(state.assignments.map((assignment) => [assignment.companyId, assignment.target, assignment.frequency]).sort()).toEqual([
-      ["c1", 45, "diaria"], ["c2", 90, "semanal"],
+      ["c1", 0, "diaria"], ["c2", 0, "semanal"],
     ]);
     expect(state.assignments.every((assignment) => assignment.templateId === "cat3" && assignment.templateVersion === 1)).toBe(true);
     expect(state.habitualTaskProposals?.every((proposal) => proposal.status === "approved")).toBe(true);

@@ -1,0 +1,191 @@
+{
+  "date": "2026-10-12",
+  "stage": 1,
+  "contract": "docs/architecture/SOL-LUNA-CONTRACTS-20261011.md",
+  "implementationModel": "GPT-6 Luna, medium, Standard (user selected for this stage)",
+  "status": "implemented_locally_pending_independent_sol_review",
+  "findings": [
+    "S02", "S06", "S14", "S17", "S18", "S21", "S23",
+    "S27", "S28", "S34", "S43", "S47", "S50", "S53"
+  ],
+  "checks": [
+    {
+      "name": "focused_domain_regressions",
+      "command": "vitest run tests/laboratory-work.test.ts tests/notifications.test.ts tests/process-improvement.test.ts tests/fiscal-obligations.test.ts tests/habitual-task-proposals.test.ts tests/scheduling-workforce.test.ts tests/joint-coordination.test.ts --maxWorkers=2 --exclude tmp/**",
+      "passed": true,
+      "tests": 94,
+      "files": 7
+    },
+    {
+      "name": "integrated_permission_and_sidebar_regressions",
+      "command": "vitest run tests/annotations-tour-app.test.tsx tests/notifications.test.ts --maxWorkers=2 --exclude tmp/**",
+      "passed": true,
+      "tests": 45,
+      "files": 2,
+      "note": "notifications.test.ts is included in both focused and integration cuts"
+    },
+    {
+      "name": "full_suite",
+      "command": "vitest run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "passed": true,
+      "tests": 518,
+      "files": 58
+    },
+    {
+      "name": "typescript",
+      "command": "tsc --noEmit",
+      "passed": true
+    },
+    {
+      "name": "client_build",
+      "command": "vite build --outDir dist/client",
+      "passed": true,
+      "notes": [
+        "Rollup removed two unrecognized PURE comments in bundled Zod sources.",
+        "The existing large-chart-chunk notice remains; no chunk refactor was part of stage 1."
+      ]
+    },
+    {
+      "name": "worker_build",
+      "command": "node scripts/build-worker.mjs",
+      "passed": true
+    },
+    {
+      "name": "browser_general",
+      "command": "node tests/browser.cjs",
+      "passed": true,
+      "browser": "Microsoft Edge installed locally",
+      "apiCalls": 0,
+      "javascriptErrors": 0,
+      "output": "outputs/stage-1-permissions-20261012/browser-final/"
+    },
+    {
+      "name": "browser_corrections",
+      "command": "node tests/browser-corrections.cjs",
+      "passed": true,
+      "apiCalls": 0,
+      "javascriptErrors": 0,
+      "output": "outputs/stage-1-permissions-20261012/browser-corrections-final/browser-validation.json"
+    },
+    {
+      "name": "diff_whitespace",
+      "command": "git diff --check",
+      "passed": true,
+      "note": "No whitespace errors; Git only reported expected LF-to-CRLF normalization warnings for the Windows working tree."
+    }
+  ],
+  "limitations": [
+    "A follow-up review found and corrected stale calendar access after the author's manager changed; a regression now confirms the former manager loses access and the current manager gains it.",
+    "This is a local implementation and validation cut, not independent Sol acceptance.",
+    "Follow-up regressions cover S14 hierarchy revocation, S17 dependency title privacy/current viewer, S18 current presence access, S21 company scope on adoption, S28 manager absence without replacement, S34 current author on resubmission, S43/S50 current assignment actor, and S53 sidebar authorization projection. All 65 audit findings and 95 cases remain formally open until independent review; stages 2 through 7 remain unimplemented.",
+    "No commit, pull request, Site update, external account, production API, or invitation was used."
+  ],
+  "followUp": {
+    "findings": ["S14 hierarchy revocation", "S17 dependency privacy/current viewer", "S18 current presence access", "S21 current company scope", "S28 manager absence without replacement", "S34 current proposal author", "S43/S50 current assignment actor", "S53 sidebar authorization projection"],
+    "sources": ["src/domain/laboratory-work.ts", "src/domain/planning.ts", "src/domain/processImprovement.ts", "src/domain/workforce.ts", "src/domain/habitualTaskProposals.ts", "src/App.tsx"],
+    "regressions": ["tests/laboratory-work.test.ts", "tests/notifications.test.ts", "tests/process-improvement.test.ts", "tests/habitual-task-proposals.test.ts", "tests/scheduling-workforce.test.ts"],
+    "checks": [
+      {
+        "name": "stage1_permission_integration_regressions",
+        "command": "vitest run tests/annotations-tour-app.test.tsx tests/scheduling-workforce.test.ts tests/joint-coordination.test.ts tests/laboratory-work.test.ts --maxWorkers=2 --testTimeout=20000 --exclude tmp/**",
+        "passed": true,
+        "tests": 103,
+        "files": 4,
+        "note": "Includes S53: one revoked and one authorized company; count, title and navigation remain scoped."
+      },
+      {
+        "name": "focused-calendar-permission-tests",
+        "command": "vitest run tests/laboratory-work.test.ts tests/notifications.test.ts --maxWorkers=2 --exclude tmp/**",
+        "passed": true,
+        "tests": 36,
+        "files": 2
+      },
+      {
+        "name": "full-suite-after-hierarchy-fix",
+        "command": "vitest run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+        "passed": true,
+        "tests": 518,
+        "files": 58
+      },
+      {
+        "name": "typescript-after-hierarchy-fix",
+        "command": "tsc --noEmit",
+        "passed": true
+      },
+      {
+        "name": "client-build-after-hierarchy-fix",
+        "command": "vite build --outDir dist/client",
+        "passed": true,
+        "notes": [
+          "Rollup removed two unrecognized PURE comments in bundled Zod sources.",
+          "The existing chart chunk size notice remains."
+        ]
+      },
+      {
+        "name": "worker-build-after-hierarchy-fix",
+        "command": "node scripts/build-worker.mjs",
+        "passed": true
+      },
+      {
+        "name": "browser-corrections-after-hierarchy-fix",
+        "command": "CHROMIUM_PATH=<local Microsoft Edge>; E2E_OUTPUT=outputs/stage-1-permissions-20261012/browser-hierarchy-followup; node tests/browser-corrections.cjs",
+        "passed": true,
+        "apiCalls": 0,
+        "javascriptErrors": 0
+      },
+      {
+        "name": "browser-general-after-hierarchy-fix",
+        "command": "CHROMIUM_PATH=<local Microsoft Edge>; E2E_OUTPUT=outputs/stage-1-permissions-20261012/browser-general-hierarchy-followup; node tests/browser.cjs",
+        "passed": true,
+        "apiCalls": 0,
+        "javascriptErrors": 0
+      }
+    ]
+  },
+  "currentCut": {
+    "date": "2026-10-12",
+    "status": "implemented_and_revalidated_locally_pending_independent_sol_review",
+    "corrections": [
+      {
+        "finding": "Generated task state could be rejected on reload when boss onboarding created work for a profile without a team.",
+        "change": "Jefatura onboarding no longer offers personal execution tasks; finishing it clears draft execution selections and creates no assignments or materialized tasks.",
+        "regression": "tests/habitual-task-app.test.tsx validates completion and reload through repository load(true)."
+      },
+      {
+        "finding": "Task composer could default a manager without a team as execution owner, producing an invalid task.",
+        "change": "The composer selects only profiles linked to an existing team, and save revalidates the responsible person's team against current state.",
+        "regression": "tests/browser.cjs checks that the manager without a team is not offered as owner and the created lab task has an existing team."
+      },
+      {
+        "finding": "General Edge fixture removed existing tasks while retaining activity rows referencing them.",
+        "change": "Fixture now appends its reminder task without deleting historical task references."
+      }
+    ],
+    "checks": [
+      { "name": "full_suite", "command": "node node_modules/vitest/vitest.mjs run --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000", "passed": true, "tests": 544, "files": 59 },
+      { "name": "typescript", "command": "node node_modules/typescript/bin/tsc --noEmit", "passed": true },
+      { "name": "client_build", "command": "node node_modules/vite/bin/vite.js build --outDir dist/client", "passed": true, "mainChunkBytes": 518310, "note": "Vite reports the existing chunk-over-500-kB warning." },
+      { "name": "worker_build", "command": "node scripts/build-worker.mjs", "passed": true },
+      { "name": "browser_general", "command": "CHROMIUM_PATH=<local Microsoft Edge>; E2E_OUTPUT=outputs/stage-1-permissions-20261012/browser-general-current-final; node tests/browser.cjs", "passed": true, "apiCalls": 0, "javascriptErrors": 0 },
+      { "name": "browser_corrections", "command": "CHROMIUM_PATH=<local Microsoft Edge>; E2E_OUTPUT=outputs/stage-1-permissions-20261012/browser-corrections-current-final; node tests/browser-corrections.cjs", "passed": true, "apiCalls": 0, "javascriptErrors": 0 },
+      { "name": "diff_whitespace", "command": "git diff --check", "passed": true }
+    ],
+    "limitations": [
+      "This is local implementation and validation, not independent Sol acceptance.",
+      "The other stages and the remaining rows in the Sol acceptance matrix remain open.",
+      "No commit, pull request, Site update, external account, production API, or invitation was used."
+    ]
+  },
+  "revalidation": "outputs/stage-1-permissions-20261013/stage1-rerun-20261013.json",
+  "stage1RegressionAddendum": {
+    "status": "passed_locally_pending_independent_sol_review",
+    "cases": [
+      "Planning applies current actor and company authorization before search, count and table, and rerenders without leaking the revoked assignment title or row count when an open view receives updated state.",
+      "An active boss retains organization-wide Planning visibility without direct company membership.",
+      "Calendar cancellation notices show event details only while the recipient retains current authorization; after revocation they become generic and lose date and navigation."
+    ],
+    "tests": "tests/planning-access.test.tsx (2) and tests/notifications.test.ts cancellation case",
+    "validation": "Full suite 547/547 in 60 files; TypeScript and git diff --check passed on 2026-10-13."
+  },
+  "next": "GPT-6.1 Sol, high effort, Standard: independently review stage 1 against its 14 findings and current evidence before proceeding with the next implementation block."
+}

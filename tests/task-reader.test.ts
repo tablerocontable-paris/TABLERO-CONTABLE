@@ -296,6 +296,9 @@ describe("task reader", () => {
       [task(1), { ...task(2), period: "2026-09-01" }],
       [task(1), { ...task(2), company_id: ids[0] }],
       [task(1), { ...task(2), team_id: ids[1] }],
+      [task(1), { ...task(2), status: "Completada", completed_at: null }],
+      [task(1), { ...task(2), blocked_by: "Esperando", blocked_since: null }],
+      [task(1), { ...task(2), due_date: "2026-10-01" }],
     ];
     for (const rows of badPages)
       expect(
@@ -352,6 +355,9 @@ describe("task reader", () => {
       [{ ...task(1), id: ids[1] }],
       [task(1), task(2)],
       [{ ...task(1), state_revision: -1 }],
+      [{ ...task(1), status: "Completada", completed_at: null }],
+      [{ ...task(1), blocked_by: "Espera", blocked_since: null }],
+      [{ ...task(1), due_date: "2026-10-01" }],
     ])
       expect(
         await createTaskReader({ read: async () => ok(data) }).findTask({

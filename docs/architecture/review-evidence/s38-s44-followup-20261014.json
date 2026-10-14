@@ -1,0 +1,74 @@
+{
+  "date": "2026-10-14",
+  "scope": "Local implementation follow-up for original findings S38 and S44, plus stable capture for S52",
+  "project": {
+    "repository": "work/site",
+    "sitesProjectId": "appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85",
+    "mode": "private laboratory; fictional data; no operational API calls"
+  },
+  "changes": [
+    {
+      "finding": "S38",
+      "files": ["src/App.tsx", "tests/annotations-tour-app.test.tsx", "tests/browser-corrections.cjs"],
+      "result": "Moved the primary ref to the tour Next/Done action. Returning to step zero focuses the enabled Next action. Added DOM and Edge native Tab/Shift+Tab regressions."
+    },
+    {
+      "finding": "S44",
+      "files": ["src/components/RemoteWorkspace.tsx", "tests/site-ui.test.tsx"],
+      "result": "Added a monotonic sequence per GET alongside context generation. Stale polling replies cannot replace state or revision. Polls do not start during explicit opens. Save, view changes, unmount and pending proposals invalidate in-flight reads."
+    },
+    {
+      "finding": "S52 capture runner",
+      "files": ["tests/browser-corrections.cjs"],
+      "result": "The Edge runner now requires both SVG sectors to keep the same path, bounds and fill for 500 ms before capturing. Product animation remains enabled."
+    }
+  ],
+  "verification": {
+    "fullSuite": {
+      "command": "node node_modules/vitest/vitest.mjs run --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "exitCode": 0,
+      "passed": 668,
+      "failed": 0,
+      "filesPassed": 67,
+      "durationSeconds": 154.62
+    },
+    "focusedSuite": {
+      "command": "node node_modules/vitest/vitest.mjs run tests/annotations-tour-app.test.tsx tests/site-ui.test.tsx --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "exitCode": 0,
+      "passed": 63,
+      "failed": 0,
+      "filesPassed": 2
+    },
+    "typeScript": {"command": "node node_modules/typescript/bin/tsc --noEmit", "exitCode": 0},
+    "clientBuild": {
+      "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+      "exitCode": 0,
+      "entryJavaScriptKilobytes": 332.85,
+      "notes": "Only the existing Zod PURE-comment warnings were printed."
+    },
+    "workerBuild": {"command": "node scripts/build-worker.mjs", "exitCode": 0},
+    "edge": {
+      "command": "node tests/browser-corrections.cjs",
+      "exitCode": 0,
+      "checks": 32,
+      "includes": ["S38 native tour focus and keyboard order", "S52 settled Recharts geometry"],
+      "javascriptErrors": 0,
+      "operationalApiCalls": 0,
+      "report": "outputs/s39-tour-refresh-20261014/edge-final-retry/browser-validation.json"
+    },
+    "diffCheck": {"command": "git diff --check -- src/App.tsx src/components/RemoteWorkspace.tsx tests/annotations-tour-app.test.tsx tests/site-ui.test.tsx tests/browser-corrections.cjs", "exitCode": 0}
+  },
+  "sourceSha256": {
+    "src/App.tsx": "CA960F3E5A5C5690488C1E4A9D0E3E4C14AFC4E410C4408864D1F64492E6B204",
+    "src/components/RemoteWorkspace.tsx": "B22607A01F9D6939FD24AE383792D30E8B24ADD1AF561D7A1EFC820D599159F3",
+    "tests/annotations-tour-app.test.tsx": "53A0DE54F77DA5F8CB56485139FD365AAF3317667B6E4845593AD5CB327F665B",
+    "tests/site-ui.test.tsx": "73A635D07546093CE001E9758BE4E877275D77C25B892DDC29257E3E492A03A0",
+    "tests/browser-corrections.cjs": "A5680C6402CED1FFC917BAD35FDB5B397DF786DA34315C86E7CB14913F1F51B7"
+  },
+  "reviewGates": {
+    "independentSolReview": "pending",
+    "humanScreenReaderAcceptance": "pending",
+    "hostedSupabaseAuthRls": "not exercised; outside the local private-laboratory scope",
+    "commitOrPublish": "not performed; the repository already contained unrelated uncommitted changes, so they were preserved"
+  }
+}

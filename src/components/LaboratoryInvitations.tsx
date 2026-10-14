@@ -6,6 +6,8 @@ export default function LaboratoryInvitations({ state }: { state: State }) {
     <Panel
       title="Invitaciones de prueba"
       sub="Probá el primer ingreso con el perfil ya configurado. No envía correos ni habilita cuentas reales."
+      collapsible
+      defaultOpen
     >
       <div className="laboratory-invitations">
         {[...state.profiles]

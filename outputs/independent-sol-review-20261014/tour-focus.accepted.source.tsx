@@ -1,0 +1,48 @@
+// @vitest-environment jsdom
+import { afterEach, expect, it, vi } from 'vitest';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import App from '../../src/App';
+import { seed } from '../../src/data/repository';
+vi.mock('recharts',()=>Object.fromEntries(['ResponsiveContainer','BarChart','Bar','LabelList','XAxis','YAxis','CartesianGrid','Tooltip','Legend','LineChart','Line','ReferenceLine','PieChart','Pie','Cell'].map(name=>[name,()=>null])));
+afterEach(()=>{cleanup();vi.restoreAllMocks();vi.unstubAllGlobals();});
+it('S38 independent: returning to the first tour step focuses its enabled next button',async()=>{
+  localStorage.clear();
+  vi.stubGlobal('matchMedia',()=>({matches:false,addEventListener(){},removeEventListener(){}}));
+  const state=seed();state.activeId='e0';state.assignments=[];state.tasks=[];state.activity=[];state.audit=[];
+  state.onboarding.e0.completedAt=new Date().toISOString();state.onboarding.e0.step=5;
+  state.tour.e0=0;state.tourStepId={e0:'day-route'};state.tourVersion={e0:6};
+  localStorage.setItem('paris-state-lab',JSON.stringify(state));
+  render(<App laboratoryMode/>);
+  fireEvent.click(screen.getByRole('button',{name:'Recorrido guiado'}));
+  fireEvent.click(screen.getByRole('button',{name:'Siguiente'}));
+  expect(document.querySelector('.tour-coach small')?.textContent).toContain('2/11');
+  const previous=screen.getByRole('button',{name:'Anterior'}) as HTMLButtonElement;
+  previous.focus();fireEvent.click(previous);
+  await act(async()=>{await new Promise(resolve=>requestAnimationFrame(()=>resolve(null)));});
+  expect(previous.disabled).toBe(true);
+  await waitFor(()=>expect(document.activeElement).toBe(screen.getByRole('button',{name:'Siguiente'})));
+});
+it('S38 independent: an open task detail cannot receive the tour focus',async()=>{
+  localStorage.clear();
+  vi.stubGlobal('matchMedia',()=>({matches:false,addEventListener(){},removeEventListener(){}}));
+  HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','');};
+  HTMLDialogElement.prototype.close=function(){this.removeAttribute('open');};
+  const state=seed();state.activeId='e0';
+  const task=state.tasks.find(task=>task.ownerId==='e0'&&task.kind==='resultado')!;
+  state.onboarding.e0.completedAt=new Date().toISOString();state.onboarding.e0.step=5;
+  state.tour.e0=0;state.tourStepId={e0:'day-route'};state.tourVersion={e0:6};
+  localStorage.setItem('paris-state-lab',JSON.stringify(state));
+  render(<App laboratoryMode/>);
+  fireEvent.click(document.querySelector('[data-nav="tasks"]')!);
+  fireEvent.click(screen.getAllByRole('button',{name:task.title,exact:true})[0]);
+  await waitFor(()=>expect(document.querySelector('dialog[open]')).toBeTruthy());
+  const trigger=screen.getByRole('button',{name:'Recorrido guiado'});trigger.focus();fireEvent.click(trigger);
+  const coach=screen.getByRole('dialog',{name:'Recorrido guiado'});
+  fireEvent.click(within(coach).getByRole('button',{name:'Siguiente'}));
+  const previous=within(coach).getByRole('button',{name:'Anterior'});previous.focus();fireEvent.click(previous);
+  await waitFor(()=>expect(document.activeElement).toBe(within(coach).getByRole('button',{name:'Siguiente'})));
+  expect(document.querySelector('dialog[open]')).toBeTruthy();
+  fireEvent.keyDown(coach,{key:'Escape'});
+  await waitFor(()=>expect(screen.queryByRole('dialog',{name:'Recorrido guiado'})).toBeNull());
+  await waitFor(()=>expect(document.activeElement).toBe(trigger));
+});

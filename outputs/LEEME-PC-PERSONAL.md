@@ -1,3 +1,5 @@
+> **Continuidad actualizada 14/10/2026:** leer docs/ops/CONTINUITY-PC-PERSONAL.md y docs/ops/MIGRATION-BOOTSTRAP-20261014.md. Paquete M0 previo al commit: ../../outputs/migration-bootstrap-20261014/ desde work/site, guia LEEME.md. Los bundles/hashes historicos de abajo no contienen el arbol local actual.
+
 # Grupo París en tu PC personal
 
 Este instructivo acompaña el bundle Git y el manifiesto incluidos en el ZIP de
@@ -16,7 +18,7 @@ laboratorio guardados en el navegador.
    ```powershell
    git bundle verify .\grupo-paris-site-personal.bundle
    git bundle list-heads .\grupo-paris-site-personal.bundle
-   git clone --branch main .\grupo-paris-site-personal.bundle .\grupo-paris-contabilidad
+   git clone --branch migration/github-bootstrap .\grupo-paris-site-personal.bundle .\grupo-paris-contabilidad
    cd .\grupo-paris-contabilidad
    git rev-parse HEAD
    ```
@@ -41,7 +43,7 @@ Trabajá desde una sola PC a la vez. En la PC personal, generá un bundle de tu
 rama `main` y transferilo por USB o una carpeta privada:
 
 ```powershell
-git bundle create .\grupo-paris-cambios.bundle main
+git bundle create .\grupo-paris-cambios.bundle migration/github-bootstrap
 ```
 
 En el checkout original, buscá el bundle recibido y aplicá sus commits sobre la
@@ -49,10 +51,10 @@ rama actual. Si `main` avanzó desde el corte transferido, rebasá primero los
 commits personales para conservar el historial lineal:
 
 ```powershell
-git fetch C:\ruta\grupo-paris-cambios.bundle main:refs/remotes/personal/main
-git switch -c personal-transfer refs/remotes/personal/main
-git rebase main
-git switch main
+git fetch C:\ruta\grupo-paris-cambios.bundle migration/github-bootstrap:refs/remotes/personal/migration/github-bootstrap
+git switch -c personal-transfer refs/remotes/personal/migration/github-bootstrap
+git rebase migration/github-bootstrap
+git switch migration/github-bootstrap
 git merge --ff-only personal-transfer
 ```
 

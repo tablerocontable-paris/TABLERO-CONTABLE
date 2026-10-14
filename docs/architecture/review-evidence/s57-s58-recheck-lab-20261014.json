@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-14",
+  "scope": "Adversarial recheck of the S57 performance benchmark and S58 isolated verification runner against the approved audit contract.",
+  "finding": {
+    "requirement": "S57",
+    "detail": "When PERFORMANCE_OUTPUT already existed, main() rejected it, but finally() could still write the failed report into that historical directory or point to a previous report.",
+    "correction": "Reserve a distinct sibling failure directory and save the current failure report there; write reports exclusively with wx. The existing output remains untouched."
+  },
+  "review": {
+    "S57": "The strict <1000ms nearest-rank p95 gate, exact sample count, route-specific content readiness, two post-render frames, fixture validation, source hash, error/API reporting, nonzero failed exit, and unique output behavior were checked in source and by execution. No other discrepancy found in the reviewed S57 contract.",
+    "S58": "The runner checks process status, JSON reporter, exact one-match expected pattern, at least one passed assertion, zero failed assertions, unique report directory, tracked/untracked source hash, and failure reporting. No further discrepancy found in the reviewed source."
+  },
+  "validation": {
+    "focusedTests": { "command": "node ./node_modules/vitest/vitest.mjs run tests/verification-contract.test.ts --exclude 'tmp/**' --maxWorkers=1 --testTimeout=30000 --hookTimeout=30000", "exitCode": 0, "passed": 12, "total": 12 },
+    "fullSuite": { "command": "node ./node_modules/vitest/vitest.mjs run --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000 --reporter=dot", "exitCode": 0, "passed": 663, "total": 663, "files": 67, "durationSeconds": 147.25 },
+    "typescript": { "command": "node ./node_modules/typescript/bin/tsc --noEmit", "exitCode": 0 },
+    "clientBuild": { "command": "node ./node_modules/vite/bin/vite.js build --outDir dist/client", "exitCode": 0, "entryBytes": 331700, "remainingWarnings": "Zod PURE-comment annotations only" },
+    "workerBuild": { "command": "node scripts/build-worker.mjs", "exitCode": 0 },
+    "isolatedRunner": { "command": "node tests/review/run-time-coverage-008-isolation.mjs", "exitCode": 0, "status": "passed", "executed": 7, "passed": 7, "skipped": 209, "failed": 0, "report": "outputs/time-coverage-008-isolation-2026-10-14T16-04-38-592Z-16896/isolation-run.json" },
+    "edgeBenchmark": { "command": "$env:CHROMIUM_PATH='C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe'; node scripts/benchmark-laboratory.cjs", "exitCode": 0, "result": "passed", "p95RouteMs": 408.51, "targetExclusiveMs": 1000, "samples": 30, "profiles": 24, "tasks": 2000, "browser": "155.0.4283.45", "operationalApiCalls": 0, "javascriptErrors": 0, "report": "outputs/performance-lab-2026-10-14T16-03-44-829Z-17828/navigation-benchmark.json" },
+    "effectiveTree": { "sha256": "74444814551da844dd681e461727a5a79c2ed33d7bd03b34f4c7ab86b3de009f", "fileCount": 431 }
+  },
+  "sourceSha256": {
+    "scripts/benchmark-laboratory.cjs": "9b9321df5d779da7547893c9c23bc0c58db9506975363a1981f5f501c458781a",
+    "tests/verification-contract.test.ts": "f1a07ee4b5a250746b2bac0b5958f0526b05883c3532cc8e958776dd21c493c1"
+  },
+  "limits": [
+    "This validates the local benchmark and verifier contracts, not concurrent-user or production-host performance.",
+    "Independent Sol acceptance is not claimed by this record."
+  ],
+  "noExternalActions": "No commit, PR, Site update, account connection, operational API call, migration, or deployment."
+}

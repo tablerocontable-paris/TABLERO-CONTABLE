@@ -1,5 +1,13 @@
 # Revisión del contrato y ejecución siguiente — 01/10/2026
 
+Nota de auditoría 11/10/2026: este documento conserva el contrato histórico de
+001–005 y su evidencia. No restablecer metas operativas, cierre de alcance
+completo ni ejecución por permiso jerárquico sobre el laboratorio actual.
+Seguir SOL-AUDIT-20261008.md y la matriz vigente; 60 hallazgos/90 casos abiertos.
+La afirmación anterior de revisión exacta de onboarding no cubría NULL: S59
+reproduce ese caso en la definición efectiva 011. Conservar snapshots/reportes
+históricos y corregir mediante migraciones nuevas, sin conectar servicios.
+
 Estado revisado: frontend 0.4, migraciones SQL 0.3 y ejecución del contrato local `202610010001`. La migración está implementada y probada con PGlite, pero no se aplicó remotamente ni se conectó al frontend. No es autorización para crear infraestructura o enviar correos reales. Ver reglas de modelos en AGENTS.md.
 
 ## Resultado de la revisión

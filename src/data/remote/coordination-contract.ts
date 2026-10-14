@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { calendarDateSchema, postgresUuidSchema, revisionSchema } from "./task-contract";
+import { calendarDateSchema, postgresUuidSchema, revisionSchema, timestampEndsBefore } from "./task-contract";
 
 // Staged schemaVersion 2. Never merge this into the operational 008 task reader.
 export const taskResponsibilitySchema = z.strictObject({
@@ -91,6 +91,29 @@ export const coordinatedTaskSchema = z.strictObject({
   }
   if (value.scheduledOn.slice(0, 7) !== value.period.slice(0, 7)) {
     context.addIssue({ code: "custom", path: ["scheduledOn"], message: "Occurrence date does not match period" });
+  }
+  if (value.dueDate !== null && value.dueDate < value.scheduledOn) {
+    context.addIssue({ code: "custom", path: ["dueDate"], message: "Due date precedes scheduled date" });
+  }
+  if ((value.status === "Completada") !== (value.completedAt !== null)) {
+    context.addIssue({ code: "custom", path: ["completedAt"], message: "Completion timestamp must match task status" });
+  }
+  if (value.startedAt !== null && value.completedAt !== null && timestampEndsBefore(value.completedAt, value.startedAt)) {
+    context.addIssue({ code: "custom", path: ["completedAt"], message: "Completion precedes start" });
+  }
+  const responsibility = value.responsibility;
+  if (responsibility.instanceId.toLowerCase() !== value.taskId.toLowerCase() ||
+      responsibility.companyId.toLowerCase() !== value.companyId.toLowerCase() ||
+      responsibility.period !== value.period) {
+    context.addIssue({ code: "custom", path: ["responsibility"], message: "Responsibility does not match task identity" });
+  }
+  const memberKey = (member: { profileId: string; shareBps: number }) =>
+    `${member.profileId.toLowerCase()}:${member.shareBps}`;
+  const responsibilityMembers = responsibility.members.map(memberKey).sort();
+  const payloadMembers = value.members.map(memberKey).sort();
+  if (responsibilityMembers.length !== payloadMembers.length ||
+      responsibilityMembers.some((member, index) => member !== payloadMembers[index])) {
+    context.addIssue({ code: "custom", path: ["members"], message: "Task members differ from responsibility snapshot" });
   }
   if (value.kind === "operativa" && (!value.unit?.trim() || value.target === null)) {
     context.addIssue({ code: "custom", path: ["kind"], message: "Invalid operational target" });

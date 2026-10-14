@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-14",
+  "stage": 4,
+  "status": "in_progress_s05_s15_s20_s24_s25_s33_s40_s41_s42_s48_accepted_s52_implemented_and_edge_visual_verified_pending_independent_review",
+  "stage_scope": [
+    "S05",
+    "S15",
+    "S20",
+    "S24",
+    "S25",
+    "S33",
+    "S40",
+    "S41",
+    "S42",
+    "S48",
+    "S52"
+  ],
+  "implemented_scope": [
+    "S05",
+    "S15",
+    "S20",
+    "S24",
+    "S25",
+    "S33",
+    "S40",
+    "S41",
+    "S42",
+    "S48",
+    "S52"
+  ],
+  "changes": {
+    "S05": "Added shared semantic calendar-event validation used by domain creation/editing and backup restoration. It checks known company or null, supported type, title/detail limits, real ordered dates, and existing linked task in the same company. Edit revalidates its linked task's current access before producing notices. Invalid input is rejected before state or notice changes. Editing after author deactivation or company-scope revocation preserves the historical author reference, while visibility still uses current authorization; inactive profiles receive no new notice. Sol functionally accepted S05 after independent recheck of edit and cancellation paths.",
+    "S15": "Operational-rate panel supports explicit choice between catalogue template and a punctual operational task. Task choices are filtered by selected company and display task, company, month, and unit; commit sends taskId and immutable rate version. Domain and backup validation now require exactly one source (template XOR task); ambiguous rates are rejected. Sol independently accepted visible company/task alignment and version restore behavior.",
+    "S20": "Improvement-process date validation now uses the shared strict Gregorian validDate. Impossible trial/review/completion/measurement dates are rejected. Backup semantic validation checks measuredOn is a real day inside the trial interval and measuredBy is an existing profile; malformed or partial attribution is rejected. Valid date-only periods and ART catalogue effective dates remain intact. Sol functionally accepted S20.",
+    "S24": "Opening a calendar obligation revalidates current actor visibility, selects that obligation's fiscal period only inside the fiscal module, expands the source panel, and focuses/scrolls the original record after it is visible. Missing or revoked origins show a notice. Scroll respects prefers-reduced-motion. Regression covers a folded panel and an obligation whose fiscal period differs from its due month, while the calendar month remains unchanged. GPT-6.1 Sol independently accepted S24; its focused probes passed 12/12, including missing origin and revoked actor.",
+    "S25": "NotificationCenter schedules one timer to next ART midnight, refreshes on focus/visibility, keeps closed badge current and recomputes IDs/cutoff when marking read. Timer/listeners clean up and no per-second writes. Independent Sol accepted functionally with 6/6 probes: ART rollover/year boundary, resume, read receipt, actor change, StrictMode timer/listener cleanup.",
+    "remaining_stage_4": "S05/S15/S20/S24/S25/S33/S40/S41/S42/S48 accepted functionally. S52 implementation and local/browser verification are complete; independent Sol review remains open.",
+    "S33": "ParameterizationInbox removes operational quotas and no longer writes operational targets or legacy weights. Deliverable weights remain editable; operational movement coefficients remain separately versioned. Laboratory domain allows operational-only review without values and preserves targets/snapshots. Failure to persist leaves the dialog open and notifies. The operational Worker/site-policy and Supabase contracts are unchanged.",
+    "S40": "New fiscal obligations use evaluationVersion 2 and accept only verifiable result tasks from the same company. Legacy unversioned obligations keep their historical target interpretation; old operational links remain visible as historical during editing and cannot be newly added. Backup validation preserves v1/unversioned history and makes an unmarked history revision inherit its parent evaluation version, preventing a v2 revision from bypassing result-only links. Sol accepted after 37/37 independent probes; regression accepts valid unmarked v2 history and rejects the same record when changed to an operational task.",
+    "S41": "OperationalRatePanel initializes its effective date with dateART and does not replace a date already selected in an open form. Tests cover ART midnight boundaries across UTC date rollover, a simulated Pacific/Kiritimati local browser zone, year rollover, and a same-day movement snapshot applying the coefficient. Sol accepted functionally with 50/50 independent probes.",
+    "S42": "Task notifications compare availability, normalized dependency sets, and commercial tracking. One generic changed notice is emitted per authorized recipient for combined changes; completion/assignment/joint precedence stays intact. Null/absent equivalence, dependency reorder/deduplication, disabled tracking, revoked recipient, preserved read receipts, no-op/timer changes, and failed persistence were independently checked. Sol accepted functionally with 18/18 probes.",
+    "S48": "Sol accepted S48 functionally. New result-point aggregation excludes legacy operational weights; movement counts, quantities, time, joint quotas, and historic snapshots remain available. Onboarding clarifies that operations are measured by movements/time and that coefficients are configured by management. A coefficient is not created by approving a proposal.",
+    "S52": "Implemented and browser-verified with real Recharts: lab analytics retain task-bearing groups independent of deliverable points; operational-only groups appear on the category axis and a note identifies them as “Sin base de entregables”; a real zero-deliverable group is listed separately under “Cumplimiento 0%”. Exported CSV distinguishes no basis, numeric zero and “Sin evaluar”. Focused integration/export tests pass."
+  },
+  "validation": {
+    "focused_tests": "S24: 9/9 local, 12/12 independent Sol. S25: 3/3 local, 6/6 independent Sol. S33: 29/29 local, 36/36 independent Sol. S40: 37/37 local and independent. S41: 50/50 local and independent. S42: 15/15 local notifications, 18/18 independent. S48: 13/13 independent Sol. S52: tests/laboratory-corrections.test.tsx passed 20/20 after final chart annotation change.",
+    "full_suite": "Historical stage-4-specific cut: 624/624 in 66 files before final real-chart zero-label annotation; its focused suite then passed 20/20. Latest integrated revalidation after all current corrections: 658/658 in 67 files, exit 0; see latest_integrated_revalidation below.",
+    "intermediate_attempts": "S24 test development first used an overly broad panel-description selector; it was scoped to the fiscal panel and final 604/604 suite passed. S25 focused development first exposed missing RTL cleanup between new tests; cleanup was added and final focused tests and full suite passed. S33: an initial UI assertion matched multiple identical quota-free notes; assertion was updated to verify all expected notes. Full suite was rerun and passed.",
+    "typescript": "pass after final S52 annotation: node node_modules/typescript/bin/tsc --noEmit",
+    "client_build": "pass after final S52 annotation: node node_modules/vite/bin/vite.js build --outDir dist/client; existing dependency annotation, mixed dynamic/static import, and >500 kB chunk warnings remain; entry 541.23 kB.",
+    "worker_build": "pass after final S52 annotation: node scripts/build-worker.mjs",
+    "edge_main": "pass after S25: tests/browser.cjs, including due reminders and persisted read receipt; no JavaScript errors or operational API requests; outputs under outputs/stage-4-validation-20261014/edge-s25/",
+    "edge_corrections": "pass after final S52 annotation: tests/browser-corrections.cjs, including real Recharts S52 chart, responsive sidebar, laboratory, invitation, drag/drop, scoped search, request conversion, review notification, persistence and mobile; zero JS errors and operational API calls. Original S52 outputs under outputs/stage-4-validation-20261014/edge-s52-real-chart/; latest integrated Edge correction run under outputs/stage-5-validation-20261014/edge-post-corrections/.",
+    "edge_backup_restore": "pass on final source: tests/browser-laboratory-backup.cjs; v2 inspection/restore, cross-tab locks, stale retry, preflight and rollback; operational storage and API untouched; outputs under outputs/stage-4-validation-20261014/edge-backup-final/",
+    "diff_check": "pass after documentation/source changes: git diff --check; line-ending conversion notices only.",
+    "edge_s52_real_chart": "pass: tests/browser-corrections.cjs against the actual Vite build and Edge/real Recharts SVG. Isolated fictitious fixture has two operational-only profiles and one zero-completion deliverable; verifies axis names, the no-basis note, the zero-completion note, no operational API calls and no JS errors. Screenshot: outputs/stage-4-validation-20261014/edge-s52-real-chart/analytics-operational-no-base.png; full browser report: outputs/stage-4-validation-20261014/edge-s52-real-chart/browser-validation.json."
+  },
+  "independent_review": {
+    "reviewer": "GPT-6.1 Sol",
+    "result": "S05, S15, S20, S24, S25, S33, S40, S41, S42 and S48 accepted functionally. S52 code and local/browser acceptance pass; independent Sol review has not occurred because two attempts were unavailable due model capacity.",
+    "scope": "S05 edit/cancel and author-scope regression; S15 visible company/task alignment, version 7 to 8 continuation, and duplicate-version restore rejection; S20 valid/invalid date writes and backup date/actor attribution; S24 current authorization, period selection, panel expansion, visibility and focus, including independent probes for missing origin and revoked actor; S25 independent probes 6/6 including year boundary, resume, actor switch and StrictMode cleanup; S33 accepted with 36/36 independent probes; S40 initially found one P2 in backup history version inheritance, then accepted after 37/37 independent probes including v2 history with missing marker preserving result links and rejecting operational-link tampering; S41 accepted after 50/50 independent probes including Pacific/Kiritimati, midnight ART while form open, year boundary and same-day coefficient snapshot; S42 accepted after 18/18 independent probes covering recipient authorization, normalized sets, duplicate suppression, revocation and rejected persistence. No changes to Worker, server, or Supabase. S48 accepted with 13/13 focal probes covering result-only points, mixed operations, retained quantity/time, joint quotas, and no rate creation on proposal approval. S52 review pending; actual Recharts chart visual verification has since passed in Edge with operational-only rows and a true zero-result row. The Sol review of S52 remains pending."
+  },
+  "global_progress": "approximately 45%; unchanged",
+  "latest_integrated_revalidation": "After stage-5 focus corrections, current integrated tree passed 658/658 tests in 67 files, TypeScript, client and Worker builds, git diff --check, plus Edge corrections with the real Recharts S52 chart (latest 29 checks, zero JavaScript errors, zero operational API calls). The Edge run also validates covered-task keyboard movement, actor attribution and focus restoration. The latest local performance run was 502.95 ms p95 for 24 profiles/2,000 tasks. These integrated checks do not replace independent Sol review of S52. Reports: docs/architecture/review-evidence/stage-5-partial-laboratory-20261014.json and outputs/performance-lab-2026-10-14-post-tour-2026-10-14/.",
+  "no_external_actions": "No commit, PR, Site update, account connection, operational API call, or deployment.",
+  "remaining_stage_4": "S05/S15/S20/S24/S25/S33/S40/S41/S42/S48 accepted functionally. S52 code, focused integration/export, and real Recharts Edge visual verification pass. Independent Sol review of S52 remains pending; stage 4 has not been fully accepted."
+}

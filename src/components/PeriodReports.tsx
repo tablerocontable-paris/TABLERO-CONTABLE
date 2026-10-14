@@ -9,9 +9,11 @@ const percent = (n: number | null) =>
 export default function PeriodReports({
   state,
   month,
+  laboratory = false,
 }: {
   state: State;
   month: string;
+  laboratory?: boolean;
 }) {
   const active = state.profiles.find((p) => p.id === state.activeId)!;
   const [selected, setSelected] = useState<Closure | null>(null);
@@ -21,9 +23,18 @@ export default function PeriodReports({
       c.report &&
       canSee(active, c.ownerId, state.profiles),
   );
-  const r = selected?.report;
+  const r = selected?.report ? {
+    ...selected.report,
+    coverageContributions: selected.report.coverageContributions?.filter((item) =>
+      active.role === "jefe" || active.id === item.executorId || canSee(active, item.originalOwnerId, state.profiles)),
+  } : undefined;
   function exportReport(c: Closure) {
-    const r = c.report!;
+    const report = {
+      ...c.report!,
+      coverageContributions: c.report!.coverageContributions?.filter((item) =>
+        active.role === "jefe" || active.id === item.executorId || canSee(active, item.originalOwnerId, state.profiles)),
+    };
+    const hasLaboratorySummary = !!report.laboratorySummary;
     const rows = [
       [
         "Empleado",
@@ -42,40 +53,55 @@ export default function PeriodReports({
         "Reaperturas",
         "Entregables antes / evaluables",
         "Entregables antes %",
-        "Metas antes / evaluables",
-        "Metas antes %",
+        ...(hasLaboratorySummary
+          ? ["Movimientos operativos", "Carga operativa ponderada", "Movimientos sin coeficiente", "Calidad", "Orden", "Oportunidad", "Evaluaciones"]
+          : ["Metas antes / evaluables", "Metas antes %"]),
         "Promedio días anticipación entregables",
-        "Promedio días anticipación metas",
+        ...(!hasLaboratorySummary ? ["Promedio días anticipación metas"] : []),
       ],
-      ...r.groups.map((g) => [
-        r.employee,
+      ...report.groups.map((g) => [
+        report.employee,
         c.month,
         g.company,
         g.process,
         g.templateId || "Puntual",
         g.kind,
         g.unit,
-        g.metrics.assigned,
-        g.metrics.done,
-        g.metrics.points,
-        g.metrics.earned,
-        g.metrics.weighted ?? "Sin base",
+        g.kind === "operativa" && hasLaboratorySummary ? "No aplica" : g.metrics.assigned,
+        g.kind === "operativa" && hasLaboratorySummary ? "No aplica" : g.metrics.done,
+        g.kind === "operativa" && hasLaboratorySummary ? "No aplica" : g.metrics.points,
+        g.kind === "operativa" && hasLaboratorySummary ? "No aplica" : g.metrics.earned,
+        g.kind === "operativa" && hasLaboratorySummary ? "No aplica" : g.metrics.weighted ?? "Sin base",
         duration(g.recordedSeconds),
         g.reopenings,
         `${g.metrics.timeliness?.results.early ?? "Sin medición histórica"}/${g.metrics.timeliness?.results.evaluated ?? "Sin medición histórica"}`,
         g.metrics.timeliness ? (g.metrics.timeliness.results.earlyRate ?? "Sin muestra") : "Sin medición histórica",
-        `${g.metrics.timeliness?.operational.early ?? "Sin medición histórica"}/${g.metrics.timeliness?.operational.evaluated ?? "Sin medición histórica"}`,
-        g.metrics.timeliness ? (g.metrics.timeliness.operational.earlyRate ?? "Sin muestra") : "Sin medición histórica",
+        ...(hasLaboratorySummary
+          ? g.kind !== "operativa"
+            ? ["No aplica", "No aplica", "No aplica", "No aplica", "No aplica", "No aplica", "No aplica"]
+            : g.operationalSummary
+              ? [g.operationalSummary.movementCount, g.operationalSummary.weightedLoad ?? "Pendiente de parametrizar", g.operationalSummary.unweightedQuantity,
+                g.operationalSummary.quality ?? "Sin evaluar", g.operationalSummary.order ?? "Sin evaluar", g.operationalSummary.timeliness ?? "Sin evaluar", g.operationalSummary.evaluations]
+              : ["Sin resumen", "Sin resumen", "Sin resumen", "Sin resumen", "Sin resumen", "Sin resumen", "Sin resumen"]
+          : [`${g.metrics.timeliness?.operational.early ?? "Sin medición histórica"}/${g.metrics.timeliness?.operational.evaluated ?? "Sin medición histórica"}`,
+            g.metrics.timeliness?.operational.earlyRate ?? "Sin muestra"]),
         g.metrics.timeliness ? (g.metrics.timeliness.results.averageDaysAhead ?? "Sin muestra") : "Sin medición histórica",
-        g.metrics.timeliness ? (g.metrics.timeliness.operational.averageDaysAhead ?? "Sin muestra") : "Sin medición histórica",
+        ...(!hasLaboratorySummary ? [g.metrics.timeliness?.operational.averageDaysAhead ?? "Sin muestra"] : []),
       ]),
-      ...(r.contributions?.length ? [
-        ["Contribuciones personales", "Período", "Proceso", "Participación %", "Puntos posibles", "Puntos obtenidos", "Tiempo propio"],
-        ...r.contributions.map((item) => [r.employee, c.month, item.title, item.shareBps / 100, item.possiblePoints, item.earnedPoints, duration(item.recordedSeconds)]),
+      ...(report.contributions?.length ? [
+        ["Contribuciones personales", "Período", "Proceso", "Participación %", "Puntos posibles", "Puntos obtenidos", "Tiempo registrado"],
+        ...report.contributions.map((item) => [report.employee, c.month, item.title, item.shareBps / 100, item.possiblePoints, item.earnedPoints, duration(item.recordedSeconds)]),
       ] : []),
-      ...(r.transfers?.length ? [
+      ...(report.transfers?.length ? [
         ["Tarea", "ID tarea", "Responsable anterior", "Responsable nuevo", "Motivo", "Fecha"],
-        ...r.transfers.map((item) => [item.title, item.taskId, item.formerOwner, item.newOwner, item.reason, item.transferredAt]),
+        ...report.transfers.map((item) => [item.title, item.taskId, item.formerOwner, item.newOwner, item.reason, item.transferredAt]),
+      ] : []),
+      ...(report.coverageContributions?.length ? [
+        ["Trabajo en cobertura", "Empresa", "Titular original", "Ejecutor", "Tipo", "Cantidad", "Unidad", "Tiempo", "Finalización"],
+        ...report.coverageContributions.map((item) => [item.title, item.company, item.originalOwner, item.executor, item.kind,
+          item.activity.reduce((sum, row) => sum + row.qty, 0), item.unit,
+          duration(item.sessions.reduce((sum, session) => sum + Math.max(0, (Date.parse(session.end || c.at) - Date.parse(session.start)) / 1000), 0)),
+          item.completionAt || "Sin finalización por el reemplazo"]),
       ] : []),
     ];
     const url = URL.createObjectURL(
@@ -93,7 +119,9 @@ export default function PeriodReports({
   return (
     <Panel
       title="Reportes emitidos al cierre"
-      sub="Un reporte por empleado y período, generado al consolidar todas sus empresas. Disponible aquí para Juan Pablo; el envío por correo requiere conectar el servicio de producción."
+      sub={`${reports.length} reporte${reports.length === 1 ? "" : "s"} disponibles · uno por empleado y período, generado al consolidar todas sus empresas.`}
+      collapsible
+      defaultOpen={false}
     >
       {!reports.length ? (
         <Empty text="Se generan automáticamente con cada cierre. Los cierres anteriores a esta función conservan su exportación original." />
@@ -105,6 +133,7 @@ export default function PeriodReports({
                 <th>Empleado</th>
                 <th>Destinatario al cierre</th>
                 <th>Cumplimiento</th>
+                {laboratory && <th>Operativas</th>}
                 <th>Anticipación</th>
                 <th>Tiempo registrado</th>
                 <th>Reporte</th>
@@ -119,6 +148,11 @@ export default function PeriodReports({
                       "Sin jefe activo configurado"}
                   </td>
                   <td>{percent(c.metrics.weighted)}</td>
+                  {laboratory && <td>{c.report!.laboratorySummary
+                    ? c.report!.groups.some((group) => group.kind === "operativa")
+                      ? <>{c.report!.laboratorySummary.operational.movementCount} movimientos · {c.report!.laboratorySummary.operational.weightedLoad === null ? "carga pendiente" : `${c.report!.laboratorySummary.operational.weightedLoad.toLocaleString("es-AR")} carga`}{c.report!.laboratorySummary.operational.unweightedQuantity > 0 && <small>{c.report!.laboratorySummary.operational.unweightedQuantity.toLocaleString("es-AR")} sin coeficiente</small>}</>
+                      : "Sin operativas"
+                    : "Métrica histórica original"}</td>}
                   <td>
                     {c.metrics.timeliness
                       ? `${c.metrics.timeliness.total.early}/${c.metrics.timeliness.total.evaluated} antes`
@@ -146,10 +180,11 @@ export default function PeriodReports({
             {new Date(r.generatedAt).toLocaleString("es-AR")}
           </p>
           <div className="note">
-            Tiempo propio: {duration(r.recordedSeconds)} · Reaperturas:{" "}
+            Tiempo registrado: {duration(r.recordedSeconds)} · Reaperturas:{" "}
             {r.reopenings}. Las coberturas conservan el titular y los ejecutores
             en el historial. El tiempo no mide por sí solo productividad.
           </div>
+          {r.laboratorySummary && <div className="note">En coberturas: {r.laboratorySummary.covered.movementCount} movimientos · {r.laboratorySummary.covered.recordedSeconds ? duration(r.laboratorySummary.covered.recordedSeconds) : "sin tiempo propio"}. Las métricas de calidad se informan por separado y no cambian el cumplimiento.</div>}
           <TimelinessNumbers value={selected.metrics.timeliness} historical={!selected.metrics.timeliness} />
           <div className="table-wrap">
             <table>
@@ -158,7 +193,7 @@ export default function PeriodReports({
                   <th>Empresa</th>
                   <th>Proceso</th>
                   <th>Entregables</th>
-                  <th>Operativas en meta</th>
+                  <th>{r.laboratorySummary ? "Carga / revisión operativa" : "Operativas en meta"}</th>
                   <th>Cumplimiento</th>
                   <th>Antes / evaluables</th>
                   <th>Tiempo</th>
@@ -176,13 +211,11 @@ export default function PeriodReports({
                           : "Trabajo puntual"}
                       </small>
                     </td>
-                    <td>
-                      {g.metrics.done}/{g.metrics.assigned}
-                    </td>
-                    <td>
-                      {g.metrics.operationalTarget}/{g.metrics.operational}
-                    </td>
-                    <td>{percent(g.metrics.weighted)}</td>
+                    <td>{r.laboratorySummary && g.kind === "operativa" ? "No aplica" : `${g.metrics.done}/${g.metrics.assigned}`}</td>
+                    <td>{r.laboratorySummary ? g.operationalSummary
+                      ? <>{g.operationalSummary.quantityByUnit.map((item) => `${item.quantity.toLocaleString("es-AR")} ${item.unit}`).join(" · ") || `${g.operationalSummary.movementCount} movimientos`}<small>{g.operationalSummary.weightedLoad === null ? "Carga pendiente de parametrizar" : `${g.operationalSummary.weightedLoad.toLocaleString("es-AR")} carga ponderada`} · Calidad {g.operationalSummary.quality ?? "sin evaluar"} · Orden {g.operationalSummary.order ?? "sin evaluar"} · Oportunidad {g.operationalSummary.timeliness ?? "sin evaluar"} · {g.operationalSummary.evaluations} evaluaciones</small></>
+                      : "—" : `${g.metrics.operationalTarget}/${g.metrics.operational}`}</td>
+                    <td>{r.laboratorySummary && g.kind === "operativa" ? "No aplica" : percent(g.metrics.weighted)}</td>
                     <td>
                       {g.metrics.timeliness
                         ? `${g.metrics.timeliness.total.early}/${g.metrics.timeliness.total.evaluated}`
@@ -196,8 +229,20 @@ export default function PeriodReports({
           </div>
           {!!r.contributions?.length && <>
             <h3>Contribución de {r.employee}</h3>
-            <div className="table-wrap"><table><thead><tr><th>Proceso</th><th>Participación</th><th>Puntos posibles</th><th>Puntos logrados</th><th>Tiempo propio</th></tr></thead>
+            <div className="table-wrap"><table><thead><tr><th>Proceso</th><th>Participación</th><th>Puntos posibles</th><th>Puntos logrados</th><th>Tiempo registrado</th></tr></thead>
               <tbody>{r.contributions.map((item) => <tr key={item.taskId}><td>{item.title}</td><td>{(item.shareBps / 100).toFixed(2).replace(/\.00$/, "")}%</td><td>{item.possiblePoints.toFixed(2)}</td><td>{item.earnedPoints.toFixed(2)}</td><td>{duration(item.recordedSeconds)}</td></tr>)}</tbody>
+            </table></div>
+          </>}
+          {!!r.coverageContributions?.length && <>
+            <h3>Trabajo realizado en cobertura</h3>
+            <div className="table-wrap"><table><thead><tr><th>Proceso</th><th>Empresa</th><th>Titular</th><th>Ejecutor</th><th>Movimientos</th><th>Tiempo</th><th>Finalización</th></tr></thead>
+              <tbody>{r.coverageContributions.map((item) => <tr key={`${item.taskId}-${item.executorId}`}>
+                <td>{item.title}<small>{item.kind === "operativa" ? item.unit : "Entregable · sin puntos duplicados"}</small></td>
+                <td>{item.company}</td><td>{item.originalOwner}</td><td>{item.executor}</td>
+                <td>{item.activity.reduce((sum, row) => sum + row.qty, 0)}{item.activity.length ? ` ${item.unit}` : "Sin movimientos"}</td>
+                <td>{duration(item.sessions.reduce((sum, session) => sum + Math.max(0, (Date.parse(session.end || r.generatedAt) - Date.parse(session.start)) / 1000), 0))}</td>
+                <td>{item.completionAt ? new Date(item.completionAt).toLocaleString("es-AR") : "Sin finalización por el reemplazo"}</td>
+              </tr>)}</tbody>
             </table></div>
           </>}
           {!!r.transfers?.length && <>

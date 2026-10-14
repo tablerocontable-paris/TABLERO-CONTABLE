@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-14",
+  "stage": 5,
+  "status": "implemented_locally_acceptance_open_screen_reader_and_independent_review",
+  "requirements": ["S36", "S37", "S38", "S39", "S54", "S56", "S62", "S63"],
+  "implementation": {
+    "S36": "The employee picker constrains scrolling to its list and scrolls the active option into view. Native browser validation covered both actor and board-owner pickers with 24 visible profiles, Home/End, Tab, Shift+Tab, Escape, and a reduced viewport.",
+    "S37-S39": "Tour progress uses stable step identifiers and a version. Steps follow current role, jefe-only closing/catalogue guidance is excluded for managers, focus returns on pause, the exterior dimmer and in-viewport coach were checked in Edge. When the actor changes during the tour, focus falls back to the current visible guide trigger instead of a stale opener. Resetting nonzero progress from an older tour version announces the reset while preserving unrelated state. Unit tests cover completion, failure persistence, actor change, and migration notice.",
+    "S54": "Covered task board now uses the guarded common move callback. Edge drag preserved the titular owner, started the replacement's clock, attributed audit to the replacement, and applied reduced-motion animation duration 0s. Edge also moved the covered card with Alt+ArrowLeft, preserved the titular owner, attributed the audit to the replacement, and verified focus remained on the remounted card. Ordinary board drag and accepted-only landing animation were also exercised. A stateful keyboard-move regression verifies the same focus behavior.",
+    "S56": "TaskBoard generates React useId-prefixed ARIA region/control IDs. Unit tests mount own, covered and empty boards together, verify unique IDs and valid controls references, and confirm independent folding.",
+    "S62-S63": "Quick search results are semantic list items with native buttons. Edge exercised Tab then Enter and Tab then Space, with current actor preserved, destination focus checked, Escape focus return checked, and no listbox/option emulation. Shared Dialog focus-return regression is covered by unit tests."
+  },
+  "validation": {
+    "tests": "Post-correction full suite: 658/658 passed in 67 files; node node_modules/vitest/vitest.mjs run --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000 --reporter=dot; exit 0; Vitest duration 128.56 s. Focused run: 89/89 passed across TaskBoard and annotations-tour test files.",
+    "typescript": "Passed: node node_modules/typescript/bin/tsc --noEmit; exit 0.",
+    "client_build": "Passed: node node_modules/vite/bin/vite.js build --outDir dist/client; exit 0. Existing warnings remain: mixed static/dynamic import of laboratoryEvidence, Zod PURE-comment notices, entry chunk 546.23 kB (>500 kB warning); chart chunk 423.74 kB.",
+    "worker_build": "Passed: node scripts/build-worker.mjs; exit 0.",
+    "edge": "Passed tests/browser-corrections.cjs on Microsoft Edge 155.0.4283.45 against the current built client. Latest run: 29 checks; 0 JavaScript errors; 0 /api calls. It includes real drag and covered-task Alt+Arrow movement, owner/actor preservation, focus after remount, and reduced-motion timing. Report: outputs/stage-5-validation-20261014/edge-covered-keyboard-post-audit/browser-validation.json.",
+    "performance": "Current-tree local benchmark passed with 24 profiles and 2,000 tasks, 30 hot navigation samples, p95 502.95 ms (<1,000 ms), zero JavaScript errors and zero operational API calls; Microsoft Edge 155.0.4283.45 on Intel Core i3-N305. Report: outputs/performance-lab-2026-10-14-post-tour-2026-10-14/navigation-benchmark.json. Hot local measurement only.",
+    "diff_check": "git diff --check exit 0; Git printed line-ending conversion notices only."
+  },
+  "acceptance_gaps": [
+    "Human screen-reader acceptance has not been performed; automated/browser semantics are not a substitute.",
+    "Independent GPT-6.1 Sol review of stage 5 has not occurred.",
+    "Independent GPT-6.1 Sol review of S52 in stage 4 remains pending. Stage 4 is therefore still not accepted."
+  ],
+  "no_external_actions": "No commit, PR, Site update, account connection, operational API call, or deployment.",
+  "global_progress": "approximately 45%; unchanged"
+}

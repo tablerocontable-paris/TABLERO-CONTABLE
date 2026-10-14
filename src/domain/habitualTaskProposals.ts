@@ -43,7 +43,7 @@ function cleanProposal(input: Omit<HabitualProposalInput, "id" | "companyId">) {
   if (!description || description.length > 1000) throw Error("Describí el trabajo en hasta 1000 caracteres.");
   if (!steps.length || steps.length > 50 || steps.some((step) => step.length > 300))
     throw Error("La propuesta necesita entre 1 y 50 controles de hasta 300 caracteres.");
-  if (!Number.isFinite(input.target) || input.target < 0) throw Error("La meta debe ser un número válido.");
+  if (!Number.isFinite(input.target) || input.target < 0) throw Error("El dato numérico de la propuesta no es válido.");
   if (input.kind === "operativa" && !unit) throw Error("Indicá la unidad de la tarea operativa.");
   validateSchedule(input.schedule);
   return { title, process, description, unit, steps };
@@ -163,7 +163,9 @@ export function resubmitHabitualTaskProposal(
 ): State {
   const proposal = (state.habitualTaskProposals || []).find((row) => row.id === proposalId);
   if (!proposal || proposal.status !== "changes_requested") throw Error("La propuesta no tiene correcciones pendientes.");
-  if (!actor.active || proposal.ownerId !== actor.id) throw Error("Sólo quien presentó la propuesta puede corregirla.");
+  const currentActor = state.profiles.find((profile) => profile.id === actor.id);
+  if (!currentActor?.active || proposal.ownerId !== currentActor.id) throw Error("Sólo quien presentó la propuesta puede corregirla.");
+  if (!currentActor.companyIds.includes(proposal.companyId)) throw Error("La empresa de esta propuesta ya no está asignada a tu perfil.");
   const clean = cleanProposal(input);
   const changed = proposal.title !== clean.title || proposal.process !== clean.process || proposal.description !== clean.description ||
     proposal.kind !== input.kind || proposal.unit !== clean.unit || proposal.target !== input.target ||
@@ -217,7 +219,7 @@ export function approveHabitualTaskProposals(
     if (!title || title.length > 120 || !input.sector.trim() || input.sector.length > 80 || !input.description.trim() || input.description.length > 1000)
       throw Error("Completá nombre, rubro y objetivo del estándar.");
     if (!Number.isFinite(input.weight) || input.weight < 0 || !Number.isFinite(input.target) || input.target < 0)
-      throw Error("El peso y la meta estándar deben ser números válidos.");
+      throw Error("El peso y la referencia numérica deben ser válidos.");
     if (!steps.length || steps.length > 50 || steps.some((step) => step.length > 300))
       throw Error("El estándar necesita entre 1 y 50 controles válidos.");
     if (selected.some((row) => row.kind !== input.kind || (row.kind === "operativa" && normalizeWords(row.unit) !== normalizeWords(input.unit))))
@@ -228,7 +230,7 @@ export function approveHabitualTaskProposals(
     template = {
       id: makeId(), title, sector: input.sector.trim(), kind: input.kind,
       weight: input.weight, unit: input.kind === "operativa" ? input.unit.trim() : "",
-      target: input.kind === "operativa" ? input.target : 0,
+      target: 0,
       steps, description: input.description.trim(),
     };
     next = addCatalogueTemplate(next, template, actor, now, makeId);
@@ -249,7 +251,7 @@ export function approveHabitualTaskProposals(
     kind: template!.kind,
     weight: template!.weight,
     unit: template!.unit,
-    target: proposal.kind === "operativa" ? proposal.target : template!.target,
+    target: proposal.kind === "operativa" ? 0 : template!.target,
     day: Number(proposal.schedule.startDate.slice(-2)),
     frequency: proposal.schedule.frequency,
     schedule: structuredClone(proposal.schedule),

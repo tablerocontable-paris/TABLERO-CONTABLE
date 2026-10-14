@@ -594,6 +594,30 @@ describe("base nueva desde cero y RLS", () => {
 
     await db.exec(`reset role;select set_config('request.jwt.claim.sub','${ids.manager}',false);select set_config('request.jwt.claims','{"aal":"aal2"}',false);set role authenticated;`);
     await expect(db.query("select approve_onboarding($1,1)", [request])).rejects.toThrow("Sólo jefatura");
+    const beforeInvalidChangeRequests = {
+      status: (await db.query<{ status: string }>("select status from onboarding_requests where id=$1", [request])).rows[0].status,
+      reviews: (await db.query<{ count: string }>("select count(*)::text count from onboarding_reviews where request_id=$1", [request])).rows[0].count,
+      changesAudit: (await db.query<{ count: string }>("select count(*)::text count from audit_events where entity_id=$1 and action='onboarding.changes_requested'", [request])).rows[0].count,
+    };
+    await expect(db.query("select request_onboarding_changes($1,null,'Revisar')", [request])).rejects.toThrow("revisión");
+    await expect(db.query("select request_onboarding_changes($1,-1,'Revisar')", [request])).rejects.toThrow("revisión");
+    await expect(db.query("select request_onboarding_changes($1,0,'Revisar')", [request])).rejects.toThrow("responsable, revisión y motivo");
+    expect({
+      status: (await db.query<{ status: string }>("select status from onboarding_requests where id=$1", [request])).rows[0].status,
+      reviews: (await db.query<{ count: string }>("select count(*)::text count from onboarding_reviews where request_id=$1", [request])).rows[0].count,
+      changesAudit: (await db.query<{ count: string }>("select count(*)::text count from audit_events where entity_id=$1 and action='onboarding.changes_requested'", [request])).rows[0].count,
+    }).toEqual(beforeInvalidChangeRequests);
+    await db.exec(`reset role;update profiles set manager_id='${ids.boss}' where id='${ids.employee}';`);
+    await actor(ids.manager, "aal2");
+    await expect(db.query("select request_onboarding_changes($1,1,'Fuera de equipo')", [request])).rejects.toThrow("Fuera del equipo asignado");
+    await db.exec("reset role");
+    expect({
+      status: (await db.query<{ status: string }>("select status from onboarding_requests where id=$1", [request])).rows[0].status,
+      reviews: (await db.query<{ count: string }>("select count(*)::text count from onboarding_reviews where request_id=$1", [request])).rows[0].count,
+      changesAudit: (await db.query<{ count: string }>("select count(*)::text count from audit_events where entity_id=$1 and action='onboarding.changes_requested'", [request])).rows[0].count,
+    }).toEqual(beforeInvalidChangeRequests);
+    await db.exec(`update profiles set manager_id='${ids.manager}' where id='${ids.employee}';`);
+    await actor(ids.manager, "aal2");
     await db.query("select request_onboarding_changes($1,1,'Confirmar los días')", [request]);
     await actor(ids.employee);
     await db.query("select save_onboarding_draft($1,$2::jsonb,1,2)", [request, payload]);
@@ -602,7 +626,23 @@ describe("base nueva desde cero y RLS", () => {
     await db.exec(`reset role;select set_config('request.jwt.claim.sub','${ids.boss}',false);select set_config('request.jwt.claims','{"aal":"aal1"}',false);set role authenticated;`);
     await expect(db.query("select approve_onboarding($1,2)", [request])).rejects.toThrow("MFA");
     await db.exec(`reset role;select set_config('request.jwt.claim.sub','${ids.boss}',false);select set_config('request.jwt.claims','{"aal":"aal2"}',false);set role authenticated;`);
+    const beforeInvalidApprovals = {
+      status: (await db.query<{ status: string }>("select status from onboarding_requests where id=$1", [request])).rows[0].status,
+      assignments: (await db.query<{ count: string }>("select count(*)::text count from task_assignments where owner_id=$1", [ids.employee])).rows[0].count,
+      activations: (await db.query<{ count: string }>("select count(*)::text count from onboarding_activations where request_id=$1", [request])).rows[0].count,
+      approvals: (await db.query<{ count: string }>("select count(*)::text count from onboarding_reviews where request_id=$1 and action='approved'", [request])).rows[0].count,
+      audit: (await db.query<{ count: string }>("select count(*)::text count from audit_events where entity_id=$1 and action='onboarding.approved'", [request])).rows[0].count,
+    };
+    await expect(db.query("select approve_onboarding($1,null)", [request])).rejects.toThrow("revisión");
+    await expect(db.query("select approve_onboarding($1,-1)", [request])).rejects.toThrow("revisión");
     await expect(db.query("select approve_onboarding($1,1)", [request])).rejects.toThrow("desactualizada");
+    expect({
+      status: (await db.query<{ status: string }>("select status from onboarding_requests where id=$1", [request])).rows[0].status,
+      assignments: (await db.query<{ count: string }>("select count(*)::text count from task_assignments where owner_id=$1", [ids.employee])).rows[0].count,
+      activations: (await db.query<{ count: string }>("select count(*)::text count from onboarding_activations where request_id=$1", [request])).rows[0].count,
+      approvals: (await db.query<{ count: string }>("select count(*)::text count from onboarding_reviews where request_id=$1 and action='approved'", [request])).rows[0].count,
+      audit: (await db.query<{ count: string }>("select count(*)::text count from audit_events where entity_id=$1 and action='onboarding.approved'", [request])).rows[0].count,
+    }).toEqual(beforeInvalidApprovals);
     await expect(db.query("select approve_onboarding($1,2)", [request])).rejects.toThrow("Empresa o equipo ya no asignado");
     expect((await db.query("select * from onboarding_activations where request_id=$1", [request])).rows).toHaveLength(0);
     expect((await db.query("select * from task_assignments where owner_id=$1 and template_version_id=$2", [ids.employee, version])).rows).toHaveLength(0);
@@ -618,5 +658,62 @@ describe("base nueva desde cero y RLS", () => {
     ]);
     expect((await db.query("select * from onboarding_activations where request_id=$1", [request])).rows).toHaveLength(2);
     expect((await db.query<{ approve_onboarding: number }>("select approve_onboarding($1,2)", [request])).rows[0].approve_onboarding).toBe(2);
+    expect((await db.query("select * from onboarding_activations where request_id=$1", [request])).rows).toHaveLength(2);
+    expect((await db.query("select * from onboarding_reviews where request_id=$1 and action='approved'", [request])).rows).toHaveLength(1);
+    expect((await db.query("select * from audit_events where entity_id=$1 and action='onboarding.approved'", [request])).rows).toHaveLength(1);
+  });
+  it("S60: los recibos repiten sólo la misma operación, no movimientos iguales", async () => {
+    const assignment = "40000000-0000-0000-0000-000000000060";
+    const task = "50000000-0000-0000-0000-000000000060";
+    const operationA = "90000000-0000-0000-0000-000000000060";
+    const operationB = "90000000-0000-0000-0000-000000000061";
+    await db.exec("reset role");
+    const today = (await db.query<{ today: string }>(
+      "select (now() at time zone 'America/Argentina/Buenos_Aires')::date::text today",
+    )).rows[0].today;
+    await db.query(
+      `insert into task_assignments(id,organization_id,company_id,owner_id,team_id,title,kind,weight,unit,target,frequency,start_month,due_day)
+       values($1,$2,$3,$4,$5,'Registro de movimientos','operativa',1,'movimientos',100,'mensual',date_trunc('month',$6::date)::date,30)`,
+      [assignment, ids.org, ids.c, ids.employee, ids.team, today],
+    );
+    await db.query(
+      `insert into task_instances(id,organization_id,assignment_id,company_id,owner_id,team_id,period,scheduled_on,title,kind,weight,unit,target,due_date)
+       values($1,$2,$3,$4,$5,$6,date_trunc('month',$7::date)::date,$7,'Registro de movimientos','operativa',1,'movimientos',100,$7)`,
+      [task, ids.org, assignment, ids.c, ids.employee, ids.team, today],
+    );
+
+    await actor(ids.employee);
+    const first = (await db.query<{ record_activity_once: string }>(
+      "select record_activity_once($1,$2::date,3,'Lote A',$3)", [task, today, operationA],
+    )).rows[0].record_activity_once;
+    const replay = (await db.query<{ record_activity_once: string }>(
+      "select record_activity_once($1,$2::date,3,'Lote A',$3)", [task, today, operationA],
+    )).rows[0].record_activity_once;
+    expect(replay).toBe(first);
+    await expect(db.query(
+      "select record_activity_once($1,$2::date,4,'Lote A',$3)", [task, today, operationA],
+    )).rejects.toThrow("otros argumentos");
+
+    const second = (await db.query<{ record_activity_once: string }>(
+      "select record_activity_once($1,$2::date,3,'Lote A',$3)", [task, today, operationB],
+    )).rows[0].record_activity_once;
+    const legacyA = (await db.query<{ record_activity: string }>(
+      "select record_activity($1,$2::date,3,'Lote A')", [task, today],
+    )).rows[0].record_activity;
+    const legacyB = (await db.query<{ record_activity: string }>(
+      "select record_activity($1,$2::date,3,'Lote A')", [task, today],
+    )).rows[0].record_activity;
+    expect(new Set([first, second, legacyA, legacyB]).size).toBe(4);
+
+    await db.exec("reset role");
+    expect((await db.query<{ count: string; total: string }>(
+      "select count(*)::text count, sum(quantity)::text total from activity_entries where instance_id=$1", [task],
+    )).rows[0]).toEqual({ count: "4", total: "12" });
+    expect((await db.query(
+      "select id from audit_events where action='activity.created' and details->>'instance'=$1", [task],
+    )).rows).toHaveLength(4);
+    expect((await db.query<{ state_revision: number }>(
+      "select state_revision from task_instances where id=$1", [task],
+    )).rows[0].state_revision).toBe(4);
   });
 });

@@ -18,3 +18,22 @@ El sitio publicado ejecuta React/TypeScript y persiste una demostración en el n
 ## Ampliación 0.4
 
 La política vigente está en docs/PRODUCT-ROADMAP.md. Se reemplaza la recurrencia mensual única por programación explícita por fecha, con vencimiento opcional. Se agregan sesiones de cronómetro, ausencias/coberturas, cuenta técnica futura y laboratorio aislado. El contrato SQL 0.3 requiere actualización antes de conectar; no se aplicaron cambios a servicios remotos.
+
+## Precedencia vigente del laboratorio — auditada 11/10/2026
+
+Los puntos 2, 4 y 6 describen la definición inicial: las metas y puntos operativos
+se conservan sólo en contratos/reportes históricos. El laboratorio aprobado
+mide cumplimiento sólo sobre entregables, carga operativa por cantidad y
+coeficiente versionado, y calidad por evaluación independiente. No interpretar
+el peso antiguo como coeficiente por movimiento ni recalcular historia.
+
+El cierre vigente se identifica por persona/empresa/mes; las unidades conectadas
+por tareas conjuntas se cierran como grupo indivisible, y el mes se consolida
+cuando todas las empresas con trabajo estén cerradas. No cerrar tareas pendientes
+como realizadas. El acceso distingue consultar, gestionar y ejecutar; un superior
+no ejecuta como el empleado ni obtiene sus anotaciones personales al consultarlo.
+
+Los contratos Supabase y Worker/D1 permanecen separados del laboratorio local.
+No activar API, cuentas o invitaciones antes de aceptación. Definición del 100%
+y automatización: docs/ops/FINAL-ACCEPTANCE.md. Auditoría y fallos pendientes:
+docs/architecture/SOL-AUDIT-20261008.md. Esta aclaración no declara aceptación.

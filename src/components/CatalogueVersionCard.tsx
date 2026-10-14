@@ -27,7 +27,7 @@ export default function CatalogueVersionCard({ state, template, actor, commit, n
 
   const versionNumber = currentCatalogueVersion(state, template.id);
   return (
-    <details className="catalog-item" key={template.id}>
+    <details className="catalog-item" key={template.id} data-tour="catalogue-row">
       <summary className="catalog-summary">
         <span className="catalog-summary-main">
           <span className="catalog-summary-title">{template.title}</span>
@@ -40,21 +40,22 @@ export default function CatalogueVersionCard({ state, template, actor, commit, n
           <ChevronDown className="catalog-chevron" size={16} aria-hidden="true" />
         </span>
       </summary>
-      <div className="catalog-item-details">
+      <div className="catalog-item-details" data-tour="catalogue-details">
         <p>{template.description}</p>
         <div className="catalog-fields">
           <label>Peso de la tarea<select disabled={!editable} value={template.weight} onChange={(event) => {
             const weight = Number(event.target.value);
             if (weight !== template.weight) save({ weight }, `Peso ${template.weight} → ${weight} puntos`);
           }}>{[1, 2, 3, 5, 8].map((weight) => <option key={weight} value={weight}>{weight} puntos</option>)}</select></label>
-          {template.kind === "operativa" && <label>Meta por ocurrencia<input type="number" min="1" max="1000000" disabled={!editable} value={targetDraft} onChange={(event) => setTargetDraft(event.target.value)} onBlur={() => {
+          {template.kind === "operativa" && versioned && <p className="catalogue-rate-note">Los movimientos se ponderan con coeficientes versionados por empresa en Actividad operativa.</p>}
+          {template.kind === "operativa" && !versioned && <label>Meta por ocurrencia<input type="number" min="1" max="1000000" disabled={!editable} value={targetDraft} onChange={(event) => setTargetDraft(event.target.value)} onBlur={() => {
             const target = Number(targetDraft);
             if (!Number.isFinite(target) || target < 1 || target > 1000000) { setTargetDraft(String(template.target)); notify("La meta debe estar entre 1 y 1.000.000."); return; }
             if (target !== template.target) save({ target }, `Meta ${template.target} → ${target} ${template.unit}`);
           }} /><small>{template.unit}</small></label>}
         </div>
         {template.steps.length > 0 && <ol>{template.steps.map((step, index) => <li key={`${index}-${step}`}>{step}</li>)}</ol>}
-        {versioned && history.length > 0 && <details className="catalogue-version-history"><summary>Historial de versiones ({history.length})</summary><ol>{history.map((version) => <li key={version.id}><b>Versión {version.version}</b> · {version.changeReason}<small>{version.effectiveOn ? ` Vigente desde ${version.effectiveOn}.` : " Vigencia anterior desconocida."} · Registrada {new Date(version.capturedAt).toLocaleDateString("es-AR")}.</small><div>{version.weight} puntos{version.kind === "operativa" ? ` · meta ${version.target} ${version.unit}` : ""} · {version.steps.length} controles</div></li>)}</ol></details>}
+        {versioned && history.length > 0 && <details className="catalogue-version-history"><summary>Historial de versiones ({history.length})</summary><ol>{history.map((version) => <li key={version.id}><b>Versión {version.version}</b> · {version.changeReason}<small>{version.effectiveOn ? ` Vigente desde ${version.effectiveOn}.` : " Vigencia anterior desconocida."} · Registrada {new Date(version.capturedAt).toLocaleDateString("es-AR")}.</small><div>{version.weight} puntos{version.kind === "operativa" && version.target > 0 ? versioned ? ` · referencia histórica: ${version.target} ${version.unit} (no se aplica)` : ` · meta ${version.target} ${version.unit}` : ""} · {version.steps.length} controles</div></li>)}</ol></details>}
       </div>
     </details>
   );

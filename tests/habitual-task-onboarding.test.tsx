@@ -34,6 +34,15 @@ function draft(step: number): Draft {
 }
 
 describe("inducción de tareas habituales", () => {
+  it("describe operativas por unidad sin mostrar el peso legacy como puntos", () => {
+    const state = seed();
+    const view = render(<Onboarding state={state} month="2026-10" profile={state.profiles.find((profile) => profile.id === "e0")!} draft={draft(2)} update={() => {}} finish={() => {}} pause={() => {}} laboratory />);
+    expect(screen.getByText(/Los entregables se evalúan por controles y puntos/)).toBeTruthy();
+    const operation = [...view.container.querySelectorAll<HTMLElement>(".catalog-option")].find((row) => row.textContent?.includes("Carga de facturas"));
+    expect(operation?.textContent).toContain("facturas · sin cuota");
+    expect(operation?.textContent).not.toContain("pts");
+    expect(operation?.textContent).not.toContain("120");
+  });
   it("guarda la frecuencia de cada empresa por separado", () => {
     const state = seed();
     const update = vi.fn();
@@ -44,7 +53,9 @@ describe("inducción de tareas habituales", () => {
     const saved = update.mock.calls[0][0] as Draft;
     expect(saved.companySchedules?.cat3?.c1.frequency).toBe("mensual");
     expect(saved.companySchedules?.cat3?.c2.frequency).toBe("semanal");
-    expect(screen.getAllByLabelText("Meta mensual · facturas")).toHaveLength(2);
+    expect(screen.getAllByText(/sin cuota mensual/i)).toHaveLength(2);
+    expect(screen.queryByLabelText("Meta mensual · facturas")).toBeNull();
+    expect(screen.getByText(/las operativas se miden por movimientos registrados y tiempo, sin meta mensual/i)).toBeTruthy();
   });
 
   it("captura el nombre libre como propuesta pendiente, no como tarea esporádica", () => {
@@ -67,5 +78,16 @@ describe("inducción de tareas habituales", () => {
     expect(saved.habitualTaskProposals).toHaveLength(1);
     expect(saved.habitualTaskProposals?.[0]).toMatchObject({ title: "CONC BNA Empresa 1", process: "Banco Nación", companyIds: ["c1", "c2"], steps: ["Descargar el extracto"] });
     expect(saved.customTasks).toHaveLength(0);
+  });
+
+  it("explica que la propuesta no parametriza el coeficiente por sí sola", () => {
+    const state = seed();
+    const initial: Draft = {
+      ...draft(3),
+      habitualTaskProposals: [{ id: "draft-ops", title: "Control de pagos", process: "Pagos", description: "Registrar pagos procesados.", kind: "operativa", unit: "pagos", steps: ["Procesar el lote"], companyIds: ["c1"] }],
+    };
+    render(<Onboarding state={state} month="2026-10" profile={state.profiles.find((profile) => profile.id === "e0")!} draft={initial} update={() => {}} finish={() => {}} pause={() => {}} laboratory />);
+    expect(screen.getByText(/La jefatura configura el coeficiente por empresa y vigencia en Coeficientes por movimiento/)).toBeTruthy();
+    expect(screen.queryByText(/El peso unitario se define al aprobar la propuesta/)).toBeNull();
   });
 });

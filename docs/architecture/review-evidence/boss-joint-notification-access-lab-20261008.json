@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-08",
+  "project": "Grupo Paris private laboratory",
+  "scope": "Align organization-wide jefe access to joint tasks and notifications with the supervision contract.",
+  "finding": "Joint-task access checked direct company membership before the jefe organization-wide rule, and notification filters repeated that membership restriction.",
+  "changes": [
+    "Active jefe profiles can consult joint tasks across the organization without a direct company membership entry.",
+    "Task notification recipients and visibility now rely on the shared canWork authorization rule.",
+    "Regression covers joint-task consultation and notification to a jefe without direct company membership, and ensures an encargado loses notifications when company access is removed."
+  ],
+  "validation": {
+    "focusedTests": { "result": "passed", "tests": 35, "files": 3 },
+    "fullSuite": { "result": "passed", "tests": 489, "files": 56 },
+    "typescript": "passed",
+    "clientBuild": { "result": "passed", "mainEntryKb": 485.34, "chartChunkKb": 423.74 },
+    "workerBuild": "passed",
+    "browserJointFlow": { "result": "passed", "operationalApiCalls": 0, "javascriptErrors": 0 },
+    "gitDiffCheck": "passed; informational LF-to-CRLF notices only"
+  },
+  "releaseState": {
+    "commitCreated": false,
+    "siteUpdated": false,
+    "externalAccountsConnected": false,
+    "estimatedGlobalProgress": "~45%"
+  }
+}

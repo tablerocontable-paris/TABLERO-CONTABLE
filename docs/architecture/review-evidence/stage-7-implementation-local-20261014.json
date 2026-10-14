@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-14",
+  "stage": 7,
+  "status": "implemented-locally-pending-independent-review",
+  "requirements": ["S01", "S13", "S30", "S31", "S32", "S44", "S45", "S46", "S59", "S60"],
+  "implementation": {
+    "S01_S13": "Validate isolated workspace projection and distinguish superior read access from permission to execute operational task changes.",
+    "S30": "Require an explicit reason for supervisor interruption of an active timer; preserve role and idempotency checks in the SQL gateway.",
+    "S31": "Reject contradictory task lifecycle, blocking, date, responsibility, member, and contribution-share DTO relationships while preserving valid historical rows.",
+    "S32": "Preserve participant contribution and represent replacement-only coverage with zero contribution in coordinated-task projections, including legacy fallback.",
+    "S44_S45": "Validate Worker response DTOs, including that state.activeId resolves to an active profile, and classify HTTP, transport, and protocol failures; invalidate stale opens/polls and preserve unconfirmed local proposals across remounts with recovery actions.",
+    "S46": "Isolate presence read/write failures from persisted workspace state for GET and POST; a valid workspace response remains available with empty presence, while workspace persistence/auth failures remain errors and unauthenticated requests do not write a heartbeat.",
+    "S59_S60": "Migration 012 adds null-safe revision checks and post-lock authority revalidation to onboarding approval and change-request flows; both flows acquire actor/profile/request coordination locks. Receipts replay by actor and operation ID and reject changed arguments while preserving legacy RPC wrappers."
+  },
+  "verification": {
+    "focused_tests": "Final Worker/site operational and UI focused rerun: 55/55 passed in 4 files, including S44 delayed polling, S45 missing/inactive active-profile DTO rejection, and S46 GET/POST presence failure behavior; output: outputs/stage-7-validation-20261014/worker-ui-s44-s46.txt, exit 0. Earlier focused sets: 161/161 across 14 files and 111/111 for S32/SQL/gateway/reader.",
+    "S44_polling_race": "Regression uses RemoteWorkspace and App with deferred GET/POST responses: a polling GET starts before the change and resolves during POST; the proposal remains visible and the confirmed POST plus follow-up GET retain the committed state.",
+    "S45_active_profile": "The response validator now requires state.activeId to match an active profile in the same DTO. GET with a missing or inactive profile is rejected before rendering; POST with a missing profile is a protocol error and keeps the unconfirmed proposal downloadable/retryable.",
+    "S46_presence": "Regression coverage verifies presence INSERT/SELECT failure after POST still returns committed revision and empty presence; SELECT failure on GET returns valid state with empty presence; storage failure remains 503 without incrementing revision; unauthenticated GET returns 401 without a presence row.",
+    "full_suite": {
+      "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "result": "Latest integrated run after stage-5 focus corrections: 658/658 tests passed in 67 files; exited 0 on 2026-10-14 (128.56 seconds reported by Vitest)."
+    },
+    "S59_revoked_manager": "tests/database.test.ts verifies a manager removed from the employee's scope cannot request onboarding changes; request status, review count, and audit count remain unchanged, and the authorized flow succeeds after restoring the relationship.",
+    "typescript": "node node_modules/typescript/bin/tsc --noEmit exited 0.",
+    "client_build": "node node_modules/vite/bin/vite.js build --outDir dist/client exited 0.",
+    "worker_build": "node scripts/build-worker.mjs exited 0.",
+    "diff_check": "git diff --check exited 0; Git emitted only line-ending conversion notices."
+  },
+  "latest_integrated_revalidation": "After S59 change-request lock and stage-5 focus corrections: 658/658 tests in 67 files, TypeScript, Vite client, Worker build, and git diff --check passed on 2026-10-14. Latest Edge corrections journey passed 29 checks with zero JavaScript errors and zero operational API calls, including covered-task keyboard movement. PGlite remains sequential and does not replace independent Sol review or PostgreSQL MVCC concurrency validation.",
+  "postgres_mvcc_recheck_20261014": {
+    "result": "26/26 concurrent scenarios passed against PostgreSQL 17.11 in a disposable local cluster; AB/BA ordering; lock barriers observed through pg_locks and pg_blocking_pids; 4 SQLSTATE 00000, 22 SQLSTATE 40001, zero 40P01 deadlocks.",
+    "assertions": "Rollback fingerprints, actor/operation receipts, and closure/report/outbox counts passed.",
+    "identity": "Synthetic auth/claims; does not validate hosted Supabase Auth/RLS.",
+    "cleanup": "Server stopped; verified no PostgreSQL processes, Windows services, or listener on 127.0.0.1:55432.",
+    "evidence": "docs/architecture/review-evidence/sol-corrections-runtime-recheck-20261014.json",
+    "report": "outputs/current-sol-corrections-browser-20261014/postgres-mvcc-coordination-20261014.json"
+  },
+  "review_gaps": [
+    "Independent GPT-6.1 Sol review of the implementation, SQL function replacements, preserved permissions, and evidence remains pending.",
+    "Human screen-reader acceptance remains pending. Windows Narrator is present but was not launched; automated accessibility evidence is not represented as human acceptance.",
+    "Build emits existing bundle-size and static/dynamic import warnings; builds succeed."
+  ],
+  "external_actions": "No remote SQL, operational API call, account connection, commit, PR, Site update, or deployment was performed.",
+  "global_progress": "approximately 45%; unchanged"
+}

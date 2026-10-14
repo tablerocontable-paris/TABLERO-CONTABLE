@@ -98,7 +98,7 @@ describe("consultas y pedidos internos del laboratorio", () => {
 
   it("conserva pedidos al recargar y acepta estados guardados anteriores sin esta colección", () => {
     const state = seed();
-    const created = request({ status: "resolved", convertedTaskId: "linked-task", convertedBy: "boss", convertedAt: "2026-10-06T15:00:00Z" });
+    const created = request({ status: "resolved", convertedTaskId: state.tasks[0]!.id, convertedBy: "boss", convertedAt: "2026-10-06T15:00:00Z" });
     state.internalRequests = [created];
     state.tasks[0].originRequestId = created.id;
     persist(state, true);
@@ -106,7 +106,7 @@ describe("consultas y pedidos internos del laboratorio", () => {
     expect(load(true).tasks[0].originRequestId).toBe(created.id);
     const older = seed();
     delete older.internalRequests;
-    persist(older, true);
+    localStorage.setItem("paris-state-lab", JSON.stringify(older));
     expect(load(true).internalRequests).toEqual([]);
   });
 
@@ -122,6 +122,13 @@ describe("consultas y pedidos internos del laboratorio", () => {
     expect(closed.status).toBe("resolved");
     expect(closed.messages[0].body).toBe("Lo reviso hoy.");
     expect(closed.history.map((event) => event.status)).toEqual(["new", "review", "responded", "resolved"]);
+    const makeId = vi.fn(counter);
+    expect(() => replyToInternalRequest(closed, boss, "Nueva respuesta tardía", "2026-10-06T16:00:00Z", makeId)).toThrow(/ya está resuelto/);
+    expect(makeId).not.toHaveBeenCalled();
+    expect(closed.messages).toHaveLength(1);
+    const converted = request({ status: "resolved", convertedTaskId: "linked-task", convertedBy: "boss", convertedAt: "2026-10-06T15:00:00Z" });
+    expect(() => replyToInternalRequest(converted, boss, "Respuesta", "2026-10-06T16:00:00Z", makeId)).toThrow(/ya está resuelto/);
+    expect(converted.convertedTaskId).toBe("linked-task");
     expect(() => setInternalRequestStatus(closed, boss, "review", "", counter)).toThrow(/no está disponible/);
   });
 
@@ -129,11 +136,18 @@ describe("consultas y pedidos internos del laboratorio", () => {
     const state = seed();
     state.internalRequests = [request({ authorId: "e1", recipientId: "boss", subject: "Privado de un par" })];
     state.internalRequests.push(request({ id: "resolved-mine", status: "resolved", messages: [{ id: "reply1", actorId: "boss", body: "Respuesta visible luego del cierre.", createdAt: "2026-10-06T11:00:00Z" }] }));
-    const onCreate = vi.fn();
+    const onCreate = vi.fn(() => true);
     const onConvert = vi.fn();
     const view = render(<InternalRequests state={state} actor={state.profiles.find((p) => p.id === "e0")!} onCreate={onCreate} onStatus={vi.fn()} onReply={vi.fn()} onConvert={onConvert} onOpenTask={vi.fn()} />);
     expect(screen.queryByText("Privado de un par")).toBeNull();
     expect(screen.getByText("Respuesta visible luego del cierre.")).toBeTruthy();
+    expect(screen.queryByLabelText("Módulo")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Nuevo pedido" }));
+    const composePanel = screen.getByRole("heading", { name: "Nuevo pedido" }).closest(".panel")!;
+    fireEvent.click(screen.getByRole("button", { name: "Plegar Nuevo pedido" }));
+    expect(composePanel.querySelector<HTMLElement>(".panel-body")?.hidden).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "Desplegar Nuevo pedido" }));
+    expect(composePanel.querySelector<HTMLElement>(".panel-body")?.hidden).toBe(false);
     fireEvent.change(screen.getAllByLabelText("Tipo")[0], { target: { value: "suggestion" } });
     fireEvent.change(screen.getByLabelText("Enviar a"), { target: { value: "m1" } });
     fireEvent.change(screen.getByLabelText("Módulo"), { target: { value: "Tablero" } });
@@ -141,13 +155,37 @@ describe("consultas y pedidos internos del laboratorio", () => {
     fireEvent.change(screen.getByPlaceholderText("Contá qué pasó, qué necesitás o qué proponés…"), { target: { value: "Propongo acortar la etiqueta." } });
     fireEvent.click(screen.getByRole("button", { name: "Registrar pedido" }));
     expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ kind: "suggestion", recipientId: "m1", authorId: "e0", module: "Tablero" }));
+    expect(screen.queryByLabelText("Módulo")).toBeNull();
     expect(screen.queryByRole("button", { name: "Convertir en tarea puntual" })).toBeNull();
     view.unmount();
 
     const bossState = seed();
     bossState.internalRequests = [request()];
-    render(<InternalRequests state={bossState} actor={bossState.profiles.find((p) => p.id === "boss")!} onCreate={vi.fn()} onStatus={vi.fn()} onReply={vi.fn()} onConvert={onConvert} onOpenTask={vi.fn()} />);
+    render(<InternalRequests state={bossState} actor={bossState.profiles.find((p) => p.id === "boss")!} onCreate={vi.fn(() => true)} onStatus={vi.fn()} onReply={vi.fn(() => true)} onConvert={onConvert} onOpenTask={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: "Convertir en tarea puntual" }));
     expect(onConvert).toHaveBeenCalledWith(expect.objectContaining({ id: "r1", kind: "work_request" }));
+  });
+
+  it("conserva borradores si guardar falla y los limpia sólo tras éxito", () => {
+    const state = seed();
+    const actor = state.profiles.find((profile) => profile.id === "e0")!;
+    const onCreate = vi.fn(() => false);
+    const onReply = vi.fn(() => false);
+    render(<InternalRequests state={{ ...state, internalRequests: [request({ authorId: "e1", recipientId: "e0" })] }} actor={actor} onCreate={onCreate} onStatus={vi.fn()} onReply={onReply} onConvert={vi.fn()} onOpenTask={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Nuevo pedido" }));
+    fireEvent.change(screen.getByLabelText("Módulo"), { target: { value: "Tablero" } });
+    fireEvent.change(screen.getByPlaceholderText("Resumí el pedido"), { target: { value: "Borrador conservado" } });
+    fireEvent.change(screen.getByPlaceholderText("Contá qué pasó, qué necesitás o qué proponés…"), { target: { value: "Texto que se debe preservar" } });
+    fireEvent.click(screen.getByRole("button", { name: "Registrar pedido" }));
+    expect(screen.getByDisplayValue("Borrador conservado")).toBeTruthy();
+    expect(screen.getByDisplayValue("Texto que se debe preservar")).toBeTruthy();
+    expect(screen.getByRole("alert").textContent).toMatch(/Conservamos el borrador/);
+    const reply = screen.getByLabelText("Respuesta") as HTMLTextAreaElement;
+    fireEvent.change(reply, { target: { value: "Respuesta pendiente" } });
+    fireEvent.click(screen.getByRole("button", { name: "Responder" }));
+    expect(reply.value).toBe("Respuesta pendiente");
+    onReply.mockReturnValue(true);
+    fireEvent.click(screen.getByRole("button", { name: "Responder" }));
+    expect(reply.value).toBe("");
   });
 });

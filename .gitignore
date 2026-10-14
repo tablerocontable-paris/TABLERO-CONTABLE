@@ -4,9 +4,17 @@ dist/
 .env.*
 !.env.example
 coverage/
-/outputs/browser-*-acceptance-*/
-/outputs/laboratory-backup-acceptance-*/
-# Git bundles, manifests and ZIPs are generated transfer artifacts, not app source.
-/outputs/grupo-paris-site-personal.bundle
-/outputs/grupo-paris-site-transfer-manifest.json
-/outputs/grupo-paris-site-transfer-*.zip
+/outputs/*
+!/outputs/LEEME-PC-PERSONAL.md
+!/outputs/independent-sol-review-20261014/
+/outputs/independent-sol-review-20261014/*
+!/outputs/independent-sol-review-20261014/acceptance-final.json
+!/outputs/independent-sol-review-20261014/tour-focus.accepted.source.tsx
+!/outputs/independent-sol-review-20261014/poll-order.accepted.source.tsx
+!/outputs/independent-sol-review-20261014/read-edges.accepted.source.tsx
+!/outputs/s39-tour-refresh-20261014/
+/outputs/s39-tour-refresh-20261014/*
+!/outputs/s39-tour-refresh-20261014/edge-final-retry/
+/outputs/s39-tour-refresh-20261014/edge-final-retry/*
+!/outputs/s39-tour-refresh-20261014/edge-final-retry/browser-validation.json
+!/outputs/s39-tour-refresh-20261014/edge-final-retry/analytics-operational-no-base.png

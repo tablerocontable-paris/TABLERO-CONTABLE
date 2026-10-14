@@ -44,7 +44,7 @@ export const timestampSchema = z
 
 // Date.parse discards sub-millisecond digits. Compare the original fractions
 // within the exact offset-adjusted second without changing the received strings.
-function endsBefore(ending: string, starting: string) {
+export function timestampEndsBefore(ending: string, starting: string) {
   const end = readTimestamp(ending),
     start = readTimestamp(starting);
   if (end === null || start === null) return false; // Their schemas report invalid instants.
@@ -111,6 +111,24 @@ export const taskInstanceSchema = z
         path: ["period"],
         message: "Invalid task period",
       });
+    if (row.due_date !== null && row.due_date < row.scheduled_on)
+      context.addIssue({
+        code: "custom",
+        path: ["due_date"],
+        message: "Due date precedes scheduled date",
+      });
+    if ((row.status === "Completada") !== (row.completed_at !== null))
+      context.addIssue({
+        code: "custom",
+        path: ["completed_at"],
+        message: "Completion timestamp must match task status",
+      });
+    if ((row.blocked_by === null) !== (row.blocked_since === null))
+      context.addIssue({
+        code: "custom",
+        path: ["blocked_since"],
+        message: "Block reason and date must be present together",
+      });
     if (
       row.kind === "operativa" &&
       (row.unit === null ||
@@ -126,7 +144,7 @@ export const taskInstanceSchema = z
     if (
       row.started_at !== null &&
       row.completed_at !== null &&
-      endsBefore(row.completed_at, row.started_at)
+      timestampEndsBefore(row.completed_at, row.started_at)
     )
       context.addIssue({
         code: "custom",
@@ -147,7 +165,7 @@ export const taskTimeSessionSchema = z
   })
   .passthrough()
   .superRefine((row, context) => {
-    if (row.ended_at !== null && endsBefore(row.ended_at, row.started_at))
+    if (row.ended_at !== null && timestampEndsBefore(row.ended_at, row.started_at))
       context.addIssue({
         code: "custom",
         path: ["ended_at"],

@@ -1,5 +1,5 @@
-import { id, isClosed, type State, type Task } from "./model";
-import { canWork } from "./workforce";
+import { canSee, id, isClosed, isResponsible, type State, type Task } from "./model";
+import { canWork, coverageFor } from "./workforce";
 
 export interface WorkNotification {
   id: string;
@@ -24,9 +24,25 @@ function recipients(s: State, t: Task, actorId: string) {
     (p) =>
       p.active &&
       p.id !== actorId &&
-      p.companyIds.includes(t.companyId) &&
       canWork(s, p, t),
   );
+}
+function taskConfigurationChanged(before: Task, after: Task) {
+  const normalized = (task: Task) => ({
+    title: task.title,
+    ownerId: task.ownerId,
+    due: task.due,
+    scheduledOn: task.scheduledOn,
+    status: task.status,
+    weight: task.weight,
+    target: task.target,
+    blockedBy: task.blockedBy,
+    checklist: task.checklist || [],
+    availableFrom: task.availableFrom ?? null,
+    dependsOnTaskIds: [...new Set(task.dependsOnTaskIds || [])].sort(),
+    commercialTrackingEnabled: task.commercialTrackingEnabled === true,
+  });
+  return JSON.stringify(normalized(before)) !== JSON.stringify(normalized(after));
 }
 export function taskNotifications(
   s: State,
@@ -83,28 +99,7 @@ export function collectTaskNotifications(
       events.push(
         ...taskNotifications(next, t, actorId, "completed", "Tarea completada"),
       );
-    } else if (
-      JSON.stringify([
-        old.title,
-        old.ownerId,
-        old.due,
-        old.status,
-        old.weight,
-        old.target,
-        old.blockedBy,
-        old.checklist,
-      ]) !==
-      JSON.stringify([
-        t.title,
-        t.ownerId,
-        t.due,
-        t.status,
-        t.weight,
-        t.target,
-        t.blockedBy,
-        t.checklist,
-      ])
-    ) {
+    } else if (taskConfigurationChanged(old, t)) {
       events.push(
         ...taskNotifications(
           next,
@@ -167,7 +162,6 @@ export function visibleNotifications(s: State) {
         s.tasks.some(
           (t) =>
             t.id === n.taskId &&
-            actor.companyIds.includes(t.companyId) &&
             canWork(s, actor, t),
         ),
     )
@@ -182,11 +176,17 @@ export function addTaskComment(
   const actor = s.profiles.find((p) => p.id === s.activeId);
   const task = s.tasks.find((t) => t.id === taskId);
   const text = content.trim();
+  const canManage = !!actor?.active && !!task && (
+    s.companies.some((company) => company.id === task.companyId) && (actor.role === "jefe" || actor.companyIds.includes(task.companyId) && (
+      actor.role === "encargado"
+        ? canSee(actor, task.ownerId, s.profiles) || !!task.responsibility?.members.some((member) => canSee(actor, member.profileId, s.profiles))
+        : isResponsible(task, actor.id) || coverageFor(s, task)?.replacementId === actor.id
+    ))
+  );
   if (
     !actor?.active ||
     !task ||
-    !actor.companyIds.includes(task.companyId) ||
-    !canWork(s, actor, task) ||
+    !canManage ||
     isClosed(s, task)
   )
     throw Error("No tenés acceso a esta tarea.");

@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import type { Activity, Profile, State, Task } from "../src/domain/model";
 import {
   applyCompletionAttribution,
+  linkEvidenceToCompletions,
   buildWorkCycle,
 } from "../src/domain/workCycle";
+import type { TaskEvidence } from "../src/domain/laboratory-work";
 
 const profiles: Profile[] = [
   {
@@ -81,6 +83,21 @@ const build = (
   });
 
 describe("ciclo mensual de trabajo", () => {
+  it("vincula evidencia de tarea a una finalización nueva y preserva movimientos e historial", () => {
+    const pending = task({ evidenceIds: ["task-file", "activity-file", "old-file"] });
+    const completed = task({ ...pending, status: "Completada", completedAt: "2026-10-02T12:00:00.000Z" });
+    const evidence: TaskEvidence[] = [
+      { id: "task-file", taskId: "task", activityId: null, profileId: "a", name: "tarea.pdf", mimeType: "application/pdf", size: 4, sha256: "a".repeat(64), createdAt: "2026-10-01T12:00:00.000Z" },
+      { id: "activity-file", taskId: "task", activityId: "move", profileId: "a", name: "mov.png", mimeType: "image/png", size: 4, sha256: "b".repeat(64), createdAt: "2026-10-01T12:00:00.000Z" },
+      { id: "old-file", taskId: "task", activityId: null, profileId: "a", completionAt: "2026-09-30T12:00:00.000Z", name: "anterior.pdf", mimeType: "application/pdf", size: 4, sha256: "c".repeat(64), createdAt: "2026-09-01T12:00:00.000Z" },
+    ];
+    const linked = linkEvidenceToCompletions([pending], [completed], evidence);
+    expect(linked[0].completionAt).toBe(completed.completedAt);
+    expect(linked[1]).toBe(evidence[1]);
+    expect(linked[2]).toBe(evidence[2]);
+    expect(linkEvidenceToCompletions([pending], [pending], evidence)).toBe(evidence);
+  });
+
   it("sella el actor al completar, borra la atribución al reabrir y conserva cierres importados sin actor", () => {
     const pending = task();
     const completed = task({ status: "Completada", completedAt: "2026-10-02T12:00:00.000Z" });
@@ -242,6 +259,38 @@ describe("ciclo mensual de trabajo", () => {
     expect(
       result.groups.find((group) => group.key === "a")?.operationalAmounts,
     ).toEqual({ pagos: 2 });
+  });
+
+  it("excluye el peso legacy operativo de los puntos y conserva ocurrencias, movimientos y tiempo", () => {
+    const deliverable = task({
+      id: "deliverable-points",
+      scheduledOn: "2026-10-05",
+      weight: 5,
+      status: "Completada",
+      completedAt: "2026-10-06T15:00:00.000Z",
+      completedBy: "b",
+    });
+    const operation = task({
+      id: "operation-no-rate",
+      kind: "operativa",
+      unit: "facturas",
+      target: 0,
+      weight: 80,
+      scheduledOn: "2026-10-05",
+      status: "Completada",
+      completedAt: "2026-10-06T16:00:00.000Z",
+      completedBy: "a",
+      sessions: [{ id: "operation-session", actorId: "a", start: "2026-10-06T12:00:00.000Z", end: "2026-10-06T13:00:00.000Z" }],
+    });
+    const activity: Activity[] = [{ id: "movement", taskId: operation.id, date: "2026-10-06", qty: 4, note: "", createdAt: "2026-10-06T14:00:00.000Z", actorId: "a" }];
+    const result = build([deliverable, operation], activity, "day", "company");
+    expect(result.buckets.reduce((sum, bucket) => sum + bucket.plannedOccurrences, 0)).toBe(2);
+    expect(result.buckets.reduce((sum, bucket) => sum + bucket.plannedPoints, 0)).toBe(5);
+    expect(result.buckets.reduce((sum, bucket) => sum + bucket.completedTasks, 0)).toBe(2);
+    expect(result.buckets.reduce((sum, bucket) => sum + bucket.completedPoints, 0)).toBe(5);
+    expect(result.buckets.reduce((sum, bucket) => sum + bucket.operationalRecords, 0)).toBe(1);
+    expect(result.buckets.reduce((sum, bucket) => sum + (bucket.operationalAmounts.facturas || 0), 0)).toBe(4);
+    expect(result.buckets.reduce((sum, bucket) => sum + bucket.recordedSeconds, 0)).toBe(3600);
   });
 
   it("no usa el vencimiento como sustituto de la fecha planificada", () => {

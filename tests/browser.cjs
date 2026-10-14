@@ -3,6 +3,7 @@ const fs = require("node:fs"),
   os = require("node:os"),
   { spawn } = require("node:child_process"),
   pw = require("playwright-core");
+const { selectProfile } = require("./browser-helpers.cjs");
 const root = path.resolve(__dirname, "..");
 async function setTheme(page, target) {
   const toggle = page.locator(".theme-toggle");
@@ -65,6 +66,15 @@ fs.mkdirSync(output, { recursive: true });
     await page.locator("h1").waitFor();
     await page.screenshot({ path: output + "/overview.png", fullPage: true });
     console.log("overview", await page.locator("h1").innerText());
+    for (const title of ["Avance ponderado del equipo", "Dónde está el trabajo"]) {
+      const toggle = page.getByRole("button", { name: `Plegar ${title}` });
+      await toggle.waitFor();
+      const bodyId = await toggle.getAttribute("aria-controls");
+      await toggle.click();
+      if ((await toggle.getAttribute("aria-expanded")) !== "false" || !(await page.locator(`#${bodyId}`).isHidden()))
+        throw Error(`${title} panel did not collapse`);
+      await page.getByRole("button", { name: `Desplegar ${title}` }).click();
+    }
     await setTheme(page, "dark");
     if (
       (await page.evaluate(() => document.documentElement.dataset.theme)) !==
@@ -139,7 +149,10 @@ fs.mkdirSync(output, { recursive: true });
     const card = page.locator(".task-card").first();
     await card.locator(".card-title").click();
     const dialog = page.getByRole("dialog");
+    await dialog.getByRole("heading", { name: "Checklist", exact: true }).waitFor();
     const checks = dialog.locator("input[type=checkbox]");
+    const checklistCount = await checks.count();
+    if (!checklistCount) throw Error("onboarding result task did not render its checklist");
     for (let i = 0; i < (await checks.count()); i++)
       await checks.nth(i).check();
     await dialog.getByRole("button", { name: "Cerrar", exact: true }).click();
@@ -153,7 +166,7 @@ fs.mkdirSync(output, { recursive: true });
       mine.filter((t) => t.status === "Completada").length !== 1 ||
       mine.filter((t) => t.status === "Pendiente").length !== 1
     )
-      throw Error("company isolation/automatic transition");
+      throw Error(`company isolation/automatic transition: active=${stored.activeId}, owned=${mine.length}, states=${JSON.stringify(mine.map((t) => ({ id: t.id, companyId: t.companyId, title: t.title, status: t.status, checklist: t.checklist?.map((step) => step.done) })))}`);
     await page.locator('[data-nav="operations"]').click();
     await page
       .getByRole("button", { name: "Registrar", exact: true })
@@ -169,22 +182,27 @@ fs.mkdirSync(output, { recursive: true });
     );
     if (!stored.activity.some((a) => a.qty === 12 && a.note === "Lote QA"))
       throw Error("activity not saved");
-    await page.getByLabel("Vista de usuario").selectOption("boss");
+    await selectProfile(page, "Vista de usuario", "Vista de prueba · actor simulado", "boss");
     await page.locator('[data-nav="analytics"]').click();
     for (const name of ["Por equipo", "Por sector", "Por empleado"])
       await page.getByRole("button", { name, exact: true }).click();
     await page.getByLabel("Empresa", { exact: true }).selectOption("c1");
     await page.locator('[data-nav="closing"]').click();
-    const row = page.getByRole("row").filter({ hasText: "Empleado QA" });
-    await row.getByRole("button", { name: "Revisar y cerrar" }).click();
-    await page
-      .getByRole("dialog")
-      .locator('textarea[name="note"]')
-      .fill("Revisión mensual QA");
-    await page.getByRole("dialog").locator("input[type=checkbox]").check();
-    await page
-      .getByRole("button", { name: "Confirmar cierre", exact: true })
-      .click();
+    await page.getByRole("heading", { name: /Cierres por empresa/ }).waitFor();
+    const closeFieldLabels = await page.locator(".lab-close-controls label").evaluateAll((labels) => labels.map((label) => ({ text: label.innerText, controlCount: label.querySelectorAll("select").length })));
+    if (closeFieldLabels.length !== 1 || closeFieldLabels[0].text.split("\n")[0] !== "Alcance" || closeFieldLabels[0].controlCount !== 1)
+      throw Error(`closure scope control label mismatch: ${JSON.stringify(closeFieldLabels)}`);
+    const qaId = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem("paris-state-lab")).profiles.find(
+        (profile) => profile.name === "Empleado QA",
+      ).id,
+    );
+    await page.locator(".lab-close-controls select").nth(0).selectOption("person");
+    await page.locator(".lab-close-controls select").nth(1).selectOption(qaId);
+    await page.locator(".lab-close-form textarea").fill("Revisión mensual QA");
+    const closeConfirmation = page.locator(".lab-close-form input[type=checkbox]");
+    await closeConfirmation.check();
+    await page.getByRole("button", { name: "Cerrar 2 unidades listas", exact: true }).click();
     stored = await page.evaluate(() =>
       JSON.parse(localStorage.getItem("paris-state-lab")),
     );
@@ -196,6 +214,10 @@ fs.mkdirSync(output, { recursive: true });
       new Set(closure.tasks.map((t) => t.companyId)).size !== 2
     )
       throw Error("closure must include all companies despite filter");
+    const companyClosures = stored.companyClosures.filter((entry) => entry.ownerId === qaId && entry.month === "2026-10");
+    if (companyClosures.length !== 2 || new Set(companyClosures.map((entry) => entry.companyId)).size !== 2)
+      throw Error("monthly consolidation did not preserve its two company closure units");
+    await page.getByRole("button", { name: "Desplegar Reportes emitidos al cierre" }).click();
     await page.getByRole("button", { name: "Ver reporte" }).first().click();
     await page.evaluate(() => {
       window.__reportPrintCalled = false;
@@ -224,12 +246,7 @@ fs.mkdirSync(output, { recursive: true });
     await page.screenshot({ path: output + "/period-report-print.png", fullPage: true });
     await page.emulateMedia({ media: "screen" });
     await page.getByRole("dialog").getByRole("button", { name: "Cerrar", exact: true }).click();
-    const qaId = await page.evaluate(() =>
-      JSON.parse(localStorage.getItem("paris-state-lab")).profiles.find(
-        (profile) => profile.name === "Empleado QA",
-      ).id,
-    );
-    await page.getByLabel("Vista de usuario").selectOption(qaId);
+    await selectProfile(page, "Vista de usuario", "Vista de prueba · actor simulado", qaId);
     await page.locator('[data-nav="tasks"]').click();
     const closedCard = page
       .locator(".task-card")
@@ -253,7 +270,7 @@ fs.mkdirSync(output, { recursive: true });
       .getByRole("dialog")
       .getByRole("button", { name: "Cerrar", exact: true })
       .click();
-    await page.getByLabel("Vista de usuario").selectOption("boss");
+    await selectProfile(page, "Vista de usuario", "Vista de prueba · actor simulado", "boss");
     await page.getByRole("button", { name: "Limpiar filtros" }).click();
     await page.locator('[data-nav="analytics"]').click();
     await page.screenshot({ path: output + "/analytics.png", fullPage: true });
@@ -323,7 +340,7 @@ fs.mkdirSync(output, { recursive: true });
     await page.getByLabel("Período", { exact: true }).fill("2026-10");
     const weeklyTaskId = recurring.find((task) => task.month === "2026-10")?.id;
     if (!weeklyTaskId) throw Error("weekly October task missing");
-    await page.getByLabel("Vista de usuario").selectOption("e0");
+    await selectProfile(page, "Vista de usuario", "Vista de prueba · actor simulado", "e0");
     await page.locator('[data-nav="tasks"]').click();
     const timedCard = page.locator(`.task-card[data-task-id="${weeklyTaskId}"]`);
     await timedCard
@@ -346,7 +363,7 @@ fs.mkdirSync(output, { recursive: true });
     );
     if (stored.tasks.some((t) => t.sessions?.some((e) => !e.end)))
       throw Error("pause did not stop timer");
-    await page.getByLabel("Vista de usuario").selectOption("boss");
+    await selectProfile(page, "Vista de usuario", "Vista de prueba · actor simulado", "boss");
     await page.locator('[data-nav="absences"]').click();
     await page.getByRole("button", { name: "Registrar ausencia" }).click();
     await page.getByLabel("Persona ausente").selectOption("e0");
@@ -363,6 +380,9 @@ fs.mkdirSync(output, { recursive: true });
     await page
       .getByRole("button", { name: "Guardar ausencia", exact: true })
       .click();
+    const absencePanel = page.locator(".panel").filter({ has: page.getByRole("heading", { name: "Vacaciones, licencias y cobertura" }) });
+    const absenceToggle = absencePanel.locator(".panel-collapse");
+    if ((await absenceToggle.getAttribute("aria-expanded")) !== "true") await absenceToggle.click();
     await page.getByRole("row").filter({ hasText: "Cobertura E2E" }).waitFor();
     await page.screenshot({ path: output + "/absence.png", fullPage: false });
     const mainBefore = await page.evaluate(() =>
@@ -373,11 +393,20 @@ fs.mkdirSync(output, { recursive: true });
     await page
       .getByRole("button", { name: "Nueva tarea", exact: true })
       .click();
+    const responsibleId = await page.locator('select[name="owner"]').inputValue();
+    if (responsibleId === "boss") throw Error("Jefatura without a team was offered as an execution owner");
     await page.locator('input[name="title"]').fill("SOLAMENTE LABORATORIO");
     await page.locator('select[name="company"]').selectOption("c1");
     await page
       .getByRole("button", { name: "Crear tarea", exact: true })
       .click();
+    const isolatedLabTask = await page.evaluate(() => {
+      const state = JSON.parse(localStorage.getItem("paris-state-lab"));
+      const task = state.tasks.find((entry) => entry.title === "SOLAMENTE LABORATORIO");
+      return { task, teamExists: state.teams.some((team) => team.id === task?.teamId) };
+    });
+    if (!isolatedLabTask.task || !isolatedLabTask.teamExists)
+      throw Error("Laboratory task did not persist with an existing responsible team");
     if (
       (await page.evaluate(() => localStorage.getItem("paris-state-v3"))) !==
       mainBefore
@@ -398,7 +427,7 @@ fs.mkdirSync(output, { recursive: true });
       const source = state.tasks.find((task) => task.ownerId === "e0" && task.kind === "resultado");
       if (!source) throw Error("deadline reminder fixture missing");
       state.activeId = "boss";
-      state.tasks = [{
+      state.tasks.push({
         ...source,
         id: "browser-deadline-reminder",
         month: due.slice(0, 7),
@@ -407,12 +436,20 @@ fs.mkdirSync(output, { recursive: true });
         status: "Pendiente",
         completedAt: null,
         sessions: [],
-      }];
+      });
       state.notifications = [];
       localStorage.setItem("paris-state-lab", JSON.stringify(state));
+      window.__deadlineReminderLabState = state;
       return { id: `deadline:boss:due-in-three-days:${today}`, title: source.title };
     });
+    fs.writeFileSync(
+      path.join(output, "deadline-reminder-state.json"),
+      JSON.stringify(await page.evaluate(() => window.__deadlineReminderLabState), null, 2),
+    );
     await page.reload();
+    await page.locator(".lab-banner").waitFor({ timeout: 5000 }).catch(async () => {
+      throw Error(`Laboratory state failed to reload: ${await page.locator("body").innerText()}`);
+    });
     await page.getByRole("button", { name: /Notificaciones:/ }).click();
     await page.getByText("1 tarea vence en 3 días").waitFor();
     await page.screenshot({ path: output + "/deadline-reminders.png", fullPage: false });
@@ -439,6 +476,20 @@ fs.mkdirSync(output, { recursive: true });
       throw Error("isolated lab banner missing");
     await setTheme(page, "dark");
     await page.locator('[data-nav="analytics"]').click();
+
+    for (const title of ["Cumplimiento ponderado", "Evolución mensual", "Distribución de tareas"]) {
+      const toggle = page.getByRole("button", { name: `Plegar ${title}` });
+      await toggle.waitFor();
+      const bodyId = await toggle.getAttribute("aria-controls");
+      await toggle.click();
+      if ((await toggle.getAttribute("aria-expanded")) !== "false")
+        throw Error(`${title} panel did not collapse`);
+      if (!(await page.locator(`#${bodyId}`).isHidden()))
+        throw Error(`${title} panel content remained visible after collapse`);
+      await page.getByRole("button", { name: `Desplegar ${title}` }).click();
+      if ((await page.getByRole("button", { name: `Plegar ${title}` }).getAttribute("aria-expanded")) !== "true")
+        throw Error(`${title} panel did not reopen`);
+    }
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.getByRole("heading", { name: "Cumplimiento ponderado" }).waitFor();

@@ -63,3 +63,11 @@ La persistencia continúa en `paris-state-lab` del navegador y no sincroniza
 entre equipos. El contrato no prueba Auth, RLS ni el backend activo. No se ha
 implementado el traspaso en Worker/D1 ni Supabase; cualquier activación real
 requiere trasladar estas reglas transaccionales y auditar permisos en el backend.
+
+## Estado de aceptación — auditoría 11/10/2026
+
+La lectura del contrato no acredita su cumplimiento completo. S26 en
+SOL-AUDIT-20261008.md reproduce la baja de reemplazo con cronómetro todavía
+activo; la regla de detener relojes de cobertura afectados sigue pendiente de
+corrección y regresión. Conservar el actor real, intervalo histórico, tarea y
+motivo al corregirlo. Los traspasos y reasignaciones no habilitan backend remoto.

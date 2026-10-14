@@ -1,13 +1,15 @@
 // @vitest-environment jsdom
 // Diagnostics report acceptance explicitly. Green execution means setup completed.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import type { ReactNode } from "react";
 import App from "../src/App";
 import { KEY, load, seed } from "../src/data/repository";
 import { closeMonth, currentMonth, dateART, metrics, type State } from "../src/domain/model";
 import { defaultSchedule } from "../src/domain/schedule";
 import { activateJointTask } from "../src/domain/coordination";
+import type { InternalRequest } from "../src/domain/internalRequests";
+import { chooseEmployee } from "./employee-picker-test-helpers";
 
 const chartProbe = vi.hoisted(() => ({ cursorProps: [] as Array<Record<string, number>>, rowId: "e0" }));
 vi.mock("recharts", () => ({
@@ -60,9 +62,13 @@ function prepare(role = "e0") {
   localStorage.setItem(KEY, JSON.stringify(state));
   return state;
 }
-async function openNotes() {
+async function openNotesPage() {
   fireEvent.click(document.querySelector('[data-nav="annotations"]')!);
   await screen.findByRole("button", { name: "Nueva anotación" });
+  await screen.findByRole("button", { name: "Plegar Tu biblioteca" });
+}
+async function openNotes() {
+  await openNotesPage();
   const create = screen.queryByRole("button", { name: "Nueva anotación" });
   if (create) fireEvent.click(create);
 }
@@ -125,7 +131,7 @@ describe("anotaciones y recorrido integrados", () => {
 
     render(<App />);
     fireEvent.click(document.querySelector('[data-nav="closing"]')!);
-    await screen.findByRole("button", { name: "Exportar cierre" });
+    await screen.findByRole("button", { name: "Exportar cierre" }, { timeout: 5000 });
     const memberName = joint.profiles.find((profile) => profile.id === "e1")!.name;
     const row = screen.getAllByText(memberName)
       .map((element) => element.closest("tr"))
@@ -152,38 +158,104 @@ describe("anotaciones y recorrido integrados", () => {
     fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
     fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
     fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
-    expect(document.querySelector(".tour-coach small")?.textContent).toContain("3/11");
+    expect(document.querySelector(".tour-coach small")?.textContent).toContain("3/9");
     fireEvent.click(screen.getByRole("button", { name: "Anterior" }));
-    expect(document.querySelector(".tour-coach small")?.textContent).toContain("2/11");
-    expect(document.querySelector("nav button.active")?.getAttribute("data-nav")).toBe("day");
+    expect(document.querySelector(".tour-coach small")?.textContent).toContain("2/9");
+    expect(document.querySelector("nav button.active")?.getAttribute("data-nav")).toBe("tasks");
     expect(stored().tour.e0).toBe(1);
+  });
+
+  it("al volver al primer paso devuelve el foco a Siguiente y no al botón deshabilitado", async () => {
+    prepare();
+    render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
+    fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
+    const previous = screen.getByRole("button", { name: "Anterior" });
+    previous.focus();
+    fireEvent.click(previous);
+
+    const next = screen.getByRole("button", { name: "Siguiente" });
+    await waitFor(() => expect(document.activeElement).toBe(next));
+    expect((previous as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("oscurece el exterior, posiciona la guía junto al objetivo y permite salir con Escape", async () => {
+    prepare();
+    render(<App />);
+    const trigger = screen.getByRole("button", { name: "Recorrido guiado" });
+    trigger.focus();
+    fireEvent.click(trigger);
+    const dialog = screen.getByRole("dialog", { name: "Recorrido guiado" });
+    expect(dialog.getAttribute("aria-modal")).toBe("true");
+    expect(document.querySelector(".tour-backdrop")).not.toBeNull();
+    await waitFor(() => {
+      expect((dialog as HTMLElement).style.top).not.toBe("");
+      expect((dialog as HTMLElement).style.left).not.toBe("");
+    });
+    const pause = within(dialog).getByRole("button", { name: "Pausar" });
+    const next = within(dialog).getByRole("button", { name: "Siguiente" });
+    expect(document.activeElement).toBe(pause);
+    fireEvent.keyDown(pause, { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(next);
+    fireEvent.keyDown(next, { key: "Tab" });
+    expect(document.activeElement).toBe(pause);
+    fireEvent.keyDown(dialog, { key: "Escape" });
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Recorrido guiado" })).toBeNull());
+    expect(document.querySelector(".tour-backdrop")).toBeNull();
+    expect(document.querySelector(".spotlight")).toBeNull();
+    await waitFor(() => expect(document.activeElement).toBe(trigger));
+  });
+
+  it("al cambiar el actor durante el recorrido devuelve el foco a un control vigente", async () => {
+    prepare();
+    render(<App />);
+    const trigger = screen.getByRole("button", { name: "Recorrido guiado" });
+    trigger.focus();
+    fireEvent.click(trigger);
+    chooseEmployee("Vista de usuario", "m1");
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Recorrido guiado" })).toBeNull());
+    await waitFor(() => expect(document.activeElement).toBe(trigger));
+    expect(load().activeId).toBe("m1");
+  });
+
+  it("avisa al reiniciar el progreso numérico de una versión anterior del recorrido", () => {
+    const state = prepare();
+    state.tour.e0 = 4;
+    state.tourVersion = { e0: 4 };
+    const templateTitle = state.templates[0]?.title;
+    localStorage.setItem(KEY, JSON.stringify(state));
+    render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
+    expect(screen.getByRole("status").textContent).toContain("El recorrido se actualizó y comienza de nuevo");
+    expect(load().tour.e0).toBe(0);
+    expect(load().templates[0]?.title).toBe(templateTitle);
   });
 
   it("abre la vista del encargado con sus tareas y conserva el perfil al volver al tablero", () => {
     const state = prepare("m1");
     const example = seed().tasks[0]!;
     state.tasks = [
-      { ...example, id: "manager-own", ownerId: "m1", title: "Tarea de Carolina" },
-      { ...example, id: "employee-own", ownerId: "e0", title: "Tarea de Valentino" },
+      { ...example, id: "manager-own", assignmentId: null, ownerId: "m1", title: "Tarea de Carolina" },
+      { ...example, id: "employee-own", assignmentId: null, ownerId: "e0", title: "Tarea de Valentino" },
     ];
     localStorage.setItem(KEY, JSON.stringify(state));
     render(<App />);
     fireEvent.click(document.querySelector('[data-nav="tasks"]')!);
     expect(screen.getByText("Tarea de Carolina")).toBeTruthy();
     expect(screen.queryByText("Tarea de Valentino")).toBeNull();
-    fireEvent.change(screen.getByLabelText("Perfil que estás viendo"), { target: { value: "e0" } });
+    chooseEmployee("Perfil que estás viendo", "e0");
     expect(screen.getByText("Tarea de Valentino")).toBeTruthy();
     expect(screen.queryByText("Tarea de Carolina")).toBeNull();
     fireEvent.click(document.querySelector('[data-nav="day"]')!);
     fireEvent.click(document.querySelector('[data-nav="tasks"]')!);
-    expect((screen.getByLabelText("Perfil que estás viendo") as HTMLSelectElement).value).toBe("e0");
+    expect(screen.getByRole("button", { name: "Perfil que estás viendo" }).textContent).toContain("Valentino Magni");
     expect(screen.getByText("Tarea de Valentino")).toBeTruthy();
   });
 
   it("separa las tareas cubiertas sin duplicar su identidad en el tablero", () => {
     const state = prepare("e1");
     const example = seed().tasks[0]!;
-    state.tasks = [{ ...example, id: "coverage-task", ownerId: "e0", month: currentMonth(), companyId: "c1", title: "Conciliación cubierta", scheduledOn: dateART(), due: dateART() }];
+    state.tasks = [{ ...example, id: "coverage-task", assignmentId: null, ownerId: "e0", month: currentMonth(), companyId: "c1", title: "Conciliación cubierta", scheduledOn: dateART(), due: dateART() }];
     state.absences = [{
       id: "coverage-absence",
       ownerId: "e0",
@@ -201,14 +273,41 @@ describe("anotaciones y recorrido integrados", () => {
     fireEvent.click(document.querySelector('[data-nav="tasks"]')!);
     expect(screen.getByText(/Tareas que cubrís/)).toBeTruthy();
     expect(document.querySelectorAll('[data-task-id="coverage-task"]')).toHaveLength(1);
+    expect(within(screen.getByRole("region", { name: "Mi jornada" })).getByText("1 pendiente")).toBeTruthy();
     expect(screen.getByText(/Tarea de cobertura para Valentino Magni/)).toBeTruthy();
+  });
+
+  it("retira una cobertura vencida de Mi jornada sin borrar la tarea titular", async () => {
+    const state = prepare("e1");
+    const example = seed().tasks.find((task) => task.ownerId === "e0")!;
+    state.tasks = [{
+      ...example, id: "expired-coverage-sidebar", assignmentId: null, ownerId: "e0", companyId: "c1",
+      month: currentMonth(), title: "Cobertura que vence hoy", status: "Pendiente", scheduledOn: dateART(), due: dateART(), sessions: [],
+    }];
+    const yesterday = dateART(new Date(Date.now() - 86_400_000).toISOString());
+    state.absences = [{
+      id: "expires-today", ownerId: "e0", replacementId: "e1", taskIds: ["expired-coverage-sidebar"],
+      from: yesterday, to: dateART(), kind: "Licencia", note: "", createdBy: "m1",
+    }];
+    localStorage.setItem(KEY, JSON.stringify(state));
+    const view = render(<App initialState={state} laboratoryMode />);
+    expect(within(await screen.findByRole("region", { name: "Mi jornada" })).getByText("1 pendiente")).toBeTruthy();
+    fireEvent.click(document.querySelector('[data-nav="tasks"]')!);
+    expect(document.querySelectorAll('[data-task-id="expired-coverage-sidebar"]')).toHaveLength(1);
+
+    const expired = { ...state, absences: state.absences!.map((absence) => ({ ...absence, to: yesterday })) };
+    view.rerender(<App initialState={expired} laboratoryMode />);
+
+    await waitFor(() => expect(screen.queryByRole("region", { name: "Mi jornada" })).toBeNull());
+    expect(document.querySelectorAll('[data-task-id="expired-coverage-sidebar"]')).toHaveLength(0);
+    expect(stored().tasks.some((task) => task.id === "expired-coverage-sidebar" && task.ownerId === "e0")).toBe(true);
   });
 
   it("al preparar una cobertura obliga a elegir tareas específicas y las conserva", async () => {
     const state = prepare("m1");
     const examples = seed().tasks.filter((task) => task.ownerId === "e0").slice(0, 2);
     state.tasks = examples.map((task, index) => ({
-      ...task, id: `selected-coverage-${index}`, title: `Cobertura ${index + 1}`,
+      ...task, id: `selected-coverage-${index}`, assignmentId: null, title: `Cobertura ${index + 1}`,
       month: currentMonth(), due: `${currentMonth()}-15`, scheduledOn: `${currentMonth()}-10`,
       status: "Pendiente" as const, blockedBy: "", sessions: [],
     }));
@@ -269,6 +368,171 @@ describe("anotaciones y recorrido integrados", () => {
     expect(stored().templates.find((item) => item.id === "cat3")?.target).toBe(120);
   });
 
+  it("reserva las recurrencias a jefatura en UI y vuelve a comprobarlo al guardar", () => {
+    prepare("m1");
+    render(<App />);
+    fireEvent.click(document.querySelector('[data-nav="tasks"]')!);
+    fireEvent.click(screen.getByRole("button", { name: "Nueva tarea" }));
+    fireEvent.change(screen.getByLabelText("Elegí del catálogo"), { target: { value: "cat1" } });
+
+    const frequency = screen.getByLabelText("Frecuencia de la tarea") as HTMLSelectElement;
+    expect(Array.from(frequency.options).map((option) => option.value)).toEqual(["única"]);
+    fireEvent.change(frequency, { target: { value: "mensual" } });
+    fireEvent.click(screen.getByRole("button", { name: /Crear tarea/ }));
+
+    expect(stored().assignments).toHaveLength(0);
+    expect(stored().tasks).toHaveLength(0);
+    expect(screen.getByRole("status").textContent).toContain("Sólo jefatura puede definir recurrencias");
+  });
+
+  it("revalida el ámbito al convertir una anotación mientras el formulario sigue abierto", async () => {
+    const state = prepare("m1");
+    const view = render(<App initialState={state} laboratoryMode />);
+    await openNotes();
+    fireEvent.click(await screen.findByRole("button", { name: "Convertir en tarea" }));
+    fireEvent.change(screen.getByLabelText("Elegí del catálogo"), { target: { value: "cat1" } });
+
+    const revoked = {
+      ...state,
+      profiles: state.profiles.map((profile) => profile.id === "m1"
+        ? { ...profile, companyIds: profile.companyIds.filter((companyId) => companyId !== "c1") }
+        : profile),
+    };
+    view.rerender(<App initialState={revoked} laboratoryMode />);
+    fireEvent.submit(screen.getByRole("dialog", { name: "Nueva tarea, con todo su contexto" }).querySelector("form")!);
+
+    expect(stored().assignments).toHaveLength(0);
+    expect(stored().tasks).toHaveLength(0);
+    expect(stored().annotations?.[0]?.convertedTaskId).toBeNull();
+    expect(screen.getByRole("dialog", { name: "Nueva tarea, con todo su contexto" })).toBeTruthy();
+    expect((screen.getByLabelText("Elegí del catálogo") as HTMLSelectElement).value).toBe("cat1");
+    expect(screen.getByRole("alert").textContent).toContain("Empresa o responsable fuera del ámbito autorizado");
+  });
+
+  it("revalida empresa y conserva el pedido al revocar su ámbito durante la conversión", async () => {
+    const state = prepare("boss");
+    const request: InternalRequest = {
+      id: "request-conversion-scope",
+      kind: "work_request",
+      authorId: "e0",
+      recipientId: "boss",
+      urgency: "medium",
+      module: "Tablero",
+      subject: "Preparar conciliación",
+      description: "Asignar el control del período.",
+      status: "new",
+      createdAt: "2026-10-01T12:00:00.000Z",
+      updatedAt: "2026-10-01T12:00:00.000Z",
+      messages: [],
+      history: [{ id: "request-event", actorId: "e0", status: "new", note: "Solicitud creada", createdAt: "2026-10-01T12:00:00.000Z" }],
+    };
+    state.internalRequests = [request];
+    localStorage.setItem(KEY, JSON.stringify(state));
+    const view = render(<App initialState={state} laboratoryMode />);
+    fireEvent.click(document.querySelector('[data-nav="requests"]')!);
+    fireEvent.click(await screen.findByRole("button", { name: "Convertir en tarea puntual" }));
+    fireEvent.change(screen.getByLabelText("Elegí del catálogo"), { target: { value: "cat1" } });
+    fireEvent.change(screen.getByLabelText("Responsable"), { target: { value: "e0" } });
+    fireEvent.change(screen.getByLabelText("Empresa obligatoria"), { target: { value: "c1" } });
+    expect((screen.getByLabelText("Elegí del catálogo") as HTMLSelectElement).value).toBe("cat1");
+    expect((screen.getByLabelText("Responsable") as HTMLSelectElement).value).toBe("e0");
+    expect((screen.getByLabelText("Empresa obligatoria") as HTMLSelectElement).value).toBe("c1");
+
+    const revoked = {
+      ...state,
+      profiles: state.profiles.map((profile) => profile.id === "e0"
+        ? { ...profile, companyIds: profile.companyIds.filter((companyId) => companyId !== "c1") }
+        : profile),
+    };
+    view.rerender(<App initialState={revoked} laboratoryMode />);
+    fireEvent.submit(screen.getByRole("dialog", { name: "Nueva tarea, con todo su contexto" }).querySelector("form")!);
+
+    const saved = stored();
+    expect(saved.assignments).toHaveLength(0);
+    expect(saved.tasks).toHaveLength(0);
+    expect(saved.internalRequests?.[0]).toMatchObject({ id: request.id, status: "new" });
+    expect(saved.internalRequests?.[0]?.convertedTaskId).toBeUndefined();
+    expect(screen.getByRole("dialog", { name: "Nueva tarea, con todo su contexto" })).toBeTruthy();
+    expect((screen.getByLabelText("Elegí del catálogo") as HTMLSelectElement).value).toBe("cat1");
+    expect((screen.getByLabelText("Responsable") as HTMLSelectElement).value).toBe("e0");
+    expect((screen.getByLabelText("Empresa obligatoria") as HTMLSelectElement).value).toBe("");
+    expect(screen.getByText(/La empresa seleccionada dejó de estar autorizada/)).toBeTruthy();
+    expect(screen.getByRole("alert").textContent).toContain("Empresa o responsable fuera del ámbito autorizado");
+  });
+
+  it("oculta empresas revocadas al asignar y evita crear si el ámbito dejó de ser válido", async () => {
+    const state = prepare("m1");
+    state.profiles = state.profiles.map((profile) => profile.id === "m1" ? { ...profile, companyIds: [] } : profile);
+    localStorage.setItem(KEY, JSON.stringify(state));
+    render(<App />);
+    fireEvent.click(document.querySelector('[data-nav="tasks"]')!);
+    fireEvent.click(screen.getByRole("button", { name: "Nueva tarea" }));
+    const ownerSelect = screen.getByLabelText("Responsable") as HTMLSelectElement;
+    fireEvent.change(ownerSelect, { target: { value: "e0" } });
+    const companyOptions = within(screen.getByLabelText("Empresa obligatoria")).getAllByRole("option");
+    expect(companyOptions.every((option) => (option as HTMLOptionElement).value === "")).toBe(true);
+    fireEvent.change(screen.getByLabelText("Título"), { target: { value: "Tarea fuera del ámbito" } });
+    fireEvent.click(screen.getByRole("button", { name: /Crear tarea/ }));
+    expect(stored().assignments).toHaveLength(0);
+  });
+
+  it("no muestra Mi jornada después de revocar el ámbito de una tarea abierta", async () => {
+    const state = prepare("e0");
+    const task = seed().tasks.find((row) => row.ownerId === "e0")!;
+    state.tasks = [{ ...task, id: "revoked-personal-task", assignmentId: null, status: "Pendiente", sessions: [] }];
+    state.profiles = state.profiles.map((profile) => profile.id === "e0" ? { ...profile, companyIds: [] } : profile);
+    localStorage.setItem(KEY, JSON.stringify(state));
+    render(<App />);
+    await waitFor(() => expect(screen.queryByRole("region", { name: "Mi jornada" })).toBeNull());
+  });
+
+  it("Mi jornada conserva sólo tareas de empresas vigentes y abre una tarea autorizada", async () => {
+    const state = prepare("e0");
+    const task = seed().tasks.find((row) => row.ownerId === "e0")!;
+    state.tasks = [
+      { ...task, id: "revoked-company-task", assignmentId: null, companyId: "c1", title: "Pendiente de empresa revocada", status: "Pendiente", sessions: [] },
+      { ...task, id: "authorized-company-task", assignmentId: null, companyId: "c2", title: "Pendiente de empresa vigente", status: "Pendiente", sessions: [] },
+    ];
+    state.profiles = state.profiles.map((profile) => profile.id === "e0" ? { ...profile, companyIds: ["c2"] } : profile);
+    localStorage.setItem(KEY, JSON.stringify(state));
+    render(<App />);
+
+    const summary = await screen.findByRole("region", { name: "Mi jornada" });
+    expect(within(summary).getByText("1 pendiente")).toBeTruthy();
+    expect(within(summary).getByText(/Pendiente de empresa vigente/)).toBeTruthy();
+    expect(within(summary).queryByText(/Pendiente de empresa revocada/)).toBeNull();
+    fireEvent.click(within(summary).getByRole("button", { name: /Pendiente de empresa vigente/ }));
+    await waitFor(() => expect(screen.getByRole("heading", { level: 2, name: "Pendiente de empresa vigente" })).toBeTruthy());
+  });
+
+  it("revoca en una vista abierta la tarea y el conteo de una empresa recién retirada", async () => {
+    const state = prepare("e0");
+    const task = seed().tasks.find((row) => row.ownerId === "e0")!;
+    state.tasks = [
+      { ...task, id: "open-revoked-company-task", assignmentId: null, companyId: "c1", title: "Se retiró el permiso", status: "Pendiente", sessions: [] },
+      { ...task, id: "open-authorized-company-task", assignmentId: null, companyId: "c2", title: "Permiso todavía vigente", status: "Pendiente", sessions: [] },
+    ];
+    state.profiles = state.profiles.map((profile) => profile.id === "e0" ? { ...profile, companyIds: ["c1", "c2"] } : profile);
+    localStorage.setItem(KEY, JSON.stringify(state));
+    const view = render(<App initialState={state} laboratoryMode />);
+    const summary = await screen.findByRole("region", { name: "Mi jornada" });
+    expect(within(summary).getByText("2 pendientes")).toBeTruthy();
+
+    const revoked = {
+      ...state,
+      profiles: state.profiles.map((profile) => profile.id === "e0"
+        ? { ...profile, companyIds: ["c2"] }
+        : profile),
+    };
+    view.rerender(<App initialState={revoked} laboratoryMode />);
+
+    await waitFor(() => {
+      expect(within(screen.getByRole("region", { name: "Mi jornada" })).getByText("1 pendiente")).toBeTruthy();
+    });
+    expect(within(screen.getByRole("region", { name: "Mi jornada" })).getByText(/Permiso todavía vigente/)).toBeTruthy();
+    expect(stored().tasks).toHaveLength(2);
+  });
+
   it("crea un checklist línea por línea y conserva errores sin truncar el control", () => {
     prepare();
     render(<App />);
@@ -291,14 +555,14 @@ describe("anotaciones y recorrido integrados", () => {
   it("limpia detalle y modal al cambiar de actor de la demostración", () => {
     const state = prepare("m1");
     const example = seed().tasks[0]!;
-    state.tasks = [{ ...example, id: "employee-detail", ownerId: "e0", title: "Tarea supervisada" }];
+    state.tasks = [{ ...example, id: "employee-detail", assignmentId: null, ownerId: "e0", title: "Tarea supervisada" }];
     localStorage.setItem(KEY, JSON.stringify(state));
     render(<App />);
     fireEvent.click(document.querySelector('[data-nav="tasks"]')!);
-    fireEvent.change(screen.getByLabelText("Perfil que estás viendo"), { target: { value: "e0" } });
+    chooseEmployee("Perfil que estás viendo", "e0");
     fireEvent.click(screen.getByRole("button", { name: "Tarea supervisada" }));
     expect(screen.getByRole("dialog")).toBeTruthy();
-    fireEvent.change(screen.getByLabelText("Vista de usuario"), { target: { value: "e0" } });
+    chooseEmployee("Vista de usuario", "e0");
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
@@ -307,7 +571,7 @@ describe("anotaciones y recorrido integrados", () => {
     state.annotations![0]!.content = "Control uno\nControl dos\nControl tres";
     localStorage.setItem(KEY, JSON.stringify(state));
     render(<App />);
-    fireEvent.click(document.querySelector('[data-nav="annotations"]')!);
+    await openNotesPage();
     const expand = await screen.findByRole("button", { name: "Leer completo" });
     expect(expand.getAttribute("aria-expanded")).toBe("false");
     fireEvent.click(expand);
@@ -499,9 +763,9 @@ describe("anotaciones y recorrido integrados", () => {
   });
   it("recorrido extenso por rol y pausa/reanudación", () => {
     for (const [role, total] of [
-      ["e0", 11],
-      ["m1", 14],
-      ["boss", 16],
+      ["e0", 9],
+      ["m1", 11],
+      ["boss", 13],
     ] as const) {
       prepare(role);
       const view = render(<App />);
@@ -532,39 +796,54 @@ describe("anotaciones y recorrido integrados", () => {
         expect(document.querySelector(selector)?.closest(".spotlight")).not.toBeNull();
       });
     };
-    await assertOneSpotlight(".heading");
+    await waitFor(() => {
+      expect(document.querySelectorAll(".spotlight")).toHaveLength(1);
+      expect(document.querySelector(".spotlight")?.getAttribute("data-tour")).toMatch(/day-route|day-overview/);
+    });
     fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
-    await assertOneSpotlight(".sidebar-workspace");
-    fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
-    await assertOneSpotlight(".board-owner-filter");
-    fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
-    await assertOneSpotlight(".task-order");
-    fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
-    await assertOneSpotlight('[data-tour="task-actions"]');
+    await assertOneSpotlight('[data-tour="board-movement"]');
     fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
     await waitFor(() => {
-      expect(document.querySelector(".heading")?.classList.contains("spotlight")).toBe(true);
-      expect(screen.getByRole("dialog", { name: "Recorrido guiado" }).textContent).toContain("tablero está vacío");
+      expect(document.querySelectorAll(".spotlight")).toHaveLength(1);
+      expect(document.querySelector(".heading")?.classList.contains("spotlight")).toBe(false);
+      expect(document.querySelector(".spotlight")?.getAttribute("data-tour")).toMatch(/task-controls|task-column-(open|empty)/);
     });
+    expect(stored().tasks).toHaveLength(0);
     fireEvent.click(screen.getByRole("button", { name: "Pausar" }));
     expect(document.querySelector(".spotlight")).toBeNull();
+  });
+  it("abre temporalmente un panel plegado para el recorrido y restaura su estado al pausar", async () => {
+    const state = prepare("e0");
+    state.tour.e0 = 8;
+    state.tourStepId = { e0: "planning-rules" };
+    state.tourVersion = { e0: 6 };
+    localStorage.setItem(KEY, JSON.stringify(state));
+    render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
+    await waitFor(() => expect(document.querySelector('[data-tour="planning-rules"]')?.closest<HTMLElement>(".panel-body")?.hidden).toBe(false));
+    const toggle = screen.getByRole("button", { name: "Plegar Planificación y recurrencias" });
+    expect(toggle.getAttribute("aria-expanded")).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "Pausar" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Desplegar Planificación y recurrencias" }).getAttribute("aria-expanded")).toBe("false"));
   });
   it("elige una sola tarjeta abierta para reloj y controles y vuelve al encabezado al plegarla", async () => {
     const state = prepare("e0");
     const task = seed().tasks.find((row) => row.ownerId === "e0" && row.kind === "resultado")!;
-    state.tasks = [{ ...task, id: "tour-spotlight-task", month: currentMonth(), status: "Pendiente" }];
+    state.tasks = [{ ...task, id: "tour-spotlight-task", assignmentId: null, month: currentMonth(), status: "Pendiente" }];
+    state.tour.e0 = 3;
+    state.tourStepId = { e0: "board-timer" };
+    state.tourVersion = { e0: 6 };
     localStorage.setItem(KEY, JSON.stringify(state));
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
-    for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
     await waitFor(() => {
       expect(document.querySelectorAll("[data-tour=task-timers].spotlight")).toHaveLength(1);
       expect(document.querySelectorAll(".spotlight")).toHaveLength(1);
     });
-    fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
+    fireEvent.click(screen.getByRole("button", { name: "Anterior" }));
     await waitFor(() => expect(document.querySelectorAll("[data-tour=task-controls].spotlight")).toHaveLength(1));
     fireEvent.click(document.querySelector(".column-toggle")!);
-    await waitFor(() => expect(document.querySelector(".heading")?.classList.contains("spotlight")).toBe(true));
+    await waitFor(() => expect(document.querySelector(".heading")?.classList.contains("spotlight")).toBe(false));
   });
   it("muestra iniciales de encargado en el organigrama", async () => {
     const state = prepare("boss");
@@ -582,6 +861,7 @@ describe("anotaciones y recorrido integrados", () => {
     employee.tasks = [{
       ...sample,
       id: "timeliness-card",
+      assignmentId: null,
       month: currentMonth(),
       due: "9999-12-31",
       status: "Completada",
@@ -610,7 +890,7 @@ describe("anotaciones y recorrido integrados", () => {
   it("pasa cursor tenue al gráfico y conserva la navegación del clic por empleado", () => {
     const state = prepare("boss");
     const task = seed().tasks.find((row) => row.ownerId === "e0" && row.kind === "resultado")!;
-    state.tasks = [{ ...task, id: "chart-navigation-task", month: currentMonth() }];
+    state.tasks = [{ ...task, id: "chart-navigation-task", assignmentId: null, month: currentMonth() }];
     localStorage.setItem(KEY, JSON.stringify(state));
     chartProbe.cursorProps = [];
     render(<App />);
@@ -629,12 +909,13 @@ describe("anotaciones y recorrido integrados", () => {
     chartProbe.rowId = "e0";
     fireEvent.click(screen.getByRole("button", { name: "chart weighted" }));
     expect(document.querySelector("nav button.active")?.getAttribute("data-nav")).toBe("tasks");
-    expect((screen.getByLabelText("Perfil que estás viendo") as HTMLSelectElement).value).toBe("e0");
+    expect(screen.getByRole("button", { name: "Perfil que estás viendo" }).textContent).toContain("Valentino Magni");
   });
   it("recorrido no avanza vista si falló guardar avance", () => {
     const state = prepare();
-    state.tour.e0 = 5;
-    state.tourVersion = { e0: 4 };
+    state.tour.e0 = 3;
+    state.tourStepId = { e0: "board-timer" };
+    state.tourVersion = { e0: 6 };
     localStorage.setItem(KEY, JSON.stringify(state));
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
@@ -679,7 +960,7 @@ describe("anotaciones y recorrido integrados", () => {
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
     expect(document.querySelector(".tour-coach small")?.textContent).toContain(
-      "1/11",
+      "1/9",
     );
   });
   it("fin de inducción abre Mi día aunque home sea tablero y no duplica asignaciones", async () => {
@@ -700,11 +981,11 @@ describe("anotaciones y recorrido integrados", () => {
       document.querySelector("nav button.active")?.getAttribute("data-nav"),
     ).toBe("day");
     expect(document.querySelector(".tour-coach small")?.textContent).toContain(
-      "1/11",
+      "1/9",
     );
     const saved = stored();
     expect(saved.tour.e0).toBe(0);
-    expect(saved.tourVersion?.e0).toBe(4);
+    expect(saved.tourVersion?.e0).toBe(6);
     expect(saved.onboarding.e0.completedAt).toBeTruthy();
     expect(saved.onboarding.e0.home).toBe("tasks");
     expect(saved.assignments).toHaveLength(1);
@@ -728,19 +1009,19 @@ describe("anotaciones y recorrido integrados", () => {
     prepare();
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
-    for (let step = 0; step < 10; step++)
+    for (let step = 0; step < 8; step++)
       fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
     expect(document.querySelector(".tour-coach small")?.textContent).toContain(
-      "11/11",
+      "9/9",
     );
     const before = stored();
     fireEvent.click(screen.getByRole("button", { name: "Listo" }));
     expect(document.querySelector(".tour-coach")).toBeNull();
-    expect(stored().tour.e0).toBe(11);
-    expect(stored().tourVersion?.e0).toBe(4);
+    expect(stored().tour.e0).toBe(9);
+    expect(stored().tourVersion?.e0).toBe(6);
     fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
     expect(document.querySelector(".tour-coach small")?.textContent).toContain(
-      "1/11",
+      "1/9",
     );
     expect(stored().tour.e0).toBe(0);
     expect(stored().assignments).toEqual(before.assignments);
@@ -750,7 +1031,7 @@ describe("anotaciones y recorrido integrados", () => {
     const state = prepare();
     state.onboarding.e0.home = "tasks";
     state.tour.e0 = 4;
-    state.tourVersion = { e0: 4 };
+    state.tourVersion = { e0: 6 };
     localStorage.setItem(KEY, JSON.stringify(state));
     render(<App />);
     const before = stored();
@@ -768,16 +1049,16 @@ describe("anotaciones y recorrido integrados", () => {
     setItem.mockRestore();
     fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
     expect(document.querySelector(".tour-coach small")?.textContent).toContain(
-      "5/11",
+      "5/9",
     );
     expect(
       document.querySelector("nav button.active")?.getAttribute("data-nav"),
-    ).toBe("tasks");
+    ).toBe("operations");
   });
   it("fallo al cerrar recorrido conserva último paso; Listo se puede reintentar", () => {
     const state = prepare();
-    state.tour.e0 = 10;
-    state.tourVersion = { e0: 4 };
+    state.tour.e0 = 8;
+    state.tourVersion = { e0: 6 };
     localStorage.setItem(KEY, JSON.stringify(state));
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: "Recorrido guiado" }));
@@ -789,21 +1070,21 @@ describe("anotaciones y recorrido integrados", () => {
       });
     fireEvent.click(screen.getByRole("button", { name: "Listo" }));
     expect(document.querySelector(".tour-coach small")?.textContent).toContain(
-      "11/11",
+      "9/9",
     );
     expect(
       document.querySelector("nav button.active")?.getAttribute("data-nav"),
-    ).toBe("annotations");
+    ).toBe("planning");
     expect(stored()).toEqual(before);
     setItem.mockRestore();
     fireEvent.click(screen.getByRole("button", { name: "Listo" }));
     expect(document.querySelector(".tour-coach")).toBeNull();
-    expect(stored().tour.e0).toBe(11);
+    expect(stored().tour.e0).toBe(9);
   });
-  it("editar nota con guardado fallido preserva ID y campos; reintento actualiza una sola nota", () => {
+  it("editar nota con guardado fallido preserva ID y campos; reintento actualiza una sola nota", async () => {
     prepare();
     render(<App />);
-    openNotes();
+    await openNotes();
     fireEvent.click(screen.getByRole("button", { name: "Editar" }));
     const original = stored().annotations![0];
     fireEvent.change(screen.getByLabelText("Título"), {

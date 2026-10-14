@@ -1,6 +1,12 @@
 # Publicación y operación
 
-## Entrega 008 — 01/10/2026
+> **Estado vigente — 08/10/2026:** este runbook conserva registros y pasos de
+> entregas anteriores. Para el estado actual, seguir `docs/EXECUTION-NEXT.md` y
+> `docs/PROJECT-STATUS.md`: el laboratorio permanece privado; el corte local no
+> está aceptado, comprometido ni publicado. No seguir el «próximo paso vigente»
+> histórico que aparece abajo ni aplicar migraciones durante esta etapa.
+
+## Registro histórico: entrega 008 — 01/10/2026
 
 Ejecución local completa: 151 pruebas/13 archivos, 32 casos críticos aislados,
 build TypeScript/Vite y archivos congelados verificados. El código se guarda,
@@ -8,11 +14,11 @@ envía y publica en Sites privado con el mismo SHA. Fuente exacta: `git log -1`
 y registro de versión en Sites; el detalle está en
 `docs/architecture/REVIEW-008-EXECUTION-20261001.md`.
 
-Próximo paso vigente: fundación del adaptador (Luna medio), luego revisión Sol
-medio. Contrato: docs/EXECUTION-NEXT.md. PostgreSQL concurrente, Supabase real,
-integración y correo siguen pendientes; aún no se migra al Gmail/GitHub/Supabase/
-hosting dedicados. Las verificaciones históricas inferiores pertenecen a sus
-iteraciones y no implican QA visual nueva en esta entrega.
+En ese corte se recomendaba la fundación del adaptador (Luna medio), seguida
+por revisión Sol medio. Esa etapa fue reemplazada por el laboratorio y el estado
+actual indicado al inicio de este runbook. PostgreSQL concurrente, Supabase real,
+integración y correo seguían pendientes; las verificaciones inferiores son
+históricas y no implican QA visual de esta entrega.
 
 ## Ubicación actual
 

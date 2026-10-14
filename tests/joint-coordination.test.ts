@@ -4,7 +4,7 @@ import { activateJointTask } from "../src/domain/coordination";
 import { seed, persist, load } from "../src/data/repository";
 import { checkTask, closeMonth, isClosed, metrics, metricsForProfile, transition } from "../src/domain/model";
 import { actorElapsedSeconds, applyClock, canWork } from "../src/domain/workforce";
-import { collectTaskNotifications } from "../src/domain/notifications";
+import { collectTaskNotifications, taskNotifications } from "../src/domain/notifications";
 
 function setup() {
   const state = seed();
@@ -14,6 +14,7 @@ function setup() {
     checklist: [], sessions: [] };
   state.tasks = state.tasks.map((row) => row.id === task.id ? task : row);
   state.tasks = [task];
+  state.activity = state.activity.filter((row) => row.taskId === task.id);
   return { state, task };
 }
 const request = (taskId: string, overrides = {}) => ({
@@ -45,6 +46,30 @@ describe("responsabilidad conjunta en laboratorio", () => {
     expect(metricsForProfile([shared], [], "e0").points).toBe(3);
     expect(metricsForProfile([shared], [], "e1").points).toBe(2);
     expect(metrics([shared], []).points).toBe(5);
+  });
+
+  it("mantiene consulta y avisos de jefatura en tareas conjuntas aunque no tenga membresía empresa directa", () => {
+    const { state, task } = setup();
+    const withoutCompany = {
+      ...state,
+      profiles: state.profiles.map((profile) => profile.id === "boss" ? { ...profile, companyIds: [] } : profile),
+    };
+    const activated = activateJointTask(withoutCompany, request(task.id), "m1");
+    const shared = activated.tasks.find((row) => row.id === task.id)!;
+    const boss = activated.profiles.find((profile) => profile.id === "boss")!;
+
+    expect(canWork(activated, boss, shared)).toBe(true);
+    expect(taskNotifications(activated, shared, "m1", "joint", "Tarea compartida")
+      .map((notification) => notification.recipientId)).toContain("boss");
+  });
+
+  it("permite a jefatura activa compartir una tarea elegible sin membresía directa", () => {
+    const { state, task } = setup();
+    const withoutCompany = { ...state, profiles: state.profiles.map((profile) => profile.id === "boss" ? { ...profile, companyIds: [] } : profile) };
+    const activated = activateJointTask(withoutCompany, request(task.id), "boss");
+    expect(activated.tasks.find((row) => row.id === task.id)?.responsibility?.activatedBy).toBe("boss");
+    const inactiveBoss = { ...withoutCompany, profiles: withoutCompany.profiles.map((profile) => profile.id === "boss" ? { ...profile, active: false } : profile) };
+    expect(() => activateJointTask(inactiveBoss, request(task.id), "boss")).toThrow();
   });
 
   it("permite dos cronómetros, pausa sólo al actor y conserva tiempo separado", () => {
@@ -104,6 +129,18 @@ describe("responsabilidad conjunta en laboratorio", () => {
     recurring.tasks = recurring.tasks.map((row) => row.id === task.id ? { ...row, assignmentId: "recurring" } : row);
     expect(() => activateJointTask(recurring, request(task.id), "m1")).toThrow();
     expect(() => activateJointTask(state, request(task.id, { secondProfileId: "e5" }), "m1")).toThrow();
+  });
+
+  it("rechaza activar una tarea si la empresa ya está cerrada para el segundo responsable", () => {
+    const { state, task } = setup();
+    state.companyClosures = [{
+      id: "e1-c1-closed", ownerId: "e1", companyId: task.companyId, month: task.month,
+      at: `${task.month}-20T12:00:00.000Z`, by: "boss", note: "Cierre parcial",
+      metrics: metrics([], []), tasks: [], activity: [], coveredActivity: [], schemaVersion: 1,
+    }];
+
+    expect(() => activateJointTask(state, request(task.id), "m1")).toThrow(/cerrado/i);
+    expect(state.tasks[0]?.responsibility).toBeUndefined();
   });
 
   it("persiste responsabilidad y recibos con validación de esquema", () => {

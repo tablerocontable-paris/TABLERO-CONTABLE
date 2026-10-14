@@ -1,0 +1,57 @@
+{
+  "date": "2026-10-14",
+  "requirement": "S39 guided tour module targets and responsive positioning",
+  "status": "implemented locally and revalidated",
+  "scope": [
+    "internal module targets for calendar, annotations, planning, requests, process quality, analytics, closure and catalogue",
+    "temporary opening/restoration for folded panels and native details",
+    "responsive spotlight recalculation and in-viewport coach position",
+    "versioned saved tour progress at version 6"
+  ],
+  "validation": {
+    "fullSuite": {
+      "files": 67,
+      "passed": true,
+      "command": "node node_modules/vitest/vitest.mjs run --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000 --reporter=dot",
+      "tests": 663
+    },
+    "typecheck": {
+      "passed": true,
+      "command": "node node_modules/typescript/bin/tsc --noEmit"
+    },
+    "clientBuild": {
+      "passed": true,
+      "command": "node node_modules/vite/bin/vite.js build --outDir dist/client"
+    },
+    "workerBuild": {
+      "passed": true,
+      "command": "node scripts/build-worker.mjs"
+    },
+    "edge": {
+      "checks": 31,
+      "mobile": "390x844",
+      "passed": true,
+      "javascriptErrors": 0,
+      "command": "node tests/browser-corrections.cjs",
+      "report": "outputs/s39-tour-refresh-20261014/browser-validation.json",
+      "browser": "Microsoft Edge",
+      "operationalApiCalls": 0,
+      "desktop": "1440x900",
+      "roles": {
+        "boss": 15,
+        "manager": 13,
+        "employee": 11
+      }
+    },
+    "diffCheck": {
+      "passed": true,
+      "command": "git diff --check"
+    }
+  },
+  "reviewGates": [
+    "independent Sol review of S39",
+    "human screen-reader acceptance for stage 5"
+  ],
+  "externalActions": "No accounts, credentials, operational API, migrations, commit, PR, Site update, or deployment used.",
+  "progress": "~45% globally; unchanged"
+}

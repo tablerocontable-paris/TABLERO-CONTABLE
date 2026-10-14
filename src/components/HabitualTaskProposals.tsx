@@ -22,7 +22,7 @@ export function HabitualTaskProposalInbox({ state, actor, month, commit, notify 
   const proposals = pendingHabitualTaskProposals(state, actor);
   const groups = groupHabitualTaskProposals(proposals);
   return (
-    <Panel title="Propuestas de tareas habituales" sub="Revisá coincidencias posibles y decidí explícitamente el estándar. Cada empresa y cada perfil conservarán su asignación y frecuencia propias.">
+    <Panel title="Propuestas de tareas habituales" sub={`${proposals.length} pendientes · revisá coincidencias y decidí explícitamente el estándar para cada perfil y empresa.`} collapsible defaultOpen>
       {groups.length ? <div className="habitual-proposal-groups">
         {groups.map((group) => <ProposalGroupCard key={group.key} group={group.proposals} suggestedMatch={group.suggestedMatch} state={state} actor={actor} month={month} commit={commit} notify={notify} />)}
       </div> : <Empty text="No hay propuestas habituales pendientes de revisión." />}
@@ -40,7 +40,7 @@ function ProposalGroupCard({ group, suggestedMatch, state, actor, month, commit,
     sector: actor.sector || "Contabilidad general",
     description: first.description,
     weight: 1,
-    target: first.target,
+    target: 0,
   });
   const [steps, setSteps] = useState([...first.steps]);
   const [correctionNotes, setCorrectionNotes] = useState<Record<string, string>>({});
@@ -75,7 +75,7 @@ function ProposalGroupCard({ group, suggestedMatch, state, actor, month, commit,
             <div>
               <b>{profileName(proposal)} · {companyName(proposal)}</b>
               <p>{proposal.title}{proposal.process ? ` · ${proposal.process}` : ""}</p>
-              <small>{proposal.schedule.frequency} · {proposal.kind === "operativa" ? `meta ${proposal.target} ${proposal.unit}/mes` : `${proposal.steps.length} controles`} · envío {new Date(proposal.submittedAt).toLocaleDateString("es-AR")}</small>
+              <small>{proposal.schedule.frequency} · {proposal.kind === "operativa" ? `actividad por ${proposal.unit} · sin cuota` : `${proposal.steps.length} controles`} · envío {new Date(proposal.submittedAt).toLocaleDateString("es-AR")}</small>
               <details>
                 <summary>Ver descripción y controles</summary>
                 <p>{proposal.description}</p>
@@ -112,12 +112,12 @@ function ProposalGroupCard({ group, suggestedMatch, state, actor, month, commit,
       </div>
       <details className="habitual-standard-create">
         <summary>Crear un estándar para {group.length === 1 ? "esta propuesta" : "el grupo"}</summary>
-        <p>El estándar define nombre, rubro, controles y peso común. Las metas y frecuencias se conservan por perfil y empresa.</p>
+        <p>El estándar define nombre, rubro, controles y peso común. La frecuencia se conserva por perfil y empresa; el peso por movimiento se parametriza por empresa.</p>
         <div className="form-grid">
           <label>Nombre estándar<input maxLength={120} value={standard.title} onChange={(event) => setStandard({ ...standard, title: event.target.value })} /></label>
           <label>Rubro o sector<input maxLength={80} value={standard.sector} onChange={(event) => setStandard({ ...standard, sector: event.target.value })} /></label>
           <label>Peso común<input type="number" min={0} step="any" value={standard.weight} onChange={(event) => setStandard({ ...standard, weight: Number(event.target.value) })} /></label>
-          {first.kind === "operativa" && <label>Meta estándar de referencia · {first.unit}<input type="number" min={0} step="any" value={standard.target} onChange={(event) => setStandard({ ...standard, target: Number(event.target.value) })} /></label>}
+          {first.kind === "operativa" && <p className="catalogue-rate-note">La cantidad se registra libremente; jefatura define el coeficiente por movimiento en Actividad operativa.</p>}
         </div>
         <label>Objetivo del proceso<textarea maxLength={1000} rows={3} value={standard.description} onChange={(event) => setStandard({ ...standard, description: event.target.value })} /></label>
         <label>Controles comunes</label>
@@ -125,7 +125,7 @@ function ProposalGroupCard({ group, suggestedMatch, state, actor, month, commit,
         <button type="button" className="primary" onClick={() => {
           try {
             const safeSteps = validateSteps(steps);
-            approve({ kind: "create", template: { ...standard, kind: first.kind, unit: first.kind === "operativa" ? first.unit : "", steps: safeSteps } });
+            approve({ kind: "create", template: { ...standard, target: 0, kind: first.kind, unit: first.kind === "operativa" ? first.unit : "", steps: safeSteps } });
           } catch (error) { notify((error as Error).message); }
         }}>Crear estándar y activar {group.length} {group.length === 1 ? "asignación" : "asignaciones"}</button>
       </details>
@@ -139,7 +139,7 @@ export function MyHabitualTaskProposals({ state, actor, month, commit, notify }:
   const proposals = proposalsForProfile(state, actor);
   if (!proposals.length) return null;
   return (
-    <Panel title="Mis propuestas de tareas habituales" sub="Los procesos nuevos esperan la revisión de Juan Pablo antes de generar tareas o puntos.">
+    <Panel title="Mis propuestas de tareas habituales" sub={`${proposals.length} propuestas · los procesos esperan revisión antes de generar tareas o puntos.`} collapsible defaultOpen>
       <div className="habitual-proposal-groups">
         {proposals.slice().sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).map((proposal) => <MyProposalCard key={proposal.id} proposal={proposal} state={state} actor={actor} month={month || currentMonth()} commit={commit} notify={notify} />)}
       </div>
@@ -162,7 +162,7 @@ function MyProposalCard({ proposal, state, actor, month, commit, notify }: {
   function resubmit(event: FormEvent) {
     event.preventDefault();
     try {
-      const next = resubmitHabitualTaskProposal(state, actor, proposal.id, { title, process, description, kind, unit, target, schedule, steps });
+      const next = resubmitHabitualTaskProposal(state, actor, proposal.id, { title, process, description, kind, unit, target: kind === "operativa" ? 0 : target, schedule, steps });
       if (commit(next, "Reenvió propuesta habitual corregida", proposal.id)) notify("La propuesta volvió a la bandeja de revisión de Juan Pablo.");
     } catch (error) { notify((error as Error).message); }
   }
@@ -173,7 +173,7 @@ function MyProposalCard({ proposal, state, actor, month, commit, notify }: {
         <small>Empresa: {state.companies.find((row) => row.id === proposal.companyId)?.name || "Empresa"}</small>
       </div>
       <p>{proposal.process || proposal.description}</p>
-      <small>Regla: {proposal.schedule.frequency} · meta: {proposal.kind === "operativa" ? `${proposal.target} ${proposal.unit}/mes` : "no aplica"} · revisión {proposal.revision}</small>
+      <small>Regla: {proposal.schedule.frequency} · {proposal.kind === "operativa" ? `cantidad ${proposal.unit} · sin cuota` : "meta no aplica"} · revisión {proposal.revision}</small>
       {proposal.status === "changes_requested" && <div className="habitual-proposal-requested-change"><b>Corrección solicitada</b><p>{proposal.managerNote}</p></div>}
       {proposal.status === "approved" && template && <p className="habitual-proposal-approved">Estándar confirmado: {template.title} · versión {proposal.templateVersion}</p>}
       {proposal.status === "changes_requested" && (
@@ -183,7 +183,7 @@ function MyProposalCard({ proposal, state, actor, month, commit, notify }: {
           <label>Descripción<textarea required maxLength={1000} rows={2} value={description} onChange={(event) => setDescription(event.target.value)} /></label>
           <div className="form-grid">
             <label>Tipo<select value={kind} onChange={(event) => setKind(event.target.value as Template["kind"])}><option value="resultado">Entregable</option><option value="operativa">Actividad con cantidad</option></select></label>
-            {kind === "operativa" && <><label>Unidad<input required maxLength={40} value={unit} onChange={(event) => setUnit(event.target.value)} /></label><label>Meta de esta empresa<input type="number" min={0} step="any" value={target} onChange={(event) => setTarget(Number(event.target.value))} /></label></>}
+            {kind === "operativa" && <label>Unidad<input required maxLength={40} value={unit} onChange={(event) => setUnit(event.target.value)} /></label>}
           </div>
           <label>Frecuencia y vencimiento</label>
           <ScheduleEditor value={schedule} month={month} onChange={setSchedule} />

@@ -71,13 +71,14 @@ const examples: {
     result: { kind: "pause", endedAt: "2026-10-01T12:00:00-03:00" },
   },
   {
-    input: { ...common, kind: "wait", note: "  Espera Banco X  " },
-    rpc: "set_task_wait",
+    input: { ...common, kind: "wait", note: "  Espera Banco X  ", reason: null },
+    rpc: "set_task_wait_reviewed",
     args: {
       p_operation_id: id(10),
       p_instance: id(1),
       p_expected_revision: 0,
       p_note: "  Espera Banco X  ",
+      p_reason: null,
     },
     ack: 1,
     result: { kind: "wait", revision: 1 },
@@ -181,6 +182,11 @@ describe("filas remotas sin traducción a tareas locales", () => {
       { due_date: "2026-04-31" },
       { due_date: "2026-1-01" },
       { due_date: "0000-01-01" },
+      { due_date: "2026-10-19" },
+      { status: "Completada", completed_at: null },
+      { status: "En curso", completed_at: "2026-10-20T10:00:00Z" },
+      { blocked_by: "Espera", blocked_since: null },
+      { blocked_by: null, blocked_since: "2026-10-20" },
       { kind: "operativa", unit: " ", target: 40 },
       { kind: "operativa", unit: "facturas", target: null },
       { kind: "operativa", unit: "facturas", target: 0 },
@@ -311,6 +317,12 @@ describe("filas remotas sin traducción a tareas locales", () => {
       }
     }
   });
+  it("conserva filas históricas válidas y exige solo la coherencia documentada", () => {
+    const legacy = { ...base, status: "Completada", completed_at: "2025-10-01T10:00:00.123456Z", started_at: null };
+    expect(taskInstanceSchema.parse(legacy)).toEqual(legacy);
+    const blocked = { ...base, blocked_by: "Depende de Tesorería", blocked_since: "2026-10-01" };
+    expect(taskInstanceSchema.parse(blocked)).toEqual(blocked);
+  });
 });
 
 describe("gateway de seis RPC con intenciones conservadas", () => {
@@ -336,7 +348,7 @@ describe("gateway de seis RPC con intenciones conservadas", () => {
     },
   );
   it("clona y congela la intención sin mutar entrada ni cambiar nulos/texto", () => {
-    const input = { ...common, kind: "wait" as const, note: null };
+    const input = { ...common, kind: "wait" as const, note: null, reason: "Interrupción autorizada" };
     const original = structuredClone(input),
       prepared = prepareTaskCommand(input);
     expect(input).toEqual(original);
@@ -344,7 +356,7 @@ describe("gateway de seis RPC con intenciones conservadas", () => {
     input.expectedRevision = 20;
     expect(prepared).toMatchObject({
       operationId: id(10),
-      args: { p_operation_id: id(10), p_expected_revision: 0, p_note: null },
+      args: { p_operation_id: id(10), p_expected_revision: 0, p_note: null, p_reason: "Interrupción autorizada" },
     });
     expect(Object.isFrozen(prepared)).toBe(true);
     expect(Object.isFrozen(prepared.args)).toBe(true);
@@ -366,7 +378,7 @@ describe("gateway de seis RPC con intenciones conservadas", () => {
         TaskCommandValidationError,
       );
     for (const input of [
-      { ...common, kind: "wait", note: " " },
+      { ...common, kind: "wait", note: " ", reason: null },
       {
         kind: "activity",
         operationId: id(10),

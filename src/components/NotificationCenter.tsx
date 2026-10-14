@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
-import { type State } from "../domain/model";
+import { dateART, type State } from "../domain/model";
 import { visibleNotifications } from "../domain/notifications";
 import { deadlineReminders, markDeadlineRemindersRead } from "../domain/deadlineNotifications";
 import { pendingParameterizations } from "../domain/parameterization";
 import ParameterizationInbox from "./ParameterizationInbox";
 import { Dialog } from "./ui";
 import { pendingHabitualTaskProposals } from "../domain/habitualTaskProposals";
+import { canViewCalendarEvent } from "../domain/laboratory-work";
 
 export default function NotificationCenter({
   state,
@@ -14,6 +15,7 @@ export default function NotificationCenter({
   notify,
   onOpenTask,
   onOpenProposals,
+  onOpenCalendar,
   laboratory = false,
 }: {
   laboratory?: boolean;
@@ -22,9 +24,27 @@ export default function NotificationCenter({
   notify: (text: string) => void;
   onOpenTask: (id: string) => void;
   onOpenProposals?: () => void;
+  onOpenCalendar?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [asOfISO, setAsOfISO] = useState(() => new Date().toISOString());
+  const artDay = dateART(asOfISO);
+  useEffect(() => {
+    const [year, month, day] = artDay.split("-").map(Number);
+    const nextARTMidnight = Date.UTC(year, month - 1, day + 1, 3, 0, 0, 25);
+    const refresh = () => setAsOfISO(new Date().toISOString());
+    const timer = window.setTimeout(refresh, Math.max(1, nextARTMidnight - Date.now()));
+    const onVisibilityChange = () => {
+      if (document.visibilityState !== "hidden") refresh();
+    };
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [artDay]);
   const items = visibleNotifications(state);
   const reminders = laboratory ? deadlineReminders(state, asOfISO) : [];
   const pending =
@@ -33,17 +53,24 @@ export default function NotificationCenter({
       : 0;
   const actor = state.profiles.find((p) => p.id === state.activeId);
   const pendingProposals = actor ? pendingHabitualTaskProposals(state, actor).length : 0;
+  const calendarNotices = laboratory ? (state.calendarNotices || []).filter((notice) => notice.recipientId === state.activeId).sort((a, b) => b.createdAt.localeCompare(a.createdAt)) : [];
+  const calendarNoticeRows = calendarNotices.map((notice) => {
+    const currentEvent = state.calendarEvents?.find((row) => row.id === notice.eventId);
+    return { notice, event: actor && currentEvent && canViewCalendarEvent(state, actor, currentEvent) ? currentEvent : null };
+  });
+  const unreadCalendar = calendarNotices.filter((notice) => !notice.readAt).length;
   const unread = items.filter((n) => !n.readAt).length;
   const unreadReminders = reminders.filter((reminder) => !reminder.readAt).length;
+  const totalUnread = unread + unreadReminders + unreadCalendar + pending + pendingProposals;
   return (
     <>
       <button
         className="notification-trigger"
-        aria-label={`Notificaciones: ${unread + unreadReminders + pending + pendingProposals} pendientes`}
+        aria-label={`Notificaciones: ${totalUnread} pendientes`}
         onClick={() => { setAsOfISO(new Date().toISOString()); setOpen(true); }}
       >
         <Bell size={19} />
-        {unread + unreadReminders + pending + pendingProposals > 0 && <span>{unread + unreadReminders + pending + pendingProposals}</span>}
+        {totalUnread > 0 && <span>{totalUnread}</span>}
       </button>
       {open && (
         <Dialog title="Notificaciones" onClose={() => setOpen(false)}>
@@ -59,10 +86,12 @@ export default function NotificationCenter({
             commit={commit}
             notify={notify}
           />
-          {!items.length && !reminders.length && !pendingProposals && !pending && <p>No hay avisos pendientes para tu perfil.</p>}
-          {!!(unread + unreadReminders) && (
+          {!items.length && !reminders.length && !calendarNotices.length && !pendingProposals && !pending && <p>No hay avisos pendientes para tu perfil.</p>}
+          {!!(unread + unreadReminders + unreadCalendar) && (
             <button onClick={() => {
               const readAt = new Date().toISOString();
+              const currentReminders = laboratory ? deadlineReminders(state, readAt) : [];
+              setAsOfISO(readAt);
               const eventsRead = {
                 ...state,
                 notifications: (state.notifications || []).map((n) =>
@@ -70,8 +99,9 @@ export default function NotificationCenter({
                     ? { ...n, readAt: n.readAt || readAt }
                     : n,
                 ),
+                calendarNotices: (state.calendarNotices || []).map((notice) => calendarNotices.some((item) => item.id === notice.id) ? { ...notice, readAt: notice.readAt || readAt } : notice),
               };
-              commit(markDeadlineRemindersRead(eventsRead, reminders.map((reminder) => reminder.id), asOfISO, readAt));
+              commit(markDeadlineRemindersRead(eventsRead, currentReminders.map((reminder) => reminder.id), readAt, readAt));
             }}>
               Marcar avisos como leídos
             </button>
@@ -116,6 +146,15 @@ export default function NotificationCenter({
               );
             })}
           </ul>
+          {!!calendarNotices.length && <ul className="notification-list calendar-notification-list" aria-label="Avisos de fechas compartidas">{calendarNoticeRows.map(({ notice, event }) =>
+            <li key={notice.id} className={notice.readAt ? "" : "unread"}>
+              {event ? <>
+                <strong>{notice.kind === "created" ? "Nueva fecha compartida" : notice.kind === "changed" ? "Fecha actualizada" : "Fecha cancelada"} · {event.title}</strong>
+                <small>{event.startOn} · {state.profiles.find((profile) => profile.id === notice.actorId)?.name || "Equipo"}</small>
+              </> : <strong>El acceso a una fecha compartida fue actualizado.</strong>}
+              {event && <button type="button" onClick={() => { const readAt = new Date().toISOString(); if (commit({ ...state, calendarNotices: (state.calendarNotices || []).map((item) => item.id === notice.id ? { ...item, readAt: item.readAt || readAt } : item) })) { setOpen(false); onOpenCalendar?.(); } }}>Ver calendario</button>}
+            </li>,
+          )}</ul>}
           {!!reminders.length && (
             <ul className="notification-list deadline-reminder-list" aria-label="Avisos de vencimiento">
               {reminders.map((reminder) => (
@@ -132,7 +171,11 @@ export default function NotificationCenter({
                           <button
                             aria-label={`Abrir tarea: ${task.title}`}
                             onClick={() => {
-                              if (commit(markDeadlineRemindersRead(state, [reminder.id], asOfISO))) {
+                              const currentAsOfISO = new Date().toISOString();
+                              setAsOfISO(currentAsOfISO);
+                              const currentReminders = deadlineReminders(state, currentAsOfISO);
+                              if (!currentReminders.some((item) => item.id === reminder.id)) return;
+                              if (commit(markDeadlineRemindersRead(state, [reminder.id], currentAsOfISO, currentAsOfISO))) {
                                 setOpen(false);
                                 onOpenTask(task.id);
                               }

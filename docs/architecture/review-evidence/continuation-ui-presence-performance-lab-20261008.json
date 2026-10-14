@@ -1,0 +1,100 @@
+{
+  "date": "2026-10-08",
+  "scope": [
+    "explain suggested route ordering",
+    "display connected presence with a 90-second expiration",
+    "fix measured contrast issues in table labels, route summaries, and simulated presence",
+    "split Zod validation code from the main browser entry",
+    "full suite, client/Worker builds, Edge flows, accessibility heuristic and performance benchmark"
+  ],
+  "suggested_route": {
+    "behavior": "Each task has a collapsed explanation for readiness/blocker and its position relative to the preceding task.",
+    "ordering_fields": ["due date", "priority", "weight", "scheduled date", "stable tie-break"],
+    "unit_tests": "passed",
+    "edge_check": "passed; reason text rendered in browser"
+  },
+  "presence": {
+    "connected_signal": "Server last_seen timestamp",
+    "poll_interval_ms": 30000,
+    "expiration_ms": 90000,
+    "missing_signal": "shown as unknown, not offline",
+    "lab": "simulated status explicitly labelled",
+    "domain_and_component_tests": "passed",
+    "live_authenticated_session": "not tested"
+  },
+  "validation": {
+    "full_suite": "480/480 tests in 54 files passed after archived evidence validation",
+    "typescript": "passed",
+    "client_build": "passed",
+    "worker_build": "passed",
+    "edge_general": "passed",
+    "edge_corrections": "passed",
+    "edge_joint_closure": "passed",
+    "edge_backup_restore": "passed",
+    "edge_accessibility": "passed",
+    "edge_contrast_followup": "passed browser-corrections.cjs after final stylesheet build; zero JavaScript errors and operational API calls",
+    "contrast_audit": {
+      "routesAudited": 76,
+      "profiles": ["boss", "m1", "e0"],
+      "themes": ["light", "dark"],
+      "checkedTextElements": 4123,
+      "skippedTextElements": 1820,
+      "contrastIssues": 0,
+      "javascriptErrors": 0,
+      "operationalApiCalls": 0,
+      "limitation": "The automated check skips gradients, unsupported color formats, and text without a resolvable opaque background; skipped cases need manual review. This is not WCAG certification."
+    },
+    "accessibility_heuristic": {
+      "routes": 38,
+      "unnamed_visible_controls": 0,
+      "keyboard_focus_stops": 875,
+      "missing_visible_focus": 0,
+      "javascript_errors": 0,
+      "operational_api_calls": 0
+    },
+    "performance": {
+      "profiles": 24,
+      "tasks": 2000,
+      "warm_navigation_cycles": 10,
+      "route_samples": 30,
+      "browser": "Edge 154.0.4258.62",
+      "p95_route_ms": 317.96,
+      "target_p95_route_ms": 1000,
+      "javascript_errors": 0,
+      "operational_api_calls": 0
+    },
+    "git_diff_check": "passed; informational LF/CRLF conversion warnings"
+  },
+  "bundle_bytes": {
+    "main_entry": 484040,
+    "main_gzip": 146270,
+    "validation_chunk": 94820,
+    "validation_gzip": 26880,
+    "charts_chunk": 423740,
+    "charts_gzip": 121390,
+    "over_500kb_chunk_warning": false,
+    "remaining_build_notices": "Zod comment annotations are removed by Rollup"
+  },
+  "not_complete": [
+    "complete requirement-by-requirement product acceptance",
+    "screen-reader acceptance",
+    "manual contrast review for skipped complex backgrounds and responsive states",
+    "live authenticated presence and storage behavior",
+    "own GitHub, Supabase dev/production, hosting and automated delivery"
+  ],
+  "release_state": {
+    "private_lab": true,
+    "commit_created": false,
+    "pull_request_created": false,
+    "site_updated": false,
+    "services_connected": false,
+    "overall_progress_estimate": "about 45 percent"
+  },
+  "evidence_paths": [
+    "outputs/plan-validation-20261008/edge-continuation-split-chunks/",
+    "outputs/plan-validation-20261008/edge-continuation-accessibility/",
+    "outputs/plan-validation-20261008/performance-continuation-final/navigation-benchmark.json",
+    "outputs/plan-validation-20261008/contrast-audit-final/contrast-audit.json",
+    "outputs/plan-validation-20261008/edge-contrast-final/"
+  ]
+}

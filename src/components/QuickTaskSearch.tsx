@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { CalendarDays, Search } from "lucide-react";
 import { canWork } from "../domain/workforce";
 import type { Profile, State, Task } from "../domain/model";
+import { calendarCanAccessTask } from "../domain/laboratory-work";
 import { Dialog, Empty } from "./ui";
 
 function normalize(value: string) {
@@ -15,20 +16,23 @@ function normalize(value: string) {
 export default function QuickTaskSearch({
   state,
   active,
+  laboratory = false,
   currentMonth,
   onClose,
   onSelect,
 }: {
   state: State;
   active: Profile;
+  laboratory?: boolean;
   currentMonth: string;
   onClose: () => void;
   onSelect: (task: Task) => void;
 }) {
   const [query, setQuery] = useState("");
+  const selectedTaskRef = useRef(false);
   const results = useMemo(() => {
     const ordered = state.tasks
-      .filter((task) => canWork(state, active, task))
+      .filter((task) => laboratory ? calendarCanAccessTask(state, active, task) : canWork(state, active, task))
       .sort((a, b) => {
         const currentPeriod = Number(b.month === currentMonth) - Number(a.month === currentMonth);
         if (currentPeriod) return currentPeriod;
@@ -49,11 +53,11 @@ export default function QuickTaskSearch({
         return terms.every((term) => searchable.includes(term));
       });
     return { rows: matches.slice(0, 10), matchCount: matches.length, accessibleCount: ordered.length };
-  }, [active, currentMonth, query, state]);
+  }, [active, currentMonth, laboratory, query, state]);
   const tasks = results.rows;
 
   return (
-    <Dialog title="Buscar tareas" onClose={onClose} wide className="quick-task-search-dialog">
+    <Dialog title="Buscar tareas" onClose={onClose} wide className="quick-task-search-dialog" restoreFocus={() => !selectedTaskRef.current} focusFallback={() => document.querySelector<HTMLElement>(".quick-search-trigger")}>
       <label className="quick-task-search-input">
         <Search size={18} aria-hidden="true" />
         <input
@@ -71,18 +75,16 @@ export default function QuickTaskSearch({
           : `Tareas accesibles · ${results.accessibleCount} en total`}
       </p>
       {tasks.length ? (
-        <div className="quick-task-search-results" role="listbox" aria-label="Resultados de tareas">
+        <ul className="quick-task-search-results" aria-label="Resultados de tareas">
           {tasks.map((task) => {
             const owner = state.profiles.find((profile) => profile.id === task.ownerId)?.name || "Sin responsable";
             const company = state.companies.find((row) => row.id === task.companyId)?.name || "Sin empresa";
             return (
+              <li key={task.id}>
               <button
                 type="button"
                 className="quick-task-search-result"
-                role="option"
-                aria-selected="false"
-                key={task.id}
-                onClick={() => onSelect(task)}
+                onClick={() => { selectedTaskRef.current = true; onSelect(task); }}
               >
                 <span className="quick-task-search-result-main">
                   <b>{task.title}</b>
@@ -93,9 +95,10 @@ export default function QuickTaskSearch({
                   <small><CalendarDays size={13} aria-hidden="true" /> {task.month}</small>
                 </span>
               </button>
+              </li>
             );
           })}
-        </div>
+        </ul>
       ) : (
         <Empty text="No encontramos tareas accesibles con ese criterio." />
       )}

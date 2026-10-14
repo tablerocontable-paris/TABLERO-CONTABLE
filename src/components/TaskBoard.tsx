@@ -1,4 +1,4 @@
-import { cloneElement, isValidElement, useState, type DragEvent, type KeyboardEvent, type ReactNode } from "react";
+import { cloneElement, isValidElement, useId, useLayoutEffect, useRef, useState, type DragEvent, type KeyboardEvent, type ReactNode } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import type { Task, Status } from "../domain/model";
 import { Empty } from "./ui";
@@ -23,8 +23,11 @@ export default function TaskBoard({
 }: {
   tasks: Task[];
   renderCard: (task: Task) => ReactNode;
-  onMove?: (taskId: string, status: Status, beforeTaskId?: string) => void;
+  onMove?: (taskId: string, status: Status, beforeTaskId?: string) => void | boolean;
 }) {
+  const id = useId();
+  const boardRef = useRef<HTMLDivElement>(null);
+  const keyboardMoveRef = useRef<string | null>(null);
   const [expanded, setExpanded] = useState<Record<Status, boolean>>({
     Pendiente: true,
     "En curso": false,
@@ -33,15 +36,30 @@ export default function TaskBoard({
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dropStatus, setDropStatus] = useState<Status | null>(null);
   const [landedId, setLandedId] = useState<string | null>(null);
-  function move(taskId: string, status: Status, beforeTaskId?: string, sourceId = draggedId) {
+  function move(taskId: string, status: Status, beforeTaskId?: string, sourceId = draggedId, keyboard = false) {
     if (!onMove || !sourceId) return;
     const id = sourceId;
     setDraggedId(null);
     setDropStatus(null);
+    keyboardMoveRef.current = keyboard ? id : null;
+    const accepted = onMove(id, status, beforeTaskId);
+    if (accepted === false) {
+      keyboardMoveRef.current = null;
+      return;
+    }
     setLandedId(id);
     window.setTimeout(() => setLandedId(current => current === id ? null : current), 420);
-    onMove(id, status, beforeTaskId);
   }
+  useLayoutEffect(() => {
+    const targetId = keyboardMoveRef.current;
+    if (!targetId || !landedId || targetId !== landedId) return;
+    const card = Array.from(boardRef.current?.querySelectorAll<HTMLElement>("[data-task-id]") || [])
+      .find((candidate) => candidate.dataset.taskId === targetId);
+    if (card) {
+      keyboardMoveRef.current = null;
+      card.focus();
+    }
+  }, [landedId, tasks]);
   function decorateCard(task: Task, status: Status) {
     const node = renderCard(task);
     if (!onMove || !isValidElement(node)) return node;
@@ -78,20 +96,21 @@ export default function TaskBoard({
         if (!event.altKey || (event.key !== "ArrowLeft" && event.key !== "ArrowRight")) return;
         event.preventDefault();
         const target = STATUSES[STATUSES.indexOf(status) + (event.key === "ArrowRight" ? 1 : -1)];
-        if (target) move(task.id, target, undefined, task.id);
+        if (target) move(task.id, target, undefined, task.id, true);
       },
     });
   }
   return (
-    <div className="kanban">
+    <div className="kanban" ref={boardRef} data-tour="board-movement">
       {STATUSES.map(
         (status, index) => {
           const rows = tasks.filter((t) => t.status === status);
           const open = expanded[status];
-          const region = `task-column-${index}`;
+          const region = `task-column-${id}-${index}`;
           return (
             <section
               className={`column ${open ? "expanded" : "folded"}${dropStatus === status ? " is-drop-target" : ""}`}
+              data-tour={open && rows.length ? "task-column-open" : !rows.length ? "task-column-empty" : undefined}
               key={status}
               onDragOver={event => { if (draggedId) { event.preventDefault(); setDropStatus(status); event.dataTransfer.dropEffect = "move"; } }}
               onDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setDropStatus(current => current === status ? null : current); }}

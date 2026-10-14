@@ -35,3 +35,18 @@ No se importan archivos o perfiles al espacio operativo.
 Pruebas unitarias y recorrido Edge de descarga, validación, confirmación y
 restauración en
 `docs/architecture/review-evidence/laboratory-backup-lab-20261007.json`.
+
+## Actualización de alcance verificada — 11/10/2026
+
+El contrato anterior documenta el corte inicial v1. La fuente vigente genera
+copias v2 con archivos de evidencia y acepta v1 para compatibilidad. V1 tiene
+límite de 10 MB y no transporta evidencia; v2 limita el JSON completo a 50 MB,
+incluido el contenido codificado en base64. Cada imagen admite hasta 5 MB y
+cada PDF hasta 10 MB. Restaurar v2 exige la ruta asíncrona de evidencia y estado;
+la inspección de referencias no demuestra restauración completa.
+
+Fuentes: src/data/repository.ts, src/data/laboratoryEvidence.ts y
+src/components/LaboratoryBackup.tsx. Auditoría e incidencias pendientes:
+docs/architecture/SOL-AUDIT-20261008.md (S03, S09 y S11). No se declara aceptada
+la recuperación frente a cuota insuficiente, referencias semánticas inválidas
+o competencia entre archivos por actualizar esta documentación.

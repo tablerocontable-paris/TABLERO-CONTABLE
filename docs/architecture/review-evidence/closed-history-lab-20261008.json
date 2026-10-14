@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-08",
+  "project": "Grupo Paris private laboratory",
+  "scope": "Immutable company closure snapshots, monthly consolidation, and laboratory trend analytics.",
+  "changes": [
+    "Company closure reports now freeze operational summaries at close time.",
+    "A person's monthly closure consolidates task, activity, transfer, and report snapshots from closed company units instead of rereading live work rows.",
+    "Laboratory monthly analytics read complete monthly closures only; open periods are excluded and filtered operational load is omitted when snapshots cannot support a comparable calculation.",
+    "Trend controls remain available while fewer than two closed periods exist, with a clear empty-state explanation."
+  ],
+  "automatedValidation": {
+    "focusedTests": {
+      "command": "node node_modules/vitest/vitest.mjs run tests/laboratory-work.test.ts --maxWorkers=2",
+      "result": "passed",
+      "passedTests": 17,
+      "passedFiles": 1,
+      "coverage": "Frozen closure remains unchanged after live task/activity mutations; open periods are omitted from analytics; operational weights do not inflate deliverable points."
+    },
+    "fullSuite": {
+      "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "result": "passed",
+      "passedTests": 456,
+      "failedTests": 0,
+      "passedFiles": 51,
+      "failedFiles": 0,
+      "note": "A final focused regression after the full suite confirmed operational weights remain excluded from deliverable points."
+    },
+    "typeScript": {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "result": "passed"
+    },
+    "clientBuild": {
+      "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+      "result": "passed",
+      "mainEntryKb": 565.32,
+      "chartChunkKb": 423.74,
+      "warning": "Vite reports chunks above its 500 kB advisory threshold."
+    },
+    "workerBuild": {
+      "command": "node scripts/build-worker.mjs",
+      "result": "passed"
+    },
+    "diffWhitespaceCheck": "passed",
+    "browser": "Not rerun for this snapshot-history slice; prior browser evidence predates these changes."
+  },
+  "releaseState": "Uncommitted local laboratory changes. No account, service, Site update, or deployment was used.",
+  "globalProgressEstimate": "~45%; this slice does not constitute product acceptance."
+}

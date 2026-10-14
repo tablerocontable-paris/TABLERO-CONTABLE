@@ -4,7 +4,7 @@ import { assignTaskResponsibilityInputSchema, coordinatedTaskSchema } from "../s
 
 describe("011 activation smoke", () => {
   let lab: AccountingLab;
-  beforeAll(async () => { lab = await new AccountingLab().init(stages.m011); }, 60_000);
+  beforeAll(async () => { lab = await new AccountingLab().init(stages.m012); }, 60_000);
   beforeEach(async () => { await lab.admin(); await lab.db.exec("begin"); });
   afterEach(async () => { await lab.db.exec("rollback; reset role"); });
   afterAll(async () => { await lab?.close(); });
@@ -72,6 +72,16 @@ describe("011 activation smoke", () => {
       ],
       myContribution:{kind:"responsible",shareBps:4000},
     });
+    expect(coordinatedTaskSchema.safeParse({ ...dto, responsibility: { ...dto.responsibility, instanceId: uid(920) } }).success).toBe(false);
+    expect(coordinatedTaskSchema.safeParse({ ...dto, responsibility: { ...dto.responsibility, companyId: uid(921) } }).success).toBe(false);
+    expect(coordinatedTaskSchema.safeParse({ ...dto, responsibility: { ...dto.responsibility, period: "2026-09-01" } }).success).toBe(false);
+    expect(coordinatedTaskSchema.safeParse({ ...dto, members: dto.members.map((member: {profileId:string;displayName:string;shareBps:number}) => ({ ...member, shareBps: 5000 })) }).success).toBe(false);
+    expect(coordinatedTaskSchema.parse({
+      ...dto,
+      taskId: dto.taskId.toUpperCase(),
+      responsibility: { ...dto.responsibility, instanceId: dto.responsibility.instanceId.toUpperCase(), companyId: dto.companyId.toUpperCase(), members: [...dto.responsibility.members].reverse() },
+      members: [...dto.members].reverse().map((member: {profileId:string;displayName:string;shareBps:number}) => ({ ...member, profileId: member.profileId.toUpperCase() })),
+    }).taskId).toBe(dto.taskId.toUpperCase());
     expect(dto).not.toHaveProperty("blocked_by");
     expect(dto).not.toHaveProperty("sessions");
     await lab.admin();
@@ -152,6 +162,11 @@ describe("011 activation smoke", () => {
     expect((await lab.first("select can_access_instance($1) ok",[task])).ok).toBe(true);
     const session=(await lab.first("select start_task_timer($1,0,$2,false) id",[task,uid(916)])).id;
     expect((await lab.first("select contribution_kind from task_time_sessions where id=$1",[session]))).toEqual({contribution_kind:"coverage"});
+    const coverageDto = (await lab.first("select read_coordinated_task($1) data", [task])).data;
+    expect(coordinatedTaskSchema.parse(coverageDto)).toMatchObject({
+      myContribution: { kind: "coverage", shareBps: 0 },
+      coverage: { kind: "coverage", bindingId: binding },
+    });
     await lab.actor(ids.boss,"aal2");
     await lab.db.query("select cancel_task_coverage_binding($1,'Cancelada',$2)",[binding,uid(906)]);
     await lab.actor(ids.peer);
@@ -160,6 +175,41 @@ describe("011 activation smoke", () => {
     expect((await lab.first("select status from task_coverage_bindings where id=$1",[binding])).status).toBe("cancelled");
     expect((await lab.first("select ended_at is not null ended from task_time_sessions where id=$1",[session])).ended).toBe(true);
     expect((await lab.first("select owner_id,period::text from task_instances where id=$1",[task]))).toEqual({owner_id:ids.owner,period:lab.period});
+  });
+
+  it("S32: una ausencia legacy se muestra como cobertura sin cuota y preserva responsabilidad del participante", async () => {
+    const task = await lab.task({ period: lab.period });
+    const absence = await lab.absence(ids.owner, ids.peer, lab.day, lab.day);
+    await lab.actor(ids.peer);
+    const dto = (await lab.first("select read_coordinated_task($1) data", [task])).data;
+    expect(coordinatedTaskSchema.parse(dto)).toMatchObject({
+      myContribution: { kind: "coverage", shareBps: 0 },
+      coverage: { kind: "coverage", bindingId: null, startsOn: lab.day, endsOn: lab.day },
+    });
+    await lab.actor(ids.owner);
+    const ownerDto = (await lab.first("select read_coordinated_task($1) data", [task])).data;
+    expect(coordinatedTaskSchema.parse(ownerDto).myContribution).toEqual({ kind: "responsible", shareBps: 10000 });
+    await lab.admin();
+    expect(await lab.first("select id from employee_absences where id=$1", [absence])).toEqual({ id: absence });
+  });
+
+  it("S32: un participante conjunto conserva su cuota aunque también sea reemplazo legacy", async () => {
+    const task = await lab.task({ period: lab.period });
+    await lab.admin();
+    await lab.db.query("update task_assignments set frequency='unica' where id=(select assignment_id from task_instances where id=$1)", [task]);
+    await lab.actor(ids.boss, "aal2");
+    await lab.first("select assign_task_responsibility($1,$2::jsonb,'Trabajo conjunto',1,$3)", [
+      task,
+      JSON.stringify([{ profileId: ids.owner, shareBps: 6000 }, { profileId: ids.peer, shareBps: 4000 }]),
+      uid(907),
+    ]);
+    await lab.absence(ids.owner, ids.peer, lab.day, lab.day);
+    await lab.actor(ids.peer);
+    const dto = (await lab.first("select read_coordinated_task($1) data", [task])).data;
+    expect(coordinatedTaskSchema.parse(dto)).toMatchObject({
+      myContribution: { kind: "responsible", shareBps: 4000 },
+      coverage: { kind: "coverage", bindingId: null },
+    });
   });
 
   it("approves a frozen recurring rule and binds existing matching occurrences by scheduled_on", async () => {

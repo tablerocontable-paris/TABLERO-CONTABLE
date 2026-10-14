@@ -257,3 +257,20 @@ equivale a aceptación final ni verifica concurrencia entre dispositivos,
 autenticación real o entrega remota de notificaciones. El contrato de servidor
 y permisos multiusuario sigue siendo una etapa posterior, después de aceptar el
 producto y habilitar las cuentas propias.
+
+## Precedencia del contrato posterior — auditoría 11/10/2026
+
+Las reglas de este documento describen el corte conjunto inicial. El plan de
+correcciones posterior prohíbe nuevas operativas conjuntas, conserva su historial
+previo para revisión y separa cumplimiento de entregables de carga/calidad
+operativas. No implementar nuevamente metas operativas por este documento.
+El cierre actual del laboratorio utiliza unidades persona/empresa/mes y grupos
+conjuntos indivisibles; la versión nueva del reporte es 3. Conservar los reportes
+históricos 1/2 sin recalcularlos. La consulta organizacional de jefatura no exige
+membresía directa, mientras ejecutar requiere participación o cobertura vigente.
+
+Los recorridos anteriores son evidencia de su fecha, no aceptación actual de
+todas las rutas. Hallazgos pendientes de esta auditoría: S12 (cobertura con sólo
+tiempo), S47 (gestión conjunta por jefe sin membresía) y S54 (arrastre en cobertura).
+Contrato vigente y aceptación pendiente: SOL-REQUIREMENT-COVERAGE-20261008.md y
+SOL-AUDIT-20261008.md. No activar backend ni cambiar audiencia.

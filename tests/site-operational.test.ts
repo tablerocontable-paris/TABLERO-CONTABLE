@@ -8,6 +8,7 @@ import {
   applyProposal,
 } from "../src/server/site-policy";
 import worker from "../src/server/site-worker";
+import { stateSchema } from "../src/server/site-schema";
 import {
   materialize,
   dateART,
@@ -194,6 +195,68 @@ describe("Sites: recorrido operativo y autorización real en servidor", () => {
     p.annotations = [s.annotations![0]];
     expect(() => save(s, p, "admin")).toThrow("ámbito");
   });
+  it("S01: la proyección remota no transmite colecciones futuras y conserva las filas del servidor", () => {
+    const s = addTasks();
+    const futureCollections = {
+      taskEvidence: [{ id: "private-evidence", name: "secreto.pdf" }],
+      companyClosures: [{ id: "lab-close", companyId: "c1" }],
+      calendarEvents: [{ id: "lab-event", title: "Evento reservado" }],
+      internalRequests: [{ id: "lab-request", body: "Pedido privado" }],
+      notifications: [{ id: "lab-notice", content: "Aviso privado" }],
+      futureCollection: [{ id: "future", secret: "no proyectar" }],
+    };
+    Object.assign(s, futureCollections);
+
+    for (const profileId of ["e0", "m1", "boss"]) {
+      const projected = projectState(s, actor(s, profileId));
+      expect(stateSchema.safeParse(projected).success).toBe(true);
+      for (const key of Object.keys(futureCollections))
+        expect(Object.hasOwn(projected, key)).toBe(false);
+      expect(projected.activeId).toBe(profileId);
+    }
+
+    const proposal = projectState(s, actor(s, "admin"));
+    Object.assign(proposal, { taskEvidence: [{ id: "forged", name: "nuevo.pdf" }] });
+    expect(() => save(s, proposal, "admin")).toThrow("datos no son válidos");
+    const next = save(s, projectState(s, actor(s, "admin")), "admin");
+    expect((next as State & typeof futureCollections).taskEvidence).toEqual(futureCollections.taskEvidence);
+    expect((next as unknown as Record<string, unknown>).futureCollection).toEqual(futureCollections.futureCollection);
+  });
+  it("S13: la jerarquía consulta tareas pero no cambia controles, estado, reloj ni actividad", () => {
+    const s = addTasks();
+    const manager = actor(s, "m1");
+    const visible = projectState(s, manager);
+    expect(visible.tasks.length).toBeGreaterThan(0);
+
+    const checklistProposal = projectState(s, manager);
+    const checklistTask = checklistProposal.tasks.find((task) => task.kind === "resultado")!;
+    checklistTask.checklist[0] = { ...checklistTask.checklist[0], done: true };
+    expect(() => save(s, checklistProposal, "m1")).toThrow("no autoriza a ejecutarla");
+
+    const transitionProposal = projectState(s, manager);
+    transitionProposal.tasks.find((task) => task.kind === "resultado")!.status = "En curso";
+    expect(() => save(s, transitionProposal, "m1")).toThrow("no autoriza a ejecutarla");
+
+    const clockProposal = projectState(s, manager);
+    const clockTask = clockProposal.tasks.find((task) => task.kind === "resultado")!;
+    clockTask.startedAt = new Date().toISOString();
+    clockTask.status = "En curso";
+    clockTask.sessions = [{ id: "manager-clock", actorId: manager.id, start: new Date().toISOString(), end: null }];
+    expect(() => save(s, clockProposal, "m1")).toThrow("no autoriza a ejecutarla");
+
+    const activityProposal = projectState(s, manager);
+    const operation = activityProposal.tasks.find((task) => task.kind === "operativa")!;
+    activityProposal.activity.push({
+      id: "manager-activity",
+      taskId: operation.id,
+      date: dateART(),
+      qty: 1,
+      note: "Movimiento por superior",
+      actorId: manager.id,
+      createdAt: new Date().toISOString(),
+    });
+    expect(() => save(s, activityProposal, "m1")).toThrow("fuera del período o de tu ámbito");
+  });
   it("deniega empresa fuera del acceso y adulteración de una tarjeta recién materializada", () => {
     const s = operationalSeed(owner);
     s.profiles.find((p) => p.id === "e0")!.companyIds = ["c1"];
@@ -341,11 +404,14 @@ describe("Worker y SQLite: acceso, persistencia y concurrencia de revisiones", (
     });
   }
   it("requiere identidad, deniega terceros y escritura desde otro origen", async () => {
-    const { env } = setup();
+    const { env, db } = setup();
     expect(
       (await worker.fetch(new Request("https://paris.test/api/workspace"), env))
         .status,
     ).toBe(401);
+    expect(
+      db.prepare("SELECT COUNT(*) AS count FROM paris_presence").get()?.count,
+    ).toBe(0);
     expect(
       (await worker.fetch(req("GET", undefined, "otro@example.test"), env))
         .status,
@@ -387,6 +453,59 @@ describe("Worker y SQLite: acceso, persistencia y concurrencia de revisiones", (
     expect(
       db.prepare("SELECT revision FROM paris_workspace").get()?.revision,
     ).toBe(1);
+  });
+  it.each([
+    ["INSERT de presencia", "INSERT INTO paris_presence"],
+    ["SELECT de presencia", "SELECT profile_id, last_seen FROM paris_presence"],
+  ])("S46: un fallo de %s no revierte un guardado confirmado", async (_label, fragment) => {
+    const { env, db } = setup();
+    const initial = await (await worker.fetch(req(), env)).json();
+    const next = structuredClone(initial.state);
+    next.companies[0].name = "Cambio confirmado";
+    const prepare = env.DB.prepare.bind(env.DB);
+    env.DB.prepare = ((sql: string) => {
+      if (sql.startsWith(fragment)) throw new Error("fallo inyectado de presencia");
+      return prepare(sql);
+    }) as typeof env.DB.prepare;
+    const response = await worker.fetch(req("POST", { state: next, revision: 0 }), env);
+    expect(response.status).toBe(200);
+    const body = await response.json() as { state: { companies: { name: string }[] }; revision: number; presence: Record<string, string> };
+    expect(body.state.companies[0]?.name).toBe("Cambio confirmado");
+    expect(body).toMatchObject({ revision: 1, presence: {} });
+    expect(db.prepare("SELECT revision FROM paris_workspace").get()?.revision).toBe(1);
+  });
+  it("S46: un fallo al leer presencia en GET conserva el workspace válido", async () => {
+    const { env, db } = setup();
+    await worker.fetch(req(), env);
+    const prepare = env.DB.prepare.bind(env.DB);
+    env.DB.prepare = ((sql: string) => {
+      if (sql.startsWith("SELECT profile_id, last_seen FROM paris_presence"))
+        throw new Error("fallo inyectado de lectura de presencia");
+      return prepare(sql);
+    }) as typeof env.DB.prepare;
+    const response = await worker.fetch(req(), env);
+    expect(response.status).toBe(200);
+    const body = await response.json() as { state: unknown; revision: number; presence: Record<string, string> };
+    expect(body.state).toBeTruthy();
+    expect(body).toMatchObject({ revision: 0, presence: {} });
+    expect(db.prepare("SELECT revision FROM paris_workspace").get()?.revision).toBe(0);
+  });
+  it("S46: un fallo de persistencia sigue siendo error y no incrementa revisión", async () => {
+    const { env, db } = setup();
+    const initial = await (await worker.fetch(req(), env)).json();
+    const next = structuredClone(initial.state);
+    next.companies[0].name = "No confirmado";
+    const batch = env.DB.batch.bind(env.DB);
+    let batchCalls = 0;
+    env.DB.batch = (async (statements) => {
+      if (batchCalls++ === 1) {
+        throw new Error("fallo inyectado de almacenamiento");
+      }
+      return batch(statements);
+    }) as typeof env.DB.batch;
+    const response = await worker.fetch(req("POST", { state: next, revision: 0 }), env);
+    expect(response.status).toBe(503);
+    expect(db.prepare("SELECT revision FROM paris_workspace").get()?.revision).toBe(0);
   });
   it("dos escrituras concurrentes sólo confirman una versión", async () => {
     const { env } = setup();

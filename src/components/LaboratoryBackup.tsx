@@ -1,13 +1,14 @@
-import { useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { Archive, Download, Upload } from "lucide-react";
 import type { State } from "../domain/model";
 import {
-  createLaboratoryBackup,
+  createLaboratoryBackupV2,
   inspectLaboratoryBackup,
-  restoreLaboratoryBackup,
+  restoreLaboratoryBackupWithEvidence,
   type LaboratoryBackup as LaboratoryBackupData,
 } from "../data/repository";
 import { Dialog } from "./ui";
+import { evidenceStorageErrorMessage } from "../data/evidenceErrors";
 
 function dateStamp(date = new Date()) {
   return [
@@ -37,12 +38,16 @@ export default function LaboratoryBackup({ state }: { state: State }) {
   >(null);
   const [confirmed, setConfirmed] = useState(false);
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
   const input = useRef<HTMLInputElement>(null);
+  const selectionToken = useRef(0);
+  useEffect(() => () => { selectionToken.current += 1; }, []);
 
-  function download() {
+  async function download() {
     setError("");
+    setBusy(true);
     try {
-      const file = new Blob([createLaboratoryBackup(state)], {
+      const file = new Blob([await createLaboratoryBackupV2(state)], {
         type: "application/json",
       });
       const url = URL.createObjectURL(file);
@@ -55,25 +60,29 @@ export default function LaboratoryBackup({ state }: { state: State }) {
       setError(
         "No pudimos crear la descarga. El laboratorio actual sigue intacto.",
       );
-    }
+    } finally { setBusy(false); }
   }
 
   async function selectBackup(event: ChangeEvent<HTMLInputElement>) {
+    const token = ++selectionToken.current;
     const file = event.currentTarget.files?.[0];
     event.currentTarget.value = "";
     setError("");
     setBackup(null);
     setConfirmed(false);
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) {
-      setError("El archivo supera el límite de 10 MB.");
+    if (file.size > 50 * 1024 * 1024) {
+      setError("El archivo supera el límite total de 50 MB.");
       return;
     }
     try {
       const contents = await readFile(file);
+      if (token !== selectionToken.current) return;
       const inspected = inspectLaboratoryBackup(contents);
+      if (token !== selectionToken.current) return;
       setBackup({ ...inspected, fileName: file.name, contents });
     } catch (reason) {
+      if (token !== selectionToken.current) return;
       setError(
         reason instanceof Error
           ? reason.message
@@ -82,16 +91,15 @@ export default function LaboratoryBackup({ state }: { state: State }) {
     }
   }
 
-  function restore() {
+  async function restore() {
     if (!backup || !confirmed) return;
+    setBusy(true);
     try {
-      restoreLaboratoryBackup(backup.contents);
+      await restoreLaboratoryBackupWithEvidence(backup.contents);
       location.reload();
-    } catch {
-      setError(
-        "No se pudo guardar la copia. El estado actual del laboratorio se conserva.",
-      );
-    }
+    } catch (reason) {
+      setError(evidenceStorageErrorMessage(reason, "restaurar la copia"));
+    } finally { setBusy(false); }
   }
 
   return (
@@ -106,7 +114,7 @@ export default function LaboratoryBackup({ state }: { state: State }) {
       {open && (
         <Dialog
           title="Copia del laboratorio"
-          onClose={() => setOpen(false)}
+          onClose={() => { selectionToken.current += 1; setOpen(false); }}
           className="lab-backup-dialog"
         >
           <p className="lab-backup-intro">
@@ -114,10 +122,10 @@ export default function LaboratoryBackup({ state }: { state: State }) {
             conectar cuentas ni servicios.
           </p>
           <div className="lab-backup-actions">
-            <button type="button" onClick={download}>
+            <button type="button" disabled={busy} onClick={() => void download()}>
               <Download size={15} aria-hidden="true" /> Descargar copia
             </button>
-            <button type="button" onClick={() => input.current?.click()}>
+            <button type="button" disabled={busy} onClick={() => input.current?.click()}>
               <Upload size={15} aria-hidden="true" /> Elegir copia para
               restaurar
             </button>
@@ -131,8 +139,7 @@ export default function LaboratoryBackup({ state }: { state: State }) {
             />
           </div>
           <p className="lab-backup-note">
-            El archivo puede incluir tareas, comentarios, notas y actividad de
-            prueba. Guardalo en un lugar privado.
+            La copia completa admite hasta 50 MB, incluidos los datos y archivos. Guardala en un lugar privado.
           </p>
           {error && (
             <p className="lab-backup-error" role="alert">
@@ -141,12 +148,13 @@ export default function LaboratoryBackup({ state }: { state: State }) {
           )}
           {backup && (
             <section className="lab-backup-preview" aria-live="polite">
-              <b>Copia válida: {backup.fileName}</b>
+              <b>Copia válida · versión {backup.formatVersion}: {backup.fileName}</b>
               <p>
                 {backup.counts.profiles} perfiles · {backup.counts.companies}{" "}
                 empresas · {backup.counts.tasks} tareas · {backup.counts.notes}{" "}
                 notas/comentarios
               </p>
+              <p>{backup.fileCount} archivos de evidencia incluidos.</p>
               <label>
                 <input
                   type="checkbox"
@@ -156,11 +164,11 @@ export default function LaboratoryBackup({ state }: { state: State }) {
                 Reemplazar la simulación guardada en este navegador por esta
                 copia.
               </label>
-              <button
-                type="button"
-                className="danger"
-                disabled={!confirmed}
-                onClick={restore}
+                <button
+                  type="button"
+                  className="danger"
+                  disabled={!confirmed || busy}
+                  onClick={() => void restore()}
               >
                 Restaurar y recargar
               </button>

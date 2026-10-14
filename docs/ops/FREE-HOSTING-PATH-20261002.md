@@ -1,5 +1,6 @@
 # Camino a infraestructura gratuita — 02/10/2026
 
+> Revisión de continuidad 11/10/2026: planificación histórica del 02/10. Las cuotas y condiciones citadas no se revalidaron en esta auditoría; deben consultarse nuevamente antes de elegir o activar servicios. El contrato vigente exige dos proyectos propios Supabase (dev/producción), GitHub, hosting y entrega automatizada comprobada después de aceptar el laboratorio. No autoriza crear cuentas, conectar API, invitar empleados ni publicar producción durante la revisión actual. Los gates de integración real se ejecutarán en esa etapa y no se declaran aprobados por una demo local.
 Decisión de diseño, sin cuentas creadas. Preferencia técnica actual: Cloudflare
 Pages para frontend Vite/React; Supabase para Postgres/Auth/RLS; GitHub para código
 y CI. Workers sólo si el consumidor/scheduler necesita ejecución servidor allí.

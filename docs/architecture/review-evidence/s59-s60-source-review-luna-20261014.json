@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-14",
+  "reviewer": "GPT-6 Luna",
+  "scope": "Source-only cross-check of the local SQL migration and regression assertions for Sol findings S59/S60.",
+  "sources": {
+    "migration": {
+      "path": "supabase/migrations/202610140012_sql_receipt_and_onboarding_guards.sql",
+      "sha256": "cabfe95dbd04ae65ea82c787bc5e3ec8e638e4620456366b7eeb8a5d715dfbf4"
+    },
+    "tests": {
+      "path": "tests/database.test.ts",
+      "sha256": "207cc7e636a02592a23728bfe5142255ee73df39a56be9ea91f041ed71717c4a"
+    }
+  },
+  "findings": {
+    "S59": {
+      "observed": [
+        "approve_onboarding rejects null and revisions below one before locks, then uses IS DISTINCT FROM for stale-revision checks before and after coordination locks.",
+        "Approval re-reads and locks the request, verifies submitted status, revalidates the privileged session, role, organization, active employee, and payload before writes.",
+        "request_onboarding_changes rejects null/invalid revisions and rechecks request status, revision, session, organization, role, and manager scope after coordination locks and while the request row is locked.",
+        "Database regressions assert invalid attempts leave status, assignments, activations, approvals, reviews, and audit rows unchanged; exact approval creates two activations once and replay preserves one review/audit record."
+      ],
+      "sourceLocations": [
+        "migration:88-254",
+        "migration:257-306",
+        "tests/database.test.ts:596-663"
+      ],
+      "result": "No source-level mismatch with the S59 contract found in the reviewed paths."
+    },
+    "S60": {
+      "observed": [
+        "Activity receipt replay is keyed by authenticated actor and operation ID; a reused ID with changed operation kind or arguments rejects.",
+        "A new operation ID reaches a fresh activity insert even when date, quantity, and reference match an earlier movement.",
+        "Regression assertions distinguish replay, changed-body rejection, distinct operation IDs, and legacy calls; they check distinct IDs, row count, summed quantity, audit-event count, and task revision."
+      ],
+      "sourceLocations": [
+        "migration:308-376",
+        "tests/database.test.ts:665-718"
+      ],
+      "result": "No source-level mismatch with the S60 sequential contract found in the reviewed paths."
+    }
+  },
+  "limits": [
+    "This is a source review, not a new SQL execution or an independent GPT-6.1 Sol review.",
+    "It does not establish concurrent PostgreSQL MVCC behavior, deployed permissions, Auth/RLS, or remote migration state."
+  ],
+  "externalActions": "No SQL was applied remotely; no account, API, commit, PR, Site update, or deployment was used."
+}

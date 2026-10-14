@@ -19,6 +19,41 @@ const note: Annotation = {
 };
 
 describe("anotaciones personales", () => {
+  it("pliega el bloque y permite abrir el formulario desde el encabezado", () => {
+    render(
+      <Annotations
+        rows={[]}
+        tasks={[]}
+        onSave={vi.fn()}
+        onDelete={vi.fn()}
+        onConvert={vi.fn()}
+        onOpenTask={vi.fn()}
+      />,
+    );
+    const panel = screen.getByRole("heading", { name: "Anotaciones personales" }).closest(".panel")!;
+    fireEvent.click(screen.getByRole("button", { name: "Plegar Anotaciones personales" }));
+    expect(panel.querySelector<HTMLElement>(".panel-body")?.hidden).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "Nueva anotación" }));
+    expect(panel.querySelector<HTMLElement>(".panel-body")?.hidden).toBe(false);
+    expect(screen.getByLabelText("Título")).toBeTruthy();
+  });
+
+  it("mantiene compacta la biblioteca cuando todavía no hay anotaciones", () => {
+    const { container } = render(
+      <Annotations
+        rows={[]}
+        tasks={[]}
+        onSave={vi.fn()}
+        onDelete={vi.fn()}
+        onConvert={vi.fn()}
+        onOpenTask={vi.fn()}
+      />,
+    );
+    const emptyState = container.querySelector(".annotation-empty-state");
+    expect(emptyState?.textContent).toContain("Todavía no guardaste anotaciones.");
+    expect(emptyState?.querySelector(".empty")).toBeTruthy();
+  });
+
   it("guarda contenido, tipo y recordatorio mediante el formulario", () => {
     const onSave = vi.fn();
     render(
@@ -31,6 +66,7 @@ describe("anotaciones personales", () => {
         onOpenTask={vi.fn()}
       />,
     );
+    expect(screen.getByRole("button", { name: "Nueva anotación" }).closest(".panel-head")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Nueva anotación" }));
     fireEvent.change(
       screen.getByLabelText("Título"),
@@ -72,6 +108,7 @@ describe("anotaciones personales", () => {
         onOpenTask={vi.fn()}
       />,
     );
+    expect(screen.getByRole("button", { name: "Plegar Tu biblioteca" })).toBeTruthy();
     fireEvent.change(screen.getByLabelText("Filtrar tipo de anotación"), {
       target: { value: "Recordatorio" },
     });
@@ -105,6 +142,7 @@ describe("anotaciones personales", () => {
         onOpenTask={onOpenTask}
       />,
     );
+    expect(screen.getByRole("button", { name: "Plegar Tu biblioteca" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: /Tarea creada/ }));
     expect(onOpenTask).toHaveBeenCalledWith("task-linked");
     expect(

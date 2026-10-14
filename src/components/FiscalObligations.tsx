@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CalendarClock, Link2, Pencil, Plus } from "lucide-react";
 import type { Profile, State } from "../domain/model";
-import { canWork } from "../domain/workforce";
+import { calendarCanAccessTask } from "../domain/laboratory-work";
 import {
   canManageFiscalObligation,
   createFiscalObligation,
@@ -66,7 +66,7 @@ function statusLabel(event: FiscalObligation, status: ReturnType<typeof fiscalOb
 }
 
 export default function FiscalObligations({
-  state, actor, month, company, commit, notify, openTask,
+  state, actor, month, company, commit, notify, openTask, focusRequest, onFocusHandled,
 }: {
   state: State;
   actor: Profile;
@@ -75,13 +75,35 @@ export default function FiscalObligations({
   commit: (next: State, action?: string, entityId?: string) => boolean;
   notify: (message: string) => void;
   openTask: (id: string) => void;
+  focusRequest?: { id: string; token: number } | null;
+  onFocusHandled?: (token: number) => void;
 }) {
-  const firstCompany = company && actor.companyIds.includes(company) ? company : actor.companyIds[0] || "";
+  const companies = state.companies.filter((row) => actor.role === "jefe" || actor.companyIds.includes(row.id));
+  const firstCompany = companies.some((row) => row.id === company) ? company : companies[0]?.id || "";
   const [form, setForm] = useState<FormState>(() => newForm(firstCompany, month));
   const [editingId, setEditingId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(true);
   const events = visibleFiscalObligations(state, actor.id, month, company);
-  const companies = state.companies.filter((row) => actor.companyIds.includes(row.id));
+
+  useEffect(() => {
+    if (focusRequest) setPanelOpen(true);
+  }, [focusRequest?.token]);
+
+  useEffect(() => {
+    if (!focusRequest || !panelOpen) return;
+    const event = events.find((row) => row.id === focusRequest.id);
+    const target = event && document.getElementById(`fiscal-obligation-${event.id}`);
+    if (!event || !target || target.closest("[hidden]")) {
+      notify("La obligación ya no está disponible en tu ámbito. Revisá el período y los permisos actuales.");
+      onFocusHandled?.(focusRequest.token);
+      return;
+    }
+    target.focus({ preventScroll: true });
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    target.scrollIntoView?.({ behavior: reducedMotion ? "auto" : "smooth", block: "center" });
+    onFocusHandled?.(focusRequest.token);
+  }, [events, focusRequest, notify, onFocusHandled, panelOpen]);
 
   const reset = () => {
     setCreating(false);
@@ -122,13 +144,21 @@ export default function FiscalObligations({
     }
   };
 
+  const editingEvent = editingId
+    ? (state.fiscalObligations || []).find((row) => row.id === editingId)
+    : undefined;
   const candidateTasks = state.tasks
-    .filter((task) => task.companyId === form.companyId && (actor.role === "jefe" || canWork(state, actor, task)))
+    .filter((task) => task.companyId === form.companyId &&
+      (task.kind === "resultado" || (editingEvent?.evaluationVersion !== 2 && form.requiredTaskIds.includes(task.id))) &&
+      (actor.role === "jefe" || calendarCanAccessTask(state, actor, task)))
     .sort((a, b) => a.due.localeCompare(b.due) || a.title.localeCompare(b.title, "es"));
 
   return <Panel
     title="Obligaciones por empresa"
-    sub="El período fiscal y el mes del vencimiento se muestran por separado. Los vínculos con tareas son explícitos."
+    sub={`${events.length} obligación${events.length === 1 ? "" : "es"} · período fiscal ${month} · tareas vinculadas explícitamente.`}
+    collapsible
+    expanded={panelOpen}
+    onExpandedChange={setPanelOpen}
     action={canManageFiscalObligation(state, actor.id, firstCompany, []) ? <button type="button" className="text-button" onClick={() => {
       reset(); setCreating(true); setForm(newForm(firstCompany, month));
     }}><Plus size={16} /> Nueva obligación</button> : undefined}
@@ -152,13 +182,17 @@ export default function FiscalObligations({
         <label>Fecha de consulta<input type="date" value={form.sourceCheckedAt} onChange={(event) => setForm({ ...form, sourceCheckedAt: event.target.value })} /></label>
       </div>
       <fieldset className="obligation-task-links">
-        <legend>Tareas obligatorias para cumplir este hito</legend>
+        <legend>{editingId && (state.fiscalObligations || []).find((row) => row.id === editingId)?.evaluationVersion !== 2
+          ? "Entregables nuevos y vínculos históricos de este hito"
+          : "Entregables obligatorios para cumplir este hito"}</legend>
+        {editingId && (state.fiscalObligations || []).find((row) => row.id === editingId)?.evaluationVersion !== 2 &&
+          <small>La evaluación de esta obligación conserva su interpretación histórica. Las operativas ya vinculadas no se reinterpretan; no pueden agregarse otras nuevas.</small>}
         {!candidateTasks.length ? <p>No hay tareas visibles de esta empresa para vincular.</p> : candidateTasks.map((task) => <label key={task.id}>
           <input type="checkbox" checked={form.requiredTaskIds.includes(task.id)} onChange={(event) => setForm({
             ...form,
             requiredTaskIds: event.target.checked ? [...form.requiredTaskIds, task.id] : form.requiredTaskIds.filter((id) => id !== task.id),
           })} />
-          <span>{task.title} · {state.profiles.find((profile) => profile.id === task.ownerId)?.name || "Sin responsable"} · {task.month}</span>
+          <span>{task.title}{task.kind === "operativa" ? " · vínculo histórico" : ""} · {state.profiles.find((profile) => profile.id === task.ownerId)?.name || "Sin responsable"} · {task.month}</span>
         </label>)}
         <small>Sin tareas vinculadas, el estado queda “Sin responsable”. Todas las tareas vinculadas deben cumplir; una tarea de otra empresa no puede cerrar este hito.</small>
       </fieldset>
@@ -169,13 +203,17 @@ export default function FiscalObligations({
       {events.map((event) => {
         const status = fiscalObligationStatus(state, event);
         const linked = event.requiredTaskIds.map((taskId) => state.tasks.find((task) => task.id === taskId)).filter((task): task is NonNullable<typeof task> => !!task);
-        const accessible = linked.filter((task) => actor.role === "jefe" || canWork(state, actor, task));
+        const historicalOperationalCount = linked.filter((task) => task.kind === "operativa").length;
+        const accessible = linked.filter((task) => actor.role === "jefe" || calendarCanAccessTask(state, actor, task));
         const editable = canManageFiscalObligation(state, actor.id, event.companyId, event.requiredTaskIds);
-        return <article className="fiscal-obligation-card" key={event.id}>
+        return <article className="fiscal-obligation-card" id={`fiscal-obligation-${event.id}`} tabIndex={-1} key={event.id}>
           <div className="fiscal-obligation-topline"><span>{state.companies.find((row) => row.id === event.companyId)?.name}</span><span>Revisión {event.revision}</span></div>
           <div className="fiscal-obligation-title"><div><h3>{event.title}</h3><p>{milestoneNames[event.milestone]}</p></div>
             <span className={`fiscal-obligation-status fiscal-obligation-status--${status}`}>{statusLabel(event, status)}</span>
           </div>
+          <p className="fiscal-obligation-evaluation">{event.evaluationVersion === 2
+            ? "Evaluación por entregables verificables · v2"
+            : `Evaluación histórica · definición original conservada${historicalOperationalCount ? ` · ${historicalOperationalCount} ${historicalOperationalCount === 1 ? "vínculo operativo requiere" : "vínculos operativos requieren"} revisión` : ""}`}</p>
           <div className="fiscal-obligation-dates"><div><small>Período fiscal</small><strong>{event.fiscalPeriod}</strong></div><div><small>Vence</small><strong>{dateLabel(event.dueOn)}</strong></div></div>
           <p className="fiscal-obligation-source">Origen: {event.sourceLabel} · {event.sourceRevision}{event.sourceCheckedAt ? ` · consultado ${dateLabel(event.sourceCheckedAt)}` : ""}</p>
           <div className="fiscal-obligation-links"><Link2 size={15} /> {accessible.length ? accessible.map((task) => <button type="button" key={task.id} onClick={() => openTask(task.id)}>{task.title}</button>) : <span>{event.requiredTaskIds.length ? `${event.requiredTaskIds.length} tarea(s) vinculada(s)` : "Sin tareas vinculadas"}</span>}</div>

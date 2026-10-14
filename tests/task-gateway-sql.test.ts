@@ -8,7 +8,7 @@ import {
   it,
   vi,
 } from "vitest";
-import { AccountingLab, ids } from "./helpers/accounting-lab";
+import { AccountingLab, ids, stages } from "./helpers/accounting-lab";
 import {
   taskInstanceSchema,
   taskTimeSessionSchema,
@@ -33,9 +33,9 @@ const statements: Record<TaskRpcName, { sql: string; keys: string[] }> = {
     sql: "select public.pause_task_timer($1,$2) value",
     keys: ["p_session", "p_operation_id"],
   },
-  set_task_wait: {
-    sql: "select public.set_task_wait($1,$2,$3,$4) value",
-    keys: ["p_instance", "p_note", "p_expected_revision", "p_operation_id"],
+  set_task_wait_reviewed: {
+    sql: "select public.set_task_wait_reviewed($1,$2,$3,$4,$5) value",
+    keys: ["p_instance", "p_note", "p_reason", "p_expected_revision", "p_operation_id"],
   },
   transition_task_reviewed: {
     sql: "select public.transition_task_reviewed($1,$2,$3,$4,$5) value",
@@ -104,7 +104,7 @@ async function taskRow(instance: string) {
   );
 }
 beforeAll(async () => {
-  lab = await new AccountingLab().init();
+  lab = await new AccountingLab().init(stages.m012);
 }, 20000);
 beforeEach(async () => {
   await lab.admin();
@@ -181,6 +181,7 @@ describe("gateway compuesto con SQL 001–008 en laboratorio aislado", () => {
       instanceId,
       expectedRevision: 1,
       note: "  Banco X  ",
+      reason: null,
     });
     await lab.actor();
     expect(await gateway.execute(wait)).toMatchObject({
@@ -189,17 +190,29 @@ describe("gateway compuesto con SQL 001–008 en laboratorio aislado", () => {
     });
     expect(rpc).toHaveBeenCalledTimes(calls + 1);
     expect(await lab.capture()).toEqual(before);
+    await lab.actor(ids.boss, "aal1");
+    expect(await gateway.execute(command({
+      kind: "wait", instanceId, expectedRevision: 1, note: "  Banco X  ",
+      reason: "Interrupción acordada con Tesorería",
+    }))).toMatchObject({ ok: false, error: { category: "server" } });
+    expect(await lab.capture()).toEqual(before);
     await lab.actor(ids.boss, "aal2");
-    expect(
-      await gateway.execute(
-        command({
-          kind: "wait",
-          instanceId,
-          expectedRevision: 1,
-          note: "  Banco X  ",
-        }),
-      ),
-    ).toEqual({ ok: true, kind: "wait", revision: 2 });
+    const acceptedWait = command({
+      kind: "wait", instanceId, expectedRevision: 1, note: "  Banco X  ",
+      reason: "Interrupción acordada con Tesorería",
+    });
+    expect(await gateway.execute(acceptedWait)).toEqual({ ok: true, kind: "wait", revision: 2 });
+    const acceptedState = await lab.capture();
+    await lab.actor(ids.boss, "aal2");
+    expect(await gateway.execute(acceptedWait)).toEqual({ ok: true, kind: "wait", revision: 2 });
+    expect(await lab.capture()).toEqual(acceptedState);
+    await lab.actor(ids.boss, "aal2");
+    const changedReason = prepareTaskCommand({
+      kind: "wait", operationId: acceptedWait.operationId, instanceId,
+      expectedRevision: 1, note: "  Banco X  ", reason: "Motivo cambiado",
+    });
+    expect(await gateway.execute(changedReason)).toMatchObject({ ok: false, error: { category: "server" } });
+    expect(await lab.capture()).toEqual(acceptedState);
     expect(taskInstanceSchema.parse(await taskRow(instanceId))).toMatchObject({
       blocked_by: "Banco X",
       state_revision: 2,
@@ -225,15 +238,19 @@ describe("gateway compuesto con SQL 001–008 en laboratorio aislado", () => {
     expect(events[0]).toMatchObject({
       actor_id: ids.boss,
       details: {
-        session: started.sessionId,
-        executor: ids.peer,
-        absence: absenceId,
+        note: "  Banco X  ",
+        reason: "Interrupción acordada con Tesorería",
       },
     });
-    expect(new Date(events[0].details.started_at).toISOString()).toBe(
+    const stoppedEvents = await lab.rows(
+      "select entity_id,details from audit_events where action='task.timer_stopped_by_task_change' and details->>'instance'=$1",
+      [instanceId],
+    );
+    expect(stoppedEvents).toMatchObject([{ entity_id: started.sessionId, details: { executor: ids.peer, reason: "Interrupción acordada con Tesorería" } }]);
+    expect(new Date(stoppedEvents[0].details.started_at).toISOString()).toBe(
       new Date(clock.started_at).toISOString(),
     );
-    expect(new Date(events[0].details.ended_at).toISOString()).toBe(
+    expect(new Date(stoppedEvents[0].details.ended_at).toISOString()).toBe(
       new Date(clock.ended_at!).toISOString(),
     );
   });
@@ -328,6 +345,7 @@ describe("gateway compuesto con SQL 001–008 en laboratorio aislado", () => {
         instanceId,
         expectedRevision: 0,
         note: "Banco",
+        reason: null,
       });
     const bytes = JSON.stringify(old),
       calls = rpc.mock.calls.length;

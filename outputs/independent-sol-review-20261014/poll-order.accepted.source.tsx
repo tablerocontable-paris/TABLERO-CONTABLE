@@ -1,0 +1,30 @@
+// @vitest-environment jsdom
+import { afterEach, expect, it, vi } from 'vitest';
+import { act, cleanup, render, screen } from '@testing-library/react';
+import RemoteWorkspace from '../../src/components/RemoteWorkspace';
+import { operationalSeed, projectState } from '../../src/server/site-policy';
+vi.mock('recharts', () => Object.fromEntries(['ResponsiveContainer','BarChart','Bar','LabelList','XAxis','YAxis','CartesianGrid','Tooltip','Legend','LineChart','Line','ReferenceLine','PieChart','Pie','Cell'].map(name => [name, () => null])));
+afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
+it('S44 independent: an older overlapping poll must not replace a newer accepted revision in App', async () => {
+  vi.stubGlobal('matchMedia', () => ({matches:false,addEventListener(){},removeEventListener(){}}));
+  const seed=operationalSeed('valentino@example.test');
+  seed.activeId='admin';
+  seed.onboarding.admin.completedAt=new Date().toISOString(); seed.onboarding.admin.step=5;
+  const state=projectState(seed,seed.profiles.find(p=>p.id==='admin')!);
+  const response=(revision:number,name:string) => {const copy=structuredClone(state);copy.companies[0].name=name;return Response.json({state:copy,revision,isOwner:true,presence:{}});};
+  const resolvers:Array<(response:Response)=>void>=[];
+  let reads=0;
+  vi.stubGlobal('fetch',vi.fn(async()=> ++reads===1 ? response(0,'Inicial') : new Promise<Response>(resolve=>resolvers.push(resolve))));
+  const interval=vi.spyOn(window,'setInterval');
+  render(<RemoteWorkspace/>);
+  await screen.findByLabelText('Mi espacio');
+  const poll=interval.mock.calls.find(([,delay])=>delay===30000)![0] as ()=>Promise<void>;
+  let first!:Promise<void>,second!:Promise<void>;
+  await act(async()=>{first=poll();await Promise.resolve();second=poll();await Promise.resolve();});
+  expect(resolvers).toHaveLength(2);
+  await act(async()=>{resolvers[1](response(2,'Versión nueva'));await second;});
+  expect(screen.getAllByText('Versión nueva').length).toBeGreaterThan(0);
+  await act(async()=>{resolvers[0](response(1,'Versión antigua'));await first;});
+  expect(screen.queryAllByText('Versión antigua')).toHaveLength(0);
+  expect(screen.getAllByText('Versión nueva').length).toBeGreaterThan(0);
+});

@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-13",
+  "stage": 2,
+  "status": "in_progress",
+  "latest_update": {
+    "date": "2026-10-14",
+    "stage_2_final_acceptance": "Accepted by independent GPT-6.1 Sol; no functional blockers remained in this cut.",
+    "full_validation": "588/588 tests in 65 files, TypeScript, client and Worker builds, git diff --check, Edge main/corrections/backup journeys, and benchmark p95 591.87 ms all passed. Full evidence: docs/architecture/review-evidence/stage-2-final-acceptance-20261014.json.",
+    "remaining": ["Physical browser disk quota exhaustion was not induced", "Screen-reader acceptance remains a later accessibility gate", "Stages 3-7 remain open"],
+    "previous_update": {
+      "date": "2026-10-13",
+    "stage_2A_review": "Accepted by independent Sol for durable evidence state, upload/restore lock, uncertain write handling, and S09/S16/S65 scope.",
+    "operational_form_regressions": "The revision-ID preparation test now suppresses unrelated recipient notifications so its injected third UUID fault occurs at labRevision. Added DOM regressions for duplicate submit during a pending upload (one movement only) and failed cleanup after a rejected commit (visible recovery message, no unhandled rejection).",
+    "indexeddb_browser_regression": "Edge performed a native IDB transaction abort after a real add request; metadata/blob counts remained unchanged and retry stayed enabled. This is not physical disk quota exhaustion.",
+    "focused_validation": "25/25 across laboratory-evidence-durable-state, task-evidence-concurrency and operational-evidence-app; exit 0.",
+    "edge_output": "outputs/stage-2-validation-20261013/edge-native-idb-abort-final2/laboratory-backup-browser.json",
+      "remaining": ["Other stage-2 adversarial cases and final stage-2 review", "Physical browser quota exhaustion is not induced", "Screen-reader acceptance", "Stage benchmark and integrated acceptance"]
+    }
+  },
+  "scope": ["S03", "S07", "S08", "S09", "S10", "S11", "S16", "S29", "S49", "S51", "S55", "S64", "S65"],
+  "changes": {
+    "S03": "Profile runtime shape, duplicate IDs, company/team/manager references, cyclic manager chains, assignment/task/activity/audit/catalogue/obligation/notification/comment/request/calendar and historical references, timestamps, schedule frequency/date bounds, operation rate snapshots and dependency cycles are rejected before restore. Historical closures may retain inactive actors and task owners need not remain current company members. Added malformed v1/v2 backup regressions for wrong runtime types, duplicate and unknown company/team/profile references, unknown managers, duplicate entity IDs, and cycles through inactive managers; additional adversarial cases and independent review remain open.",
+    "S07": "Evidence preview reads are invalidated on unmount or record changes; stale reads do not create object URLs and active URLs are revoked.",
+    "S08": "Recurring-plan replacement rejects pending tasks with dependent links, commercial progress, comments, evidence, notifications, shared dates, joint receipts, transfers, request links, fiscal links or annotations.",
+    "S09": "Successful restore reconciles the IndexedDB quota index to active state references, retains orphaned bytes, rejects conflicting record scopes, and rolls back local state on reconciliation failure. A shared Web Lock spans evidence blob/state commits and backup restore. The current Edge run verified a second tab blocks both upload and restore until lock release; restore then completed with evidence intact.",
+    "S10": "Laboratory boot no longer overwrites existing state unconditionally; inaccessible storage opens a read/export path with writes blocked, and theme storage failures fall back to session appearance.",
+    "S11": "Backup file selection uses a monotonic token so stale reads/errors cannot replace the latest preview.",
+    "S16": "Activity/evidence submission is serialized, cleanup failure is reported, and ambiguous commit outcomes preserve files instead of deleting potentially referenced evidence. The new explicit commit outcome distinguishes committed, rejected and unknown; failed localStorage writes are classified by reading back the exact candidate and prior state.",
+    "S29": "Create/reply callbacks return actual commit success and keep drafts on rejected/failed commits.",
+    "S49": "Activity form has a synchronous submit lock and accessible busy state; DOM regression now verifies a duplicate submit during a deferred evidence upload creates exactly one movement and one evidence reference.",
+    "S51": "Resolved requests reject late replies before IDs, messages or history are created.",
+    "S55": "Evidence errors remain visible after permission revocation or panel unmount.",
+    "S64": "Backup copy limit text now says the 50 MB cap includes data and files.",
+    "S65": "Known rejected commits compensate fresh files; ambiguous outcomes keep files and report that review is needed. Explicit commit-result contract is implemented in both deliverable evidence and operational activity paths. Integrated App regressions cover exact-candidate localStorage write-then-throw (commit confirmed), definite storage rejection (compensation and precise error), unreadable readback (unknown, preserve bytes, request verification), and failed cleanup recovery without an unhandled rejection. Task evidence covers confirmation-notice failure after committed state. Edge now also aborts a native IndexedDB transaction after a real add request and verifies unchanged metadata/blob counts. Physical disk quota exhaustion and every post-commit operational notification interleaving remain distinct limits."
+  },
+  "validation": {
+    "focused_tests": "76/76 in 6 files covering backup malformed-data validation, inactive hierarchy guard, integrated operational evidence commits, evidence concurrency/error handling, calendar notification privacy, and planning access",
+    "full_suite": "Latest rerun: 579/579 in 65 files, exit 0 on 2026-10-13; node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000. Earlier 553/61 is historical.",
+    "typescript": "pass: node node_modules/typescript/bin/tsc --noEmit",
+    "client_and_worker_build": "pass on 2026-10-13: Vite client build and scripts/build-worker.mjs; main client chunk 518.41 kB, so the existing >500 kB warning remains",
+    "edge_main": "pass: tests/browser.cjs; mobile included; zero JS errors and operational API calls",
+    "edge_corrections": "pass: tests/browser-corrections.cjs; mobile included; zero JS errors and operational API calls",
+    "edge_backup_restore": "pass: tests/browser-laboratory-backup.cjs; actual second-tab upload and restore wait for shared lock release; v2 backup, scope-conflict rollback, quota rollback, evidence snapshots/orphan retention, mobile fit, no operational API calls; see outputs/stage-2-validation-20261012/edge-backup-cross-tab-run-4/laboratory-backup-browser.json"
+  },
+  "outputs": [
+    "outputs/stage-2-validation-20261012/edge-main/",
+    "outputs/stage-2-validation-20261012/edge-corrections/",
+    "outputs/stage-2-validation-20261012/edge-backup-reconcile/",
+    "outputs/stage-2-validation-20261012/edge-backup-final/",
+    "outputs/stage-2-validation-20261012/edge-backup-cross-tab-run-4/",
+    "outputs/stage-2-validation-20261013/stage2-rerun-20261013.json"
+  ],
+    "limits": [
+    "This is implementation evidence, not independent Sol review or acceptance.",
+    "S03 needs independent review and additional malformed-data edge cases; full semantic families are now checked.",
+    "The first two cross-tab runs stalled because the runner tried to restore before its button was enabled and failed to trace phases; the runner now waits for readiness and run 4 completed. Keep unique output directories per run.",
+    "Operational App now covers definite rejection with failed compensation and a deferred duplicate submit. TaskEvidencePanel covers post-commit confirmation failure and failed compensation. The native IndexedDB abort test exercises a real transaction abort in Edge; actual disk quota exhaustion is not induced.",
+    "The full set of stage-2 adverse cases, screen-reader acceptance, and performance benchmark were not rerun. Existing Edge runs predate the latest S03/S65 regressions; no claim is made that these new storage-failure branches were exercised in a real browser or against physical IndexedDB quota exhaustion.",
+    "No commit, Site update, account connection, operational API request, or external deployment occurred."
+  ],
+  "model_selection": "The model selector is not observable from the filesystem or test runner; do not attribute this implementation to Luna without client-side confirmation."
+}

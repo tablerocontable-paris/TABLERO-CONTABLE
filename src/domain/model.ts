@@ -68,6 +68,10 @@ export interface Assignment {
   steps: string[];
   startMonth: string;
   priority: "Alta" | "Media" | "Baja";
+  /** Lab-only dependency links. The remote workspace does not consume them. */
+  dependsOnTaskIds?: string[];
+  availableFrom?: string | null;
+  commercialProgress?: { month: string; throughDay: number; updatedAt: string; updatedBy: string } | null;
 }
 export interface Task {
   templateId?: string | null;
@@ -101,6 +105,14 @@ export interface Task {
   blockedBy: string;
   blockedSince: string | null;
   responsibility?: JointResponsibility;
+  /** Optional, explicit dependencies used by the private laboratory. */
+  dependsOnTaskIds?: string[];
+  availableFrom?: string | null;
+  /** Optional bank reconciliation tracking, expressed on a 30-day commercial month. */
+  commercialTrackingEnabled?: boolean;
+  commercialProgress?: { month: string; throughDay: number; updatedAt: string; updatedBy: string } | null;
+  /** Evidence IDs are metadata references; file bytes live only in laboratory IndexedDB. */
+  evidenceIds?: string[];
 }
 export interface JointMemberSnapshot {
   profileId: string;
@@ -134,6 +146,10 @@ export interface Activity {
   note: string;
   createdAt: string;
   actorId: string;
+  /** Rate is snapshotted when this movement is recorded in the laboratory. */
+  operationalRateId?: string | null;
+  operationalUnitWeight?: number | null;
+  evidenceIds?: string[];
 }
 export interface Audit {
   id: string;
@@ -314,6 +330,8 @@ export interface ParameterReview {
   reviewedBy: string;
 }
 export interface State {
+  /** Changes on every durable lab write so stale tabs can reject overwrites safely. */
+  labRevision?: string;
   boardOrder?: "original" | "az" | "za";
   notifications?: import('./notifications').WorkNotification[];
   deadlineReminderReads?: Record<string, string>;
@@ -338,21 +356,30 @@ export interface State {
   activeId: string;
   tour: Record<string, number>;
   tourVersion?: Record<string, number>;
+  tourStepId?: Record<string, string>;
   annotations?: Annotation[];
   catalogueVersions?: import("./processImprovement").CatalogueVersion[];
   improvementProposals?: import("./processImprovement").KaizenProposal[];
   fiveSReviews?: import("./processImprovement").FiveSReview[];
   fiscalObligations?: import("./fiscalObligations").FiscalObligation[];
   habitualTaskProposals?: HabitualTaskProposal[];
+  /** These collections belong to the private lab contract; the remote API ignores them. */
+  operationalRates?: import("./laboratory-work").OperationalRate[];
+  operationalAssessments?: import("./laboratory-work").OperationalAssessment[];
+  calendarEvents?: import("./laboratory-work").LabCalendarEvent[];
+  calendarNotices?: import("./laboratory-work").CalendarNotice[];
+  companyClosures?: import("./laboratory-work").CompanyClosure[];
+  taskEvidence?: import("./laboratory-work").TaskEvidence[];
 }
 export const id = () => crypto.randomUUID();
+const argentinaDateFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "America/Argentina/Buenos_Aires",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
 export const dateART = (iso = new Date().toISOString()) =>
-  new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Argentina/Buenos_Aires",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date(iso));
+  argentinaDateFormatter.format(new Date(iso));
 export const currentMonth = () => dateART().slice(0, 7);
 export function dueDate(month: string, day: number) {
   const [y, m] = month.split("-").map(Number);
@@ -382,20 +409,47 @@ export function responsibilityShare(t: TaskResponsibilityView, profileId: string
 export function isResponsible(t: TaskResponsibilityView, profileId: string) {
   return responsibleMembers(t).some((m) => m.profileId === profileId);
 }
+export function isCompanyClosed(s: State, ownerId: string, companyId: string, month: string) {
+  return s.closures.some((closure) => closure.ownerId === ownerId && closure.month === month) ||
+    (s.companyClosures || []).some((closure) => closure.ownerId === ownerId && closure.companyId === companyId && closure.month === month);
+}
 export function canAccessJointTask(s: State, actor: Profile, t: Task) {
   if (!t.responsibility) return canSee(actor, t.ownerId, s.profiles);
   if (actor.id === "admin") return false;
-  if (!actor.active || !actor.companyIds.includes(t.companyId)) return false;
-  if (isResponsible(t, actor.id)) return true;
+  if (!actor.active) return false;
   if (actor.role === "jefe") return true;
+  if (!actor.companyIds.includes(t.companyId)) return false;
+  if (isResponsible(t, actor.id)) return true;
   return actor.role === "encargado" && t.responsibility.members.some((m) => {
     const member = s.profiles.find((p) => p.id === m.profileId);
     return member?.managerId === actor.id;
   });
 }
-export function isClosed(s: State, t: Pick<Task, "ownerId" | "month" | "responsibility">) {
+export function isClosed(s: State, t: Pick<Task, "ownerId" | "companyId" | "month" | "responsibility">) {
   const owners = t.responsibility?.members.map((m) => m.profileId) || [t.ownerId];
-  return owners.some((ownerId) => s.closures.some((c) => c.ownerId === ownerId && c.month === t.month));
+  return owners.some((ownerId) => isCompanyClosed(s, ownerId, t.companyId, t.month));
+}
+export function taskReadiness(state: State, task: Task, on = dateART(), viewer?: Profile) {
+  const currentViewer = viewer ? state.profiles.find((profile) => profile.id === viewer.id) : undefined;
+  const deps = task.dependsOnTaskIds || [];
+  const unmet = deps.map((depId) => state.tasks.find((row) => row.id === depId)).filter((dep) => !dep || dep.status !== "Completada");
+  const visibleUnmet = unmet.filter((dependency): dependency is Task => !!dependency && (!viewer ||
+    !!currentViewer?.active && (currentViewer.role === "jefe" || currentViewer.companyIds.includes(dependency.companyId)) && canAccessJointTask(state, currentViewer, dependency)));
+  const hasHiddenUnmet = visibleUnmet.length !== unmet.length;
+  return {
+    ready: !task.blockedBy && (!task.availableFrom || task.availableFrom <= on) && unmet.length === 0,
+    reason: task.blockedBy
+      ? `Espera externa: ${task.blockedBy}`
+      : task.availableFrom && task.availableFrom > on
+        ? `Disponible desde ${task.availableFrom}`
+        : unmet.length
+          ? hasHiddenUnmet
+            ? visibleUnmet.length
+              ? `Espera ${visibleUnmet.map((dep) => dep.title).join(", ")} y otras tareas fuera de tu ámbito`
+              : "Espera una tarea que no está disponible en tu ámbito"
+            : `Espera ${unmet.map((dep) => dep?.title || "una tarea eliminada").join(", ")}`
+          : "Lista para empezar",
+  };
 }
 export function transition(
   t: Task,
@@ -409,6 +463,8 @@ export function transition(
       );
     if (t.status === "Pendiente") throw Error("Primero iniciá la tarea.");
     if (t.blockedBy) throw Error("Liberá la espera antes de completar.");
+    if (t.commercialTrackingEnabled && t.commercialProgress?.throughDay !== 30)
+      throw Error("Para completar esta conciliación, registrá el día comercial 30 y confirmá el cierre del período.");
     if (t.checklist.some((c) => !c.done))
       throw Error("Completá todos los pasos del checklist.");
   }
@@ -438,7 +494,8 @@ export function checkTask(t: Task, checkId: string, done: boolean): Task {
     next.checklist.length &&
     next.checklist.every((c) => c.done) &&
     !next.blockedBy &&
-    next.kind === "resultado"
+    next.kind === "resultado" &&
+    !next.commercialTrackingEnabled
   )
     next = transition(next, "Completada");
   return next;
@@ -505,7 +562,8 @@ export function materialize(s: State, month: string): State {
   const tasks = [...s.tasks];
   for (const a of s.assignments) {
     if (a.retired) continue;
-    if (s.closures.some((c) => c.ownerId === a.ownerId && c.month === month))
+    if (s.closures.some((c) => c.ownerId === a.ownerId && c.month === month) ||
+        (s.companyClosures || []).some((c) => c.ownerId === a.ownerId && c.companyId === a.companyId && c.month === month))
       continue;
     const p = s.profiles.find((p) => p.id === a.ownerId);
     if (!p?.active) continue;
@@ -571,10 +629,10 @@ export function closeMonth(
   if (
     !actor ||
     !actor.active ||
-    actor.role === "empleado" ||
+    actor.role !== "jefe" ||
     !canSee(actor, ownerId, s.profiles)
   )
-    throw Error("El cierre requiere un responsable de este empleado.");
+    throw Error("El cierre requiere jefatura activa y autorizada.");
   if (!note.trim())
     throw Error("La revisión requiere observaciones de cierre.");
   if (s.closures.some((c) => c.ownerId === ownerId && c.month === month))

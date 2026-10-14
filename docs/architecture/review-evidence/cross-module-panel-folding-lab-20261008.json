@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-08",
+  "scope": "Consistencia de paneles de contenido extenso en el laboratorio",
+  "changes": [
+    "Catálogo estándar, obligaciones por empresa y bandejas de propuestas habituales ahora conservan su título y resumen al plegarse.",
+    "Una acción del encabezado, como Nueva obligación, vuelve a desplegar el panel antes de mostrar su formulario.",
+    "Las acciones de encabezado y los controles de plegado siguen separados; los paneles continúan abiertos inicialmente para no ocultar contenido al entrar."
+  ],
+  "checks": {
+    "focused_tests": "20/20 tests passed across fiscal obligations, habitual proposals, catalog, and annotations",
+    "full_suite": "464/464 tests across 53 files passed",
+    "typescript": "passed",
+    "vite_client_build": "passed; main entry 570070 bytes, charts chunk 423739 bytes",
+    "worker_build": "passed",
+    "edge_browser_core": "passed",
+    "edge_browser_corrections": "passed",
+    "edge_browser_joint": "passed",
+    "edge_browser_backup": "passed",
+    "edge_accessibility_audit": "passed on final build; 38 routes across boss, manager, and employee, zero unnamed visible controls, zero JS errors, and zero operational API calls",
+    "git_diff_check": "passed with informational LF-to-CRLF notices",
+    "operational_api_calls": 0,
+    "javascript_errors": 0
+  },
+  "known_limits": [
+    "This improves folding in selected long sections; it is not a complete consistency review of every section or every help control.",
+    "The main entry chunk remains over Vite's 500 kB advisory threshold.",
+    "No commit or Site update was made."
+  ]
+}

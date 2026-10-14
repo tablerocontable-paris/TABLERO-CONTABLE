@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-14",
+  "requirement": "S39",
+  "scope": "Real-browser recheck of the guided tour and current correction flows in the isolated laboratory build.",
+  "finding": {
+    "kind": "stale_test_expectation",
+    "detail": "The browser runner expected the former title 'Cierre por alcance'. The current jefe-only tour correctly displays 'Cierre de mes' at step 14/15 and 'Catálogo y versiones' at step 15/15.",
+    "correction": "Updated only the browser assertion in tests/browser-corrections.cjs to match the current user-facing title; no product code changed."
+  },
+  "validation": {
+    "command": "$env:CHROMIUM_PATH='C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe'; $env:E2E_OUTPUT='outputs/stage-5-validation-20261014/edge-post-s57-recheck-final'; node tests/browser-corrections.cjs",
+    "exitCode": 0,
+    "browser": "Microsoft Edge 155.0.4283.45",
+    "checks": 29,
+    "passed": true,
+    "javascriptErrors": 0,
+    "operationalApiCalls": 0,
+    "report": "outputs/stage-5-validation-20261014/edge-post-s57-recheck-final/browser-validation.json",
+    "screenshots": ["guided-tour.png", "mobile.png", "analytics-operational-no-base.png"]
+  },
+  "limits": [
+    "This is local browser validation, not human screen-reader acceptance.",
+    "Independent Sol review remains pending.",
+    "The repository runner used installed playwright-core and local Edge; npm/npx CLI was not required."
+  ],
+  "noExternalActions": "No commit, PR, Site update, account connection, operational API call, migration, or deployment."
+}

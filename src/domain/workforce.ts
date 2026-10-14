@@ -4,13 +4,17 @@ import {
   dateART,
   canSee,
   canAccessJointTask,
+  isCompanyClosed,
   isClosed,
+  isResponsible,
+  taskReadiness,
   type State,
   type Profile,
   type Task,
   type OrphanedWork,
   type TaskTransfer,
 } from "./model";
+import type { WorkNotification } from "./notifications";
 export interface Absence {
   id: string;
   ownerId: string;
@@ -29,6 +33,28 @@ export interface TimeSession {
   actorId: string;
   start: string;
   end: string | null;
+}
+export function presenceStatus(profileId: string, activeId: string, simulated: boolean, lastSeen?: string, now = Date.now()) {
+  if (simulated) {
+    const online = profileId === activeId;
+    return { online, label: online ? "En línea · simulación" : "Sin sesión · simulación" };
+  }
+  if (!lastSeen) return { online: false, label: "Sin señal registrada" };
+  const timestamp = Date.parse(lastSeen);
+  if (!Number.isFinite(timestamp) || timestamp - now > 30_000)
+    return { online: false, label: "Señal no disponible" };
+  if (now - timestamp <= 90_000) return { online: true, label: "En línea" };
+  const time = new Intl.DateTimeFormat("es-AR", { hour: "2-digit", minute: "2-digit" }).format(timestamp);
+  return { online: false, label: `Fuera de línea · última señal ${time}` };
+}
+
+export function canViewPresence(state: State, actor: Profile, profileId: string) {
+  const currentActor = state.profiles.find((profile) => profile.id === actor.id);
+  const subject = state.profiles.find((profile) => profile.id === profileId);
+  if (!currentActor?.active || currentActor.id === "admin" || !subject?.active) return false;
+  if (currentActor.role === "jefe") return true;
+  return currentActor.role === "encargado" && subject.managerId === currentActor.id &&
+    subject.companyIds.some((companyId) => state.companies.some((company) => company.id === companyId) && currentActor.companyIds.includes(companyId));
 }
 export const elapsedSeconds = (t: Task, at = new Date().toISOString()) =>
   (t.sessions || []).reduce(
@@ -58,7 +84,13 @@ export function startClock(
   t: Task,
   actorId: string,
   at = new Date().toISOString(),
+  state?: State,
 ): Task {
+  if (state) {
+    const viewer = state.profiles.find((profile) => profile.id === actorId);
+    const readiness = taskReadiness(state, t, dateART(at), viewer);
+    if (!readiness.ready) throw Error(readiness.reason);
+  }
   if (t.blockedBy || t.status === "Completada")
     throw Error("Liberá la espera o reabrí la tarea antes de cronometrar.");
   if ((t.sessions || []).some((s) => !s.end && s.actorId === actorId)) return t;
@@ -199,7 +231,7 @@ export function registerAbsence(s: State, a: Absence, actorId: string): State {
       "Elegí una tarea o regla recurrente y un reemplazante activo de tu ámbito.",
     );
   if (p.role === "encargado" &&
-    (owner.managerId !== p.id || replacement?.managerId !== p.id))
+    (owner.managerId !== p.id || (replacement && replacement.managerId !== p.id)))
     throw Error("Un encargado sólo puede aprobar coberturas dentro de su equipo.");
   const selected = new Set(a.taskIds || []);
   const selectedRules = new Set(a.assignmentIds || []);
@@ -212,14 +244,17 @@ export function registerAbsence(s: State, a: Absence, actorId: string): State {
     t.ownerId !== owner.id || t.status === "Completada" ||
     (t.scheduledOn || t.due || "") < a.from || (t.scheduledOn || t.due || "") > a.to ||
     !owner.companyIds.includes(t.companyId) ||
+    (p.role === "encargado" && !p.companyIds.includes(t.companyId)) ||
     (!!replacement && !replacement.companyIds.includes(t.companyId)) ||
     isClosed(s, t)))
     throw Error("La cobertura sólo puede incluir tareas abiertas del titular, dentro del rango y en empresas autorizadas.");
   const previewableRules = new Set(recurringCoveragePreview(s, owner.id, a.from, a.to, replacement?.id || "")
-    .filter((preview) => owner.companyIds.includes(preview.companyId))
+    .filter((preview) => owner.companyIds.includes(preview.companyId) &&
+      (p.role === "jefe" || p.companyIds.includes(preview.companyId)))
     .map((preview) => preview.assignmentId));
   const validRules = new Set(s.assignments.filter((assignment) => selectedRules.has(assignment.id) &&
     assignment.ownerId === owner.id && !assignment.retired && assignment.frequency !== "única" &&
+    (p.role === "jefe" || p.companyIds.includes(assignment.companyId)) &&
     previewableRules.has(assignment.id)).map((assignment) => assignment.id));
   if (validRules.size !== selectedRules.size)
     throw Error("Elegí reglas recurrentes activas del titular con ocurrencias abiertas dentro del rango.");
@@ -281,16 +316,43 @@ export function deactivateProfile(
       };
     });
   const cancelledAbsences = (configured.absences || []).filter((absence) =>
-    absence.ownerId === current.id && !absence.cancelledAt,
+    (absence.ownerId === current.id || absence.replacementId === current.id) && !absence.cancelledAt,
   );
+  const noticeIds = new Set<string>();
+  const cancellationNotices: WorkNotification[] = [];
+  for (const absence of cancelledAbsences) {
+    const affectedTasks = configured.tasks.filter((task) => task.ownerId === absence.ownerId && isCoveredOccurrence(absence, task));
+    for (const task of affectedTasks) {
+      const owner = configured.profiles.find((item) => item.id === absence.ownerId);
+      const replacement = configured.profiles.find((item) => item.id === absence.replacementId);
+      const recipients = configured.profiles.filter((item) => item.active && item.id !== actor.id && item.id !== current.id &&
+        (item.role === "jefe" || item.companyIds.includes(task.companyId) && (
+          item.id === absence.ownerId || item.id === absence.replacementId ||
+          item.role === "encargado" && (item.id === owner?.managerId || item.id === replacement?.managerId)
+        )));
+      for (const recipient of recipients) {
+        const key = `${recipient.id}:${task.id}`;
+        if (noticeIds.has(key)) continue;
+        noticeIds.add(key);
+        cancellationNotices.push({
+          id: id(), recipientId: recipient.id, actorId, taskId: task.id,
+          title: `Cobertura cancelada por baja de acceso · ${current.name} · ${note}`,
+          kind: "changed", createdAt: at, readAt: null,
+        });
+      }
+    }
+  }
   const retired = {
     ...configured,
     profiles: configured.profiles.map((item) => item.id === current.id ? { ...item, active: false } : item),
     assignments: configured.assignments.map((item) => item.ownerId === current.id ? { ...item, retired: true } : item),
     tasks: configured.tasks.map((task) => {
-      let next = task.ownerId === current.id ? stopActorClock(task, current.id, at) : task;
+      let next = task;
+      if (!isCompanyClosed(configured, current.id, task.companyId, task.month)) next = stopActorClock(next, current.id, at);
       for (const absence of cancelledAbsences) {
-        if (isCoveredOccurrence(absence, task)) next = stopActorClock(next, absence.replacementId, at);
+        if (task.ownerId === absence.ownerId && isCoveredOccurrence(absence, task) &&
+            !isCompanyClosed(configured, absence.replacementId, task.companyId, task.month))
+          next = stopActorClock(next, absence.replacementId, at);
       }
       return next;
     }),
@@ -298,6 +360,7 @@ export function deactivateProfile(
       cancelledAbsences.some((item) => item.id === absence.id) ? { ...absence, cancelledAt: at } : absence,
     ),
     orphanedWork: [...(configured.orphanedWork || []), ...work],
+    notifications: [...(configured.notifications || []), ...cancellationNotices],
   };
   return retired;
 }
@@ -323,6 +386,8 @@ export function reassignOrphanedTask(
     throw Error("La tarea dejó de cumplir las condiciones para una reasignación directa.");
   if (replacement.id === item.formerOwnerId || !replacement.companyIds.includes(item.companyId))
     throw Error("Elegí una persona activa autorizada para la empresa de la tarea.");
+  if (isCompanyClosed(s, replacement.id, item.companyId, task.month))
+    throw Error("La empresa y el período ya están cerrados para la persona receptora.");
   return {
     ...s,
     tasks: s.tasks.map((row) => row.id === task.id ? { ...row, ownerId: replacement.id, teamId: replacement.teamId } : row),
@@ -354,8 +419,8 @@ export function transferOrphanedTask(
     throw Error("No tenés alcance para resolver el trabajo de esta persona.");
   if (item.formerOwnerId !== task.ownerId || task.status === "Completada" || isClosed(s, task))
     throw Error("La tarea cambió o su período ya está cerrado; no se puede traspasar.");
-  if (s.closures.some((closure) => closure.ownerId === replacement.id && closure.month === task.month))
-    throw Error("El período de la persona receptora ya está cerrado.");
+  if (isCompanyClosed(s, replacement.id, item.companyId, task.month))
+    throw Error("La empresa y el período ya están cerrados para la persona receptora.");
   if ((task.sessions || []).some((session) => !session.end))
     throw Error("Pausá todos los cronómetros antes de confirmar el traspaso.");
   if (replacement.id === item.formerOwnerId || !replacement.companyIds.includes(item.companyId))
@@ -386,7 +451,8 @@ export function transferOrphanedTask(
 }
 
 export function updateProfile(s: State, p: Profile, actorId: string): State {
-  if (s.profiles.find((x) => x.id === actorId)?.role !== "jefe")
+  const actor = s.profiles.find((x) => x.id === actorId);
+  if (!actor?.active || actor.role !== "jefe")
     throw Error("Sólo Juan Pablo / jefatura administra los perfiles.");
   if (!p.name.trim() || !p.companyIds.length)
     throw Error("Completá nombre y empresas.");
@@ -422,6 +488,9 @@ export function updateProfile(s: State, p: Profile, actorId: string): State {
     s.profiles.some((x) => x.active && x.managerId === p.id)
   )
     throw Error("Reasigná primero las personas a cargo.");
+  const companyIds = p.companyIds || [];
+  if (new Set(companyIds).size !== companyIds.length || companyIds.some((companyId) => !s.companies.some((company) => company.id === companyId)))
+    throw Error("Elegí empresas existentes sin repetirlas.");
   return {
     ...s,
     teams,
@@ -437,14 +506,21 @@ export function applyClock(
 ): State {
   const p = s.profiles.find((p) => p.id === actorId)!;
   const t = s.tasks.find((t) => t.id === taskId)!;
-  if (!t || !canWork(s, p, t, dateART(at)) || isClosed(s, t))
+  const on = dateART(at);
+  const executionAuthorized = !!t && (isResponsible(t, actorId) || coverageFor(s, t, on)?.replacementId === actorId);
+  const actorUnitClosed = !!t && isClosed(s, { ownerId: actorId, companyId: t.companyId, month: t.month, responsibility: undefined });
+  if (!t || !canWork(s, p, t, on) || !executionAuthorized || isClosed(s, t) || actorUnitClosed)
     throw Error("Tarea fuera de tu ámbito o mes cerrado.");
+  if (running) {
+    const readiness = taskReadiness(s, t, on, p);
+    if (!readiness.ready) throw Error(readiness.reason);
+  }
   return {
     ...s,
     tasks: s.tasks.map((x) =>
       x.id === taskId
         ? running
-          ? startClock(x, actorId, at)
+          ? startClock(x, actorId, at, s)
           : stopActorClock(x, actorId, at)
         : running && x.sessions?.some((e) => !e.end && e.actorId === actorId)
           ? stopActorClock(x, actorId, at)

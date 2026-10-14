@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-08",
+  "project": "Grupo Paris private laboratory",
+  "scope": "Enforce the jefe-only monthly closure rule in the domain, not only in navigation and UI.",
+  "finding": "The close screen was restricted to jefe, but closeMonth accepted any active non-employee supervisor with visibility to the employee.",
+  "changes": [
+    "closeMonth now requires an active jefe authorized for the employee.",
+    "Regression verifies an authorized encargado cannot close a month and an active jefe can.",
+    "Regression continues to reject an inactive jefe."
+  ],
+  "validation": {
+    "regression": { "file": "tests/domain.test.ts", "result": "passed", "cases": 3 },
+    "focusedTests": { "result": "passed", "tests": 60, "files": 6 },
+    "typescript": "passed",
+    "fullSuite": { "result": "passed", "tests": 488, "files": 56 },
+    "clientBuild": { "result": "passed", "mainEntryKb": 485.41, "chartChunkKb": 423.74 },
+    "workerBuild": "passed",
+    "gitDiffCheck": "passed; informational LF-to-CRLF notices only"
+  },
+  "releaseState": {
+    "commitCreated": false,
+    "siteUpdated": false,
+    "externalAccountsConnected": false,
+    "estimatedGlobalProgress": "~45%"
+  }
+}

@@ -1,5 +1,22 @@
 # Decisiones vigentes — continuidad06/10/2026
 
+## Precedencia actual — auditoría 11/10/2026
+
+La auditoría integral sigue abierta en `architecture/SOL-AUDIT-20261008.md`
+(60 hallazgos, 90 casos reproducidos). Los contratos posteriores del plan y la
+matriz `architecture/SOL-REQUIREMENT-COVERAGE-20261008.md` prevalecen sobre las
+reglas cronológicas siguientes: operativas sin metas, cantidad/carga versionada
+y calidad independiente; cierres persona/empresa/mes exclusivos de jefatura;
+consulta/gestión/ejecución separadas; notas personales sólo del autor; presencia
+para jefe y encargados autorizados, simulada en laboratorio y sin uso en KPI.
+
+El producto continúa en LaboratoryWorkspace, sin API ni cuentas reales. La
+infraestructura final requiere dos proyectos Supabase (dev/producción), GitHub
+y hosting propios, con migraciones y entrega automáticas comprobadas; se
+abordará después de aceptar el producto local. No ejecutar commits/publicación
+con los hallazgos actuales abiertos. Las cifras y autorizaciones de los cortes
+inferiores son históricas; PROJECT-STATUS y EXECUTION-NEXT rigen la continuidad.
+
 UI A/v43, B1/009 y B2a/010 conservan su evidencia. B2b/011 completado localmente
 desde los commits recuperados: cierre/reporte v4, cuotas, cobertura recurrente,
 cancelación de derivados y conversión de writers. PostgreSQL 17.11 verificó26

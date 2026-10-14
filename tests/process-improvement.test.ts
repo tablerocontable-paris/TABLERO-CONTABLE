@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from "vitest";
-import { seed, load, persist } from "../src/data/repository";
+import { createLaboratoryBackup, inspectLaboratoryBackup, seed, load, persist } from "../src/data/repository";
 import type { Profile, State } from "../src/domain/model";
 import {
   canViewKaizenProposal,
+  canViewFiveSReview,
   completeFiveSAction,
   createFiveSReview,
   createKaizenProposal,
@@ -65,10 +66,12 @@ describe("Kaizen, 5S y versionado del catálogo en el laboratorio", () => {
     }, "2026-10-25T14:00:00Z");
     const assignment = state.assignments.find((row) => row.templateId === proposal.templateId && row.ownerId === "e0")!;
     const taskBase = state.tasks.find((row) => row.templateId === proposal.templateId && row.ownerId === "e0")!;
-    const future = { ...taskBase, id: "future-open", month: "2026-11", scheduledOn: "2026-11-02", status: "Pendiente" as const, completedAt: null, startedAt: null, sessions: [], checklist: [{ id: "old-step", text: "Control anterior", done: false }] };
+    const future = { ...taskBase, id: "future-open", companyId: "c2", month: "2026-11", scheduledOn: "2026-11-02", status: "Pendiente" as const, completedAt: null, startedAt: null, sessions: [], checklist: [{ id: "old-step", text: "Control anterior", done: false }] };
     const started = { ...future, id: "future-started", scheduledOn: "2026-11-03", status: "En curso" as const, startedAt: "2026-10-30T10:00:00Z" };
     const closed = { ...future, id: "future-closed-month", ownerId: "e1", scheduledOn: "2026-11-04" };
-    state.tasks = [...state.tasks, future, started, closed];
+    const closedCompany = { ...future, id: "future-closed-company", companyId: "c1", scheduledOn: "2026-11-05" };
+    state.tasks = [...state.tasks, future, started, closed, closedCompany];
+    state.companyClosures = [{ id: "company-close", ownerId: "e0", companyId: "c1", month: "2026-11", at: "2026-10-31T10:00:00Z", by: "boss", note: "Cierre empresarial", metrics: { assigned: 0, done: 0, points: 0, earned: 0, weighted: null, onTime: null, late: 0, blocked: 0, operational: 0, operationalTarget: 0 }, tasks: [], activity: [], coveredActivity: [], schemaVersion: 1 }];
     const closure = { id: "closure-e1", ownerId: "e1", month: "2026-11", at: "2026-10-31T10:00:00Z", by: "boss", metrics: { assigned: 0, done: 0, points: 0, earned: 0, weighted: null, onTime: null, late: 0, blocked: 0, operational: 0, operationalTarget: 0 }, tasks: [], activity: [], note: "Cierre de control" } as State["closures"][number];
     state.closures = [...state.closures, closure];
     const oldCompleted = structuredClone(taskBase);
@@ -90,6 +93,7 @@ describe("Kaizen, 5S y versionado del catálogo en el laboratorio", () => {
     expect(revisedFuture.checklist[0].id).toBe("old-step");
     expect(state.tasks.find((row) => row.id === "future-started")).toEqual(started);
     expect(state.tasks.find((row) => row.id === "future-closed-month")).toEqual(closed);
+    expect(state.tasks.find((row) => row.id === "future-closed-company")).toEqual(closedCompany);
     expect(state.tasks.find((row) => row.id === taskBase.id)).toEqual(oldCompleted);
   });
 
@@ -99,6 +103,33 @@ describe("Kaizen, 5S y versionado del catálogo en el laboratorio", () => {
     const proposal = createKaizenProposal(state, profile(state, "e0"), proposalInput(), "2026-10-06T10:00:00Z", ids);
     const testing = reviewKaizenProposal({ ...state, improvementProposals: [proposal] }, profile(state, "boss"), proposal.id, "test", "Prueba aprobada.", "2026-10-06T11:00:00Z");
     expect(() => recordKaizenMeasurement(testing, profile(state, "e0"), proposal.id, { afterValue: 18, afterEvidence: "Detalle suficiente.", afterContext: "Mismo volumen.", measuredOn: "2026-11-01" })).toThrow(/dentro del período/);
+  });
+
+  it("rechaza fechas imposibles en ensayos y revisiones 5S sin cambiar el estado", () => {
+    const state = seed();
+    const employee = profile(state, "e0");
+    expect(() => createKaizenProposal(state, employee, proposalInput({ trialFrom: "2026-02-30" }), "2026-02-01T12:00:00Z", ids)).toThrow(/período de prueba válido/i);
+    expect(state.improvementProposals || []).toEqual([]);
+    expect(() => createFiveSReview(state, employee, { ...fiveSInput(), reviewedOn: "2026-02-30" }, "2026-02-01T12:00:00Z", ids)).toThrow(/fecha de revisión válida/i);
+    expect(state.fiveSReviews || []).toEqual([]);
+  });
+
+  it("valida mediciones Kaizen reales y dentro del ensayo al restaurar", () => {
+    let state = seed();
+    const employee = profile(state, "e0");
+    const proposal = createKaizenProposal(state, employee, proposalInput(), "2026-10-06T10:00:00Z", ids);
+    state = reviewKaizenProposal({ ...state, improvementProposals: [proposal] }, profile(state, "boss"), proposal.id, "test", "La muestra está acotada.", "2026-10-06T11:00:00Z");
+    state = recordKaizenMeasurement(state, employee, proposal.id, {
+      afterValue: 15, afterEvidence: "Muestra revisada después del cambio.", afterContext: "Volumen comparable al inicial.", measuredOn: "2026-10-25",
+    }, "2026-10-25T14:00:00Z");
+    expect(inspectLaboratoryBackup(createLaboratoryBackup(state)).state.improvementProposals?.[0]?.measuredOn).toBe("2026-10-25");
+
+    const invalidDate = JSON.parse(createLaboratoryBackup(state));
+    invalidDate.state.improvementProposals[0].measuredOn = "2026-02-30";
+    expect(() => inspectLaboratoryBackup(JSON.stringify(invalidDate))).toThrow(/copia compatible/i);
+    const outsideTrial = JSON.parse(createLaboratoryBackup(state));
+    outsideTrial.state.improvementProposals[0].measuredOn = "2026-11-01";
+    expect(() => inspectLaboratoryBackup(JSON.stringify(outsideTrial))).toThrow(/copia compatible/i);
   });
 
   const fiveSInput = (): FiveSReviewInput => ({
@@ -124,6 +155,56 @@ describe("Kaizen, 5S y versionado del catálogo en el laboratorio", () => {
     expect(state.fiveSReviews?.[0].items.find((item) => item.id === "classify")).toMatchObject({ status: "done", completedBy: "e0", completedOn: "2026-10-07" });
     persist(state, true);
     expect(load(true).fiveSReviews).toEqual(state.fiveSReviews);
+  });
+
+  it("revoca consulta y acciones de calidad cuando el encargado pierde la empresa", () => {
+    const base = seed();
+    const employee = profile(base, "e0");
+    const manager = profile(base, "m1");
+    const proposal = createKaizenProposal(base, employee, proposalInput(), "2026-10-06T10:00:00Z", ids);
+    const review = createFiveSReview(base, employee, fiveSInput(), "2026-10-06T12:00:00Z", ids);
+    const withRecords = { ...base, improvementProposals: [proposal], fiveSReviews: [review] };
+    expect(canViewKaizenProposal(withRecords, manager, proposal)).toBe(true);
+    expect(canViewFiveSReview(withRecords, manager, review)).toBe(true);
+    const revokedManager = { ...manager, companyIds: manager.companyIds.filter((companyId) => companyId !== "c1") };
+    const revoked = { ...withRecords, profiles: withRecords.profiles.map((row) => row.id === manager.id ? revokedManager : row) };
+    expect(canViewKaizenProposal(revoked, revokedManager, proposal)).toBe(false);
+    expect(canViewKaizenProposal(revoked, manager, proposal)).toBe(false);
+    expect(canViewFiveSReview(revoked, revokedManager, review)).toBe(false);
+    expect(canViewFiveSReview(revoked, manager, review)).toBe(false);
+    const companyMissing = { ...withRecords, companies: withRecords.companies.filter((company) => company.id !== "c1") };
+    expect(canViewKaizenProposal(companyMissing, profile(companyMissing, "boss"), proposal)).toBe(false);
+    expect(() => reviewKaizenProposal(revoked, revokedManager, proposal.id, "test", "Revisión luego de revocar empresa.")).toThrow(/sólo el encargado/i);
+    expect(() => reviewKaizenProposal(revoked, manager, proposal.id, "test", "Intento con perfil anterior.")).toThrow(/sólo el encargado/i);
+    expect(() => completeFiveSAction(revoked, revokedManager, review.id, "classify", "Verificación no autorizada.", "2026-10-07")).toThrow(/sólo la persona asignada/i);
+    expect(revoked.improvementProposals).toEqual(withRecords.improvementProposals);
+    expect(revoked.fiveSReviews).toEqual(withRecords.fiveSReviews);
+  });
+
+  it("revalida actor vigente y empresa antes de adoptar una propuesta medida", () => {
+    const base = seed();
+    const owner = profile(base, "e0");
+    const proposal = createKaizenProposal(base, owner, proposalInput(), "2026-10-06T10:00:00Z", ids);
+    const submitted = { ...base, improvementProposals: [proposal] };
+    const testing = reviewKaizenProposal(submitted, profile(base, "m1"), proposal.id, "test", "La muestra es adecuada para comparar.", "2026-10-06T11:00:00Z");
+    const revokedOwner = { ...owner, companyIds: [] };
+    const revokedTesting = { ...testing, profiles: testing.profiles.map((profile) => profile.id === owner.id ? revokedOwner : profile) };
+    expect(() => recordKaizenMeasurement(revokedTesting, owner, proposal.id, {
+      afterValue: 15, afterEvidence: "Muestra posterior de diez conciliaciones.",
+      afterContext: "Mismo volumen y complejidad que la base.", measuredOn: "2026-10-25",
+    }, "2026-10-25T14:00:00Z")).toThrow(/sólo la persona responsable/i);
+    expect(revokedTesting.improvementProposals?.[0].status).toBe("testing");
+    const measured = recordKaizenMeasurement(testing, owner, proposal.id, {
+      afterValue: 15, afterEvidence: "Muestra posterior de diez conciliaciones.",
+      afterContext: "Mismo volumen y complejidad que la base.", measuredOn: "2026-10-25",
+    }, "2026-10-25T14:00:00Z");
+    const withoutCompany = { ...measured, companies: measured.companies.filter((company) => company.id !== proposal.companyId) };
+    const boss = profile(measured, "boss");
+    const standard = { description: "Verificar integridad del extracto.", steps: ["Confirmar período", "Conciliar movimientos"] };
+
+    expect(() => decideKaizenProposal(withoutCompany, boss, proposal.id, "adopt", "Se adopta por evidencia comparable.", standard, "2026-10-31T15:00:00Z", ids)).toThrow(/empresa.*no está disponible/i);
+    expect(withoutCompany.improvementProposals?.[0]).toEqual(measured.improvementProposals?.[0]);
+    expect(() => decideKaizenProposal(measured, { ...boss, companyIds: [] }, proposal.id, "adopt", "Se adopta por evidencia comparable.", standard, "2026-10-31T15:00:00Z", ids)).not.toThrow();
   });
 
   it("incorpora versionado a una simulación anterior sin inventar vigencias", () => {

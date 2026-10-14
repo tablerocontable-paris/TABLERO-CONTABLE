@@ -50,7 +50,7 @@ export default function CatalogueCreator({
       kind,
       weight: Number(f.get("weight")),
       unit: kind === "operativa" ? String(f.get("unit")).trim() : "",
-      target: kind === "operativa" ? Number(f.get("target")) : 0,
+      target: kind === "operativa" && !versioned ? Number(f.get("target")) : 0,
       description: String(f.get("description")).trim(),
       steps: safeSteps,
     };
@@ -76,9 +76,9 @@ export default function CatalogueCreator({
           wide
         >
           <p>
-            Definí el proceso una vez. En las asignaciones se seleccionan la
-            empresa, responsable, frecuencia y meta; el nombre y controles se
-            conservan.
+            {versioned
+              ? "Definí el proceso una vez. En las asignaciones se seleccionan empresa, responsable y frecuencia; las operativas se ponderan por movimiento desde Actividad operativa."
+              : "Definí el proceso una vez. En las asignaciones se seleccionan la empresa, responsable, frecuencia y meta; el nombre y controles se conservan."}
           </p>
           <form onSubmit={submit}>
             <label>
@@ -131,17 +131,12 @@ export default function CatalogueCreator({
                     Unidad
                     <input name="unit" required maxLength={30} />
                   </label>
-                  <label>
-                    Meta sugerida por ocurrencia
-                    <input
-                      name="target"
-                      type="number"
-                      min="1"
-                      max="1000000"
-                      defaultValue="1"
-                      required
-                    />
-                  </label>
+                  {versioned
+                    ? <small className="catalogue-rate-note">El peso por movimiento se configura por empresa y vigencia en Actividad operativa.</small>
+                    : <label>
+                        Meta sugerida por ocurrencia
+                        <input name="target" type="number" min="1" max="1000000" defaultValue="1" required />
+                      </label>}
                 </>
               )}
             </div>

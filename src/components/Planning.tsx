@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Panel, Dialog } from "./ui";
 import ScheduleEditor from "./ScheduleEditor";
-import { type State, type Assignment, canSee } from "../domain/model";
-import { scheduleOf, reviseAssignment } from "../domain/planning";
+import { type State, type Assignment } from "../domain/model";
+import { canViewLabAssignment, scheduleOf, reviseAssignment } from "../domain/planning";
 import { describeSchedule, type Schedule } from "../domain/schedule";
 export default function Planning({
   state,
@@ -22,7 +22,7 @@ export default function Planning({
   const rows = state.assignments.filter(
     (a) =>
       !a.retired &&
-      canSee(active, a.ownerId, state.profiles) &&
+      canViewLabAssignment(state, active, a) &&
       `${a.title} ${state.profiles.find((p) => p.id === a.ownerId)?.name}`
         .toLowerCase()
         .includes(search.toLowerCase()),
@@ -30,16 +30,19 @@ export default function Planning({
   return (
     <Panel
       title="Planificación y recurrencias"
-      sub="Reglas explícitas por tarea y empresa. Juan Pablo puede cambiarlas desde una fecha; el trabajo anterior conserva sus condiciones."
+      sub={`${rows.length} regla${rows.length === 1 ? "" : "s"} · por tarea y empresa. El trabajo anterior conserva sus condiciones.`}
+      collapsible
+      defaultOpen={false}
     >
       <input
+        data-tour="planning-rules"
         aria-label="Buscar planificación"
         placeholder="Buscar tarea o responsable"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
-      <div className="table-wrap">
-        <table>
+      <div className="table-wrap" data-tour="planning-list">
+        {rows.length ? <table>
           <thead>
             <tr>
               <th>Tarea</th>
@@ -79,7 +82,7 @@ export default function Planning({
               </tr>
             ))}
           </tbody>
-        </table>
+        </table> : <p className="empty-state" data-tour="planning-empty">No hay reglas para estos filtros.</p>}
       </div>
       {edit && rule && (
         <Dialog

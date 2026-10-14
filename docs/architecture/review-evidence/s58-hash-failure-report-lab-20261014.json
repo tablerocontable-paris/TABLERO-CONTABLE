@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-14",
+  "requirement": "S58",
+  "status": "S57_S58_corrected_locally_regression_passed_independent_sol_review_pending",
+  "finding": "The isolation runner calculated the effective tree hash and HEAD before entering its guarded report lifecycle. If Git was unavailable, it terminated without writing the required failed JSON report.",
+  "change": "Move Git hash and HEAD reads inside the guarded execution after reserving a unique output directory. A provenance failure now produces a failed report with null provenance, records the fatal error, and exits nonzero; existing output directories remain protected from overwrite.",
+  "regression": "Spawn the runner with an empty PATH, verify exit code 1, and verify the new output contains status=failed, acceptance=false, null sourceTree/sourceHead, and the Git failure. The isolated temporary directory is removed only after resolving it under the OS temp directory.",
+  "validation": {
+    "command": "node node_modules/vitest/vitest.mjs run tests/verification-contract.test.ts --exclude 'tmp/**' --maxWorkers=1 --testTimeout=20000 --hookTimeout=30000 --reporter=dot",
+    "exitCode": 0,
+    "passed": 11,
+    "total": 11,
+    "files": 1,
+    "durationSeconds": 0.632
+  },
+  "fullRunner": {
+    "command": "node tests/review/run-time-coverage-008-isolation.mjs",
+    "exitCode": 0,
+    "status": "passed",
+    "totals": { "executed": 7, "passed": 7, "skipped": 209, "failed": 0 },
+    "sourceHead": "2c3fbfe29770d358cad545e24cb0a7aa0236f1d3",
+    "effectiveTree": {
+      "sha256": "91941fc2cd8af560ec545310c8ee371cd26784d6442baf5646be94a1e641c271",
+      "fileCount": 426
+    },
+    "report": "outputs/time-coverage-008-isolation-2026-10-14T15-21-30-444Z-17108/isolation-run.json"
+  },
+  "fullSuite": {
+    "command": "node node_modules/vitest/vitest.mjs run --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000 --reporter=dot",
+    "exitCode": 0,
+    "passed": 661,
+    "total": 661,
+    "files": 67,
+    "durationSeconds": 174.30
+  },
+  "s57ProvenanceGate": {
+    "change": "Benchmark acceptance now fails when effective-tree hashing fails, even when all route samples meet the p95 threshold; TypeScript declaration matches the runtime contract.",
+    "regression": "tests/verification-contract.test.ts: an otherwise passing benchmark is rejected when provenanceError is supplied.",
+    "focusedTests": { "passed": 11, "total": 11 }
+  },
+  "typescript": {
+    "command": "node node_modules/typescript/bin/tsc --noEmit",
+    "exitCode": 0
+  },
+  "limits": [
+    "Independent GPT-6.1 Sol review of S57/S58 remains pending.",
+    "This does not establish benchmark acceptance or global product acceptance.",
+    "No commit, PR, Site update, account connection, operational API call, or deployment was made."
+  ]
+}

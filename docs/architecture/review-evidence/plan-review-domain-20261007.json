@@ -1,0 +1,102 @@
+{
+  "date": "2026-10-08T02:48:50.543Z",
+  "mode": "Local fictional-state domain probes; no API, accounts, Site changes or product edits",
+  "findings": [
+    {
+      "id": "R01-company-access",
+      "contractViolationReproduced": true,
+      "canWork": false,
+      "labConsult": true,
+      "companyId": "c1"
+    },
+    {
+      "id": "R02-dependency-execution",
+      "contractViolationReproduced": true,
+      "routeReady": false,
+      "executionAllowed": true,
+      "resultingStatus": "En curso"
+    },
+    {
+      "id": "R03-closed-company-planning",
+      "contractViolationReproduced": true,
+      "companyClosed": true,
+      "monthlyClosureExists": false,
+      "originalTaskStillLive": false,
+      "replacementTasks": 2
+    },
+    {
+      "id": "R04-joint-atomicity",
+      "contractViolationReproduced": true,
+      "closed": [
+        {
+          "ownerId": "e0",
+          "companyId": "c1",
+          "month": "2026-10"
+        }
+      ],
+      "blocked": [
+        {
+          "unit": {
+            "ownerId": "e1",
+            "companyId": "c1",
+            "month": "2026-10"
+          },
+          "reason": "Hay cronómetros activos en esta unidad."
+        }
+      ],
+      "expected": "No member company unit closes while another linked member unit is blocked."
+    },
+    {
+      "id": "R05-commercial-confirmation",
+      "contractViolationReproduced": true,
+      "status": "Completada",
+      "explicitConfirmationRecorded": false,
+      "callSite": "App.advance -> transition without confirmation"
+    },
+    {
+      "id": "R06-backup-validation",
+      "contractViolationReproduced": true,
+      "invalidBackupAccepted": true,
+      "runtimeError": "deps.map is not a function"
+    },
+    {
+      "id": "R10-coverage-closure",
+      "contractViolationReproduced": true,
+      "activeCoverageClock": true,
+      "blocker": null,
+      "closed": [
+        {
+          "ownerId": "e0",
+          "companyId": "c1",
+          "month": "2026-10"
+        }
+      ],
+      "coveredExecutionStillAllowed": true
+    },
+    {
+      "id": "R11-report-operational-quota",
+      "contractViolationReproduced": true,
+      "schemaVersion": 3,
+      "reportOperationalAssignedPoints": 4,
+      "reportOperationalEarnedPoints": 2,
+      "reportOperationalQuotaTarget": 10,
+      "recordedQuantity": 5,
+      "newOperationalSummary": {
+        "movementCount": 1,
+        "quantityByUnit": [
+          {
+            "unit": "facturas",
+            "quantity": 5
+          }
+        ],
+        "weightedLoad": null,
+        "unweightedQuantity": 5,
+        "recordedSeconds": 0,
+        "quality": null,
+        "order": null,
+        "timeliness": null,
+        "evaluations": 0
+      }
+    }
+  ]
+}

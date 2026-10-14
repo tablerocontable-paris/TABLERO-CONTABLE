@@ -5,7 +5,12 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: { charts: ["recharts"], icons: ["lucide-react"] },
+        manualChunks: {
+          framework: ["react-dom/client", "react", "scheduler"],
+          charts: ["recharts"],
+          icons: ["lucide-react"],
+          validation: ["zod"],
+        },
       },
     },
   },

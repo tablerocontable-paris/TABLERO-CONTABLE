@@ -18,7 +18,7 @@ export default function ParameterizationInbox({
 }) {
   const [profileId, setProfileId] = useState("");
   const [values, setValues] = useState<
-    { id: string; weight: number; target: number }[]
+    { id: string; weight: number }[]
   >([]);
   const actor = state.profiles.find((p) => p.id === state.activeId);
   const pending = pendingParameterizations(state);
@@ -32,12 +32,12 @@ export default function ParameterizationInbox({
       <details className="parameterization-inbox">
         <summary>
           <Bell size={18} aria-hidden="true" />
-          <strong>Pendiente parametrizar pesos y objetivos</strong>
+          <strong>Perfiles pendientes de revisión</strong>
           <span>{pending.length} perfiles</span>
         </summary>
         <p>
           Estos perfiles completaron su inducción. El aviso permanece hasta que
-          jefatura confirme sus parámetros.
+          jefatura revise sus tareas. Las operativas no requieren cuotas; sus coeficientes por movimiento se configuran por separado.
         </p>
         {pending.map((p) => (
           <div className="parameterization-person" key={p.id}>
@@ -50,11 +50,10 @@ export default function ParameterizationInbox({
                 setProfileId(p.id);
                 setValues(
                   state.assignments
-                    .filter((a) => a.ownerId === p.id && !a.retired)
+                    .filter((a) => a.ownerId === p.id && !a.retired && a.kind !== "operativa")
                     .map((a) => ({
                       id: a.id,
                       weight: a.weight,
-                      target: a.target,
                     })),
                 );
               }}
@@ -66,7 +65,7 @@ export default function ParameterizationInbox({
       </details>
       {profile && (
         <Dialog
-          title={"Pesos y objetivos · " + profile.name}
+          title={"Revisión de tareas · " + profile.name}
           onClose={() => setProfileId("")}
         >
           <form
@@ -79,11 +78,13 @@ export default function ParameterizationInbox({
                   actor.id,
                   values,
                 );
-                if (commit(next, "Confirmó pesos y objetivos", profileId)) {
+                if (commit(next, "Confirmó revisión de tareas", profileId)) {
                   setProfileId("");
                   notify(
-                    "Parámetros confirmados. El aviso de este perfil quedó resuelto.",
+                    "Revisión confirmada. El aviso de este perfil quedó resuelto.",
                   );
+                } else {
+                  notify("No se pudo guardar la revisión. El formulario sigue abierto para reintentar.");
                 }
               } catch (e) {
                 notify((e as Error).message);
@@ -100,47 +101,29 @@ export default function ParameterizationInbox({
                 Planificación antes de confirmar.
               </p>
             )}
-            {assignments.map((a, i) => (
+            {assignments.map((a) => (
               <fieldset className="parameterization-fields" key={a.id}>
                 <legend>
                   {a.title} ·{" "}
                   {state.companies.find((c) => c.id === a.companyId)?.name}
                 </legend>
-                <label>
-                  Peso
-                  <input
-                    type="number"
-                    min={1}
-                    max={100}
-                    step="any"
-                    required
-                    value={values[i].weight}
-                    onChange={(e) =>
-                      setValues(
-                        values.map((v) =>
-                          v.id === a.id
-                            ? { ...v, weight: Number(e.target.value) }
-                            : v,
-                        ),
-                      )
-                    }
-                  />
-                </label>
-                {a.kind === "operativa" && (
+                {a.kind === "operativa" ? (
+                  <p className="note">Operativa · se registra por cantidad ({a.unit}); sin cuota. El coeficiente por movimiento se configura aparte.</p>
+                ) : (
                   <label>
-                    Objetivo · {a.unit}
+                    Peso del entregable
                     <input
                       type="number"
                       min={1}
-                      max={1000000}
+                      max={100}
                       step="any"
                       required
-                      value={values[i].target}
+                      value={values.find((value) => value.id === a.id)?.weight ?? a.weight}
                       onChange={(e) =>
                         setValues(
                           values.map((v) =>
                             v.id === a.id
-                              ? { ...v, target: Number(e.target.value) }
+                              ? { ...v, weight: Number(e.target.value) }
                               : v,
                           ),
                         )
@@ -153,7 +136,7 @@ export default function ParameterizationInbox({
             <div className="modal-actions">
               <button className="primary" disabled={!assignments.length}>
                 <Check size={16} />
-                Confirmar parámetros
+                Confirmar revisión
               </button>
             </div>
           </form>

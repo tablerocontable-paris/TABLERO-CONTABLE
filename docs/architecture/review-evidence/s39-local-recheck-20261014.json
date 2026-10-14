@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-14",
+  "requirement": "S39",
+  "status": "focused_regressions_rechecked_visual_and_independent_review_pending",
+  "validation": {
+    "command": "node node_modules/vitest/vitest.mjs run tests/ui-a-acceptance.test.tsx tests/annotations-tour-app.test.tsx tests/task-board.test.tsx --exclude 'tmp/**' --maxWorkers=1 --testTimeout=20000 --hookTimeout=30000 --reporter=dot",
+    "exitCode": 0,
+    "passed": 57,
+    "total": 57,
+    "files": 3,
+    "durationSeconds": 28.14
+  },
+  "scope": [
+    "Complete guided tours by role with one internal target per step.",
+    "Folded and filtered board recovery, empty-column fallback, and manual toggle preservation.",
+    "Tour target transitions and board controls in the current local tree."
+  ],
+  "limits": [
+    "This focused DOM/unit run does not replace visual browser validation of S39.",
+    "Independent GPT-6.1 Sol review and human screen-reader acceptance remain pending.",
+    "No external services, accounts, API, commit, or deployment were used."
+  ]
+}

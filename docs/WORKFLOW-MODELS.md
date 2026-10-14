@@ -1,3 +1,5 @@
+> **Accion vigente 14/10/2026:** Contrato M0 de arquitectura definido en ops/MIGRATION-BOOTSTRAP-20261014.md. M1 Git/PC personal corresponde a Luna medio Standard; M2/M3 requieren contratos y revision Sol alto. Seleccion manual, sin simular modelos ni delegar para sustituirla. La nueva autorizacion permite cuentas/dev; produccion mantiene sus gates.
+
 # Modelos y uso del plan Plus — 01/10/2026
 
 Recomendación actualizada a pedido de Valentino: mantener dos modelos y ajustar
@@ -37,8 +39,10 @@ Fuentes oficiales consultadas el 01/10/2026:
 ## Flujo permanente
 
 1. Sol define un bloque completo con archivos, decisiones cerradas y aceptación.
-2. Luna ejecuta el bloque, pruebas requeridas, commit/push y publicación privada
-   verificada. Continúa mientras el contrato y el modelo sean adecuados.
+2. Luna ejecuta el contrato y sus pruebas. No crea commit ni publica mientras
+   haya defectos abiertos o falte la revisión/aceptación indicada en el estado
+   vigente del proyecto. Las cuentas propias se posponen hasta la aceptación
+   funcional del producto.
 3. Sol revisa por bloque. Evitar releer todo el proyecto o repetir una prueba ya
    válida sin un cambio o riesgo concreto. Mantener evidencia en archivos y
    devoluciones breves.
@@ -59,10 +63,21 @@ Este estado fue reemplazado por las decisiones posteriores del usuario: se
 autorizó commit, sincronización de la fuente del mismo Site y publicación
 privada. No habilita cuentas reales, cambios de audiencia ni migraciones.
 
-## Próximo paso vigente — tras cobertura recurrente
-Las tareas conjuntas y la cobertura puntual/recurrente están implementadas en el
-laboratorio. Falta cerrar traspaso, baja/reasignación e historial de reportes.
-GPT-6 Luna medio, Standard, para implementar los criterios ya escritos; si
-aparece una decisión nueva de permisos o jerarquía, GPT-6.1 Sol alto, Standard,
-para revisar sólo ese contrato primero. Mantener infraestructura productiva
-fuera del laboratorio.
+## Próximo paso vigente — revisión del corte de correcciones, 08/10/2026
+El laboratorio local pasó 500/500 pruebas, TypeScript, builds de cliente y
+Worker, cuatro recorridos Edge, auditorías automatizadas y benchmark. El corte
+sigue sin commit, PR ni publicación. Primero seleccionar GPT-6.1 Sol, esfuerzo
+alto, Standard, para revisar permisos, cierres, historia y evidencia contra el
+contrato vigente. Después GPT-6 Luna, esfuerzo medio, Standard, implementa los
+defectos que Sol confirme. Aceptación con lector de pantalla e integral sigue
+pendiente; no conectar cuentas ni servicios antes de aceptar el producto. Ver
+`docs/EXECUTION-NEXT.md` y `docs/PROJECT-STATUS.md` para evidencia y límites.
+## Revisión de continuidad — 11/10/2026
+
+Se reconsultaron las páginas oficiales de pricing y selección de modelos el 11/10. Los rangos locales Plus de 15–160 para Sol 6.1 y 350–3.000 para Luna 6 siguen publicados como estimaciones por cinco horas, con uso compartido y posibles límites semanales; no permiten calcular consumo real de esta auditoría. Fast sigue publicado como 2,5× para uso incluido y 2× para créditos comprados: no mezclar ambas modalidades.
+
+La separación Sol alto para esta auditoría / Luna medio para contratos definidos es una decisión del proyecto. No se atribuye al modelo seleccionado automáticamente ni se promete ahorro medido. Sigue la selección manual acordada, sin delegación para sustituirla. El corte de 500 pruebas del 08/10 es histórico; la auditoría integral actual continúa con 60 hallazgos/90 casos abiertos y aceptación pendiente. La regla de evitar relecturas rutinarias no restringe el pedido posterior explícito de auditar todo.
+
+Próximo paso actual: terminar consistencia del informe, matriz de requisitos y validación integral con Sol alto, Standard; luego Luna medio, Standard ejecutará las instrucciones consolidadas. No comenzar cuentas, API, publicación o paquete final antes de los gates de aceptación aplicables.
+
+Fuentes reconsultadas: https://learn.chatgpt.com/docs/pricing y https://learn.chatgpt.com/docs/model-selection. Para saldo/reset de la cuenta, consultar el panel actual; este documento no registra su saldo.

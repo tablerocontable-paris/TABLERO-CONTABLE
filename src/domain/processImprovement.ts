@@ -1,4 +1,5 @@
-import { canSee, dateART, id, type Profile, type State, type Template } from "./model";
+import { canSee, dateART, id, isClosed, type Profile, type State, type Template } from "./model";
+import { validDate } from "./schedule";
 
 export type CatalogueVersionSource =
   | "initial_snapshot"
@@ -139,8 +140,6 @@ const text = (value: string, label: string, max: number) => {
   return cleaned;
 };
 
-const validDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T12:00:00`));
-
 function requireActive(state: State, profileId: string, label = "responsable") {
   const profile = state.profiles.find((candidate) => candidate.id === profileId && candidate.active);
   if (!profile) throw Error(`Elegí un ${label} activo.`);
@@ -151,23 +150,41 @@ function requireCompany(profile: Profile, companyId: string) {
   if (!profile.companyIds.includes(companyId)) throw Error("La empresa está fuera del ámbito de este perfil.");
 }
 
-export function canCoordinateProcess(state: State, actor: Profile, profileId: string) {
-  return actor.active && (actor.role === "jefe" || (actor.role === "encargado" && canSee(actor, profileId, state.profiles)));
+function activeProcessActor(state: State, actor: Profile) {
+  const current = state.profiles.find((profile) => profile.id === actor.id);
+  return current?.active ? current : null;
+}
+
+function hasProcessCompanyScope(state: State, actor: Profile, companyId: string) {
+  const current = activeProcessActor(state, actor);
+  return !!current && state.companies.some((company) => company.id === companyId) &&
+    (current.role === "jefe" || current.companyIds.includes(companyId));
+}
+
+function canAccessProcessSubject(state: State, actor: Profile, profileId: string, companyId: string) {
+  const current = activeProcessActor(state, actor);
+  if (!current || !hasProcessCompanyScope(state, current, companyId)) return false;
+  if (current.role === "jefe") return true;
+  const subject = state.profiles.find((profile) => profile.id === profileId && profile.active && profile.companyIds.includes(companyId));
+  if (!subject) return false;
+  if (current.id === subject.id) return true;
+  return current.role === "encargado" && subject.managerId === current.id;
+}
+
+export function canCoordinateProcess(state: State, actor: Profile, profileId: string, companyId: string) {
+  const current = activeProcessActor(state, actor);
+  return !!current && hasProcessCompanyScope(state, current, companyId) && (current.role === "jefe" ||
+    current.role === "encargado" && canAccessProcessSubject(state, current, profileId, companyId) && canSee(current, profileId, state.profiles));
 }
 
 export function canViewKaizenProposal(state: State, actor: Profile, proposal: KaizenProposal) {
-  return actor.active && (
-    actor.id === proposal.proposedBy || actor.id === proposal.responsibleId ||
-    canCoordinateProcess(state, actor, proposal.proposedBy) ||
-    canCoordinateProcess(state, actor, proposal.responsibleId)
-  );
+  return canAccessProcessSubject(state, actor, proposal.proposedBy, proposal.companyId) ||
+    canAccessProcessSubject(state, actor, proposal.responsibleId, proposal.companyId);
 }
 
 export function canViewFiveSReview(state: State, actor: Profile, review: FiveSReview) {
-  return actor.active && (
-    actor.id === review.createdBy || review.items.some((item) => actor.id === item.responsibleId) ||
-    review.items.some((item) => canCoordinateProcess(state, actor, item.responsibleId))
-  );
+  return canAccessProcessSubject(state, actor, review.createdBy, review.companyId) ||
+    review.items.some((item) => canAccessProcessSubject(state, actor, item.responsibleId, review.companyId));
 }
 
 function sameTemplateSnapshot(version: Pick<CatalogueVersion, "title" | "sector" | "kind" | "weight" | "unit" | "target" | "description" | "steps">, template: Template) {
@@ -275,7 +292,7 @@ export function createKaizenProposal(
   makeId: () => string = id,
 ): KaizenProposal {
   if (!actor.active) throw Error("El perfil está inactivo.");
-  requireCompany(actor, input.companyId);
+  if (!hasProcessCompanyScope(state, actor, input.companyId)) throw Error("La empresa está fuera del ámbito de este perfil.");
   const template = state.templates.find((row) => row.id === input.templateId);
   if (!template) throw Error("Elegí un proceso vigente del catálogo.");
   const responsible = requireActive(state, input.responsibleId);
@@ -303,7 +320,7 @@ export function reviewKaizenProposal(state: State, actor: Profile, proposalId: s
   if (!actor.active) throw Error("El perfil está inactivo.");
   const proposal = (state.improvementProposals || []).find((row) => row.id === proposalId);
   if (!proposal || proposal.status !== "proposed") throw Error("La propuesta ya no está pendiente de revisión.");
-  if (!canCoordinateProcess(state, actor, proposal.proposedBy) && !canCoordinateProcess(state, actor, proposal.responsibleId))
+  if (!canCoordinateProcess(state, actor, proposal.proposedBy, proposal.companyId) && !canCoordinateProcess(state, actor, proposal.responsibleId, proposal.companyId))
     throw Error("Sólo el encargado responsable o Juan Pablo pueden revisar esta propuesta.");
   const reviewNote = text(note, decision === "test" ? "el criterio para habilitar la prueba" : "el motivo del rechazo", 1000);
   const updated: KaizenProposal = decision === "test"
@@ -316,7 +333,8 @@ export function recordKaizenMeasurement(state: State, actor: Profile, proposalId
   if (!actor.active) throw Error("El perfil está inactivo.");
   const proposal = (state.improvementProposals || []).find((row) => row.id === proposalId);
   if (!proposal || proposal.status !== "testing") throw Error("La propuesta no está en etapa de prueba.");
-  if (actor.id !== proposal.responsibleId && !canCoordinateProcess(state, actor, proposal.responsibleId))
+  if (!(actor.id === proposal.responsibleId && canAccessProcessSubject(state, actor, proposal.responsibleId, proposal.companyId)) &&
+      !canCoordinateProcess(state, actor, proposal.responsibleId, proposal.companyId))
     throw Error("Sólo la persona responsable, su encargado o Juan Pablo pueden registrar la medición.");
   if (!Number.isFinite(input.afterValue) || input.afterValue < 0) throw Error("La medición posterior debe ser un número válido, igual o mayor a cero.");
   if (!validDate(input.measuredOn) || input.measuredOn < proposal.trialFrom || input.measuredOn > proposal.trialThrough)
@@ -340,11 +358,13 @@ export function decideKaizenProposal(
   now = new Date().toISOString(),
   makeId: () => string = id,
 ) {
-  if (!actor.active) throw Error("El perfil está inactivo.");
+  const currentActor = activeProcessActor(state, actor);
+  if (!currentActor) throw Error("El perfil está inactivo.");
   const proposal = (state.improvementProposals || []).find((row) => row.id === proposalId);
   if (!proposal || proposal.status !== "measured") throw Error("La propuesta necesita una medición final antes de decidir.");
-  if (decision === "adopt" && actor.role !== "jefe") throw Error("La adopción de un estándar requiere decisión de Juan Pablo.");
-  if (decision === "reject" && !canCoordinateProcess(state, actor, proposal.responsibleId)) throw Error("Sólo el encargado responsable o Juan Pablo pueden cerrar la propuesta.");
+  if (!hasProcessCompanyScope(state, currentActor, proposal.companyId)) throw Error("La empresa de la propuesta ya no está disponible en el ámbito vigente.");
+  if (decision === "adopt" && currentActor.role !== "jefe") throw Error("La adopción de un estándar requiere decisión de Juan Pablo.");
+  if (decision === "reject" && !canCoordinateProcess(state, actor, proposal.responsibleId, proposal.companyId)) throw Error("Sólo el encargado responsable o Juan Pablo pueden cerrar la propuesta.");
   const decisionNote = text(note, decision === "adopt" ? "la comparación y criterio de adopción" : "el motivo del descarte", 1200);
   let nextState = state;
   let adoptedVersion: number | undefined;
@@ -366,7 +386,7 @@ export function decideKaizenProposal(
     const futureTasks = prepared.tasks.map((task) => {
       const untouched = task.status === "Pendiente" && !task.startedAt && !task.completedAt &&
         !(task.sessions || []).length && task.checklist.every((check) => !check.done);
-      if (task.templateId !== current.id || !task.scheduledOn || task.scheduledOn < dateART(now) || !untouched || isTaskClosed(prepared, task)) return task;
+      if (task.templateId !== current.id || !task.scheduledOn || task.scheduledOn < dateART(now) || !untouched || isClosed(prepared, task)) return task;
       return {
         ...task, templateVersion: adoptedVersion,
         checklist: steps.map((step, index) => ({ id: task.checklist[index]?.id || makeId(), text: step, done: false })),
@@ -385,14 +405,9 @@ export function decideKaizenProposal(
   return { ...nextState, improvementProposals: (nextState.improvementProposals || []).map((row) => row.id === proposalId ? decided : row) };
 }
 
-function isTaskClosed(state: State, task: State["tasks"][number]) {
-  return state.closures.some((closure) => closure.ownerId === task.ownerId && closure.month === task.month) ||
-    !!task.responsibility?.members.some((member) => state.closures.some((closure) => closure.ownerId === member.profileId && closure.month === task.month));
-}
-
 export function createFiveSReview(state: State, actor: Profile, input: FiveSReviewInput, now = new Date().toISOString(), makeId: () => string = id): FiveSReview {
   if (!actor.active) throw Error("El perfil está inactivo.");
-  requireCompany(actor, input.companyId);
+  if (!hasProcessCompanyScope(state, actor, input.companyId)) throw Error("La empresa está fuera del ámbito de este perfil.");
   if (!validDate(input.reviewedOn)) throw Error("Indicá una fecha de revisión válida.");
   const template = input.templateId ? state.templates.find((row) => row.id === input.templateId) : undefined;
   if (input.templateId && !template) throw Error("El proceso seleccionado ya no está disponible.");
@@ -420,7 +435,8 @@ export function completeFiveSAction(state: State, actor: Profile, reviewId: stri
   const review = (state.fiveSReviews || []).find((row) => row.id === reviewId);
   const item = review?.items.find((row) => row.id === areaId);
   if (!review || !item || item.status !== "open") throw Error("La acción 5S ya no está pendiente.");
-  if (actor.id !== item.responsibleId && !canCoordinateProcess(state, actor, item.responsibleId))
+  if (!(actor.id === item.responsibleId && canAccessProcessSubject(state, actor, item.responsibleId, review.companyId)) &&
+      !canCoordinateProcess(state, actor, item.responsibleId, review.companyId))
     throw Error("Sólo la persona asignada, su encargado o Juan Pablo pueden cerrar esta acción.");
   if (!validDate(completedOn) || completedOn < review.reviewedOn) throw Error("Indicá una fecha válida de verificación.");
   const nextItem: FiveSItem = { ...item, status: "done", completionEvidence: text(completionEvidence, "la evidencia de cierre", 1200), completedOn, completedBy: actor.id };

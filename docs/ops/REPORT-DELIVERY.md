@@ -1,3 +1,4 @@
+> Alcance histórico verificado el 11/10/2026: este documento describe el consumidor Supabase y el snapshot versión 2 de una etapa anterior. No es la ruta activa del laboratorio ni la aceptación del contrato efectivo 011, que introduce reportes versión 4. El cierre vigente del laboratorio corresponde únicamente a jefatura por persona, empresa y mes; sus métricas operativas no usan metas. Los 48 tests/build citados al final son evidencia histórica. Consultar SOL-AUDIT-20261008.md y PROJECT-STATUS.md antes de implementar o habilitar esta ruta. No hay proveedor de correo real ni autorización para crear cuentas antes de aceptar el producto.
 # Reportes mensuales: estado de implementación
 
 Implementado en fuente, probado localmente; no está activado en Supabase ni enviando correo. El deploy estático de Sites no ejecuta migraciones ni instala este consumidor.

@@ -1,0 +1,95 @@
+{
+  "date": "2026-10-08",
+  "scope": "Fresh local validation of the current uncommitted laboratory tree. No Site publication, account connection, API write, or migration application.",
+  "toolchain": {
+    "node": "Codex bundled Node runtime",
+    "browser": "Microsoft Edge 154.0.4258.62",
+    "platform": "Windows 10.0.26200"
+  },
+  "checks": {
+    "fullSuite": {
+      "command": "vitest run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "result": "passed",
+      "files": 58,
+      "tests": 500
+    },
+    "typescript": { "command": "tsc --noEmit", "result": "passed" },
+    "clientBuild": {
+      "command": "vite build --outDir dist/client",
+      "result": "passed",
+      "entryBytes": 486515,
+      "notes": "Two non-blocking Zod annotation comments were removed by Rollup."
+    },
+    "workerBuild": { "command": "node scripts/build-worker.mjs", "result": "passed" },
+    "preCommitValidator": {
+      "command": "node scripts/validate-change.mjs",
+      "result": "passed",
+      "focusedTests": 130,
+      "partiallyStagedTrackedFilesRejected": true,
+      "integrationRegression": "tests/staged-paths.test.ts runs validate-change.mjs in a temporary Git repository and proves it exits before other checks when a filename with spaces has staged and unstaged edits."
+    },
+    "browserJourneys": {
+      "result": "passed",
+      "runs": [
+        "tests/browser.cjs: induction, role navigation, monthly closure, timers, absence, reminders, themes, mobile",
+        "tests/browser-corrections.cjs: responsive layout, drag, route rationale, search, requests, conversion, onboarding, mobile; repeated after compact annotation empty state",
+        "tests/browser-joint.cjs: joint activation, independent clocks, shared completion, atomic company closure, reports and CSV",
+        "tests/browser-laboratory-backup.cjs: backup v2, evidence quota rollback, restore and closure retention"
+      ],
+      "operationalApiCalls": 0,
+      "javascriptErrors": 0,
+      "artifacts": "outputs/continuation-validation-20261008/"
+    },
+    "annotationEmptyState": {
+      "result": "passed",
+      "change": "Reduced vertical padding when the annotation library has no visible rows.",
+      "regressionTest": "tests/annotations.test.tsx",
+      "browserCapture": "outputs/continuation-validation-20261008/browser-corrections-after-annotation-compact/annotations-prioritized.png"
+    },
+    "taskEvidenceCompletionRace": {
+      "result": "passed",
+      "regression": "tests/task-evidence-concurrency.test.tsx",
+      "tests": 4,
+      "scenario": "A task completes while IndexedDB is storing an attachment; the final commit uses the current task completion timestamp and keeps task and evidence references linked.",
+      "cleanupOnRejectedCommit": "passed"
+    },
+    "accessibilityAudit": {
+      "result": "passed",
+      "routes": 38,
+      "accessibilityTreeControls": 2124,
+      "controlsWithoutName": 0,
+      "keyboardFocusStops": 877,
+      "missingVisibleFocus": 0,
+      "javascriptErrors": 0,
+      "operationalApiCalls": 0,
+      "limitation": "Automated audit only; screen-reader acceptance remains outstanding."
+    },
+    "contrastAudit": {
+      "result": "passed",
+      "routeProfileThemeCombinations": 76,
+      "checkedTextElements": 5943,
+      "skippedTextElements": 0,
+      "contrastIssues": 0,
+      "javascriptErrors": 0,
+      "operationalApiCalls": 0
+    },
+    "performance": {
+      "result": "passed",
+      "profiles": 24,
+      "tasks": 2000,
+      "measuredRouteNavigations": 30,
+      "p95Milliseconds": 324.99,
+      "targetP95Milliseconds": 1000,
+      "javascriptErrors": 0,
+      "operationalApiCalls": 0
+    }
+  },
+  "releaseState": {
+    "commitCreated": false,
+    "pullRequestCreated": false,
+    "sitePublished": false,
+    "accountsConnected": false,
+    "remoteMigrationApplied": false,
+    "productAccepted": false
+  }
+}

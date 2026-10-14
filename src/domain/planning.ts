@@ -1,10 +1,12 @@
 import {
+  type Profile,
   type State,
   type Assignment,
   id,
   dueDate,
   materialize,
   isClosed,
+  canSee,
 } from "./model";
 import {
   defaultSchedule,
@@ -12,6 +14,14 @@ import {
   addDays,
   type Schedule,
 } from "./schedule";
+
+export function canViewLabAssignment(state: State, actor: Profile, assignment: Assignment) {
+  const currentActor = state.profiles.find((profile) => profile.id === actor.id);
+  const owner = state.profiles.find((profile) => profile.id === assignment.ownerId);
+  const companyExists = state.companies.some((company) => company.id === assignment.companyId);
+  return !!currentActor?.active && companyExists && !!owner?.active && owner.companyIds.includes(assignment.companyId) &&
+    (currentActor.role === "jefe" || currentActor.companyIds.includes(assignment.companyId) && canSee(currentActor, owner.id, state.profiles));
+}
 export const scheduleOf = (a: Assignment): Schedule =>
   a.schedule || {
     ...defaultSchedule(
@@ -28,7 +38,8 @@ export function reviseAssignment(
   rule: Schedule,
   actorId: string,
 ) {
-  if (s.profiles.find((p) => p.id === actorId)?.role !== "jefe")
+  const actor = s.profiles.find((p) => p.id === actorId);
+  if (!actor?.active || actor.role !== "jefe")
     throw Error("Jefatura administra las recurrencias.");
   validateSchedule(rule);
   const old = s.assignments.find((a) => a.id === assignmentId);
@@ -43,10 +54,27 @@ export function reviseAssignment(
       t.assignmentId === old.id &&
       (t.scheduledOn || t.due || t.month + "-01") >= rule.startDate,
   );
+  const editableAffected = affected.filter((task) => !isClosed(s, task));
+  const affectedIds = new Set(editableAffected.map((task) => task.id));
+  const hasReferences = (taskId: string) =>
+    (s.taskComments || []).some((row) => row.taskId === taskId) ||
+    (s.taskEvidence || []).some((row) => row.taskId === taskId) ||
+    (s.notifications || []).some((row) => row.taskId === taskId) ||
+    (s.calendarEvents || []).some((row) => row.linkedTaskId === taskId) ||
+    (s.jointReceipts || []).some((row) => row.taskId === taskId) ||
+    (s.taskTransfers || []).some((row) => row.taskId === taskId) ||
+    (s.internalRequests || []).some((row) => row.convertedTaskId === taskId) ||
+    (s.fiscalObligations || []).some((row) => row.requiredTaskIds.includes(taskId)) ||
+    (s.annotations || []).some((row) => row.convertedTaskId === taskId) ||
+    (s.operationalRates || []).some((row) => row.taskId === taskId) ||
+    (s.operationalAssessments || []).some((row) => row.taskId === taskId) ||
+    (s.absences || []).some((row) => row.taskIds?.includes(taskId) || (s.tasks.find((task) => task.id === taskId)?.assignmentId && row.assignmentIds?.includes(s.tasks.find((task) => task.id === taskId)!.assignmentId!))) ||
+    (s.tasks || []).some((row) => row.dependsOnTaskIds?.includes(taskId));
+  if (editableAffected.some((task) => task.dependsOnTaskIds?.length || task.availableFrom || task.commercialProgress || task.evidenceIds?.length || hasReferences(task.id)))
+    throw Error("Hay referencias, progreso comercial o dependencias en tareas que esta regla eliminaría. Elegí una fecha posterior para conservarlas.");
   if (
-    affected.some(
+    editableAffected.some(
       (t) =>
-        isClosed(s, t) ||
         t.status !== "Pendiente" ||
         t.sessions?.length ||
         s.activity.some((e) => e.taskId === t.id),
@@ -56,7 +84,7 @@ export function reviseAssignment(
       "Hay trabajo iniciado o un mes cerrado desde esa fecha. Elegí una fecha posterior para conservar el historial.",
     );
   const periods = [
-    ...new Set([rule.startDate.slice(0, 7), ...affected.map((t) => t.month)]),
+    ...new Set([rule.startDate.slice(0, 7), ...editableAffected.map((t) => t.month)]),
   ];
   const nextAssignment: Assignment = {
     ...old,
@@ -68,7 +96,7 @@ export function reviseAssignment(
   };
   let next: State = {
     ...s,
-    tasks: s.tasks.filter((t) => !affected.some((a) => a.id === t.id)),
+    tasks: s.tasks.filter((t) => !editableAffected.some((a) => a.id === t.id)),
     assignments: [
       ...s.assignments.map((a) =>
         a.id === old.id

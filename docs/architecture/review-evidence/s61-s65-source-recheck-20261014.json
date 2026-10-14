@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-14",
+  "scope": ["S61", "S62", "S63", "S64", "S65"],
+  "result": "no-contract-mismatch-found-in-reviewed-source",
+  "findings": {
+    "S61": "closeCompanyUnits builds a candidate State for each connected group and only publishes it after all group-owner consolidations succeed. Failure discards the candidate, marks that group blocked, and preserves previously successful independent groups.",
+    "S62": "QuickTaskSearch uses a list of native buttons; it no longer exposes listbox/option semantics or false aria-selected state. Selection opens an authorized task without changing the actor.",
+    "S63": "The shared Dialog captures the opener, conditionally restores focus when closing, supports a visible fallback, and lets QuickTaskSearch suppress restoration when selection intentionally transfers focus to the task destination.",
+    "S64": "Backup validation and UI language describe the 50 MB limit as applying to the complete backup, including data and files; v1 compatibility and individual evidence limits remain.",
+    "S65": "Evidence commits distinguish committed, definitely rejected, and unknown outcomes. Fresh evidence is compensated only after confirmed rejection; ambiguous or post-commit failures retain referenced files and expose recovery information. Operational and deliverable evidence paths both have regressions."
+  },
+  "verification": {
+    "command": "node node_modules/vitest/vitest.mjs run tests/laboratory-work.test.ts tests/quick-task-search.test.tsx tests/ui-a-acceptance.test.tsx tests/laboratory-backup.test.tsx tests/task-evidence-concurrency.test.tsx tests/operational-evidence-app.test.tsx tests/laboratory-evidence-errors.test.ts tests/laboratory-evidence-lock.test.ts --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+    "result": "99/99 tests passed in 8 files; exit 0",
+    "output": "outputs/stage-7-validation-20261014/s61-s65-focused-recheck.txt",
+    "runtime": "Node v24.19.0 from repository-local environment; no installation performed"
+  },
+  "sha256": {
+    "src/domain/laboratory-work.ts": "747c21ae6319b430ca9a8adfb3d0fbbf10b8c2615ed37a10e3352cb7ea3a36e3",
+    "src/components/QuickTaskSearch.tsx": "80e30537d3a35bcdb1643e8d6b9a818001ee32c1dfd443eb3151787cda30a332",
+    "src/components/ui.tsx": "b118ff57f2903c1df4f94a8ba32c4dc2295ae44de060da8decddfcc6e252b7b7",
+    "src/data/repository.ts": "ae6a2956e59c5b73077e8e212a402abbe754b51ad3383c9ca91208d538223b70",
+    "src/components/TaskEvidencePanel.tsx": "1582c5de8908a8b0c734ec0c08ed6cd54c96cd4ce9c64584a435d4933f3f8283",
+    "src/App.tsx": "85b5a687a3c6dac81cdbf5e6d883b99663d60a1bf7c08d636433c42f499b2608",
+    "tests/laboratory-work.test.ts": "f453b10ecc34a6e26ed954dbbc518c4b7058dd24dd869408a2bb2c374e333ecd",
+    "tests/quick-task-search.test.tsx": "c6efaadfae112570971a45f8ded83daf1b5f4b5b554f39e5e857957ecc88ef77c",
+    "tests/ui-a-acceptance.test.tsx": "1449d204cd7f99d0cb87b89e4e84eb55b57a07139ecb881358cb08ef62dcb5b4",
+    "tests/laboratory-backup.test.tsx": "96a2c68f24c63b218f916741693fb59c169bdb39146fe27f8ccb468f72c35a48",
+    "tests/task-evidence-concurrency.test.tsx": "60fdb7d5f163063148b6d56062da249efbcdcb448f6f6ef8b96c17aeaeb6f7f2",
+    "tests/operational-evidence-app.test.tsx": "3a151e8ed844ecc2e53809082c516641ca7f2c2831d54e49bc50080933a5e38a",
+    "tests/laboratory-evidence-errors.test.ts": "4d80c33b75b0f0c2ac08c11bc3ff4d9ae94d532445b3abb7667c3adaffc3d6a",
+    "tests/laboratory-evidence-lock.test.ts": "c010c9219e4e6551c4f7ed7a4bf09e0ab0ab501a53c60279a4ef49f44ec46193"
+  },
+  "limits": [
+    "This is a focused local source/test recheck, not independent GPT-6.1 Sol approval of stage 5 or 6.",
+    "The 99 tests do not replace the existing Edge evidence for native dialog behavior, visible charts, or the full backup/restore journey.",
+    "Human screen-reader acceptance remains a separate product acceptance gate."
+  ],
+  "external_actions": "No commit, PR, Site update, API, account, remote migration, or deployment."
+}

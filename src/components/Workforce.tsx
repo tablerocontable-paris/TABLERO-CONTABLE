@@ -10,17 +10,25 @@ import {
   transferOrphanedTask,
   updateProfile,
   type Absence,
+  presenceStatus,
+  canViewPresence,
 } from "../domain/workforce";
 export function Workforce({
   state,
   commit,
   notify,
   remote=false,
+  laboratory=false,
+  presence={},
+  now=Date.now(),
 }: {
   state: State;
   commit: (s: State, action: string, entityId?: string) => boolean;
   notify: (s: string) => void;
   remote?:boolean;
+  laboratory?:boolean;
+  presence?: Record<string, string>;
+  now?: number;
 }) {
   const active = state.profiles.find((p) => p.id === state.activeId)!;
   const [editing, setEditing] = useState<Profile | null>(null);
@@ -32,7 +40,9 @@ export function Workforce({
   return (
     <Panel
       title="Administración de perfiles"
-      sub="Juan Pablo administra perfiles. Las bajas conservan el historial y dejan el trabajo por resolver en una bandeja auditable."
+      sub={`${state.profiles.length} perfiles · las bajas conservan el historial y dejan el trabajo por resolver en una bandeja auditable.`}
+      collapsible
+      defaultOpen
     >
       <div className="table-wrap">
         <table>
@@ -40,6 +50,7 @@ export function Workforce({
             <tr>
               <th>Persona</th>
               <th>Rol</th>
+              {(laboratory || remote) && <th>Presencia</th>}
               <th>Responsable</th>
               <th>Acceso</th>
               <th />
@@ -50,6 +61,7 @@ export function Workforce({
               <tr key={p.id}>
                 <td>{p.name}</td>
                 <td>{p.role}</td>
+                {(laboratory || remote) && <td>{canViewPresence(state, active, p.id) ? (() => { const status = presenceStatus(p.id, active.id, laboratory && !remote, presence[p.id], now); return <span className={`lab-presence ${status.online ? "is-online" : "is-offline"}`}><i aria-hidden="true" />{status.label}</span>; })() : <span aria-label="Presencia no disponible">—</span>}</td>}
                 <td>
                   {state.profiles.find((x) => x.id === p.managerId)?.name ||
                     "Dirección"}
@@ -379,22 +391,27 @@ export function Absences({
   );
   const recurringPreviews = recurringCoveragePreview(
     state, form.ownerId, form.from, form.to, form.replacementId,
-  );
+  ).filter((preview) => active.role === "jefe" || active.companyIds.includes(preview.companyId));
   const affected = state.tasks.filter(
     (t) =>
       t.ownerId === form.ownerId &&
       t.status !== "Completada" &&
       !isClosed(state, t) &&
+      (active.role === "jefe" || active.companyIds.includes(t.companyId)) &&
       !(t.assignmentId && recurringPreviews.some((preview) => preview.assignmentId === t.assignmentId)) &&
       (!form.replacementId || !!state.profiles.find((profile) => profile.id === form.replacementId)?.companyIds.includes(t.companyId)) &&
       (t.scheduledOn || t.due || "") >= form.from &&
       (t.scheduledOn || t.due || "") <= form.to,
   );
+  const allowedTaskIds = new Set(affected.map((task) => task.id));
+  const allowedAssignmentIds = new Set(recurringPreviews.map((preview) => preview.assignmentId));
   return (
     <>
       <Panel
         title="Vacaciones, licencias y cobertura"
-        sub="Se conserva el titular y sólo se habilitan las tareas elegidas. El responsable aprueba la cobertura dentro de su equipo; jefatura puede coordinar entre equipos."
+        sub={`${visible.filter((absence) => !absence.cancelledAt).length} ausencias vigentes o próximas · se conserva el titular y sólo se habilitan las tareas elegidas.`}
+        collapsible
+        defaultOpen={false}
         action={
           active.role !== "empleado" ? (
             <button className="primary" onClick={() => setAdding(true)}>
@@ -403,7 +420,7 @@ export function Absences({
           ) : undefined
         }
       >
-        <div className="table-wrap">
+        <div className="table-wrap" data-tour="absence-coverage">
           <table>
             <thead>
               <tr>
@@ -470,6 +487,17 @@ export function Absences({
             onSubmit={(e) => {
               e.preventDefault();
               try {
+                const revokedTasks = form.taskIds.filter((taskId) => !allowedTaskIds.has(taskId));
+                const revokedRules = form.assignmentIds.filter((assignmentId) => !allowedAssignmentIds.has(assignmentId));
+                if (revokedTasks.length || revokedRules.length) {
+                  setForm({
+                    ...form,
+                    taskIds: form.taskIds.filter((taskId) => allowedTaskIds.has(taskId)),
+                    assignmentIds: form.assignmentIds.filter((assignmentId) => allowedAssignmentIds.has(assignmentId)),
+                  });
+                  notify("Cambió el alcance de la cobertura. Quité tareas y reglas que ya no están autorizadas; revisá la selección antes de guardar.");
+                  return;
+                }
                 const a = { ...form, id: id(), createdBy: active.id };
                 if (
                   commit(
@@ -502,7 +530,7 @@ export function Absences({
             <div className="form-grid">
               <label>
                 Desde
-                <input
+      <input
                   type="date"
                   required
                   value={form.from}

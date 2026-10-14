@@ -2,7 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import App from "../src/App";
-import { seed } from "../src/data/repository";
+import { load, seed } from "../src/data/repository";
 import { defaultSchedule } from "../src/domain/schedule";
 import type { Onboarding as Draft, State } from "../src/domain/model";
 
@@ -66,5 +66,36 @@ describe("integración de propuestas en la inducción", () => {
     expect(saved.assignments).toHaveLength(0);
     expect(saved.tasks).toHaveLength(0);
     expect(saved.onboarding.e0.completedAt).toBeTruthy();
+  });
+
+  it("completa la inducción de jefatura sin generar tareas propias inválidas", async () => {
+    const state = seed();
+    const boss = state.profiles.find((profile) => profile.role === "jefe")!;
+    state.activeId = boss.id;
+    state.onboarding[boss.id] = {
+      ...state.onboarding[boss.id],
+      name: boss.name,
+      step: 5,
+      completedAt: null,
+      selectedCompanyIds: [boss.companyIds[0]!],
+      selectedTemplateIds: [state.templates[0]!.id],
+      assignmentCompanyIds: {},
+      schedules: {},
+      companySchedules: {},
+      companyTargets: {},
+      customTitle: "",
+      customSteps: "",
+      customTasks: [],
+      habitualTaskProposals: [],
+    };
+
+    render(<App initialState={state as State} laboratoryMode />);
+    fireEvent.click(await screen.findByRole("button", { name: /Preparar mi tablero/ }));
+
+    await waitFor(() => expect(localStorage.getItem("paris-state-lab")).not.toBeNull());
+    const saved = load(true);
+    expect(saved.onboarding[boss.id]?.completedAt).toBeTruthy();
+    expect(saved.assignments.some((assignment) => assignment.ownerId === boss.id)).toBe(false);
+    expect(saved.tasks.some((task) => task.ownerId === boss.id)).toBe(false);
   });
 });

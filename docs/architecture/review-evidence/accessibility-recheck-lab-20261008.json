@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-08",
+  "scope": "Re-run automated accessibility checks on the current built private laboratory.",
+  "command": "node tests/browser-accessibility-audit.cjs",
+  "result": "passed",
+  "profiles": ["jefe", "encargado", "empleado"],
+  "routesVisited": 38,
+  "domControlsWithoutName": 0,
+  "chromiumAccessibilityTreeControls": 2124,
+  "accessibilityTreeControlsWithoutName": 0,
+  "keyboardFocusStops": 887,
+  "missingVisibleFocus": 0,
+  "javascriptErrors": 0,
+  "operationalApiCalls": 0,
+  "rawEvidence": "outputs/plan-validation-20261008/accessibility-current-after-key-fix/accessibility-audit.json",
+  "limitations": [
+    "This automated check is not a screen-reader acceptance test or WCAG certification.",
+    "It does not cover every dynamic state or assistive technology combination."
+  ]
+}

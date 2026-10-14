@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-14",
+  "scope": "Current-tree recheck of the documented Sol correction package, limited to the laboratory and explicitly deferred local contracts.",
+  "currentTreeUnderTest": {
+    "sha256": "2cff5088bbc8992cecfbe25c1f019c8121ae673119d4580493c3bd534047d425",
+    "fileCount": 433,
+    "basis": "Identical effective-tree fingerprint in S57 benchmark and S58 isolation runner; output artifacts excluded. Product source did not change after those runs; the evidence record itself was added afterward."
+  },
+  "correctionDocumentsReviewed": [
+    "docs/architecture/PLAN-REVIEW-20261007.md (historical baseline R01-R11)",
+    "docs/architecture/PLAN-CORRECTIONS-NEXT-20261007.md (implementation contract and acceptance criteria)",
+    "docs/architecture/SOL-AUDIT-20261008.md (S01-S65 and later reconciliations)",
+    "docs/architecture/SOL-LUNA-CONTRACTS-20261011.md (stage contracts and acceptance gates)",
+    "docs/architecture/SOL-REQUIREMENT-COVERAGE-20261008.md (requirement-by-requirement crosswalk)",
+    "docs/EXECUTION-NEXT.md and docs/PROJECT-STATUS.md (current execution/status records)"
+  ],
+  "implementationStatus": {
+    "stages1to3": "Previously accepted by independent GPT-6.1 Sol; cited stage acceptance records remain authoritative.",
+    "stage4": "S05/S15/S20/S24/S25/S33/S40/S41/S42/S48 accepted functionally by Sol. S52 is implemented and locally verified; independent Sol acceptance remains open.",
+    "stage5": "S36/S37/S38/S39/S54/S56/S62/S63 implemented and locally rechecked. The prior S39 browser failure was only a stale runner title; current tour title 'Cierre de mes' is correct. Independent Sol review and human screen-reader acceptance remain open.",
+    "stage6": "S57/S58 current-tree verifier checks pass. This does not certify cold, concurrent, or production performance.",
+    "stage7": "S01/S13/S30/S31/S32/S44/S45/S46/S59/S60 implemented and locally tested. Independent Sol review and real PostgreSQL/MVCC concurrency remain open; no remote SQL/API was used."
+  },
+  "validation": {
+    "fullSuite": { "command": "node ./node_modules/vitest/vitest.mjs run --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000 --reporter=dot", "exitCode": 0, "passed": 663, "files": 67, "durationSeconds": 178.25 },
+    "typescript": { "command": "node ./node_modules/typescript/bin/tsc --noEmit", "exitCode": 0 },
+    "clientBuild": { "command": "node ./node_modules/vite/bin/vite.js build --outDir dist/client", "exitCode": 0, "entryBytes": 331700, "frameworkBytes": 208980, "remainingWarnings": "Zod PURE-comment annotations only" },
+    "workerBuild": { "command": "node scripts/build-worker.mjs", "exitCode": 0 },
+    "edgeJourneys": {
+      "main": { "exitCode": 0, "script": "tests/browser.cjs", "result": "induction, resume, company isolation, monthly closure, timers, absences, reminders, themes and mobile passed; no JS errors or API requests", "artifacts": "outputs/stage-5-validation-20261014/edge-final-full/main/" },
+      "corrections": { "exitCode": 0, "script": "tests/browser-corrections.cjs", "checks": 29, "javascriptErrors": 0, "operationalApiCalls": 0, "report": "outputs/stage-5-validation-20261014/edge-post-s57-recheck-final/browser-validation.json" },
+      "backup": { "exitCode": 0, "script": "tests/browser-laboratory-backup.cjs", "passed": true, "nativeIndexedDbAbortPreservedState": true, "physicalQuotaExhaustionInduced": false, "javascriptErrors": 0, "operationalApiCalls": 0, "report": "outputs/stage-5-validation-20261014/edge-final-full/backup/laboratory-backup-browser.json" },
+      "joint": { "exitCode": 0, "script": "tests/browser-joint.cjs", "result": "joint activation, independent clocks, shared completion, atomic participant-company closure, schema-v3 reports and CSV privacy passed; no JS errors or API calls", "artifacts": "outputs/stage-5-validation-20261014/edge-final-full/joint/" }
+    },
+    "automatedAccessibility": { "command": "node tests/browser-accessibility-audit.cjs", "exitCode": 0, "roles": 3, "routes": 38, "axControls": 2124, "controlsWithoutNames": 0, "keyboardFocusStops": 904, "missingVisibleFocus": 0, "javascriptErrors": 0, "operationalApiCalls": 0, "report": "outputs/stage-5-validation-20261014/accessibility-final/accessibility-audit.json" },
+    "contrast": { "command": "node tests/browser-contrast-audit.cjs", "exitCode": 0, "roleThemeRouteCombinations": 76, "checkedTextNodes": 5943, "skipped": 0, "issues": 0, "javascriptErrors": 0, "operationalApiCalls": 0, "report": "outputs/stage-5-validation-20261014/contrast-final/contrast-audit.json" },
+    "benchmarkS57": { "command": "node scripts/benchmark-laboratory.cjs", "exitCode": 0, "browser": "Microsoft Edge 155.0.4283.45", "machine": "Intel Core i3-N305, Windows 10 x64", "viewport": "1440x900", "profiles": 24, "tasks": 2000, "samples": 30, "p95Ms": 534.39, "limitExclusiveMs": 1000, "javascriptErrors": 0, "operationalApiCalls": 0, "report": "outputs/performance-lab-2026-10-14T16-25-20-956Z-18376/navigation-benchmark.json" },
+    "isolatedS58": { "command": "node tests/review/run-time-coverage-008-isolation.mjs", "exitCode": 0, "executed": 7, "passed": 7, "skipped": 209, "failed": 0, "report": "outputs/time-coverage-008-isolation-2026-10-14T16-25-38-288Z-2512/isolation-run.json" },
+    "diffCheck": { "command": "git diff --check", "result": "exit 0; line-ending conversion notices only" }
+  },
+  "unresolvedGates": [
+    "Independent GPT-6.1 Sol acceptance of S52 and stages 5-7.",
+    "Human screen-reader acceptance; automated AX-tree and focus checks are not a substitute.",
+    "Real PostgreSQL/MVCC concurrent scenarios for stage 7; PGlite/SQLite sequential tests do not prove it."
+  ],
+  "noExternalActions": "No commit, PR, Site update, account connection, operational API call, remote migration, or deployment."
+}

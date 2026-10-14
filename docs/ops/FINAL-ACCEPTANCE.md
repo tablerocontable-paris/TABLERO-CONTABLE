@@ -1,3 +1,5 @@
+> **Secuencia actualizada 14/10/2026:** el usuario autorizo iniciar cuentas, Git y desarrollo conectado ahora. Seguir MIGRATION-BOOTSTRAP-20261014.md. Esto reemplaza la espera de aceptacion para iniciar infraestructura dev; no declara aceptacion funcional ni productiva. Lector humano, paridad Supabase, piloto y recuperacion continuan como gates. Preparar documentos/respaldo no aumenta el porcentaje global.
+
 # Definición de terminado — pedido 06/10/2026
 
 100% exige cerrar el alcance funcional y todas las correcciones conocidas,
@@ -30,7 +32,11 @@ No aumentar el porcentaje por escribir un plan o preparar un workflow.
 
 - Activo localmente: hook pre-commit (tipos, pruebas rápidas y diff staged).
   Instalar en cada checkout con `npm run hooks:install`. Requiere dependencias.
-  Valida el árbol de trabajo; no garantiza un snapshot parcialmente staged.
+  Rechaza archivos rastreados que estén staged y tengan cambios posteriores sin
+  stage. Las comprobaciones locales corren sobre el árbol de trabajo; GitHub debe
+  validar el commit exacto. `.gitignore` excluye sólo rutas concretas de `outputs/`; el resto puede
+  estar rastreado o sin seguimiento. Revisar `git status` y seleccionar evidencia
+  expresamente antes de cada commit.
 - Preparado: workflow GitHub con suite completa, build y validación del paquete
   de despliegue Sites del commit enviado. No ejecutado en GitHub: todavía no
   existe ese repositorio propio.

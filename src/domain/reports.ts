@@ -16,6 +16,38 @@ export interface ReportTransfer {
   reason: string;
   transferredAt: string;
 }
+export interface OperationalReportSummary {
+  movementCount: number;
+  quantityByUnit: Array<{ unit: string; quantity: number }>;
+  weightedLoad: number | null;
+  unweightedQuantity: number;
+  recordedSeconds: number;
+  quality: number | null;
+  order: number | null;
+  timeliness: number | null;
+  evaluations: number;
+}
+export interface LaboratoryPeriodSummary {
+  operational: OperationalReportSummary;
+  covered: Pick<OperationalReportSummary, "movementCount" | "quantityByUnit" | "weightedLoad" | "unweightedQuantity" | "recordedSeconds">;
+}
+export interface CoverageReportContribution {
+  taskId: string;
+  title: string;
+  companyId: string;
+  company: string;
+  originalOwnerId: string;
+  originalOwner: string;
+  executorId: string;
+  executor: string;
+  executorTeamId: string;
+  sector: string;
+  kind: "resultado" | "operativa";
+  unit: string;
+  sessions: Array<{ id: string; start: string; end: string | null }>;
+  activity: Array<{ id: string; date: string; qty: number; note: string }>;
+  completionAt: string | null;
+}
 export interface ReportGroup {
   key: string;
   company: string;
@@ -27,9 +59,10 @@ export interface ReportGroup {
   recordedSeconds: number;
   reopenings: number;
   contributions?: ReportContribution[];
+  operationalSummary?: OperationalReportSummary;
 }
 export interface PeriodReport {
-  schemaVersion: 1 | 2;
+  schemaVersion: 1 | 2 | 3;
   generatedAt: string;
   employee: string;
   team: string;
@@ -44,10 +77,16 @@ export interface PeriodReport {
   contributions?: ReportContribution[];
   transfers?: ReportTransfer[];
   algorithm?: "joint-lab-v1";
+  laboratorySummary?: LaboratoryPeriodSummary;
+  /** Versioned immutable contributions performed under a replacement coverage. */
+  coverageContributions?: CoverageReportContribution[];
+  /** Marks that this report was produced with the versioned coverage snapshot contract, including an empty snapshot. */
+  coverageSnapshotVersion?: 1;
 }
 export function closureCsvRows(
   c: Closure,
   companyName: (companyId: string) => string,
+  canExportCovered: (item: CoverageReportContribution) => boolean = () => true,
 ) {
   return [
     [
@@ -69,6 +108,7 @@ export function closureCsvRows(
       .map((task) => {
         const shareBps = responsibilityShare(task, c.ownerId);
         const quantity = taskQuantity(task, c.activity);
+        const laboratoryOperation = c.report?.schemaVersion === 3 && task.kind === "operativa";
         const globalEarned = task.weight * (task.kind === "resultado"
           ? task.status === "Completada" ? 1 : 0
           : task.target > 0 ? Math.min(quantity / task.target, 1) : 0);
@@ -76,17 +116,26 @@ export function closureCsvRows(
           task.title,
           companyName(task.companyId),
           task.kind,
-          task.weight,
-          shareBps / 100,
-          task.weight * shareBps / 10000,
-          globalEarned * shareBps / 10000,
+          laboratoryOperation ? "No aplica" : task.weight,
+          laboratoryOperation ? "No aplica" : shareBps / 100,
+          laboratoryOperation ? "No aplica" : task.weight * shareBps / 10000,
+          laboratoryOperation ? "No aplica" : globalEarned * shareBps / 10000,
           duration(actorElapsedSeconds(task, c.ownerId, c.at)),
           task.status,
           quantity,
           task.unit,
-          task.target,
+          laboratoryOperation ? "No aplica" : task.target,
         ];
       }),
+    ...(c.report?.schemaVersion === 3 ? (c.report.coverageContributions || []).filter(canExportCovered).map((item) => [
+      `${item.title} · titular ${item.originalOwner} · ejecutor ${item.executor}`,
+      item.company,
+      "Cobertura ejecutada",
+      "No aplica", "No aplica", "No aplica", "No aplica",
+      duration(item.sessions.reduce((sum, session) => sum + Math.max(0, (Date.parse(session.end || c.at) - Date.parse(session.start)) / 1000), 0)),
+      item.completionAt ? "Completada en cobertura" : "Contribución registrada",
+      item.activity.reduce((sum, activity) => sum + activity.qty, 0), item.unit, "No aplica",
+    ]) : []),
   ];
 }
 export function generatePeriodReport(s: State, c: Closure): PeriodReport {
