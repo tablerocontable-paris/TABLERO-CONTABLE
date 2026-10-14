@@ -1,4 +1,4 @@
-> **Precedencia 14/10/2026:** autorizados cuentas propias/dev y consolidacion Git con cuenta GitHub NUEVA. Seguir MIGRATION-BOOTSTRAP-20261014.md, M1 primero. Workers Static Assets con Access reemplaza la preferencia historica por Pages para el hosting nuevo. Los estados/cuotas siguientes son historicos; aun no hay pipeline propio activo. Produccion/datos reales/invitaciones requieren gates posteriores.
+> **Precedencia 14/10/2026:** M1 local consolidado; contrato de migración en ../architecture/SUPABASE-M2-CONTRACT-20261014.md. Próximo M2.1, identidad/API locales con Luna medio Standard; después revisión Sol alto. GitHub destino NUEVO pendiente. Workers Static Assets con Access reemplaza Pages para hosting nuevo. No hay pipeline propio activo: CI preparada no acredita checks de GitHub, aplicación SQL ni despliegues. Producción/datos reales/invitaciones requieren gates posteriores.
 
 # Flujo objetivo de cambios y despliegues
 

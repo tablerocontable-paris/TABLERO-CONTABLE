@@ -1,4 +1,4 @@
-> **Accion vigente 14/10/2026:** Contrato M0 de arquitectura definido en ops/MIGRATION-BOOTSTRAP-20261014.md. M1 Git/PC personal corresponde a Luna medio Standard; M2/M3 requieren contratos y revision Sol alto. Seleccion manual, sin simular modelos ni delegar para sustituirla. La nueva autorizacion permite cuentas/dev; produccion mantiene sus gates.
+> **Acción vigente 14/10/2026:** diseño M2 por módulos en architecture/SUPABASE-M2-CONTRACT-20261014.md. Siguiente: GPT-6 Luna, medio, Standard, ejecuta únicamente architecture/M2-1-IDENTITY-LUNA-20261014.md. Después GPT-6.1 Sol, alto, Standard, revisa y cierra el contrato M2.2. Selección manual, sin simular modelos ni delegar para sustituirla. M2.1 local no requiere conectar cuentas; recursos remotos usarán sólo la cuenta nueva autorizada.
 
 # Modelos y uso del plan Plus — 01/10/2026
 

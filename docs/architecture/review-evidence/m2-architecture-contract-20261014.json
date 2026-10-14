@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-14",
+  "sourceCommit": "8d95200f599b6188e041526507627f649d673940",
+  "scope": "M2 architecture and local reproducibility review; no Supabase implementation or hosted acceptance",
+  "inventory": {
+    "file": "m2-source-inventory-20261014.json",
+    "sourceHashesMatched": 90,
+    "stateFieldsCovered": 38,
+    "domainFunctionInterfaceTypeExports": 232,
+    "namedAppFunctions": 30,
+    "syntacticPersistenceCalls": 70,
+    "sqlDefinitionsIncludingReplacements": 230,
+    "migrations": 14,
+    "migrationVersionsUnique": true
+  },
+  "design": {
+    "contract": "docs/architecture/SUPABASE-M2-CONTRACT-20261014.md",
+    "plannedBlocks": 7,
+    "immediateImplementationContract": "docs/architecture/M2-1-IDENTITY-LUNA-20261014.md",
+    "implementationReadyBlock": "M2.1 only",
+    "newMigrationImplemented": false,
+    "productAndExistingSqlModified": false
+  },
+  "portableGuideCorrections": [
+    "Verify the bundle inside the new clone, after cloning, instead of outside any repository",
+    "Read manifest.commit and manifest.source_branch rather than the missing source.commit field or assuming main",
+    "Remove outdated account-before-acceptance sequencing from the current guide; keep historical documents labelled",
+    "Describe separate v2 laboratory state/evidence transfer without implying browser synchronization"
+  ],
+  "cleanReproduction": {
+    "commit": "8d95200f599b6188e041526507627f649d673940",
+    "node": "24.19.0",
+    "npm": "12.2.0",
+    "npmDistribution": "https://registry.npmjs.org/npm/-/npm-12.2.0.tgz",
+    "npmIntegrityVerified": "sha512-ZsJjKpTnlmSXOLLXiU1xDCzC4Wlok4IwZmh/aw2KUuXytU7q6qMv/cUT7MoeSf95Slwuw/lRXYefGzGCspHPNQ==",
+    "adminInstallationRequired": false,
+    "install": {
+      "command": "node <portable-npm-cli> ci --prefix <clean-clone> --no-audit --no-fund",
+      "exitCode": 0,
+      "packagesAdded": 223,
+      "warnings": "npm12 blocked three esbuild postinstall scripts by its policy; optional platform binaries still supported the successful tests/build. Deprecated transitive package notices also occurred. No script approval or dependency change was added."
+    },
+    "suite": {"command": "node <portable-npm-cli> --prefix <clean-clone> test", "exitCode": 0, "filesPassed": 67, "testsPassed": 668, "durationSeconds": 149.91},
+    "build": {"command": "node <portable-npm-cli> --prefix <clean-clone> run build", "exitCode": 0, "typescript": "passed", "client": "passed", "worker": "passed", "warnings": "Two informational Zod pure-annotation warnings"},
+    "sitePackage": {"command": "node scripts/package-site-archive.mjs <output>", "exitCode": 0, "bytes": 858623, "sha256": "80509ed4202877093003339157130c3be0bc9ea222a9023ddd74ab8da8a7eb4b", "deployed": false},
+    "cleanCloneGitStatus": true,
+    "bitIdenticalArtifactsClaimed": false,
+    "rawLogs": "../../outputs/m2-contract-20261014/npm-clean-tests.log and npm-clean-build.log from repository root; included in the new portable delivery"
+  },
+  "pending": [
+    "Implement and review M2.1 before M2.2",
+    "Connect the newly authorized GitHub account and verify private repo ownership and CI",
+    "Create verified Supabase development resources and test real Auth/MFA/RLS/Storage/Realtime after the applicable blocks",
+    "Personal-PC first opening and human screen-reader acceptance",
+    "Own hosting, environment separation, automated migrations/deploy and production acceptance"
+  ],
+  "nextModel": "GPT-6 Luna, medium effort, Standard; then GPT-6.1 Sol high review",
+  "remoteActions": false,
+  "globalProgress": "Historical estimate approximately 45%; not remeasured"
+}

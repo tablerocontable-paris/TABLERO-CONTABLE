@@ -1,5 +1,11 @@
 # Migración a cuentas propias — contrato de inicio, 14/10/2026
 
+> Actualización M2: M1 local consolidado en 8d95200. Diseño de paridad completo en
+> ../architecture/SUPABASE-M2-CONTRACT-20261014.md; contrato inmediato de Luna en
+> ../architecture/M2-1-IDENTITY-LUNA-20261014.md. Los siguientes preflight/M0/M1
+> conservan el estado inicial de su corte. La cuenta GitHub nueva sigue pendiente
+> para trabajo remoto y no bloquea la implementación local de SQL013/contexto.
+
 ## Decisión vigente
 
 El usuario autorizó iniciar GitHub, Supabase y hosting propios para continuar

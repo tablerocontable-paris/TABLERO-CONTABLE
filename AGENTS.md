@@ -1,3 +1,5 @@
+> PRECEDENCIA M2 — 14/10/2026: diseño en docs/architecture/SUPABASE-M2-CONTRACT-20261014.md. M1 local está en 8d95200; GitHub nuevo sigue sin remoto. Siguiente implementación: únicamente docs/architecture/M2-1-IDENTITY-LUNA-20261014.md con Luna medio Standard, después Sol alto revisa. No implementar los siete bloques juntos ni habilitar una UI remota con paridad simulada. Mantener actor Auth separado del perfil consultado, cuenta técnica sin perfil de negocio y Anotaciones sólo para autor. La cuenta nueva es necesaria al crear/enlazar recursos remotos, no para ejecutar M2.1 local.
+
 > PRECEDENCIA VIGENTE 14/10/2026: el usuario autorizo iniciar infraestructura propia y continuidad PC; GitHub sera cuenta NUEVA, no usar conexiones anteriores. Seguir docs/ops/MIGRATION-BOOTSTRAP-20261014.md. M0 Sol prepara inventario/respaldo; M1 Luna medio Standard consolida Git/paquete. Se permite iniciar cuentas/dev aunque siga pendiente lector humano; produccion, datos reales e invitaciones conservan gates. No activar D1/Sites como adaptador Supabase. Esta nota reemplaza las prohibiciones historicas de iniciar cuentas para este alcance.
 
 # Grupo París
