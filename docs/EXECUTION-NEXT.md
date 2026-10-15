@@ -1,4 +1,23 @@
-# Acción vigente — preparar candidato corregido R6 para Sol, 15/10/2026
+# Acción vigente — Luna completa R7/R8, 15/10/2026
+
+**GPT‑6 Luna, esfuerzo medio, Standard** implementa únicamente
+`architecture/M2-2A-PREFLIGHT-LUNA-20261015.md`. La revisión de `ebe1633` cerró
+R6 original y devolvió dos puntos acotados: prevalidación completa antes de
+locks/recibos (R7) y rechazo de miembro NULL en claves esperadas (R8).
+
+Informe `architecture/M2-2A-R6-SOL-REVIEW-20261015.md`; evidencia
+`architecture/review-evidence/m2-2a-r6-sol-review-20261015.json`. Las sondas nuevas
+8/18 y3/6 documentan los fallos; deben pasar18/18 y6/6 tras la corrección. Los
+casos existentes30/30, protocolo15/15, focales17/17 y TypeScript pasan. Las
+matrices mixtas reales se repitieron correctamente43/43 cada una; las etiquetas
+mixtas de la implementación R6 eran RC/RC por opciones desconocidas ignoradas.
+
+Conservar SQL001–013/DTO/UI/Worker/Site; no instalar dependencias, conectar
+cuentas, desplegar014 ni iniciar B/C. Validar y registrar un único commit del
+bloque, con hook y paquete final, como indica el contrato; después Sol alto
+revisa A y define B/C. Avance~45% histórico sin recalcular.
+
+## Acción anterior — preparar el candidato R6 para revisión
 
 La corrección NULL-safe de 014 ya está implementada y validada. Evidencia vigente:
 `architecture/review-evidence/m2-2a-r6-implementation-20261015.json`; contrato

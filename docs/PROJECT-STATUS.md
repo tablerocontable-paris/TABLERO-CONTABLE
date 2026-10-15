@@ -1,4 +1,27 @@
-# Estado vigente — M2.2A-R6 corregido localmente, revisión Sol pendiente, 15/10/2026
+# Estado vigente — R6 resuelto; R7/R8 pendientes, 15/10/2026
+
+La revisión de `ebe1633` cerró el bypass original de revisiones vacías: el
+reproductor pasa 30/30. M2.2A todavía no se acepta por dos correcciones de
+validación previa: algunas revisiones/cursores se validan después de adquirir
+locks (R7), y el helper de claves acepta un conjunto esperado con miembro NULL
+(R8). Con locks ocupados, las entradas inválidas alcanzan timeout55P03; no se
+observaron cambios parciales. Sondas nuevas: 8/18 PGlite y 3/6 PostgreSQL17.11.
+
+Las pruebas antes etiquetadas como mixtas R6 usaron realmente RC/RC por flags
+incorrectos. Esta revisión las repitió con opciones válidas: RC/RR43/43 y
+RR/RC43/43. Además pasaron protocolo15/15, focales17/17 y TypeScript. Producto
+intacto durante la revisión; suite712/builds corresponden al mismo código
+validado antes y no se repitieron ahora. Bundle/ZIP `ebe1633` verificado, pero
+sigue siendo candidato con hallazgos conocidos, no entrega final.
+
+Informe: `architecture/M2-2A-R6-SOL-REVIEW-20261015.md`. Evidencia:
+`architecture/review-evidence/m2-2a-r6-sol-review-20261015.json`. Próximo:
+**GPT‑6 Luna, medio, Standard** ejecuta
+`architecture/M2-2A-PREFLIGHT-LUNA-20261015.md`; luego Sol alto revisa A.
+B/C, Supabase alojado, hosting y aceptación final siguen pendientes. Avance
+~45% histórico sin recalcular. Sin despliegue ni nuevas cuentas en este corte.
+
+## Candidato anterior — implementación R6 pendiente de revisión
 
 Se corrigió la validación NULL-safe de claves y revisiones en la migración local
 014. Los envelopes, payloads, revisiones, filtros y cursores malformados devuelven

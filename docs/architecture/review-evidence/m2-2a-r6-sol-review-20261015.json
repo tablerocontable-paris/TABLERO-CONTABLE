@@ -1,0 +1,319 @@
+{
+  "date": "2026-10-15",
+  "candidateCommit": "ebe16335b183d0df3f4ea0e643801f7f249970be",
+  "decision": "not_accepted_pending_M22A_R7_and_R8",
+  "originalR6BypassResolved": true,
+  "productEditsDuringReview": false,
+  "findings": [
+    {
+      "id": "M22A-R7",
+      "priority": "P2",
+      "summary": "Required revisions and cursor shape are parsed after coordination locks and receipt checks",
+      "reproduced": [
+        "invalid revision and existing operation ID returns 40001 instead of 22023",
+        "native occupied receipt lock turns invalid revision into 55P03",
+        "native occupied task lock turns invalid cursor into 55P03"
+      ],
+      "noPartialStateObserved": true
+    },
+    {
+      "id": "M22A-R8",
+      "priority": "P2",
+      "summary": "api_exact_keys accepts a required-key array containing NULL",
+      "reproduced": "{\"a\":1,\"b\":2} vs array[a,NULL] returns TRUE",
+      "publicExploitDemonstrated": false
+    }
+  ],
+  "validation": {
+    "preflightSentinels": {
+      "exitCode": 1,
+      "scope": "Independent R6 preflight review; fixture sentinels and synthetic PGlite only",
+      "total": 18,
+      "passed": 8,
+      "failed": 10,
+      "results": [
+        {
+          "name": "invalid expected-key set with NULL member must be rejected",
+          "passed": false,
+          "expected": false,
+          "observed": true
+        },
+        {
+          "name": "duplicate expected keys must be rejected",
+          "passed": true,
+          "expected": false,
+          "observed": false
+        },
+        {
+          "name": "SQL NULL expected-key set must be rejected",
+          "passed": true,
+          "expected": false,
+          "observed": false
+        },
+        {
+          "name": "valid initial record succeeds before replay probe",
+          "passed": true,
+          "expected": "00000",
+          "observed": "00000"
+        },
+        {
+          "name": "invalid revision remains a protocol error when operation ID exists",
+          "passed": false,
+          "expected": "22023",
+          "observed": "40001"
+        },
+        {
+          "name": "valid command reaches receipt-lock sentinel (positive control)",
+          "passed": true,
+          "expected": "PZ001",
+          "observed": "PZ001"
+        },
+        {
+          "name": "record NULL revision rejected before receipt lock",
+          "passed": false,
+          "expected": "22023",
+          "observed": "PZ001"
+        },
+        {
+          "name": "record numeric revision rejected before receipt lock",
+          "passed": false,
+          "expected": "22023",
+          "observed": "PZ001"
+        },
+        {
+          "name": "record overflow revision rejected before receipt lock",
+          "passed": false,
+          "expected": "22023",
+          "observed": "PZ001"
+        },
+        {
+          "name": "empty revision map rejected before receipt lock",
+          "passed": true,
+          "expected": "22023",
+          "observed": "22023"
+        },
+        {
+          "name": "rate NULL revision rejected before receipt lock",
+          "passed": false,
+          "expected": "22023",
+          "observed": "PZ001"
+        },
+        {
+          "name": "assessment NULL task revision rejected before receipt lock",
+          "passed": false,
+          "expected": "22023",
+          "observed": "PZ001"
+        },
+        {
+          "name": "assessment NULL assessment revision rejected before receipt lock",
+          "passed": true,
+          "expected": "22023",
+          "observed": "22023"
+        },
+        {
+          "name": "valid query reaches task-scope sentinel (positive control)",
+          "passed": true,
+          "expected": "PZ002",
+          "observed": "PZ002"
+        },
+        {
+          "name": "invalid activity cursor rejected before task-scope locks",
+          "passed": false,
+          "expected": "22023",
+          "observed": "PZ002"
+        },
+        {
+          "name": "non-paginated summary invalid limit rejected before task-scope locks",
+          "passed": false,
+          "expected": "22023",
+          "observed": "PZ002"
+        },
+        {
+          "name": "non-paginated quality invalid cursor rejected before task-scope locks",
+          "passed": false,
+          "expected": "22023",
+          "observed": "PZ002"
+        },
+        {
+          "name": "valid query remains available after fixture sentinel restoration",
+          "passed": true,
+          "expected": "00000",
+          "observed": "00000"
+        }
+      ],
+      "sha256": {
+        "supabase/migrations/202610150014_operational_api.sql": "d0c4ebf747530529118af1c2525dec03e6d2f65d7dfbe46639a1ed8feaaa701e",
+        "tests/review/m2-2a-r6-preflight-review.mjs": "e0c7bda626d9d5c345a41b0c134cb2ab6a6ee82b0d0c1755fd25a3419d46df1a"
+      }
+    },
+    "nativePreflight": {
+      "exitCode": 1,
+      "scope": "Native PostgreSQL R6 preflight contention review; disposable fixture",
+      "engine": "postgres (PostgreSQL) 17.11",
+      "total": 6,
+      "passed": 3,
+      "failed": 3,
+      "results": [
+        {
+          "name": "native helper rejects NULL member in expected key set",
+          "passed": false,
+          "expected": "f",
+          "observed": "t"
+        },
+        {
+          "name": "native malformed revision without contention returns 22023",
+          "passed": true,
+          "expected": "22023",
+          "observed": "22023"
+        },
+        {
+          "name": "native malformed revision rejects before occupied receipt lock",
+          "passed": false,
+          "expected": "22023",
+          "observed": "55P03",
+          "error": "ERROR:  55P03: canceling statement due to lock timeout\r\nCONTEXT:  SQL statement \"SELECT pg_catalog.pg_advisory_xact_lock(p_namespace,pg_catalog.hashtext(p_identity))\"\r\nPL/pgSQL function public._coordination_lock_one(integer,text) line 3 at PERFORM\r\nSQL statement \"SELECT public._coordination_lock_one(1101,p_actor::text||':'||p_operation::text)\"\r\nPL/pgSQL function public._coordination_receipt_lock(uuid,uuid) line 4 at PERFORM\r\nSQL statement \"SELECT public._coordination_receipt_lock(actor,op)\"\r\nPL/pgSQL function api.command_v1(jsonb) line 40 at PERFORM\r\nLOCATION:  ProcessInterrupts, postgres.c:3401\r\n"
+        },
+        {
+          "name": "native malformed cursor without contention returns 22023",
+          "passed": true,
+          "expected": "22023",
+          "observed": "22023"
+        },
+        {
+          "name": "native malformed cursor rejects before occupied task lock",
+          "passed": false,
+          "expected": "22023",
+          "observed": "55P03",
+          "error": "ERROR:  55P03: canceling statement due to lock timeout\r\nCONTEXT:  while locking tuple (0,19) in relation \"task_instances\"\r\nSQL statement \"select t.owner_id,t.company_id,t.organization_id               from public.task_instances t where t.id=p_task for share\"\r\nPL/pgSQL function app_private.api_lock_task_scope(uuid,uuid,uuid) line 4 at SQL statement\r\nSQL statement \"SELECT app_private.api_lock_task_scope(actor,org,task_id)\"\r\nPL/pgSQL function api.query_v1(jsonb) line 41 at PERFORM\r\nLOCATION:  ProcessInterrupts, postgres.c:3401\r\n"
+        },
+        {
+          "name": "native rejected inputs preserve state",
+          "passed": true,
+          "expected": "{\"activity\": 4, \"receipts\": 19, \"revision\": 5, \"month_fences\": 6, \"operation_fences\": 19}",
+          "observed": "{\"activity\": 4, \"receipts\": 19, \"revision\": 5, \"month_fences\": 6, \"operation_fences\": 19}"
+        }
+      ],
+      "migration014Sha256": "d0c4ebf747530529118af1c2525dec03e6d2f65d7dfbe46639a1ed8feaaa701e"
+    },
+    "existingR6": {
+      "exitCode": 0,
+      "total": 30,
+      "passed": 30,
+      "failed": 0
+    },
+    "previousProtocol": {
+      "exitCode": 0,
+      "total": 15,
+      "passed": 15,
+      "failed": 0
+    },
+    "focusedVitest": {
+      "exitCode": 0,
+      "passed": 17,
+      "total": 17
+    },
+    "typeScript": {
+      "exitCode": 0
+    },
+    "correctedCrossIsolation": [
+      {
+        "directory": "../../outputs/m2-2a-r6-sol-review-20261015/cross-rc-rr",
+        "total": 43,
+        "passed": 43,
+        "failed": 0,
+        "firstIsolation": "read committed",
+        "secondIsolation": "repeatable read",
+        "relevantResults": [
+          {
+            "name": "M2.2A concurrent exact replay serializes without duplicate activity",
+            "passed": true,
+            "isolationPair": "read committed/repeatable read",
+            "blocked": true,
+            "replaySQLSTATE": "40001",
+            "retrySQLSTATE": "00000",
+            "measurementV2Entries": 3
+          },
+          {
+            "name": "M2.2A record-first actor revocation waits for the record then denies exact replay",
+            "passed": true,
+            "isolationPair": "read committed/repeatable read",
+            "blocked": true,
+            "recordSQLSTATE": "00000",
+            "revocationSQLSTATE": "00000",
+            "replaySQLSTATE": "42501",
+            "activityReceiptActorState": "1|1|false"
+          }
+        ]
+      },
+      {
+        "directory": "../../outputs/m2-2a-r6-sol-review-20261015/cross-rr-rc",
+        "total": 43,
+        "passed": 43,
+        "failed": 0,
+        "firstIsolation": "repeatable read",
+        "secondIsolation": "read committed",
+        "relevantResults": [
+          {
+            "name": "M2.2A concurrent exact replay serializes without duplicate activity",
+            "passed": true,
+            "isolationPair": "repeatable read/read committed",
+            "blocked": true,
+            "replaySQLSTATE": "00000",
+            "retrySQLSTATE": null,
+            "measurementV2Entries": 3
+          },
+          {
+            "name": "M2.2A record-first actor revocation waits for the record then denies exact replay",
+            "passed": true,
+            "isolationPair": "repeatable read/read committed",
+            "blocked": true,
+            "recordSQLSTATE": "00000",
+            "revocationSQLSTATE": "00000",
+            "replaySQLSTATE": "42501",
+            "activityReceiptActorState": "1|1|false"
+          }
+        ]
+      }
+    ],
+    "priorFullSuite": {
+      "passed": 712,
+      "total": 712,
+      "files": 72,
+      "rerunThisReview": false,
+      "reason": "Product source unchanged; migration SHA matches prior validated source"
+    },
+    "priorBuilds": {
+      "typeScript": true,
+      "client": true,
+      "worker": true,
+      "rerunThisReview": false
+    },
+    "bundleZip": {
+      "extracted": true,
+      "bundleVerified": true,
+      "commit": "ebe16335b183d0df3f4ea0e643801f7f249970be",
+      "bundleSha256": "6569e70514a4bc592cf1661e8860c4a90e7fc297c06680cc4642e4c508786b7f",
+      "zipSha256": "fd9e53ff4528aed562a43d70480657586ca049925133c43b6336ae48ae879568"
+    }
+  },
+  "evidenceCorrection": {
+    "previousDirectories": "../../outputs/m2-2a-r6-validation-20261015/cross-rc-rr and cross-rr-rc",
+    "previousEffectivePair": "read committed/read committed in both",
+    "cause": "Unrecognized --m2-2a-first and --m2-2a-second options were silently ignored",
+    "correctFlags": [
+      "--m2-2a-first-isolation",
+      "--m2-2a-second-isolation"
+    ],
+    "correctedHere": true
+  },
+  "sha256": {
+    "supabase/migrations/202610150014_operational_api.sql": "d0c4ebf747530529118af1c2525dec03e6d2f65d7dfbe46639a1ed8feaaa701e",
+    "src/data/supabase/operational-contract.ts": "c062afcde6eb8e2d83c95de47ddb1bd4330da1f79cf160a24c8f24e68b188d82",
+    "tests/review/m2-2a-r6-preflight-review.mjs": "e0c7bda626d9d5c345a41b0c134cb2ab6a6ee82b0d0c1755fd25a3419d46df1a",
+    "tests/review/m2-2a-r6-native-preflight-review.mjs": "43ab12273c9a90734ead014deee2323a5bcf591196e47799966e481e014b14af"
+  },
+  "nextContract": "docs/architecture/M2-2A-PREFLIGHT-LUNA-20261015.md",
+  "nextModel": "GPT-6 Luna; medium; Standard",
+  "hostedAccountsConnected": false,
+  "migrationDeployed": false
+}
