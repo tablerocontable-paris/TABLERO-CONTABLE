@@ -241,26 +241,42 @@ try {
     insert into auth.users(id) values(${lit(actor)});
     insert into public.profiles(id,organization_id,name,role,sector,branch,position)
       values(${lit(actor)},${lit(org)},'Synthetic employee','empleado','Test','Test','Test');`);
-  const claims = async (claim) => {
+  const claims = async (claim, subject = actor) => {
     await a.ok(
-      `reset role;select set_config('request.jwt.claim.sub',${lit(actor)},false),set_config('request.jwt.claims',${lit(JSON.stringify(claim))},false);set role authenticated;`,
+      `reset role;select set_config('request.jwt.claim.sub',${lit(subject)},false),set_config('request.jwt.claims',${lit(JSON.stringify(claim))},false);set role authenticated;`,
     );
   };
-  for (const [name, claim] of [
-    ["missing AAL", { role: "authenticated" }],
-    ["null AAL", { role: "authenticated", aal: null }],
-  ]) {
-    await claims(claim);
-    const response = await a.query("select api.get_context_v1();");
-    record(name, response.code === "42501", {
-      expectedSQLSTATE: "42501",
-      observedSQLSTATE: response.code,
-      body: response.lines.at(-1),
-    });
-  }
+  const technical = uid(3);
+  await a.ok(`insert into auth.users(id) values(${lit(technical)});
+    insert into app_private.technical_accounts(user_id,organization_id,display_name) values(${lit(technical)},${lit(org)},'Synthetic technical');`);
+  for (const principal of [
+    ["business", actor],
+    ["technical", technical],
+  ])
+    for (const [name, claim] of [
+      ["missing AAL", { role: "authenticated" }],
+      ["null AAL", { role: "authenticated", aal: null }],
+      ["empty AAL", { role: "authenticated", aal: "" }],
+      ["unknown AAL", { role: "authenticated", aal: "aal3" }],
+    ]) {
+      await claims(claim, principal[1]);
+      const response = await a.query("select api.get_context_v1();");
+      record(`${principal[0]} ${name}`, response.code === "42501", {
+        expectedSQLSTATE: "42501",
+        observedSQLSTATE: response.code,
+        body: response.lines.at(-1),
+      });
+    }
   for (const [name, value, expected] of [
     ["whitespace-only display name", "\t\n", "deny"],
     ["Unicode code-point display name", "😀".repeat(150), "decode"],
+    [
+      "mixed ECMAScript whitespace",
+      "\u00a0\ufeff\tValid Name\u2028\u3000",
+      "normalized",
+    ],
+    ["maximum 200 code points", "x".repeat(200), "decode"],
+    ["over maximum 201 code points", "x".repeat(201), "deny"],
   ]) {
     await a.ok(
       `reset role;update public.profiles set name=${lit(value)} where id=${lit(actor)};`,
@@ -276,7 +292,8 @@ try {
       expected === "deny"
         ? response.code === "42501"
         : decoded?.ok === true &&
-            decoded.context.principal.displayName === value,
+            decoded.context.principal.displayName ===
+              (expected === "normalized" ? "Valid Name" : value),
       {
         expected,
         observedSQLSTATE: response.code,
@@ -359,6 +376,90 @@ try {
           commitSQLSTATE: committed.code,
           coexist,
         },
+      );
+    }
+  }
+  for (const firstKind of ["business", "technical"]) {
+    for (const [firstIsolation, secondIsolation] of [
+      ["read committed", "repeatable read"],
+      ["repeatable read", "read committed"],
+    ]) {
+      const source = uid(++serial),
+        target = uid(++serial);
+      await observer.ok(
+        `insert into auth.users(id) values(${lit(source)}),(${lit(target)});`,
+      );
+      if (firstKind === "business")
+        await observer.ok(
+          `insert into public.profiles(id,organization_id,name,role,sector,branch,position) values(${lit(source)},${lit(org)},'Synthetic update','empleado','Test','Test','Test');`,
+        );
+      else
+        await observer.ok(
+          `insert into app_private.technical_accounts(user_id,organization_id,display_name) values(${lit(source)},${lit(org)},'Synthetic update');`,
+        );
+      const firstUpdate =
+        firstKind === "business"
+          ? `update public.profiles set id=${lit(target)} where id=${lit(source)};`
+          : `update app_private.technical_accounts set user_id=${lit(target)} where user_id=${lit(source)};`;
+      const secondInsert =
+        firstKind === "business"
+          ? `insert into app_private.technical_accounts(user_id,organization_id,display_name) values(${lit(target)},${lit(org)},'Synthetic mixed race');`
+          : `insert into public.profiles(id,organization_id,name,role,sector,branch,position) values(${lit(target)},${lit(org)},'Synthetic mixed race','empleado','Test','Test','Test');`;
+      await a.ok(`begin isolation level ${firstIsolation};`);
+      await b.ok(
+        `begin isolation level ${secondIsolation};select count(*) from public.profiles;select count(*) from app_private.technical_accounts;`,
+      );
+      await a.ok(firstUpdate);
+      const pending = b.query(secondInsert);
+      const deadline = Date.now() + 10000;
+      let blocked = false;
+      while (Date.now() < deadline) {
+        if (
+          (
+            await observer.ok(
+              `select ${pidA}=any(pg_catalog.pg_blocking_pids(${pidB}));`,
+            )
+          ).at(-1) === "t"
+        ) {
+          blocked = true;
+          break;
+        }
+        await new Promise((done) => setImmediate(done));
+      }
+      await a.ok("commit;");
+      const second = await pending;
+      const committed = await b.query(
+        second.code === "00000" ? "commit;" : "rollback;",
+      );
+      const finalCount = (
+        await observer.ok(
+          `select ((select count(*) from public.profiles where id=${lit(target)})+(select count(*) from app_private.technical_accounts where user_id=${lit(target)}))::text;`,
+        )
+      ).at(-1);
+      const fenceRevision = (
+        await observer.ok(
+          `select revision::text from app_private.principal_identity_fences where user_id=${lit(target)};`,
+        )
+      ).at(-1);
+      record(
+        `identity UUID update race ${firstIsolation}/${secondIsolation}: ${firstKind} first`,
+        blocked &&
+          finalCount === "1" &&
+          fenceRevision === "1" &&
+          !["40P01"].includes(second.code) &&
+          ["23514", "40001"].includes(
+            second.code === "00000" ? committed.code : second.code,
+          ),
+        {
+          blocked,
+          secondSQLSTATE: second.code,
+          commitSQLSTATE: committed.code,
+          finalPrincipalCount: finalCount,
+          fenceRevision,
+        },
+      );
+      await observer.ok(
+        `delete from public.profiles where id in (${lit(source)},${lit(target)});delete from app_private.technical_accounts where user_id in (${lit(source)},${lit(target)});`,
       );
     }
   }

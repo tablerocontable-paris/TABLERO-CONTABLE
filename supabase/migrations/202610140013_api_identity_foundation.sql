@@ -18,11 +18,26 @@ revoke create on schema public from public, anon, authenticated, service_role;
 revoke create on schema api from public, anon, authenticated, service_role;
 revoke create on schema app_private from public, anon, authenticated, service_role;
 
+
+-- Match ECMAScript String.trim without changing stored names.
+create function app_private.normalize_context_name(value text)
+returns text language sql immutable strict set search_path = ''
+as $$select pg_catalog.btrim(value,U&'\0009\000A\000B\000C\000D\0020\00A0\1680\2000\2001\2002\2003\2004\2005\2006\2007\2008\2009\200A\2028\2029\202F\205F\3000\FEFF')$$;
+revoke all on function app_private.normalize_context_name(text) from public, anon, authenticated, service_role;
+
+-- The row write forces stale snapshot transactions to serialize or abort.
+create table app_private.principal_identity_fences (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  revision bigint not null default 0 check (revision >= 0)
+);
+alter table app_private.principal_identity_fences enable row level security;
+revoke all on table app_private.principal_identity_fences from public, anon, authenticated, service_role;
+
 create table app_private.technical_accounts (
   user_id uuid primary key references auth.users(id),
   organization_id uuid not null references public.organizations(id),
   display_name text not null check (
-    pg_catalog.char_length(pg_catalog.btrim(display_name)) between 1 and 200
+    pg_catalog.char_length(app_private.normalize_context_name(display_name)) between 1 and 200
   ),
   active boolean not null default true,
   created_at timestamptz not null default pg_catalog.now()
@@ -46,6 +61,10 @@ begin
     principal_id := new.user_id;
   end if;
   perform pg_catalog.pg_advisory_xact_lock(1110, pg_catalog.hashtext(principal_id::text));
+  insert into app_private.principal_identity_fences(user_id,revision)
+    values(principal_id,1)
+    on conflict(user_id) do update
+    set revision=app_private.principal_identity_fences.revision+1;
 
   if tg_table_schema = 'public' then
     select exists(select 1 from app_private.technical_accounts t where t.user_id = principal_id)
@@ -87,21 +106,21 @@ declare
   company_ids uuid[];
   needs_mfa boolean;
 begin
-  if actor_id is null or token_role is distinct from 'authenticated' or aal not in ('aal1','aal2') then
+  if actor_id is null or token_role is distinct from 'authenticated' or aal is null or aal not in ('aal1','aal2') then
     raise exception using errcode = '42501', message = 'Contexto no disponible';
   end if;
 
   select count(*) into principal_count from (
-    select 1 from public.profiles p where p.id = actor_id and p.active
+    select 1 from public.profiles p where p.id = actor_id
     union all
-    select 1 from app_private.technical_accounts t where t.user_id = actor_id and t.active
+    select 1 from app_private.technical_accounts t where t.user_id = actor_id
   ) active_principals;
 
   if principal_count <> 1 then
     raise exception using errcode = '42501', message = 'Contexto no disponible';
   end if;
 
-  select p.id, p.organization_id, pg_catalog.btrim(p.name) as display_name, p.role
+  select p.id, p.organization_id, app_private.normalize_context_name(p.name) as display_name, p.role
     into profile_row
     from public.profiles p
     where p.id = actor_id and p.active;
@@ -137,7 +156,7 @@ begin
     );
   end if;
 
-  select t.user_id, t.organization_id, pg_catalog.btrim(t.display_name) as display_name
+  select t.user_id, t.organization_id, app_private.normalize_context_name(t.display_name) as display_name
     into technical_row
     from app_private.technical_accounts t
     where t.user_id = actor_id and t.active;

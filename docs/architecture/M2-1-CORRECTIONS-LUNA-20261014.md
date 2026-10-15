@@ -1,8 +1,10 @@
-# M2.1: correcciones ejecutables para Luna
+# M2.1: contrato implementado y pendiente de aceptación independiente
 
-Fecha: 14/10/2026. Leer `M2-1-SOL-REVIEW-20261014.md`, AGENTS y EXECUTION-NEXT.
-Implementación: GPT-6 Luna, medio, Standard. Revisión posterior: Sol alto.
-No iniciar M2.2 ni crear014 durante esta ejecución.
+Fecha: 14/10/2026. Este documento fue el contrato para corregir la revisión de
+Sol. Las correcciones ya están implementadas localmente; consultar la evidencia
+actual en `review-evidence/m2-1-corrected-implementation-20261014.json`.
+Pendiente: revisión independiente Sol alto. No iniciar M2.2 ni crear014 hasta
+aceptación. Conserva criterios y comandos del trabajo ejecutado.
 
 ## Alcance y archivo SQL
 

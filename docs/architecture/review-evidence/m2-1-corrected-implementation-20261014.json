@@ -1,0 +1,228 @@
+{
+  "sourceCommit": "4a078e48a25cb4f7050e9cb4d6c9606775fe8d80",
+  "engine": "postgres (PostgreSQL) 17.11",
+  "migrationSha256": "d013b82bfa1101ed11a35daeaf7a64b2e6063da9c09b55e7586ce67cc586bac2",
+  "candidate": null,
+  "total": 24,
+  "passed": 24,
+  "failed": 0,
+  "results": [
+    {
+      "name": "business missing AAL",
+      "passed": true,
+      "expectedSQLSTATE": "42501",
+      "observedSQLSTATE": "42501"
+    },
+    {
+      "name": "business null AAL",
+      "passed": true,
+      "expectedSQLSTATE": "42501",
+      "observedSQLSTATE": "42501"
+    },
+    {
+      "name": "business empty AAL",
+      "passed": true,
+      "expectedSQLSTATE": "42501",
+      "observedSQLSTATE": "42501"
+    },
+    {
+      "name": "business unknown AAL",
+      "passed": true,
+      "expectedSQLSTATE": "42501",
+      "observedSQLSTATE": "42501"
+    },
+    {
+      "name": "technical missing AAL",
+      "passed": true,
+      "expectedSQLSTATE": "42501",
+      "observedSQLSTATE": "42501"
+    },
+    {
+      "name": "technical null AAL",
+      "passed": true,
+      "expectedSQLSTATE": "42501",
+      "observedSQLSTATE": "42501"
+    },
+    {
+      "name": "technical empty AAL",
+      "passed": true,
+      "expectedSQLSTATE": "42501",
+      "observedSQLSTATE": "42501"
+    },
+    {
+      "name": "technical unknown AAL",
+      "passed": true,
+      "expectedSQLSTATE": "42501",
+      "observedSQLSTATE": "42501"
+    },
+    {
+      "name": "whitespace-only display name",
+      "passed": true,
+      "expected": "deny",
+      "observedSQLSTATE": "42501",
+      "decoded": null
+    },
+    {
+      "name": "Unicode code-point display name",
+      "passed": true,
+      "expected": "decode",
+      "observedSQLSTATE": "00000",
+      "decoded": true
+    },
+    {
+      "name": "mixed ECMAScript whitespace",
+      "passed": true,
+      "expected": "normalized",
+      "observedSQLSTATE": "00000",
+      "decoded": true
+    },
+    {
+      "name": "maximum 200 code points",
+      "passed": true,
+      "expected": "decode",
+      "observedSQLSTATE": "00000",
+      "decoded": true
+    },
+    {
+      "name": "over maximum 201 code points",
+      "passed": true,
+      "expected": "deny",
+      "observedSQLSTATE": "42501",
+      "decoded": null
+    },
+    {
+      "name": "corrupted dual identity with an inactive duplicate",
+      "passed": true,
+      "expectedSQLSTATE": "42501",
+      "observedSQLSTATE": "42501"
+    },
+    {
+      "name": "identity race read committed: business first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "23514",
+      "commitSQLSTATE": "00000",
+      "coexist": false
+    },
+    {
+      "name": "identity race read committed: technical first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "23514",
+      "commitSQLSTATE": "00000",
+      "coexist": false
+    },
+    {
+      "name": "identity race repeatable read: business first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "40001",
+      "commitSQLSTATE": "00000",
+      "coexist": false
+    },
+    {
+      "name": "identity race repeatable read: technical first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "40001",
+      "commitSQLSTATE": "00000",
+      "coexist": false
+    },
+    {
+      "name": "identity race serializable: business first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "40001",
+      "commitSQLSTATE": "00000",
+      "coexist": false
+    },
+    {
+      "name": "identity race serializable: technical first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "40001",
+      "commitSQLSTATE": "00000",
+      "coexist": false
+    },
+    {
+      "name": "identity UUID update race read committed/repeatable read: business first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "40001",
+      "commitSQLSTATE": "00000",
+      "finalPrincipalCount": "1",
+      "fenceRevision": "1"
+    },
+    {
+      "name": "identity UUID update race repeatable read/read committed: business first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "23514",
+      "commitSQLSTATE": "00000",
+      "finalPrincipalCount": "1",
+      "fenceRevision": "1"
+    },
+    {
+      "name": "identity UUID update race read committed/repeatable read: technical first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "40001",
+      "commitSQLSTATE": "00000",
+      "finalPrincipalCount": "1",
+      "fenceRevision": "1"
+    },
+    {
+      "name": "identity UUID update race repeatable read/read committed: technical first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "23514",
+      "commitSQLSTATE": "00000",
+      "finalPrincipalCount": "1",
+      "fenceRevision": "1"
+    }
+  ],
+  "providerAuth": "synthetic claims only; no hosted Supabase connection",
+  "references": [
+    "https://www.postgresql.org/docs/17/transaction-iso.html",
+    "https://www.postgresql.org/docs/17/xfunc-volatility.html"
+  ],
+  "implementation": {
+    "migrationSha256Raw": "d013b82bfa1101ed11a35daeaf7a64b2e6063da9c09b55e7586ce67cc586bac2",
+    "noCandidateTransform": true,
+    "sourceChanges": [
+      "supabase/migrations/202610140013_api_identity_foundation.sql",
+      "tests/helpers/accounting-lab.ts",
+      "tests/review/m2-1-native-review.mjs",
+      "tests/supabase-identity-foundation.test.ts"
+    ],
+    "migrationVersionsChanged": [
+      "013"
+    ],
+    "migration012AndEarlierChanged": false,
+    "syntheticOnly": true
+  },
+  "vitest": {
+    "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+    "files": 69,
+    "passed": 690,
+    "failed": 0
+  },
+  "focused": {
+    "files": 2,
+    "passed": 22,
+    "failed": 0
+  },
+  "build": {
+    "typescript": true,
+    "viteClient": true,
+    "worker": true,
+    "workerOutput": "dist/server/index.js",
+    "command": "npm run build using portable npm 12.2.0"
+  },
+  "boundaries": [
+    "No Supabase hosted project or Auth connection",
+    "No migration deployment",
+    "No frontend, Worker/D1, Site, or migration 001-012 changes",
+    "M2.1 remains pending independent Sol review"
+  ]
+}

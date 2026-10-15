@@ -1,4 +1,4 @@
-> **Acción vigente tras revisión 14/10/2026:** M2.1 no aceptado. GPT-6 Luna, medio, Standard ejecuta únicamente architecture/M2-1-CORRECTIONS-LUNA-20261014.md; luego Sol alto revisa. Revisión nativa actual 5/11; propuesta aislada 11/11. No iniciar014/M2.2 ni servicios antes de aceptar la corrección. Selección manual, sin simular modelos ni delegar para sustituirla.
+> **Acción vigente 14/10/2026:** las correcciones M2.1 para SQL013 están implementadas localmente. Suites: PostgreSQL17.11 nativo24/24, Vitest690/690, TypeScript y build cliente/Worker. Próximo: GPT-6.1 Sol, esfuerzo alto, Standard, para aceptar o devolver correcciones concretas sobre el diff de `migration/github-bootstrap` y `M2-1-CORRECTIONS-LUNA-20261014.md`. No iniciar M2.2/014 ni conectar/desplegar servicios hasta aceptar013. Selección manual; no afirmar un modelo ejecutor si la app no lo expone/verifica.
 
 # Modelos y uso del plan Plus — 01/10/2026
 

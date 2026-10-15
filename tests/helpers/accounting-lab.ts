@@ -63,11 +63,17 @@ export class AccountingLab {
   async admin() {
     await this.db.exec("reset role");
   }
-  async actor(actorId = ids.owner, aal = "aal1", tokenRole = "authenticated") {
+  async actor(actorId = ids.owner, aal = "aal1", tokenRole?: string) {
     await this.admin();
     await this.db.query(
       "select set_config('request.jwt.claim.sub',$1,false),set_config('request.jwt.claims',$2,false)",
-      [actorId, JSON.stringify({ aal, role: tokenRole })],
+      [
+        actorId,
+        JSON.stringify({
+          aal,
+          ...(tokenRole === undefined ? {} : { role: tokenRole }),
+        }),
+      ],
     );
     await this.db.exec("set role authenticated");
   }
@@ -240,6 +246,19 @@ export class AccountingLab {
       data[table] = await this.rows(
         `select to_jsonb(t) row from public.${table} t order by to_jsonb(t)::text`,
       );
+    }
+    for (const table of ["technical_accounts", "principal_identity_fences"]) {
+      if (
+        (
+          await this.first("select to_regclass($1) is not null exists", [
+            `app_private.${table}`,
+          ])
+        ).exists
+      ) {
+        data[`app_private.${table}`] = await this.rows(
+          `select to_jsonb(t) row from app_private.${table} t order by to_jsonb(t)::text`,
+        );
+      }
     }
     return data;
   }

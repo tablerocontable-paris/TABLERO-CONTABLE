@@ -11,6 +11,20 @@
 
 # Estado de ejecución vigente — 14/10/2026
 
+## Acción vigente — revisión independiente de M2.1
+
+La implementación de correcciones para 013 quedó localmente completa: PostgreSQL
+17.11 nativo **24/24**, Vitest **690/690 en69 archivos**, TypeScript y builds de
+cliente/Worker aprobados. Incluye upgrade poblado 012→013 con familias de datos
+no vacías, pruebas de ACL/default privileges, cuatro estados de identidad dual y
+rollback de fence. Evidencia: `architecture/review-evidence/m2-1-corrected-implementation-20261014.json`.
+El diff está en `migration/github-bootstrap`; primero completar el commit y el
+bundle portable de esta fase. Luego seleccionar **GPT-6.1 Sol, esfuerzo alto,
+Standard** para revisar cambios, hashes, carreras, privacidad y criterios del
+contrato M2.1. No iniciar 014/M2.2, conectar cuentas ni desplegar antes de su
+aceptación. Sin cambios en App, Worker/D1, Site o migraciones 001–012. El avance
+global orientativo sigue ~45% y no se recalcula con esta etapa local.
+
 ## Revisión de aceptación posterior — acción vigente
 
 S38/S44 aceptados técnicamente tras revisión independiente del código y 69/69
