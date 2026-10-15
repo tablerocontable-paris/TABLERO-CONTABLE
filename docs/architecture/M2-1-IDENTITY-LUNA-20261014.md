@@ -1,5 +1,9 @@
 # M2.1: contrato ejecutable para Luna
 
+> Estado15/10: M2.1 aceptado en alcance local. Ver M2-1-SOL-ACCEPTANCE-20261015.md;
+> la implementación de013 incorpora el contrato de correcciones y42/42 escenarios
+> nativos. No reimplementar este contrato; siguiente M2-2A-OPERATIVE-API-LUNA-20261015.md.
+
 > Revisión14/10: la implementación inicial no fue aceptada. La siguiente ejecución
 > usa M2-1-CORRECTIONS-LUNA-20261014.md, que amplía este contrato con la coordinación
 > de identidad entre snapshots y las regresiones independientes. Ver M2-1-SOL-REVIEW-20261014.md.

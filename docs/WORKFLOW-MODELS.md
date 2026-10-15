@@ -1,4 +1,4 @@
-> **Acción vigente 14/10/2026:** las correcciones M2.1 para SQL013 están implementadas localmente. Suites: PostgreSQL17.11 nativo24/24, Vitest690/690, TypeScript y build cliente/Worker. Próximo: GPT-6.1 Sol, esfuerzo alto, Standard, para aceptar o devolver correcciones concretas sobre el diff de `migration/github-bootstrap` y `M2-1-CORRECTIONS-LUNA-20261014.md`. No iniciar M2.2/014 ni conectar/desplegar servicios hasta aceptar013. Selección manual; no afirmar un modelo ejecutor si la app no lo expone/verifica.
+> **Acción vigente 15/10/2026:** M2.1 aceptado localmente (native42/42, focales27/27 y TypeScript). Próximo: GPT-6 Luna, medio, Standard, implementa `architecture/M2-2A-OPERATIVE-API-LUNA-20261015.md`. Después GPT-6.1 Sol alto revisa A y define B/C para completar M2.2. Selección manual según el flujo acordado, sin atribuir un modelo ejecutor no verificado. No desplegar014 parcial ni declarar paridad Supabase.
 
 # Modelos y uso del plan Plus — 01/10/2026
 

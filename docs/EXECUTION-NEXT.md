@@ -1,4 +1,4 @@
-> **Acción vigente M2 — revisión 14/10/2026: GPT-6 Luna, medio, Standard.** Ejecutar únicamente `architecture/M2-1-CORRECTIONS-LUNA-20261014.md`. Sol encontró cuatro defectos en 013; revisión nativa 5/11, propuesta aislada 11/11. Informe: `architecture/M2-1-SOL-REVIEW-20261014.md`. PostgreSQL portable está en `work/pg-runtime/pgsql/bin`; ya no corresponde marcarlo ausente. Corregir013 aún sin aplicación remota, ampliar pruebas y validar la migración real sin --candidate. Luego Sol alto acepta/rechaza.014 y el contrato ejecutable M2.2 esperan esa aceptación; no desplegar ni conectar servicios. Rama `migration/github-bootstrap`, sin remoto.
+> **Acción vigente 15/10/2026: GPT-6 Luna, medio, Standard.** M2.1 aceptado localmente, informe `architecture/M2-1-SOL-ACCEPTANCE-20261015.md`. Implementar únicamente `architecture/M2-2A-OPERATIVE-API-LUNA-20261015.md`: protocolo API y operativas sobre tareas existentes. M2.2 completo requiere A/B/C; B/C esperan contrato posterior. Crear014 localmente, sin desplegarlo incompleto ni iniciar015. Mantener001–013/srcUI/Worker/Site y datos sintéticos. Sin remoto GitHub nuevo. El runner nativo de aceptación usa --review-matrix full (42/42).
 
 > Registro histórico del cierre de auditoría Sol (11/10/2026): en ese corte se identificaron 65 hallazgos/95 casos y la siguiente acción era implementar la etapa 1 con Luna. El estado actual figura en la actualización del 12/10 inmediatamente debajo.
 
@@ -11,7 +11,7 @@
 
 # Estado de ejecución vigente — 14/10/2026
 
-## Acción vigente — revisión independiente de M2.1
+## Corte anterior — implementación M2.1 del14/10, aceptada el15/10
 
 La implementación de correcciones para 013 quedó localmente completa: PostgreSQL
 17.11 nativo **24/24**, Vitest **690/690 en69 archivos**, TypeScript y builds de

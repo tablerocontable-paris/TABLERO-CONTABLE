@@ -463,6 +463,118 @@ try {
       );
     }
   }
+  // Independent acceptance: the waiting transaction also changes an existing UUID.
+  if (flags["--review-matrix"] === "full") {
+    const makePrincipal = (kind, id) =>
+      kind === "business"
+        ? `insert into public.profiles(id,organization_id,name,role,sector,branch,position) values(${lit(id)},${lit(org)},'Acceptance fixture','empleado','Test','Test','Test');`
+        : `insert into app_private.technical_accounts(user_id,organization_id,display_name) values(${lit(id)},${lit(org)},'Acceptance fixture');`;
+    const changeIdentity = (kind, from, to) =>
+      kind === "business"
+        ? `update public.profiles set id=${lit(to)} where id=${lit(from)};`
+        : `update app_private.technical_accounts set user_id=${lit(to)} where user_id=${lit(from)};`;
+    const waitForBlock = async () => {
+      const until = Date.now() + 10000;
+      while (Date.now() < until) {
+        if (
+          (
+            await observer.ok(`select ${pidA}=any(pg_blocking_pids(${pidB}));`)
+          ).at(-1) === "t"
+        )
+          return true;
+        await new Promise((done) => setImmediate(done));
+      }
+      return false;
+    };
+    for (const firstKind of ["business", "technical"])
+      for (const firstMutation of ["insert", "update"]) {
+        const secondKind = firstKind === "business" ? "technical" : "business";
+        for (const [firstIsolation, secondIsolation] of [
+          ["read committed", "read committed"],
+          ["read committed", "repeatable read"],
+          ["repeatable read", "read committed"],
+          ["repeatable read", "repeatable read"],
+        ]) {
+          const target = uid(++serial),
+            sourceA = uid(++serial),
+            sourceB = uid(++serial);
+          await observer.ok(
+            `insert into auth.users(id) values(${lit(target)}),(${lit(sourceA)}),(${lit(sourceB)});`,
+          );
+          if (firstMutation === "update")
+            await observer.ok(makePrincipal(firstKind, sourceA));
+          await observer.ok(makePrincipal(secondKind, sourceB));
+          await a.ok(`begin isolation level ${firstIsolation};`);
+          await b.ok(
+            `begin isolation level ${secondIsolation};select count(*) from public.profiles;`,
+          );
+          await a.ok(
+            firstMutation === "insert"
+              ? makePrincipal(firstKind, target)
+              : changeIdentity(firstKind, sourceA, target),
+          );
+          const pending = b.query(changeIdentity(secondKind, sourceB, target));
+          const blocked = await waitForBlock();
+          await a.ok("commit;");
+          const second = await pending;
+          await b.ok("rollback;");
+          const state = JSON.parse(
+            (
+              await observer.ok(
+                `select json_build_object('targetCount',(select count(*) from public.profiles where id=${lit(target)})+(select count(*) from app_private.technical_accounts where user_id=${lit(target)}),'loserPreserved',(select count(*) from public.profiles where id=${lit(sourceB)})+(select count(*) from app_private.technical_accounts where user_id=${lit(sourceB)}),'fenceRevision',(select revision::text from app_private.principal_identity_fences where user_id=${lit(target)}));`,
+              )
+            ).at(-1),
+          );
+          record(
+            `acceptance ${firstKind} ${firstMutation}/update ${firstIsolation}/${secondIsolation}`,
+            blocked &&
+              ["23514", "40001"].includes(second.code) &&
+              state.targetCount === 1 &&
+              state.loserPreserved === 1 &&
+              state.fenceRevision === "1",
+            { blocked, secondSQLSTATE: second.code, ...state },
+          );
+        }
+      }
+    for (const firstKind of ["business", "technical"]) {
+      const target = uid(++serial),
+        secondKind = firstKind === "business" ? "technical" : "business";
+      await observer.ok(`insert into auth.users(id) values(${lit(target)});`);
+      await a.ok("begin;");
+      await b.ok(
+        "begin isolation level repeatable read;select count(*) from public.profiles;",
+      );
+      await a.ok(makePrincipal(firstKind, target));
+      const pending = b.query(makePrincipal(secondKind, target));
+      const blocked = await waitForBlock();
+      await a.ok("rollback;");
+      const second = await pending;
+      const committed = await b.query(
+        second.code === "00000" ? "commit;" : "rollback;",
+      );
+      const state = JSON.parse(
+        (
+          await observer.ok(
+            `select json_build_object('targetCount',(select count(*) from public.profiles where id=${lit(target)})+(select count(*) from app_private.technical_accounts where user_id=${lit(target)}),'fenceRevision',(select revision::text from app_private.principal_identity_fences where user_id=${lit(target)}));`,
+          )
+        ).at(-1),
+      );
+      record(
+        `acceptance rollback winner ${firstKind}`,
+        blocked &&
+          second.code === "00000" &&
+          committed.code === "00000" &&
+          state.targetCount === 1 &&
+          state.fenceRevision === "1",
+        {
+          blocked,
+          secondSQLSTATE: second.code,
+          commitSQLSTATE: committed.code,
+          ...state,
+        },
+      );
+    }
+  }
   const sqlFile = join(
     root,
     "supabase/migrations/202610140013_api_identity_foundation.sql",

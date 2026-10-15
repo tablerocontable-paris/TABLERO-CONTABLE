@@ -1,4 +1,4 @@
-> **Continuidad actualizada 14/10/2026:** usar el paquete M2 con esta guía y su manifiesto. Los paquetes M0/M1 son cortes anteriores. Leer docs/EXECUTION-NEXT.md para el contrato vigente; el bundle no configura cuentas ni migra datos del navegador.
+> **Continuidad actualizada 15/10/2026:** usar `grupo-paris-m2-1-accepted-20261015.zip`, esta guía y su manifiesto. M2.1 está aceptado localmente; el próximo contrato es M2-2A-OPERATIVE-API-LUNA-20261015.md. Los paquetes anteriores son históricos. El bundle conserva Git y el mismo proyecto; no configura cuentas ni migra datos del navegador.
 
 # Grupo París en tu PC personal
 

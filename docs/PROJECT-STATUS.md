@@ -1,4 +1,4 @@
-> **Corte vigente: revisión M2.1 NO aceptada (14/10/2026).** Cuatro defectos reproducidos en PostgreSQL nativo; propuesta aislada 11/11. Próximo: Luna medio Standard ejecuta architecture/M2-1-CORRECTIONS-LUNA-20261014.md y después Sol alto revisa. Los cortes anteriores son históricos. 014/M2.2 esperan la aceptación de 013; avance global ~45% histórico.
+> **Corte vigente 15/10/2026: M2.1 aceptado localmente.** Los cuatro defectos anteriores quedaron resueltos. Revisión independiente: PostgreSQL42/42, focales27/27 y TypeScript; fuentes de producto iguales al corte690/690/builds del14/10. Informe architecture/M2-1-SOL-ACCEPTANCE-20261015.md. Próximo: Luna medio Standard implementa architecture/M2-2A-OPERATIVE-API-LUNA-20261015.md. M2.2 completo requiere A/B/C; sólo A tiene contrato ejecutable. Sin aceptación de servicios alojados ni despliegue. ~45% histórico, sin recalcular por revisión/documentación.
 
 > **Diseño M2 — 14/10/2026.** Inventario estático de 90 fuentes/38 campos State y matriz completa de consultas/comandos, con siete bloques de migración a Supabase. Se definieron fronteras de API, identidad técnica separada, privacidad de anotaciones, operativas versionadas, cierres por empresa, evidencia y recuperación. Contrato inmediato cerrado para M2.1; los demás requieren desglose/revisión antes de Luna. Ver architecture/SUPABASE-M2-CONTRACT-20261014.md y architecture/M2-1-IDENTITY-LUNA-20261014.md. Reproducibilidad M1 verificada ahora sobre clonación limpia con npm ci: Node24.19/npm portable12.2, 223 paquetes, 668/668, TypeScript/builds/paquete Sites aprobados; Git limpio. Se corrigió la guía portable. Evidencia: architecture/review-evidence/m2-architecture-contract-20261014.json. SQL013 y la app Supabase aún no están implementados. ~45% histórico sin recalcular.
 
@@ -12,6 +12,18 @@
 > **Reauditoría del recorrido S39 — 14/10/2026.** La lectura módulo por módulo encontró brechas después de la validación anterior: algunos pasos aún apuntaban a controles generales, y una vista sin laboratorio no resolvía su destino de calendario. Se ajustaron los anclajes internos, los estados vacíos, el despliegue temporal de Catálogo y el recálculo de posición al cambiar el viewport. El recorrido no abre formularios ni ejecuta acciones de negocio; empleado, encargado y jefe conservan sus permisos.
 > Suite completa: **663/663 en 67 archivos**. TypeScript, build cliente y Worker pasan. Edge: **31/31**, tours completos para los tres roles (11/13/15 pasos), desktop 1440×900 y coach móvil 390×844; cero errores JS y cero llamadas a la API operativa. Revisión independiente Sol y aceptación humana con lector de pantalla siguen pendientes. Evidencia: `docs/architecture/review-evidence/s39-tour-refresh-20261014.json` y `outputs/s39-tour-refresh-20261014/browser-validation.json`. No se hizo commit ni publicación; avance global ~45%.
 # Estado del proyecto Grupo París
+
+> **Aceptación M2.1 — 15/10/2026.** Se revisaron migración013, decoder, permisos,
+> fixtures y evidencia del commit a93f7d0. Las cinco pruebas independientes nuevas
+> cubren todas las tablas públicas y snapshots en upgrade, whitespace completo,
+> nombres técnicos200/201 Unicode, ACL y JWT vigente al inactivar. Runner nativo
+> ampliado:42/42, incluidas carreras con actualizador esperando y rollback de la
+> primera sesión; focales27/27 y TypeScript pasan. Producto001–013/src intacto,
+> por lo que suite690/690/builds se conservan como evidencia histórica coincidente.
+> M2.1 queda aceptado en alcance local. M2.2A tiene contrato ejecutable para
+> protocolo y operativas; seguimiento/dependencias y creación/inducción/catálogo
+> sin metas completarán B/C bajo revisión posterior. El backend no está conectado
+> al proveedor ni a la UI. Evidencia: architecture/review-evidence/m2-1-independent-acceptance-20261015.json.
 
 > **M2.1 corregido y listo para revisión Sol — 14/10/2026.** La migración 013 ahora deniega AAL ausente/null, reconoce identidades dobles aunque una esté inactiva, normaliza nombres con el mismo conjunto Unicode que el decoder y serializa cambios de UUID con filas de fence. `AccountingLab.actor()` volvió a preservar claims históricos sin `role`; el wrapper de estas pruebas envía explícitamente `authenticated`. El upgrade 012→013 conserva filas y snapshots de datos de prueba poblados, y se amplió la matriz ACL, corrupción y rollback. PostgreSQL17.11 nativo: **24/24**, incluidas carreras insert/update, RC/RR/Serializable y bloqueos observados; Vitest completa: **690/690 en69 archivos**; TypeScript, build cliente y Worker aprobados. Evidencia en `architecture/review-evidence/m2-1-corrected-implementation-20261014.json`. Sólo entorno local descartable/sintético: no se conectó ni desplegó Supabase. Próximo paso: GPT-6.1 Sol, esfuerzo alto, revisión independiente contra `M2-1-CORRECTIONS-LUNA-20261014.md`; M2.2/014 permanece bloqueado hasta aceptación. Avance global sigue ~45% histórico.
 

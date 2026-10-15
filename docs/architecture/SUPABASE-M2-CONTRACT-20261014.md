@@ -1,5 +1,11 @@
 # M2: contrato de migración a Supabase
 
+> Estado15/10: M2.1 aceptado localmente, ver M2-1-SOL-ACCEPTANCE-20261015.md.
+> La tabla de siete bloques conserva vigencia; M2.2/014 se ejecuta en A/B/C.
+> Sólo A tiene contrato inmediato: M2-2A-OPERATIVE-API-LUNA-20261015.md. B/C
+> requieren desglose posterior para completar014 antes de desplegar. No afirmar
+> aceptación de M2.2 por terminar A. Las notas del14/10 siguientes son históricas.
+
 > Revisión M2.1 del14/10: no aceptado; cuatro defectos reproducidos en PostgreSQL.
 > El mecanismo de identidad requiere además del advisory lock una fila privada
 > de coordinación actualizada, para abortar snapshots obsoletos. Decisión y prueba

@@ -1,10 +1,13 @@
-# M2.1: contrato implementado y pendiente de aceptación independiente
+# M2.1: contrato implementado y aceptado localmente
+
+> Aceptación independiente15/10: ver M2-1-SOL-ACCEPTANCE-20261015.md. Los criterios
+> y comandos de este documento se conservan como historia de implementación.
 
 Fecha: 14/10/2026. Este documento fue el contrato para corregir la revisión de
 Sol. Las correcciones ya están implementadas localmente; consultar la evidencia
 actual en `review-evidence/m2-1-corrected-implementation-20261014.json`.
-Pendiente: revisión independiente Sol alto. No iniciar M2.2 ni crear014 hasta
-aceptación. Conserva criterios y comandos del trabajo ejecutado.
+Aceptación local cerrada el15/10; no acredita servicios alojados. Siguiente:
+M2-2A-OPERATIVE-API-LUNA-20261015.md. Conserva criterios y comandos ejecutados.
 
 ## Alcance y archivo SQL
 
