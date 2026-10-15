@@ -37,8 +37,10 @@ cantidad existente de movimientos permaneció igual y la transacción se revirti
 
 Todos los ensayos usan fixtures ficticios/locales. No prueban Supabase alojado,
 Auth/MFA real, permisos remotos ni despliegues. El candidato anterior conserva
-el defecto y no es una entrega aceptada. **Siguiente paso:** verificar el bundle
-de este commit en clonación limpia; después revisión independiente GPT‑6.1 Sol,
-esfuerzo alto, Standard. B/C continúan fuera del alcance hasta aceptar A.
+el defecto y no es una entrega aceptada. **Siguiente paso:** revisión
+independiente GPT‑6.1 Sol, esfuerzo alto, Standard. El bundle y ZIP del commit
+de evidencia `de38b3d` quedaron verificados desde clonación limpia; el HEAD
+restaurado coincide con el manifiesto. B/C continúan fuera del alcance hasta
+aceptar A.
 
 Detalle y hashes: `review-evidence/m2-2a-r6-implementation-20261015.json`.

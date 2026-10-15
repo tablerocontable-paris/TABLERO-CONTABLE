@@ -9,10 +9,13 @@ Resultados: matriz R6 30/30, sonda independiente 9/9, pruebas previas 15/15,
 focales 17/17, PostgreSQL nativo 61/61 RC/RC + 61/61 RR/RR + 43/43 RC/RR +
 43/43 RR/RC, suite 712/712, TypeScript y builds de cliente/Worker aprobados.
 
-El commit R6 es **08b7405**; su hook automático pasó **196/196 en 19 archivos**.
-Siguiente acción: empaquetar las ramas `main` y `migration/github-bootstrap` y
-verificar el ZIP desde clonación limpia. Luego **GPT‑6.1 Sol, esfuerzo alto,
-Standard** revisa el commit y el paquete; si lo acepta, define el contrato B/C.
+El commit de código R6 es **08b7405** y el commit de evidencia **de38b3d**;
+ambos hooks automáticos pasaron **196/196 en 19 archivos**. Bundle y ZIP se
+verificaron en clonación limpia; el HEAD restaurado coincide con el manifiesto.
+Paquete: `outputs/m2-2a-r6-candidate-delivery-20261015`.
+
+Siguiente acción: **GPT‑6.1 Sol, esfuerzo alto, Standard**, revisa el commit y el
+paquete como evaluador independiente. Si acepta M2.2A, define el contrato B/C.
 No iniciar B/C antes de la aceptación, ni desplegar 014 ni conectar cuentas.
 Conservar 001–013/UI/Worker/Site. Avance ~45% histórico, sin recalcular.
 

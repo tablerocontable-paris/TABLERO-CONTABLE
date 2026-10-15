@@ -14,13 +14,15 @@ TypeScript, build de cliente y build de Worker aprobados. Se probó además en
 PostgreSQL nativo el rechazo de `expectedRevisions: {}` con estado sin cambios.
 Evidencia y hashes: `architecture/review-evidence/m2-2a-r6-implementation-20261015.json`.
 
-La corrección quedó guardada en el commit **08b7405** y pasó el hook pre-commit
-**196/196 en 19 archivos**. Está lista para revisión independiente de **GPT‑6.1
-Sol, esfuerzo alto, Standard** después de verificar el nuevo bundle en clonación
-limpia. Los candidatos anteriores 9c096973/4597e74 conservan el defecto. No
-iniciar B/C, desplegar 014 ni conectar cuentas. Integración alojada y aceptación
-final siguen pendientes. El avance permanece ~45% histórico, sin recalcular por
-este corte.
+La corrección quedó guardada en `08b7405`; la evidencia documental en `de38b3d`.
+Ambos commits pasaron el hook pre-commit **196/196 en 19 archivos**. El bundle y
+ZIP de `de38b3d` se verificaron con clonación limpia: el HEAD restaurado coincide
+con el manifiesto. Paquete: `outputs/m2-2a-r6-candidate-delivery-20261015`.
+
+Próximo: revisión independiente de **GPT‑6.1 Sol, esfuerzo alto, Standard**.
+Los candidatos anteriores 9c096973/4597e74 conservan el defecto. No iniciar
+B/C, desplegar 014 ni conectar cuentas. Integración alojada y aceptación final
+siguen pendientes. El avance permanece ~45% histórico, sin recalcular por este corte.
 
 ## Candidato anterior — M2.2A pendiente de revisión, 15/10/2026
 
