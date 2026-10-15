@@ -17,7 +17,7 @@
 > mínimo estricto sin iniciar sesión ni tocar State. Verificación: 688/688 en
 > 69 archivos, TypeScript y build cliente/Worker aprobados; prueba focal 20/20.
 > Evidencia: `architecture/review-evidence/m2-1-identity-implementation-20261014.json`.
-> Sigue sin commit y sin conexión remota. PostgreSQL de dos sesiones para la
+> Tiene commit local y sigue sin conexión remota. PostgreSQL de dos sesiones para la
 > carrera de doble identidad y revisión independiente Sol permanecen pendientes;
 > PGlite secuencial no sustituye esa comprobación. No se conecta UI ni datos
 > operativos a Supabase. Próximo: GPT-6.1 Sol alto audita M2.1 y define el
