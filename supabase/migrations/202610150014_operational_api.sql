@@ -237,7 +237,7 @@ returns jsonb language plpgsql stable security definer set search_path='' as $$
 declare c jsonb; p jsonb;
 begin
  c:=api.get_context_v1(); p:=c->'principal';
- if p->>'kind'<>'business' or (p->>'role') not in ('empleado','encargado','jefe') or (c->'authentication'->>'requiresMfa')::boolean then
+ if p->>'kind' is distinct from 'business' or p->>'role' is null or (p->>'role') not in ('empleado','encargado','jefe') or (c->'authentication'->>'requiresMfa')::boolean is distinct from false then
    raise exception using errcode='42501',message='Contexto no autorizado';
  end if;
  if p_privileged and (p->>'role'<>'jefe' or c->'authentication'->>'aal'<>'aal2') then
@@ -248,16 +248,21 @@ end $$;
 
 create function app_private.api_exact_keys(p_value jsonb,p_keys text[]) returns boolean
 language sql immutable set search_path='' as $$
- select case when jsonb_typeof(p_value)='object' then
-   (select array_agg(k order by k) from jsonb_object_keys(p_value) k)=
-   (select array_agg(k order by k) from unnest(p_keys) k)
-   else false end
+ select coalesce(
+   case when jsonb_typeof(p_value) is distinct from 'object' or p_keys is null then false
+   else (
+     select count(*)=cardinality(p_keys)
+       and coalesce(bool_and(k=any(p_keys)),cardinality(p_keys)=0)
+     from jsonb_object_keys(p_value) as keys(k)
+   ) end,
+   false
+ )
 $$;
 create function app_private.api_text(p_value jsonb,p_key text,p_min integer,p_max integer) returns text
 language plpgsql immutable set search_path='' as $$
 declare v text;
 begin
- if jsonb_typeof(p_value->p_key)<>'string' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
+ if jsonb_typeof(p_value->p_key) is distinct from 'string' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
  v:=app_private.normalize_context_name(p_value->>p_key);
  if char_length(v) not between p_min and p_max then raise exception using errcode='22023',message='Solicitud inválida'; end if;
  return v;
@@ -266,7 +271,7 @@ create function app_private.api_date(p_value jsonb,p_key text) returns date
 language plpgsql immutable set search_path='' as $$
 declare raw text; result date;
 begin
- if jsonb_typeof(p_value->p_key)<>'string' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
+ if jsonb_typeof(p_value->p_key) is distinct from 'string' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
  raw:=p_value->>p_key;
  if raw !~ '^(?!0000)\d{4}-\d{2}-\d{2}$' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
  begin result:=raw::date; exception when others then raise exception using errcode='22023',message='Solicitud inválida'; end;
@@ -288,7 +293,7 @@ create function app_private.api_uuid(p_value jsonb,p_key text) returns uuid
 language plpgsql immutable set search_path='' as $$
 declare raw text;
 begin
- if jsonb_typeof(p_value->p_key)<>'string' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
+ if jsonb_typeof(p_value->p_key) is distinct from 'string' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
  raw:=p_value->>p_key;
  if raw !~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
  return raw::uuid;
@@ -297,7 +302,7 @@ create function app_private.api_expected(p_value jsonb,p_key text) returns bigin
 language plpgsql immutable set search_path='' as $$
 declare raw text; result bigint;
 begin
- if jsonb_typeof(p_value->p_key)<>'string' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
+ if jsonb_typeof(p_value->p_key) is distinct from 'string' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
  raw:=p_value->>p_key;
  if raw !~ '^(0|[1-9][0-9]*)$' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
  begin result:=raw::bigint; exception when others then raise exception using errcode='22023',message='Solicitud inválida'; end;
@@ -307,7 +312,7 @@ create function app_private.api_integer(p_value jsonb,p_key text,p_min integer,p
 language plpgsql immutable set search_path='' as $$
 declare raw text; result integer;
 begin
- if jsonb_typeof(p_value->p_key)<>'number' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
+ if jsonb_typeof(p_value->p_key) is distinct from 'number' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
  raw:=p_value->>p_key;
  if raw !~ '^-?(0|[1-9][0-9]*)$' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
  begin result:=raw::integer; exception when others then raise exception using errcode='22023',message='Solicitud inválida'; end;
@@ -338,16 +343,16 @@ declare c jsonb; actor uuid:=auth.uid(); org uuid; role_name text; kind text; op
  result_data jsonb; existing app_private.api_command_receipts%rowtype; plan jsonb; people uuid[]; months jsonb; locks text[]; now_at timestamptz;
 begin
  if actor is null then raise exception using errcode='28000',message='Autenticación requerida'; end if;
- if octet_length(coalesce(p::text,''))>32768 or not app_private.api_exact_keys(p,array['contractVersion','operationId','kind','expectedRevisions','payload']) or jsonb_typeof(p->'contractVersion')<>'number' or p->>'contractVersion'<>'1' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
+ if octet_length(coalesce(p::text,''))>32768 or not app_private.api_exact_keys(p,array['contractVersion','operationId','kind','expectedRevisions','payload']) or jsonb_typeof(p->'contractVersion') is distinct from 'number' or p->>'contractVersion' is distinct from '1' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
  if jsonb_typeof(p->'kind') is distinct from 'string' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
  c:=app_private.api_require_business(false); org:=(c->'principal'->>'organizationId')::uuid; role_name:=c->'principal'->>'role';
  op:=app_private.api_uuid(p,'operationId'); kind:=p->>'kind'; payload:=p->'payload'; revisions:=p->'expectedRevisions';
- if jsonb_typeof(revisions)<>'object' or jsonb_typeof(payload)<>'object' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
+ if jsonb_typeof(revisions) is distinct from 'object' or jsonb_typeof(payload) is distinct from 'object' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
  if kind not in ('operation.record','operation.rate','operation.assess') then raise exception using errcode='0A000',message='Operación no disponible'; end if;
  if kind='operation.record' then
    if not app_private.api_exact_keys(payload,array['taskId','workDate','quantity','reference']) or not app_private.api_exact_keys(revisions,array['task:'||(payload->>'taskId')]) then raise exception using errcode='22023',message='Solicitud inválida'; end if;
    task_id:=app_private.api_uuid(payload,'taskId'); work_date:=app_private.api_date(payload,'workDate');
-   if jsonb_typeof(payload->'quantity')<>'number' or (payload->>'quantity') !~ '^[1-9][0-9]{0,6}$' or (payload->>'quantity')::integer>1000000 or (jsonb_typeof(payload->'reference') not in ('string','null')) then raise exception using errcode='22023',message='Solicitud inválida'; end if;
+   if jsonb_typeof(payload->'quantity') is distinct from 'number' or (payload->>'quantity') !~ '^[1-9][0-9]{0,6}$' or (payload->>'quantity')::integer>1000000 or (jsonb_typeof(payload->'reference') is distinct from 'string' and jsonb_typeof(payload->'reference') is distinct from 'null') then raise exception using errcode='22023',message='Solicitud inválida'; end if;
    amount:=(payload->>'quantity')::integer;
    if jsonb_typeof(payload->'reference')='string' then ref:=nullif(app_private.normalize_context_name(payload->>'reference'),''); if ref is not null and char_length(ref)>2000 then raise exception using errcode='22023',message='Solicitud inválida'; end if; else ref:=null; end if;
  elsif kind='operation.rate' then
@@ -357,7 +362,7 @@ begin
    task_id:=case when payload->>'taskId' is null then null else app_private.api_uuid(payload,'taskId') end;
    if not app_private.api_exact_keys(revisions,array[case when template_id is not null then 'rate:'||company_id||':template:'||template_id else 'rate:'||company_id||':task:'||task_id end]) then raise exception using errcode='22023',message='Solicitud inválida'; end if;
    work_date:=app_private.api_date(payload,'effectiveOn'); reason:=app_private.api_text(payload,'reason',5,1000);
-   if jsonb_typeof(payload->'unitWeight')<>'string' or (payload->>'unitWeight') !~ '^(0|[1-9][0-9]*)(\.[0-9]{1,6})?$' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
+   if jsonb_typeof(payload->'unitWeight') is distinct from 'string' or (payload->>'unitWeight') !~ '^(0|[1-9][0-9]*)(\.[0-9]{1,6})?$' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
    begin coeff:=(payload->>'unitWeight')::numeric(20,6); exception when others then raise exception using errcode='22023',message='Solicitud inválida'; end;
    if coeff<=0 or coeff>1000000 then raise exception using errcode='22023',message='Solicitud inválida'; end if;
  elsif kind='operation.assess' then
@@ -488,16 +493,25 @@ language plpgsql security definer set search_path='' as $$
  declare c jsonb; actor uuid:=auth.uid(); org uuid; role_name text; kind text; f jsonb; task_id uuid; target uuid; target_date date; company_id uuid; v_company uuid; template_id uuid; v_template uuid; lim integer; cursor_value text; cursor_json jsonb; cursor_at timestamptz; cursor_id uuid; cursor_version bigint; t public.task_instances%rowtype; r app_private.api_command_receipts%rowtype; data jsonb; next_cursor text; unit_value text; total numeric; rated numeric; unrated numeric; count_entries bigint; seconds numeric; full_weighted boolean; scope_rev bigint; now_at timestamptz; newest app_private.operational_assessment_versions%rowtype;
 begin
  if actor is null then raise exception using errcode='28000',message='Autenticación requerida'; end if;
- if octet_length(coalesce(p::text,''))>4096 or not app_private.api_exact_keys(p,array['contractVersion','kind','filters','cursor','limit']) or jsonb_typeof(p->'contractVersion')<>'number' or p->>'contractVersion'<>'1' then raise exception using errcode='22023',message='Consulta inválida'; end if;
+ if octet_length(coalesce(p::text,''))>4096 or not app_private.api_exact_keys(p,array['contractVersion','kind','filters','cursor','limit']) or jsonb_typeof(p->'contractVersion') is distinct from 'number' or p->>'contractVersion' is distinct from '1' then raise exception using errcode='22023',message='Consulta inválida'; end if;
  if jsonb_typeof(p->'kind') is distinct from 'string' then raise exception using errcode='22023',message='Consulta inválida'; end if;
  c:=app_private.api_require_business(false); org:=(c->'principal'->>'organizationId')::uuid; role_name:=c->'principal'->>'role'; kind:=p->>'kind'; f:=p->'filters';
  if jsonb_typeof(p->'limit') is distinct from 'number' then raise exception using errcode='22023',message='Consulta inválida'; end if; lim:=app_private.api_integer(p,'limit',1,100);
  if jsonb_typeof(p->'cursor') is distinct from 'string' and jsonb_typeof(p->'cursor') is distinct from 'null' then raise exception using errcode='22023',message='Consulta inválida'; end if; cursor_value:=p->>'cursor'; if cursor_value is not null and char_length(cursor_value)>2048 then raise exception using errcode='22023',message='Consulta inválida'; end if;
- if kind='commandReceipt' then perform public._coordination_lock_keys(1102,array[actor::text]); perform public._coordination_lock_keys(1103,array[actor::text]); end if;
- perform app_private.api_revalidate_actor(actor,c);
  if kind='commandReceipt' then
    if not app_private.api_exact_keys(f,array['operationId']) or lim<>1 or cursor_value is not null then raise exception using errcode='22023',message='Consulta inválida'; end if;
    target:=app_private.api_uuid(f,'operationId');
+ elsif kind in ('activityPage','operationalSummary','quality') then
+   if not app_private.api_exact_keys(f,array['taskId']) then raise exception using errcode='22023',message='Consulta inválida'; end if;
+   task_id:=app_private.api_uuid(f,'taskId');
+ elsif kind='rateHistory' then
+   if not app_private.api_exact_keys(f,array['companyId','templateId','taskId']) or ((f->>'templateId' is null)=(f->>'taskId' is null)) then raise exception using errcode='22023',message='Consulta inválida'; end if;
+ elsif kind not in ('activityPage','operationalSummary','quality','rateHistory','commandReceipt') then
+   raise exception using errcode='0A000',message='Consulta no disponible';
+ end if;
+ if kind='commandReceipt' then perform public._coordination_lock_keys(1102,array[actor::text]); perform public._coordination_lock_keys(1103,array[actor::text]); end if;
+ perform app_private.api_revalidate_actor(actor,c);
+ if kind='commandReceipt' then
    select * into r from app_private.api_command_receipts where actor_id=actor and operation_id=target;
    if found then
      if r.organization_id<>org then raise exception using errcode='42501',message='Consulta no disponible'; end if;
@@ -518,7 +532,7 @@ begin
    task_id:=app_private.api_uuid(f,'taskId'); perform app_private.api_lock_task_scope(actor,org,task_id); select * into t from public.task_instances where id=task_id and organization_id=org;
    if not found or t.kind<>'operativa' or not public.can_access_instance(task_id) then raise exception using errcode='42501',message='Consulta no disponible'; end if;
  elsif kind='rateHistory' then
-   if not app_private.api_exact_keys(f,array['companyId','templateId','taskId']) or ((f->>'templateId' is null)=(f->>'taskId' is null)) or role_name<>'jefe' or c->'authentication'->>'aal'<>'aal2' or lim>100 then raise exception using errcode='42501',message='Consulta no disponible'; end if;
+   if role_name<>'jefe' or c->'authentication'->>'aal'<>'aal2' then raise exception using errcode='42501',message='Consulta no disponible'; end if;
    company_id:=app_private.api_uuid(f,'companyId'); v_company:=company_id; template_id:=case when f->>'templateId' is null then null else app_private.api_uuid(f,'templateId') end; v_template:=template_id; task_id:=case when f->>'taskId' is null then null else app_private.api_uuid(f,'taskId') end;
    if not exists(select 1 from public.companies co where co.organization_id=org and co.id=v_company) then raise exception using errcode='42501',message='Consulta no disponible'; end if;
    if v_template is not null and not exists(select 1 from public.task_templates tt where tt.organization_id=org and tt.id=v_template and tt.kind='operativa') then raise exception using errcode='42501',message='Consulta no disponible'; end if;

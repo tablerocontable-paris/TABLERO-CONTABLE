@@ -1,16 +1,20 @@
-# Acción vigente — corregir M22A-R6 con Luna, 15/10/2026
+# Acción vigente — preparar candidato corregido R6 para Sol, 15/10/2026
 
-**GPT‑6 Luna, esfuerzo medio, Standard** implementa únicamente
-architecture/M2-2A-NULL-SAFETY-LUNA-20261015.md, sobre el mismo repositorio.
-Revisión: architecture/M2-2A-FINAL-REVIEW-20261015.md. El candidato
-9c096973/4597e74 no está aceptado: revisiones vacías permiten escribir sin
-la precondición esperada; hay reproducción PostgreSQL nativa y PGlite.
+La corrección NULL-safe de 014 ya está implementada y validada. Evidencia vigente:
+`architecture/review-evidence/m2-2a-r6-implementation-20261015.json`; contrato
+ejecutado: `architecture/M2-2A-NULL-SAFETY-LUNA-20261015.md`; informe que originó
+la corrección: `architecture/M2-2A-FINAL-REVIEW-20261015.md`.
 
-Corregir helpers/callsites NULL-safe y agregar cobertura de objetos vacíos,
-ausentes/null/tipos y estado transaccional. La sonda independiente debe pasar9/9;
-conservar protocolo15/15, focales, matrices RC/RR, suite y builds. Después commit
-candidato/bundle verificado y revisión Sol alto. Conservar001–013/UI/Worker/Site;
-no iniciar B/C, desplegar014 ni conectar cuentas. Avance~45% histórico.
+Resultados: matriz R6 30/30, sonda independiente 9/9, pruebas previas 15/15,
+focales 17/17, PostgreSQL nativo 61/61 RC/RC + 61/61 RR/RR + 43/43 RC/RR +
+43/43 RR/RC, suite 712/712, TypeScript y builds de cliente/Worker aprobados.
+
+Siguiente acción técnica: ejecutar `node scripts/validate-change.mjs`, revisar
+el diff, crear commit R6, empaquetar ramas `main` y `migration/github-bootstrap`
+y verificar el ZIP desde clonación limpia. Luego **GPT‑6.1 Sol, esfuerzo alto,
+Standard** revisa el commit y el paquete; si lo acepta, define el contrato B/C.
+No iniciar B/C antes de la aceptación, ni desplegar 014 ni conectar cuentas.
+Conservar 001–013/UI/Worker/Site. Avance ~45% histórico, sin recalcular.
 
 ## Acción anterior — revisión del candidato M2.2A (15/10/2026)
 

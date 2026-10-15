@@ -1,20 +1,25 @@
-# Estado vigente — M2.2A no aceptado por R6, 15/10/2026
+# Estado vigente — M2.2A-R6 corregido localmente, revisión Sol pendiente, 15/10/2026
 
-La revisión independiente confirmó **M22A-R6 (P1)**: SQL acepta revisiones vacías
-para registrar, parametrizar y evaluar. PostgreSQL17.11 reprodujo un registro
-sin revisión esperada: tarea5→6, movimientos4→5 y un recibo; transacción revertida.
-Causa: claves exactas y extracción de revisión pueden retornar NULL y saltar
-las precondiciones. La sonda nueva pasó3/9; seis casos documentan el defecto.
+Se corrigió la validación NULL-safe de claves y revisiones en la migración local
+014. Los envelopes, payloads, revisiones, filtros y cursores malformados devuelven
+errores de protocolo antes de producir efectos. Las revisiones vacías, ausentes,
+nulas, parciales o con claves/tipos incorrectos ya no habilitan escrituras. Una
+revisión explícita obsoleta conserva `40001`; una entrada vigente sigue funcionando.
+Los errores 22023 se pueden revertir a SAVEPOINT y continuar con una operación válida.
 
-La matriz nativa RR pasó61/61, las sondas anteriores15/15 y las focales17/17.
-Producto SQL/DTO intacto; la suite712/712/builds corresponde al corte anterior y
-no cubre R6. Informe: architecture/M2-2A-FINAL-REVIEW-20261015.md. Evidencia:
-architecture/review-evidence/m2-2a-final-acceptance-20261015.json.
+Validación de este corte: reproductor R6 **30/30**, sonda independiente **9/9**,
+sondas previas **15/15**, focos **17/17**; PostgreSQL 17.11 **61/61 RC/RC**,
+**61/61 RR/RR**, **43/43 RC/RR** y **43/43 RR/RC**; suite **712/712 en 72 archivos**.
+TypeScript, build de cliente y build de Worker aprobados. Se probó además en
+PostgreSQL nativo el rechazo de `expectedRevisions: {}` con estado sin cambios.
+Evidencia y hashes: `architecture/review-evidence/m2-2a-r6-implementation-20261015.json`.
 
-Siguiente **Luna medio Standard**: architecture/M2-2A-NULL-SAFETY-LUNA-20261015.md;
-después revisión Sol alto. B/C, integración alojada y aceptación final pendientes.
-Los paquetes9c096973/4597e74 conservan el defecto; no son entrega aceptada.
-Sin conexión de cuentas ni despliegue. Avance ~45% histórico sin recalcular.
+La implementación y documentación están listas para revisión independiente de
+**GPT‑6.1 Sol, esfuerzo alto, Standard**. Los candidatos anteriores
+9c096973/4597e74 conservan el defecto; la corrección actual aún requiere commit,
+hook pre-commit y bundle limpio antes de enviar el corte para revisión. No iniciar
+B/C, desplegar 014 ni conectar cuentas. Integración alojada y aceptación final
+siguen pendientes. El avance permanece ~45% histórico, sin recalcular por este corte.
 
 ## Candidato anterior — M2.2A pendiente de revisión, 15/10/2026
 
