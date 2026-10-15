@@ -28,8 +28,8 @@ compatibles previas pasaron 15/15; las pruebas focales 17/17; las matrices
 PostgreSQL 17.11 pasaron 61/61 RC/RC, 61/61 RR/RR, 43/43 RC/RR y 43/43 RR/RC.
 La suite completa aprobó 712/712 en 72 archivos. TypeScript, build de cliente y
 Worker terminaron con código 0. `git diff --check` y `node --check` para ambos
-reproductores terminaron sin errores. El hook de commit y el hash final se
-agregarán después de ejecutarlos.
+reproductores terminaron sin errores. El commit local `08b7405` pasó el hook
+pre-commit automático: 196/196 en 19 archivos.
 
 La prueba nativa adicional intentó registrar una operativa avanzada con
 `expectedRevisions: {}`: el llamado fue rechazado como entrada inválida; la
@@ -37,8 +37,8 @@ cantidad existente de movimientos permaneció igual y la transacción se revirti
 
 Todos los ensayos usan fixtures ficticios/locales. No prueban Supabase alojado,
 Auth/MFA real, permisos remotos ni despliegues. El candidato anterior conserva
-el defecto y no es una entrega aceptada. **Siguiente paso:** commit local y
-bundle de verificación; después revisión independiente GPT‑6.1 Sol, esfuerzo
-alto, Standard. B/C continúan fuera del alcance hasta aceptar A.
+el defecto y no es una entrega aceptada. **Siguiente paso:** verificar el bundle
+de este commit en clonación limpia; después revisión independiente GPT‑6.1 Sol,
+esfuerzo alto, Standard. B/C continúan fuera del alcance hasta aceptar A.
 
 Detalle y hashes: `review-evidence/m2-2a-r6-implementation-20261015.json`.

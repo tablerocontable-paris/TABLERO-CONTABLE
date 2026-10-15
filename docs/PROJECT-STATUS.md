@@ -14,12 +14,13 @@ TypeScript, build de cliente y build de Worker aprobados. Se probó además en
 PostgreSQL nativo el rechazo de `expectedRevisions: {}` con estado sin cambios.
 Evidencia y hashes: `architecture/review-evidence/m2-2a-r6-implementation-20261015.json`.
 
-La implementación y documentación están listas para revisión independiente de
-**GPT‑6.1 Sol, esfuerzo alto, Standard**. Los candidatos anteriores
-9c096973/4597e74 conservan el defecto; la corrección actual aún requiere commit,
-hook pre-commit y bundle limpio antes de enviar el corte para revisión. No iniciar
-B/C, desplegar 014 ni conectar cuentas. Integración alojada y aceptación final
-siguen pendientes. El avance permanece ~45% histórico, sin recalcular por este corte.
+La corrección quedó guardada en el commit **08b7405** y pasó el hook pre-commit
+**196/196 en 19 archivos**. Está lista para revisión independiente de **GPT‑6.1
+Sol, esfuerzo alto, Standard** después de verificar el nuevo bundle en clonación
+limpia. Los candidatos anteriores 9c096973/4597e74 conservan el defecto. No
+iniciar B/C, desplegar 014 ni conectar cuentas. Integración alojada y aceptación
+final siguen pendientes. El avance permanece ~45% histórico, sin recalcular por
+este corte.
 
 ## Candidato anterior — M2.2A pendiente de revisión, 15/10/2026
 

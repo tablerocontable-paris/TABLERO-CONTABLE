@@ -2,6 +2,7 @@
   "date": "2026-10-15",
   "scope": "M2.2A R6 NULL-safe validation correction; local synthetic databases only",
   "baseCommit": "1124d0b56639aefbb8d08d35691683e75a883d24",
+  "candidateCommit": "08b74050c1ae1d16bb53578783dd8a698810ddba",
   "migration": "supabase/migrations/202610150014_operational_api.sql",
   "sha256": {
     "migration014": "d0c4ebf747530529118af1c2525dec03e6d2f65d7dfbe46639a1ed8feaaa701e",
@@ -28,10 +29,11 @@
     "reviewerSyntax": { "passed": true, "exitCode": 0, "commands": ["node --check tests/review/m2-2a-final-acceptance-review.mjs", "node --check tests/review/m2-2a-r6-independent-review.mjs"] },
     "diffCheck": { "passed": true, "exitCode": 0, "command": "git diff --check" }
   },
+  "preCommitHook": { "passed": 196, "total": 196, "files": 19, "exitCode": 0, "command": "node scripts/validate-change.mjs", "commit": "08b74050c1ae1d16bb53578783dd8a698810ddba" },
   "notValidated": [
     "Supabase hosted project, Auth/MFA, remote permissions or migration application",
     "GitHub, hosting, Site publication or production deployment",
     "Human review and acceptance by GPT-6.1 Sol"
   ],
-  "nextStep": "Commit the validated local correction and package it for independent GPT-6.1 Sol high-effort review. Keep M2.2B/C, deployment, and account connections gated."
+  "nextStep": "Verify the candidate bundle in a clean clone, then submit commit 08b74050c1ae1d16bb53578783dd8a698810ddba for independent GPT-6.1 Sol high-effort review. Keep M2.2B/C, deployment, and account connections gated."
 }
