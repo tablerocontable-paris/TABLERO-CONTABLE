@@ -1,4 +1,22 @@
-# Corte vigente — M2.2A candidato local; revisión Sol pendiente, 15/10/2026
+# Estado vigente — M2.2A no aceptado por R6, 15/10/2026
+
+La revisión independiente confirmó **M22A-R6 (P1)**: SQL acepta revisiones vacías
+para registrar, parametrizar y evaluar. PostgreSQL17.11 reprodujo un registro
+sin revisión esperada: tarea5→6, movimientos4→5 y un recibo; transacción revertida.
+Causa: claves exactas y extracción de revisión pueden retornar NULL y saltar
+las precondiciones. La sonda nueva pasó3/9; seis casos documentan el defecto.
+
+La matriz nativa RR pasó61/61, las sondas anteriores15/15 y las focales17/17.
+Producto SQL/DTO intacto; la suite712/712/builds corresponde al corte anterior y
+no cubre R6. Informe: architecture/M2-2A-FINAL-REVIEW-20261015.md. Evidencia:
+architecture/review-evidence/m2-2a-final-acceptance-20261015.json.
+
+Siguiente **Luna medio Standard**: architecture/M2-2A-NULL-SAFETY-LUNA-20261015.md;
+después revisión Sol alto. B/C, integración alojada y aceptación final pendientes.
+Los paquetes9c096973/4597e74 conservan el defecto; no son entrega aceptada.
+Sin conexión de cuentas ni despliegue. Avance ~45% histórico sin recalcular.
+
+## Candidato anterior — M2.2A pendiente de revisión, 15/10/2026
 
 Las cinco correcciones del informe Sol están implementadas en la migración local
 014 y el DTO. Matriz PostgreSQL17.11: **61/61 RC/RC, 61/61 RR/RR**, y las

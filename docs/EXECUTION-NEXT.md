@@ -1,4 +1,18 @@
-# Acción vigente — revisión independiente de M2.2A (15/10/2026)
+# Acción vigente — corregir M22A-R6 con Luna, 15/10/2026
+
+**GPT‑6 Luna, esfuerzo medio, Standard** implementa únicamente
+architecture/M2-2A-NULL-SAFETY-LUNA-20261015.md, sobre el mismo repositorio.
+Revisión: architecture/M2-2A-FINAL-REVIEW-20261015.md. El candidato
+9c096973/4597e74 no está aceptado: revisiones vacías permiten escribir sin
+la precondición esperada; hay reproducción PostgreSQL nativa y PGlite.
+
+Corregir helpers/callsites NULL-safe y agregar cobertura de objetos vacíos,
+ausentes/null/tipos y estado transaccional. La sonda independiente debe pasar9/9;
+conservar protocolo15/15, focales, matrices RC/RR, suite y builds. Después commit
+candidato/bundle verificado y revisión Sol alto. Conservar001–013/UI/Worker/Site;
+no iniciar B/C, desplegar014 ni conectar cuentas. Avance~45% histórico.
+
+## Acción anterior — revisión del candidato M2.2A (15/10/2026)
 
 R1–R5 ya están corregidos y revalidados. PostgreSQL 17.11: **61/61 RC/RC** y
 **61/61 RR/RR**; replay y revocación cruzados: **43/43 RC/RR** y **43/43 RR/RC**.
