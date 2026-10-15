@@ -1,4 +1,35 @@
-> **Acción vigente 15/10/2026: GPT-6 Luna, medio, Standard.** M2.1 aceptado localmente, informe `architecture/M2-1-SOL-ACCEPTANCE-20261015.md`. Implementar únicamente `architecture/M2-2A-OPERATIVE-API-LUNA-20261015.md`: protocolo API y operativas sobre tareas existentes. M2.2 completo requiere A/B/C; B/C esperan contrato posterior. Crear014 localmente, sin desplegarlo incompleto ni iniciar015. Mantener001–013/srcUI/Worker/Site y datos sintéticos. Sin remoto GitHub nuevo. El runner nativo de aceptación usa --review-matrix full (42/42).
+# Acción vigente — completar la matriz M2.2A (15/10/2026)
+
+R1–R5 ya están corregidos y revalidados. PostgreSQL 17.11: **61/61 RC/RC** y
+**61/61 RR/RR**; replay y revocación cruzados: **43/43 RC/RR** y **43/43 RR/RC**.
+PGlite/protocolo **15/15**, suite **712/712**, TypeScript, build cliente y Worker
+con código 0. Comandos, salidas y hashes:
+`architecture/review-evidence/m2-2a-corrections-validation-20261015.json`.
+
+**Siguiente trabajo local:** crear el commit candidato explícito y el bundle portable
+de este corte, comprobando una clonación limpia. Conservar 001–013 y UI/Worker/Site;
+no desplegar ni conectar cuentas. Después corresponde **GPT‑6.1 Sol, esfuerzo alto,
+Standard** para revisar el commit, hashes y evidencia, aceptar/rechazar M2.2A y
+definir B/C. No se conectaron cuentas ni hay integración alojada comprobada. Avance
+~45% histórico, sin recalcularlo.
+
+## Evidencia anterior de implementación — supersedida por la matriz completa
+
+Continuar el contrato `architecture/M2-2A-OPERATIVE-API-LUNA-20261015.md` sobre
+la migración local 014. El último runner PostgreSQL nativo pasó 35/35, incluyendo
+pruebas nuevas de snapshot RR obsoleto tras baja de perfil y cierre mensual, sin
+actividad ni recibos. El upgrade PGlite 013→014 conserva sesiones, recibos legacy,
+notas privadas/versiones y snapshots; decoder 16/16. TypeScript, builds cliente y
+Worker y suite completa 712/712 en 72 archivos también pasaron.
+El recorrido y evidencia están en
+`architecture/review-evidence/m2-2a-implementation-20261015.json`.
+
+Ese primer corte no incluía todos los ordenamientos RC/RR. La matriz completa
+posterior está registrada en la actualización vigente al inicio de este archivo.
+Mantener 014 local, sin conexión de cuentas, despliegue, handlers UI ni cambios
+a 001–013.
+
+> **Registro previo 15/10/2026: GPT-6 Luna, medio, Standard.** M2.1 aceptado localmente, informe `architecture/M2-1-SOL-ACCEPTANCE-20261015.md`. El contrato de A se completa ahora con las correcciones indicadas al inicio. M2.2 completo requiere A/B/C; B/C esperan contrato posterior. Mantener 014 local sin desplegarlo incompleto ni iniciar 015. Sin remoto GitHub nuevo. El runner nativo de aceptación M2.1 usa --review-matrix full (42/42).
 
 > Registro histórico del cierre de auditoría Sol (11/10/2026): en ese corte se identificaron 65 hallazgos/95 casos y la siguiente acción era implementar la etapa 1 con Luna. El estado actual figura en la actualización del 12/10 inmediatamente debajo.
 

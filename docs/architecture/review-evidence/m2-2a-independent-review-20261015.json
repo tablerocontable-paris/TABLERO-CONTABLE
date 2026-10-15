@@ -1,0 +1,117 @@
+{
+  "date": "2026-10-15",
+  "status": "reviewed; not accepted; corrections required",
+  "baseCommit": "bc6c0a476f9c284d4e843995f5b4e70bb1e3c33f",
+  "scope": "M2.2A only, synthetic local PostgreSQL/PGlite; no hosted connection",
+  "productChangedDuringReview": false,
+  "findings": [
+    "M22A-R1 P1 coordinated revocation/record lock inversion produces 40P01",
+    "M22A-R2 P1 valid legacy whitespace reference prevents upgrade with 23514",
+    "M22A-R3 P2 SQL NULL/type/cursor/overflow validation",
+    "M22A-R4 P2 decoder accepts year zero rejected by PostgreSQL",
+    "M22A-R5 P2 valid legacy unit cannot pass the new response decoder"
+  ],
+  "native": {
+    "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2a-independent-review-20261015/native-lock-order --port 55456 --through-014 yes --m2-2a-smoke yes --m2-2a-independent yes",
+    "exitCode": 1,
+    "engine": "postgres (PostgreSQL) 17.11",
+    "total": 36,
+    "passed": 35,
+    "failed": 1,
+    "report": "../../outputs/m2-2a-independent-review-20261015/native-lock-order/review.json",
+    "finding": {
+      "name": "M2.2A coordinated actor revocation and waiting record must not deadlock",
+      "passed": false,
+      "blocked": true,
+      "revocationSQLSTATE": "00000",
+      "recordSQLSTATE": "40P01",
+      "rollbackArtifacts": "0|true"
+    }
+  },
+  "protocol": {
+    "command": "node tests/review/m2-2a-independent-review.mjs --output-dir ../../outputs/m2-2a-independent-review-20261015/protocol-final",
+    "exitCode": 1,
+    "total": 8,
+    "passed": 1,
+    "failed": 7,
+    "report": "../../outputs/m2-2a-independent-review-20261015/protocol-final/review.json",
+    "results": [
+      {
+        "name": "013 valid whitespace reference survives upgrade without rewriting",
+        "passed": false,
+        "expected": "00000",
+        "observed": "23514"
+      },
+      {
+        "name": "null query kind",
+        "passed": false,
+        "expected": "22023",
+        "observed": "00000",
+        "responseDecodes": false
+      },
+      {
+        "name": "integer overflow in query limit",
+        "passed": false,
+        "expected": "22023",
+        "observed": "22003",
+        "responseDecodes": null
+      },
+      {
+        "name": "null cursor timestamp",
+        "passed": false,
+        "expected": "22023",
+        "observed": "00000",
+        "responseDecodes": true
+      },
+      {
+        "name": "null cursor kind",
+        "passed": false,
+        "expected": "22023",
+        "observed": "00000",
+        "responseDecodes": true
+      },
+      {
+        "name": "year zero is rejected by decoder and SQL",
+        "passed": false,
+        "decoderAccepts": true,
+        "sqlCode": "22023"
+      },
+      {
+        "name": "non-BMP text length is compatible between installed Zod and SQL",
+        "passed": true,
+        "decoderAccepts": true,
+        "sqlCode": "00000",
+        "responseDecodes": true
+      },
+      {
+        "name": "legacy unit longer than 80 remains readable through the new DTO",
+        "passed": false,
+        "sqlCode": "00000",
+        "responseDecodes": false
+      }
+    ]
+  },
+  "checks": {
+    "diffCheck": "exit 0",
+    "nodeCheck": "both review runners exit 0",
+    "historicalSuite": "712/712, not rerun during this review; SQL/DTO hashes unchanged"
+  },
+  "pending": [
+    "correct R1-R5 using executable Luna contract",
+    "complete required RC/RR both-order concurrency matrix",
+    "full suite/typecheck/build after product corrections",
+    "local candidate commit and verified portable bundle",
+    "independent acceptance of corrected candidate"
+  ],
+  "sha256": {
+    "supabase/migrations/202610150014_operational_api.sql": "bab9dd45c23e8c4fdaea96fcba3e2025693df8fa1cfca4cf95702142da259aaa",
+    "src/data/supabase/operational-contract.ts": "0f3528736b253f5e7d3d1e43d95286694a717de81b10023d13b9a8e3c13f6cec",
+    "tests/review/m2-1-native-review.mjs": "c67b59eb74c15d6e96f10e3266668f432bbefb280864809b1ec72198cdd311c5",
+    "tests/review/m2-2a-independent-review.mjs": "30439da242243761b68749c6f3db81622a9f7b575fe5fd34d5354a94043a3b81",
+    "docs/architecture/M2-2A-REVIEW-20261015.md": "2d4e92a98aa3ea0e6fa3425f3708b5ec63b6d6aab3097f1fa3d0d9b5406b0bbe",
+    "docs/architecture/M2-2A-CORRECTIONS-LUNA-20261015.md": "7899055ead6827306836a5431c25df8ee6fb958d035cf812663c5b7409512d91",
+    "docs/PROJECT-STATUS.md": "22830f7fc48fffed808afd82a76b9a078eee904ef240dc8edb03f88b3facda8f",
+    "docs/EXECUTION-NEXT.md": "756c3d9ef48b6210c7117da71032ca2b7ad3625d6e7e1fadcfc279482cced785",
+    "AGENTS.md": "32e24d522825b94e24cdf16fc71de5f4c24ee0baa61ac9900cdc6c726cfd5866"
+  }
+}

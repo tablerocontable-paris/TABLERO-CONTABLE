@@ -1,3 +1,50 @@
+# Corte vigente — M2.2A corregido localmente; falta aceptación, 15/10/2026
+
+Las cinco correcciones del informe Sol están implementadas en la migración local
+014 y el DTO. Matriz PostgreSQL17.11: **61/61 RC/RC, 61/61 RR/RR**, y las
+variantes cruzadas para replay/revocación **43/43 RC/RR y 43/43 RR/RC**. Los 19
+casos M2.2A pasaron en cada corte completo; se observaron los bloqueos, reintentos,
+recibos y estados finales. Sondas PGlite/protocolo **15/15**; suite completa
+**712/712 en72 archivos**; TypeScript y builds cliente/Worker código0. Evidencia:
+`architecture/review-evidence/m2-2a-corrections-validation-20261015.json`.
+
+**M2.2A está listo para commit candidato y revisión, pero aún no aceptado por Sol.**
+La revalidación fue sólo local y sintética. No desplegar 014 ni conectar cuentas;
+M2.2B/C e integración Supabase/hosting siguen pendientes. Se conservan 001–013,
+UI, Worker y Site. El avance global permanece ~45% histórico y no se recalcula.
+
+## Evidencia del corte previo a la matriz — histórica, no pendiente vigente
+
+La migración local 014, el contrato Zod y el runner operativo siguen en revisión.
+PostgreSQL 17.11 nativo aprobó **35/35**, incluido el control de ACL, paginación,
+registro/tasa/evaluación, rollback, cierre legacy y ámbito de encargado. Dos
+regresiones nuevas confirman que un snapshot RR anterior a la baja del actor o a
+un cierre no produce actividad ni recibo; también se volvió a comprobar la
+cancelación de cobertura sin `40P01`. El upgrade PGlite 013→014 preserva actividad,
+tarea, cierre, reporte, outbox, sesión, recibos legacy y notas privadas con su
+historial. El decoder pasó **16/16**, TypeScript, build cliente y build Worker.
+
+La suite completa corrió **712/712 en 72 archivos**. El intento
+anterior mostró una falla intermitente de búsqueda accesible en Catálogo; la
+prueba aislada y la suite completa posterior pasaron.
+
+**En ese corte** M2.2A todavía esperaba el repaso Sol independiente y ampliar
+ordenamientos entre niveles de aislamiento. La matriz del encargado cubría
+AAL2, consultas dentro y fuera de su equipo, prohibición
+de ejecutar y parametrizar, privacidad y revocación de recibos de los tres
+comandos. Fallos inyectados en registro, tasa y evaluación confirmaron rollback
+de cambios parciales, recibos y fences. Las carreras cubiertas incluyen primera tasa↔registro,
+replay, evaluación, cierre legado y cancelación de cobertura mientras espera; todas
+se observaron bloqueadas y finalizaron sin `40P01`. 014 sigue sin desplegar. No se
+conectaron cuentas, transporte de UI, Worker ni Site. M2.2 B/C y M2.3 siguen fuera
+de este corte. El avance global permanece ~45% histórico, sin recalcular ni aumentarlo.
+
+Evidencia de aquel corte: `architecture/review-evidence/m2-2a-implementation-20261015.json`.
+La revalidación posterior y la acción vigente constan al inicio de este archivo.
+
+
+
+
 > **Corte vigente 15/10/2026: M2.1 aceptado localmente.** Los cuatro defectos anteriores quedaron resueltos. Revisión independiente: PostgreSQL42/42, focales27/27 y TypeScript; fuentes de producto iguales al corte690/690/builds del14/10. Informe architecture/M2-1-SOL-ACCEPTANCE-20261015.md. Próximo: Luna medio Standard implementa architecture/M2-2A-OPERATIVE-API-LUNA-20261015.md. M2.2 completo requiere A/B/C; sólo A tiene contrato ejecutable. Sin aceptación de servicios alojados ni despliegue. ~45% histórico, sin recalcular por revisión/documentación.
 
 > **Diseño M2 — 14/10/2026.** Inventario estático de 90 fuentes/38 campos State y matriz completa de consultas/comandos, con siete bloques de migración a Supabase. Se definieron fronteras de API, identidad técnica separada, privacidad de anotaciones, operativas versionadas, cierres por empresa, evidencia y recuperación. Contrato inmediato cerrado para M2.1; los demás requieren desglose/revisión antes de Luna. Ver architecture/SUPABASE-M2-CONTRACT-20261014.md y architecture/M2-1-IDENTITY-LUNA-20261014.md. Reproducibilidad M1 verificada ahora sobre clonación limpia con npm ci: Node24.19/npm portable12.2, 223 paquetes, 668/668, TypeScript/builds/paquete Sites aprobados; Git limpio. Se corrigió la guía portable. Evidencia: architecture/review-evidence/m2-architecture-contract-20261014.json. SQL013 y la app Supabase aún no están implementados. ~45% histórico sin recalcular.
