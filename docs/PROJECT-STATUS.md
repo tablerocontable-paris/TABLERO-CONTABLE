@@ -11,6 +11,19 @@
 > Suite completa: **663/663 en 67 archivos**. TypeScript, build cliente y Worker pasan. Edge: **31/31**, tours completos para los tres roles (11/13/15 pasos), desktop 1440×900 y coach móvil 390×844; cero errores JS y cero llamadas a la API operativa. Revisión independiente Sol y aceptación humana con lector de pantalla siguen pendientes. Evidencia: `docs/architecture/review-evidence/s39-tour-refresh-20261014.json` y `outputs/s39-tour-refresh-20261014/browser-validation.json`. No se hizo commit ni publicación; avance global ~45%.
 # Estado del proyecto Grupo París
 
+> **M2.1 implementado localmente — 14/10/2026.** Se añadió SQL013 con los
+> esquemas `api`/`app_private`, cuenta técnica separada, bloqueo de identidad
+> cruzada, ACL cerradas y `api.get_context_v1()`. El decoder Zod valida el DTO
+> mínimo estricto sin iniciar sesión ni tocar State. Verificación: 688/688 en
+> 69 archivos, TypeScript y build cliente/Worker aprobados; prueba focal 20/20.
+> Evidencia: `architecture/review-evidence/m2-1-identity-implementation-20261014.json`.
+> Sigue sin commit y sin conexión remota. PostgreSQL de dos sesiones para la
+> carrera de doble identidad y revisión independiente Sol permanecen pendientes;
+> PGlite secuencial no sustituye esa comprobación. No se conecta UI ni datos
+> operativos a Supabase. Próximo: GPT-6.1 Sol alto audita M2.1 y define el
+> contrato ejecutable M2.2. El ~45% global es histórico; se actualizará al
+> cerrar bloques migratorios con aceptación, infraestructura y entrega medidas.
+
 > **Aceptación técnica independiente vigente — 14/10/2026.** S38/S44 y el
 > runner S52 aceptados tras revisar fuente y 69/69 comprobaciones (63 existentes
 > y seis variantes independientes). Los hashes del producto coinciden con el

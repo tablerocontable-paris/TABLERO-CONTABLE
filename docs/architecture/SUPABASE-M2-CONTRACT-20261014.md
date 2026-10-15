@@ -9,6 +9,12 @@ paquete Sites aprobados. Evidencia: review-evidence/m2-architecture-contract-202
 La primera apertura en la PC personal sigue pendiente. Los tests originales de
 M1 habían usado las dependencias existentes; no se atribuye esa instalación a M1.
 
+**Corte M2.1 — 14/10/2026:** SQL013 y el decoder tipado local están
+implementados, con 688/688 pruebas y build cliente/Worker aprobados. Sigue
+pendiente la revisión independiente Sol y la comprobación del trigger con dos
+sesiones PostgreSQL. No se conectó Supabase ni se abrió el cliente operativo.
+El detalle está en `review-evidence/m2-1-identity-implementation-20261014.json`.
+
 El inventario está en `review-evidence/m2-source-inventory-20261014.json`:
 90 fuentes con hash, 38 campos de State, 232 funciones/interfaces/tipos exportados del
 dominio, 30 funciones nombradas de App, 70 llamadas sintácticas a persistencia,

@@ -1,0 +1,112 @@
+{
+  "stage": "M2.1",
+  "date": "2026-10-14",
+  "baseCommit": "cb5f43ce39476702d7809711e7176f136022d02c",
+  "branch": "migration/github-bootstrap",
+  "implementation": {
+    "migration": "supabase/migrations/202610140013_api_identity_foundation.sql",
+    "endpoint": "api.get_context_v1()",
+    "typedDecoder": "src/data/supabase/context-contract.ts",
+    "scope": [
+      "api and app_private schemas",
+      "closed schema/table/function ACL defaults and explicit endpoint grant",
+      "technical principal without a business profile",
+      "cross-table identity guard using a transaction advisory lock",
+      "minimal context resolved from auth.uid(), JWT role/AAL, and current database memberships",
+      "strict Zod decoder with no client session or State persistence"
+    ],
+    "notImplemented": [
+      "Supabase hosted configuration or authentication session",
+      "operational frontend reads and writes",
+      "business queries and commands",
+      "new real user or account fixtures",
+      "new operational migration blocks 014 to 019"
+    ]
+  },
+  "runtime": {
+    "node": "v24.19.0",
+    "npm": "12.2.0 portable",
+    "vitest": "3.2.7",
+    "pglite": "0.5.8",
+    "hostedSupabase": "not connected"
+  },
+  "checks": [
+    {
+      "name": "Focused M2.1 tests",
+      "command": "node node_modules/vitest/vitest.mjs run tests/supabase-context-contract.test.ts tests/supabase-identity-foundation.test.ts --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "exitCode": 0,
+      "passed": "20/20",
+      "covers": [
+        "empty database migration through 013",
+        "populated 012 upgrade",
+        "serialized business row snapshots unchanged",
+        "role and current membership context",
+        "same JWT sees database role/membership changes",
+        "technical identity isolation and inactive/missing/auditor/service/anon rejection",
+        "dual identity rejection on both table inserts and both ID update directions",
+        "grants, default privileges, schema access, and no context writes",
+        "strict decoder success and invalid DTO cases"
+      ]
+    },
+    {
+      "name": "Full test suite",
+      "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "exitCode": 0,
+      "passed": "688/688 in 69 files",
+      "log": "outputs/m2-1-implementation-20261014/full-test-final.log"
+    },
+    {
+      "name": "TypeScript, client and Worker build",
+      "command": "npm run build (portable npm 12.2.0)",
+      "exitCode": 0,
+      "status": "passed",
+      "knownWarnings": "Two existing Rollup pure-annotation warnings in Zod; build completed.",
+      "log": "outputs/m2-1-implementation-20261014/build-final.log"
+    }
+  ],
+  "pending": [
+    {
+      "check": "Concurrent profile-vs-technical identity inserts using two real PostgreSQL sessions, both lock orders",
+      "status": "not run",
+      "reason": "No psql/postgres executable is available in this environment; PGlite sequential tests are not represented as a concurrency pass."
+    },
+    {
+      "check": "Supabase-hosted API schema exposure, real Auth JWT/AAL, and ACL verification",
+      "status": "not run",
+      "reason": "No new Supabase project is connected."
+    },
+    {
+      "check": "Independent implementation review",
+      "status": "pending",
+      "reviewModel": "GPT-6.1 Sol, high, Standard"
+    }
+  ],
+  "previousMigrationSha256": {
+    "202609300001_foundation.sql": "2b1115e1e043883d3284613d2367b7228a5c443925829ff09ee5d32322189dd9",
+    "202609300002_workflows.sql": "7472d4ae996c827412e5f7daaefda498206349bbf49d02a8c90e3542f8eeccbe",
+    "202610010001_occurrence_contract.sql": "3a9c3b92a241fc4a6569fea2549fa179ca96e7faac50832c5841efc90db5ca2f",
+    "202610010002_onboarding_approval.sql": "9560644d1304dd5123d6b295bc9e4e5ec07d91bb07024174aed979b3a425d897",
+    "202610010003_report_delivery.sql": "39c8b92f41d00fb96174978be8903120424cbabe4d0378761746148e57b38731",
+    "202610010004_time_coverage.sql": "fa49aa77bb8a7fc9b153c8af9b27225ed6500d0489d7c396d9c7128b393e7630",
+    "202610010005_time_coverage_hardening.sql": "400c671934e0fa050907aea78c3da28248255068f0e8ad16f0007081421d8a33",
+    "202610010006_time_coverage_acceptance.sql": "a47942d0281adb517aa7bc5e1123769dd77f415b58cf97748b97fce376314fbf",
+    "202610010007_time_coverage_completion.sql": "34886ff8e7ccb947d8e68754f68ac9155f4e012dc4200b395c95967d2710160b",
+    "202610010008_time_coverage_finalization.sql": "3cde522cbf9df98a05bee0f1c6fd510377324a9551ff2ad396756a397bc70a46",
+    "202610020009_private_block_notes.sql": "cf2b2babf4a0ff8b144a643aba5d71796d9062559cdd201c989ba754640d6269",
+    "202610040010_coordination_foundation.sql": "84ba65311535e85f5b1ab3a991308193ce634c79f031978dc020b15b683ad7b1",
+    "202610060011_coordination_activation.sql": "9729a6800e93dedc43ab5f0840309b7c0d222343898cc8d5b43eeb4a387f4210",
+    "202610140012_sql_receipt_and_onboarding_guards.sql": "cabfe95dbd04ae65ea82c787bc5e3ec8e638e4620456366b7eeb8a5d715dfbf4"
+  },
+  "newFileSha256": {
+    "supabase/migrations/202610140013_api_identity_foundation.sql": "aaced2308a23801f92a207e3cdd1f08b094e85d6ae7576eb35efd00630a786bd",
+    "src/data/supabase/context-contract.ts": "e01d216c19f2f052551400acec19f695ee48b4e36c8e1f978e3c0afbab4f7e92",
+    "tests/helpers/accounting-lab.ts": "f35d1ffaff53869c8cf5c610699c0edaa34fec6478b606b54c9f40f0cbf11441",
+    "tests/supabase-context-contract.test.ts": "cafad292e3d284ab219c493f3c6a1f662f62f9d6c7d760f8b7fa5a56fb21cebd",
+    "tests/supabase-identity-foundation.test.ts": "2108ff5283e780abf5f5d53c49c92e6f7088e2720808808223e34394a5bcd45a"
+  },
+  "limitations": [
+    "This is local PGlite evidence, not Supabase-provider evidence.",
+    "The migration has not been applied to a hosted project.",
+    "M2.1 is implemented but not independently accepted until Sol review and the real PostgreSQL concurrency case are resolved."
+  ]
+}
