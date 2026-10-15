@@ -249,7 +249,7 @@ end $$;
 create function app_private.api_exact_keys(p_value jsonb,p_keys text[]) returns boolean
 language sql immutable set search_path='' as $$
  select coalesce(
-   case when jsonb_typeof(p_value) is distinct from 'object' or p_keys is null then false
+    case when jsonb_typeof(p_value) is distinct from 'object' or p_keys is null or array_position(p_keys,null) is not null then false
    else (
      select count(*)=cardinality(p_keys)
        and coalesce(bool_and(k=any(p_keys)),cardinality(p_keys)=0)
@@ -336,7 +336,7 @@ $$;
 create function api.command_v1(p jsonb) returns jsonb
 language plpgsql security definer set search_path='' as $$
 declare c jsonb; actor uuid:=auth.uid(); org uuid; role_name text; kind text; op uuid; payload jsonb; revisions jsonb; args jsonb;
- task_id uuid; company_id uuid; v_company uuid; template_id uuid; expected bigint; expected_assessment bigint; new_revision bigint;
+ task_id uuid; company_id uuid; v_company uuid; template_id uuid; expected bigint; expected_task bigint; expected_rate bigint; expected_assessment bigint; new_revision bigint;
   t public.task_instances%rowtype; planned_t public.task_instances%rowtype; a public.task_assignments%rowtype; h app_private.operational_rate_heads%rowtype;
  chosen app_private.operational_rate_versions%rowtype; rate_id uuid; rate_version bigint; unit_value text; coeff numeric(20,6); amount integer; ref text; work_date date; reason text;
  quality_score integer; order_value integer; timely integer; observation text; assessment_id uuid; assessment_rev bigint;
@@ -352,6 +352,7 @@ begin
  if kind='operation.record' then
    if not app_private.api_exact_keys(payload,array['taskId','workDate','quantity','reference']) or not app_private.api_exact_keys(revisions,array['task:'||(payload->>'taskId')]) then raise exception using errcode='22023',message='Solicitud inválida'; end if;
    task_id:=app_private.api_uuid(payload,'taskId'); work_date:=app_private.api_date(payload,'workDate');
+    expected_task:=app_private.api_expected(revisions,'task:'||task_id);
    if jsonb_typeof(payload->'quantity') is distinct from 'number' or (payload->>'quantity') !~ '^[1-9][0-9]{0,6}$' or (payload->>'quantity')::integer>1000000 or (jsonb_typeof(payload->'reference') is distinct from 'string' and jsonb_typeof(payload->'reference') is distinct from 'null') then raise exception using errcode='22023',message='Solicitud inválida'; end if;
    amount:=(payload->>'quantity')::integer;
    if jsonb_typeof(payload->'reference')='string' then ref:=nullif(app_private.normalize_context_name(payload->>'reference'),''); if ref is not null and char_length(ref)>2000 then raise exception using errcode='22023',message='Solicitud inválida'; end if; else ref:=null; end if;
@@ -361,6 +362,7 @@ begin
    company_id:=app_private.api_uuid(payload,'companyId'); v_company:=company_id; template_id:=case when payload->>'templateId' is null then null else app_private.api_uuid(payload,'templateId') end;
    task_id:=case when payload->>'taskId' is null then null else app_private.api_uuid(payload,'taskId') end;
    if not app_private.api_exact_keys(revisions,array[case when template_id is not null then 'rate:'||company_id||':template:'||template_id else 'rate:'||company_id||':task:'||task_id end]) then raise exception using errcode='22023',message='Solicitud inválida'; end if;
+    expected_rate:=app_private.api_expected(revisions,'rate:'||company_id||case when template_id is not null then ':template:'||template_id else ':task:'||task_id end);
    work_date:=app_private.api_date(payload,'effectiveOn'); reason:=app_private.api_text(payload,'reason',5,1000);
    if jsonb_typeof(payload->'unitWeight') is distinct from 'string' or (payload->>'unitWeight') !~ '^(0|[1-9][0-9]*)(\.[0-9]{1,6})?$' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
    begin coeff:=(payload->>'unitWeight')::numeric(20,6); exception when others then raise exception using errcode='22023',message='Solicitud inválida'; end;
@@ -369,6 +371,7 @@ begin
    if not app_private.api_exact_keys(payload,array['taskId','quality','order','timeliness','observation']) then raise exception using errcode='22023',message='Solicitud inválida'; end if;
    task_id:=app_private.api_uuid(payload,'taskId');
    if not app_private.api_exact_keys(revisions,array['task:'||task_id,'assessment:'||task_id]) then raise exception using errcode='22023',message='Solicitud inválida'; end if;
+    expected_task:=app_private.api_expected(revisions,'task:'||task_id);
    expected_assessment:=app_private.api_expected(revisions,'assessment:'||task_id);
    quality_score:=app_private.api_integer(payload,'quality',0,100); order_value:=app_private.api_integer(payload,'order',0,100); timely:=app_private.api_integer(payload,'timeliness',0,100); observation:=app_private.api_text(payload,'observation',5,1000);
  end if;
@@ -427,7 +430,7 @@ begin
      if not found then raise exception using errcode='40001',message='Cambió el catálogo; reintente'; end if;
    end if;
    insert into app_private.operational_rate_heads(organization_id,company_id,template_id,instance_id) values(org,company_id,template_id,task_id) on conflict on constraint operational_rate_heads_scope_key do update set fence_epoch=app_private.operational_rate_heads.fence_epoch+1 returning * into h;
-   if h.config_revision<>app_private.api_expected(revisions,'rate:'||company_id||case when template_id is not null then ':template:'||template_id else ':task:'||task_id end) then raise exception using errcode='40001',message='La configuración cambió; reintente'; end if;
+   if h.config_revision<>expected_rate then raise exception using errcode='40001',message='La configuración cambió; reintente'; end if;
    rate_version:=h.config_revision+1; now_at:=clock_timestamp(); rate_id:=gen_random_uuid();
    insert into app_private.operational_rate_versions(id,organization_id,head_id,version,effective_on,unit,unit_weight,reason,created_by,created_at) values(rate_id,org,h.id,rate_version,work_date,unit_value,coeff,reason,actor,now_at);
    update app_private.operational_rate_heads set config_revision=rate_version where id=h.id;
@@ -450,7 +453,7 @@ begin
    perform app_private.api_touch_month_fences(org,months);
    perform public._coordination_revalidate(plan);
    select * into t from public.task_instances where id=task_id and organization_id=org;
-   if not found or t.state_revision<>app_private.api_expected(revisions,'task:'||task_id) or not public.can_access_instance(task_id) then raise exception using errcode='40001',message='La tarea o el acceso cambiaron; reintente'; end if;
+    if not found or t.state_revision<>expected_task or not public.can_access_instance(task_id) then raise exception using errcode='40001',message='La tarea o el acceso cambiaron; reintente'; end if;
    if exists(select 1 from unnest(people) person where exists(select 1 from public.monthly_closures mc where mc.owner_id=person and mc.period=t.period)) then raise exception using errcode='55000',message='GP_CLOSED_UNIT'; end if;
    if kind='operation.assess' and exists(select 1 from public.task_responsibility_heads rh join public.task_responsibility_sets rs on rs.id=rh.set_id where rh.instance_id=t.id and rs.mode='conjunta') then raise exception using errcode='0A000',message='GP_JOINT_ASSESSMENT_REQUIRES_REVIEW'; end if;
    if kind='operation.record' then
@@ -472,7 +475,7 @@ begin
      result_data:=jsonb_build_object('contractVersion',1,'operationId',op,'kind',kind,'result',jsonb_build_object('entryId',assessment_id,'taskRevision',new_revision::text,'measurementVersion',2,'rateId',chosen.id,'unitWeight',case when chosen.id is null then null else chosen.unit_weight::text end,'weightedLoad',case when chosen.id is null then null else (amount*chosen.unit_weight)::text end));
    else
      if role_name<>'jefe' or c->'authentication'->>'aal'<>'aal2' then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
-     if t.state_revision<>app_private.api_expected(revisions,'task:'||task_id) then raise exception using errcode='40001',message='La tarea cambió; reintente'; end if;
+      if t.state_revision<>expected_task then raise exception using errcode='40001',message='La tarea cambió; reintente'; end if;
      select revision into assessment_rev from app_private.operational_assessments where instance_id=t.id;
      assessment_rev:=coalesce(assessment_rev,0);
      if assessment_rev<>expected_assessment then raise exception using errcode='40001',message='La evaluación cambió; reintente'; end if;
@@ -506,8 +509,16 @@ begin
    task_id:=app_private.api_uuid(f,'taskId');
  elsif kind='rateHistory' then
    if not app_private.api_exact_keys(f,array['companyId','templateId','taskId']) or ((f->>'templateId' is null)=(f->>'taskId' is null)) then raise exception using errcode='22023',message='Consulta inválida'; end if;
+   company_id:=app_private.api_uuid(f,'companyId'); v_company:=company_id; template_id:=case when f->>'templateId' is null then null else app_private.api_uuid(f,'templateId') end; v_template:=template_id; task_id:=case when f->>'taskId' is null then null else app_private.api_uuid(f,'taskId') end;
  elsif kind not in ('activityPage','operationalSummary','quality','rateHistory','commandReceipt') then
    raise exception using errcode='0A000',message='Consulta no disponible';
+ end if;
+ if kind in ('operationalSummary','quality') and (lim<>1 or cursor_value is not null) then raise exception using errcode='22023',message='Consulta inválida'; end if;
+ if kind='activityPage' and cursor_value is not null then
+   begin cursor_json:=convert_from(decode(translate(cursor_value,'-_','+/')||repeat('=',(4-char_length(cursor_value)%4)%4),'base64'),'UTF8')::jsonb; if not app_private.api_exact_keys(cursor_json,array['kind','taskId','createdAt','entryId']) or cursor_json->>'kind' is distinct from 'activityPage' or cursor_json->>'taskId' is distinct from task_id::text then raise exception using errcode='22023',message='Cursor inválido'; end if; cursor_at:=app_private.api_timestamp(cursor_json,'createdAt'); cursor_id:=app_private.api_uuid(cursor_json,'entryId'); exception when others then raise exception using errcode='22023',message='Consulta inválida'; end;
+ end if;
+ if kind='rateHistory' and cursor_value is not null then
+   begin cursor_json:=convert_from(decode(translate(cursor_value,'-_','+/')||repeat('=',(4-char_length(cursor_value)%4)%4),'base64'),'UTF8')::jsonb; if not app_private.api_exact_keys(cursor_json,array['kind','companyId','templateId','taskId','version','rateId']) or cursor_json->>'kind' is distinct from 'rateHistory' or cursor_json->>'companyId' is distinct from v_company::text or cursor_json->>'templateId' is distinct from v_template::text or cursor_json->>'taskId' is distinct from task_id::text then raise exception using errcode='22023',message='Cursor inválido'; end if; cursor_version:=app_private.api_expected(cursor_json,'version'); cursor_id:=app_private.api_uuid(cursor_json,'rateId'); exception when others then raise exception using errcode='22023',message='Consulta inválida'; end;
  end if;
  if kind='commandReceipt' then perform public._coordination_lock_keys(1102,array[actor::text]); perform public._coordination_lock_keys(1103,array[actor::text]); end if;
  perform app_private.api_revalidate_actor(actor,c);
@@ -533,16 +544,13 @@ begin
    if not found or t.kind<>'operativa' or not public.can_access_instance(task_id) then raise exception using errcode='42501',message='Consulta no disponible'; end if;
  elsif kind='rateHistory' then
    if role_name<>'jefe' or c->'authentication'->>'aal'<>'aal2' then raise exception using errcode='42501',message='Consulta no disponible'; end if;
-   company_id:=app_private.api_uuid(f,'companyId'); v_company:=company_id; template_id:=case when f->>'templateId' is null then null else app_private.api_uuid(f,'templateId') end; v_template:=template_id; task_id:=case when f->>'taskId' is null then null else app_private.api_uuid(f,'taskId') end;
    if not exists(select 1 from public.companies co where co.organization_id=org and co.id=v_company) then raise exception using errcode='42501',message='Consulta no disponible'; end if;
    if v_template is not null and not exists(select 1 from public.task_templates tt where tt.organization_id=org and tt.id=v_template and tt.kind='operativa') then raise exception using errcode='42501',message='Consulta no disponible'; end if;
    if task_id is not null and not exists(select 1 from public.task_instances ti where ti.id=task_id and ti.organization_id=org and ti.company_id=v_company and ti.kind='operativa') then raise exception using errcode='42501',message='Consulta no disponible'; end if;
  elsif kind not in ('activityPage','operationalSummary','quality') then raise exception using errcode='0A000',message='Consulta no disponible'; end if;
- if kind in ('operationalSummary','quality') and (lim<>1 or cursor_value is not null) then raise exception using errcode='22023',message='Consulta inválida'; end if;
  if kind='quality' and role_name<>'jefe' and t.owner_id<>actor then raise exception using errcode='42501',message='Consulta no disponible'; end if;
  if kind='quality' and role_name='jefe' and c->'authentication'->>'aal'<>'aal2' then raise exception using errcode='42501',message='Consulta no disponible'; end if;
  if kind='activityPage' then
-   if cursor_value is not null then begin cursor_json:=convert_from(decode(translate(cursor_value,'-_','+/')||repeat('=',(4-char_length(cursor_value)%4)%4),'base64'),'UTF8')::jsonb; if not app_private.api_exact_keys(cursor_json,array['kind','taskId','createdAt','entryId']) or cursor_json->>'kind' is distinct from 'activityPage' or cursor_json->>'taskId' is distinct from task_id::text then raise exception using errcode='22023',message='Cursor inválido'; end if; cursor_at:=app_private.api_timestamp(cursor_json,'createdAt'); cursor_id:=app_private.api_uuid(cursor_json,'entryId'); exception when others then raise exception using errcode='22023',message='Consulta inválida'; end; end if;
    select coalesce(jsonb_agg(item order by created_at desc,id desc),'[]'::jsonb) into data from (select jsonb_build_object('entryId',e.id,'taskId',e.instance_id,'workDate',e.work_date,'quantity',e.quantity,'unit',coalesce(e.unit_snapshot,t.unit),'reference',e.reference,'actorId',e.actor_id,'createdAt',e.created_at,'measurementVersion',e.measurement_version,'rateId',e.operational_rate_id,'unitWeight',case when e.operational_unit_weight is null then null else e.operational_unit_weight::text end,'weightedLoad',case when e.operational_unit_weight is null then null else (e.quantity*e.operational_unit_weight)::text end) item,e.created_at,id from public.activity_entries e where e.instance_id=task_id and (cursor_json is null or (e.created_at,e.id)<(cursor_at,cursor_id)) order by e.created_at desc,e.id desc limit lim+1) q;
    if jsonb_array_length(data)>lim then next_cursor:=rtrim(translate(replace(encode(convert_to(jsonb_build_object('kind',kind,'taskId',task_id,'createdAt',(data->(lim-1)->>'createdAt'),'entryId',(data->(lim-1)->>'entryId'))::text,'UTF8'),'base64'),E'\n',''),'+/','-_'),'='); data:= (select jsonb_agg(value order by ord) from jsonb_array_elements(data) with ordinality x(value,ord) where ord<=lim); else next_cursor:=null; end if;
    return jsonb_build_object('contractVersion',1,'kind',kind,'data',jsonb_build_object('items',data,'nextCursor',next_cursor));
@@ -558,7 +566,6 @@ begin
    select * into newest from app_private.operational_assessment_versions where instance_id=task_id order by revision desc limit 1;
    return jsonb_build_object('contractVersion',1,'kind',kind,'data',jsonb_build_object('taskId',task_id,'current',case when newest.id is null then null else jsonb_build_object('assessmentId',newest.id,'revision',newest.revision::text,'quality',newest.quality,'order',newest.order_score,'timeliness',newest.timeliness,'mean',round((newest.quality+newest.order_score+newest.timeliness)::numeric/3,2)::text,'observation',newest.observation,'evaluatedBy',newest.evaluated_by,'evaluatedAt',newest.evaluated_at) end));
  else
-   if cursor_value is not null then begin cursor_json:=convert_from(decode(translate(cursor_value,'-_','+/')||repeat('=',(4-char_length(cursor_value)%4)%4),'base64'),'UTF8')::jsonb; if not app_private.api_exact_keys(cursor_json,array['kind','companyId','templateId','taskId','version','rateId']) or cursor_json->>'kind' is distinct from 'rateHistory' or cursor_json->>'companyId' is distinct from v_company::text or cursor_json->>'templateId' is distinct from v_template::text or cursor_json->>'taskId' is distinct from task_id::text then raise exception using errcode='22023',message='Cursor inválido'; end if; cursor_version:=app_private.api_expected(cursor_json,'version'); cursor_id:=app_private.api_uuid(cursor_json,'rateId'); exception when others then raise exception using errcode='22023',message='Consulta inválida'; end; end if;
    select coalesce(rh.config_revision,0) into scope_rev from (select 1) x left join app_private.operational_rate_heads rh on rh.organization_id=org and rh.company_id=v_company and rh.template_id is not distinct from v_template and rh.instance_id is not distinct from task_id;
    select coalesce(jsonb_agg(item order by version desc,id desc),'[]'::jsonb) into data from (select jsonb_build_object('rateId',v.id,'version',v.version::text,'effectiveOn',v.effective_on,'unit',v.unit,'unitWeight',v.unit_weight::text,'createdAt',v.created_at,'createdBy',v.created_by,'reason',v.reason) item,v.version,v.id from app_private.operational_rate_heads h join app_private.operational_rate_versions v on v.head_id=h.id where h.organization_id=org and h.company_id=v_company and h.template_id is not distinct from v_template and h.instance_id is not distinct from task_id and (cursor_json is null or (v.version,v.id)<(cursor_version,cursor_id)) order by v.version desc,v.id desc limit lim+1) q;
    if jsonb_array_length(data)>lim then next_cursor:=rtrim(translate(replace(encode(convert_to(jsonb_build_object('kind',kind,'companyId',company_id,'templateId',template_id,'taskId',task_id,'version',(data->(lim-1)->>'version'),'rateId',(data->(lim-1)->>'rateId'))::text,'UTF8'),'base64'),E'\n',''),'+/','-_'),'='); data:=(select jsonb_agg(value order by ord) from jsonb_array_elements(data) with ordinality x(value,ord) where ord<=lim); else next_cursor:=null; end if;

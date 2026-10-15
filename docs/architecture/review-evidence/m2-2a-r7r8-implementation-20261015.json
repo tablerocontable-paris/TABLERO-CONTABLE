@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-15",
+  "scope": "Local correction of M2.2A R7/R8; synthetic databases and local PostgreSQL only",
+  "baseCommit": "fdd352e12ae47c4a8e2719f82bbc3c9b36f347d1",
+  "migration": "supabase/migrations/202610150014_operational_api.sql",
+  "reviewDecision": "implementation_validated_pending_independent_Sol_review",
+  "productSource": {
+    "migration001Through013Unchanged": true,
+    "dtoUiWorkerSiteChanged": false,
+    "hostedSupabaseOrOperationalApiCalled": false,
+    "accountsConnectedOrMigrationApplied": false
+  },
+  "acceptance": {
+    "preflightOriginalChecks": { "passed": 18, "total": 18, "exitCode": 0 },
+    "preflightRateHistorySupplement": { "passed": 2, "total": 2, "exitCode": 0 },
+    "nativeLockContention": { "passed": 6, "total": 6, "exitCode": 0 },
+    "nativeRejectionSnapshots": { "captureRevisionAndFenceValues": true, "changedByRejectedInputs": false },
+    "nativeRunnerInvalidCli": { "passed": 4, "total": 4, "exitCode": 0 },
+    "r6Matrix": { "passed": 30, "total": 30, "exitCode": 0 },
+    "independentR6": { "passed": 9, "total": 9, "exitCode": 0 },
+    "priorProtocol": { "passed": 15, "total": 15, "exitCode": 0 },
+    "postgresql17_11": {
+      "readCommittedReadCommitted": { "passed": 61, "total": 61, "exitCode": 0, "isolationPair": "read committed/read committed" },
+      "repeatableReadRepeatableRead": { "passed": 61, "total": 61, "exitCode": 0, "isolationPair": "repeatable read/repeatable read" },
+      "readCommittedRepeatableRead": { "passed": 43, "total": 43, "exitCode": 0, "isolationPair": "read committed/repeatable read" },
+      "repeatableReadReadCommitted": { "passed": 43, "total": 43, "exitCode": 0, "isolationPair": "repeatable read/read committed" }
+    },
+    "fullVitest": { "passed": 712, "total": 712, "files": 72, "exitCode": 0 },
+    "typescript": { "passed": true, "exitCode": 0 },
+    "clientBuild": { "passed": true, "exitCode": 0 },
+    "workerBuild": { "passed": true, "exitCode": 0 },
+    "reviewRunnerSyntax": { "passed": true, "exitCode": 0 },
+    "gitDiffCheck": { "passed": true, "exitCode": 0 }
+  },
+  "migration014Sha256": "f93451b238c4d09a0ae1e87dabf32701e87022d9a21a2d65d943b0da171b92ee",
+  "rawReports": "../../outputs/m2-2a-r7r8-implementation-20261015/",
+  "notes": [
+    "The original 18 preflight checks remain unchanged; two rateHistory cursor controls were added.",
+    "A first supplemental positive-control fixture used a nonexistent template ID and failed with 22023; the fixture was corrected to use a real task scope, and the final 20/20 report passed.",
+    "All PostgreSQL reports identify migration 014 by SHA-256 and record the effective isolation pair.",
+    "No Supabase-hosted project, Auth, GitHub, hosting, browser state, or production data was used.",
+    "Independent GPT-6.1 Sol review and human acceptance remain pending."
+  ],
+  "nextStep": "GPT-6.1 Sol high effort Standard independently reviews R7/R8 and accepts or returns M2.2A corrections; do not start B/C or apply/deploy migration 014 before that decision."
+}

@@ -22,7 +22,16 @@ const command={contractVersion:1,operationId:operation,kind:'operation.record',e
 const query={contractVersion:1,kind:'activityPage',filters:{taskId:task},cursor:'!!!',limit:10};
 const callCommand=`select api.command_v1('${JSON.stringify(command)}'::jsonb);`;
 const callQuery=`select api.query_v1('${JSON.stringify(query)}'::jsonb);`;
-const snapshot=`select jsonb_build_object('revision',(select state_revision from public.task_instances where id='${task}'),'activity',(select count(*) from public.activity_entries where instance_id='${task}'),'receipts',(select count(*) from app_private.api_command_receipts),'operation_fences',(select count(*) from app_private.api_operation_fences),'month_fences',(select count(*) from app_private.api_month_fences))::text;`;
+const snapshot=`select jsonb_build_object(
+ 'taskRevision',(select state_revision::text from public.task_instances where id='${task}'),
+ 'activity',(select coalesce(jsonb_agg(jsonb_build_array(id::text,quantity::text,created_at::text) order by id),'[]'::jsonb) from public.activity_entries where instance_id='${task}'),
+ 'receipts',(select coalesce(jsonb_agg(jsonb_build_array(actor_id::text,operation_id::text,kind,created_at::text) order by actor_id,operation_id),'[]'::jsonb) from app_private.api_command_receipts),
+ 'operationFences',(select coalesce(jsonb_agg(jsonb_build_array(actor_id::text,operation_id::text,fence_epoch::text) order by actor_id,operation_id),'[]'::jsonb) from app_private.api_operation_fences),
+ 'monthFences',(select coalesce(jsonb_agg(jsonb_build_array(owner_id::text,period::text,fence_epoch::text) order by owner_id,period),'[]'::jsonb) from app_private.api_month_fences),
+ 'rateHeads',(select coalesce(jsonb_agg(jsonb_build_array(id::text,config_revision::text,fence_epoch::text) order by id),'[]'::jsonb) from app_private.operational_rate_heads),
+ 'assessments',(select coalesce(jsonb_agg(jsonb_build_array(instance_id::text,revision::text) order by instance_id),'[]'::jsonb) from app_private.operational_assessments),
+ 'assessmentVersions',(select coalesce(jsonb_agg(jsonb_build_array(id::text,instance_id::text,revision::text) order by instance_id,revision),'[]'::jsonb) from app_private.operational_assessment_versions)
+)::text;`;
 const results=[];
 const check=(name,expected,observed,details={})=>{const row={name,passed:expected===observed,expected,observed,...details};results.push(row);console.log(JSON.stringify(row));};
 const contested=async(lock,call)=>{

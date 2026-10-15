@@ -74,6 +74,16 @@ try {
   await lab.admin(); await lab.db.exec(scopeDefinition);
   await lab.actor(ids.owner, 'aal1', 'authenticated');
   check('valid query remains available after fixture sentinel restoration', '00000', await attempt('query_v1', query('operationalSummary')));
+
+  await lab.admin();
+  const actorDefinition = (await lab.first("select pg_get_functiondef('app_private.api_revalidate_actor(uuid,jsonb)'::regprocedure) definition")).definition;
+  await lab.db.exec(`create or replace function app_private.api_revalidate_actor(p_actor uuid,p_context jsonb) returns void
+    language plpgsql security definer set search_path='' as $$begin raise exception using errcode='PZ003',message='Review actor-revalidation sentinel'; end$$`);
+  await lab.actor(ids.boss, 'aal2', 'authenticated');
+  const rateHistory = cursor => ({ contractVersion: 1, kind: 'rateHistory', filters: { companyId: ids.company, templateId: null, taskId: task }, cursor, limit: 10 });
+  check('valid rate-history query reaches actor-revalidation sentinel (positive control)', 'PZ003', await attempt('query_v1', rateHistory(null)));
+  check('invalid rate-history cursor rejected before actor revalidation', '22023', await attempt('query_v1', rateHistory('!!!')));
+  await lab.admin(); await lab.db.exec(actorDefinition);
 } finally { await lab.close(); }
 const files = ['supabase/migrations/202610150014_operational_api.sql','tests/review/m2-2a-r6-preflight-review.mjs'];
 const report = { scope: 'Independent R6 preflight review; fixture sentinels and synthetic PGlite only', total: results.length, passed: results.filter(x => x.passed).length, failed: results.filter(x => !x.passed).length, results, sha256: Object.fromEntries(files.map(path => [path,createHash('sha256').update(readFileSync(path)).digest('hex')])) };

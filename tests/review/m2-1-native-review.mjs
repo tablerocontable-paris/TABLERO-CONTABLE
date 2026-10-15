@@ -8,11 +8,25 @@ import assert from "node:assert/strict";
 import { decodeContextV1 } from "../../src/data/supabase/context-contract.ts";
 import { decodeCommandResponseV1, decodeQueryResponseV1 } from "../../src/data/supabase/operational-contract.ts";
 
-const flags = Object.fromEntries(
-  process.argv
-    .slice(2)
-    .reduce((a, v, i, all) => (i % 2 ? a : [...a, [v, all[i + 1]]]), []),
-);
+const allowedFlags = new Set([
+  "--pg-bin", "--output-dir", "--port", "--candidate", "--review-matrix",
+  "--through-014", "--m2-2a-smoke", "--m2-2a-independent",
+  "--m2-2a-isolation", "--m2-2a-first-isolation", "--m2-2a-second-isolation",
+]);
+const flags = {};
+for (let i = 2; i < process.argv.length; i += 2) {
+  const key = process.argv[i], value = process.argv[i + 1];
+  if (!allowedFlags.has(key)) throw Error(`Unknown option: ${key}`);
+  if (Object.hasOwn(flags, key)) throw Error(`Repeated option: ${key}`);
+  if (value === undefined || value.startsWith("--")) throw Error(`Missing value for ${key}`);
+  flags[key] = value;
+}
+if (flags["--review-matrix"] && flags["--review-matrix"] !== "full")
+  throw Error("--review-matrix must be full");
+if (flags["--through-014"] && flags["--through-014"] !== "yes")
+  throw Error("--through-014 must be yes");
+for (const key of ["--m2-2a-smoke", "--m2-2a-independent"])
+  if (flags[key] && flags[key] !== "yes") throw Error(`${key} must be yes`);
 const m2aIsolation = flags["--m2-2a-isolation"] === "rr"
   ? "repeatable read"
   : "read committed";
@@ -1316,6 +1330,7 @@ try {
     root,
     "supabase/migrations/202610140013_api_identity_foundation.sql",
   );
+  const sql014File = join(root, "supabase/migrations/202610150014_operational_api.sql");
   const report = {
     sourceCommit: execFileSync("git", ["rev-parse", "HEAD"], {
       cwd: root,
@@ -1326,6 +1341,9 @@ try {
     migrationSha256: createHash("sha256")
       .update(readFileSync(sqlFile))
       .digest("hex"),
+    migration014Sha256: flags["--through-014"]
+      ? createHash("sha256").update(readFileSync(sql014File)).digest("hex")
+      : null,
     candidate: flags["--candidate"] ?? null,
     m2aIsolation,
     m2aFirstIsolation,

@@ -1,21 +1,17 @@
-# Acción vigente — Luna completa R7/R8, 15/10/2026
+# Acción vigente — GPT‑6.1 Sol revisa M2.2A-R7/R8, 15/10/2026
 
-**GPT‑6 Luna, esfuerzo medio, Standard** implementa únicamente
-`architecture/M2-2A-PREFLIGHT-LUNA-20261015.md`. La revisión de `ebe1633` cerró
-R6 original y devolvió dos puntos acotados: prevalidación completa antes de
-locks/recibos (R7) y rechazo de miembro NULL en claves esperadas (R8).
+La implementación local está completa. Evidencia:
+`architecture/review-evidence/m2-2a-r7r8-implementation-20261015.json` y los
+reportes nativos en `../../outputs/m2-2a-r7r8-implementation-20261015/`.
+Pasaron sondas20/20 (18 base +2 rateHistory), nativo6/6, R6 30/30 e
+independiente9/9, protocolo15/15, PostgreSQL RC/RC61/61, RR/RR61/61, los dos
+cruces43/43, suite712/712, TypeScript, builds cliente/Worker, sintaxis y
+diff-check. El reporte captura SHA‑256 de 014 y pares de aislamiento efectivos.
 
-Informe `architecture/M2-2A-R6-SOL-REVIEW-20261015.md`; evidencia
-`architecture/review-evidence/m2-2a-r6-sol-review-20261015.json`. Las sondas nuevas
-8/18 y3/6 documentan los fallos; deben pasar18/18 y6/6 tras la corrección. Los
-casos existentes30/30, protocolo15/15, focales17/17 y TypeScript pasan. Las
-matrices mixtas reales se repitieron correctamente43/43 cada una; las etiquetas
-mixtas de la implementación R6 eran RC/RC por opciones desconocidas ignoradas.
-
-Conservar SQL001–013/DTO/UI/Worker/Site; no instalar dependencias, conectar
-cuentas, desplegar014 ni iniciar B/C. Validar y registrar un único commit del
-bloque, con hook y paquete final, como indica el contrato; después Sol alto
-revisa A y define B/C. Avance~45% histórico sin recalcular.
+Siguiente: **GPT‑6.1 Sol, esfuerzo alto, Standard**, revisión independiente de
+R7/R8 y del candidato A. Conservar SQL001–013/DTO/UI/Worker/Site. Hasta esa
+decisión no iniciar B/C, aplicar o desplegar014, conectar cuentas ni declarar
+aceptada M2.2A. El ~45% sigue siendo histórico; no recalcular por este bloque.
 
 ## Acción anterior — preparar el candidato R6 para revisión
 

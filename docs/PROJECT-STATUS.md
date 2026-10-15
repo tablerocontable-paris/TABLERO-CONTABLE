@@ -1,25 +1,27 @@
-# Estado vigente — R6 resuelto; R7/R8 pendientes, 15/10/2026
+# Estado vigente — R7/R8 corregidos localmente; revisión Sol pendiente, 15/10/2026
 
-La revisión de `ebe1633` cerró el bypass original de revisiones vacías: el
-reproductor pasa 30/30. M2.2A todavía no se acepta por dos correcciones de
-validación previa: algunas revisiones/cursores se validan después de adquirir
-locks (R7), y el helper de claves acepta un conjunto esperado con miembro NULL
-(R8). Con locks ocupados, las entradas inválidas alcanzan timeout55P03; no se
-observaron cambios parciales. Sondas nuevas: 8/18 PGlite y 3/6 PostgreSQL17.11.
+La migración 014 ahora parsea las revisiones obligatorias antes del lock del
+recibo y compara revisiones bien formadas sólo después de la reautorización y
+los locks existentes. Los cursores de `activityPage` y `rateHistory`, además
+de los límites/cursores de consultas no paginadas, se validan antes de locks.
+`api_exact_keys` rechaza arrays esperados con miembros NULL. El runner nativo
+rechaza flags desconocidos, repetidos y sin valor antes de crear el directorio
+de salida y reporta el SHA‑256 de 014.
 
-Las pruebas antes etiquetadas como mixtas R6 usaron realmente RC/RC por flags
-incorrectos. Esta revisión las repitió con opciones válidas: RC/RR43/43 y
-RR/RC43/43. Además pasaron protocolo15/15, focales17/17 y TypeScript. Producto
-intacto durante la revisión; suite712/builds corresponden al mismo código
-validado antes y no se repitieron ahora. Bundle/ZIP `ebe1633` verificado, pero
-sigue siendo candidato con hallazgos conocidos, no entrega final.
+Validación final: sondas **20/20** (las 18 originales más dos controles de
+`rateHistory`), PostgreSQL con bloqueos **6/6**, R6 **30/30**, sonda R6
+independiente **9/9**, protocolo **15/15**; PostgreSQL17.11 **61/61 RC/RC**,
+**61/61 RR/RR**, **43/43 RC/RR** y **43/43 RR/RC**. Suite completa **712/712 en
+72 archivos**, TypeScript, build cliente, Worker, `node --check` de los runners
+y `git diff --check` pasaron. La revisión inicial de la comprobación agregada
+de rateHistory encontró un control positivo mal configurado; se corrigió el
+fixture y la ejecución final pasó 20/20.
 
-Informe: `architecture/M2-2A-R6-SOL-REVIEW-20261015.md`. Evidencia:
-`architecture/review-evidence/m2-2a-r6-sol-review-20261015.json`. Próximo:
-**GPT‑6 Luna, medio, Standard** ejecuta
-`architecture/M2-2A-PREFLIGHT-LUNA-20261015.md`; luego Sol alto revisa A.
-B/C, Supabase alojado, hosting y aceptación final siguen pendientes. Avance
-~45% histórico sin recalcular. Sin despliegue ni nuevas cuentas en este corte.
+Evidencia: `architecture/review-evidence/m2-2a-r7r8-implementation-20261015.json`;
+sondas en `../../outputs/m2-2a-r7r8-implementation-20261015/`. La revisión Sol
+de A sigue pendiente. No aplicar ni desplegar 014, iniciar B/C ni conectar
+cuentas. Supabase alojado, hosting y aceptación final siguen pendientes; avance
+~45% histórico sin recalcular.
 
 ## Candidato anterior — implementación R6 pendiente de revisión
 

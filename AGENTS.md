@@ -1,3 +1,15 @@
+# Precedencia M2.2A-R7/R8 — implementación local lista para revisión, 15/10/2026
+
+R7/R8 están corregidos en la migración local 014 y el runner nativo. Evidencia
+vigente `docs/architecture/review-evidence/m2-2a-r7r8-implementation-20261015.json`.
+Preflight: 20/20 (18 originales + 2 de rateHistory); nativo con locks: 6/6;
+R6: 30/30 + independiente9/9; protocolo15/15; PostgreSQL17.11: RC/RC61/61,
+RR/RR61/61, RC/RR43/43, RR/RC43/43; suite712/712 en72 archivos, TypeScript,
+build cliente/Worker, sintaxis y diff-check aprobados. Revisión Sol pendiente.
+Siguiente **GPT‑6.1 Sol, esfuerzo alto, Standard** revisa M2.2A-R7/R8; no
+iniciar B/C, aplicar/desplegar014, conectar cuentas ni recalcular el ~45%
+histórico antes de esa decisión.
+
 > **Precedencia M2.2A — revisión R6 finalizada, 15/10/2026.** R6 original resuelto (30/30); candidato `ebe1633` aún NO aceptado por R7/R8 P2: valores de revisión/cursores validados después de locks y helper de claves que acepta un conjunto esperado con NULL. Sonda nueva 8/18, nativa 3/6, con estado sin cambios; los fallos son evidencia deliberada. Se corrigió la evidencia mixta previa: sus opciones erróneas produjeron RC/RC; nuevas ejecuciones reales RC/RR y RR/RC pasan 43/43 cada una. Focales17/17, protocolo15/15 y TypeScript pasan. Producto SQL/DTO/UI/Worker sin cambios en la revisión; suite712/builds son del mismo producto anterior. Siguiente **GPT‑6 Luna medio Standard** ejecuta `docs/architecture/M2-2A-PREFLIGHT-LUNA-20261015.md`; después Sol alto acepta A y define B/C. Informe/evidencia `M2-2A-R6-SOL-REVIEW-20261015.md` / `review-evidence/m2-2a-r6-sol-review-20261015.json`. No desplegar014, iniciar B/C ni conectar cuentas en este corte. Avance ~45% histórico.
 
 > **Precedencia M2.2A-R6 — candidato local empaquetado y verificado, 15/10/2026.** Corrección NULL-safe implementada en 014. R6 30/30, sonda independiente 9/9, pruebas previas 15/15, matrices PostgreSQL 17.11: 61/61 RC/RC, 61/61 RR/RR, 43/43 RC/RR, 43/43 RR/RC; focales 17/17; suite 712/712; TypeScript y builds cliente/Worker aprobados. Los commits `08b7405` (código) y `de38b3d` (evidencia) pasaron cada uno el hook 196/196. Bundle/ZIP de `de38b3d` verificado desde clonación limpia en `outputs/m2-2a-r6-candidate-delivery-20261015`. Próximo: GPT‑6.1 Sol, esfuerzo alto, revisión independiente del candidato. No iniciar B/C, desplegar 014 ni conectar cuentas. Evidencia `docs/architecture/review-evidence/m2-2a-r6-implementation-20261015.json`; avance ~45% histórico sin recalcular.
