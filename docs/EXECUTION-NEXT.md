@@ -1,4 +1,4 @@
-# Acción vigente — completar la matriz M2.2A (15/10/2026)
+# Acción vigente — revisión independiente de M2.2A (15/10/2026)
 
 R1–R5 ya están corregidos y revalidados. PostgreSQL 17.11: **61/61 RC/RC** y
 **61/61 RR/RR**; replay y revocación cruzados: **43/43 RC/RR** y **43/43 RR/RC**.
@@ -6,12 +6,17 @@ PGlite/protocolo **15/15**, suite **712/712**, TypeScript, build cliente y Worke
 con código 0. Comandos, salidas y hashes:
 `architecture/review-evidence/m2-2a-corrections-validation-20261015.json`.
 
-**Siguiente trabajo local:** crear el commit candidato explícito y el bundle portable
-de este corte, comprobando una clonación limpia. Conservar 001–013 y UI/Worker/Site;
-no desplegar ni conectar cuentas. Después corresponde **GPT‑6.1 Sol, esfuerzo alto,
-Standard** para revisar el commit, hashes y evidencia, aceptar/rechazar M2.2A y
-definir B/C. No se conectaron cuentas ni hay integración alojada comprobada. Avance
-~45% histórico, sin recalcularlo.
+El candidato de implementación está en el commit **9c096973**. El bundle portátil
+con las ramas `main` y `migration/github-bootstrap` se verificó y clonó en limpio
+con ese HEAD. También pasó el hook automático **196/196**; la suite completa es
+**712/712** y las cuatro matrices nativas suman **208/208** ejecuciones aprobadas.
+La entrega local está en `outputs/m2-2a-candidate-delivery-20261015`.
+
+**Siguiente paso:** **GPT‑6.1 Sol, esfuerzo alto, Standard** revisa el diff exacto,
+los contratos de permiso/MVCC, migración 014, evidencia y matrices; decide aceptar
+o devolver hallazgos y define B/C. Conservar 001–013 y UI/Worker/Site; no desplegar
+ni conectar cuentas. No hay integración alojada comprobada. Avance ~45% histórico,
+sin recalcularlo.
 
 ## Evidencia anterior de implementación — supersedida por la matriz completa
 

@@ -1,4 +1,4 @@
-# Corte vigente — M2.2A corregido localmente; falta aceptación, 15/10/2026
+# Corte vigente — M2.2A candidato local; revisión Sol pendiente, 15/10/2026
 
 Las cinco correcciones del informe Sol están implementadas en la migración local
 014 y el DTO. Matriz PostgreSQL17.11: **61/61 RC/RC, 61/61 RR/RR**, y las
@@ -8,8 +8,10 @@ recibos y estados finales. Sondas PGlite/protocolo **15/15**; suite completa
 **712/712 en72 archivos**; TypeScript y builds cliente/Worker código0. Evidencia:
 `architecture/review-evidence/m2-2a-corrections-validation-20261015.json`.
 
-**M2.2A está listo para commit candidato y revisión, pero aún no aceptado por Sol.**
-La revalidación fue sólo local y sintética. No desplegar 014 ni conectar cuentas;
+**El commit candidato 9c096973 y el bundle portátil se generaron y verificaron**
+mediante clonación limpia en `outputs/m2-2a-candidate-delivery-20261015`.
+M2.2A aún no está aceptado por Sol. La revalidación fue sólo local y sintética.
+No desplegar 014 ni conectar cuentas;
 M2.2B/C e integración Supabase/hosting siguen pendientes. Se conservan 001–013,
 UI, Worker y Site. El avance global permanece ~45% histórico y no se recalcula.
 
