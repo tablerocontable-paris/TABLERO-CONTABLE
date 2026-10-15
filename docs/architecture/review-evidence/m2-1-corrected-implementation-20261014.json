@@ -1,5 +1,5 @@
 {
-  "sourceCommit": "4a078e48a25cb4f7050e9cb4d6c9606775fe8d80",
+  "sourceCommit": "5125d7e412985ef2f2a17bb37a0231d7ef19f4bf",
   "engine": "postgres (PostgreSQL) 17.11",
   "migrationSha256": "d013b82bfa1101ed11a35daeaf7a64b2e6063da9c09b55e7586ce67cc586bac2",
   "candidate": null,
@@ -189,7 +189,7 @@
   "implementation": {
     "migrationSha256Raw": "d013b82bfa1101ed11a35daeaf7a64b2e6063da9c09b55e7586ce67cc586bac2",
     "noCandidateTransform": true,
-    "sourceChanges": [
+    "files": [
       "supabase/migrations/202610140013_api_identity_foundation.sql",
       "tests/helpers/accounting-lab.ts",
       "tests/review/m2-1-native-review.mjs",
@@ -199,7 +199,8 @@
       "013"
     ],
     "migration012AndEarlierChanged": false,
-    "syntheticOnly": true
+    "syntheticOnly": true,
+    "commit": "5125d7e"
   },
   "vitest": {
     "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
@@ -212,6 +213,11 @@
     "passed": 22,
     "failed": 0
   },
+  "precommit": {
+    "files": 19,
+    "passed": 196,
+    "failed": 0
+  },
   "build": {
     "typescript": true,
     "viteClient": true,
@@ -220,9 +226,9 @@
     "command": "npm run build using portable npm 12.2.0"
   },
   "boundaries": [
-    "No Supabase hosted project or Auth connection",
+    "No hosted Supabase project/Auth connection",
     "No migration deployment",
     "No frontend, Worker/D1, Site, or migration 001-012 changes",
-    "M2.1 remains pending independent Sol review"
+    "M2.1 pending independent Sol review"
   ]
 }
