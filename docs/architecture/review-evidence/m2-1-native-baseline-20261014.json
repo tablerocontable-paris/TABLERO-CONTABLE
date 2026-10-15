@@ -1,0 +1,98 @@
+{
+  "sourceCommit": "66f14a69a9a70460d4b516c64e559badde1c8a8c",
+  "engine": "postgres (PostgreSQL) 17.11",
+  "migrationSha256": "aaced2308a23801f92a207e3cdd1f08b094e85d6ae7576eb35efd00630a786bd",
+  "candidate": null,
+  "total": 11,
+  "passed": 5,
+  "failed": 6,
+  "results": [
+    {
+      "name": "missing AAL",
+      "passed": false,
+      "expectedSQLSTATE": "42501",
+      "observedSQLSTATE": "00000",
+      "body": "{\"principal\": {\"id\": \"00000000-0000-0000-0000-000000000002\", \"kind\": \"business\", \"role\": \"empleado\", \"teamIds\": [], \"companyIds\": [], \"displayName\": \"Synthetic employee\", \"organizationId\": \"00000000-0000-0000-0000-000000000001\"}, \"capabilities\": [], \"authentication\": {\"aal\": null, \"requiresMfa\": false}, \"contractVersion\": 1}"
+    },
+    {
+      "name": "null AAL",
+      "passed": false,
+      "expectedSQLSTATE": "42501",
+      "observedSQLSTATE": "00000",
+      "body": "{\"principal\": {\"id\": \"00000000-0000-0000-0000-000000000002\", \"kind\": \"business\", \"role\": \"empleado\", \"teamIds\": [], \"companyIds\": [], \"displayName\": \"Synthetic employee\", \"organizationId\": \"00000000-0000-0000-0000-000000000001\"}, \"capabilities\": [], \"authentication\": {\"aal\": null, \"requiresMfa\": false}, \"contractVersion\": 1}"
+    },
+    {
+      "name": "whitespace-only display name",
+      "passed": false,
+      "expected": "deny",
+      "observedSQLSTATE": "00000",
+      "decoded": false
+    },
+    {
+      "name": "Unicode code-point display name",
+      "passed": true,
+      "expected": "decode",
+      "observedSQLSTATE": "00000",
+      "decoded": true
+    },
+    {
+      "name": "corrupted dual identity with an inactive duplicate",
+      "passed": false,
+      "expectedSQLSTATE": "42501",
+      "observedSQLSTATE": "00000"
+    },
+    {
+      "name": "identity race read committed: business first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "23514",
+      "commitSQLSTATE": "00000",
+      "coexist": false
+    },
+    {
+      "name": "identity race read committed: technical first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "23514",
+      "commitSQLSTATE": "00000",
+      "coexist": false
+    },
+    {
+      "name": "identity race repeatable read: business first",
+      "passed": false,
+      "blocked": true,
+      "secondSQLSTATE": "00000",
+      "commitSQLSTATE": "00000",
+      "coexist": true
+    },
+    {
+      "name": "identity race repeatable read: technical first",
+      "passed": false,
+      "blocked": true,
+      "secondSQLSTATE": "00000",
+      "commitSQLSTATE": "00000",
+      "coexist": true
+    },
+    {
+      "name": "identity race serializable: business first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "40001",
+      "commitSQLSTATE": "00000",
+      "coexist": false
+    },
+    {
+      "name": "identity race serializable: technical first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "40001",
+      "commitSQLSTATE": "00000",
+      "coexist": false
+    }
+  ],
+  "providerAuth": "synthetic claims only; no hosted Supabase connection",
+  "references": [
+    "https://www.postgresql.org/docs/17/transaction-iso.html",
+    "https://www.postgresql.org/docs/17/xfunc-volatility.html"
+  ]
+}

@@ -1,5 +1,9 @@
 # M2.1: contrato ejecutable para Luna
 
+> Revisión14/10: la implementación inicial no fue aceptada. La siguiente ejecución
+> usa M2-1-CORRECTIONS-LUNA-20261014.md, que amplía este contrato con la coordinación
+> de identidad entre snapshots y las regresiones independientes. Ver M2-1-SOL-REVIEW-20261014.md.
+
 Fecha: 14/10/2026. Leer SUPABASE-M2-CONTRACT-20261014.md y el estado vigente.
 Modelo de ejecución recomendado: GPT-6 Luna, esfuerzo medio, Standard.
 Revisión posterior: GPT-6.1 Sol, esfuerzo alto, Standard.

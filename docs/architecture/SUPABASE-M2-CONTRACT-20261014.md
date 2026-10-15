@@ -1,5 +1,11 @@
 # M2: contrato de migración a Supabase
 
+> Revisión M2.1 del14/10: no aceptado; cuatro defectos reproducidos en PostgreSQL.
+> El mecanismo de identidad requiere además del advisory lock una fila privada
+> de coordinación actualizada, para abortar snapshots obsoletos. Decisión y prueba
+> en M2-1-SOL-REVIEW-20261014.md; ejecución siguiente M2-1-CORRECTIONS-LUNA-20261014.md.
+> M2.2/014 espera la aceptación de esa corrección. El diseño histórico sigue abajo.
+
 Fecha: 14/10/2026. Base inspeccionada: `8d95200f599b6188e041526507627f649d673940`,
 rama `migration/github-bootstrap`. Estado: diseño y contratos, no implementación
 ni aceptación de Supabase. M1 tiene commit y clonación de bundle comprobados.

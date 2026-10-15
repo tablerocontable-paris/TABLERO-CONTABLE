@@ -1,3 +1,5 @@
+> **Corte vigente: revisión M2.1 NO aceptada (14/10/2026).** Cuatro defectos reproducidos en PostgreSQL nativo; propuesta aislada 11/11. Próximo: Luna medio Standard ejecuta architecture/M2-1-CORRECTIONS-LUNA-20261014.md y después Sol alto revisa. Los cortes anteriores son históricos. 014/M2.2 esperan la aceptación de 013; avance global ~45% histórico.
+
 > **Diseño M2 — 14/10/2026.** Inventario estático de 90 fuentes/38 campos State y matriz completa de consultas/comandos, con siete bloques de migración a Supabase. Se definieron fronteras de API, identidad técnica separada, privacidad de anotaciones, operativas versionadas, cierres por empresa, evidencia y recuperación. Contrato inmediato cerrado para M2.1; los demás requieren desglose/revisión antes de Luna. Ver architecture/SUPABASE-M2-CONTRACT-20261014.md y architecture/M2-1-IDENTITY-LUNA-20261014.md. Reproducibilidad M1 verificada ahora sobre clonación limpia con npm ci: Node24.19/npm portable12.2, 223 paquetes, 668/668, TypeScript/builds/paquete Sites aprobados; Git limpio. Se corrigió la guía portable. Evidencia: architecture/review-evidence/m2-architecture-contract-20261014.json. SQL013 y la app Supabase aún no están implementados. ~45% histórico sin recalcular.
 
 > **Migración propia — corte M1, 14/10/2026.** Commit `8d95200` en `migration/github-bootstrap`; fuente/evidencia acotadas, CI con acciones fijadas a SHA, suite 668/668, TypeScript, builds cliente/Worker y paquete Sites aprobados con las dependencias existentes. Bundle clonado en limpio con HEAD coincidente. La guía anterior tenía errores de orden de verificación y de clave del manifiesto; corregidos en M2 y reemplazados en el paquete portable siguiente. GitHub NUEVO aún sin conexión/remoto; Supabase Auth/paridad alojada pendientes. M1 no acredita por sí mismo npm ci en copia limpia ni aceptación productiva.
@@ -10,6 +12,16 @@
 > **Reauditoría del recorrido S39 — 14/10/2026.** La lectura módulo por módulo encontró brechas después de la validación anterior: algunos pasos aún apuntaban a controles generales, y una vista sin laboratorio no resolvía su destino de calendario. Se ajustaron los anclajes internos, los estados vacíos, el despliegue temporal de Catálogo y el recálculo de posición al cambiar el viewport. El recorrido no abre formularios ni ejecuta acciones de negocio; empleado, encargado y jefe conservan sus permisos.
 > Suite completa: **663/663 en 67 archivos**. TypeScript, build cliente y Worker pasan. Edge: **31/31**, tours completos para los tres roles (11/13/15 pasos), desktop 1440×900 y coach móvil 390×844; cero errores JS y cero llamadas a la API operativa. Revisión independiente Sol y aceptación humana con lector de pantalla siguen pendientes. Evidencia: `docs/architecture/review-evidence/s39-tour-refresh-20261014.json` y `outputs/s39-tour-refresh-20261014/browser-validation.json`. No se hizo commit ni publicación; avance global ~45%.
 # Estado del proyecto Grupo París
+
+> **Revisión M2.1 — 14/10/2026: NO aceptado.** Cuatro defectos reproducidos:
+> AAL ausente/null, identidades simultáneas con snapshot repetible, identidad
+> doble parcialmente inactiva y nombre sólo de espacios invisibles. PostgreSQL
+> portable sí estaba en work/pg-runtime/pgsql/bin. El corte actual pasó5/11 casos
+> independientes; una propuesta aislada corrigió los cuatro y pasó11/11, sin
+> incorporarse aún a013. Se identificaron brechas de upgrade poblado y fixtures.
+> Informe architecture/M2-1-SOL-REVIEW-20261014.md; siguiente Luna medio Standard
+> ejecuta architecture/M2-1-CORRECTIONS-LUNA-20261014.md, luego Sol alto revisa.
+>014/M2.2 pendiente; sin cuentas conectadas, avance ~45% histórico sin aumentar.
 
 > **M2.1 implementado localmente — 14/10/2026.** Se añadió SQL013 con los
 > esquemas `api`/`app_private`, cuenta técnica separada, bloqueo de identidad

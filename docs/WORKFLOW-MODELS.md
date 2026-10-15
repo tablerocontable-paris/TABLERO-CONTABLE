@@ -1,4 +1,4 @@
-> **Acción vigente 14/10/2026:** diseño M2 por módulos en architecture/SUPABASE-M2-CONTRACT-20261014.md. Siguiente: GPT-6 Luna, medio, Standard, ejecuta únicamente architecture/M2-1-IDENTITY-LUNA-20261014.md. Después GPT-6.1 Sol, alto, Standard, revisa y cierra el contrato M2.2. Selección manual, sin simular modelos ni delegar para sustituirla. M2.1 local no requiere conectar cuentas; recursos remotos usarán sólo la cuenta nueva autorizada.
+> **Acción vigente tras revisión 14/10/2026:** M2.1 no aceptado. GPT-6 Luna, medio, Standard ejecuta únicamente architecture/M2-1-CORRECTIONS-LUNA-20261014.md; luego Sol alto revisa. Revisión nativa actual 5/11; propuesta aislada 11/11. No iniciar014/M2.2 ni servicios antes de aceptar la corrección. Selección manual, sin simular modelos ni delegar para sustituirla.
 
 # Modelos y uso del plan Plus — 01/10/2026
 
