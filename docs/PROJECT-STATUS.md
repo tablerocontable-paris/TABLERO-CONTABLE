@@ -2,7 +2,7 @@
 
 El código está en el repositorio privado `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`, con autoría nueva **Tablero Contable**. La PC personal puede clonar y ejecutar el laboratorio; GitHub no traslada `localStorage`/IndexedDB. La guía vigente es `outputs/LEEME-PC-PERSONAL.md`.
 
-Supabase ya está disponible mediante el conector autorizado de esta sesión. La organización `tablerocontable-paris` no tiene proyectos todavía. La integración Supabase↔GitHub no está configurada; se realizará sobre un proyecto dev después de confirmar organización/costo y aceptar la revisión independiente de SQL 014. No aplicar migraciones a un proyecto alojado antes de esa revisión. El estado de CI consultado para el commit `3af0f943d55da95e5940f3e666198985999aceb4` no devolvió checks; no afirmar que el workflow de ese commit terminó.
+Supabase está disponible mediante el conector autorizado. Se creó, con confirmación del usuario, el proyecto dev `grupo-paris-dev` en `sa-east-1`; el costo cotizado fue USD 0/mes. Está activo y vacío: no tiene migraciones ni tablas, y los asesores de seguridad/rendimiento no muestran hallazgos. Sol aceptó M2.2A R7/R8 en alcance local; B/C aún deben definirse y completarse. Por contrato, 014 no se aplica hasta aceptar A/B/C. Supabase↔GitHub sigue pendiente. La consulta de CI para `c2fe8b41544edeb41b19cedc6c428b5af9a8f76f` no devolvió checks.
 # Estado vigente — R7/R8 corregidos localmente; revisión Sol pendiente, 15/10/2026
 
 La migración 014 ahora parsea las revisiones obligatorias antes del lock del

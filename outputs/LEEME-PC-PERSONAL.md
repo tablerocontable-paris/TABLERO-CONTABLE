@@ -31,7 +31,7 @@ El repositorio oficial privado es [`tablerocontable-paris/TABLERO-CONTABLE`](htt
 
 GitHub sincroniza el código y el historial Git; no sincroniza el estado ficticio guardado en el navegador (`paris-state-lab`) ni los archivos locales de IndexedDB. Para trasladar ese estado, exportá el respaldo desde la interfaz de «Vista de prueba», guardalo en un medio privado, y restauralo en la otra PC. El respaldo contiene datos ficticios y no está cifrado. No subirlo al repositorio.
 
-El entorno local del laboratorio no necesita Supabase. La organización Supabase `tablerocontable-paris` está accesible, pero todavía no tiene proyectos; no hay una base alojada conectada ni migraciones remotas aplicadas. La conexión del repositorio a Supabase también está pendiente. La migración SQL 014 continúa en revisión independiente; no habilitar despliegues automáticos de base hasta cerrar esa revisión y preparar un proyecto dev.
+El entorno local del laboratorio no necesita Supabase. La organización Supabase `tablerocontable-paris` tiene el proyecto `grupo-paris-dev`, en región `sa-east-1`, creado con cotización de USD 0/mes. Está activo y vacío. El repo aún no está conectado a Supabase; no hay migraciones remotas aplicadas. Sol aceptó M2.2A R7/R8 en local, pero 014 sólo se aplicará cuando B/C también estén completas y aceptadas.
 
 ## Qué queda alojado
 
