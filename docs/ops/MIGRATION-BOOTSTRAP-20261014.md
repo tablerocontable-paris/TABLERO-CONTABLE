@@ -1,3 +1,19 @@
+# Precedencia vigente — 16/10/2026
+
+La importación a GitHub quedó hecha en una raíz Git nueva, atribuida a Tablero
+Contable y publicada directamente en `main` del repositorio privado
+`tablerocontable-paris/TABLERO-CONTABLE`. `main` es la rama de trabajo; no usar
+PR, `dev` ni ramas de integración para el flujo rutinario. El commit inicial es
+`8a10c6c19c1a619d3a621ea25af30e15f503cae0`; sólo se publica el código y los
+documentos versionados, no credenciales ni estado local del navegador. El
+checkout de la PC personal debe clonar `main` y autenticarse con la cuenta nueva.
+
+La conexión Supabase/Cloudflare todavía no está verificada. La revisión Sol de
+M2.2A-R7/R8 sigue siendo gate antes de cambiar/aplicar SQL. La creación de
+recursos dev, si se autoriza al continuar, no significa producción, migración de
+empleados, invitaciones ni despliegue público. No configurar SMTP/Gmail ni
+enviar correo hasta acordar el dominio/remitente y la necesidad de Auth.
+
 # Migración a cuentas propias — contrato de inicio, 14/10/2026
 
 > Actualización M2: M1 local consolidado en 8d95200. Diseño de paridad completo en

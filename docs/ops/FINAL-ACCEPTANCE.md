@@ -1,4 +1,6 @@
-> **Secuencia actualizada 14/10/2026:** el usuario autorizo iniciar cuentas, Git y desarrollo conectado ahora. Seguir MIGRATION-BOOTSTRAP-20261014.md. Esto reemplaza la espera de aceptacion para iniciar infraestructura dev; no declara aceptacion funcional ni productiva. Lector humano, paridad Supabase, piloto y recuperacion continuan como gates. Preparar documentos/respaldo no aumenta el porcentaje global.
+> **Secuencia actualizada 16/10/2026:** GitHub está migrado a un repositorio privado nuevo con `main` como rama única y push directo, sin PR. Supabase/hosting siguen pendientes. La revisión de M2.2A-R7/R8 y la paridad del producto son gates antes de aplicar SQL o publicar un entorno operativo. La infraestructura dev no supone aceptación funcional ni productiva; no enviar invitaciones ni usar datos reales.
+
+> **Secuencia 14/10/2026 (histórica):** el usuario autorizó iniciar cuentas, Git y desarrollo conectado ahora. La cuenta GitHub nueva ya se conectó. Lector humano, paridad Supabase, piloto y recuperación continúan como gates.
 
 # Definición de terminado — pedido 06/10/2026
 

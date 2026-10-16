@@ -1,4 +1,6 @@
-> **Precedencia 14/10/2026:** M1 local consolidado; contrato de migración en ../architecture/SUPABASE-M2-CONTRACT-20261014.md. Próximo M2.1, identidad/API locales con Luna medio Standard; después revisión Sol alto. GitHub destino NUEVO pendiente. Workers Static Assets con Access reemplaza Pages para hosting nuevo. No hay pipeline propio activo: CI preparada no acredita checks de GitHub, aplicación SQL ni despliegues. Producción/datos reales/invitaciones requieren gates posteriores.
+> **Precedencia 16/10/2026:** el repositorio privado `tablerocontable-paris/TABLERO-CONTABLE` existe y sólo usa `main`; se trabaja con push directo a esa rama, sin PRs ni aprobación manual. `.github/workflows/validate.yml` corre al actualizar `main` o manualmente; no ejecuta SQL ni despliega. La conexión de GitHub no implica que los checks del commit inicial ya estén aceptados.
+
+> **Precedencia 14/10/2026 (histórica):** M1 local consolidado; contrato de migración en ../architecture/SUPABASE-M2-CONTRACT-20261014.md. El plan de PR y ramas `dev/main` de abajo queda reemplazado por la instrucción directa del usuario del 16/10. Workers Static Assets con Access sigue como candidato de hosting. Producción/datos reales/invitaciones requieren gates posteriores.
 
 # Flujo objetivo de cambios y despliegues
 

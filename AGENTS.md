@@ -1,3 +1,16 @@
+# Estado operativo y precedencia — 16/10/2026
+
+La cuenta y el repositorio GitHub privados ya están creados. El repositorio
+`tablerocontable-paris/TABLERO-CONTABLE` usa `main` como rama única y flujo de
+push directo; no abrir PR ni recrear `dev` sin nueva decisión del usuario. La
+importación inicial es `8a10c6c19c1a619d3a621ea25af30e15f503cae0`, atribuida a
+Tablero Contable y con el árbol actual del laboratorio. El workflow valida
+pushes a `main`. La PR de bootstrap está cerrada y no se integró.
+
+La conexión a Supabase/hosting no autoriza desplegar producción ni datos reales.
+M2.2A-R7/R8 requiere la revisión Sol descrita abajo antes de iniciar B/C o
+aplicar migraciones. El laboratorio sigue siendo el producto activo.
+
 # Precedencia M2.2A-R7/R8 — implementación local lista para revisión, 15/10/2026
 
 R7/R8 están corregidos en la migración local 014 y el runner nativo. Evidencia
