@@ -1,3 +1,8 @@
+# Estado general de la migración — 16/10/2026
+
+El código está en el repositorio privado `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`, con autoría nueva **Tablero Contable**. La PC personal puede clonar y ejecutar el laboratorio; GitHub no traslada `localStorage`/IndexedDB. La guía vigente es `outputs/LEEME-PC-PERSONAL.md`.
+
+Supabase ya está disponible mediante el conector autorizado de esta sesión. La organización `tablerocontable-paris` no tiene proyectos todavía. La integración Supabase↔GitHub no está configurada; se realizará sobre un proyecto dev después de confirmar organización/costo y aceptar la revisión independiente de SQL 014. No aplicar migraciones a un proyecto alojado antes de esa revisión. El estado de CI consultado para el commit `3af0f943d55da95e5940f3e666198985999aceb4` no devolvió checks; no afirmar que el workflow de ese commit terminó.
 # Estado vigente — R7/R8 corregidos localmente; revisión Sol pendiente, 15/10/2026
 
 La migración 014 ahora parsea las revisiones obligatorias antes del lock del

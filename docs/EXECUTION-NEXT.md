@@ -1,3 +1,9 @@
+# Acción de migración vigente — 16/10/2026
+
+1. Revisión independiente Sol de M2.2A/SQL 014 en curso. Hasta su resultado, no aplicar SQL al hosting ni habilitar despliegue automático de migraciones.
+2. GitHub privado ya es fuente del proyecto: `tablerocontable-paris/TABLERO-CONTABLE`, `main`; trabajar directamente en `main`, sin PR. La guía correcta de PC personal es `outputs/LEEME-PC-PERSONAL.md`.
+3. Supabase connector responde para la organización `tablerocontable-paris`; no hay proyectos. Creación de un proyecto dev queda pendiente de confirmar con el usuario la organización, luego informar el costo antes de crear. Una vez aceptado SQL 014, conectar repo desde la integración GitHub de Supabase sólo al entorno dev.
+4. Cloudflare/hosting propio y correo productivo siguen sin configurar. El Site privado existente permanece separado y no debe abrir su audiencia.
 # Acción vigente — GPT‑6.1 Sol revisa M2.2A-R7/R8, 15/10/2026
 
 La implementación local está completa. Evidencia:
