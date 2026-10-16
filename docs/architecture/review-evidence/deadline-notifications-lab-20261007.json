@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-07",
+  "scope": "private local laboratory deadline reminders",
+  "commit": "25d1490b88bddeb349328053774acbe99cb7b042",
+  "site": {
+    "version": 68,
+    "deploymentId": "appgdep_6ac64381bc288191ad9d5247e4e0b340",
+    "url": "https://grupo-paris-contabilidad.valentino-magni.chatgpt.site",
+    "audience": "custom owner only; one authorized account; zero groups; zero external visitors"
+  },
+  "vitest": {
+    "command": "vitest run --maxWorkers=2 --testTimeout=30000 --hookTimeout=30000",
+    "filesPassed": 48,
+    "testsPassed": 420,
+    "result": "passed"
+  },
+  "typecheck": "passed",
+  "viteBuild": {
+    "result": "passed",
+    "mainJavaScriptBytes": 496560,
+    "notes": "Zod pure-annotation warnings only; build completed."
+  },
+  "workerBuild": "passed",
+  "edgeBrowser": {
+    "result": "passed",
+    "viewports": ["1440x1000", "390x844"],
+    "checks": [
+      "three-day deadline reminder rendered",
+      "authorized task opened from reminder",
+      "read receipt persisted in laboratory state",
+      "reminder remains read after reopening notification center",
+      "notification dialog fits mobile viewport",
+      "mobile page has no horizontal overflow",
+      "no JavaScript errors",
+      "zero requests to local /api routes"
+    ],
+    "screenshots": [
+      "outputs/deadline-notifications-browser/deadline-reminders.png",
+      "outputs/deadline-notifications-browser/deadline-reminders-mobile.png",
+      "outputs/deadline-notifications-browser/mobile.png"
+    ]
+  },
+  "limits": [
+    "localStorage laboratory only",
+    "no background scheduler, email, server notification delivery, or cross-device synchronization",
+    "no Auth, D1, or Supabase integration tested"
+  ]
+}

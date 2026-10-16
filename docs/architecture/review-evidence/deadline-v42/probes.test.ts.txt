@@ -1,0 +1,11 @@
+import {it,expect} from 'vitest';
+import {taskTimeliness} from '../src/domain/timeliness';
+import {checkTask,type Task,type Activity} from '../src/domain/model';
+const t:Task={id:'review',title:'Banco',ownerId:'e0',companyId:'c1',teamId:'t1',sector:'Tesorería',month:'2026-10',due:'2026-10-10',kind:'resultado',weight:1,unit:'',target:0,status:'Completada',checklist:[],completedAt:'2026-10-08T15:00:00Z',startedAt:null,priority:'Media',blockedBy:'',blockedSince:null};
+it('R1 rejects a completion later on the same day',()=>expect(taskTimeliness(t,[],'2026-10-08T12:00:00Z').status).toBe('unknown'));
+it('R2 rejects normalized February timestamp',()=>expect(taskTimeliness({...t,completedAt:'2026-02-31T15:00:00Z'},[],'2026-10-09T12:00:00Z').status).toBe('unknown'));
+it('R3 rejects invalid own work date before filtering period',()=>{
+ const a:Activity={id:'a',taskId:t.id,qty:1,createdAt:'2026-10-08T15:00:00Z',date:'garbage',actorId:'e0',note:''};
+ expect(taskTimeliness({...t,kind:'operativa',target:1,status:'En curso',completedAt:null},[a],'2026-10-09T12:00:00Z').status).toBe('unknown');
+});
+it('R4 repeated checklist is a no-op object',()=>{const completed={...t,checklist:[{id:'c',text:'Control',done:true}]};expect(checkTask(completed,'c',true)).toBe(completed);});

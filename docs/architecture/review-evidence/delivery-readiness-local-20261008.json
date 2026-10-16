@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-08",
+  "project": "Grupo Paris private laboratory",
+  "scope": "Verify the local pre-commit gate and the same Site deployment archive validator used by the prepared GitHub workflow, without publishing or applying migrations.",
+  "checks": {
+    "localHook": {
+      "hooksPath": ".githooks",
+      "command": "node scripts/validate-change.mjs",
+      "result": "passed",
+      "focusedTests": 130,
+      "rejectsPartiallyStagedTrackedFiles": true
+    },
+    "dependencyLock": {
+      "result": "passed",
+      "manifest": "package.json",
+      "lockfile": "package-lock.json"
+    },
+    "deploymentArchive": {
+      "command": "node scripts/package-site-archive.mjs <workspace>/outputs/continuation-validation-20261008/grupo-paris-site-current.tar.gz",
+      "result": "passed",
+      "projectId": "appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85",
+      "path": "outputs/continuation-validation-20261008/grupo-paris-site-current.tar.gz",
+      "sizeBytes": 834892,
+      "sha256": "520cf088e089ab15810d8c743ce00f522ba98df0fa7539a82fc14f00faf34da4",
+      "migrationCount": 1,
+      "containsValidatedManifestClientWorkerAndMigrations": true
+    }
+  },
+  "releaseState": {
+    "githubWorkflowExecuted": false,
+    "commitCreated": false,
+    "siteUpdated": false,
+    "migrationApplied": false,
+    "externalAccountsConnected": false
+  }
+}

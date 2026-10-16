@@ -1,0 +1,319 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "interaction": "s52-real-recharts-operational-only-and-zero-result-groups",
+      "chartFixture": {
+        "operationalIds": [
+          "1534a795-cf56-4468-b53a-9cf3333ddfe5",
+          "cd3164ad-d8a4-4c98-b3aa-94b2964de8fd"
+        ],
+        "resultId": "dd64f5c2-8cb7-4023-968e-41d4f8dbeec9",
+        "owners": [
+          "e0",
+          "e1",
+          "e2"
+        ],
+        "month": "2026-10",
+        "activeId": "boss",
+        "onboarding": {
+          "version": 1,
+          "step": 5,
+          "completedAt": "2026-10-14T19:33:47.121Z",
+          "selectedCompanyIds": [
+            "c1"
+          ],
+          "selectedTemplateIds": [],
+          "day": 25,
+          "frequency": "única",
+          "schedules": {},
+          "customTasks": [],
+          "home": "day",
+          "reminders": true,
+          "name": "Juan Pablo",
+          "customTitle": "",
+          "customSteps": "",
+          "customKind": "resultado"
+        }
+      },
+      "chartState": {
+        "svg": true,
+        "svgText": [
+          "0%",
+          "25%",
+          "50%",
+          "75%",
+          "100%",
+          "Joaquín Pérez",
+          "Valentino Magni",
+          "Lucía Fernández"
+        ],
+        "bars": [],
+        "note": "Sin base de entregables: Valentino Magni, Lucía Fernández.  Cumplimiento 0%: Joaquín Pérez.",
+        "panelText": "Cumplimiento ponderadoPuntos logrados sobre asignados · un 0% es distinto de un ámbito sin base0%25%50%75%100%Joaquín PérezValentino MagniLucía FernándezSin base de entregables: Valentino Magni, Lucía Fernández.  Cumplimiento 0%: Joaquín Pérez.Puntos por entregablesCumplimiento de entregables; calidad operativa se informa por separadoJoaquín Pérez0.0 / 5 pts0/1 entregables · 0 en espera · Calidad sin evaluar · Orden sin evaluar · Oportunidad sin evaluarValentino MagniSin base0/0 entregables · 0 "
+      },
+      "pieState": {
+        "sectors": [
+          {
+            "name": "En curso",
+            "fill": "rgb(55, 58, 64)",
+            "bounds": {
+              "width": 166.00001525878906,
+              "height": 152.87147521972656
+            }
+          },
+          {
+            "name": "Pendiente",
+            "fill": "rgb(85, 90, 98)",
+            "bounds": {
+              "width": 125.28300476074219,
+              "height": 81.53424835205078
+            }
+          }
+        ]
+      }
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "overflow": "visible",
+      "bottom": 886,
+      "right": 278,
+      "logoWidth": 102,
+      "logoCenter": 153,
+      "selectorCenter": 153,
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1600,
+      "height": 740,
+      "overflow": "visible",
+      "bottom": 732,
+      "right": 278,
+      "logoWidth": 102,
+      "logoCenter": 153,
+      "selectorCenter": 153,
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "overflow": "visible",
+      "bottom": 712,
+      "right": 278,
+      "logoWidth": 102,
+      "logoCenter": 153,
+      "selectorCenter": 153,
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1024,
+      "height": 650,
+      "overflow": "visible",
+      "bottom": 640,
+      "right": 278,
+      "logoWidth": 102,
+      "logoCenter": 153,
+      "selectorCenter": 153,
+      "horizontalOverflow": false
+    },
+    {
+      "interaction": "boss-onboarding-does-not-create-execution-work",
+      "profileId": "boss"
+    },
+    {
+      "interaction": "suggested-route-position-explanation",
+      "reason": "Es la primera tarea habilitada. El orden considera su vencimiento (2026-10-20), prioridad Alta, peso 5 y fecha programada (2026-10-20)."
+    },
+    {
+      "interaction": "drag-to-progress",
+      "taskId": "06676565-63a0-40cf-8087-da55b3d412bc",
+      "status": "En curso",
+      "actorClockStarted": true,
+      "dragFeedback": {
+        "scale": 1.0399983972344622,
+        "opacity": 0.92
+      },
+      "landingAnimation": "task-land"
+    },
+    {
+      "interaction": "quick-task-search-native-tab-enter-accent-insensitive-and-actor-preserved",
+      "results": 2,
+      "actor": "e0"
+    },
+    {
+      "interaction": "quick-task-search-native-space-activation-actor-preserved",
+      "actor": "e0"
+    },
+    {
+      "interaction": "quick-search-escape-restores-trigger-focus"
+    },
+    {
+      "interaction": "internal-request-created-without-task-or-KPI-mutation",
+      "requestId": "2acdd90c-8ba0-489b-a8da-bd49d2d0161b"
+    },
+    {
+      "interaction": "manager-explicit-one-off-task-conversion",
+      "requestId": "7271e6d0-882d-4532-b8d4-2f5ff868b9d6",
+      "taskId": "19c89ba6-0d00-4bf0-9a4d-12ad6ab0489d",
+      "scheduledOn": "2026-10-25",
+      "assigneeNotification": true
+    },
+    {
+      "interaction": "fiscal-obligation-created-linked-and-versioned",
+      "id": "bed8ed55-f5c8-4189-90bf-42521c0bafaf",
+      "revision": 2
+    },
+    {
+      "interaction": "monthly-work-cycle-day-week-and-team-breakdown",
+      "month": "2026-10",
+      "days": 31
+    },
+    {
+      "interaction": "kaizen-evidence-test-adoption-and-versioned-catalogue",
+      "proposalId": "6b880bb5-b8d8-4cbf-a12f-1cd05affc8c3",
+      "version": 2
+    },
+    {
+      "interaction": "five-s-review-and-evidence-backed-action-closure",
+      "completedActions": 1
+    },
+    {
+      "interaction": "mobile-process-quality-without-page-overflow",
+      "viewport": "390x844"
+    },
+    {
+      "interaction": "mobile-work-cycle-without-page-overflow",
+      "viewport": "390x844"
+    },
+    {
+      "interaction": "board-owner-selector-24-profiles-end-scroll-and-escape",
+      "boardPickerFixture": {
+        "visibleProfiles": 24
+      },
+      "boardPickerScroll": {
+        "count": 24,
+        "active": "IDIntegrante de equipo 26empleado · Tesorería",
+        "scrollTop": 663,
+        "visible": true
+      }
+    },
+    {
+      "interaction": "employee-tour-role-scope-and-module-targets",
+      "steps": 11,
+      "internalTargets": 11
+    },
+    {
+      "interaction": "manager-tour-role-scope-and-focus-restoration",
+      "steps": 13,
+      "internalTargets": 13,
+      "excluded": [
+        "Cierre por alcance",
+        "Catálogo y versiones"
+      ]
+    },
+    {
+      "interaction": "chief-tour-includes-close-and-catalogue",
+      "internalTargets": 15
+    },
+    {
+      "interaction": "covered-task-drag-preserves-owner-and-records-replacement-actor",
+      "coverageFixture": {
+        "taskId": "browser-s54-covered-task",
+        "ownerId": "e0",
+        "activeId": "e1",
+        "day": "2026-10-14"
+      },
+      "status": "En curso",
+      "auditActor": "e1",
+      "reducedMotion": "0s"
+    },
+    {
+      "interaction": "covered-task-keyboard-move-preserves-owner-actor-and-focus",
+      "status": "Pendiente",
+      "focused": true,
+      "auditActor": "e1"
+    },
+    {
+      "interaction": "s38-tour-first-step-restores-focus-and-native-keyboard-order"
+    },
+    {
+      "interaction": "guided-tour-dimmer-and-target-relative-position",
+      "geometry": {
+        "top": 558.46875,
+        "left": 314,
+        "bottom": 814.71875,
+        "right": 704,
+        "viewportWidth": 1440,
+        "viewportHeight": 900
+      }
+    },
+    {
+      "interaction": "guided-tour-pause-clears-highlight"
+    },
+    {
+      "interaction": "mobile-guided-tour-target-and-coach-geometry",
+      "geometry": {
+        "insideModule": true,
+        "top": 479.359375,
+        "left": 12,
+        "bottom": 757.296875,
+        "right": 378,
+        "viewportWidth": 390,
+        "viewportHeight": 844
+      }
+    },
+    {
+      "interaction": "calendar-grid-arrow-page-navigation-and-single-tab-stop",
+      "previousCalendarDay": "2026-09-30",
+      "pagedCalendarDay": "2026-10-30"
+    },
+    {
+      "interaction": "calendar-event-details-and-fiscal-obligation-origin-navigation",
+      "calendarFixture": {
+        "month": "2026-10",
+        "day": "2026-10-01"
+      }
+    },
+    {
+      "interaction": "rendered-accessible-names-across-manager-sections",
+      "routes": [
+        "overview",
+        "day",
+        "tasks",
+        "operations",
+        "calendar",
+        "analytics",
+        "closing",
+        "team",
+        "catalog",
+        "quality",
+        "planning",
+        "absences",
+        "annotations",
+        "requests"
+      ],
+      "unnamedControls": 0
+    }
+  ],
+  "apiCalls": [],
+  "errors": [],
+  "flows": [
+    "laboratory users",
+    "simulated invitation",
+    "preconfigured onboarding",
+    "independent icon folds",
+    "drag task and auto-start its actor clock",
+    "boss parameter review",
+    "internal request routing, response, resolution and persistence",
+    "jefatura-only explicit one-off request-to-task conversion with provenance and no duplicate",
+    "daily and weekly monthly work-cycle with team breakdown",
+    "accent-insensitive global quick task search scoped to employee access",
+    "Kaizen evidence, controlled trial, manager adoption and catalogue versioning",
+    "five-area 5S review and evidence-backed corrective action closure",
+    "fiscal obligation linked to exact tasks with separate fiscal period, due date, and revision history",
+    "desktop and mobile process-quality layout",
+    "persisted review",
+    "mobile"
+  ]
+}

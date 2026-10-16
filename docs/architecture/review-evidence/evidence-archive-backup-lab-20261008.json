@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-08",
+  "scope": "Preserve and validate task and movement evidence across immutable closures, completion events, backup restore, and concurrent uploads.",
+  "changes": [
+    "Backup validation now resolves evidence subjects across live state, person-month closures, and company closures.",
+    "Task and movement snapshots validate their evidence ID lists; every archived evidence reference must resolve to matching metadata and a file in v2 backups.",
+    "Evidence metadata can remain valid when its task or movement exists only in an archived closure; orphaned snapshot references are rejected before restore.",
+    "Evidence attached to a task is linked to the timestamp when that task is newly completed; activity attachments and existing completion links remain unchanged.",
+    "The IndexedDB upgrade adds a record-scope index; per-record file limits are checked in the same read-write transaction as writes, preventing concurrent upload races.",
+    "Version 2 backup files carry task and activity identity, and restore repopulates the indexed record scope. Older version 2 backups without these optional fields remain valid."
+  ],
+  "validation": {
+    "focusedTests": {
+      "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** tests/laboratory-backup.test.tsx tests/laboratory-work.test.ts tests/task-evidence-concurrency.test.tsx --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "result": "passed",
+      "passedTests": 33,
+      "passedFiles": 3,
+      "coverage": "Archived task and movement references accepted; missing archived metadata rejected; current upload races and closure snapshots retained."
+    },
+    "typeScript": "passed",
+    "clientBuild": "passed; main entry 484.89 kB, chart chunk 423.74 kB",
+    "workerBuild": "passed",
+    "edgeBackupRestore": {
+      "result": "passed",
+      "scope": "Download, inspect, confirm and restore v2 laboratory backup; no operational storage or API access.",
+      "evidenceFiles": 1,
+      "storageQuotaFailure": "No stale references; failed restore preserves previous state and removes temporary blob.",
+      "closureRetention": "Evidence remains available through company and monthly closure.",
+      "mobileDialogFits": true,
+      "operationalStorageUnchanged": true,
+      "operationalApiCalls": 0,
+      "javascriptErrors": 0,
+      "evidence": "outputs/plan-validation-20261008/edge-evidence-archive-final/laboratory-backup-browser.json"
+    },
+    "edgeConcurrentEvidenceLimit": {
+      "result": "passed",
+      "concurrentUploads": "Two simultaneous 2-file uploads to the same record yield one successful transaction and one limit rejection.",
+      "restoredRecord": "A restored attachment counts against the same record's limit even when the caller's count is stale.",
+      "javascriptErrors": 0,
+      "operationalApiCalls": 0,
+      "legacyIndexedDbUpgrade": "Existing v1 evidence remains readable after upgrading the database and adding the record index.",
+      "evidence": "outputs/plan-validation-20261008/evidence-record-limit-final3/evidence-record-limit.json"
+    },
+    "edgeBackupRestoreAfterIndexUpgrade": {
+      "result": "passed",
+      "scope": "Version 2 download, validation, rollback on quota failure, restore, and evidence retention through closures after IndexedDB schema upgrade.",
+      "operationalApiCalls": 0,
+      "backupScope": "Downloaded v2 file contains the exact task ID and null activity ID for the uploaded task evidence.",
+      "evidence": "outputs/plan-validation-20261008/edge-evidence-concurrency-final3/laboratory-backup-browser.json"
+    },
+    "fullSuite": {
+      "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "result": "passed",
+      "passedTests": 482,
+      "failedTests": 0,
+      "passedFiles": 54,
+      "failedFiles": 0
+    }
+  },
+  "completionEvidenceLink": {
+    "validation": "work-cycle.test.ts covers first completion, activity evidence, immutable prior completion, and no-op transitions",
+    "typeScript": "passed",
+    "clientBuild": "passed",
+    "workerBuild": "passed",
+    "diffCheck": "passed; Git reported informational LF/CRLF normalization warnings"
+  },
+  "releaseState": "Uncommitted local laboratory changes. No accounts, deployment, Site update or API connection.",
+  "globalProgressEstimate": "about 45%; this slice does not constitute product acceptance."
+}

@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-06",
+  "scope": "Consultas y pedidos internos en el laboratorio local",
+  "source_base": "e410532",
+  "verification": {
+    "vitest": {
+      "passed": true,
+      "files": 36,
+      "tests": 371,
+      "command": "node node_modules/vitest/vitest.mjs run --maxWorkers=1 --minWorkers=1 --testTimeout=30000 --hookTimeout=30000"
+    },
+    "typescript_no_emit": "passed",
+    "vite_production_build": "passed",
+    "worker_bundle": "passed",
+    "browser": {
+      "browser": "Microsoft Edge headless",
+      "viewports": ["1440x900", "1600x740", "1280x720", "1024x650", "390x844"],
+      "internal_request_flow": "created by employee, reviewed/replied/resolved by manager, response visible to author",
+      "sidebar_clipped": false,
+      "horizontal_overflow": false,
+      "javascript_errors": [],
+      "operational_api_calls": []
+    },
+    "database_migrations_changed": false,
+    "remote_services_connected": false,
+    "site_deployment": {
+      "status": "succeeded",
+      "version_number": 57,
+      "commit_sha": "c080a52ce5ca6b6d949be7fa3888e7bf85f1b8a0",
+      "deployment_id": "appgdep_6ac5a7a6e618819180aa2a118849fa40",
+      "url": "https://grupo-paris-contabilidad.valentino-magni.chatgpt.site",
+      "audience": "owner-only",
+      "external_visitors": 0
+    }
+  },
+  "known_limits": [
+    "Browser-local laboratory storage only; no cross-device sync",
+    "Technical support destination is a simulated queue, not an authenticated account",
+    "No attachments, email, automatic task conversion or production API"
+  ]
+}

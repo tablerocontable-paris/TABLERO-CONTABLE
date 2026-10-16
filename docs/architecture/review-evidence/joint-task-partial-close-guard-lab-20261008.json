@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-08",
+  "project": "Grupo Paris private laboratory",
+  "scope": "Prevent activating joint work when the second participant's person-company-month unit is already closed.",
+  "finding": "Joint activation checked the second participant's full-month closure but missed a partial company closure. This could create shared work that was locked immediately by the normal execution guard.",
+  "changes": [
+    "Added one shared isCompanyClosed domain rule for full-month and person-company-month closures.",
+    "Joint task activation now checks the second participant's exact company unit.",
+    "The existing isClosed and laboratory isLabCompanyClosed helpers use the shared rule."
+  ],
+  "validation": {
+    "regression": {
+      "file": "tests/joint-coordination.test.ts",
+      "result": "passed",
+      "case": "Rejects joint activation when the second participant has closed that company, and leaves task responsibility unchanged."
+    },
+    "focusedTests": { "result": "passed", "tests": 36, "files": 3 },
+    "typescript": "passed",
+    "fullSuite": { "result": "passed", "tests": 488, "files": 56 },
+    "clientBuild": { "result": "passed", "mainEntryKb": 485.28, "chartChunkKb": 423.74 },
+    "workerBuild": "passed",
+    "gitDiffCheck": "passed; informational LF-to-CRLF notices only"
+  },
+  "releaseState": {
+    "commitCreated": false,
+    "siteUpdated": false,
+    "externalAccountsConnected": false,
+    "estimatedGlobalProgress": "~45%"
+  }
+}

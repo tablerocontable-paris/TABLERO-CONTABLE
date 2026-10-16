@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-08",
+  "project": "Grupo Paris private laboratory",
+  "scope": "Remove duplicate React keys when opening a task detail from quick search.",
+  "finding": "TaskSchedulePanel and TaskComments were siblings keyed only by the same task ID. The historical task search integration reproduced React duplicate-key warnings.",
+  "change": [
+    "Give each sibling component a distinct key prefix while retaining the task ID, so each panel resets when the selected task changes.",
+    "Extend the historical search integration test to fail if React reports duplicate child keys."
+  ],
+  "validation": {
+    "focusedTest": {
+      "command": "node node_modules/vitest/vitest.mjs run tests/quick-task-search.test.tsx -t \"abre una tarea histórica\" --maxWorkers=1 --testTimeout=20000 --hookTimeout=30000 --exclude 'tmp/**'",
+      "result": "passed",
+      "tests": 1,
+      "reactDuplicateKeyWarnings": 0
+    },
+    "fullSuite": {
+      "command": "node node_modules/vitest/vitest.mjs run --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000 --exclude 'tmp/**'",
+      "result": "passed",
+      "tests": 494,
+      "files": 57
+    },
+    "typescript": { "result": "passed", "exitCode": 0 },
+    "clientBuild": { "result": "passed", "mainEntryKb": 486.52 },
+    "workerBuild": { "result": "passed", "exitCode": 0 },
+    "edgeCorrections": {
+      "result": "passed",
+      "script": "tests/browser-corrections.cjs",
+      "javascriptErrors": 0,
+      "operationalApiCalls": 0,
+      "scope": "Responsive sidebar, quick search access, invitation, drag and drop, request conversion, notification and mobile layout"
+    }
+  },
+  "releaseState": {
+    "commitCreated": false,
+    "siteUpdated": false,
+    "externalAccountsConnected": false,
+    "estimatedGlobalProgress": "~45%"
+  }
+}

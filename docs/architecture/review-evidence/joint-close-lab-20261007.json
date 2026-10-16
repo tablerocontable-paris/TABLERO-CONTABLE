@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-07",
+  "scope": "private laboratory only",
+  "change": "After a successful monthly close, reset the employee filter so an authorized manager can review the next employee.",
+  "acceptance": {
+    "jointActivation": "passed",
+    "parallelActorClocks": "passed",
+    "individualPause": "passed",
+    "sharedCompletionStopsAllClocks": "passed",
+    "sequentialClosures": "passed",
+    "personalReportSchemaV2": "passed",
+    "personalShares": "60% and 40%",
+    "csvExportAndPeerPrivacy": "passed",
+    "operationalApiRequests": 0,
+    "javascriptErrors": 0
+  },
+  "validation": {
+    "fullVitest": "407/407 tests across 44 files passed with --testTimeout=20000",
+    "initialDefaultTimeoutRun": "404/407 passed; three tests timed out at 5000 ms without assertion failures",
+    "typescript": "passed",
+    "viteBuild": "passed with informational main-chunk size warning (~585 kB)",
+    "workerBuild": "passed",
+    "chromium": "passed",
+    "diffCheck": "passed"
+  },
+  "browserArtifacts": [
+    "outputs/joint-close-acceptance/joint-task-detail.png",
+    "outputs/joint-close-acceptance/joint-member-report.csv"
+  ],
+  "deployment": {
+    "siteVersion": 62,
+    "sourceCommit": "8d21e3245c6e4ee93aa741b4c3baf3ddc7b8b608",
+    "deploymentId": "appgdep_6ac5d2df02ec8191b861bfcee8d98934",
+    "status": "succeeded",
+    "url": "https://grupo-paris-contabilidad.valentino-magni.chatgpt.site",
+    "audience": "custom owner-only; one allowed account, zero groups, zero external visitors",
+    "operationalApiOrAccountChanges": "none"
+  }
+}

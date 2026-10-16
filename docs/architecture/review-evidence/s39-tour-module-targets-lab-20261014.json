@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-14",
+  "requirement": "S39",
+  "status": "implemented_locally_validated_unit_and_full_suite_browser_review_pending",
+  "finding": "The prior guided tour highlighted headings or navigation entries instead of useful controls inside each module. Empty and folded states could leave no valid spotlight target.",
+  "implementation": {
+    "targets": "Added stable internal targets for Mi día, task movement/controls/timers, operational movements, the shared and basic calendar views, absence coverage, personal annotations, planning, request follow-up, process quality, analytics, team consultation, monthly closure, and catalogue search.",
+    "empty_and_folded": "The task board uses visible open/empty columns when card controls are unavailable. The tour does not create sample tasks and never falls back to the generic page heading.",
+    "panel_state": "The tour temporarily opens a folded panel or card only when its target is inside; it restores the previous state on step change or pause unless the user manually changed that toggle.",
+    "navigation_and_motion": "The target scrolls into view once, reduced-motion preference is respected, and the coach reports when a target is unavailable or an equivalent view is being shown.",
+    "scope": "Role gates remain unchanged. Tour presentation changes do not write business data or alter task execution permissions."
+  },
+  "validation": {
+    "focused": "tests/ui-a-acceptance.test.tsx passed 10/10, including complete tours for employee, manager, and boss and folded/filter fallback recovery. tests/annotations-tour-app.test.tsx and tests/task-board.test.tsx passed in the focused run.",
+    "full_suite": "659/659 passed in 67 files. Command: node node_modules/vitest/vitest.mjs run --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000 --reporter=dot; exit 0; Vitest duration 129.64 s.",
+    "typescript": "Passed: node node_modules/typescript/bin/tsc --noEmit; exit 0.",
+    "client_build": "Passed: node node_modules/vite/bin/vite.js build --outDir dist/client; exit 0. Existing warnings include Zod PURE-comment notices, mixed static/dynamic import of laboratoryEvidence, 423.74 kB charts chunk, and 548.96 kB entry chunk (>500 kB).",
+    "worker_build": "Passed: node scripts/build-worker.mjs; exit 0.",
+    "diff_check": "git diff --check exit 0; only LF-to-CRLF working-copy notices. Handoff JSON parses successfully."
+  },
+  "acceptance_gaps": [
+    "Real-browser visual validation was not run: this execution environment has no npm or npx, which the repository Playwright CLI wrapper requires.",
+    "Independent GPT-6.1 Sol review of this correction remains pending.",
+    "Human screen-reader acceptance remains a separate stage 5 gate."
+  ],
+  "no_external_actions": "No commit, PR, Site update, account connection, operational API call, or deployment.",
+  "global_progress": "approximately 45%; unchanged"
+}

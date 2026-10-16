@@ -1,0 +1,85 @@
+{
+  "date": "2026-10-13",
+  "stage": 1,
+  "status": "accepted_by_independent_sol_review",
+  "scope": ["S02", "S06", "S14", "S17", "S18", "S21", "S23", "S27", "S28", "S34", "S43", "S47", "S50", "S53"],
+  "implementationFollowUps": [
+    {
+      "finding": "S28 manager absence selection could include a task or recurring rule after its company left the manager scope.",
+      "change": "Domain and UI filter/validate selected task and rule companies against current manager scope. A no-replacement absence remains authorized by hierarchy. An open form clears revoked selections and does not save stale choices.",
+      "files": ["src/domain/workforce.ts", "src/components/Workforce.tsx"],
+      "regression": ["tests/scheduling-workforce.test.ts", "tests/workforce-retirement.test.tsx"]
+    },
+    {
+      "finding": "S50 task conversion kept a revoked company selected and its warning depended on the global company filter.",
+      "change": "The form clears the revoked company, shows an associated scope warning, and blocks submission before creation unless a currently authorized company is selected. The warning is outside the label and linked with aria-describedby so the select name remains stable.",
+      "files": ["src/App.tsx"],
+      "regression": ["tests/annotations-tour-app.test.tsx"]
+    },
+    {
+      "finding": "S53 coverage expiry and open sidebar revocation needed live regressions.",
+      "change": "Use a valid historical coverage interval and verify the open view drops revoked counts while retaining a separate authorized company task.",
+      "regression": ["tests/annotations-tour-app.test.tsx"]
+    }
+  ],
+  "validation": {
+    "focused": {
+      "command": "node node_modules/vitest/vitest.mjs run tests/annotations-tour-app.test.tsx tests/workforce-retirement.test.tsx tests/scheduling-workforce.test.ts tests/process-improvement-permissions.test.tsx tests/laboratory-corrections.test.tsx --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "exitCode": 0,
+      "passed": 93,
+      "files": 5
+    },
+    "fullSuite": {
+      "command": "node node_modules/vitest/vitest.mjs run --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "exitCode": 0,
+      "passed": 565,
+      "files": 62,
+      "durationSeconds": 196.04
+    },
+    "typescript": { "command": "node node_modules/typescript/bin/tsc --noEmit", "exitCode": 0 },
+    "clientBuild": {
+      "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+      "exitCode": 0,
+      "mainChunkBytes": 519270,
+      "warning": "The existing main client chunk exceeds 500 kB; Zod PURE-comment notices remain."
+    },
+    "workerBuild": { "command": "node scripts/build-worker.mjs", "exitCode": 0 },
+    "browserGeneral": {
+      "command": "CHROMIUM_PATH=<local Microsoft Edge>; E2E_OUTPUT=outputs/stage-1-permissions-20261013/browser-general-final; node tests/browser.cjs",
+      "exitCode": 0,
+      "javascriptErrors": 0,
+      "operationalApiCalls": 0,
+      "coverage": "induction, resume, company isolation, tasks, monthly closure, timers, absences, reminders, themes and mobile"
+    },
+    "browserCorrections": {
+      "command": "CHROMIUM_PATH=<local Microsoft Edge>; E2E_OUTPUT=outputs/stage-1-permissions-20261013/browser-corrections-final; node tests/browser-corrections.cjs",
+      "exitCode": 0,
+      "javascriptErrors": 0,
+      "operationalApiCalls": 0,
+      "coverage": "responsive sidebar, laboratory, invitations, drag/drop, quick search, request conversion, notification, persistence and mobile"
+    },
+    "diffCheck": { "command": "git diff --check", "exitCode": 0 }
+  },
+  "independentReview": {
+    "reviewer": "GPT-6.1 Sol",
+    "verdict": "accepted_stage_1_no_residual_blockers",
+    "coverage": "S02/S06/S14/S17/S18/S21/S23/S27/S28/S34/S43/S47/S50/S53 checked against contracts, source guards and regressions.",
+    "recheck": {
+      "command": "independent 13-file permission cut with tmp/** excluded; repeat of the two UI files with one worker",
+      "initialExitCode": 1,
+      "initialPassed": 174,
+      "initialTotal": 178,
+      "initialFailures": "Four UI mount/wait failures in two files under two workers; no permission defect was attributed.",
+      "repeatExitCode": 0,
+      "repeatPassed": 56,
+      "repeatTotal": 56,
+      "conclusion": "The four wait failures did not reproduce. Keep both results in the evidence; the first run was not all-green."
+    }
+  },
+  "limits": [
+    "This accepts stage 1 only. Stages 2 through 7 and the full product acceptance remain open.",
+    "No commit, PR, Site update, account connection, operational API call or invitation was made.",
+    "The laboratory remains private and uses fictitious profiles/data."
+  ],
+  "next": "Continue stage 2 from docs/architecture/review-evidence/stage-2-partial-laboratory-20261012.json. Keep services disconnected."
+}

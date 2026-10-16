@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-08",
+  "scope": "Plegado de paneles de datos en Resumen y Análisis mensual",
+  "changes": [
+    "Avance ponderado del equipo, Dónde está el trabajo, Cumplimiento ponderado, Evolución mensual y Distribución de tareas permiten plegar y reabrir su contenido; permanecen expandidos al entrar."
+  ],
+  "checks": {
+    "component_integration": "tests/laboratory-corrections.test.tsx passed",
+    "full_suite": "463/463 tests in 53 files passed",
+    "typescript": "passed",
+    "vite_client_build": "passed",
+    "worker_build": "passed",
+    "edge_desktop_mobile": "tests/browser.cjs passed; collapse/reopen checked for the five panels; mobile viewport checked; zero JS errors and operational API calls",
+    "git_diff_check": "passed"
+  },
+  "known_limits": [
+    "The main entry bundle remains above the 500 kB warning at 567369 bytes; the chart chunk is 423739 bytes.",
+    "No comprehensive accessibility audit or review of every module panel was performed.",
+    "No commit or Site update was made; work remains in the private local lab."
+  ],
+  "estimated_global_completion_percent": 45
+}

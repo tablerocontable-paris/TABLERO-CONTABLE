@@ -1,0 +1,94 @@
+{
+  "date": "2026-10-07",
+  "project": "Grupo Paris private laboratory",
+  "baseHead": "2c3fbfe",
+  "gitState": "Implementation and evidence are uncommitted; Site was not updated.",
+  "audience": "Existing private Site; no audience or account changes.",
+  "scope": [
+    "Operational quantity, movement coefficients and separate quality review",
+    "Commercial-period follow-up, task dependencies and suggested route",
+    "Person-company-period closing scopes",
+    "Calendar events, reminders and simulated team presence",
+    "Optional task evidence and laboratory backup version 2",
+    "Foldable analytics and tables, selectable chart series, compact selectors, fixed header, responsive navigation, drag feedback and guided tour"
+  ],
+  "automatedValidation": {
+    "unitAndIntegration": {
+      "command": "npm test",
+      "result": "passed",
+      "passedTests": 442,
+      "failedTests": 0,
+      "passedFiles": 109,
+      "failedFiles": 0,
+      "rawSummary": "%TEMP%/grupo-paris-plan-validation-postperf.json"
+    },
+    "build": {
+      "command": "npm run build",
+      "result": "passed",
+      "includes": ["tsc --noEmit", "vite build --outDir dist/client", "node scripts/build-worker.mjs"],
+      "mainEntryKb": 554.46,
+      "mainEntryGzipKb": 167.34,
+      "chartChunkKb": 423.74,
+      "chartChunkGzipKb": 121.39,
+      "warning": "Vite reports the main entry above its 500 kB advisory threshold; this warning was not suppressed."
+    },
+    "edgeBrowser": [
+      {
+        "script": "tests/browser.cjs",
+        "result": "passed",
+        "scope": "Onboarding, navigation, tasks, analytics, closure, recurrence, timers, absence, notifications, themes and mobile"
+      },
+      {
+        "script": "tests/browser-corrections.cjs",
+        "result": "passed",
+        "scope": "Responsive navigation, drag/drop, access-scoped search, internal requests and mobile"
+      },
+      {
+        "script": "tests/browser-joint.cjs",
+        "result": "passed",
+        "scope": "Joint work, separate clocks, atomic company closure, monthly reports and CSV privacy"
+      },
+      {
+        "script": "tests/browser-laboratory-backup.cjs",
+        "result": "passed",
+        "scope": "Version 2 backup/restore including evidence; operational storage isolation"
+      }
+    ],
+    "browserErrors": 0,
+    "operationalApiRequests": 0
+  },
+  "performance": {
+    "result": "passed local target",
+    "browser": "Microsoft Edge 154.0.4258.62",
+    "platform": "Windows, Intel Core i3-N305",
+    "viewport": "1440x900",
+    "dataset": {
+      "profiles": 24,
+      "tasks": 2000,
+      "owners": 23,
+      "month": "2026-10"
+    },
+    "method": "Two warm-up cycles followed by ten measured Overview -> Analytics -> Tasks -> Overview cycles (30 route changes).",
+    "targetP95RouteMs": 1000,
+    "p95RouteMs": 399.35,
+    "p95CycleMs": 920,
+    "javascriptErrors": 0,
+    "operationalApiCalls": 0,
+    "rawEvidence": "../../../../outputs/plan-validation-20261007/performance/navigation-benchmark.json",
+    "limitations": "Local warm navigation only; not production hosting, concurrent users, cross-device persistence, or a cold-start benchmark."
+  },
+  "remainingReview": [
+    "Sol review of the implementation against privacy, access control, calculations, closure atomicity, dependency readiness and evidence recovery contracts",
+    "Full accessibility audit, including assistive technology",
+    "Real authentication, MFA, RLS, invitations, server notifications and remote persistence",
+    "Cross-tab/device concurrency and production performance",
+    "Resolve or explicitly accept the Vite bundle-size advisory before product acceptance"
+  ],
+  "nextModel": {
+    "model": "GPT-6.1 Sol",
+    "effort": "high",
+    "speed": "Standard",
+    "purpose": "Review this completed local block before any commit or Site update."
+  },
+  "globalProgressEstimate": "~45%"
+}

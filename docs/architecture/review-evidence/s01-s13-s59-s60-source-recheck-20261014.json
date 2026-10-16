@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-14",
+  "scope": ["S01", "S13", "S30", "S31", "S32", "S44", "S45", "S46", "S59", "S60"],
+  "result": "no-contract-mismatch-found-in-reviewed-source",
+  "review": {
+    "S01": "Worker projection enumerates only legacy contract fields, excludes future laboratory collections, and keeps hidden rows server-side when merging proposals. Tests cover employee, manager, and chief DTOs, invalid future fields, and preservation of hidden server data.",
+    "S13": "Visible tasks do not grant execution. Task lifecycle, checklist, and timer deltas require an active in-scope responsible person or current replacement; operational entries also validate executor identity. Manager regression covers checklist, transition, timer, and activity attempts.",
+    "S30": "The wait gateway requires an explicit interruption reason for a superior, includes it in the allowlisted receipt arguments, and rejects a replay that changes the reason. SQL stores the reason and closes the real executor's active clock while preserving actor identity and audit details.",
+    "S31": "Strict task DTO validators enforce status/completedAt consistency, blocker and date relationships, timestamp ordering, and coordination responsibility/share relationships while accepting valid historical cases covered by fixtures.",
+    "S32": "The coordinated-task DTO distinguishes current and legacy coverage; replacement-only coverage receives zero contribution while a participant retains their frozen share. SQL activation tests cover legacy absence and simultaneous participant-plus-replacement cases.",
+    "S44": "RemoteWorkspace rejects stale reads after view changes and stale polling results during an in-flight write; the proposal remains visible and recoverable across a remount.",
+    "S45": "The UI rejects DTOs whose activeId does not resolve to an active profile and retains unconfirmed proposals after invalid server responses.",
+    "S46": "Worker presence read/write failures are isolated from workspace persistence; GET/POST still return valid state with empty presence while auth or workspace-storage failures remain errors.",
+    "S59": "Migration 012 validates non-null positive revisions, then rechecks request revision/status and current authority after coordination locks. The change-request flow locks the request and revalidates team scope before writes; approval revalidates privileged session, revision, and owner status after locks.",
+    "S60": "Activity receipts replay by actor and operation ID, reject changed arguments, and create independent entries for distinct operation IDs even when content is equal. Legacy wrappers retain their behavior."
+  },
+  "verification": {
+    "command": "node node_modules/vitest/vitest.mjs run tests/site-operational.test.ts tests/database.test.ts tests/task-gateway-sql.test.ts --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+    "result": "47/47 tests passed in 3 files; exit 0",
+    "output": "outputs/stage-7-validation-20261014/s01-s13-s59-s60-focused-recheck.txt",
+    "runtime": "Node v24.19.0 from repository-local environment; no installation performed"
+  },
+  "additional_verification": {
+    "command": "node node_modules/vitest/vitest.mjs run tests/coordination-activation-011.test.ts tests/task-reader-sql.test.ts tests/task-gateway.test.ts --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+    "result": "40/40 tests passed in 3 files; exit 0",
+    "output": "outputs/stage-7-validation-20261014/s30-s31-s32-focused-recheck.txt",
+    "s44_s45_s46_command": "node node_modules/vitest/vitest.mjs run tests/site-ui.test.tsx tests/site-operational.test.ts --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+    "s44_s45_s46_result": "35/35 tests passed in 2 files; exit 0",
+    "s44_s45_s46_output": "outputs/stage-7-validation-20261014/s44-s45-s46-focused-recheck.txt",
+    "combined_result": "122/122 tests passed across 8 test files in three focused runs"
+  },
+  "sha256": {
+    "src/server/site-policy.ts": "9f9f31e1483c2ccea4068122535741a8437e125b7f5c920bc1e4de31c8695d81",
+    "tests/site-operational.test.ts": "826bdc5c7488cb8683c5f81ed43cc4b0f9349c87b0c23df0201834fdb9b687fd",
+    "supabase/migrations/202610140012_sql_receipt_and_onboarding_guards.sql": "cabfe95dbd04ae65ea82c787bc5e3ec8e638e4620456366b7eeb8a5d715dfbf4",
+    "tests/database.test.ts": "207cc7e636a02592a23728bfe5142255ee73df39a56be9ea91f041ed71717c4a",
+    "tests/task-gateway-sql.test.ts": "884771dfa881bc6ab83b2101f8a8fdae86ed48c1e89b43ce27f06a9d0cbd6187",
+    "src/data/remote/task-contract.ts": "b7ba9f1fd8beef41dab18904ff53493a5428a3b09e3ed88eacdc6d778a328453",
+    "src/data/remote/coordination-contract.ts": "d8b7c62481fa5a1bfbd04a4e760b4b2d4715ca90679d185986d5f2767f87ce9f",
+    "src/data/remote/task-gateway.ts": "0eb8d51c5bd16abf2a5abb9ec3c3aae00547f2104b5cc1086f32a13d14b6a195",
+    "tests/coordination-activation-011.test.ts": "f1d687306733b6afb11012fcf60ebfd45aa1655e2817e582eb1be41bcf07ecd9",
+    "tests/task-reader-sql.test.ts": "f6d3933ea11c641bae9792897479a2e7b76b5d5608a9f0ee89e0953a874a2c91",
+    "tests/task-gateway.test.ts": "66f15672ee590372c9a9bfa86c3ed8de605665775a9d72e552504eaca30bff3d",
+    "src/components/RemoteWorkspace.tsx": "99ed6a7e81ebbfaafa6bc8b15cd43d389199405adc310cbab1726b8a3fd3aad7",
+    "src/server/site-worker.ts": "8abe8049580f3c0c2abb91203e3bcb7b7ad5cbcf585788546f714e9dddd83ee",
+    "tests/site-ui.test.tsx": "1944396287683c437568229c426cdb20029fa45ad8ca11c4676418718018caf6"
+  },
+  "limits": [
+    "This was an implementation/source recheck, not an independent GPT-6.1 Sol review.",
+    "Database tests use the local laboratory and do not validate hosted Supabase Auth/RLS.",
+    "No SQL was applied remotely; no account, API, commit, PR, Site update, or deployment was used."
+  ]
+}

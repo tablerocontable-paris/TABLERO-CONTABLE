@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-08",
+  "project": "Grupo Paris private laboratory",
+  "scope": "Make the closure screen display readiness for atomic joint participant groups, not isolated company units.",
+  "finding": "A participant's company unit could be shown as ready while another unit linked by a joint task was blocked by an independent active clock. The domain closure remained atomic, but the screen's ready count and confirmation text overstated what could close.",
+  "changes": [
+    "Exposed the domain grouping of transitively connected company closure units to the closure manager.",
+    "A group is shown ready only when every open unit in the connected group passes its blocker checks.",
+    "If a connected group has a previously closed unit and still-open units, the open units require review instead of being offered for closure.",
+    "The confirmation uses only units from fully ready groups; the domain revalidates the group during commit.",
+    "Updated the explanatory copy to distinguish blocked joint groups from independent groups that can still close."
+  ],
+  "validation": {
+    "regression": {
+      "file": "tests/company-closure-manager.test.tsx",
+      "result": "passed",
+      "case": "One member's separate active clock marks both linked company units pending and excludes both from the ready count."
+    },
+    "focusedDomainAndUI": { "result": "passed", "tests": 22, "files": 2 },
+    "fullSuite": {
+      "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "result": "passed",
+      "tests": 487,
+      "files": 56
+    },
+    "typescript": "passed",
+    "clientBuild": { "result": "passed", "mainEntryKb": 485.38, "chartChunkKb": 423.74 },
+    "workerBuild": "passed",
+    "edgeJointClosure": {
+      "script": "tests/browser-joint.cjs",
+      "result": "passed",
+      "apiCalls": 0,
+      "javascriptErrors": 0,
+      "evidence": "outputs/plan-validation-20261008/closure-group-readiness-final"
+    },
+    "gitDiffCheck": "passed; informational LF-to-CRLF notices only"
+  },
+  "releaseState": {
+    "commitCreated": false,
+    "siteUpdated": false,
+    "externalAccountsConnected": false,
+    "estimatedGlobalProgress": "~45%"
+  }
+}

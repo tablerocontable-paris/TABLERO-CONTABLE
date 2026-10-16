@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-14",
+  "requirement": "S39 guided tour current-source recheck after module-target refresh",
+  "scope": "Source review against the existing Sol contract; does not claim independent Sol acceptance.",
+  "sources": {
+    "app": {
+      "path": "src/App.tsx",
+      "sha256": "85b5a687a3c6dac81cdbf5e6d883b99663d60a1bf7c08d636433c42f499b2608"
+    },
+    "styles": {
+      "path": "src/styles.css",
+      "sha256": "7db27332eac99559b3cc5293385ce16b4012ab8af94babdfb1af95f2b74865b2"
+    },
+    "tourTests": {
+      "path": "tests/annotations-tour-app.test.tsx",
+      "sha256": "f507cd89ede481096d11aa3ced984df340ad4a893d6d3e1c9230be339c103d6a"
+    },
+    "browserRunner": {
+      "path": "tests/browser-corrections.cjs",
+      "sha256": "6145c4704c6540b1cfae83e3e419545e42e92b2b612fcae0bea5ee9fdfe947e7"
+    }
+  },
+  "contractChecks": {
+    "roleAndPrivacy": "Base steps are available by role; request/quality, manager analytics/team, and jefe-only closure/catalogue steps are conditionally included. The annotations step points to the user's own action/library and its copy states that the tour does not reveal note contents.",
+    "targetsAndFallbacks": "Current step selectors exist in App or their owning modules, including empty-state fallbacks. Folded panels and native details are opened temporarily; manual user toggles are recorded and preserved when the tour restores state.",
+    "viewportAndMotion": "Target scroll respects prefers-reduced-motion, recalculates on resize and scroll, and coach coordinates clamp to the viewport. CSS disables animation, transitions, and smooth scrolling under reduced motion.",
+    "keyboardAndFocus": "Escape pauses; Tab and Shift+Tab are contained in the coach. Closing restores the initiating element when still valid, otherwise the current tour trigger. Changing actor closes the tour before stale actor content is retained.",
+    "noBusinessMutation": "Tour actions only change tour progress, route, focus, and temporary presentation state; no submission or business confirmation is wired to the steps. Existing tests assert the tour does not seed tasks."
+  },
+  "runtimeEvidence": {
+    "path": "outputs/s39-tour-refresh-20261014/browser-validation.json",
+    "result": "31/31 Edge checks passed; employee/manager/boss tours had 11/13/15 steps; desktop 1440x900 and mobile 390x844; 0 JavaScript errors and 0 operational API calls."
+  },
+  "result": "No source-level mismatch found in the inspected S39 contract; no product code correction was warranted.",
+  "limits": [
+    "This does not replace the independent GPT-6.1 Sol review.",
+    "Human screen-reader acceptance remains unperformed.",
+    "The historical source review s39-tour-source-review-luna-20261014.json refers to earlier App/test hashes and is not evidence for the refreshed files."
+  ],
+  "externalActions": "No account, API, Site update, commit, or deployment was used."
+}

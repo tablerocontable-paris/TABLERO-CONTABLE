@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-14",
+  "scope": ["S52", "S36-S39", "S54", "S56", "S62-S63", "S57-S58", "S01", "S13", "S30-S32", "S44-S46", "S59-S60"],
+  "sourceReview": "Compared the open Sol acceptance contracts to current App, TaskBoard, QuickTaskSearch, shared Dialog, analytics, verification scripts, Worker, and local migration 012. No new product-code discrepancy was confirmed in this focused pass.",
+  "tests": {
+    "command": "node ./node_modules/vitest/vitest.mjs run tests/employee-picker.test.tsx tests/database.test.ts tests/cross-module-panel-folding.test.tsx tests/annotations-tour-app.test.tsx tests/process-improvement-permissions.test.tsx tests/workforce-retirement.test.tsx tests/verification-contract.test.ts tests/ui-a-acceptance.test.tsx tests/task-reader.test.ts tests/task-reader-sql.test.ts tests/task-gateway.test.ts tests/task-gateway-sql.test.ts tests/task-board.test.tsx tests/suggested-route-panel.test.tsx tests/site-operational.test.ts tests/quick-task-search.test.tsx tests/laboratory-corrections.test.tsx tests/planning-access.test.tsx --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000 --reporter=dot",
+    "exitCode": 0,
+    "passed": 200,
+    "files": 18
+  },
+  "benchmarkS57": {
+    "exitCode": 0,
+    "effectiveTreeSha256": "292d563c7f2306cc5f71967e76dc737e8da8e1a87de1b7322b1b9cd3b9b5568e",
+    "effectiveFileCount": 434,
+    "profiles": 24,
+    "tasks": 2000,
+    "samples": 30,
+    "p95Ms": 569.62,
+    "limitExclusiveMs": 1000,
+    "javascriptErrors": 0,
+    "operationalApiCalls": 0,
+    "report": "outputs/performance-lab-2026-10-14T16-35-13-508Z-9160/navigation-benchmark.json"
+  },
+  "isolatedS58": {
+    "exitCode": 0,
+    "effectiveTreeSha256": "292d563c7f2306cc5f71967e76dc737e8da8e1a87de1b7322b1b9cd3b9b5568e",
+    "effectiveFileCount": 434,
+    "executed": 7,
+    "passed": 7,
+    "skipped": 209,
+    "failed": 0,
+    "report": "outputs/time-coverage-008-isolation-2026-10-14T16-35-13-153Z-10656/isolation-run.json"
+  },
+  "unresolvedAcceptance": [
+    "Independent GPT-6.1 Sol review of S52 and stages 5-7.",
+    "Human screen-reader acceptance for stage 5.",
+    "Real PostgreSQL/MVCC concurrent validation for stage 7."
+  ],
+  "postgresEnvironmentRecheck": {
+    "date": "2026-10-14",
+    "localExecutables": { "psql": false, "postgres": false, "pg_ctl": false, "initdb": false, "docker": false, "podman": false },
+    "package": "PostgreSQL 17.11-5 EDB EXE; Winget verified its manifest SHA-256 and downloaded it.",
+    "extractionMethod": "EDB documents --extract-only 1 as an option that extracts binaries without installing.",
+    "result": "Launching the signed installer with --help returned 'El usuario ha cancelado la operación' before extraction. No binaries were extracted, no service/database was installed or started, and no MVCC test ran.",
+    "installerPath": "%LOCALAPPDATA%/Temp/paris-pg-mvcc-2eb16d7f1d7a46f9933842d2559ecf60/PostgreSQL 17_17.11-5_Machine_X64_exe_en-US.exe",
+    "cleanup": "Removal of the downloaded temporary installer was rejected by the execution policy; it remains in that unique temporary directory.",
+    "references": ["https://www.enterprisedb.com/docs/supported-open-source/postgresql/installing/command_line_parameters/", "https://www.enterprisedb.com/docs/supported-open-source/postgresql/installing/windows/"]
+  },
+  "noExternalActions": "No source/product code changes, commit, PR, Site update, account connection, operational API call, remote SQL, or deployment. This record was written after the runners; the recorded effective tree is the exact tree they tested."
+}

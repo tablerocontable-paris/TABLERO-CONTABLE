@@ -1,0 +1,3897 @@
+{
+  "date": "2026-10-14",
+  "sourceCommit": "8d95200f599b6188e041526507627f649d673940",
+  "scope": "Static inventory only; no execution, remote inspection or grant correctness claim.",
+  "stateFields": [
+    {
+      "name": "labRevision",
+      "path": "src/domain/model.ts",
+      "line": 334
+    },
+    {
+      "name": "boardOrder",
+      "path": "src/domain/model.ts",
+      "line": 335
+    },
+    {
+      "name": "notifications",
+      "path": "src/domain/model.ts",
+      "line": 336
+    },
+    {
+      "name": "deadlineReminderReads",
+      "path": "src/domain/model.ts",
+      "line": 337
+    },
+    {
+      "name": "internalRequests",
+      "path": "src/domain/model.ts",
+      "line": 338
+    },
+    {
+      "name": "taskComments",
+      "path": "src/domain/model.ts",
+      "line": 339
+    },
+    {
+      "name": "jointReceipts",
+      "path": "src/domain/model.ts",
+      "line": 340
+    },
+    {
+      "name": "parameterReviews",
+      "path": "src/domain/model.ts",
+      "line": 341
+    },
+    {
+      "name": "version",
+      "path": "src/domain/model.ts",
+      "line": 342
+    },
+    {
+      "name": "absences",
+      "path": "src/domain/model.ts",
+      "line": 343
+    },
+    {
+      "name": "orphanedWork",
+      "path": "src/domain/model.ts",
+      "line": 344
+    },
+    {
+      "name": "taskTransfers",
+      "path": "src/domain/model.ts",
+      "line": 345
+    },
+    {
+      "name": "companies",
+      "path": "src/domain/model.ts",
+      "line": 346
+    },
+    {
+      "name": "teams",
+      "path": "src/domain/model.ts",
+      "line": 347
+    },
+    {
+      "name": "profiles",
+      "path": "src/domain/model.ts",
+      "line": 348
+    },
+    {
+      "name": "templates",
+      "path": "src/domain/model.ts",
+      "line": 349
+    },
+    {
+      "name": "assignments",
+      "path": "src/domain/model.ts",
+      "line": 350
+    },
+    {
+      "name": "tasks",
+      "path": "src/domain/model.ts",
+      "line": 351
+    },
+    {
+      "name": "activity",
+      "path": "src/domain/model.ts",
+      "line": 352
+    },
+    {
+      "name": "audit",
+      "path": "src/domain/model.ts",
+      "line": 353
+    },
+    {
+      "name": "closures",
+      "path": "src/domain/model.ts",
+      "line": 354
+    },
+    {
+      "name": "onboarding",
+      "path": "src/domain/model.ts",
+      "line": 355
+    },
+    {
+      "name": "activeId",
+      "path": "src/domain/model.ts",
+      "line": 356
+    },
+    {
+      "name": "tour",
+      "path": "src/domain/model.ts",
+      "line": 357
+    },
+    {
+      "name": "tourVersion",
+      "path": "src/domain/model.ts",
+      "line": 358
+    },
+    {
+      "name": "tourStepId",
+      "path": "src/domain/model.ts",
+      "line": 359
+    },
+    {
+      "name": "annotations",
+      "path": "src/domain/model.ts",
+      "line": 360
+    },
+    {
+      "name": "catalogueVersions",
+      "path": "src/domain/model.ts",
+      "line": 361
+    },
+    {
+      "name": "improvementProposals",
+      "path": "src/domain/model.ts",
+      "line": 362
+    },
+    {
+      "name": "fiveSReviews",
+      "path": "src/domain/model.ts",
+      "line": 363
+    },
+    {
+      "name": "fiscalObligations",
+      "path": "src/domain/model.ts",
+      "line": 364
+    },
+    {
+      "name": "habitualTaskProposals",
+      "path": "src/domain/model.ts",
+      "line": 365
+    },
+    {
+      "name": "operationalRates",
+      "path": "src/domain/model.ts",
+      "line": 367
+    },
+    {
+      "name": "operationalAssessments",
+      "path": "src/domain/model.ts",
+      "line": 368
+    },
+    {
+      "name": "calendarEvents",
+      "path": "src/domain/model.ts",
+      "line": 369
+    },
+    {
+      "name": "calendarNotices",
+      "path": "src/domain/model.ts",
+      "line": 370
+    },
+    {
+      "name": "companyClosures",
+      "path": "src/domain/model.ts",
+      "line": 371
+    },
+    {
+      "name": "taskEvidence",
+      "path": "src/domain/model.ts",
+      "line": 372
+    }
+  ],
+  "domainExports": [
+    {
+      "name": "CalendarTaskReference",
+      "kind": "interface",
+      "path": "src/domain/calendar-validation.ts",
+      "line": 5
+    },
+    {
+      "name": "calendarEventFieldsError",
+      "kind": "function",
+      "path": "src/domain/calendar-validation.ts",
+      "line": 10
+    },
+    {
+      "name": "standardizeAssignment",
+      "kind": "function",
+      "path": "src/domain/catalogue.ts",
+      "line": 5
+    },
+    {
+      "name": "ClosedHistoryFilters",
+      "kind": "interface",
+      "path": "src/domain/closedHistory.ts",
+      "line": 4
+    },
+    {
+      "name": "closedPeriodHistory",
+      "kind": "function",
+      "path": "src/domain/closedHistory.ts",
+      "line": 15
+    },
+    {
+      "name": "ActivateJointTaskInput",
+      "kind": "interface",
+      "path": "src/domain/coordination.ts",
+      "line": 3
+    },
+    {
+      "name": "activateJointTask",
+      "kind": "function",
+      "path": "src/domain/coordination.ts",
+      "line": 12
+    },
+    {
+      "name": "DeadlineReminderRule",
+      "kind": "type",
+      "path": "src/domain/deadlineNotifications.ts",
+      "line": 5
+    },
+    {
+      "name": "DeadlineReminder",
+      "kind": "interface",
+      "path": "src/domain/deadlineNotifications.ts",
+      "line": 7
+    },
+    {
+      "name": "deadlineReminders",
+      "kind": "function",
+      "path": "src/domain/deadlineNotifications.ts",
+      "line": 23
+    },
+    {
+      "name": "markDeadlineRemindersRead",
+      "kind": "function",
+      "path": "src/domain/deadlineNotifications.ts",
+      "line": 82
+    },
+    {
+      "name": "ObligationMilestone",
+      "kind": "type",
+      "path": "src/domain/fiscalObligations.ts",
+      "line": 5
+    },
+    {
+      "name": "FiscalObligationStatus",
+      "kind": "type",
+      "path": "src/domain/fiscalObligations.ts",
+      "line": 6
+    },
+    {
+      "name": "FiscalObligationRevision",
+      "kind": "interface",
+      "path": "src/domain/fiscalObligations.ts",
+      "line": 8
+    },
+    {
+      "name": "FiscalObligation",
+      "kind": "interface",
+      "path": "src/domain/fiscalObligations.ts",
+      "line": 21
+    },
+    {
+      "name": "FiscalObligationInput",
+      "kind": "interface",
+      "path": "src/domain/fiscalObligations.ts",
+      "line": 42
+    },
+    {
+      "name": "FiscalObligationUpdate",
+      "kind": "interface",
+      "path": "src/domain/fiscalObligations.ts",
+      "line": 55
+    },
+    {
+      "name": "canonicalObligationCode",
+      "kind": "function",
+      "path": "src/domain/fiscalObligations.ts",
+      "line": 77
+    },
+    {
+      "name": "canManageFiscalObligation",
+      "kind": "function",
+      "path": "src/domain/fiscalObligations.ts",
+      "line": 109
+    },
+    {
+      "name": "createFiscalObligation",
+      "kind": "function",
+      "path": "src/domain/fiscalObligations.ts",
+      "line": 126
+    },
+    {
+      "name": "updateFiscalObligation",
+      "kind": "function",
+      "path": "src/domain/fiscalObligations.ts",
+      "line": 153
+    },
+    {
+      "name": "fiscalObligationStatus",
+      "kind": "function",
+      "path": "src/domain/fiscalObligations.ts",
+      "line": 204
+    },
+    {
+      "name": "visibleFiscalObligations",
+      "kind": "function",
+      "path": "src/domain/fiscalObligations.ts",
+      "line": 222
+    },
+    {
+      "name": "seedFiscalObligations",
+      "kind": "function",
+      "path": "src/domain/fiscalObligations.ts",
+      "line": 248
+    },
+    {
+      "name": "HabitualProposalInput",
+      "kind": "interface",
+      "path": "src/domain/habitualTaskProposals.ts",
+      "line": 5
+    },
+    {
+      "name": "StandardProposalInput",
+      "kind": "interface",
+      "path": "src/domain/habitualTaskProposals.ts",
+      "line": 18
+    },
+    {
+      "name": "ProposalGroup",
+      "kind": "type",
+      "path": "src/domain/habitualTaskProposals.ts",
+      "line": 29
+    },
+    {
+      "name": "submitHabitualTaskProposal",
+      "kind": "function",
+      "path": "src/domain/habitualTaskProposals.ts",
+      "line": 52
+    },
+    {
+      "name": "groupHabitualTaskProposals",
+      "kind": "function",
+      "path": "src/domain/habitualTaskProposals.ts",
+      "line": 113
+    },
+    {
+      "name": "requestHabitualProposalChanges",
+      "kind": "function",
+      "path": "src/domain/habitualTaskProposals.ts",
+      "line": 134
+    },
+    {
+      "name": "resubmitHabitualTaskProposal",
+      "kind": "function",
+      "path": "src/domain/habitualTaskProposals.ts",
+      "line": 156
+    },
+    {
+      "name": "approveHabitualTaskProposals",
+      "kind": "function",
+      "path": "src/domain/habitualTaskProposals.ts",
+      "line": 190
+    },
+    {
+      "name": "pendingHabitualTaskProposals",
+      "kind": "function",
+      "path": "src/domain/habitualTaskProposals.ts",
+      "line": 279
+    },
+    {
+      "name": "proposalsForProfile",
+      "kind": "function",
+      "path": "src/domain/habitualTaskProposals.ts",
+      "line": 285
+    },
+    {
+      "name": "proposalStatusLabel",
+      "kind": "function",
+      "path": "src/domain/habitualTaskProposals.ts",
+      "line": 289
+    },
+    {
+      "name": "InternalRequestKind",
+      "kind": "type",
+      "path": "src/domain/internalRequests.ts",
+      "line": 5
+    },
+    {
+      "name": "InternalRequestUrgency",
+      "kind": "type",
+      "path": "src/domain/internalRequests.ts",
+      "line": 6
+    },
+    {
+      "name": "InternalRequestStatus",
+      "kind": "type",
+      "path": "src/domain/internalRequests.ts",
+      "line": 7
+    },
+    {
+      "name": "InternalRequestMessage",
+      "kind": "type",
+      "path": "src/domain/internalRequests.ts",
+      "line": 8
+    },
+    {
+      "name": "InternalRequestEvent",
+      "kind": "type",
+      "path": "src/domain/internalRequests.ts",
+      "line": 14
+    },
+    {
+      "name": "InternalRequest",
+      "kind": "type",
+      "path": "src/domain/internalRequests.ts",
+      "line": 21
+    },
+    {
+      "name": "canViewInternalRequest",
+      "kind": "function",
+      "path": "src/domain/internalRequests.ts",
+      "line": 61
+    },
+    {
+      "name": "visibleInternalRequests",
+      "kind": "function",
+      "path": "src/domain/internalRequests.ts",
+      "line": 65
+    },
+    {
+      "name": "createInternalRequest",
+      "kind": "function",
+      "path": "src/domain/internalRequests.ts",
+      "line": 78
+    },
+    {
+      "name": "canManageInternalRequest",
+      "kind": "function",
+      "path": "src/domain/internalRequests.ts",
+      "line": 105
+    },
+    {
+      "name": "canConvertInternalRequest",
+      "kind": "function",
+      "path": "src/domain/internalRequests.ts",
+      "line": 109
+    },
+    {
+      "name": "completeInternalRequestConversion",
+      "kind": "function",
+      "path": "src/domain/internalRequests.ts",
+      "line": 115
+    },
+    {
+      "name": "replyToInternalRequest",
+      "kind": "function",
+      "path": "src/domain/internalRequests.ts",
+      "line": 158
+    },
+    {
+      "name": "setInternalRequestStatus",
+      "kind": "function",
+      "path": "src/domain/internalRequests.ts",
+      "line": 174
+    },
+    {
+      "name": "internalRequestRecipients",
+      "kind": "function",
+      "path": "src/domain/internalRequests.ts",
+      "line": 194
+    },
+    {
+      "name": "OperationalRate",
+      "kind": "interface",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 24
+    },
+    {
+      "name": "OperationalAssessment",
+      "kind": "interface",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 36
+    },
+    {
+      "name": "CalendarEventKind",
+      "kind": "type",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 50
+    },
+    {
+      "name": "LabCalendarEvent",
+      "kind": "interface",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 51
+    },
+    {
+      "name": "CalendarNotice",
+      "kind": "interface",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 68
+    },
+    {
+      "name": "TaskEvidence",
+      "kind": "interface",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 79
+    },
+    {
+      "name": "CompanyClosure",
+      "kind": "interface",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 93
+    },
+    {
+      "name": "CoveredContributionSnapshot",
+      "kind": "interface",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 105
+    },
+    {
+      "name": "CloseUnit",
+      "kind": "interface",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 116
+    },
+    {
+      "name": "CloseBlock",
+      "kind": "interface",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 117
+    },
+    {
+      "name": "CloseBatchResult",
+      "kind": "interface",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 118
+    },
+    {
+      "name": "OperationalLoad",
+      "kind": "interface",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 124
+    },
+    {
+      "name": "saveOperationalRate",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 183
+    },
+    {
+      "name": "effectiveOperationalRate",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 205
+    },
+    {
+      "name": "snapshotOperationalRate",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 214
+    },
+    {
+      "name": "operationalLoad",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 219
+    },
+    {
+      "name": "saveOperationalAssessment",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 244
+    },
+    {
+      "name": "qualitySummary",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 266
+    },
+    {
+      "name": "setCommercialTracking",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 273
+    },
+    {
+      "name": "updateCommercialProgress",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 284
+    },
+    {
+      "name": "updateTaskReadiness",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 296
+    },
+    {
+      "name": "SuggestedRouteFilters",
+      "kind": "interface",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 316
+    },
+    {
+      "name": "suggestedRoute",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 323
+    },
+    {
+      "name": "calendarRecipients",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 356
+    },
+    {
+      "name": "createCalendarEvent",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 366
+    },
+    {
+      "name": "calendarCanAccessTask",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 384
+    },
+    {
+      "name": "visibleCalendarEvents",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 392
+    },
+    {
+      "name": "canViewCalendarEvent",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 399
+    },
+    {
+      "name": "changeCalendarEvent",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 407
+    },
+    {
+      "name": "isLabCompanyClosed",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 435
+    },
+    {
+      "name": "updateTaskWeight",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 439
+    },
+    {
+      "name": "canRescheduleLabTask",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 454
+    },
+    {
+      "name": "rescheduleLabTask",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 464
+    },
+    {
+      "name": "isLabTaskLocked",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 477
+    },
+    {
+      "name": "companyCloseUnits",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 482
+    },
+    {
+      "name": "companyCloseGroups",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 523
+    },
+    {
+      "name": "companyUnitCloseBlocker",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 527
+    },
+    {
+      "name": "closeCompanyUnits",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 745
+    },
+    {
+      "name": "dashboardOperationalLoad",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 769
+    },
+    {
+      "name": "companyMetrics",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 779
+    },
+    {
+      "name": "isEventManager",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 784
+    },
+    {
+      "name": "eligibleCalendarRecipients",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 789
+    },
+    {
+      "name": "operationalTaskIds",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 793
+    },
+    {
+      "name": "activitySnapshotsForLog",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 797
+    },
+    {
+      "name": "canExecuteLab",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 802
+    },
+    {
+      "name": "canAssignLabTask",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 809
+    },
+    {
+      "name": "closureProgress",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 818
+    },
+    {
+      "name": "assessableOperations",
+      "kind": "function",
+      "path": "src/domain/laboratory-work.ts",
+      "line": 824
+    },
+    {
+      "name": "Role",
+      "kind": "type",
+      "path": "src/domain/model.ts",
+      "line": 10
+    },
+    {
+      "name": "Status",
+      "kind": "type",
+      "path": "src/domain/model.ts",
+      "line": 11
+    },
+    {
+      "name": "Kind",
+      "kind": "type",
+      "path": "src/domain/model.ts",
+      "line": 12
+    },
+    {
+      "name": "Profile",
+      "kind": "interface",
+      "path": "src/domain/model.ts",
+      "line": 13
+    },
+    {
+      "name": "Company",
+      "kind": "interface",
+      "path": "src/domain/model.ts",
+      "line": 26
+    },
+    {
+      "name": "Team",
+      "kind": "interface",
+      "path": "src/domain/model.ts",
+      "line": 30
+    },
+    {
+      "name": "Check",
+      "kind": "interface",
+      "path": "src/domain/model.ts",
+      "line": 35
+    },
+    {
+      "name": "Template",
+      "kind": "interface",
+      "path": "src/domain/model.ts",
+      "line": 40
+    },
+    {
+      "name": "Assignment",
+      "kind": "interface",
+      "path": "src/domain/model.ts",
+      "line": 51
+    },
+    {
+      "name": "Task",
+      "kind": "interface",
+      "path": "src/domain/model.ts",
+      "line": 76
+    },
+    {
+      "name": "JointMemberSnapshot",
+      "kind": "interface",
+      "path": "src/domain/model.ts",
+      "line": 117
+    },
+    {
+      "name": "JointResponsibility",
+      "kind": "interface",
+      "path": "src/domain/model.ts",
+      "line": 124
+    },
+    {
+      "name": "JointReceipt",
+      "kind": "interface",
+      "path": "src/domain/model.ts",
+      "line": 133
+    },
+    {
+      "name": "Activity",
+      "kind": "interface",
+      "path": "src/domain/model.ts",
+      "line": 141
+    },
+    {
+      "name": "Audit",
+      "kind": "interface",
+      "path": "src/domain/model.ts",
+      "line": 154
+    },
+    {
+      "name": "TaskTransfer",
+      "kind": "interface",
+      "path": "src/domain/model.ts",
+      "line": 161
+    },
+    {
+      "name": "Metrics",
+      "kind": "interface",
+      "path": "src/domain/model.ts",
+      "line": 177
+    },
+    {
+      "name": "Closure",
+      "kind": "interface",
+      "path": "src/domain/model.ts",
+      "line": 190
+    },
+    {
+      "name": "OrphanedWork",
+      "kind": "interface",
+      "path": "src/domain/model.ts",
+      "line": 203
+    },
+    {
+      "name": "AnnotationKind",
+      "kind": "type",
+      "path": "src/domain/model.ts",
+      "line": 224
+    },
+    {
+      "name": "Annotation",
+      "kind": "interface",
+      "path": "src/domain/model.ts",
+      "line": 225
+    },
+    {
+      "name": "Onboarding",
+      "kind": "interface",
+      "path": "src/domain/model.ts",
+      "line": 237
+    },
+    {
+      "name": "HabitualTaskProposalDraft",
+      "kind": "interface",
+      "path": "src/domain/model.ts",
+      "line": 275
+    },
+    {
+      "name": "HabitualTaskProposal",
+      "kind": "interface",
+      "path": "src/domain/model.ts",
+      "line": 285
+    },
+    {
+      "name": "ParameterReview",
+      "kind": "interface",
+      "path": "src/domain/model.ts",
+      "line": 327
+    },
+    {
+      "name": "State",
+      "kind": "interface",
+      "path": "src/domain/model.ts",
+      "line": 332
+    },
+    {
+      "name": "dueDate",
+      "kind": "function",
+      "path": "src/domain/model.ts",
+      "line": 384
+    },
+    {
+      "name": "canSee",
+      "kind": "function",
+      "path": "src/domain/model.ts",
+      "line": 388
+    },
+    {
+      "name": "responsibleMembers",
+      "kind": "function",
+      "path": "src/domain/model.ts",
+      "line": 401
+    },
+    {
+      "name": "responsibilityShare",
+      "kind": "function",
+      "path": "src/domain/model.ts",
+      "line": 406
+    },
+    {
+      "name": "isResponsible",
+      "kind": "function",
+      "path": "src/domain/model.ts",
+      "line": 409
+    },
+    {
+      "name": "isCompanyClosed",
+      "kind": "function",
+      "path": "src/domain/model.ts",
+      "line": 412
+    },
+    {
+      "name": "canAccessJointTask",
+      "kind": "function",
+      "path": "src/domain/model.ts",
+      "line": 416
+    },
+    {
+      "name": "isClosed",
+      "kind": "function",
+      "path": "src/domain/model.ts",
+      "line": 428
+    },
+    {
+      "name": "taskReadiness",
+      "kind": "function",
+      "path": "src/domain/model.ts",
+      "line": 432
+    },
+    {
+      "name": "transition",
+      "kind": "function",
+      "path": "src/domain/model.ts",
+      "line": 454
+    },
+    {
+      "name": "checkTask",
+      "kind": "function",
+      "path": "src/domain/model.ts",
+      "line": 482
+    },
+    {
+      "name": "taskQuantity",
+      "kind": "function",
+      "path": "src/domain/model.ts",
+      "line": 503
+    },
+    {
+      "name": "metrics",
+      "kind": "function",
+      "path": "src/domain/model.ts",
+      "line": 508
+    },
+    {
+      "name": "metricsForProfile",
+      "kind": "function",
+      "path": "src/domain/model.ts",
+      "line": 554
+    },
+    {
+      "name": "materialize",
+      "kind": "function",
+      "path": "src/domain/model.ts",
+      "line": 561
+    },
+    {
+      "name": "closeMonth",
+      "kind": "function",
+      "path": "src/domain/model.ts",
+      "line": 621
+    },
+    {
+      "name": "csvCell",
+      "kind": "function",
+      "path": "src/domain/model.ts",
+      "line": 672
+    },
+    {
+      "name": "WorkNotification",
+      "kind": "interface",
+      "path": "src/domain/notifications.ts",
+      "line": 4
+    },
+    {
+      "name": "TaskComment",
+      "kind": "interface",
+      "path": "src/domain/notifications.ts",
+      "line": 14
+    },
+    {
+      "name": "taskNotifications",
+      "kind": "function",
+      "path": "src/domain/notifications.ts",
+      "line": 47
+    },
+    {
+      "name": "collectTaskNotifications",
+      "kind": "function",
+      "path": "src/domain/notifications.ts",
+      "line": 69
+    },
+    {
+      "name": "visibleNotifications",
+      "kind": "function",
+      "path": "src/domain/notifications.ts",
+      "line": 155
+    },
+    {
+      "name": "addTaskComment",
+      "kind": "function",
+      "path": "src/domain/notifications.ts",
+      "line": 171
+    },
+    {
+      "name": "pendingParameterizations",
+      "kind": "function",
+      "path": "src/domain/parameterization.ts",
+      "line": 4
+    },
+    {
+      "name": "prepareLaboratoryInvitation",
+      "kind": "function",
+      "path": "src/domain/parameterization.ts",
+      "line": 15
+    },
+    {
+      "name": "confirmParameters",
+      "kind": "function",
+      "path": "src/domain/parameterization.ts",
+      "line": 51
+    },
+    {
+      "name": "canViewLabAssignment",
+      "kind": "function",
+      "path": "src/domain/planning.ts",
+      "line": 18
+    },
+    {
+      "name": "reviseAssignment",
+      "kind": "function",
+      "path": "src/domain/planning.ts",
+      "line": 35
+    },
+    {
+      "name": "CatalogueVersionSource",
+      "kind": "type",
+      "path": "src/domain/processImprovement.ts",
+      "line": 4
+    },
+    {
+      "name": "CatalogueVersion",
+      "kind": "interface",
+      "path": "src/domain/processImprovement.ts",
+      "line": 12
+    },
+    {
+      "name": "KaizenStatus",
+      "kind": "type",
+      "path": "src/domain/processImprovement.ts",
+      "line": 32
+    },
+    {
+      "name": "MeasureDirection",
+      "kind": "type",
+      "path": "src/domain/processImprovement.ts",
+      "line": 33
+    },
+    {
+      "name": "KaizenProposal",
+      "kind": "interface",
+      "path": "src/domain/processImprovement.ts",
+      "line": 35
+    },
+    {
+      "name": "FiveSAreaId",
+      "kind": "type",
+      "path": "src/domain/processImprovement.ts",
+      "line": 76
+    },
+    {
+      "name": "FiveSResult",
+      "kind": "type",
+      "path": "src/domain/processImprovement.ts",
+      "line": 77
+    },
+    {
+      "name": "FiveSActionStatus",
+      "kind": "type",
+      "path": "src/domain/processImprovement.ts",
+      "line": 78
+    },
+    {
+      "name": "FiveSItem",
+      "kind": "interface",
+      "path": "src/domain/processImprovement.ts",
+      "line": 80
+    },
+    {
+      "name": "FiveSReview",
+      "kind": "interface",
+      "path": "src/domain/processImprovement.ts",
+      "line": 94
+    },
+    {
+      "name": "KaizenInput",
+      "kind": "interface",
+      "path": "src/domain/processImprovement.ts",
+      "line": 105
+    },
+    {
+      "name": "KaizenMeasurement",
+      "kind": "interface",
+      "path": "src/domain/processImprovement.ts",
+      "line": 121
+    },
+    {
+      "name": "FiveSReviewInput",
+      "kind": "interface",
+      "path": "src/domain/processImprovement.ts",
+      "line": 128
+    },
+    {
+      "name": "canCoordinateProcess",
+      "kind": "function",
+      "path": "src/domain/processImprovement.ts",
+      "line": 174
+    },
+    {
+      "name": "canViewKaizenProposal",
+      "kind": "function",
+      "path": "src/domain/processImprovement.ts",
+      "line": 180
+    },
+    {
+      "name": "canViewFiveSReview",
+      "kind": "function",
+      "path": "src/domain/processImprovement.ts",
+      "line": 185
+    },
+    {
+      "name": "ensureCatalogueVersions",
+      "kind": "function",
+      "path": "src/domain/processImprovement.ts",
+      "line": 219
+    },
+    {
+      "name": "currentCatalogueVersion",
+      "kind": "function",
+      "path": "src/domain/processImprovement.ts",
+      "line": 236
+    },
+    {
+      "name": "pinMatchingCatalogueAssignments",
+      "kind": "function",
+      "path": "src/domain/processImprovement.ts",
+      "line": 244
+    },
+    {
+      "name": "addCatalogueTemplate",
+      "kind": "function",
+      "path": "src/domain/processImprovement.ts",
+      "line": 257
+    },
+    {
+      "name": "reviseCatalogueTemplate",
+      "kind": "function",
+      "path": "src/domain/processImprovement.ts",
+      "line": 264
+    },
+    {
+      "name": "createKaizenProposal",
+      "kind": "function",
+      "path": "src/domain/processImprovement.ts",
+      "line": 287
+    },
+    {
+      "name": "reviewKaizenProposal",
+      "kind": "function",
+      "path": "src/domain/processImprovement.ts",
+      "line": 319
+    },
+    {
+      "name": "recordKaizenMeasurement",
+      "kind": "function",
+      "path": "src/domain/processImprovement.ts",
+      "line": 332
+    },
+    {
+      "name": "decideKaizenProposal",
+      "kind": "function",
+      "path": "src/domain/processImprovement.ts",
+      "line": 351
+    },
+    {
+      "name": "createFiveSReview",
+      "kind": "function",
+      "path": "src/domain/processImprovement.ts",
+      "line": 408
+    },
+    {
+      "name": "completeFiveSAction",
+      "kind": "function",
+      "path": "src/domain/processImprovement.ts",
+      "line": 433
+    },
+    {
+      "name": "ReportContribution",
+      "kind": "interface",
+      "path": "src/domain/reports.ts",
+      "line": 3
+    },
+    {
+      "name": "ReportTransfer",
+      "kind": "interface",
+      "path": "src/domain/reports.ts",
+      "line": 11
+    },
+    {
+      "name": "OperationalReportSummary",
+      "kind": "interface",
+      "path": "src/domain/reports.ts",
+      "line": 19
+    },
+    {
+      "name": "LaboratoryPeriodSummary",
+      "kind": "interface",
+      "path": "src/domain/reports.ts",
+      "line": 30
+    },
+    {
+      "name": "CoverageReportContribution",
+      "kind": "interface",
+      "path": "src/domain/reports.ts",
+      "line": 34
+    },
+    {
+      "name": "ReportGroup",
+      "kind": "interface",
+      "path": "src/domain/reports.ts",
+      "line": 51
+    },
+    {
+      "name": "PeriodReport",
+      "kind": "interface",
+      "path": "src/domain/reports.ts",
+      "line": 64
+    },
+    {
+      "name": "closureCsvRows",
+      "kind": "function",
+      "path": "src/domain/reports.ts",
+      "line": 86
+    },
+    {
+      "name": "generatePeriodReport",
+      "kind": "function",
+      "path": "src/domain/reports.ts",
+      "line": 141
+    },
+    {
+      "name": "Frequency",
+      "kind": "type",
+      "path": "src/domain/schedule.ts",
+      "line": 1
+    },
+    {
+      "name": "Schedule",
+      "kind": "interface",
+      "path": "src/domain/schedule.ts",
+      "line": 2
+    },
+    {
+      "name": "validDate",
+      "kind": "function",
+      "path": "src/domain/schedule.ts",
+      "line": 15
+    },
+    {
+      "name": "defaultSchedule",
+      "kind": "function",
+      "path": "src/domain/schedule.ts",
+      "line": 22
+    },
+    {
+      "name": "validateSchedule",
+      "kind": "function",
+      "path": "src/domain/schedule.ts",
+      "line": 37
+    },
+    {
+      "name": "occurrences",
+      "kind": "function",
+      "path": "src/domain/schedule.ts",
+      "line": 60
+    },
+    {
+      "name": "describeSchedule",
+      "kind": "function",
+      "path": "src/domain/schedule.ts",
+      "line": 98
+    },
+    {
+      "name": "TimelinessStatus",
+      "kind": "type",
+      "path": "src/domain/timeliness.ts",
+      "line": 3
+    },
+    {
+      "name": "TimelinessEvidence",
+      "kind": "type",
+      "path": "src/domain/timeliness.ts",
+      "line": 11
+    },
+    {
+      "name": "TaskTimeliness",
+      "kind": "interface",
+      "path": "src/domain/timeliness.ts",
+      "line": 12
+    },
+    {
+      "name": "TimelinessBucket",
+      "kind": "interface",
+      "path": "src/domain/timeliness.ts",
+      "line": 18
+    },
+    {
+      "name": "TimelinessSummary",
+      "kind": "interface",
+      "path": "src/domain/timeliness.ts",
+      "line": 30
+    },
+    {
+      "name": "endOfARTDate",
+      "kind": "function",
+      "path": "src/domain/timeliness.ts",
+      "line": 87
+    },
+    {
+      "name": "taskTimeliness",
+      "kind": "function",
+      "path": "src/domain/timeliness.ts",
+      "line": 154
+    },
+    {
+      "name": "summarizeTimeliness",
+      "kind": "function",
+      "path": "src/domain/timeliness.ts",
+      "line": 228
+    },
+    {
+      "name": "WorkCycleMode",
+      "kind": "type",
+      "path": "src/domain/workCycle.ts",
+      "line": 4
+    },
+    {
+      "name": "WorkCycleDimension",
+      "kind": "type",
+      "path": "src/domain/workCycle.ts",
+      "line": 5
+    },
+    {
+      "name": "WorkCycleMeasure",
+      "kind": "interface",
+      "path": "src/domain/workCycle.ts",
+      "line": 7
+    },
+    {
+      "name": "WorkCycleBucket",
+      "kind": "interface",
+      "path": "src/domain/workCycle.ts",
+      "line": 17
+    },
+    {
+      "name": "WorkCycleGroup",
+      "kind": "interface",
+      "path": "src/domain/workCycle.ts",
+      "line": 25
+    },
+    {
+      "name": "WorkCycleResult",
+      "kind": "interface",
+      "path": "src/domain/workCycle.ts",
+      "line": 30
+    },
+    {
+      "name": "applyCompletionAttribution",
+      "kind": "function",
+      "path": "src/domain/workCycle.ts",
+      "line": 36
+    },
+    {
+      "name": "linkEvidenceToCompletions",
+      "kind": "function",
+      "path": "src/domain/workCycle.ts",
+      "line": 55
+    },
+    {
+      "name": "buildWorkCycle",
+      "kind": "function",
+      "path": "src/domain/workCycle.ts",
+      "line": 294
+    },
+    {
+      "name": "Absence",
+      "kind": "interface",
+      "path": "src/domain/workforce.ts",
+      "line": 18
+    },
+    {
+      "name": "TimeSession",
+      "kind": "interface",
+      "path": "src/domain/workforce.ts",
+      "line": 31
+    },
+    {
+      "name": "presenceStatus",
+      "kind": "function",
+      "path": "src/domain/workforce.ts",
+      "line": 37
+    },
+    {
+      "name": "canViewPresence",
+      "kind": "function",
+      "path": "src/domain/workforce.ts",
+      "line": 51
+    },
+    {
+      "name": "stopClock",
+      "kind": "function",
+      "path": "src/domain/workforce.ts",
+      "line": 73
+    },
+    {
+      "name": "stopActorClock",
+      "kind": "function",
+      "path": "src/domain/workforce.ts",
+      "line": 79
+    },
+    {
+      "name": "startClock",
+      "kind": "function",
+      "path": "src/domain/workforce.ts",
+      "line": 83
+    },
+    {
+      "name": "absenceForTask",
+      "kind": "function",
+      "path": "src/domain/workforce.ts",
+      "line": 107
+    },
+    {
+      "name": "coverageFor",
+      "kind": "function",
+      "path": "src/domain/workforce.ts",
+      "line": 117
+    },
+    {
+      "name": "RecurringCoveragePreview",
+      "kind": "interface",
+      "path": "src/domain/workforce.ts",
+      "line": 132
+    },
+    {
+      "name": "recurringCoveragePreview",
+      "kind": "function",
+      "path": "src/domain/workforce.ts",
+      "line": 138
+    },
+    {
+      "name": "cancelAbsence",
+      "kind": "function",
+      "path": "src/domain/workforce.ts",
+      "line": 168
+    },
+    {
+      "name": "expireCoverageClocks",
+      "kind": "function",
+      "path": "src/domain/workforce.ts",
+      "line": 180
+    },
+    {
+      "name": "canWork",
+      "kind": "function",
+      "path": "src/domain/workforce.ts",
+      "line": 199
+    },
+    {
+      "name": "registerAbsence",
+      "kind": "function",
+      "path": "src/domain/workforce.ts",
+      "line": 208
+    },
+    {
+      "name": "deactivateProfile",
+      "kind": "function",
+      "path": "src/domain/workforce.ts",
+      "line": 275
+    },
+    {
+      "name": "reassignOrphanedTask",
+      "kind": "function",
+      "path": "src/domain/workforce.ts",
+      "line": 368
+    },
+    {
+      "name": "transferOrphanedTask",
+      "kind": "function",
+      "path": "src/domain/workforce.ts",
+      "line": 400
+    },
+    {
+      "name": "updateProfile",
+      "kind": "function",
+      "path": "src/domain/workforce.ts",
+      "line": 453
+    },
+    {
+      "name": "applyClock",
+      "kind": "function",
+      "path": "src/domain/workforce.ts",
+      "line": 500
+    }
+  ],
+  "appFunctions": [
+    {
+      "name": "App",
+      "path": "src/App.tsx",
+      "line": 235
+    },
+    {
+      "name": "notify",
+      "path": "src/App.tsx",
+      "line": 327
+    },
+    {
+      "name": "commitAgainstResult",
+      "path": "src/App.tsx",
+      "line": 358
+    },
+    {
+      "name": "commitAgainst",
+      "path": "src/App.tsx",
+      "line": 445
+    },
+    {
+      "name": "commit",
+      "path": "src/App.tsx",
+      "line": 448
+    },
+    {
+      "name": "commitLatest",
+      "path": "src/App.tsx",
+      "line": 451
+    },
+    {
+      "name": "commitLatestWithResult",
+      "path": "src/App.tsx",
+      "line": 456
+    },
+    {
+      "name": "saveAnnotation",
+      "path": "src/App.tsx",
+      "line": 466
+    },
+    {
+      "name": "createRequest",
+      "path": "src/App.tsx",
+      "line": 510
+    },
+    {
+      "name": "updateRequestStatus",
+      "path": "src/App.tsx",
+      "line": 526
+    },
+    {
+      "name": "replyRequest",
+      "path": "src/App.tsx",
+      "line": 537
+    },
+    {
+      "name": "convertRequestToTask",
+      "path": "src/App.tsx",
+      "line": 550
+    },
+    {
+      "name": "openRequestTask",
+      "path": "src/App.tsx",
+      "line": 561
+    },
+    {
+      "name": "deleteAnnotation",
+      "path": "src/App.tsx",
+      "line": 569
+    },
+    {
+      "name": "convertAnnotation",
+      "path": "src/App.tsx",
+      "line": 580
+    },
+    {
+      "name": "changeProfile",
+      "path": "src/App.tsx",
+      "line": 667
+    },
+    {
+      "name": "mutateTask",
+      "path": "src/App.tsx",
+      "line": 686
+    },
+    {
+      "name": "clock",
+      "path": "src/App.tsx",
+      "line": 729
+    },
+    {
+      "name": "advance",
+      "path": "src/App.tsx",
+      "line": 743
+    },
+    {
+      "name": "moveBoardTask",
+      "path": "src/App.tsx",
+      "line": 766
+    },
+    {
+      "name": "download",
+      "path": "src/App.tsx",
+      "line": 809
+    },
+    {
+      "name": "finishOnboarding",
+      "path": "src/App.tsx",
+      "line": 822
+    },
+    {
+      "name": "toggleHistorySeries",
+      "path": "src/App.tsx",
+      "line": 1365
+    },
+    {
+      "name": "stats",
+      "path": "src/App.tsx",
+      "line": 1374
+    },
+    {
+      "name": "taskCard",
+      "path": "src/App.tsx",
+      "line": 1424
+    },
+    {
+      "name": "table",
+      "path": "src/App.tsx",
+      "line": 1545
+    },
+    {
+      "name": "distribution",
+      "path": "src/App.tsx",
+      "line": 1614
+    },
+    {
+      "name": "openSearchResult",
+      "path": "src/App.tsx",
+      "line": 1662
+    },
+    {
+      "name": "NewTask",
+      "path": "src/App.tsx",
+      "line": 3871
+    },
+    {
+      "name": "submit",
+      "path": "src/App.tsx",
+      "line": 3929
+    }
+  ],
+  "persistenceCalls": [
+    {
+      "callee": "commit",
+      "path": "src/App.tsx",
+      "line": 253
+    },
+    {
+      "callee": "remoteSave",
+      "path": "src/App.tsx",
+      "line": 370
+    },
+    {
+      "callee": "persist",
+      "path": "src/App.tsx",
+      "line": 418
+    },
+    {
+      "callee": "commitAgainstResult",
+      "path": "src/App.tsx",
+      "line": 446
+    },
+    {
+      "callee": "commitAgainst",
+      "path": "src/App.tsx",
+      "line": 449
+    },
+    {
+      "callee": "commitAgainst",
+      "path": "src/App.tsx",
+      "line": 454
+    },
+    {
+      "callee": "commitAgainstResult",
+      "path": "src/App.tsx",
+      "line": 464
+    },
+    {
+      "callee": "commit",
+      "path": "src/App.tsx",
+      "line": 497
+    },
+    {
+      "callee": "commit",
+      "path": "src/App.tsx",
+      "line": 516
+    },
+    {
+      "callee": "commit",
+      "path": "src/App.tsx",
+      "line": 532
+    },
+    {
+      "callee": "commit",
+      "path": "src/App.tsx",
+      "line": 543
+    },
+    {
+      "callee": "commit",
+      "path": "src/App.tsx",
+      "line": 575
+    },
+    {
+      "callee": "commit",
+      "path": "src/App.tsx",
+      "line": 598
+    },
+    {
+      "callee": "commit",
+      "path": "src/App.tsx",
+      "line": 669
+    },
+    {
+      "callee": "commit",
+      "path": "src/App.tsx",
+      "line": 710
+    },
+    {
+      "callee": "commit",
+      "path": "src/App.tsx",
+      "line": 734
+    },
+    {
+      "callee": "mutateTask",
+      "path": "src/App.tsx",
+      "line": 752
+    },
+    {
+      "callee": "commit",
+      "path": "src/App.tsx",
+      "line": 803
+    },
+    {
+      "callee": "commit",
+      "path": "src/App.tsx",
+      "line": 1001
+    },
+    {
+      "callee": "commit",
+      "path": "src/App.tsx",
+      "line": 1351
+    },
+    {
+      "callee": "commit",
+      "path": "src/App.tsx",
+      "line": 1758
+    },
+    {
+      "callee": "commit",
+      "path": "src/App.tsx",
+      "line": 3129
+    },
+    {
+      "callee": "commit",
+      "path": "src/App.tsx",
+      "line": 3142
+    },
+    {
+      "callee": "commit",
+      "path": "src/App.tsx",
+      "line": 3154
+    },
+    {
+      "callee": "commit",
+      "path": "src/App.tsx",
+      "line": 3307
+    },
+    {
+      "callee": "mutateTask",
+      "path": "src/App.tsx",
+      "line": 3415
+    },
+    {
+      "callee": "mutateTask",
+      "path": "src/App.tsx",
+      "line": 3437
+    },
+    {
+      "callee": "mutateTask",
+      "path": "src/App.tsx",
+      "line": 3515
+    },
+    {
+      "callee": "commit",
+      "path": "src/App.tsx",
+      "line": 3519
+    },
+    {
+      "callee": "commitLatestWithResult",
+      "path": "src/App.tsx",
+      "line": 3587
+    },
+    {
+      "callee": "commit",
+      "path": "src/App.tsx",
+      "line": 3723
+    },
+    {
+      "callee": "commit",
+      "path": "src/App.tsx",
+      "line": 3819
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/CatalogueCreator.tsx",
+      "line": 62
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/CatalogueVersionCard.tsx",
+      "line": 24
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/CommercialProgressPanel.tsx",
+      "line": 25
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/CommercialProgressPanel.tsx",
+      "line": 34
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/CompanyClosureManager.tsx",
+      "line": 84
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/DeadlineAgenda.tsx",
+      "line": 124
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/DeadlineAgenda.tsx",
+      "line": 133
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/FiscalObligations.tsx",
+      "line": 123
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/FiscalObligations.tsx",
+      "line": 138
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/HabitualTaskProposals.tsx",
+      "line": 56
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/HabitualTaskProposals.tsx",
+      "line": 97
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/HabitualTaskProposals.tsx",
+      "line": 166
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/JointTaskSetup.tsx",
+      "line": 38
+    },
+    {
+      "callee": "persist",
+      "path": "src/components/LaboratoryWorkspace.tsx",
+      "line": 41
+    },
+    {
+      "callee": "persist",
+      "path": "src/components/LaboratoryWorkspace.tsx",
+      "line": 51
+    },
+    {
+      "callee": "persist",
+      "path": "src/components/LaboratoryWorkspace.tsx",
+      "line": 62
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/NotificationCenter.tsx",
+      "line": 104
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/NotificationCenter.tsx",
+      "line": 124
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/NotificationCenter.tsx",
+      "line": 155
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/NotificationCenter.tsx",
+      "line": 178
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/OperationalQualityReview.tsx",
+      "line": 24
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/OperationalRatePanel.tsx",
+      "line": 32
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/ParameterizationInbox.tsx",
+      "line": 81
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/Planning.tsx",
+      "line": 103
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/ProcessQuality.tsx",
+      "line": 51
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/TaskComments.tsx",
+      "line": 39
+    },
+    {
+      "callee": "commitLatest",
+      "path": "src/components/TaskEvidencePanel.tsx",
+      "line": 47
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/TaskReadinessPanel.tsx",
+      "line": 22
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/TaskSchedulePanel.tsx",
+      "line": 23
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/Workforce.tsx",
+      "line": 81
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/Workforce.tsx",
+      "line": 98
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/Workforce.tsx",
+      "line": 263
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/Workforce.tsx",
+      "line": 310
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/Workforce.tsx",
+      "line": 333
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/Workforce.tsx",
+      "line": 463
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/Workforce.tsx",
+      "line": 503
+    },
+    {
+      "callee": "commit",
+      "path": "src/components/WorkspaceSetup.tsx",
+      "line": 46
+    },
+    {
+      "callee": "persist",
+      "path": "src/data/repository.ts",
+      "line": 1346
+    }
+  ],
+  "sqlDefinitions": [
+    {
+      "kind": "table",
+      "name": "public.organizations",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 3
+    },
+    {
+      "kind": "table",
+      "name": "public.companies",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 4
+    },
+    {
+      "kind": "table",
+      "name": "public.profiles",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 5
+    },
+    {
+      "kind": "table",
+      "name": "public.teams",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 6
+    },
+    {
+      "kind": "table",
+      "name": "public.team_members",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 7
+    },
+    {
+      "kind": "table",
+      "name": "public.company_memberships",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 8
+    },
+    {
+      "kind": "table",
+      "name": "public.task_templates",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 9
+    },
+    {
+      "kind": "table",
+      "name": "public.task_assignments",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 10
+    },
+    {
+      "kind": "table",
+      "name": "public.task_instances",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 11
+    },
+    {
+      "kind": "table",
+      "name": "public.activity_entries",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 12
+    },
+    {
+      "kind": "table",
+      "name": "public.onboarding_progress",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 13
+    },
+    {
+      "kind": "table",
+      "name": "public.monthly_closures",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 14
+    },
+    {
+      "kind": "table",
+      "name": "public.audit_events",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 15
+    },
+    {
+      "kind": "function",
+      "name": "public.actor_org",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 21
+    },
+    {
+      "kind": "function",
+      "name": "public.actor_role",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 22
+    },
+    {
+      "kind": "function",
+      "name": "public.can_access_owner",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 23
+    },
+    {
+      "kind": "function",
+      "name": "public.can_access_instance",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 24
+    },
+    {
+      "kind": "policy",
+      "name": "org_read",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 39
+    },
+    {
+      "kind": "policy",
+      "name": "company_read",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 40
+    },
+    {
+      "kind": "policy",
+      "name": "profile_read",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 41
+    },
+    {
+      "kind": "policy",
+      "name": "teams_read",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 42
+    },
+    {
+      "kind": "policy",
+      "name": "team_members_read",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 43
+    },
+    {
+      "kind": "policy",
+      "name": "company_members_read",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 44
+    },
+    {
+      "kind": "policy",
+      "name": "templates_read",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 45
+    },
+    {
+      "kind": "policy",
+      "name": "assignments_read",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 46
+    },
+    {
+      "kind": "policy",
+      "name": "instance_read",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 47
+    },
+    {
+      "kind": "policy",
+      "name": "activity_read",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 48
+    },
+    {
+      "kind": "policy",
+      "name": "onboarding_read",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 49
+    },
+    {
+      "kind": "policy",
+      "name": "closures_read",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 50
+    },
+    {
+      "kind": "policy",
+      "name": "audit_read",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 51
+    },
+    {
+      "kind": "function",
+      "name": "public.lock_open_month",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 54
+    },
+    {
+      "kind": "function",
+      "name": "public.transition_task",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 58
+    },
+    {
+      "kind": "function",
+      "name": "public.record_activity",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 71
+    },
+    {
+      "kind": "function",
+      "name": "public.save_onboarding",
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "line": 79
+    },
+    {
+      "kind": "function",
+      "name": "public.require_privileged_session",
+      "path": "supabase/migrations/202609300002_workflows.sql",
+      "line": 8
+    },
+    {
+      "kind": "function",
+      "name": "public.set_checklist_item",
+      "path": "supabase/migrations/202609300002_workflows.sql",
+      "line": 15
+    },
+    {
+      "kind": "function",
+      "name": "public.create_catalog_assignment",
+      "path": "supabase/migrations/202609300002_workflows.sql",
+      "line": 35
+    },
+    {
+      "kind": "function",
+      "name": "public.materialize_month",
+      "path": "supabase/migrations/202609300002_workflows.sql",
+      "line": 52
+    },
+    {
+      "kind": "function",
+      "name": "public.update_template_weight",
+      "path": "supabase/migrations/202609300002_workflows.sql",
+      "line": 71
+    },
+    {
+      "kind": "function",
+      "name": "public.close_employee_month",
+      "path": "supabase/migrations/202609300002_workflows.sql",
+      "line": 81
+    },
+    {
+      "kind": "table",
+      "name": "public.task_template_versions",
+      "path": "supabase/migrations/202610010001_occurrence_contract.sql",
+      "line": 5
+    },
+    {
+      "kind": "function",
+      "name": "public.reject_template_version_change",
+      "path": "supabase/migrations/202610010001_occurrence_contract.sql",
+      "line": 30
+    },
+    {
+      "kind": "function",
+      "name": "public.normalize_assignment_schedule",
+      "path": "supabase/migrations/202610010001_occurrence_contract.sql",
+      "line": 57
+    },
+    {
+      "kind": "table",
+      "name": "public.task_time_sessions",
+      "path": "supabase/migrations/202610010001_occurrence_contract.sql",
+      "line": 87
+    },
+    {
+      "kind": "table",
+      "name": "public.employee_absences",
+      "path": "supabase/migrations/202610010001_occurrence_contract.sql",
+      "line": 100
+    },
+    {
+      "kind": "policy",
+      "name": "template_versions_read",
+      "path": "supabase/migrations/202610010001_occurrence_contract.sql",
+      "line": 115
+    },
+    {
+      "kind": "policy",
+      "name": "sessions_read",
+      "path": "supabase/migrations/202610010001_occurrence_contract.sql",
+      "line": 116
+    },
+    {
+      "kind": "policy",
+      "name": "absences_read",
+      "path": "supabase/migrations/202610010001_occurrence_contract.sql",
+      "line": 117
+    },
+    {
+      "kind": "function",
+      "name": "public.materialize_month",
+      "path": "supabase/migrations/202610010001_occurrence_contract.sql",
+      "line": 122
+    },
+    {
+      "kind": "function",
+      "name": "public.create_catalog_assignment",
+      "path": "supabase/migrations/202610010001_occurrence_contract.sql",
+      "line": 150
+    },
+    {
+      "kind": "function",
+      "name": "public.update_template_weight",
+      "path": "supabase/migrations/202610010001_occurrence_contract.sql",
+      "line": 170
+    },
+    {
+      "kind": "function",
+      "name": "public.create_task_template",
+      "path": "supabase/migrations/202610010001_occurrence_contract.sql",
+      "line": 186
+    },
+    {
+      "kind": "table",
+      "name": "public.onboarding_requests",
+      "path": "supabase/migrations/202610010002_onboarding_approval.sql",
+      "line": 5
+    },
+    {
+      "kind": "table",
+      "name": "public.onboarding_request_versions",
+      "path": "supabase/migrations/202610010002_onboarding_approval.sql",
+      "line": 17
+    },
+    {
+      "kind": "table",
+      "name": "public.onboarding_reviews",
+      "path": "supabase/migrations/202610010002_onboarding_approval.sql",
+      "line": 25
+    },
+    {
+      "kind": "table",
+      "name": "public.onboarding_activations",
+      "path": "supabase/migrations/202610010002_onboarding_approval.sql",
+      "line": 32
+    },
+    {
+      "kind": "policy",
+      "name": "onboarding_requests_read",
+      "path": "supabase/migrations/202610010002_onboarding_approval.sql",
+      "line": 43
+    },
+    {
+      "kind": "policy",
+      "name": "onboarding_versions_read",
+      "path": "supabase/migrations/202610010002_onboarding_approval.sql",
+      "line": 44
+    },
+    {
+      "kind": "policy",
+      "name": "onboarding_reviews_read",
+      "path": "supabase/migrations/202610010002_onboarding_approval.sql",
+      "line": 45
+    },
+    {
+      "kind": "policy",
+      "name": "onboarding_activations_read",
+      "path": "supabase/migrations/202610010002_onboarding_approval.sql",
+      "line": 46
+    },
+    {
+      "kind": "function",
+      "name": "public.validate_onboarding_payload",
+      "path": "supabase/migrations/202610010002_onboarding_approval.sql",
+      "line": 50
+    },
+    {
+      "kind": "function",
+      "name": "public.save_onboarding_draft",
+      "path": "supabase/migrations/202610010002_onboarding_approval.sql",
+      "line": 67
+    },
+    {
+      "kind": "function",
+      "name": "public.submit_onboarding",
+      "path": "supabase/migrations/202610010002_onboarding_approval.sql",
+      "line": 88
+    },
+    {
+      "kind": "function",
+      "name": "public.request_onboarding_changes",
+      "path": "supabase/migrations/202610010002_onboarding_approval.sql",
+      "line": 107
+    },
+    {
+      "kind": "function",
+      "name": "public.approve_onboarding",
+      "path": "supabase/migrations/202610010002_onboarding_approval.sql",
+      "line": 121
+    },
+    {
+      "kind": "table",
+      "name": "public.report_settings",
+      "path": "supabase/migrations/202610010003_report_delivery.sql",
+      "line": 3
+    },
+    {
+      "kind": "table",
+      "name": "public.period_reports",
+      "path": "supabase/migrations/202610010003_report_delivery.sql",
+      "line": 10
+    },
+    {
+      "kind": "table",
+      "name": "public.report_deliveries",
+      "path": "supabase/migrations/202610010003_report_delivery.sql",
+      "line": 18
+    },
+    {
+      "kind": "table",
+      "name": "public.report_outbox_events",
+      "path": "supabase/migrations/202610010003_report_delivery.sql",
+      "line": 34
+    },
+    {
+      "kind": "function",
+      "name": "public.reject_report_change",
+      "path": "supabase/migrations/202610010003_report_delivery.sql",
+      "line": 39
+    },
+    {
+      "kind": "function",
+      "name": "public.can_read_period_report",
+      "path": "supabase/migrations/202610010003_report_delivery.sql",
+      "line": 42
+    },
+    {
+      "kind": "policy",
+      "name": "report_settings_read",
+      "path": "supabase/migrations/202610010003_report_delivery.sql",
+      "line": 50
+    },
+    {
+      "kind": "policy",
+      "name": "period_reports_read",
+      "path": "supabase/migrations/202610010003_report_delivery.sql",
+      "line": 51
+    },
+    {
+      "kind": "policy",
+      "name": "report_deliveries_read",
+      "path": "supabase/migrations/202610010003_report_delivery.sql",
+      "line": 52
+    },
+    {
+      "kind": "policy",
+      "name": "report_outbox_read",
+      "path": "supabase/migrations/202610010003_report_delivery.sql",
+      "line": 53
+    },
+    {
+      "kind": "function",
+      "name": "public.set_report_recipient",
+      "path": "supabase/migrations/202610010003_report_delivery.sql",
+      "line": 56
+    },
+    {
+      "kind": "function",
+      "name": "public.close_employee_month",
+      "path": "supabase/migrations/202610010003_report_delivery.sql",
+      "line": 64
+    },
+    {
+      "kind": "function",
+      "name": "public.claim_report_deliveries",
+      "path": "supabase/migrations/202610010003_report_delivery.sql",
+      "line": 109
+    },
+    {
+      "kind": "function",
+      "name": "public.complete_report_delivery",
+      "path": "supabase/migrations/202610010003_report_delivery.sql",
+      "line": 123
+    },
+    {
+      "kind": "function",
+      "name": "public.fail_report_delivery",
+      "path": "supabase/migrations/202610010003_report_delivery.sql",
+      "line": 130
+    },
+    {
+      "kind": "function",
+      "name": "public.retry_report_delivery",
+      "path": "supabase/migrations/202610010003_report_delivery.sql",
+      "line": 139
+    },
+    {
+      "kind": "table",
+      "name": "public.employee_absence_companies",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 14
+    },
+    {
+      "kind": "table",
+      "name": "public.task_reopen_events",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 25
+    },
+    {
+      "kind": "table",
+      "name": "public.task_mutation_receipts",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 38
+    },
+    {
+      "kind": "policy",
+      "name": "absences_read",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 48
+    },
+    {
+      "kind": "policy",
+      "name": "absence_companies_read",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 49
+    },
+    {
+      "kind": "policy",
+      "name": "reopen_events_read",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 50
+    },
+    {
+      "kind": "policy",
+      "name": "own_session_read",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 51
+    },
+    {
+      "kind": "function",
+      "name": "public.can_cover_instance",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 55
+    },
+    {
+      "kind": "function",
+      "name": "public.can_access_instance",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 67
+    },
+    {
+      "kind": "function",
+      "name": "public._get_mutation_receipt",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 76
+    },
+    {
+      "kind": "function",
+      "name": "public._save_mutation_receipt",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 85
+    },
+    {
+      "kind": "function",
+      "name": "public.approve_employee_absence",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 91
+    },
+    {
+      "kind": "function",
+      "name": "public.cancel_employee_absence",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 117
+    },
+    {
+      "kind": "function",
+      "name": "public.start_task_timer",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 132
+    },
+    {
+      "kind": "function",
+      "name": "public._effective_session_end",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 165
+    },
+    {
+      "kind": "function",
+      "name": "public.pause_task_timer",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 168
+    },
+    {
+      "kind": "function",
+      "name": "public.set_task_wait",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 178
+    },
+    {
+      "kind": "function",
+      "name": "public.transition_task_reviewed",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 191
+    },
+    {
+      "kind": "function",
+      "name": "public.transition_task",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 215
+    },
+    {
+      "kind": "function",
+      "name": "public.set_checklist_item_reviewed",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 218
+    },
+    {
+      "kind": "function",
+      "name": "public.set_checklist_item",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 241
+    },
+    {
+      "kind": "function",
+      "name": "public.create_catalog_assignment",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 244
+    },
+    {
+      "kind": "function",
+      "name": "public.record_activity",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 266
+    },
+    {
+      "kind": "function",
+      "name": "public.record_activity_once",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 278
+    },
+    {
+      "kind": "function",
+      "name": "public.close_employee_month",
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "line": 288
+    },
+    {
+      "kind": "function",
+      "name": "public.prevent_reopen_event_mutation",
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "line": 43
+    },
+    {
+      "kind": "function",
+      "name": "public._effective_session_end",
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "line": 51
+    },
+    {
+      "kind": "function",
+      "name": "public._get_mutation_receipt",
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "line": 57
+    },
+    {
+      "kind": "function",
+      "name": "public._save_mutation_receipt",
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "line": 67
+    },
+    {
+      "kind": "function",
+      "name": "public._can_access_instance_at",
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "line": 75
+    },
+    {
+      "kind": "function",
+      "name": "public.clamp_covered_session_end",
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "line": 91
+    },
+    {
+      "kind": "function",
+      "name": "public.reject_overlapping_absence",
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "line": 104
+    },
+    {
+      "kind": "function",
+      "name": "public.guard_absence_approval",
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "line": 117
+    },
+    {
+      "kind": "function",
+      "name": "public.approve_employee_absence",
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "line": 129
+    },
+    {
+      "kind": "function",
+      "name": "public.cancel_employee_absence",
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "line": 159
+    },
+    {
+      "kind": "function",
+      "name": "public.pause_task_timer",
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "line": 216
+    },
+    {
+      "kind": "function",
+      "name": "public.start_task_timer",
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "line": 250
+    },
+    {
+      "kind": "function",
+      "name": "public.set_task_wait",
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "line": 316
+    },
+    {
+      "kind": "function",
+      "name": "public.transition_task_reviewed",
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "line": 346
+    },
+    {
+      "kind": "function",
+      "name": "public.set_checklist_item_reviewed",
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "line": 388
+    },
+    {
+      "kind": "function",
+      "name": "public.transition_task",
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "line": 433
+    },
+    {
+      "kind": "function",
+      "name": "public.set_checklist_item",
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "line": 439
+    },
+    {
+      "kind": "function",
+      "name": "public.record_activity",
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "line": 446
+    },
+    {
+      "kind": "function",
+      "name": "public.close_employee_month",
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "line": 470
+    },
+    {
+      "kind": "function",
+      "name": "public.guard_absence_immutability",
+      "path": "supabase/migrations/202610010006_time_coverage_acceptance.sql",
+      "line": 40
+    },
+    {
+      "kind": "function",
+      "name": "public.set_checklist_item_reviewed",
+      "path": "supabase/migrations/202610010006_time_coverage_acceptance.sql",
+      "line": 61
+    },
+    {
+      "kind": "function",
+      "name": "public.set_task_wait",
+      "path": "supabase/migrations/202610010006_time_coverage_acceptance.sql",
+      "line": 150
+    },
+    {
+      "kind": "function",
+      "name": "public.guard_absence_company_immutability",
+      "path": "supabase/migrations/202610010006_time_coverage_acceptance.sql",
+      "line": 200
+    },
+    {
+      "kind": "function",
+      "name": "public.guard_task_session_integrity",
+      "path": "supabase/migrations/202610010006_time_coverage_acceptance.sql",
+      "line": 211
+    },
+    {
+      "kind": "function",
+      "name": "public._session_cutoff",
+      "path": "supabase/migrations/202610010006_time_coverage_acceptance.sql",
+      "line": 246
+    },
+    {
+      "kind": "function",
+      "name": "public.approve_employee_absence",
+      "path": "supabase/migrations/202610010006_time_coverage_acceptance.sql",
+      "line": 253
+    },
+    {
+      "kind": "function",
+      "name": "public.pause_task_timer",
+      "path": "supabase/migrations/202610010006_time_coverage_acceptance.sql",
+      "line": 285
+    },
+    {
+      "kind": "function",
+      "name": "public.start_task_timer",
+      "path": "supabase/migrations/202610010006_time_coverage_acceptance.sql",
+      "line": 317
+    },
+    {
+      "kind": "function",
+      "name": "public.close_employee_month",
+      "path": "supabase/migrations/202610010006_time_coverage_acceptance.sql",
+      "line": 384
+    },
+    {
+      "kind": "function",
+      "name": "public.transition_task_reviewed",
+      "path": "supabase/migrations/202610010006_time_coverage_acceptance.sql",
+      "line": 460
+    },
+    {
+      "kind": "function",
+      "name": "public.guard_absence_immutability",
+      "path": "supabase/migrations/202610010007_time_coverage_completion.sql",
+      "line": 4
+    },
+    {
+      "kind": "function",
+      "name": "public.guard_absence_company_immutability",
+      "path": "supabase/migrations/202610010007_time_coverage_completion.sql",
+      "line": 26
+    },
+    {
+      "kind": "function",
+      "name": "public.approve_employee_absence",
+      "path": "supabase/migrations/202610010007_time_coverage_completion.sql",
+      "line": 34
+    },
+    {
+      "kind": "function",
+      "name": "public.pause_task_timer",
+      "path": "supabase/migrations/202610010007_time_coverage_completion.sql",
+      "line": 66
+    },
+    {
+      "kind": "function",
+      "name": "public.start_task_timer",
+      "path": "supabase/migrations/202610010007_time_coverage_completion.sql",
+      "line": 102
+    },
+    {
+      "kind": "function",
+      "name": "public.set_checklist_item_reviewed",
+      "path": "supabase/migrations/202610010007_time_coverage_completion.sql",
+      "line": 174
+    },
+    {
+      "kind": "function",
+      "name": "public.set_task_wait",
+      "path": "supabase/migrations/202610010007_time_coverage_completion.sql",
+      "line": 279
+    },
+    {
+      "kind": "function",
+      "name": "public.transition_task_reviewed",
+      "path": "supabase/migrations/202610010007_time_coverage_completion.sql",
+      "line": 344
+    },
+    {
+      "kind": "function",
+      "name": "public.cancel_employee_absence",
+      "path": "supabase/migrations/202610010007_time_coverage_completion.sql",
+      "line": 416
+    },
+    {
+      "kind": "function",
+      "name": "public.can_cover_instance",
+      "path": "supabase/migrations/202610010008_time_coverage_finalization.sql",
+      "line": 5
+    },
+    {
+      "kind": "function",
+      "name": "public._can_access_instance_at",
+      "path": "supabase/migrations/202610010008_time_coverage_finalization.sql",
+      "line": 23
+    },
+    {
+      "kind": "function",
+      "name": "public.set_checklist_item_reviewed",
+      "path": "supabase/migrations/202610010008_time_coverage_finalization.sql",
+      "line": 51
+    },
+    {
+      "kind": "function",
+      "name": "public.start_task_timer",
+      "path": "supabase/migrations/202610010008_time_coverage_finalization.sql",
+      "line": 161
+    },
+    {
+      "kind": "function",
+      "name": "public.set_task_wait",
+      "path": "supabase/migrations/202610010008_time_coverage_finalization.sql",
+      "line": 236
+    },
+    {
+      "kind": "function",
+      "name": "public.transition_task_reviewed",
+      "path": "supabase/migrations/202610010008_time_coverage_finalization.sql",
+      "line": 304
+    },
+    {
+      "kind": "function",
+      "name": "public.pause_task_timer",
+      "path": "supabase/migrations/202610010008_time_coverage_finalization.sql",
+      "line": 378
+    },
+    {
+      "kind": "function",
+      "name": "public._normalize_private_block_note_body",
+      "path": "supabase/migrations/202610020009_private_block_notes.sql",
+      "line": 5
+    },
+    {
+      "kind": "table",
+      "name": "public.task_private_block_notes",
+      "path": "supabase/migrations/202610020009_private_block_notes.sql",
+      "line": 11
+    },
+    {
+      "kind": "table",
+      "name": "public.task_private_block_note_versions",
+      "path": "supabase/migrations/202610020009_private_block_notes.sql",
+      "line": 30
+    },
+    {
+      "kind": "table",
+      "name": "public.private_block_note_receipts",
+      "path": "supabase/migrations/202610020009_private_block_notes.sql",
+      "line": 46
+    },
+    {
+      "kind": "function",
+      "name": "public.can_read_private_block_note",
+      "path": "supabase/migrations/202610020009_private_block_notes.sql",
+      "line": 63
+    },
+    {
+      "kind": "policy",
+      "name": "private_block_notes_read",
+      "path": "supabase/migrations/202610020009_private_block_notes.sql",
+      "line": 82
+    },
+    {
+      "kind": "policy",
+      "name": "private_block_note_versions_read",
+      "path": "supabase/migrations/202610020009_private_block_notes.sql",
+      "line": 84
+    },
+    {
+      "kind": "function",
+      "name": "public.guard_private_block_note_versions",
+      "path": "supabase/migrations/202610020009_private_block_notes.sql",
+      "line": 87
+    },
+    {
+      "kind": "function",
+      "name": "public.save_private_block_note",
+      "path": "supabase/migrations/202610020009_private_block_notes.sql",
+      "line": 98
+    },
+    {
+      "kind": "function",
+      "name": "public._coordination_text_present",
+      "path": "supabase/migrations/202610040010_coordination_foundation.sql",
+      "line": 5
+    },
+    {
+      "kind": "table",
+      "name": "public.task_responsibility_sets",
+      "path": "supabase/migrations/202610040010_coordination_foundation.sql",
+      "line": 11
+    },
+    {
+      "kind": "table",
+      "name": "public.task_responsibility_members",
+      "path": "supabase/migrations/202610040010_coordination_foundation.sql",
+      "line": 42
+    },
+    {
+      "kind": "table",
+      "name": "public.task_responsibility_heads",
+      "path": "supabase/migrations/202610040010_coordination_foundation.sql",
+      "line": 52
+    },
+    {
+      "kind": "function",
+      "name": "public._validate_task_responsibility_set",
+      "path": "supabase/migrations/202610040010_coordination_foundation.sql",
+      "line": 60
+    },
+    {
+      "kind": "function",
+      "name": "public._guard_task_responsibility_set",
+      "path": "supabase/migrations/202610040010_coordination_foundation.sql",
+      "line": 99
+    },
+    {
+      "kind": "function",
+      "name": "public._guard_task_responsibility_member",
+      "path": "supabase/migrations/202610040010_coordination_foundation.sql",
+      "line": 117
+    },
+    {
+      "kind": "function",
+      "name": "public._guard_task_responsibility_head",
+      "path": "supabase/migrations/202610040010_coordination_foundation.sql",
+      "line": 137
+    },
+    {
+      "kind": "table",
+      "name": "public.task_coverage_plans",
+      "path": "supabase/migrations/202610040010_coordination_foundation.sql",
+      "line": 153
+    },
+    {
+      "kind": "table",
+      "name": "public.task_coverage_plan_instances",
+      "path": "supabase/migrations/202610040010_coordination_foundation.sql",
+      "line": 178
+    },
+    {
+      "kind": "table",
+      "name": "public.task_coverage_plan_assignment_rules",
+      "path": "supabase/migrations/202610040010_coordination_foundation.sql",
+      "line": 192
+    },
+    {
+      "kind": "function",
+      "name": "public._validate_task_coverage_plan",
+      "path": "supabase/migrations/202610040010_coordination_foundation.sql",
+      "line": 204
+    },
+    {
+      "kind": "function",
+      "name": "public._guard_task_coverage_plan",
+      "path": "supabase/migrations/202610040010_coordination_foundation.sql",
+      "line": 238
+    },
+    {
+      "kind": "function",
+      "name": "public._guard_task_coverage_selection",
+      "path": "supabase/migrations/202610040010_coordination_foundation.sql",
+      "line": 257
+    },
+    {
+      "kind": "function",
+      "name": "public._legacy_task_responsibility",
+      "path": "supabase/migrations/202610040010_coordination_foundation.sql",
+      "line": 293
+    },
+    {
+      "kind": "table",
+      "name": "public.task_coverage_bindings",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 20
+    },
+    {
+      "kind": "function",
+      "name": "public._coordination_lock_one",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 81
+    },
+    {
+      "kind": "function",
+      "name": "public._coordination_lock_keys",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 86
+    },
+    {
+      "kind": "function",
+      "name": "public._coordination_receipt_lock",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 94
+    },
+    {
+      "kind": "function",
+      "name": "public._coordination_acquire",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 100
+    },
+    {
+      "kind": "function",
+      "name": "public._coordination_assert_month",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 111
+    },
+    {
+      "kind": "function",
+      "name": "public._coordination_prepare",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 123
+    },
+    {
+      "kind": "function",
+      "name": "public._coordination_revalidate",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 207
+    },
+    {
+      "kind": "function",
+      "name": "public._coordination_acquire",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 214
+    },
+    {
+      "kind": "function",
+      "name": "public.lock_open_month",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 234
+    },
+    {
+      "kind": "function",
+      "name": "public._guard_task_responsibility_head",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 238
+    },
+    {
+      "kind": "function",
+      "name": "public._capture_new_task_responsibility",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 270
+    },
+    {
+      "kind": "function",
+      "name": "public._legacy_coverage_scope_allowed",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 320
+    },
+    {
+      "kind": "function",
+      "name": "public.can_read_period_report",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 328
+    },
+    {
+      "kind": "function",
+      "name": "public.can_cover_instance",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 336
+    },
+    {
+      "kind": "function",
+      "name": "public._can_access_instance_at",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 361
+    },
+    {
+      "kind": "function",
+      "name": "public.can_access_instance",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 385
+    },
+    {
+      "kind": "function",
+      "name": "public._effective_session_end",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 390
+    },
+    {
+      "kind": "function",
+      "name": "public._session_cutoff",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 402
+    },
+    {
+      "kind": "function",
+      "name": "public.start_task_timer",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 413
+    },
+    {
+      "kind": "function",
+      "name": "public.pause_task_timer",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 557
+    },
+    {
+      "kind": "function",
+      "name": "public._coordination_apply_task_control",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 615
+    },
+    {
+      "kind": "function",
+      "name": "public.transition_task_reviewed",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 774
+    },
+    {
+      "kind": "function",
+      "name": "public.set_checklist_item_reviewed",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 789
+    },
+    {
+      "kind": "function",
+      "name": "public.set_task_wait",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 804
+    },
+    {
+      "kind": "function",
+      "name": "public._coordination_record_activity",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 820
+    },
+    {
+      "kind": "function",
+      "name": "public.record_activity_once",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 876
+    },
+    {
+      "kind": "function",
+      "name": "public.record_activity",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 883
+    },
+    {
+      "kind": "function",
+      "name": "public.save_private_block_note",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 891
+    },
+    {
+      "kind": "function",
+      "name": "public._coordination_can_assign",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 962
+    },
+    {
+      "kind": "function",
+      "name": "public.assign_task_responsibility",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 992
+    },
+    {
+      "kind": "function",
+      "name": "public.approve_task_coverage_plan",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 1051
+    },
+    {
+      "kind": "function",
+      "name": "public._guard_coverage_binding",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 1172
+    },
+    {
+      "kind": "function",
+      "name": "public.cancel_task_coverage_binding",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 1191
+    },
+    {
+      "kind": "function",
+      "name": "public._coordinated_task_payload",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 1225
+    },
+    {
+      "kind": "function",
+      "name": "public.read_coordinated_task",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 1268
+    },
+    {
+      "kind": "function",
+      "name": "public.read_coordinated_task_for_manager",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 1274
+    },
+    {
+      "kind": "function",
+      "name": "public.materialize_month",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 1289
+    },
+    {
+      "kind": "policy",
+      "name": "coordinated_session_read",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 1359
+    },
+    {
+      "kind": "policy",
+      "name": "coordinated_activity_read",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 1369
+    },
+    {
+      "kind": "function",
+      "name": "public._get_mutation_receipt",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 1379
+    },
+    {
+      "kind": "function",
+      "name": "public.approve_employee_absence",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 1389
+    },
+    {
+      "kind": "function",
+      "name": "public.cancel_employee_absence",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 1423
+    },
+    {
+      "kind": "function",
+      "name": "public.create_catalog_assignment",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 1464
+    },
+    {
+      "kind": "function",
+      "name": "public.update_template_weight",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 1489
+    },
+    {
+      "kind": "function",
+      "name": "public.create_task_template",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 1509
+    },
+    {
+      "kind": "function",
+      "name": "public._coordination_materialize_core",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 1534
+    },
+    {
+      "kind": "function",
+      "name": "public.approve_onboarding",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 1582
+    },
+    {
+      "kind": "function",
+      "name": "public.close_employee_month",
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "line": 1650
+    },
+    {
+      "kind": "function",
+      "name": "public.set_task_wait_reviewed",
+      "path": "supabase/migrations/202610140012_sql_receipt_and_onboarding_guards.sql",
+      "line": 7
+    },
+    {
+      "kind": "function",
+      "name": "public._coordinated_task_payload",
+      "path": "supabase/migrations/202610140012_sql_receipt_and_onboarding_guards.sql",
+      "line": 41
+    },
+    {
+      "kind": "function",
+      "name": "public.approve_onboarding",
+      "path": "supabase/migrations/202610140012_sql_receipt_and_onboarding_guards.sql",
+      "line": 88
+    },
+    {
+      "kind": "function",
+      "name": "public.request_onboarding_changes",
+      "path": "supabase/migrations/202610140012_sql_receipt_and_onboarding_guards.sql",
+      "line": 257
+    },
+    {
+      "kind": "function",
+      "name": "public._coordination_record_activity",
+      "path": "supabase/migrations/202610140012_sql_receipt_and_onboarding_guards.sql",
+      "line": 308
+    }
+  ],
+  "sources": [
+    {
+      "path": "src/App.tsx",
+      "sha256": "ca960f3e5a5c5690488c1e4a9d0e3e4c14afc4e410c4408864d1f64492e6b204"
+    },
+    {
+      "path": "src/components/Annotations.tsx",
+      "sha256": "fe942f51a6d2fdb5b414121fb2d55d0b454ac413aa07463f8f98bb12a863824d"
+    },
+    {
+      "path": "src/components/CatalogueCreator.tsx",
+      "sha256": "007f496c10bd6f6da778bc36b258799618f9dab0e9381c40285ed07cf9ceb503"
+    },
+    {
+      "path": "src/components/CatalogueVersionCard.tsx",
+      "sha256": "b9a26cc1aedd99637ff1a357b4ab1bcae69188f3187bef0825f49ddd58f9846a"
+    },
+    {
+      "path": "src/components/CommercialProgressPanel.tsx",
+      "sha256": "95c03f2a4e82ba961f92fc1097f6d23b5c44773c38dd1980428cb01244405364"
+    },
+    {
+      "path": "src/components/CompanyClosureManager.tsx",
+      "sha256": "67064ac61dda14120756cdf668acad49f47976d28b9724f8e702abc8381272e5"
+    },
+    {
+      "path": "src/components/DeadlineAgenda.tsx",
+      "sha256": "5e4ccec31d8b0c1ed8871fd424b566af58347296b0f4c0900d09a01eb09edee3"
+    },
+    {
+      "path": "src/components/EmployeePicker.tsx",
+      "sha256": "d1d7a7c5d38cb8b86bed1c4eab633eb2738fbffabf506be60983ab2cb2823ac6"
+    },
+    {
+      "path": "src/components/FiscalObligations.tsx",
+      "sha256": "a2f21bc1611c609d0aa87d4cdfbdebfe8dda181b56e05eb7d5a2c94e7f478195"
+    },
+    {
+      "path": "src/components/HabitualTaskProposals.tsx",
+      "sha256": "506638e97c071482ad89eb71bc04999b08fb47bded89e1c387b8df4c699c46b9"
+    },
+    {
+      "path": "src/components/InternalRequests.tsx",
+      "sha256": "47d9442c822680609bb73a730ba6e473617a01a72bce4789a669a04e9208c39b"
+    },
+    {
+      "path": "src/components/JointTaskSetup.tsx",
+      "sha256": "7a0246b9c3a7bb07374570c2e07a4cd2635eb2b0f3308f7f50446a0d2c7d6a99"
+    },
+    {
+      "path": "src/components/LaboratoryBackup.tsx",
+      "sha256": "4a996bda1dd8e3cc5d9a06bbdf1c15d5d8d9171a39676beb4b649b8d39bdcfe9"
+    },
+    {
+      "path": "src/components/LaboratoryInvitations.tsx",
+      "sha256": "954afcf4af1bb6f441ab7510f6aca3211f96a193e1717c29624a73ff981aaf42"
+    },
+    {
+      "path": "src/components/LaboratoryWorkspace.tsx",
+      "sha256": "038c6038fe845767ab855705fd88168c8100fdc7fa1e7d18c58acbb2e0cddc25"
+    },
+    {
+      "path": "src/components/NotificationCenter.tsx",
+      "sha256": "1b7d94c729c0cfeaa7d8f1c93d838ea7f99a80d77a8227afd63a781c96a15446"
+    },
+    {
+      "path": "src/components/Onboarding.tsx",
+      "sha256": "b748e0be3a64d3e287fe85553b0b64dba397d93c452a85f28e1e5560888a675e"
+    },
+    {
+      "path": "src/components/OperationalQualityReview.tsx",
+      "sha256": "b1b75b050870571af213668446ccde6201cd6286ed044ce4b6a3b11f5261a213"
+    },
+    {
+      "path": "src/components/OperationalRatePanel.tsx",
+      "sha256": "aa47949ca085db992fa2a965159ad14c4cf8145c5e322b6c8e072d4d8897bd4f"
+    },
+    {
+      "path": "src/components/OperationalTaskCard.tsx",
+      "sha256": "7f3a1340cec5002d3b630f10a2d1acfc7494fec39ad821d2e99d235bc67aabce"
+    },
+    {
+      "path": "src/components/ParameterizationInbox.tsx",
+      "sha256": "6dc7c831fa39a431561ed147110ae0ec555320a94d35e796c9eff16413da9374"
+    },
+    {
+      "path": "src/components/PeriodReports.tsx",
+      "sha256": "4ff756f8d8faf8a4345a3e3d60158b16a1c07c048a6caf17111b248ecfaf059a"
+    },
+    {
+      "path": "src/components/Planning.tsx",
+      "sha256": "e8f83265dc430615cca685518475943544d418fbad9eb72a93aae6be12df8d72"
+    },
+    {
+      "path": "src/components/ProcessQuality.tsx",
+      "sha256": "506f9ff7b44149419ccac2b70c2f12c9b8e5037f0515b43f7ed7304866b3c429"
+    },
+    {
+      "path": "src/components/QuickTaskSearch.tsx",
+      "sha256": "80e30537d3a35bcdb1643e8d6b9a818001ee32c1dfd443eb3151787cda30a332"
+    },
+    {
+      "path": "src/components/RemoteWorkspace.tsx",
+      "sha256": "b22607a01f9d6939fd24ae383792d30e8b24add1af561d7a1efc820d599159f3"
+    },
+    {
+      "path": "src/components/ScheduleEditor.tsx",
+      "sha256": "16ccf6a1f59d354cfe8a7aefd52f0124c3734ee2549ee169af29e46b6b377518"
+    },
+    {
+      "path": "src/components/StepListEditor.tsx",
+      "sha256": "a76bb72672c6c5f4ca69c09f6e16eee6090187e4f7ed865b19f7658fab38796b"
+    },
+    {
+      "path": "src/components/SuggestedRoutePanel.tsx",
+      "sha256": "e7d457c808137b273261f6d51b36271643777904cfe5f5440b36081b6660a18b"
+    },
+    {
+      "path": "src/components/TaskBoard.tsx",
+      "sha256": "677c1401d132141de6045e226651d26529deb1407be722919853b813934d071b"
+    },
+    {
+      "path": "src/components/TaskComments.tsx",
+      "sha256": "1cf109d989b7d91c469c7091a8a2f09fa6cf87f2e1a33c3aea4e58fb57b29910"
+    },
+    {
+      "path": "src/components/TaskEvidencePanel.tsx",
+      "sha256": "1582c5de8908a8b0c734ec0c08ed6cd54c96cd4ce9c64584a435d4933f3f8283"
+    },
+    {
+      "path": "src/components/TaskReadinessPanel.tsx",
+      "sha256": "f4ff45a4640181e1c246cba24ab07582635505fabf346d4dae982637d87e6dff"
+    },
+    {
+      "path": "src/components/TaskSchedulePanel.tsx",
+      "sha256": "4dfcbc03fd32b75c538fbdd926314dccdd06155e90bf9d59b89784947f3d087c"
+    },
+    {
+      "path": "src/components/ThemeControl.tsx",
+      "sha256": "48591f97bd12b82fc9ff90fd7746e07e32b00f4ed89e81a879f9294e2826f1fd"
+    },
+    {
+      "path": "src/components/TimelinessBadge.tsx",
+      "sha256": "50f4d1f92e9c648a596203cd994b199055849930c236839a035d49208ef629d2"
+    },
+    {
+      "path": "src/components/TimelinessPanel.tsx",
+      "sha256": "49e095c91121bb20e3401f58097603383e0d71f7c0c69e1840008b5cac044832"
+    },
+    {
+      "path": "src/components/WorkCycle.tsx",
+      "sha256": "dd744271deaae3ceb342ff262abe0dec81cdf3a59d0c52d5050b5277030a1f3d"
+    },
+    {
+      "path": "src/components/Workforce.tsx",
+      "sha256": "f24b69133f2d97a9b02a8e6b16b38570c0c6c0e839f16412ad8395b0817643c0"
+    },
+    {
+      "path": "src/components/WorkspaceSetup.tsx",
+      "sha256": "5e99d50486734e940e45dad59fae29baadf4883a21c3c417026253ffaaf13c0f"
+    },
+    {
+      "path": "src/components/ui.tsx",
+      "sha256": "b118ff57f2903c1df4f94a8ba32c4dc2295ae44de060da8decddfcc6e252b7b7"
+    },
+    {
+      "path": "src/data/evidenceErrors.ts",
+      "sha256": "39e49fc5291f0b41f6fcd3249a44bae254a2d5076a9c43991dd4840e7ee03aa1"
+    },
+    {
+      "path": "src/data/laboratoryEvidence.ts",
+      "sha256": "431365e4d4659ad51ed9a714d99c9ba6a6fa544f9aca4804b7dc8e37eb4ca201"
+    },
+    {
+      "path": "src/data/remote/coordination-contract.ts",
+      "sha256": "d8b7c62481fa5a1bfbd04a4e760b4b2d4715ca90679d185986d5f2767f87ce9f"
+    },
+    {
+      "path": "src/data/remote/private-block-notes.ts",
+      "sha256": "a42207bc5d8db98a54781f52ba84d97ea40c47008138f0b261ff8e5af8d390d3"
+    },
+    {
+      "path": "src/data/remote/task-contract.ts",
+      "sha256": "b7ba9f1fd8beef41dab18904ff53493a5428a3b09e3ed88eacdc6d778a328453"
+    },
+    {
+      "path": "src/data/remote/task-gateway.ts",
+      "sha256": "0eb8d51c5bd16abf2a5abb9ec3c3aae00547f2104b5cc1086f32a13d14b6a195"
+    },
+    {
+      "path": "src/data/remote/task-reader.ts",
+      "sha256": "aad1be6a06d15fe337f5b006493f33bf4e042189ab5dcbf29c06016e79db3ff1"
+    },
+    {
+      "path": "src/data/repository.ts",
+      "sha256": "ae6a2956e59c5b73077e8e212a402abbe754b51ad3383c9ca91208d538223b70"
+    },
+    {
+      "path": "src/data/site-client.ts",
+      "sha256": "cead8b2b6f6466c4213552c1b6a18634f17cecb9b70a31362db5d1d715c0fdfd"
+    },
+    {
+      "path": "src/domain/calendar-validation.ts",
+      "sha256": "98126454391e57b983df6e0d149089c3691b78a2f0ae216ef0ddf03bc7f3204e"
+    },
+    {
+      "path": "src/domain/catalogue.ts",
+      "sha256": "76c0fc9a8a838c85fc1be7448ee61d23c81a325b04e30ec5778893db31f2d3e1"
+    },
+    {
+      "path": "src/domain/closedHistory.ts",
+      "sha256": "43de8e8abd10894f3ba114896a7807b7efd21e61ecbeb4f8774ed02814ed94f4"
+    },
+    {
+      "path": "src/domain/coordination.ts",
+      "sha256": "d8b8e539ad1432cbbaf650fde4f4de997fea45c37e00ff908a3e8a9e2199fa13"
+    },
+    {
+      "path": "src/domain/deadlineNotifications.ts",
+      "sha256": "06cafc6d4e2806d6e5dfff026483e7a11dcddc9c0593bf7ff5969703cc94730f"
+    },
+    {
+      "path": "src/domain/fiscalObligations.ts",
+      "sha256": "6394a040ee74e8a6ad0332aef44c8e23495a6ec80c7cd551d7f14fb6129658ac"
+    },
+    {
+      "path": "src/domain/habitualTaskProposals.ts",
+      "sha256": "d19d83c74dc9081806737311fb868b6298aba5cb0f1c2f0c04fe7c2f200d2154"
+    },
+    {
+      "path": "src/domain/internalRequests.ts",
+      "sha256": "892306627aa7b8113cef2ef62747570efdbd5438a0d78c7b29077039993f7bb5"
+    },
+    {
+      "path": "src/domain/laboratory-work.ts",
+      "sha256": "747c21ae6319b430ca9a8adfb3d0fbbf10b8c2615ed37a10e3352cb7ea3a36e3"
+    },
+    {
+      "path": "src/domain/model.ts",
+      "sha256": "cbca08a17b4f4fb942dd1b9e93e9277be6524c86c229c29903a5a39f4617dfb8"
+    },
+    {
+      "path": "src/domain/notifications.ts",
+      "sha256": "9f933c590cfb73eafb08e3a93a8186deb323542ca037cfcfe6de52134edcb27d"
+    },
+    {
+      "path": "src/domain/parameterization.ts",
+      "sha256": "5acd17e7cc0b71fb3d675a3887c7d44f1a9dfacf33e08f9b427201205227d03b"
+    },
+    {
+      "path": "src/domain/planning.ts",
+      "sha256": "c5f421f7ff06c93c95721039f70239bce2c96cf1a0b68b5b48a246f499e5fd6f"
+    },
+    {
+      "path": "src/domain/processImprovement.ts",
+      "sha256": "a9ff429384a17512b9253b5e611089aa1d6fd52eedf9b7b0601e6c341254b988"
+    },
+    {
+      "path": "src/domain/reports.ts",
+      "sha256": "5447d2f90573feaf532c663403022ca5fddbf8ca9279acfd9b8db9061926d24d"
+    },
+    {
+      "path": "src/domain/schedule.ts",
+      "sha256": "b6d0fcdb84cab6d1705ca86a3f47fade5329bc725f9b2679ef2505eefd3e8c42"
+    },
+    {
+      "path": "src/domain/timeliness.ts",
+      "sha256": "f748a6c7959baafda4e06d5887d62a9bbcbe16c64e41af1fb456f96fc1252f55"
+    },
+    {
+      "path": "src/domain/workCycle.ts",
+      "sha256": "20d54b64db9f84ad5aa1e12f291055ea4e24a9f54ba63fbf2f1dda3332bc6d7e"
+    },
+    {
+      "path": "src/domain/workforce.ts",
+      "sha256": "a3b5abc64df4ed8fb37338f7130dce40031ea384b4df1459e0c7605cdf073372"
+    },
+    {
+      "path": "src/main.tsx",
+      "sha256": "82b4b57341a50fbe58a2991740311415a90e3aa4d131a928b771599e83e3498b"
+    },
+    {
+      "path": "src/server/report-delivery.ts",
+      "sha256": "8ffab11044e685930e5ee4e1f26d77a1696d484fd2b83ebbe5b2696f045fc849"
+    },
+    {
+      "path": "src/server/site-policy.ts",
+      "sha256": "9f9f31e1483c2ccea4068122535741a8437e125b7f5c920bc1e4de31c8695d81"
+    },
+    {
+      "path": "src/server/site-schema.ts",
+      "sha256": "d5e0716ec317ab61d4718bb038c36d046162322452df0f9e6a5ef0882b1ec783"
+    },
+    {
+      "path": "src/server/site-store.ts",
+      "sha256": "9350c8b58805bb5a9e6c8b25a2b72a53a4bff6513c8b792f9828898e53526c37"
+    },
+    {
+      "path": "src/server/site-worker.ts",
+      "sha256": "8abe8049580f3c0c2abb91203e3bcbb7b7ad5cbcf585788546f714e9dddd83ee"
+    },
+    {
+      "path": "src/server/supabase-report-store.ts",
+      "sha256": "0e9f2ba2b351a6f08fab61f1e763c03f4e418018f6f5dbf154b9e7cf21f2b8ac"
+    },
+    {
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "sha256": "2b1115e1e043883d3284613d2367b7228a5c443925829ff09ee5d32322189dd9"
+    },
+    {
+      "path": "supabase/migrations/202609300002_workflows.sql",
+      "sha256": "7472d4ae996c827412e5f7daaefda498206349bbf49d02a8c90e3542f8eeccbe"
+    },
+    {
+      "path": "supabase/migrations/202610010001_occurrence_contract.sql",
+      "sha256": "3a9c3b92a241fc4a6569fea2549fa179ca96e7faac50832c5841efc90db5ca2f"
+    },
+    {
+      "path": "supabase/migrations/202610010002_onboarding_approval.sql",
+      "sha256": "9560644d1304dd5123d6b295bc9e4e5ec07d91bb07024174aed979b3a425d897"
+    },
+    {
+      "path": "supabase/migrations/202610010003_report_delivery.sql",
+      "sha256": "39c8b92f41d00fb96174978be8903120424cbabe4d0378761746148e57b38731"
+    },
+    {
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "sha256": "fa49aa77bb8a7fc9b153c8af9b27225ed6500d0489d7c396d9c7128b393e7630"
+    },
+    {
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "sha256": "400c671934e0fa050907aea78c3da28248255068f0e8ad16f0007081421d8a33"
+    },
+    {
+      "path": "supabase/migrations/202610010006_time_coverage_acceptance.sql",
+      "sha256": "a47942d0281adb517aa7bc5e1123769dd77f415b58cf97748b97fce376314fbf"
+    },
+    {
+      "path": "supabase/migrations/202610010007_time_coverage_completion.sql",
+      "sha256": "34886ff8e7ccb947d8e68754f68ac9155f4e012dc4200b395c95967d2710160b"
+    },
+    {
+      "path": "supabase/migrations/202610010008_time_coverage_finalization.sql",
+      "sha256": "3cde522cbf9df98a05bee0f1c6fd510377324a9551ff2ad396756a397bc70a46"
+    },
+    {
+      "path": "supabase/migrations/202610020009_private_block_notes.sql",
+      "sha256": "cf2b2babf4a0ff8b144a643aba5d71796d9062559cdd201c989ba754640d6269"
+    },
+    {
+      "path": "supabase/migrations/202610040010_coordination_foundation.sql",
+      "sha256": "84ba65311535e85f5b1ab3a991308193ce634c79f031978dc020b15b683ad7b1"
+    },
+    {
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "sha256": "9729a6800e93dedc43ab5f0840309b7c0d222343898cc8d5b43eeb4a387f4210"
+    },
+    {
+      "path": "supabase/migrations/202610140012_sql_receipt_and_onboarding_guards.sql",
+      "sha256": "cabfe95dbd04ae65ea82c787bc5e3ec8e638e4620456366b7eeb8a5d715dfbf4"
+    }
+  ],
+  "migrations": [
+    {
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "version": "202609300001"
+    },
+    {
+      "path": "supabase/migrations/202609300002_workflows.sql",
+      "version": "202609300002"
+    },
+    {
+      "path": "supabase/migrations/202610010001_occurrence_contract.sql",
+      "version": "202610010001"
+    },
+    {
+      "path": "supabase/migrations/202610010002_onboarding_approval.sql",
+      "version": "202610010002"
+    },
+    {
+      "path": "supabase/migrations/202610010003_report_delivery.sql",
+      "version": "202610010003"
+    },
+    {
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "version": "202610010004"
+    },
+    {
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "version": "202610010005"
+    },
+    {
+      "path": "supabase/migrations/202610010006_time_coverage_acceptance.sql",
+      "version": "202610010006"
+    },
+    {
+      "path": "supabase/migrations/202610010007_time_coverage_completion.sql",
+      "version": "202610010007"
+    },
+    {
+      "path": "supabase/migrations/202610010008_time_coverage_finalization.sql",
+      "version": "202610010008"
+    },
+    {
+      "path": "supabase/migrations/202610020009_private_block_notes.sql",
+      "version": "202610020009"
+    },
+    {
+      "path": "supabase/migrations/202610040010_coordination_foundation.sql",
+      "version": "202610040010"
+    },
+    {
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "version": "202610060011"
+    },
+    {
+      "path": "supabase/migrations/202610140012_sql_receipt_and_onboarding_guards.sql",
+      "version": "202610140012"
+    }
+  ]
+}

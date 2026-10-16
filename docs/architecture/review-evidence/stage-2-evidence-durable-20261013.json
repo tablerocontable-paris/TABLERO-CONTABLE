@@ -1,0 +1,92 @@
+{
+  "date": "2026-10-13",
+  "stage": "2A",
+  "title": "Durabilidad de evidencia, bloqueo y resultados de guardado",
+  "status": "accepted_stage_2A",
+  "changes": [
+    {
+      "area": "Estado vigente del laboratorio",
+      "detail": "Se agregó labRevision como token de escritura versionado para detectar otra pestaña o restauración concurrente sin comparar estados normalizados grandes. Las escrituras directas renuevan el token; persist recibe y verifica la revisión previa esperada en los commits del tablero, y las restauraciones nuevas renuevan la suya. Los reintentos con resultado incierto se rechazan cuando el token durable avanzó."
+    },
+    {
+      "area": "Adjuntos de tareas y movimientos",
+      "detail": "La escritura previa se confirma por comparación del estado candidato exacto; si el navegador no permite la lectura posterior, el resultado permanece unknown y se preservan los bytes para no eliminar evidencia potencialmente vinculada. Los errores de preparación se distinguen de permisos o cambios de identidad."
+    },
+    {
+      "area": "Fallo al preparar la revisión",
+      "detail": "La generación de labRevision quedó dentro del bloque de preparación controlada. La prueba integrada desactiva otros perfiles para omitir la ruta de notificaciones e inyecta el error en el tercer UUID, que corresponde a labRevision; confirma rechazo seguro más compensación del blob temporal antes de guardar estado."
+    },
+    {
+      "area": "Restauración y recuperación",
+      "detail": "La restauración y el alta de evidencia comparten un Web Lock. La restauración lee el estado previo antes de escribir blobs, conserva bytes recuperables huérfanos, reconcilia el índice de cuota y revierte el estado ante fallo seguro."
+    }
+  ],
+  "validation": {
+    "focusedTests": {
+      "command": "node node_modules/vitest/vitest.mjs run tests/laboratory-evidence-durable-state.test.ts tests/task-evidence-concurrency.test.tsx tests/operational-evidence-app.test.tsx --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "exitCode": 0,
+      "passed": 23,
+      "files": 3,
+      "rerunAfterReviewCorrection": {
+        "passed": 25,
+        "files": 3,
+        "exitCode": 0
+      }
+    },
+    "fullSuite": {
+      "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "exitCode": 0,
+      "passed": 579,
+      "files": 65
+    },
+    "typescript": { "command": "node node_modules/typescript/bin/tsc --noEmit", "exitCode": 0 },
+    "clientBuild": {
+      "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+      "exitCode": 0,
+      "mainChunkBytes": 530450,
+      "warnings": ["Main client chunk exceeds 500 kB.", "Zod PURE-comment notices remain.", "laboratoryEvidence is both dynamically and statically imported."]
+    },
+    "workerBuild": { "command": "node scripts/build-worker.mjs", "exitCode": 0 },
+    "standardBuildCommand": {
+      "command": "pnpm run build",
+      "exitCode": 1,
+      "reason": "pnpm blocked esbuild@0.18.20, esbuild@0.25.12 and esbuild@0.28.2 build scripts as ignored; equivalent tsc, Vite client and Worker steps were run directly and passed. No approval policy was changed."
+    },
+    "browserEdge": {
+      "command": "CHROMIUM_PATH=<local Microsoft Edge>; E2E_OUTPUT=outputs/stage-2-validation-20261013/edge-evidence-failure-recovery-final13; node tests/browser-laboratory-backup.cjs",
+      "exitCode": 0,
+      "coverage": [
+        "Web Lock rejection leaves form retryable without state or blobs.",
+        "Upload and v2 restore wait for another tab's lock; state changed in another tab during the wait rejects the upload.",
+        "Failed compensation retains recoverable bytes and reconciles quota index; retry commits once.",
+        "Native IndexedDB transaction abort in Edge preserves prior metadata/blob counts and leaves submission retryable; physical quota exhaustion was not induced.",
+        "Unreadable restore preflight stages no blobs; scope conflict and quota failure preserve prior state.",
+        "Uncertain write-then-throw preserves exact metadata and blobs; a retry is rejected as stale.",
+        "Restored evidence remains available through company and monthly closure; mobile dialog fits."
+      ],
+      "operationalStorageUnchanged": true,
+      "operationalApiCalls": 0,
+      "javascriptErrors": 0,
+      "artifacts": "outputs/stage-2-validation-20261013/edge-native-idb-abort-final2/",
+      "caveat": "The Edge runner changes state while upload is waiting for Web Lock, not during the subsequent store await; the final commit guard is covered by source inspection and focused component tests."
+    },
+    "browserScriptSyntax": { "command": "node --check tests/browser-laboratory-backup.cjs", "exitCode": 0 },
+    "diffCheck": { "command": "git diff --check", "exitCode": 0 }
+  },
+  "independentReview": {
+    "reviewer": "GPT-6.1 Sol",
+    "status": "accepted_no_blockers",
+    "scope": "Review labRevision/stale-tab semantics, upload/restore lock, uncertain write and readback, IndexedDB index recovery, and compatibility with prior lab contracts.",
+    "findings": [
+      "The initial UUID fault injection hit notification generation before labRevision. The fixture now disables other profiles so the third UUID specifically exercises labRevision; 23/23 focused tests pass after the correction.",
+      "The durable token does not detect arbitrary localStorage tampering that deliberately preserves the token; this remains outside the stated cross-tab revision contract."
+    ]
+  },
+  "limits": [
+    "This is stage 2A implementation evidence, not acceptance of all stage 2 or the product.",
+    "A native IndexedDB transaction abort was induced in Edge; physical browser quota exhaustion was not induced through real disk pressure.",
+    "Other stage 2 adversarial cases, screen-reader acceptance and benchmark remain open.",
+    "No commit, PR, Site update, account connection, operational API call or external deployment occurred. The Site remains private."
+  ],
+  "globalProgress": "Approximately 45%; unchanged and not recalculated."
+}

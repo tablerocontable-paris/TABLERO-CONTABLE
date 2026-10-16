@@ -1,0 +1,107 @@
+{
+  "date": "2026-10-08",
+  "project": "Grupo Paris private laboratory",
+  "baseHead": "2c3fbfe29770d358cad545e24cb0a7aa0236f1d3",
+  "gitState": "Changes and evidence remain uncommitted. No Site update or deployment was made.",
+  "scope": "Implementation and validation of the approved 2026-10-07 plan corrections, limited to fictional local laboratory state.",
+  "automatedValidation": {
+    "unitAndIntegration": {
+      "command": "node node_modules/vitest/vitest.mjs run --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000 --exclude tmp/**",
+      "result": "passed",
+      "passedTests": 455,
+      "failedTests": 0,
+      "passedFiles": 51,
+      "failedFiles": 0
+    },
+    "focusedRegressionAfterFinalUIChange": {
+      "result": "passed",
+      "passedTests": 53,
+      "passedFiles": 4,
+      "scope": "Laboratory corrections, EmployeePicker, work contracts and workforce scheduling"
+    },
+    "typeScript": {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "result": "passed"
+    },
+    "clientBuild": {
+      "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+      "result": "passed",
+      "mainEntryKb": 560.57,
+      "mainEntryGzipKb": 169.04,
+      "chartChunkKb": 423.74,
+      "warning": "Vite reports chunks above its 500 kB advisory threshold; warning remains visible."
+    },
+    "workerBuild": {
+      "command": "node scripts/build-worker.mjs",
+      "result": "passed"
+    },
+    "edgeBrowser": [
+      {
+        "script": "tests/browser.cjs",
+        "result": "passed on final build",
+        "scope": "Onboarding, task navigation, company isolation, analytics, monthly closure, recurrence, timers, absences, reminders, themes and mobile",
+        "evidence": "outputs/plan-validation-20261008/browser-core-final"
+      },
+      {
+        "script": "tests/browser-corrections.cjs",
+        "result": "passed on final build with guided-tour and calendar source-navigation checks",
+        "scope": "Responsive navigation, duplicate actor identity, drag-and-drop, search, internal request flows, guided-tour dimmer and placement, calendar event details and fiscal-obligation origin navigation",
+        "evidence": "outputs/plan-validation-20261008/browser-calendar-final"
+      },
+      {
+        "script": "tests/browser-joint.cjs",
+        "result": "passed on final build",
+        "scope": "Joint work, separate clocks, atomic participant company closure, reports and CSV privacy",
+        "evidence": "outputs/plan-validation-20261008/browser-joint-final"
+      },
+      {
+        "script": "tests/browser-laboratory-backup.cjs",
+        "result": "passed on final build",
+        "scope": "Laboratory v2 backup and restore with operational state isolation",
+        "evidence": "outputs/plan-validation-20261008/browser-backup-final"
+      }
+    ],
+    "browserJavaScriptErrors": 0,
+    "operationalApiRequests": 0,
+    "diffWhitespaceCheck": "passed",
+    "guidedTourFocusedRegression": {
+      "result": "passed",
+      "passedTests": 35,
+      "scope": "Exterior dimmer, target-relative coach coordinates, modal naming, focus entry and Tab/Shift+Tab wrapping, Escape closure, highlight cleanup"
+    },
+    "performanceBenchmark": {
+      "result": "passed",
+      "command": "node scripts/benchmark-laboratory.cjs",
+      "browser": "Microsoft Edge 154.0.4258.62",
+      "platform": "Windows 10.0.26200",
+      "viewport": "1440x900",
+      "profiles": 24,
+      "tasks": 2000,
+      "measuredRouteChanges": 30,
+      "warmupCycles": 2,
+      "targetP95RouteMs": 1000,
+      "p95RouteMs": 670.11,
+      "javascriptErrors": 0,
+      "operationalApiCalls": 0,
+      "evidence": "outputs/plan-validation-20261008/performance-calendar-final/navigation-benchmark.json",
+      "limitation": "Local warm route navigation; not production, concurrent use, or cold start."
+    }
+  },
+  "implementedCorrections": [
+    "Company-scoped task consultation, dependency readiness guards, company-level closure protection, and coverage executor closure checks.",
+    "Atomic close of connected joint-work units, commercial day-30 confirmation on normal and drag completion, and independent manager weight updates.",
+    "Operational reports no longer award quota points to operational work; backup validation covers new dependency fields and cycles.",
+    "Removed the duplicate simulated actor card while retaining the actor identity in the sidebar footer.",
+    "Guided tour dims the exterior, highlights one target, positions its coach near the target, traps focus, supports Escape and clears the highlight when paused.",
+    "Calendar events expose type, company, description and authorized recipients; obligation dates show their fiscal period/source and navigate to the original obligation card."
+  ],
+  "stillOpen": [
+    "Closed-period history and comparable analytics must be generated from immutable company closure snapshots; current work does not finish this requirement.",
+    "Evidence writes need a complete async state reconciliation/rollback review and explicit linkage to final completion snapshots.",
+    "Full Mi Día filters, selector density and consistent fold/help behavior need additional review and implementation.",
+    "Accessibility audit remains pending; guided tour has focused keyboard tests but not a whole-app assistive-technology audit.",
+    "Sol review remains pending.",
+    "Real authentication, remote collaboration, Supabase, GitHub and hosting automation remain outside the private laboratory stage."
+  ],
+  "globalProgressEstimate": "~45%; this correction block does not imply final acceptance."
+}

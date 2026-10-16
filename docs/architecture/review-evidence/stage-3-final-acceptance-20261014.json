@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-14",
+  "stage": 3,
+  "status": "accepted_stage_3",
+  "scope": ["S04", "S12", "S19", "S22", "S26", "S35", "S61"],
+  "independent_review": {
+    "reviewer": "GPT-6.1 Sol",
+    "result": "accepted",
+    "summary": "No remaining blockers in the stage-3 laboratory cut. Confirmed scoped historical operational load, versioned preservation of coverage, both mixed legacy/new closure orders, no duplicate covered session time, readiness-bound confirmation, and atomic group rollback/retry.",
+    "limits": "Stage-3 functional acceptance only. It is not global product, accessibility, infrastructure, deployment, or Site acceptance."
+  },
+  "validation": {
+    "focused_tests": "43/43 passed across tests/laboratory-work.test.ts and tests/company-closure-manager.test.tsx.",
+    "full_suite": "595/595 tests in 65 files, exit 0, isolated from browser/performance runs: node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+    "typescript": "pass: node node_modules/typescript/bin/tsc --noEmit",
+    "client_build": "pass: node node_modules/vite/bin/vite.js build --outDir dist/client; existing main chunk warning (>500 kB) and dependency/dynamic-import warnings remain",
+    "worker_build": "pass: node scripts/build-worker.mjs",
+    "diff_check": "pass: git diff --check; Git emitted line-ending conversion notices only",
+    "edge_main": "pass: tests/browser.cjs; journey covered onboarding, isolation, analytics, closures, timers, absences, themes and mobile; zero JavaScript errors and zero operational API calls",
+    "edge_corrections": "pass: tests/browser-corrections.cjs; 21 checks including drag feedback, calendar, guided tour, employee picker, mobile and request conversion; zero JavaScript errors and zero operational API calls; outputs under outputs/stage-3-validation-20261014/edge-corrections/",
+    "edge_joint": "pass: tests/browser-joint.cjs; shared completion, independent clocks, atomic participant closure, v3 reports and CSV privacy; zero JavaScript errors and zero operational API calls; outputs under outputs/stage-3-validation-20261014/edge-joint/",
+    "benchmark": "pass: 24 profiles, 2,000 tasks, Edge 155.0.4283.45, Windows 10.0.26200, 1440x900, two warmups and ten measured Analytics→Tasks→Overview cycles; isolated p95 405.45 ms against <1,000 ms target, zero JavaScript errors/API calls; outputs/stage-3-validation-20261014/benchmark-isolated/navigation-benchmark.json"
+  },
+  "discarded_concurrent_attempts": [
+    "A full-suite run while browser processes were active ended 594/595 due one SQL migration test exceeding its 20-second timeout; the same complete suite passed 595/595 when rerun without browser processes.",
+    "A concurrent benchmark reported p95 1,922.46 ms while tests and three browser journeys ran; the isolated repeat passed at 405.45 ms. The concurrent sample is retained under outputs/stage-3-validation-20261014/benchmark/navigation-benchmark.json and is not the acceptance measurement."
+  ],
+  "limits": [
+    "Screen-reader acceptance remains a later gate.",
+    "Existing bundle-size and dependency warnings remain; builds succeeded.",
+    "No commit, PR, Site update, account connection, operational API call, or deployment was performed."
+  ],
+  "global_progress": "approximately 45%; unchanged",
+  "remaining_stages": [4, 5, 6, 7],
+  "next_stage": {
+    "stage": 4,
+    "scope": ["S05", "S15", "S20", "S24", "S25", "S33", "S40", "S41", "S42", "S48", "S52"],
+    "implementation_model": "GPT-6 Luna, medium effort, Standard",
+    "review_model": "GPT-6.1 Sol, high effort"
+  },
+  "outputs": [
+    "outputs/stage-3-validation-20261014/edge-main/",
+    "outputs/stage-3-validation-20261014/edge-corrections/browser-validation.json",
+    "outputs/stage-3-validation-20261014/edge-joint/",
+    "outputs/stage-3-validation-20261014/benchmark-isolated/navigation-benchmark.json"
+  ]
+}

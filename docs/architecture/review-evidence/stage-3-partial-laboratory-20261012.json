@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-12",
+  "status": "partial_validation",
+  "scope": ["S04", "S12", "S19", "S22", "S26", "S35", "S61"],
+  "changes": {
+    "S04": "Closed history reads frozen operational metrics and preserves null as no historical base; it no longer reconstructs load from live movements. Coverage time is included only from frozen contribution snapshots and legacy absence is identified.",
+    "S12": "Company closure snapshots include versioned replacement contributions based on authorized execution (ended sessions, movements, or completion). Coverage-only company units can be closed and consolidated without assigning points to the replacement. Reports, history, and backup retain these snapshots; CSV and UI present coverage separately.",
+    "S19": "New laboratory CSV rows mark operational targets as not applicable while legacy schema 1/2 exports retain historical target values.",
+    "S22": "Process-improvement adoption uses the shared company-level closed-unit guard.",
+    "S26": "Deactivating a profile cancels absences where that profile is owner or replacement; only that actor's open coverage clock is stopped, notifications are sent, and frozen units are preserved.",
+    "S35": "Bulk-close confirmation is fingerprinted to actor, month, exact scope, candidate units, group membership and readiness; result is scoped to the same preview context.",
+    "S61": "Candidate close groups are discarded atomically if monthly consolidation throws; independent successful groups remain retryable.",
+    "report_privacy": "Coverage detail export now uses the same hierarchy filter as the on-screen report, avoiding raw snapshot export of hidden coverage rows. Label changed from Tiempo propio to Tiempo registrado where monthly totals include coverage."
+  },
+  "validation": {
+    "focused_tests": "97/97 across 7 files before final report-export UI privacy assertion; period-reports-csv subsequently passed 7/7.",
+    "full_suite": "543/543 tests across 59 files, exit 0; command: node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+    "typescript": "pass: node node_modules/typescript/bin/tsc --noEmit",
+    "worker_build": "pass: node scripts/build-worker.mjs",
+    "client_build": "pass: Vite build; main chunk 517.78 kB, chart chunk 423.74 kB; bundle-size warning remains.",
+    "edge_main": "incomplete: tests/browser.cjs stopped after reload while waiting for the Notificaciones button; output screenshot exists at outputs/stage-3-validation-20261012/edge-coverage-report/overview.png; no terminal result JSON.",
+    "edge_corrections": "incomplete: tests/browser-corrections.cjs stopped after reload while waiting for the lab banner at test line 381; screenshots through fiscal-obligations.png exist; no terminal result JSON.",
+    "edge_existing_backup": "Prior run 4 remains evidence for stage 2 only; it predates this cut and does not validate these changes."
+  },
+  "limits": [
+    "This is local implementation evidence, not independent Sol review or final acceptance.",
+    "Stage 2 still has injected S65 commit/storage cases and Edge rerun/diagnosis outstanding; stage 3 is not accepted.",
+    "Coverage expiry/cancellation boundary variants and all integrated report/privacy routes remain part of broader stage acceptance.",
+    "No commit, Site update, account connection, operational API request, or external deployment occurred.",
+    "The test/build runner does not expose the selected model; do not attribute this cut to a model based on code evidence."
+  ],
+  "outputs": [
+    "outputs/stage-3-validation-20261012/edge-coverage-report/",
+    "outputs/stage-3-validation-20261012/edge-corrections/"
+  ]
+}

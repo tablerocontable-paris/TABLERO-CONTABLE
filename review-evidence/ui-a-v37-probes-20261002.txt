@@ -1,0 +1,21 @@
+Independent v37 UI acceptance probes — summary extracted from JSON report
+Command: npm test -- tests/review-v37.probe.test.tsx --reporter=json --outputFile=review-evidence/ui-a-v37-probes-20261002.json --maxWorkers=1 --minWorkers=1
+Source: 3f2995270081f6d5c54ac2590c32f81d035d6ad1
+
+FAILED: A-R01: induction keeps the first empty checklist row
+AssertionError: expected null not to be null
+FAILED: A-R02: operative assignment stores the editable target
+AssertionError: expected 120 to be 321 // Object.is equality
+FAILED: A-R03: new task defaults to the consulted employee
+AssertionError: expected 'm1' to be 'e0' // Object.is equality
+FAILED: A-R04: Mi dia shows the consulted employee's pending task
+AssertionError: expected null not to be null
+PASSED: A-P05: employee selector offers only the employee's own profile
+FAILED: A-R06: changing demo profile closes task details
+AssertionError: expected <dialog class open>…(11)</dialog> to be null
+FAILED: A-R07: a short multiline annotation can be expanded
+AssertionError: expected null not to be null
+FAILED: A-R08: conversion rejects an overlong checklist step without partial save
+AssertionError: expected [ { schedule: { …(8) }, …(15) } ] to have a length of +0 but got 1
+
+7 expected acceptance failures; 1 passed. These probes are not the original green suite.

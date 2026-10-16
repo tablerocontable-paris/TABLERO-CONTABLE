@@ -1,0 +1,1 @@
+{"source":"bdb87e235e3871d1f6f3d712834812fb78b3a48c","case":"expiry-wait BA before ART cutoff","contract_met":false,"error":"Sólo un responsable permanente puede detener al ejecutor","unchanged":true,"synthetic_boss_alternative":{"state_revision":2,"blocked_by":"Synthetic wait","open":0,"wait_audits":1,"expired_audits":0},"concurrency_tested":false,"sql_product_changed":false}

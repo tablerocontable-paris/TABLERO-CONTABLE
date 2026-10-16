@@ -1,0 +1,32 @@
+{
+  "reviewed_source": "bdb87e235e3871d1f6f3d712834812fb78b3a48c",
+  "date": "2026-10-01",
+  "decision": {
+    "sql_R008_01": "accepted_local",
+    "guide_complete": false,
+    "postgresql_concurrency": "NO EJECUTADO",
+    "production_approved": false
+  },
+  "suite": {
+    "command": "npm test",
+    "passed": 151,
+    "files": 13,
+    "exit_code": 0
+  },
+  "build": {
+    "command": "npm run build",
+    "exit_code": 0
+  },
+  "preserved_existing_source_tests_evidence": 73,
+  "critical_previous_evidence_verified": 32,
+  "diagnostic": {
+    "command": "node tests/review/time-coverage-008-final-probes.mjs",
+    "completed": true,
+    "original_employee_branch_rejected": true,
+    "rollback_preserved_rows": true,
+    "synthetic_boss_MFA_branch_passed": true,
+    "concurrency_tested": false
+  },
+  "finding": "R008-F01: expiry-wait BA calls employee aal1 instead of permanent supervisor with MFA",
+  "next_model": "GPT-6 Luna, medium, Standard"
+}

@@ -1,0 +1,90 @@
+{
+  "date": "2026-10-07",
+  "sourceCommit": "a69fbd4728925e819fe68a51473eab7b52ca014c",
+  "site": {
+    "projectId": "appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85",
+    "version": 92,
+    "audience": "custom owner-only",
+    "allowedAccounts": 1,
+    "groups": 0,
+    "externalVisitors": 0
+  },
+  "validation": {
+    "fullTestSuite": {
+      "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "exitCode": 0,
+      "filesPassed": 48,
+      "testsPassed": 424,
+      "testsFailed": 0,
+      "durationSeconds": 126.22
+    },
+    "typecheck": {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "exitCode": 0
+    },
+    "viteBuild": {
+      "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+      "exitCode": 0,
+      "mainEntryKb": 500.19,
+      "chartChunkKb": 423.74,
+      "warnings": [
+        "Main entry exceeds Vite's 500 kB informational warning threshold by 0.19 kB.",
+        "Upstream Zod pure-annotation comments are removed during bundling."
+      ]
+    },
+    "workerBuild": {
+      "command": "node scripts/build-worker.mjs",
+      "exitCode": 0
+    },
+    "edgeBrowserRuns": [
+      {
+        "script": "tests/browser.cjs",
+        "result": "PASS",
+        "javascriptErrors": 0,
+        "operationalApiRequests": 0
+      },
+      {
+        "script": "tests/browser-corrections.cjs",
+        "result": "PASS",
+        "javascriptErrors": 0,
+        "operationalApiRequests": 0
+      },
+      {
+        "script": "tests/browser-laboratory-backup.cjs",
+        "result": "PASS",
+        "javascriptErrors": 0,
+        "operationalApiRequests": 0
+      },
+      {
+        "script": "tests/browser-joint.cjs",
+        "result": "PASS",
+        "javascriptErrors": 0,
+        "operationalApiRequests": 0
+      }
+    ],
+    "keyboardRoute": {
+      "result": "PASS",
+      "details": "Tab to task navigation, Enter, Tab to viewed-profile selector, ArrowDown/Enter to employee, Tab through cards, Alt+ArrowRight moves the next unblocked result from Pendiente to En curso.",
+      "persistedStatus": "En curso",
+      "javascriptErrors": 0,
+      "operationalApiRequests": 0,
+      "evidence": "docs/architecture/review-evidence/keyboard-task-move-lab-20261007.json"
+    },
+    "volumeProbe": {
+      "baseProfiles": 13,
+      "syntheticProfilesAdded": 11,
+      "profileRows": 24,
+      "elapsedMilliseconds": 491,
+      "viewport": "1440x900",
+      "javascriptErrors": 0,
+      "operationalApiRequests": 0,
+      "acceptance": "Local baseline only; no production threshold or concurrency conclusion. Previous recorded baseline was 512 ms, measured locally with the same row count and viewport."
+    }
+  },
+  "limitations": [
+    "The keyboard route is one tested workflow, not a full accessibility audit or assistive-technology evaluation.",
+    "The performance baseline has no agreed acceptance threshold and does not represent production hosting.",
+    "Multiple tabs/devices and server-backed concurrent writes remain untested.",
+    "Authentication, MFA, RLS, invitations and Supabase were not exercised; real accounts remain deferred until final acceptance."
+  ]
+}

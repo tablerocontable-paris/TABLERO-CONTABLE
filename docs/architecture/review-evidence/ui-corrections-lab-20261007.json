@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-07",
+  "scope": "Private laboratory UI corrections only",
+  "baseCommit": "862f29b73e9cca6d0499992723701b2ad371c8bf",
+  "projectVersionBefore": 81,
+  "acceptance": false,
+  "unitTests": {
+    "passed": 423,
+    "failed": 0,
+    "filesPassed": 48
+  },
+  "build": {
+    "typescript": "passed",
+    "vite": "passed",
+    "worker": "passed",
+    "mainEntryRawKB": 496.86,
+    "mainEntryGzipKB": 151.29,
+    "chartsChunkRawKB": 405.70,
+    "chartsChunkGzipKB": 117.13
+  },
+  "edgeBrowser": {
+    "browser": "Microsoft Edge headless",
+    "flowsPassed": [
+      "general laboratory flows, system/light/dark theme, desktop and mobile",
+      "corrections, responsive sidebar at 1024x650, 1280x720, 1440x900 and 1600x740",
+      "drag to in-progress starts actor timer and persists state",
+      "drag feedback scale 1.04 and opacity 0.92",
+      "drop animation task-land",
+      "quick search, requests, fiscal obligations, work cycle, process quality",
+      "laboratory backup and restore without changing operational storage",
+      "joint task contribution reports and CSV privacy"
+    ],
+    "javascriptErrors": [],
+    "operationalApiCalls": [],
+    "mobileOverflow": false
+  },
+  "siteBefore": {
+    "version": 81,
+    "audience": "custom owner-only",
+    "authorizedAccounts": 1,
+    "groups": 0,
+    "externalVisitors": 0
+  },
+  "notVerified": [
+    "real users, authentication, MFA, or Supabase RLS",
+    "cross-device notification delivery",
+    "production recovery",
+    "final product acceptance or 100 percent completion"
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-14",
+  "sourceCommit": "66f14a69a9a70460d4b516c64e559badde1c8a8c",
+  "decision": "not accepted",
+  "productSourceChangedByReview": false,
+  "runtime": {
+    "engine": "PostgreSQL 17.11 portable, Windows x64",
+    "binary": "work/pg-runtime/pgsql/bin/postgres.exe",
+    "postgresBinarySha256": "f5dbfd059f8088b9511a02fc014e659369996fc7d3e88e47658b1cfa2fbb02d2",
+    "node": "v24.19.0",
+    "installedNewDependencies": false,
+    "serverScope": "fresh disposable clusters, 127.0.0.1:55439, stopped after each completed run",
+    "auth": "synthetic JWT claim functions; not hosted Supabase"
+  },
+  "nativeBaseline": {
+    "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-1-sol-review-20261014/native-baseline-final --port 55439",
+    "exitCode": 1,
+    "total": 11,
+    "passed": 5,
+    "failed": 6,
+    "report": "m2-1-native-baseline-20261014.json"
+  },
+  "nativeCandidate": {
+    "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-1-sol-review-20261014/native-candidate-final --port 55439 --candidate guard-fence-v2",
+    "exitCode": 0,
+    "total": 11,
+    "passed": 11,
+    "failed": 0,
+    "report": "m2-1-native-candidate-20261014.json",
+    "candidateSqlSha256": "168e0fc739820bf7f03e54326ff9f8998f667ab4a75ce444c449301a8ef8b12c",
+    "candidateAppliedToActiveMigration": false
+  },
+  "findings": [
+    { "id": "M21-R1", "priority": 1, "issue": "missing/null AAL accepted because SQL condition evaluates NULL" },
+    { "id": "M21-R2", "priority": 1, "issue": "repeatable-read snapshots allow dual identities after waiting on the advisory lock" },
+    { "id": "M21-R3", "priority": 1, "issue": "context counts only active principals and accepts a corrupted inactive duplicate" },
+    { "id": "M21-R4", "priority": 2, "issue": "SQL btrim and JavaScript trim disagree on whitespace-only display names" }
+  ],
+  "coverageCorrectionsRequired": [
+    "populate reports, closures, activity, receipts and private-note histories before the upgrade fingerprint",
+    "preserve the historical AccountingLab.actor default claims unless tokenRole is explicitly supplied",
+    "restore authenticated database role after snapshots when testing context writes",
+    "expand ACL tests to both client roles and all internal tables/helpers",
+    "extend native races to UUID updates and mixed transaction isolation"
+  ],
+  "priorEvidence": {
+    "suite": "688/688 and client/Worker build passed before this review; runtime files unchanged",
+    "notRepeated": "Full suite/build not repeated because only review script and documentation were added",
+    "postgresAbsenceClaim": "superseded; portable binaries were located under work/pg-runtime, outside PATH and outputs"
+  },
+  "nextContract": "docs/architecture/M2-1-CORRECTIONS-LUNA-20261014.md",
+  "nextModel": "GPT-6 Luna, medium, Standard; then Sol high review",
+  "pending": [
+    "incorporate and test the correction in active SQL013",
+    "independent acceptance of corrected M2.1",
+    "M2.2 executable contract and remaining migration blocks",
+    "new GitHub account, Supabase dev/production, hosting, automated delivery and hosted acceptance"
+  ]
+}

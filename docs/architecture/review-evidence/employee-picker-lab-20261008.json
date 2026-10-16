@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-08",
+  "scope": "Selector de empleados en el laboratorio privado",
+  "changes": [
+    "Se reemplazó el selector nativo por un desplegable buscable con iniciales, nombre, rol, sector y equipos diferenciados por tonos grises.",
+    "Se implementaron selección por mouse y teclado, búsqueda sin acentos y cierre accesible con Escape; Tab cierra el desplegable sin perder el foco y el contraste del texto quedó corregido."
+  ],
+  "checks": {
+    "component_tests": "tests/employee-picker.test.tsx and tests/laboratory-corrections.test.tsx passed 14/14 after the keyboard adjustment",
+    "full_suite": "464/464 tests in 53 files passed after the final keyboard adjustment",
+    "typescript": "passed after final source changes",
+    "vite_client_build": "passed after final source changes; main entry 570070 bytes, charts chunk 423739 bytes",
+    "worker_build": "passed after final source changes",
+    "edge_browser_corrections": "tests/browser-corrections.cjs passed after final source changes; verified Tab preserves focus, visible initials, distinct team tones, sidebar at four desktop sizes, and captured the open selector",
+    "edge_other_flows": "browser.cjs, browser-joint.cjs, browser-laboratory-backup.cjs, and browser-accessibility-audit.cjs passed on the final build",
+    "operational_api_calls": 0,
+    "javascript_errors": 0
+  },
+  "known_limits": [
+    "This custom selector is for the private lab's simulated identity. It does not provide authenticated employee identity or production permissions.",
+    "The main entry bundle exceeds the 500 kB Vite warning.",
+    "The broader product plan, accessibility audit, and independent Sol review remain incomplete.",
+    "No commit or Site update was made."
+  ],
+  "estimated_global_completion_percent": 45
+}

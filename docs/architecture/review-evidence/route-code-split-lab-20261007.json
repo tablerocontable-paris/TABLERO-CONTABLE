@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-07",
+  "scope": "private laboratory only",
+  "feature": "route-level code splitting and loading feedback",
+  "rules": [
+    "Route-specific administration, planning, reports, workforce, onboarding, notes, and laboratory modules load on demand.",
+    "The active view announces module loading through a status region; onboarding uses the same accessible fallback.",
+    "No business data, persistence rules, identity, or API boundary changes are included."
+  ],
+  "bundle": {
+    "previousEntryJavaScriptKb": "approximately 593",
+    "currentEntryJavaScriptKb": 489.53,
+    "currentEntryGzipKb": 148.9,
+    "entryReductionKb": "approximately 103.5",
+    "entryReductionPercent": "approximately 17.4",
+    "largestRemainingChunk": "charts: 405.70 kB (117.13 kB gzip); chart modules remain imported by the overview and can be considered in a separate performance pass"
+  },
+  "verification": {
+    "completeSuite": "45 files, 412 passed, 0 failed; vitest run --testTimeout=20000 --hookTimeout=30000 --maxWorkers=2",
+    "typecheck": "passed",
+    "viteBuild": "passed; main entry below Vite's 500 kB warning threshold",
+    "workerBuild": "passed",
+    "chromium": {
+      "passed": true,
+      "scripts": [
+        "tests/browser.cjs",
+        "tests/browser-corrections.cjs",
+        "tests/browser-joint.cjs"
+      ],
+      "devices": ["Edge desktop", "Edge mobile 390x844"],
+      "javascriptErrors": [],
+      "operationalApiCalls": [],
+      "assertions": [
+        "Induction and resume, company isolation, task board, timers, closures, themes, and mobile workflow.",
+        "Responsive navigation, laboratory invitations, drag and drop, quick search, request conversion, notices, and persistence.",
+        "Joint activation, separate clocks, sequential closures, private reports, and CSV export."
+      ]
+    },
+    "preCommit": "passed: scripts/validate-change.mjs; 96/96 tests in 14 files, TypeScript and cached diff check"
+  },
+  "siteDeployment": {
+    "project": "Grupo París · Tablero contable",
+    "version": 66,
+    "commit": "806ff00696434f573ee0542e4710d8b383ab1406",
+    "deployment": "appgdep_6ac5f09cccb48191910a364ef6e8f998",
+    "url": "https://grupo-paris-contabilidad.valentino-magni.chatgpt.site",
+    "audience": {
+      "mode": "custom owner-only",
+      "allowedAccounts": 1,
+      "allowedGroups": 0,
+      "externalVisitors": 0
+    }
+  },
+  "buildNotes": [
+    "The main JavaScript entry is now below the Vite 500 kB warning threshold.",
+    "Rollup reports two upstream Zod purity-comment annotations that it removes; the build succeeds."
+  ],
+  "limitations": [
+    "The largest chart dependency remains a separate 405.70 kB chunk used by the overview.",
+    "Loading is local to the browser; no API, D1, Supabase, email, or cross-device synchronization was added.",
+    "The Site stays in the private laboratory; user accounts and invitations are not enabled."
+  ]
+}

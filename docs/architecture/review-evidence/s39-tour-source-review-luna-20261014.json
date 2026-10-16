@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-14",
+  "reviewer": "GPT-6 Luna",
+  "scope": "Source-only review of S39 guided-tour implementation against the Sol contract.",
+  "sources": {
+    "app": {
+      "path": "src/App.tsx",
+      "sha256": "9c97db92d21831dae532be6c5357c6c5fde2839abb62aa009749ae27312f321c"
+    },
+    "styles": {
+      "path": "src/styles.css",
+      "sha256": "7db27332eac99559b3cc5293385ce16b4012ab8af94babdfb1af95f2b74865b2"
+    },
+    "tests": {
+      "path": "tests/annotations-tour-app.test.tsx",
+      "sha256": "ba8586f0927eaa3150ab61fb2342620f2d0f97f6c4f8dc399078989318e9b55d"
+    }
+  },
+  "contractChecks": {
+    "roleScopedSteps": "Steps for requests/quality, manager analytics/team, and boss-only closure/catalogue are gated by current role and laboratory mode.",
+    "internalTargets": "Module-specific targets and empty-state fallbacks are defined; the tour opens collapsed panels/cards temporarily, tracks manual interaction, and restores prior state on exit/transition.",
+    "overlayAndCoach": "A fixed exterior backdrop and a single spotlight are rendered; coach coordinates are calculated from target bounds and clamped to viewport dimensions; resize and scroll trigger recalculation.",
+    "keyboardAndFocus": "The dialog has aria-modal and a Tab focus loop; Escape pauses; closing restores focus to the opener or an available tour trigger.",
+    "reducedMotion": "Target scrolling checks prefers-reduced-motion; global CSS disables transitions/animations and smooth scrolling for reduced-motion users."
+  },
+  "regressionEvidence": "Existing DOM regressions check backdrop/dialog/focus/Escape, one spotlight, module targets, collapsed-panel restoration, and a complete role-scoped tour; the already-recorded focused run is 57/57 in s39-local-recheck-20261014.json.",
+  "result": "No source-level mismatch with the inspected S39 behavior contract found.",
+  "limits": [
+    "No current real-browser visual run was performed because npm/npx/playwright-cli are absent from this terminal.",
+    "This does not replace independent GPT-6.1 Sol review or human screen-reader acceptance.",
+    "DOM tests do not establish physical geometry, clipping, stacking, or screen-reader virtual-cursor behavior."
+  ],
+  "externalActions": "No account, API, Site update, commit, or deployment was used."
+}

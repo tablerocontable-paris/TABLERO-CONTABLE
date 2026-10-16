@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-14",
+  "reviewer": "GPT-6 Luna",
+  "scope": "Source-only review of closed-history calculations for frozen operational load, participant quotas, and own/covered time.",
+  "sources": {
+    "history": {
+      "path": "src/domain/closedHistory.ts",
+      "sha256": "43de8e8abd10894f3ba114896a7807b7efd21e61ecbeb4f8774ed02814ed94f4"
+    },
+    "model": {
+      "path": "src/domain/model.ts",
+      "sha256": "cbca08a17b4f4fb942dd1b9e93e9277be6524c86c229c29903a5a39f4617dfb8"
+    },
+    "tests": {
+      "path": "tests/laboratory-work.test.ts",
+      "sha256": "f453b10ecc34a6e26ed954dbbc518c4b7058dd24dd869408a2bb2c374e333ecd"
+    }
+  },
+  "contractChecks": {
+    "frozenHistory": "Operational load comes only from immutable company/month or legacy monthly report snapshots. A frozen null remains null; missing comparison under sector/team/query filters remains unavailable rather than being reconstructed from live movements or current rates.",
+    "companyScope": "Company summaries are selected by visible operational companies; a legacy aggregate is used only if the whole task-company scope is visible.",
+    "participantQuota": "Owner filtering narrows closures and metricsForProfile applies the participant responsibility share to result-only tasks.",
+    "ownAndCoveredTime": "Task sessions are filtered to the selected participant; separately frozen coverage sessions are included for that executor and deduplicated by task/session/actor.",
+    "existingRegressions": "Source tests cover owner/company history, unknown versus zero load, company authorization, frozen coverage time with no owned tasks, removal of live tasks after close, and no duplicate coverage time in global history."
+  },
+  "result": "No source-level mismatch with the inspected S04 history/participant-filter criteria found.",
+  "limits": [
+    "No test was rerun in this source-review pass; cited regressions are existing tests in the current tree.",
+    "This does not replace accepted independent Sol review or establish visual chart acceptance."
+  ],
+  "externalActions": "No service, account, API, commit, PR, or deployment was used."
+}

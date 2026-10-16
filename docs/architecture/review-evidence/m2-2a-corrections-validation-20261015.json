@@ -1,0 +1,124 @@
+{
+  "date": "2026-10-15",
+  "status": "local corrections and RC/RR matrix revalidated; awaiting independent acceptance",
+  "scope": "M2.2A SQL 014 and DTO corrections; synthetic data only",
+  "sourceCommit": "bc6c0a476f9c284d4e843995f5b4e70bb1e3c33f",
+  "hostedSupabaseConnected": false,
+  "migrationDeployed": false,
+  "nativePostgres": {
+    "engine": "PostgreSQL 17.11",
+    "baseMigration013Sha256": "d013b82bfa1101ed11a35daeaf7a64b2e6063da9c09b55e7586ce67cc586bac2",
+    "matrix": [
+      {
+        "isolation": "RC/RC",
+        "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2a-corrections-20261015/native-rc-final --port 55470 --through-014 yes --m2-2a-smoke yes --m2-2a-isolation rc --m2-2a-independent yes --review-matrix full",
+        "exitCode": 0,
+        "total": 61,
+        "passed": 61,
+        "failed": 0,
+        "m22aCases": 19,
+        "report": "../../outputs/m2-2a-corrections-20261015/native-rc-final/review.json"
+      },
+      {
+        "isolation": "RR/RR",
+        "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2a-corrections-20261015/native-rr-final --port 55471 --through-014 yes --m2-2a-smoke yes --m2-2a-isolation rr --m2-2a-independent yes --review-matrix full",
+        "exitCode": 0,
+        "total": 61,
+        "passed": 61,
+        "failed": 0,
+        "m22aCases": 19,
+        "report": "../../outputs/m2-2a-corrections-20261015/native-rr-final/review.json"
+      },
+      {
+        "isolation": "RC/RR for replay and actor revocation",
+        "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2a-corrections-20261015/native-mixed-rc-rr --port 55468 --through-014 yes --m2-2a-smoke yes --m2-2a-isolation rc --m2-2a-first-isolation rc --m2-2a-second-isolation rr --m2-2a-independent yes",
+        "exitCode": 0,
+        "total": 43,
+        "passed": 43,
+        "failed": 0,
+        "replaySQLSTATE": "40001 then retry 00000",
+        "report": "../../outputs/m2-2a-corrections-20261015/native-mixed-rc-rr/review.json"
+      },
+      {
+        "isolation": "RR/RC for replay and actor revocation",
+        "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2a-corrections-20261015/native-mixed-rr-rc --port 55469 --through-014 yes --m2-2a-smoke yes --m2-2a-isolation rc --m2-2a-first-isolation rr --m2-2a-second-isolation rc --m2-2a-independent yes",
+        "exitCode": 0,
+        "total": 43,
+        "passed": 43,
+        "failed": 0,
+        "replaySQLSTATE": "00000",
+        "report": "../../outputs/m2-2a-corrections-20261015/native-mixed-rr-rc/review.json"
+      }
+    ],
+    "matrixPairs": [
+      "First rate / record; both winner orders",
+      "Rate change / record; both winner orders",
+      "Assessment / record; both winner orders",
+      "Public month close / record; both winner orders",
+      "Coverage cancellation / record; both winner orders",
+      "Actor revocation / record and replay; both winner orders",
+      "Exact replay / exact replay; both isolation orders"
+    ]
+  },
+  "protocolAndLegacyProbes": {
+    "command": "node tests/review/m2-2a-independent-review.mjs --output-dir ../../outputs/m2-2a-corrections-20261015/protocol-current-validation",
+    "exitCode": 0,
+    "total": 15,
+    "passed": 15,
+    "failed": 0,
+    "report": "../../outputs/m2-2a-corrections-20261015/protocol-current-validation/review.json"
+  },
+  "fullSuite": {
+    "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+    "exitCode": 0,
+    "testFilesPassed": 72,
+    "testsPassed": 712,
+    "durationSeconds": 203.59
+  },
+  "typecheck": {
+    "command": "node node_modules/typescript/bin/tsc --noEmit",
+    "exitCode": 0
+  },
+  "builds": {
+    "client": {
+      "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+      "exitCode": 0
+    },
+    "worker": {
+      "command": "node scripts/build-worker.mjs",
+      "exitCode": 0
+    }
+  },
+  "staticChecks": {
+    "gitDiffCheck": "passed",
+    "nodeCheckNativeRunner": "passed"
+  },
+  "implementedCorrections": [
+    "API command coordination lock order prevents the reproduced authorization-lock deadlock; stale actor snapshots revalidate",
+    "013 legacy whitespace reference behavior and stored bytes survive the 013-to-014 upgrade",
+    "SQL query and cursor validators reject nulls, wrong types, integer overflow, and invalid timestamps with generic protocol errors",
+    "SQL and TypeScript agree that civil year zero is invalid",
+    "Legacy units above 80 characters remain readable; v2 writes reject them without partial activity, receipt, or fence state"
+  ],
+  "pendingAcceptance": [
+    "Independent GPT-6.1 Sol review of the completed matrix and exact local candidate diff",
+    "M2.2B/C contracts and implementation remain future work; 014 is not deployed and hosted Supabase/Auth has not been connected"
+  ],
+  "currentSha256": {
+    "supabase/migrations/202610150014_operational_api.sql": "fec86ac9b2cc2b2ec2fbbc26af449b4b5bdedd7dc9f021b7a968a7204c3ce96f",
+    "supabase/migrations/202610140013_api_identity_foundation.sql": "d013b82bfa1101ed11a35daeaf7a64b2e6063da9c09b55e7586ce67cc586bac2",
+    "src/data/supabase/operational-contract.ts": "c062afcde6eb8e2d83c95de47ddb1bd4330da1f79cf160a24c8f24e68b188d82",
+    "tests/review/m2-1-native-review.mjs": "3c32a8f36c47cda25edd07946d8ff1aac232a544f17477d0ed4924e4fd6adcdd",
+    "tests/review/m2-2a-independent-review.mjs": "e223287aa9d45cab6495bbe918841eae7682990b751d38424825993412db9bbe",
+    "tests/helpers/accounting-lab.ts": "9f38423b3baeb6354da46486f6e9a6332614ecec6efa7f89948a3389b5d3377b",
+    "tests/supabase-operational-contract.test.ts": "57413a9fc9c880bc8b2fb9bbe5600a4882c939e47d386aa6288499d88944b7ad",
+    "tests/supabase-operational-migration.test.ts": "f367951f4d91276f8fb00def71b02c9f07f28c667660fdb7bb75c1aae7eeaae1"
+  },
+  "delivery": {
+    "branch": "migration/github-bootstrap",
+    "commitAtValidation": false,
+    "bundleAtValidation": false,
+    "deploymentPerformed": false,
+    "globalProgressEstimate": "~45% historical; not recalculated by this local revalidation"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-08",
+  "project": "Grupo Paris private laboratory",
+  "scope": "Allow authorized supervisors to reschedule one pending task occurrence with an audit reason and notification.",
+  "finding": "Jefatura could adjust task weights and managers could assign/comment, but there was no punctual rescheduling action. Changes to scheduledOn were also absent from the notification comparison.",
+  "changes": [
+    "Jefatura and an active encargado with direct team and company scope can reschedule an individual pending task with no start, timer, activity, or closed company period.",
+    "The date must be valid and within the task accounting month; a 5-500 character reason is required.",
+    "Only scheduledOn changes. The task deadline, accounting month, and recurring assignment remain unchanged.",
+    "The application audit records actor, date, and reason; authorized recipients receive a task-changed notice.",
+    "The task detail exposes a compact form only to authorized supervisors. Joint, started, active, or closed work cannot be changed through this action."
+  ],
+  "validation": {
+    "focusedTests": { "result": "passed", "tests": 31, "files": 3 },
+    "fullSuite": { "result": "passed", "tests": 494, "files": 57 },
+    "typescript": "passed",
+    "clientBuild": { "result": "passed", "mainEntryKb": 486.49, "schedulePanelKb": 1.38 },
+    "workerBuild": "passed",
+    "browserCorrections": { "result": "passed", "operationalApiCalls": 0, "javascriptErrors": 0 },
+    "gitDiffCheck": "passed; informational LF-to-CRLF notices only"
+  },
+  "releaseState": {
+    "commitCreated": false,
+    "siteUpdated": false,
+    "externalAccountsConnected": false,
+    "estimatedGlobalProgress": "~45%"
+  }
+}

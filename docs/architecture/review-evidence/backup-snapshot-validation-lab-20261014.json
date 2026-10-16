@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-14",
+  "scope": "Audit and correction of new task and activity fields inside frozen backup snapshots; legacy snapshot fields remain optional.",
+  "finding": "snapshotTaskSchema and snapshotActivitySchema used passthrough shapes that did not validate commercialProgress day bounds, progress period/timestamp, real snapshot dates, or frozen operational coefficient type/range.",
+  "changes": [
+    "Added optional typed validation for due/availability, dependencies, commercial tracking/progress, and frozen operational rate fields.",
+    "Added semantic checks for real dates, matching commercial period, valid progress timestamp, duplicate and incompatible frozen dependencies, missing dependency targets, historical dependency cycles, frozen coefficient references and coefficient type/range.",
+    "Added regressions proving malformed frozen progress, impossible snapshot activity dates, invalid coefficient data and dependency failures are rejected, while a legacy snapshot without new fields remains accepted."
+  ],
+  "validation": {
+    "focusedTest": {
+      "command": "node ./node_modules/vitest/vitest.mjs run tests/laboratory-backup.test.tsx --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "exitCode": 0,
+      "passed": 17,
+      "total": 17
+    },
+    "typescript": {
+      "command": "node ./node_modules/typescript/bin/tsc --noEmit",
+      "exitCode": 0
+    },
+    "diffCheck": {
+      "command": "git diff --check -- scoped source, tests and status documents",
+      "exitCode": 0,
+      "note": "CRLF conversion notices only"
+    }
+  },
+  "sourceSha256": {
+    "src/data/repository.ts": "ae6a2956e59c5b73077e8e212a402abbe754b51ad3383c9ca91208d538223b70",
+    "tests/laboratory-backup.test.tsx": "96a2c68f24c63b218f916741693fb59c169bdb39146fe27f8ccb468f72c35a48"
+  },
+  "limits": [
+    "This is a focused validator correction, not full restore/storage acceptance.",
+    "Real-browser review remains unavailable in this terminal because npm/npx are not on PATH."
+  ],
+  "noExternalActions": "No commit, PR, Site update, operational API, migration, account connection, or deployment."
+}

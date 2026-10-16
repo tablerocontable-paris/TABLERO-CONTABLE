@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-07",
+  "status": "PASS",
+  "scope": "Versioned browser-local backup and explicit restore for fictitious laboratory state only.",
+  "format": {
+    "id": "grupo-paris-lab-backup",
+    "version": 1,
+    "maxBytes": 10485760,
+    "targetStorageKey": "paris-state-lab"
+  },
+  "unitTests": {
+    "command": "node node_modules/vitest/vitest.mjs run --testTimeout=20000 --hookTimeout=30000 --maxWorkers=2",
+    "passed": 416,
+    "files": 46,
+    "backupTests": 4
+  },
+  "preCommit": {
+    "command": "node scripts/validate-change.mjs",
+    "passed": 100,
+    "files": 15,
+    "typescript": "PASS",
+    "diffCheck": "PASS"
+  },
+  "build": {
+    "typescript": "PASS",
+    "vite": "PASS",
+    "worker": "PASS",
+    "viteNotes": "Only upstream Zod pure-comment annotation warnings; build completed."
+  },
+  "browser": {
+    "backupRoundTrip": {
+      "script": "tests/browser-laboratory-backup.cjs",
+      "result": "PASS",
+      "download": true,
+      "formatAndPreviewValidation": true,
+      "explicitRestoreConfirmation": true,
+      "restoredProfile": "Juan Pablo",
+      "operationalStorageUnchanged": true,
+      "mobileDialogFits390x844": true,
+      "operationalApiCalls": 0,
+      "javascriptErrors": 0
+    },
+    "general": "tests/browser.cjs PASS: induction, resume, company isolation, checklist, activity, monthly closure, timers, absences, themes, mobile; zero JS errors.",
+    "corrections": "tests/browser-corrections.cjs PASS: responsive navigation, logo, simulation, invitations, drag and drop, scoped quick search, request conversion, notifications, persistence and mobile; zero API calls or JS errors.",
+    "joint": "tests/browser-joint.cjs PASS: activation, independent clocks, shared completion, sequential member closures, v2 reports and CSV privacy; zero API calls or JS errors."
+  },
+  "artifacts": [
+    "docs/architecture/review-evidence/laboratory-backup-preview-20261007.png",
+    "docs/architecture/review-evidence/laboratory-backup-mobile-20261007.png"
+  ],
+  "limits": [
+    "JSON is not encrypted and can include notes or comments; store it privately.",
+    "This is a manual local laboratory transfer, not automatic PC synchronization or a production database backup.",
+    "No account, API, GitHub, D1, Supabase or Site audience change was made by the feature."
+  ]
+}

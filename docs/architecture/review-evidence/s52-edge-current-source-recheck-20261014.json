@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-14",
+  "requirement": "S52",
+  "status": "current_source_and_real_edge_visual_recheck_passed_independent_sol_review_pending",
+  "implementation_review": {
+    "eligibility": "App retains groups with work in the authorized, filtered task set, while calculating deliverable-point metrics only from result tasks.",
+    "noDeliverableBasis": "Operational-only groups retain null weighted completion and are labeled Sin base de entregables in the chart and CSV.",
+    "zeroAndQuality": "A deliverable group with zero points earned remains 0%; operational-only groups without evaluation show Sin evaluar. Operational quality/order/opportunity are separate from deliverable points.",
+    "filters": "Groups are computed from monthTasks after current actor access, company, owner, sector, team, and text filters; empty groups are excluded."
+  },
+  "validation": {
+    "clientBuild": {
+      "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+      "result": "exit 0; entry 332.85 kB, below 500 kB; existing Zod PURE-comment notices remain"
+    },
+    "focusedIntegration": {
+      "command": "node node_modules/vitest/vitest.mjs run tests/laboratory-corrections.test.tsx --exclude tmp/** --maxWorkers=1 --testTimeout=20000 --hookTimeout=30000",
+      "result": "20/20 tests passed in 1 file; exit 0",
+      "output": "outputs/current-sol-review-20261014/edge-corrections/s52-focused-tests.txt"
+    },
+    "edge": {
+      "command": "node tests/browser-corrections.cjs",
+      "environment": {
+        "CHROMIUM_PATH": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+        "E2E_OUTPUT": "outputs/current-sol-review-20261014/edge-corrections"
+      },
+      "result": "31/31 checks; passed=true; zero JavaScript errors; zero operational API calls",
+      "report": "outputs/current-sol-review-20261014/edge-corrections/browser-validation.json",
+      "screenshot": "outputs/current-sol-review-20261014/edge-corrections/analytics-operational-no-base.png",
+      "screenshotReview": "Real Recharts SVG rendered the operational-only names Valentino Magni and Lucía Fernández, a zero-completion result row Joaquín Pérez, separated Sin base/0% labels, and two complete gray pie sectors."
+    }
+  },
+  "sha256": {
+    "src/App.tsx": "85b5a687a3c6dac81cdbf5e6d883b99663d60a1bf7c08d636433c42f499b2608",
+    "tests/laboratory-corrections.test.tsx": "150da7a94c94ff79fe5af87e6ae92118bfb1ba3f88957e19d84d7f4ce5741ac1",
+    "tests/browser-corrections.cjs": "6145c4704c6540b1cfae83e3e419545e42e92b2b612fcae0bea5ee9fdfe947e7",
+    "outputs/current-sol-review-20261014/edge-corrections/browser-validation.json": "84f9854868f15c1e69b7301f019daeb821e4ce01067fab2f2f3633c0d58c2239",
+    "outputs/current-sol-review-20261014/edge-corrections/analytics-operational-no-base.png": "0ce82ec1ed422e7f2b49e741778b5b61b5df3ebb166ad0571314e6eb3dbfa620"
+  },
+  "limits": [
+    "This is local source/test/browser revalidation and visual review, not independent GPT-6.1 Sol approval of S52.",
+    "No hosted Supabase, operational API, account, remote migration, commit, PR, Site update, or deployment was used."
+  ]
+}

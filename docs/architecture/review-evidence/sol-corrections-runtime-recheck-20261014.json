@@ -1,0 +1,68 @@
+{
+  "date": "2026-10-14",
+  "scope": "Fresh local runtime recheck of the existing Sol correction package; no product feature or runtime-source change. The S52 browser runner was strengthened to wait for fully rendered pie sectors before capturing evidence.",
+  "environment": {
+    "node": "v24.19.0 from the Codex bundled runtime",
+    "npmInPath": false,
+    "playwright": "repository-local playwright-core",
+    "browser": "Microsoft Edge 155.0.4283.45"
+  },
+  "sourceTree": {
+    "sha256": "4689380e4de922d32cbf34e8154a40847953396c16f9f1eb5f8e977005d882ca",
+    "fileCount": 436
+  },
+  "validation": {
+    "fullSuite": { "exitCode": 0, "passed": 663, "files": 67, "durationSeconds": 157.10, "report": "outputs/current-sol-corrections-browser-20261014/full-suite-final.log" },
+    "typescript": { "command": "node node_modules/typescript/bin/tsc --noEmit", "exitCode": 0 },
+    "clientBuild": { "command": "node node_modules/vite/bin/vite.js build --outDir dist/client", "exitCode": 0, "entryJavaScriptBytes": 331700, "warningLimitBytes": 500000, "largeEntryWarning": false, "log": "outputs/current-recheck-client-build.log" },
+    "workerBuild": { "command": "node scripts/build-worker.mjs", "exitCode": 0 },
+    "edgeE2E": {
+      "main": { "exitCode": 0, "log": "outputs/current-sol-corrections-browser-20261014/browser.log" },
+      "corrections": { "exitCode": 0, "checks": 29, "javascriptErrors": 0, "operationalApiCalls": 0, "report": "outputs/current-sol-corrections-browser-20261014/browser-corrections-s52-pie-final2/browser-validation.json", "s52PieSectors": [{ "name": "En curso", "fill": "rgb(55, 58, 64)", "bounds": "166x90.24" }, { "name": "Pendiente", "fill": "rgb(85, 90, 98)", "bounds": "96.09x77.88" }] },
+      "joint": { "exitCode": 0, "log": "outputs/current-sol-corrections-browser-20261014/browser-joint.log" },
+      "backupRestore": { "exitCode": 0, "passed": true, "javascriptErrors": 0, "operationalApiCalls": 0, "report": "outputs/current-sol-corrections-browser-20261014/browser-laboratory-backup/laboratory-backup-browser.json" }
+    },
+    "accessibilityAutomation": { "passed": true, "routes": 38, "profiles": 3, "interactiveControls": 2124, "keyboardFocusStops": 877, "issues": 0, "javascriptErrors": 0, "operationalApiCalls": 0, "report": "outputs/current-sol-corrections-browser-20261014/accessibility/accessibility-audit.json", "limit": "Automated Chromium tree and focus audit only; not human screen-reader acceptance or WCAG certification." },
+    "contrast": { "passed": true, "routesAndThemeCombinations": 76, "textElements": 5943, "skipped": 0, "issues": 0, "report": "outputs/current-sol-corrections-browser-20261014/contrast/contrast-audit.json" },
+    "benchmarkS57": { "passed": true, "profiles": 24, "tasks": 2000, "warmups": 2, "measuredTransitions": 30, "p95Ms": 501.38, "limitExclusiveMs": 1000, "report": "outputs/current-sol-corrections-browser-20261014/benchmark-s52-pie-runner-final/navigation-benchmark.json" },
+    "isolatedS58": { "exitCode": 0, "passed": 7, "executed": 7, "skipped": 209, "failed": 0, "report": "outputs/current-sol-corrections-browser-20261014/s58-final.log" },
+    "diffCheck": { "command": "git diff --check", "exitCode": 0 }
+  },
+  "postgresConcurrency": {
+    "engine": "PostgreSQL 17.11 Windows x64 binaries from the official EDB binaries archive",
+    "archive": {
+      "officialListing": "https://www.enterprisedb.com/download-postgresql-binaries",
+      "download": "https://sbp.enterprisedb.com/getfile.jsp?fileid=1260616",
+      "bytes": 381531864,
+      "sha256": "80379B2C04D51C30225532E0AE04509899141E9957ED096FE749D7FD9DF8F82F"
+    },
+    "extraction": "Extracted only pgsql/bin, pgsql/lib, and pgsql/share (1,563 files) under %TEMP%; postgres and initdb both reported 17.11.",
+    "cluster": {
+      "path": "%TEMP%/paris-pg-mvcc-data-20261014",
+      "initdb": "--auth=trust --no-sync --encoding=UTF8 --locale=C",
+      "listen": "127.0.0.1:55432",
+      "windowsServiceCreated": false,
+      "syntheticAuth": true
+    },
+    "runner": "node scripts/coordination-concurrency.mjs --psql <EDB pgsql/bin/psql.exe> --port 55432 --output outputs/current-sol-corrections-browser-20261014/postgres-mvcc-coordination-20261014.json",
+    "result": {
+      "exitCode": 0,
+      "scenarios": 26,
+      "passed": 26,
+      "orders": ["AB", "BA"],
+      "serialStates": { "00000": 4, "40001": 22 },
+      "deadlocks40P01": 0,
+      "barrier": "Each second transaction was confirmed blocked through pg_locks and pg_blocking_pids before releasing the first.",
+      "assertions": "Rollback fingerprints, unique actor/operation receipts, and closure/report/outbox count equality passed.",
+      "report": "outputs/current-sol-corrections-browser-20261014/postgres-mvcc-coordination-20261014.json",
+      "log": "outputs/current-sol-corrections-browser-20261014/postgres-mvcc-coordination-20261014.log"
+    },
+    "shutdown": "pg_ctl fast shutdown completed; verified zero postgres processes, Windows services, and listeners on port 55432. The synthetic cluster remains stopped under %TEMP%.",
+    "limits": "This validates local PostgreSQL concurrency for the SQL laboratory with synthetic Auth; it does not validate hosted Supabase Auth/RLS or a deployed project."
+  },
+  "openAcceptanceGates": [
+    "Independent GPT-6.1 Sol review of S52 and stages 5-7.",
+    "Human screen-reader acceptance for stage 5."
+  ],
+  "noExternalActions": "No product runtime-source change, commit, PR, Site update, account connection, operational API call, remote SQL, service installation, or deployment."
+}

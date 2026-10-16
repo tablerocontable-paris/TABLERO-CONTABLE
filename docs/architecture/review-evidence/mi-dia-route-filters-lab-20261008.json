@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-08",
+  "scope": "Búsqueda y filtro de la hoja de ruta sugerida en Mi día",
+  "implemented": [
+    "Búsqueda por tarea, empresa y motivo de recomendación.",
+    "Filtro entre todas, listas para empezar y en espera.",
+    "Apertura automática de resultados en espera cuando se filtran o son los únicos resultados de la búsqueda.",
+    "Conservación del orden recomendado y sin iniciar tareas ni cronómetros."
+  ],
+  "validation": {
+    "focused_test": "tests/suggested-route-panel.test.tsx",
+    "full_suite": "465/465 tests, 54 files",
+    "typescript_and_build": "passed",
+    "edge_flows_after_final_change": ["browser.cjs", "browser-corrections.cjs", "browser-joint.cjs", "browser-laboratory-backup.cjs"],
+    "keyboard_routes": 38,
+    "keyboard_focus_stops": 876,
+    "operational_api_calls": 0,
+    "javascript_errors": 0,
+    "git_diff_check": "passed"
+  },
+  "raw_evidence": [
+    "tests/suggested-route-panel.test.tsx",
+    "outputs/plan-validation-20261008/edge-final-after-mi-dia/browser-validation.json",
+    "outputs/plan-validation-20261008/accessibility-keyboard-review-final/accessibility-audit.json"
+  ]
+}

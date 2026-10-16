@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-14",
+  "requirement": "S52",
+  "status": "locally_rechecked_contract_aligned_independent_sol_review_pending",
+  "sourceReview": {
+    "eligibility": "Analytics groups are retained when they have task work in the filtered authorized scope; deliverable metrics are calculated from result tasks separately.",
+    "noDeliverableBasis": "A group with no deliverable points keeps a null weighted value and is labeled Sin base in the chart/CSV, rather than being represented as zero percent.",
+    "zeroAndQuality": "A real zero-completion deliverable remains zero percent; operational quality/order/opportunity remain separate and use Sin evaluar when there are no assessments.",
+    "files": [
+      "src/App.tsx",
+      "tests/laboratory-corrections.test.tsx"
+    ]
+  },
+  "validation": {
+    "command": "node node_modules/vitest/vitest.mjs run tests/laboratory-corrections.test.tsx --exclude 'tmp/**' --maxWorkers=1 --testTimeout=20000 --hookTimeout=30000 --reporter=dot",
+    "exitCode": 0,
+    "passed": 20,
+    "total": 20,
+    "files": 1,
+    "durationSeconds": 8.10
+  },
+  "limits": [
+    "This scoped source/test recheck does not replace the pending independent GPT-6.1 Sol review of S52.",
+    "The existing Edge evidence covers the real Recharts SVG and is recorded in stage-4-partial-laboratory-20261014.json; it was not rerun in this check.",
+    "This does not establish acceptance of stage 4 or global product acceptance."
+  ]
+}

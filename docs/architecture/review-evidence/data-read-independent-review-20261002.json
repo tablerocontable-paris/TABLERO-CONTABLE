@@ -1,0 +1,37 @@
+{
+  "reviewed_source_sha": "16862eec715d81193c1b8a30403cae0288b8a326",
+  "decision": "acceptance_pending_test_corrections",
+  "findings": [
+    "READ-I01",
+    "READ-I02",
+    "READ-I03",
+    "READ-I04"
+  ],
+  "checks": {
+    "original_suite": {
+      "files": 17,
+      "tests": 189,
+      "exit_code": 0
+    },
+    "build_exit_code": 0,
+    "diagnostic_probe": {
+      "exit_code": 1,
+      "expected_role": "authenticated",
+      "observed_role": "postgres",
+      "temporary_copy_removed": true
+    }
+  },
+  "source_files_sha256": {
+    "src/data/remote/task-reader.ts": "60703e4b4ba11dbd2831cb30a0ef2448c68cbeeb344042af742d52d97343fcbd",
+    "tests/task-reader.test.ts": "f387856f76e05f60a3425a65096befcd3f620e5fb471edbfca0c8c39a552aa03",
+    "tests/task-reader-sql.test.ts": "a49c30fc53f28a0d048bb3e55bf53edf3c809300b71c088c3c80ba23e32d0c91",
+    "tests/helpers/accounting-lab.ts": "e9c33a590a335c0053826333fd393c82de3950a5386ce5dc16be0adc068f1339"
+  },
+  "no_source_or_sql_edits": true,
+  "next_execution": "docs/product/CORRECTIONS-UI-EXECUTION-20261002.md then reader test contract in docs/architecture/REVIEW-DATA-READ-INDEPENDENT-20261002.md",
+  "limitations": [
+    "PGlite simulations; no live Supabase Auth/MFA/PostgREST",
+    "No PostgreSQL concurrency execution",
+    "No remote integration or employee migration"
+  ]
+}

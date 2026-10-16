@@ -1,0 +1,835 @@
+{
+  "date": "2026-10-15",
+  "status": "rejected",
+  "reviewedHead": "4597e748f795d5ffeda287bb8cd8e6a2c6d0419c",
+  "implementationCommit": "9c096973c21fe56fdb91ac0ba4e54ec0f8232649",
+  "productChanged": false,
+  "finding": {
+    "id": "M22A-R6",
+    "priority": "P1",
+    "cause": "api_exact_keys returns SQL NULL for an empty object; api_expected returns NULL for an absent key; IF conditions fail open",
+    "effect": "All three commands accept empty expectedRevisions and write; malformed empty query filters also bypass strict validation"
+  },
+  "finalProtocol": {
+    "command": "node tests/review/m2-2a-final-acceptance-review.mjs --output-dir ../../outputs/m2-2a-final-acceptance-20261015/protocol",
+    "exitCode": 1,
+    "report": {
+      "candidate": "9c096973c21fe56fdb91ac0ba4e54ec0f8232649",
+      "total": 9,
+      "passed": 3,
+      "failed": 6,
+      "results": [
+        {
+          "name": "record rejects empty revisions without effects",
+          "passed": false,
+          "expected": "22023 and unchanged state",
+          "decoderAccepts": false,
+          "observed": {
+            "code": "00000",
+            "response": {
+              "kind": "operation.record",
+              "result": {
+                "rateId": null,
+                "entryId": "7d0e43f6-378d-44ae-8b19-0ec8fcfc1bea",
+                "unitWeight": null,
+                "taskRevision": "1",
+                "weightedLoad": null,
+                "measurementVersion": 2
+              },
+              "operationId": "00000000-0000-0000-0000-000000000103",
+              "contractVersion": 1
+            }
+          },
+          "before": {
+            "revision": "0",
+            "entries": 0,
+            "receipts": 0
+          },
+          "after": {
+            "revision": "1",
+            "entries": 1,
+            "receipts": 1
+          }
+        },
+        {
+          "name": "explicit current revision succeeds",
+          "passed": true,
+          "observed": "00000"
+        },
+        {
+          "name": "explicit stale revision is rejected",
+          "passed": true,
+          "expected": "40001",
+          "observed": "40001"
+        },
+        {
+          "name": "rate rejects empty revisions",
+          "passed": false,
+          "expected": "22023",
+          "decoderAccepts": false,
+          "observed": {
+            "code": "00000",
+            "response": {
+              "kind": "operation.rate",
+              "result": {
+                "unit": "facturas",
+                "rateId": "a0cce119-8691-45eb-8225-8fbab620a1db",
+                "version": "1",
+                "unitWeight": "2.000000",
+                "effectiveOn": "2026-10-15",
+                "scopeRevision": "1"
+              },
+              "operationId": "00000000-0000-0000-0000-000000000106",
+              "contractVersion": 1
+            }
+          }
+        },
+        {
+          "name": "assessment rejects empty revisions",
+          "passed": false,
+          "expected": "22023",
+          "decoderAccepts": false,
+          "observed": {
+            "code": "00000",
+            "response": {
+              "kind": "operation.assess",
+              "result": {
+                "order": 90,
+                "quality": 90,
+                "timeliness": 90,
+                "assessmentId": "9b7b501f-e7ce-488f-8e80-a4119da210d4",
+                "taskRevision": "3",
+                "assessmentRevision": "1"
+              },
+              "operationId": "00000000-0000-0000-0000-000000000107",
+              "contractVersion": 1
+            }
+          }
+        },
+        {
+          "name": "query rejects empty filters as protocol error",
+          "passed": false,
+          "expected": "22023",
+          "observed": {
+            "code": "42501",
+            "message": "Contexto no autorizado"
+          }
+        },
+        {
+          "name": "receipt query rejects empty filters as protocol error",
+          "passed": false,
+          "expected": "22023",
+          "observed": {
+            "code": "00000",
+            "response": {
+              "data": {
+                "found": false
+              },
+              "kind": "commandReceipt",
+              "contractVersion": 1
+            }
+          }
+        },
+        {
+          "name": "record rejects empty payload as protocol error",
+          "passed": false,
+          "expected": "22023",
+          "observed": {
+            "code": "42501",
+            "message": "Contexto no autorizado"
+          }
+        },
+        {
+          "name": "assessment rejects a missing assessment revision",
+          "passed": true,
+          "expected": "22023",
+          "observed": {
+            "code": "22023",
+            "message": "Solicitud inválida"
+          }
+        }
+      ]
+    }
+  },
+  "priorProtocol": {
+    "command": "node tests/review/m2-2a-independent-review.mjs --output-dir ../../outputs/m2-2a-final-acceptance-20261015/prior-protocol",
+    "exitCode": 0,
+    "report": {
+      "scope": "Independent protocol and populated-legacy compatibility probes; no hosted connection",
+      "total": 15,
+      "passed": 15,
+      "failed": 0,
+      "results": [
+        {
+          "name": "013 valid whitespace reference survives upgrade without rewriting",
+          "passed": true,
+          "expected": "00000",
+          "observed": "00000",
+          "pageSQL": "00000",
+          "referencePreserved": true
+        },
+        {
+          "name": "null query kind",
+          "passed": true,
+          "expected": "22023",
+          "observed": "22023",
+          "responseDecodes": null
+        },
+        {
+          "name": "integer overflow in query limit",
+          "passed": true,
+          "expected": "22023",
+          "observed": "22023",
+          "responseDecodes": null
+        },
+        {
+          "name": "null cursor timestamp",
+          "passed": true,
+          "expected": "22023",
+          "observed": "22023",
+          "responseDecodes": null
+        },
+        {
+          "name": "null cursor kind",
+          "passed": true,
+          "expected": "22023",
+          "observed": "22023",
+          "responseDecodes": null
+        },
+        {
+          "name": "infinite cursor timestamp",
+          "passed": true,
+          "expected": "22023",
+          "observed": "22023",
+          "responseDecodes": null
+        },
+        {
+          "name": "cursor missing entry id",
+          "passed": true,
+          "expected": "22023",
+          "observed": "22023",
+          "responseDecodes": null
+        },
+        {
+          "name": "null command kind is rejected with generic protocol error",
+          "passed": true,
+          "expected": "22023",
+          "observed": "22023"
+        },
+        {
+          "name": "year zero is rejected by decoder and SQL",
+          "passed": true,
+          "decoderAccepts": false,
+          "sqlCode": "22023"
+        },
+        {
+          "name": "non-BMP text length is compatible between installed Zod and SQL",
+          "passed": true,
+          "decoderAccepts": true,
+          "sqlCode": "00000",
+          "responseDecodes": true
+        },
+        {
+          "name": "failed 014 upgrade rolls back its schema changes and preserves prior rows",
+          "passed": true,
+          "migrationSQLSTATE": "23514",
+          "rate_table": null,
+          "version_column": false,
+          "legacy_rows": 1
+        },
+        {
+          "name": "legacy unit longer than 80 remains readable in activity and summary DTOs",
+          "passed": true,
+          "pageSQL": "00000",
+          "summarySQL": "00000",
+          "pageDecodes": true,
+          "summaryDecodes": true,
+          "unitPreserved": true
+        },
+        {
+          "name": "v2 rate write rejects legacy unit over 80 without partial state",
+          "passed": true,
+          "sqlCode": "22023",
+          "artifacts": "0|0|0"
+        },
+        {
+          "name": "v2 activity write rejects legacy unit over 80 before creating records or receipts",
+          "passed": true,
+          "sqlCode": "22023",
+          "artifacts": "0|0|0"
+        },
+        {
+          "name": "v2 activity response passes envelope and query-data decoders",
+          "passed": true,
+          "writeSQL": "00000",
+          "querySQL": "00000",
+          "envelopeDecoder": true,
+          "queryDataDecoder": true
+        }
+      ],
+      "sha256": {
+        "supabase/migrations/202610150014_operational_api.sql": "fec86ac9b2cc2b2ec2fbbc26af449b4b5bdedd7dc9f021b7a968a7204c3ce96f",
+        "src/data/supabase/operational-contract.ts": "c062afcde6eb8e2d83c95de47ddb1bd4330da1f79cf160a24c8f24e68b188d82",
+        "tests/review/m2-2a-independent-review.mjs": "e223287aa9d45cab6495bbe918841eae7682990b751d38424825993412db9bbe"
+      }
+    }
+  },
+  "nativeRepeatableRead": {
+    "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2a-final-acceptance-20261015/native-rr --port 55474 --through-014 yes --m2-2a-smoke yes --m2-2a-isolation rr --m2-2a-independent yes --review-matrix full",
+    "exitCode": 0,
+    "report": {
+      "sourceCommit": "4597e748f795d5ffeda287bb8cd8e6a2c6d0419c",
+      "engine": "postgres (PostgreSQL) 17.11",
+      "migrationSha256": "d013b82bfa1101ed11a35daeaf7a64b2e6063da9c09b55e7586ce67cc586bac2",
+      "candidate": null,
+      "m2aIsolation": "repeatable read",
+      "m2aFirstIsolation": "repeatable read",
+      "m2aSecondIsolation": "repeatable read",
+      "total": 61,
+      "passed": 61,
+      "failed": 0,
+      "results": [
+        {
+          "name": "M2.2A rate and assessment receipts are reauthorized before replay",
+          "passed": true,
+          "revokedRateReplay": "42501",
+          "revokedAssessmentReplay": "42501"
+        },
+        {
+          "name": "M2.2A concurrent exact replay serializes without duplicate activity",
+          "passed": true,
+          "isolationPair": "repeatable read/repeatable read",
+          "blocked": true,
+          "replaySQLSTATE": "40001",
+          "retrySQLSTATE": "00000",
+          "measurementV2Entries": 3
+        },
+        {
+          "name": "M2.2A first rate configuration racing an operational record preserves the winning entry snapshot",
+          "passed": true,
+          "isolation": "repeatable read",
+          "blocked": true,
+          "rateSQLSTATE": "40001",
+          "rateRetrySQLSTATE": "00000",
+          "rateVersionsAfterRace": "0",
+          "originalActivity": "null|2"
+        },
+        {
+          "name": "M2.2A first rate commits before a blocked record and its coefficient is snapshotted",
+          "passed": true,
+          "isolation": "repeatable read",
+          "blocked": true,
+          "rateSQLSTATE": "00000",
+          "recordSQLSTATE": "40001",
+          "recordRetrySQLSTATE": "00000",
+          "activitySnapshot": "4.000000|2"
+        },
+        {
+          "name": "M2.2A assessment racing a stale operational record serializes with one revision",
+          "passed": true,
+          "blocked": true,
+          "recordSQLSTATE": "40001",
+          "activityEntries": 2
+        },
+        {
+          "name": "M2.2A record-first race rejects the stale assessment without a partial revision",
+          "passed": true,
+          "blocked": true,
+          "recordSQLSTATE": "00000",
+          "assessmentSQLSTATE": "40001",
+          "assessmentRevision": "1"
+        },
+        {
+          "name": "M2.2A record-first rate change preserves the entry coefficient and updates future rate",
+          "passed": true,
+          "isolation": "repeatable read",
+          "blocked": true,
+          "recordSQLSTATE": "00000",
+          "rateSQLSTATE": "40001",
+          "rateRetrySQLSTATE": "00000",
+          "entryWeight": "4.000000",
+          "currentWeight": "5.000000"
+        },
+        {
+          "name": "M2.2A rate-change-first race applies the new coefficient only to the later record",
+          "passed": true,
+          "isolation": "repeatable read",
+          "blocked": true,
+          "rateSQLSTATE": "00000",
+          "recordSQLSTATE": "40001",
+          "recordRetrySQLSTATE": "00000",
+          "activitySnapshot": "6.000000"
+        },
+        {
+          "name": "M2.2A record-first public close fails cleanly without closure, report, or outbox",
+          "passed": true,
+          "blocked": true,
+          "recordSQLSTATE": "00000",
+          "closeSQLSTATE": "40001",
+          "closeRetrySQLSTATE": "0A000",
+          "artifacts": "0|0|0"
+        },
+        {
+          "name": "M2.2A public monthly close revalidates a coordinated concurrent record and denies its retry",
+          "passed": true,
+          "closeBlocked": true,
+          "recordBlocked": true,
+          "closeSQLSTATE": "00000",
+          "firstSQLSTATE": "40001",
+          "retrySQLSTATE": "55000",
+          "activityEntries": 0
+        },
+        {
+          "name": "M2.2A public coverage cancellation revalidates a coordinated waiting record",
+          "passed": true,
+          "cancellationBlocked": true,
+          "recordBlocked": true,
+          "cancellationSQLSTATE": "00000",
+          "firstSQLSTATE": "40001",
+          "retrySQLSTATE": "42501",
+          "activityEntries": 0
+        },
+        {
+          "name": "M2.2A record-first coverage cancellation preserves the real executor and completes on retry",
+          "passed": true,
+          "blocked": true,
+          "recordSQLSTATE": "00000",
+          "cancellationSQLSTATE": "40001",
+          "retrySQLSTATE": "00000",
+          "activityAndCoverage": "00000000-0000-0000-0000-000000000002|cancelled"
+        },
+        {
+          "name": "M2.2A stale RR snapshot cannot write into a newly closed month",
+          "passed": true,
+          "writeSQLSTATE": "40001",
+          "artifacts": "0|0"
+        },
+        {
+          "name": "M2.2A stale RR actor snapshot cannot write after profile deactivation",
+          "passed": true,
+          "writeSQLSTATE": "40001",
+          "activityAndReceipt": "3|0"
+        },
+        {
+          "name": "M2.2A manager can consult only assigned scope; execution, private quality, foreign, and inactive access deny",
+          "passed": true,
+          "managerActivity": "00000",
+          "managerOutOfScopeDenied": "42501",
+          "managerQualityDenied": "42501",
+          "managerRecordDenied": "42501",
+          "employeeRateHistory": "42501",
+          "foreignTaskDenied": "42501",
+          "foreignOwnerRead": "00000",
+          "inactiveOwnerDenied": "42501",
+          "revokedReceiptDenied": "42501"
+        },
+        {
+          "name": "M2.2A operation, rate, assessment, and query smoke",
+          "passed": true,
+          "task": "00000000-0000-0000-0000-000000000026",
+          "quantity": 7
+        },
+        {
+          "name": "M2.2A injected failures roll back all partial writes for record, rate, and assessment",
+          "passed": true,
+          "record": "0|0|0",
+          "rate": "2|4|0|0|0",
+          "assessment": "4|1|0|0|0"
+        },
+        {
+          "name": "M2.2A record-first actor revocation waits for the record then denies exact replay",
+          "passed": true,
+          "isolationPair": "repeatable read/repeatable read",
+          "blocked": true,
+          "recordSQLSTATE": "00000",
+          "revocationSQLSTATE": "00000",
+          "replaySQLSTATE": "42501",
+          "activityReceiptActorState": "1|1|false"
+        },
+        {
+          "name": "M2.2A coordinated actor revocation denies a waiting record and exact replay without deadlock or partial write",
+          "passed": true,
+          "blocked": true,
+          "revocationSQLSTATE": "00000",
+          "recordSQLSTATE": "40001",
+          "revokedReplaySQLSTATE": "42501",
+          "beforeActivity": "4",
+          "finalArtifacts": "0|4|false"
+        },
+        {
+          "name": "business missing AAL",
+          "passed": true,
+          "expectedSQLSTATE": "42501",
+          "observedSQLSTATE": "42501"
+        },
+        {
+          "name": "business null AAL",
+          "passed": true,
+          "expectedSQLSTATE": "42501",
+          "observedSQLSTATE": "42501"
+        },
+        {
+          "name": "business empty AAL",
+          "passed": true,
+          "expectedSQLSTATE": "42501",
+          "observedSQLSTATE": "42501"
+        },
+        {
+          "name": "business unknown AAL",
+          "passed": true,
+          "expectedSQLSTATE": "42501",
+          "observedSQLSTATE": "42501"
+        },
+        {
+          "name": "technical missing AAL",
+          "passed": true,
+          "expectedSQLSTATE": "42501",
+          "observedSQLSTATE": "42501"
+        },
+        {
+          "name": "technical null AAL",
+          "passed": true,
+          "expectedSQLSTATE": "42501",
+          "observedSQLSTATE": "42501"
+        },
+        {
+          "name": "technical empty AAL",
+          "passed": true,
+          "expectedSQLSTATE": "42501",
+          "observedSQLSTATE": "42501"
+        },
+        {
+          "name": "technical unknown AAL",
+          "passed": true,
+          "expectedSQLSTATE": "42501",
+          "observedSQLSTATE": "42501"
+        },
+        {
+          "name": "whitespace-only display name",
+          "passed": true,
+          "expected": "deny",
+          "observedSQLSTATE": "42501",
+          "decoded": null
+        },
+        {
+          "name": "Unicode code-point display name",
+          "passed": true,
+          "expected": "decode",
+          "observedSQLSTATE": "00000",
+          "decoded": true
+        },
+        {
+          "name": "mixed ECMAScript whitespace",
+          "passed": true,
+          "expected": "normalized",
+          "observedSQLSTATE": "00000",
+          "decoded": true
+        },
+        {
+          "name": "maximum 200 code points",
+          "passed": true,
+          "expected": "decode",
+          "observedSQLSTATE": "00000",
+          "decoded": true
+        },
+        {
+          "name": "over maximum 201 code points",
+          "passed": true,
+          "expected": "deny",
+          "observedSQLSTATE": "42501",
+          "decoded": null
+        },
+        {
+          "name": "corrupted dual identity with an inactive duplicate",
+          "passed": true,
+          "expectedSQLSTATE": "42501",
+          "observedSQLSTATE": "42501"
+        },
+        {
+          "name": "identity race read committed: business first",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "23514",
+          "commitSQLSTATE": "00000",
+          "coexist": false
+        },
+        {
+          "name": "identity race read committed: technical first",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "23514",
+          "commitSQLSTATE": "00000",
+          "coexist": false
+        },
+        {
+          "name": "identity race repeatable read: business first",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "40001",
+          "commitSQLSTATE": "00000",
+          "coexist": false
+        },
+        {
+          "name": "identity race repeatable read: technical first",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "40001",
+          "commitSQLSTATE": "00000",
+          "coexist": false
+        },
+        {
+          "name": "identity race serializable: business first",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "40001",
+          "commitSQLSTATE": "00000",
+          "coexist": false
+        },
+        {
+          "name": "identity race serializable: technical first",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "40001",
+          "commitSQLSTATE": "00000",
+          "coexist": false
+        },
+        {
+          "name": "identity UUID update race read committed/repeatable read: business first",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "40001",
+          "commitSQLSTATE": "00000",
+          "finalPrincipalCount": "1",
+          "fenceRevision": "1"
+        },
+        {
+          "name": "identity UUID update race repeatable read/read committed: business first",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "23514",
+          "commitSQLSTATE": "00000",
+          "finalPrincipalCount": "1",
+          "fenceRevision": "1"
+        },
+        {
+          "name": "identity UUID update race read committed/repeatable read: technical first",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "40001",
+          "commitSQLSTATE": "00000",
+          "finalPrincipalCount": "1",
+          "fenceRevision": "1"
+        },
+        {
+          "name": "identity UUID update race repeatable read/read committed: technical first",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "23514",
+          "commitSQLSTATE": "00000",
+          "finalPrincipalCount": "1",
+          "fenceRevision": "1"
+        },
+        {
+          "name": "acceptance business insert/update read committed/read committed",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "23514",
+          "targetCount": 1,
+          "loserPreserved": 1,
+          "fenceRevision": "1"
+        },
+        {
+          "name": "acceptance business insert/update read committed/repeatable read",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "40001",
+          "targetCount": 1,
+          "loserPreserved": 1,
+          "fenceRevision": "1"
+        },
+        {
+          "name": "acceptance business insert/update repeatable read/read committed",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "23514",
+          "targetCount": 1,
+          "loserPreserved": 1,
+          "fenceRevision": "1"
+        },
+        {
+          "name": "acceptance business insert/update repeatable read/repeatable read",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "40001",
+          "targetCount": 1,
+          "loserPreserved": 1,
+          "fenceRevision": "1"
+        },
+        {
+          "name": "acceptance business update/update read committed/read committed",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "23514",
+          "targetCount": 1,
+          "loserPreserved": 1,
+          "fenceRevision": "1"
+        },
+        {
+          "name": "acceptance business update/update read committed/repeatable read",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "40001",
+          "targetCount": 1,
+          "loserPreserved": 1,
+          "fenceRevision": "1"
+        },
+        {
+          "name": "acceptance business update/update repeatable read/read committed",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "23514",
+          "targetCount": 1,
+          "loserPreserved": 1,
+          "fenceRevision": "1"
+        },
+        {
+          "name": "acceptance business update/update repeatable read/repeatable read",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "40001",
+          "targetCount": 1,
+          "loserPreserved": 1,
+          "fenceRevision": "1"
+        },
+        {
+          "name": "acceptance technical insert/update read committed/read committed",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "23514",
+          "targetCount": 1,
+          "loserPreserved": 1,
+          "fenceRevision": "1"
+        },
+        {
+          "name": "acceptance technical insert/update read committed/repeatable read",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "40001",
+          "targetCount": 1,
+          "loserPreserved": 1,
+          "fenceRevision": "1"
+        },
+        {
+          "name": "acceptance technical insert/update repeatable read/read committed",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "23514",
+          "targetCount": 1,
+          "loserPreserved": 1,
+          "fenceRevision": "1"
+        },
+        {
+          "name": "acceptance technical insert/update repeatable read/repeatable read",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "40001",
+          "targetCount": 1,
+          "loserPreserved": 1,
+          "fenceRevision": "1"
+        },
+        {
+          "name": "acceptance technical update/update read committed/read committed",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "23514",
+          "targetCount": 1,
+          "loserPreserved": 1,
+          "fenceRevision": "1"
+        },
+        {
+          "name": "acceptance technical update/update read committed/repeatable read",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "40001",
+          "targetCount": 1,
+          "loserPreserved": 1,
+          "fenceRevision": "1"
+        },
+        {
+          "name": "acceptance technical update/update repeatable read/read committed",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "23514",
+          "targetCount": 1,
+          "loserPreserved": 1,
+          "fenceRevision": "1"
+        },
+        {
+          "name": "acceptance technical update/update repeatable read/repeatable read",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "40001",
+          "targetCount": 1,
+          "loserPreserved": 1,
+          "fenceRevision": "1"
+        },
+        {
+          "name": "acceptance rollback winner business",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "00000",
+          "commitSQLSTATE": "00000",
+          "targetCount": 1,
+          "fenceRevision": "1"
+        },
+        {
+          "name": "acceptance rollback winner technical",
+          "passed": true,
+          "blocked": true,
+          "secondSQLSTATE": "00000",
+          "commitSQLSTATE": "00000",
+          "targetCount": 1,
+          "fenceRevision": "1"
+        }
+      ],
+      "providerAuth": "synthetic claims only; no hosted Supabase connection",
+      "references": [
+        "https://www.postgresql.org/docs/17/transaction-iso.html",
+        "https://www.postgresql.org/docs/17/xfunc-volatility.html"
+      ]
+    }
+  },
+  "nativeEmptyRevisions": {
+    "engine": "PostgreSQL 17.11",
+    "psqlExitCode": 0,
+    "functionalAcceptance": false,
+    "beforeRevision": "5",
+    "afterRevision": "6",
+    "beforeEntries": 4,
+    "afterEntries": 5,
+    "newReceipts": 1,
+    "transactionRolledBack": true,
+    "sql": "\\set ON_ERROR_STOP on\n\\set VERBOSITY verbose\nbegin;\nselect state_revision as before_revision,(select count(*) from public.activity_entries e where e.instance_id=t.id) as before_entries from public.task_instances t where id='00000000-0000-0000-0000-000000000026';\nselect set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',true),set_config('request.jwt.claims','{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000000002\",\"aal\":\"aal1\"}',true);\nset local role authenticated;\nselect api.command_v1('{\"contractVersion\":1,\"operationId\":\"00000000-0000-0000-0000-000000009100\",\"kind\":\"operation.record\",\"expectedRevisions\":{},\"payload\":{\"taskId\":\"00000000-0000-0000-0000-000000000026\",\"workDate\":\"2026-10-15\",\"quantity\":1,\"reference\":null}}'::jsonb) accepted_without_revision;\nreset role;\nselect state_revision as after_revision,(select count(*) from public.activity_entries e where e.instance_id=t.id) as after_entries,(select count(*) from app_private.api_command_receipts where operation_id='00000000-0000-0000-0000-000000009100') as new_receipts from public.task_instances t where id='00000000-0000-0000-0000-000000000026';\nrollback;\r\n",
+    "log": "BEGIN\r\n before_revision | before_entries \r\n-----------------+----------------\r\n               5 |              4\r\n(1 row)\r\n\r\n              set_config              |                                     set_config                                     \r\n--------------------------------------+------------------------------------------------------------------------------------\r\n 00000000-0000-0000-0000-000000000002 | {\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000000002\",\"aal\":\"aal1\"}\r\n(1 row)\r\n\r\nSET\r\n                                                                                                                                                   accepted_without_revision                                                                                                                                                    \r\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\r\n {\"kind\": \"operation.record\", \"result\": {\"rateId\": \"b09e69e8-dbfe-4b05-b869-3d18d03be116\", \"entryId\": \"8dc14c11-1b7a-49f2-bb4c-e35a4e06a880\", \"unitWeight\": \"2.500000\", \"taskRevision\": \"6\", \"weightedLoad\": \"2.500000\", \"measurementVersion\": 2}, \"operationId\": \"00000000-0000-0000-0000-000000009100\", \"contractVersion\": 1}\r\n(1 row)\r\n\r\nRESET\r\n after_revision | after_entries | new_receipts \r\n----------------+---------------+--------------\r\n              6 |             5 |            1\r\n(1 row)\r\n\r\nROLLBACK\r\n"
+  },
+  "focused": {
+    "command": "node node_modules/vitest/vitest.mjs run tests/supabase-operational-contract.test.ts tests/supabase-operational-migration.test.ts --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+    "exitCode": 0,
+    "files": 2,
+    "passed": 17
+  },
+  "priorFullSuite": {
+    "passed": 712,
+    "files": 72,
+    "repeatedDuringReview": false,
+    "reason": "Product hashes unchanged; new final acceptance cases reveal missing coverage"
+  },
+  "sha256": {
+    "supabase/migrations/202610150014_operational_api.sql": "fec86ac9b2cc2b2ec2fbbc26af449b4b5bdedd7dc9f021b7a968a7204c3ce96f",
+    "src/data/supabase/operational-contract.ts": "c062afcde6eb8e2d83c95de47ddb1bd4330da1f79cf160a24c8f24e68b188d82",
+    "tests/review/m2-2a-final-acceptance-review.mjs": "16662fc190906ea981d75b3a5450d78dc75b5f86898e5f5613c04062babbd706"
+  },
+  "nextContract": "docs/architecture/M2-2A-NULL-SAFETY-LUNA-20261015.md",
+  "hostedSupabaseConnected": false,
+  "deploymentPerformed": false
+}

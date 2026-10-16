@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-14",
+  "scope": "Independent technical acceptance of S38/S44 and S52 capture runner",
+  "productChanges": false,
+  "newConfirmedDefects": [],
+  "accepted": [
+    "S38: empty laboratory and open task detail, coach focus and Escape return",
+    "S44: overlapping replies, opening pending, pre-debounce proposal, remount invalidation and POST base revision",
+    "S52 capture runner: stable SVG for 500ms, final screenshot inspected"
+  ],
+  "independentVerification": {
+    "exitCode": 0,
+    "passed": 69,
+    "failed": 0,
+    "files": 5,
+    "report": "outputs/independent-sol-review-20261014/acceptance-final.json",
+    "sources": [
+      "outputs/independent-sol-review-20261014/tour-focus.accepted.source.tsx",
+      "outputs/independent-sol-review-20261014/poll-order.accepted.source.tsx",
+      "outputs/independent-sol-review-20261014/read-edges.accepted.source.tsx"
+    ],
+    "existingRegressions": 63,
+    "independentProbes": 6
+  },
+  "reusedImplementationEvidence": {
+    "record": "docs/architecture/review-evidence/s38-s44-followup-20261014.json",
+    "fullSuite": 668,
+    "typeScriptAndBuilds": "passed in previous implementation turn; not rerun in this review",
+    "edgeChecks": 32,
+    "edgeReport": "outputs/s39-tour-refresh-20261014/edge-final-retry/browser-validation.json",
+    "javascriptErrors": 0,
+    "operationalApiCalls": 0,
+    "allFiveHashesMatch": true,
+    "otherPriorIndependentSourceHashesMatch": 13
+  },
+  "sourceSha256": {
+    "src/App.tsx": "CA960F3E5A5C5690488C1E4A9D0E3E4C14AFC4E410C4408864D1F64492E6B204",
+    "src/components/RemoteWorkspace.tsx": "B22607A01F9D6939FD24AE383792D30E8B24ADD1AF561D7A1EFC820D599159F3",
+    "tests/annotations-tour-app.test.tsx": "53A0DE54F77DA5F8CB56485139FD365AAF3317667B6E4845593AD5CB327F665B",
+    "tests/site-ui.test.tsx": "73A635D07546093CE001E9758BE4E877275D77C25B892DDC29257E3E492A03A0",
+    "tests/browser-corrections.cjs": "A5680C6402CED1FFC917BAD35FDB5B397DF786DA34315C86E7CB14913F1F51B7"
+  },
+  "fixtureCorrection": "Intermediate S38 probe failures came from initialState without a matching durable laboratory baseline and orphaned activity. Final probes use valid stored lab state and wait for deferred detail mounting. Intermediate reports retained.",
+  "technicalStageStatus": {
+    "stages1to4": "accepted locally",
+    "stage5": "technical review accepted; human screen-reader gate pending",
+    "stage6": "accepted local verifier/performance contract",
+    "stage7": "technical local code accepted; hosted Auth/RLS outside this phase"
+  },
+  "nextAction": "Execute docs/runbooks/SCREEN-READER-ACCEPTANCE-LAB.md and record human observations; then consolidate validated work and prepare PC transfer",
+  "externalActions": "No install, accounts, operational API, remote SQL, commit, deployment or audience change"
+}

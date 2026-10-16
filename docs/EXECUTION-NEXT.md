@@ -1,0 +1,1214 @@
+# Acción vigente — GPT‑6.1 Sol revisa M2.2A-R7/R8, 15/10/2026
+
+La implementación local está completa. Evidencia:
+`architecture/review-evidence/m2-2a-r7r8-implementation-20261015.json` y los
+reportes nativos en `../../outputs/m2-2a-r7r8-implementation-20261015/`.
+Pasaron sondas20/20 (18 base +2 rateHistory), nativo6/6, R6 30/30 e
+independiente9/9, protocolo15/15, PostgreSQL RC/RC61/61, RR/RR61/61, los dos
+cruces43/43, suite712/712, TypeScript, builds cliente/Worker, sintaxis y
+diff-check. El reporte captura SHA‑256 de 014 y pares de aislamiento efectivos.
+
+Siguiente: **GPT‑6.1 Sol, esfuerzo alto, Standard**, revisión independiente de
+R7/R8 y del candidato A. Conservar SQL001–013/DTO/UI/Worker/Site. Hasta esa
+decisión no iniciar B/C, aplicar o desplegar014, conectar cuentas ni declarar
+aceptada M2.2A. El ~45% sigue siendo histórico; no recalcular por este bloque.
+
+## Acción anterior — preparar el candidato R6 para revisión
+
+La corrección NULL-safe de 014 ya está implementada y validada. Evidencia vigente:
+`architecture/review-evidence/m2-2a-r6-implementation-20261015.json`; contrato
+ejecutado: `architecture/M2-2A-NULL-SAFETY-LUNA-20261015.md`; informe que originó
+la corrección: `architecture/M2-2A-FINAL-REVIEW-20261015.md`.
+
+Resultados: matriz R6 30/30, sonda independiente 9/9, pruebas previas 15/15,
+focales 17/17, PostgreSQL nativo 61/61 RC/RC + 61/61 RR/RR + 43/43 RC/RR +
+43/43 RR/RC, suite 712/712, TypeScript y builds de cliente/Worker aprobados.
+
+El commit de código R6 es **08b7405** y el commit de evidencia **de38b3d**;
+ambos hooks automáticos pasaron **196/196 en 19 archivos**. Bundle y ZIP se
+verificaron en clonación limpia; el HEAD restaurado coincide con el manifiesto.
+Paquete: `outputs/m2-2a-r6-candidate-delivery-20261015`.
+
+Siguiente acción: **GPT‑6.1 Sol, esfuerzo alto, Standard**, revisa el commit y el
+paquete como evaluador independiente. Si acepta M2.2A, define el contrato B/C.
+No iniciar B/C antes de la aceptación, ni desplegar 014 ni conectar cuentas.
+Conservar 001–013/UI/Worker/Site. Avance ~45% histórico, sin recalcular.
+
+## Acción anterior — revisión del candidato M2.2A (15/10/2026)
+
+R1–R5 ya están corregidos y revalidados. PostgreSQL 17.11: **61/61 RC/RC** y
+**61/61 RR/RR**; replay y revocación cruzados: **43/43 RC/RR** y **43/43 RR/RC**.
+PGlite/protocolo **15/15**, suite **712/712**, TypeScript, build cliente y Worker
+con código 0. Comandos, salidas y hashes:
+`architecture/review-evidence/m2-2a-corrections-validation-20261015.json`.
+
+El candidato de implementación está en el commit **9c096973**. El bundle portátil
+con las ramas `main` y `migration/github-bootstrap` se verificó y clonó en limpio
+con ese HEAD. También pasó el hook automático **196/196**; la suite completa es
+**712/712** y las cuatro matrices nativas suman **208/208** ejecuciones aprobadas.
+La entrega local está en `outputs/m2-2a-candidate-delivery-20261015`.
+
+**Siguiente paso:** **GPT‑6.1 Sol, esfuerzo alto, Standard** revisa el diff exacto,
+los contratos de permiso/MVCC, migración 014, evidencia y matrices; decide aceptar
+o devolver hallazgos y define B/C. Conservar 001–013 y UI/Worker/Site; no desplegar
+ni conectar cuentas. No hay integración alojada comprobada. Avance ~45% histórico,
+sin recalcularlo.
+
+## Evidencia anterior de implementación — supersedida por la matriz completa
+
+Continuar el contrato `architecture/M2-2A-OPERATIVE-API-LUNA-20261015.md` sobre
+la migración local 014. El último runner PostgreSQL nativo pasó 35/35, incluyendo
+pruebas nuevas de snapshot RR obsoleto tras baja de perfil y cierre mensual, sin
+actividad ni recibos. El upgrade PGlite 013→014 conserva sesiones, recibos legacy,
+notas privadas/versiones y snapshots; decoder 16/16. TypeScript, builds cliente y
+Worker y suite completa 712/712 en 72 archivos también pasaron.
+El recorrido y evidencia están en
+`architecture/review-evidence/m2-2a-implementation-20261015.json`.
+
+Ese primer corte no incluía todos los ordenamientos RC/RR. La matriz completa
+posterior está registrada en la actualización vigente al inicio de este archivo.
+Mantener 014 local, sin conexión de cuentas, despliegue, handlers UI ni cambios
+a 001–013.
+
+> **Registro previo 15/10/2026: GPT-6 Luna, medio, Standard.** M2.1 aceptado localmente, informe `architecture/M2-1-SOL-ACCEPTANCE-20261015.md`. El contrato de A se completa ahora con las correcciones indicadas al inicio. M2.2 completo requiere A/B/C; B/C esperan contrato posterior. Mantener 014 local sin desplegarlo incompleto ni iniciar 015. Sin remoto GitHub nuevo. El runner nativo de aceptación M2.1 usa --review-matrix full (42/42).
+
+> Registro histórico del cierre de auditoría Sol (11/10/2026): en ese corte se identificaron 65 hallazgos/95 casos y la siguiente acción era implementar la etapa 1 con Luna. El estado actual figura en la actualización del 12/10 inmediatamente debajo.
+
+> **Nota histórica 14/10/2026 (supersedida para MVCC local):** la ruta del
+> instalador EDB fue cancelada por Windows y no se creó servicio. Más tarde se
+> extrajeron los binarios oficiales portátiles y se completó la prueba local
+> PostgreSQL/MVCC, documentada en la reejecución vigente abajo. La aceptación
+> humana con lector de pantalla continúa abierta; no se modificó SQL ni se
+> conectaron cuentas.
+
+# Estado de ejecución vigente — 14/10/2026
+
+## Corte anterior — implementación M2.1 del14/10, aceptada el15/10
+
+La implementación de correcciones para 013 quedó localmente completa: PostgreSQL
+17.11 nativo **24/24**, Vitest **690/690 en69 archivos**, TypeScript y builds de
+cliente/Worker aprobados. Incluye upgrade poblado 012→013 con familias de datos
+no vacías, pruebas de ACL/default privileges, cuatro estados de identidad dual y
+rollback de fence. Evidencia: `architecture/review-evidence/m2-1-corrected-implementation-20261014.json`.
+El diff está en `migration/github-bootstrap`; primero completar el commit y el
+bundle portable de esta fase. Luego seleccionar **GPT-6.1 Sol, esfuerzo alto,
+Standard** para revisar cambios, hashes, carreras, privacidad y criterios del
+contrato M2.1. No iniciar 014/M2.2, conectar cuentas ni desplegar antes de su
+aceptación. Sin cambios en App, Worker/D1, Site o migraciones 001–012. El avance
+global orientativo sigue ~45% y no se recalcula con esta etapa local.
+
+## Revisión de aceptación posterior — acción vigente
+
+S38/S44 aceptados técnicamente tras revisión independiente del código y 69/69
+comprobaciones en cinco archivos: foco con detalle abierto, Escape, sondeo durante
+apertura, respuesta de montaje anterior, propuesta antes del debounce y revisión
+correcta del POST. Los cinco hashes coinciden con el corte de implementación;
+se conserva su suite 668/668 y build, sin repetirlos al no cambiar producto.
+El runner S52 y su captura estable también quedan aceptados. Evidencia:
+`docs/architecture/review-evidence/s38-s44-independent-acceptance-20261014.json`.
+
+Las siete etapas quedan revisadas en su alcance técnico local. Etapa 5 conserva
+únicamente la aceptación humana con lector de pantalla. Ejecutar
+`docs/runbooks/SCREEN-READER-ACCEPTANCE-LAB.md` y registrar los resultados antes
+de afirmar aceptación funcional completa. Narrador está presente en esta PC.
+No hacen falta instalaciones ni cuentas para ese recorrido. Después consolidar
+el corte validado en Git y actualizar el paquete de PC personal; una revisión de
+código aprobada no acredita ese commit, el paquete ni una publicación.
+
+Modelo para acompañar la aceptación: **GPT-6.1 Sol, esfuerzo medio, Standard**.
+Si aparecen defectos concretos, documentar contrato y pasar a Luna medio para
+corregirlos. No hay un nuevo contrato de código pendiente en este bloque.
+
+## Registro de implementación — S38/S44 y captura S52
+
+S38 quedó corregido: el foco principal ahora pertenece al botón Siguiente/Listo
+del recorrido, y el retorno al primer paso recupera un control habilitado. S44
+ahora asigna una secuencia monotónica por lectura, descarta sondeos viejos,
+invalida lecturas al guardar/cambiar contexto y evita sondear durante una apertura
+explícita. El runner S52 espera 500 ms de geometría SVG estable antes de capturar.
+
+Aceptación local: suite completa **668/668 en 67 archivos**; TypeScript, build
+Vite, build Worker y Edge **32/32** pasan. Edge reporta cero errores JS y cero
+llamadas a la API operativa. Evidencia:
+`docs/architecture/review-evidence/s38-s44-followup-20261014.json` y
+`outputs/s39-tour-refresh-20261014/edge-final-retry/browser-validation.json`.
+Los cambios no se comprometieron ni publicaron porque el árbol ya contenía
+cambios ajenos a esta corrección. No se conectaron servicios.
+
+Siguiente: revisión independiente **GPT-6.1 Sol, esfuerzo alto, Standard** de
+S38/S44 y del diff acotado. Etapa 5 aún requiere aceptación humana con lector de
+pantalla; etapa 7 no acepta servicios alojados ni Supabase Auth/RLS.
+
+## Registro histórico de revisión inicial — supersedido por la aceptación
+
+Se confirmaron dos correcciones incompletas de contratos originales: S38 deja
+foco en Anterior deshabilitado al volver al primer paso; S44 acepta un sondeo
+antiguo después de otro más nuevo. Sus pruebas independientes fallan con App
+real, aunque las 138 regresiones existentes del bloque pasan. S52 se acepta
+funcionalmente y S57/S58 se aceptan para el contrato local. La captura anterior
+de la torta era intermedia; Edge con paths estables confirmó el gráfico completo.
+
+Próximo modelo: **GPT-6 Luna, esfuerzo medio, Standard**, para ejecutar los dos
+contratos y corregir la espera de captura definidos en
+`docs/architecture/SOL-INDEPENDENT-REVIEW-20261014.md`. Después, Sol alto revisa
+esas correcciones. Etapas 5 y 7 no aceptadas; lector de pantalla humano pendiente.
+Esta actualización reemplaza los saldos anteriores de revisión y la afirmación
+de que no quedaban correcciones concretas. No modifica el alcance del producto.
+
+## Revalidación runtime actual del paquete Sol — 14/10/2026
+
+Revisión focal posterior S01/S13/S59/S60: fuente y contratos cotejados; no se
+encontró discrepancia concreta que requiera código. La proyección remota enumera
+el DTO vigente y mantiene filas ocultas en servidor; consultar tareas no otorga
+permiso de ejecución; S59 revalida autoridad y revisión tras locks; S60 usa el
+recibo por actor/operationId para replay y conserva operaciones distintas.
+Pruebas focales S01/S13/S59/S60 47/47, S30–S32 40/40 y S44–S46 35/35,
+excluyendo `tmp/**` (122/122 en 8 archivos).
+Informe, outputs y hashes:
+`docs/architecture/review-evidence/s01-s13-s59-s60-source-recheck-20261014.json`.
+S61–S65: fuente y regresiones cotejadas también, 99/99 en 8 archivos; ver
+`docs/architecture/review-evidence/s61-s65-source-recheck-20261014.json`.
+Las revisiones independientes Sol de S52 y etapas 5–7 siguen pendientes; la
+aceptación humana con lector de pantalla también.
+
+Revalidación actual S52/etapa 5 en Edge local: build cliente aprobado y el
+recorrido `tests/browser-corrections.cjs` pasó 31/31, cero errores JS y cero
+llamadas a API operativa. Inspección visual de Recharts confirmó ámbitos sólo
+operativos, cero entregables, etiquetas Sin base/Sin evaluar y sectores grises.
+Reporte/captura y hashes:
+`docs/architecture/review-evidence/s52-edge-current-source-recheck-20261014.json`.
+No sustituye la revisión independiente Sol ni la aceptación humana.
+
+Reconciliación final del alcance documental: el informe fuente tiene 65 IDs
+únicos; la asignación a siete etapas también reúne 65 IDs, sin omisiones ni
+duplicados entre etapas. La suite actual pasó **665/665 en 67 archivos**;
+TypeScript, build cliente, Worker y Edge 31/31 pasan. Estado por etapa, outputs
+y hashes en
+`docs/architecture/review-evidence/sol-65-current-closure-recheck-20261014.json`.
+Etapas 4–7 aún esperan revisión independiente Sol, y etapa 5 lector de pantalla.
+
+Corrección vigente S57/S58: se retiraron opciones que podían relajar el umbral
+de 1.000 ms, el número de muestras y la fixture 24/2.000. La suite pasó
+665/665; las regresiones focales 14/14; TypeScript, cliente y Worker pasaron.
+Edge registró p95 384,85 ms y el runner aislado S58 pasó 7/7. Detalle y hash
+compartido en `docs/architecture/review-evidence/s57-s58-current-contract-recheck-20261014.json`.
+
+Reejecución con huella exacta del árbol actual: TypeScript, build Vite cliente
+(entrada 332,85 kB), build Worker y `git diff --check` pasan. El benchmark S57
+registró 30/30 muestras, 24 perfiles/2.000 tareas y p95 383,72 ms. S58 pasó
+7/7 (209 omitidas por filtros, 0 fallidas). Ambos reportes registran la misma
+huella SHA-256 `4b599c7c83732082c72d0a9dbbd343ea8b4bd4b5c19766aa9ff0a4cb0032a109`
+(443 archivos antes de esta nota documental). Salidas:
+`outputs/current-sol-followup-20261014/navigation-benchmark.json` y
+`outputs/current-sol-followup-20261014/isolation/isolation-run.json`.
+
+Se repitió la aceptación local sobre el árbol actual. Node v24.19.0 y las
+dependencias del repositorio bastaron; npm/npx global no están en el PATH.
+TypeScript, build cliente (entrada JS 331,70 kB, bajo el límite de 500 kB),
+Worker y suite completa **665/665 en 67 archivos** pasaron. Los cuatro E2E de
+Edge pasaron; el de correcciones verificó 29 controles, sin errores JS ni
+llamadas a la API operativa. S52 esperó geometría visible de los dos sectores
+del gráfico de torta antes de capturar: En curso y Pendiente, en grises.
+Accesibilidad automatizada: 38 rutas, 2.124 controles AX y 877 focos; contraste:
+5.943 textos en 76 combinaciones. S57: p95 384,85 ms con 24 perfiles/2.000
+tareas; S58: 7/7 (209 filtradas por sus
+patrones explícitos). `git diff --check` pasó. Evidencia:
+`docs/architecture/review-evidence/sol-corrections-runtime-recheck-20261014.json`
+y `outputs/current-sol-corrections-browser-20261014/`.
+
+Esto cierra la limitación anterior del runner de navegador. Siguen abiertas la
+revisión independiente Sol de S52 y etapas 5–7 y la aceptación humana con lector
+de pantalla. PostgreSQL/MVCC local pasó 26/26 escenarios con Auth sintético;
+esto no valida Supabase Auth/RLS alojado. No se confirmó otra corrección de
+producto en esta reejecución.
+
+**PostgreSQL/MVCC local — reejecución 14/10/2026:** usando el archivo binario
+oficial EDB 17.11 se creó un cluster descartable en `%TEMP%`, sólo en
+`127.0.0.1:55432`, sin servicio de Windows ni datos reales. La prueba pasó
+**26/26** (órdenes AB/BA, bloqueos observados en `pg_locks`, SQLSTATE 00000 y
+40001, cero deadlocks 40P01). Se comprobaron huellas de rollback, recibos
+únicos y consistencia de cierres/reportes/outbox. PostgreSQL se apagó y se
+verificó que no quedaron procesos ni listeners. Auth fue sintético: esto valida
+MVCC del laboratorio SQL, no Supabase Auth/RLS alojado. Reporte:
+`outputs/current-sol-corrections-browser-20261014/postgres-mvcc-coordination-20261014.json`.
+
+## Revalidación real S39 en Edge — 14/10/2026
+
+El recorrido anterior se detuvo por una expectativa vieja del runner, no por un
+defecto del producto: jefatura llega al paso correcto con el título actual
+“Cierre de mes”, mientras el runner esperaba “Cierre por alcance”. Se actualizó
+sólo esa aserción y el recorrido completo pasó **29/29**, con cero errores JS y
+cero llamadas a la API operativa. Se comprobaron los pasos de jefatura y
+catálogo, foco/teclado, arrastre, vistas móviles y flujos de las correcciones.
+Evidencia: `outputs/stage-5-validation-20261014/edge-post-s57-recheck-final/`
+y `docs/architecture/review-evidence/s39-edge-browser-recheck-20261014.json`.
+
+Esto cierra la comprobación visual local de S39, pero no la aceptación humana
+con lector de pantalla ni la revisión independiente Sol. El runner usa
+`playwright-core` del repositorio y Edge local; no necesita npm/npx global. No
+hay cambio de producto pendiente por el fallo inicial.
+
+## Revisión local de todos los documentos de correcciones Sol — 14/10/2026
+
+Se contrastaron `PLAN-REVIEW`, el contrato `PLAN-CORRECTIONS-NEXT`, los 65
+hallazgos de `SOL-AUDIT`, los contratos `SOL-LUNA` y la matriz por requisito.
+Las etapas 1–3 tienen aceptación Sol registrada; S52 y las etapas 5–7 no se
+declaran aceptadas porque conservan gates expresos. Los resultados más antiguos
+que afirmaban que faltaba Edge para S39 quedaron sustituidos por la revalidación
+vigente.
+
+Repetición sobre el árbol efectivo SHA-256
+`2cff5088bbc8992cecfbe25c1f019c8121ae673119d4580493c3bd534047d425`:
+**663/663** pruebas en 67 archivos; TypeScript, build cliente y Worker; los
+cuatro E2E Edge; auditoría automatizada de 38 rutas con 2.124 controles AX y
+904 paradas de teclado sin errores; contraste de 5.943 textos en 76
+combinaciones sin omisiones ni fallos; benchmark p95 534,39 ms (<1.000 ms) con
+24 perfiles/2.000 tareas; S58 7/7. Los E2E y auditorías no llamaron a la API
+operativa. Git diff-check pasó con avisos de conversión LF/CRLF solamente.
+Registro: `docs/architecture/review-evidence/sol-corrections-recheck-full-20261014.json`.
+
+No se halló una corrección adicional de producto en la revalidación de S39; el
+fallo previo correspondía al texto esperado por el runner. Gates restantes:
+revisión independiente Sol de S52 y etapas 5–7, aceptación humana de lector de
+pantalla y PostgreSQL/MVCC concurrente real para etapa 7. No se hicieron commit,
+PR, Site, cuentas, API ni migraciones remotas. Próximo modelo de revisión:
+GPT‑6.1 Sol, esfuerzo alto, Standard.
+
+## Revisión focal de los contratos Sol aún abiertos — 14/10/2026
+
+Se contrastaron los contratos de S52, S36–S39, S54, S56, S62–S63, S57–S58 y
+S01/S13/S30–S32/S44–S46/S59–S60 con sus fuentes actuales. Las regresiones
+focales pasaron **200/200 en 18 archivos**. El benchmark S57 volvió a pasar con
+24 perfiles, 2.000 tareas y p95 **569,62 ms**; S58 pasó 7/7 (209 omitidas por
+los filtros explícitos). Ambos runners registraron el mismo hash efectivo
+`292d563c7f2306cc5f71967e76dc737e8da8e1a87de1b7322b1b9cd3b9b5568e`.
+Evidencia: `docs/architecture/review-evidence/open-contracts-recheck-20261014.json`
+y los reportes referidos allí. No se confirmó una discrepancia nueva de código.
+
+Esto no reemplaza la aceptación independiente GPT‑6.1 Sol de S52 y etapas 5–7,
+la aceptación humana con lector de pantalla ni la prueba concurrente real de
+PostgreSQL/MVCC. No se modificó código de producto ni se conectaron servicios.
+
+### Reintento de comprobación PostgreSQL local — 14/10/2026
+
+La comprobación vigente volvió a encontrar `psql`, `postgres`, `pg_ctl`,
+`initdb`, Docker y Podman ausentes. Winget descargó el instalador EDB 17.11-5
+y verificó su hash. EDB documenta `--extract-only 1` para extraer binarios
+sin instalar el servicio
+([parámetros oficiales](https://www.enterprisedb.com/docs/supported-open-source/postgresql/installing/command_line_parameters/)).
+Sin embargo, al invocar el instalador firmado con `--help`, Windows devolvió
+“El usuario ha cancelado la operación” antes de extraerlo. No se instaló ni
+inició PostgreSQL y no se ejecutó MVCC. No repetir la instalación: requiere que
+el usuario autorice ese inicio local. El instalador quedó en la ruta temporal
+única registrada en `open-contracts-recheck-20261014.json`; la limpieza fue
+rechazada por la política del entorno. Esto no conecta cuentas ni servicios
+externos.
+
+## Revisión de documentos Sol y separación del bundle — 14/10/2026
+
+Se revisaron `PLAN-REVIEW-20261007.md`, `PLAN-CORRECTIONS-NEXT-20261007.md`,
+`SOL-AUDIT-20261008.md`, `SOL-REQUIREMENT-COVERAGE-20261008.md` y
+`SOL-LUNA-CONTRACTS-20261011.md`. La matriz enumera los 65 hallazgos S01–S65
+sin duplicados ni omisiones; etapas 1–3 están aceptadas, y S52/etapas 5–7
+constan implementadas localmente con las puertas de revisión y aceptación aún
+abiertas que se detallan abajo.
+
+Se resolvió el aviso de entrada grande del plan de correcciones sin elevar el
+límite: `laboratoryEvidence` queda bajo el límite de importación diferida y
+React/ReactDOM/scheduler forman el chunk `framework`. El build dejó la entrada
+en 328,29 kB (antes 548,96 kB), sin aviso de chunk >500 kB ni de importación
+mixta. Suite 661/661, TypeScript y builds de cliente/Worker pasaron. Zod aún
+emite avisos `PURE`. Evidencia:
+`docs/architecture/review-evidence/sol-corrections-review-recheck-20261014.json`.
+
+La comprobación visual de S39 quedó completada en Edge después del corte de
+bundle: ver “Revalidación real S39 en Edge” arriba. La inspección visual del
+bundle tras su separación aún requiere revisión independiente Sol. No hacer
+commit, PR ni entrega antes de resolver los gates restantes.
+
+## Corrección de validador en snapshots de respaldo — 14/10/2026
+
+La auditoría de campos nuevos encontró que snapshots congelados no aplicaban
+los mismos límites para avance comercial y fechas que los registros vivos.
+Se corrigió manteniendo opcionales los campos nuevos en snapshots antiguos.
+Prueba focal: 17/17; TypeScript: pasa. Evidencia:
+`docs/architecture/review-evidence/backup-snapshot-validation-lab-20261014.json`.
+La validación visual S39 se completó con Edge desde el runner existente; ver la
+evidencia referenciada arriba. Sigue pendiente la revisión integral del
+respaldo y las aceptaciones independientes/humanas correspondientes. No se
+requiere npm/npx global para este runner del repositorio.
+
+## Relectura S57/S58 — 14/10/2026
+
+Se corrigió el caso en que una ruta de salida ya existente recibía el informe
+fallido del benchmark. Ahora se conserva esa carpeta y el informe de esta
+ejecución se guarda en una hermana nueva. Regresión focal 12/12; suite completa
+663/663, TypeScript y builds cliente/Worker pasan. El runner S58 pasó 7/7, y el
+benchmark Edge actual pasó 30/30 con p95 408,51 ms, 24 perfiles/2.000 tareas,
+cero errores y cero llamadas operativas. La revisión independiente Sol de
+S57/S58 sigue pendiente; el recheck PostgreSQL/MVCC local 26/26 está registrado
+en la actualización vigente al inicio de este documento. Evidencia:
+`docs/architecture/review-evidence/s57-s58-recheck-lab-20261014.json`.
+El recorrido visual S39 pasó en Edge; ver la revalidación registrada arriba.
+
+## Etapa 7 — implementación local completa; auditoría independiente pendiente
+
+La etapa incorpora S59/S60 y los contratos S01/S13/S30/S31/S32/S44/S45/S46.
+La migración 012 corrige revisión nula/desactualizada y revalida autoridad en
+aprobación y pedido de cambios de inducción. Ambos flujos adquieren bloqueos de
+actor/perfil/solicitud y vuelven a validar antes de escribir; una regresión
+confirma que un encargado removido del equipo no modifica la solicitud ni deja
+revisión o auditoría parcial. Los recibos identifican replay por actor y
+operationId. También se endurecieron proyección/permisos, interrupción de
+cronómetros, DTOs de tareas y
+coberturas, respuestas Worker con referencia a perfil activo y recuperación de
+propuestas locales. Las pruebas S44/S45 integradas con
+RemoteWorkspace y App cubren el polling GET tardío durante POST y respuestas
+GET cuyo perfil activo no existe o está inactivo, más POST cuyo perfil no
+existe; la propuesta se conserva ante POST
+inválido. S46 cubre presencia fallida en GET/POST y rechazo previo a heartbeat
+si falta identidad. Tras integrar la continuación S39 del recorrido, la suite
+actual pasó **661/661 en 67 archivos** tras la regresión S57/S58; TypeScript, cliente, Worker y
+`git diff --check` pasan. La evidencia Edge 29/29 corresponde al corte integrado
+anterior a S39; la comprobación visual Edge posterior pasó 29/29 y está
+registrada en `s39-edge-browser-recheck-20261014.json`.
+Edge recorrió 29 comprobaciones, incluida tarea cubierta con teclado y retorno de foco, sin errores JS ni
+llamadas a `/api`. Benchmark local actual: 24 perfiles/2.000 tareas, p95
+502,95 ms en 30 recorridos calientes. Es una medición local, no concurrente ni
+de producción. No se aplicó SQL remoto. La limitación antigua de no tener
+PostgreSQL/Docker quedó resuelta para MVCC local: PostgreSQL 17.11 descartable
+pasó 26/26 escenarios concurrentes en órdenes AB/BA, con barreras verificadas
+en `pg_locks`, cero deadlocks y comprobaciones de rollback/recibos/cierres. Auth
+fue sintético; no se validó Supabase Auth/RLS alojado. Cluster apagado y sin
+servicio. Evidencia en `review-evidence/sol-corrections-runtime-recheck-20261014.json`
+y `outputs/current-sol-corrections-browser-20261014/postgres-mvcc-coordination-20261014.json`.
+
+## Relectura local S57/S58 — procedencia y reporte ante falla de Git — 14/10/2026
+
+El runner S58 calculaba el hash/HEAD antes del bloque que escribe su resultado;
+si Git fallaba, la ejecución terminaba sin reporte. Ambos accesos quedaron bajo
+el manejo de errores y la regresión con PATH vacío confirma salida no-cero y
+reporte fallido sin sobrescribir resultados previos. S57 también falla si no
+puede calcular el hash del árbol efectivo, aunque las muestras sean válidas.
+Las pruebas focales pasaron 11/11, el runner completo pasó 7/7 con 209 omitidas
+y 0 fallidas, y la suite completa pasó 661/661 en 67 archivos; `tsc --noEmit`
+pasó. Evidencia:
+`docs/architecture/review-evidence/s58-hash-failure-report-lab-20261014.json`.
+La revisión independiente Sol de S57/S58 sigue pendiente.
+
+**Siguiente paso: GPT-6.1 Sol, esfuerzo alto, Standard**, para revisar de forma
+independiente S52 y las etapas 5–7, incluida la migración 012, los contratos,
+permisos y evidencias; corregir lo que encuentre antes de aceptar. La etapa 5
+también requiere aceptación humana con lector de pantalla. La concurrencia
+PostgreSQL/MVCC local ya pasó; Auth/RLS alojado e integración desplegada se
+reservan para la infraestructura futura autorizada. No conectar ni activar API.
+Evidencia:
+`docs/architecture/review-evidence/stage-7-implementation-local-20261014.json`.
+Revalidación de foco/benchmark: `docs/architecture/review-evidence/
+stage-5-partial-laboratory-20261014.json` y
+`outputs/performance-lab-2026-10-14-post-tour-2026-10-14/`.
+
+## Corte histórico previo a la etapa 7 — etapa 6 implementada localmente (14/10/2026)
+
+S57/S58 están implementados y validados localmente, pendientes de revisión
+independiente Sol. Suite completa: 638/638 en 67 archivos; TypeScript, cliente
+y Worker pasan. Benchmark con fixture válida de 24 perfiles/2.000 tareas:
+30 recorridos calientes, p95 368,07 ms, umbral estricto <1.000 ms; cero errores
+JS/API. El runner aislado ejecutó 7 expectativas exactas: 7 aprobadas, 0
+fallidas y 206 omitidas por los filtros de nombre; los casos de cero pruebas,
+todo omitido, patrón ausente, status nulo y fallo se rechazan en pruebas de
+contrato. Los informes incluyen hash del árbol efectivo y salidas únicas.
+
+En ese corte, la acción pendiente era la revisión independiente GPT-6.1 Sol,
+esfuerzo alto, Standard, sobre S57/S58 y su evidencia. Luego correspondía
+resolver los pendientes de aceptación de etapas 5 y 4 antes de iniciar la etapa
+7. El estado vigente y sus gates están en la sección superior. Este corte no es
+aceptación global ni modifica el avance orientativo ~45%. No hubo commit, PR,
+publicación, cuentas, API operativa o despliegue.
+Evidencia: `docs/architecture/review-evidence/stage-6-verifier-implementation-
+lab-20261014.json`.
+
+## Registro de etapa 5 — corte anterior (14/10/2026)
+
+La suite oficial pasó **629/629 en 66 archivos**; TypeScript, cliente, Worker,
+`git diff --check` y Edge correcciones pasan. El Edge final comprobó los dos
+selectores con 24 perfiles y navegación Tab/Shift+Tab/Escape, búsqueda nativa
+con Tab/Enter/Espacio preservando actor, guía con permisos por rol y foco, y
+arrastre de cobertura con responsable original, actor reemplazante y duración
+de animación reducida `0s`. Cero errores JS y cero llamadas a `/api`.
+
+La aceptación de etapa 5 sigue abierta por aceptación humana con lector de
+pantalla y revisión independiente de Sol. La etapa 4 también queda abierta
+hasta la revisión independiente de S52. No hay commit, PR, actualización del
+Site, cuentas conectadas, API operativa ni despliegue. Avance global ~45%, sin
+cambio. Evidencia: `docs/architecture/review-evidence/stage-5-partial-
+laboratory-20261014.json` y `outputs/stage-5-validation-20261014/edge/`.
+
+## Registro histórico — etapa 3 aceptada (14/10/2026)
+
+Sol aceptó funcionalmente S04/S12/S19/S22/S26/S35/S61. Corte final:
+595/595 pruebas en 65 archivos; TypeScript, build cliente y Worker,
+`git diff --check`, Edge principal/correcciones/conjuntas y benchmark aislado
+pasaron. Con 24 perfiles y 2.000 tareas, p95 caliente fue 405,45 ms frente a
+objetivo <1.000 ms. Una corrida concurrente de pruebas/navegadores tuvo un
+timeout SQL y un benchmark fuera de objetivo; ambos se repitieron aislados y
+pasaron. La evidencia mantiene ambos intentos visibles.
+
+En ese corte, etapas 1–3 estaban aceptadas y etapa 6 era el siguiente bloque.
+S57/S58 ya quedaron implementados según el estado vigente al inicio de este
+documento. Etapas 4–7 y la aceptación global siguen abiertas; revisar el corte
+vigente anterior para los gates pendientes. No commit, PR, publicación,
+cuentas, API operativa ni despliegue.
+Evidencia: `docs/architecture/review-evidence/stage-3-final-acceptance-20261014.json`.
+
+## Progreso parcial de etapa 4 — 14/10/2026
+
+### Corte más reciente
+
+S48 quedó **aceptado funcionalmente por Sol**. La revisión confirmó que las
+operativas sin coeficiente no suman puntos de entregables, pero conservan
+movimientos, cantidades, tiempo y cuotas conjuntas; aprobar una propuesta no
+crea un coeficiente por movimiento.
+
+S52 quedó implementado: los grupos con tareas operativas permanecen en el
+análisis, se distinguen los grupos sin base de entregables de un cero real, y
+la exportación CSV conserva esa distinción y la calidad “Sin evaluar”. La
+prueba focal pasó 20/20; TypeScript, build Vite cliente, build Worker y Edge
+correcciones pasaron. Edge ejercitó el SVG de Recharts real con dos grupos sólo
+operativos y un entregable con cero avance; se ven los nombres y la nota separa
+“Sin base de entregables” de “Cumplimiento 0%”. Captura y datos en
+`outputs/stage-4-validation-20261014/edge-s52-real-chart/`. Los dos intentos de
+revisión independiente de S52 por Sol quedaron sin respuesta por capacidad del
+modelo; esa revisión funcional permanece pendiente.
+
+**Etapa 5:** S36–S39, S54, S56, S62 y S63 están implementados localmente y sus
+comprobaciones automáticas y Edge pasan. Falta lector de pantalla y revisión
+independiente. Las comprobaciones de S52 se conservan para revisión Sol. No
+conectar cuentas ni actualizar/publicar el Site. Avance global ~45%, sin cambio.
+
+Sol aceptó S05, S15 y S20 por separado. S05 conserva referencia histórica del
+autor sin ampliar su permiso vigente; S15 alinea empresa/tarea visible y guardada
+y continúa versionado desde el máximo restaurado; S20 rechaza fechas imposibles
+en escrituras y copias, sin alterar fechas válidas ni interpretación ART.
+
+Corte integrado: 603/603 pruebas en 66 archivos, TypeScript, builds
+cliente/Worker, `git diff --check` y Edge principal, correcciones y
+respaldo/restauración pasaron sobre el árbol final; no hubo errores JS ni
+llamadas a API operativa.
+
+Actualización S24: la navegación de una obligación desde el calendario usa su
+período fiscal dentro del módulo de origen, abre el panel si estaba plegado,
+revalida visibilidad vigente y enfoca el registro después del render. La
+selección de mes del calendario no cambia. Validación actual: prueba focal 9/9,
+suite integrada 604/604 en 66 archivos, TypeScript, Vite cliente, Worker y Edge
+correcciones; Edge sin errores JS ni llamadas operativas. Sol aceptó S24 tras
+12/12 probes independientes, incluyendo origen inexistente y actor revocado.
+
+Actualización S25: Sol aceptó funcionalmente la campana tras seis pruebas
+independientes. Se verificaron cambio de día ART, cruce de año, recuperación de
+foco/visibilidad, panel abierto/cerrado, lectura con ID actual, cambio de actor,
+un solo timer bajo StrictMode y limpieza de listeners al desmontar. No se
+detectaron bloqueos en S25. La suite integrada local final del corte sigue en
+606/606 en 66 archivos; TypeScript, cliente, Worker y Edge principal aprobaron.
+Edge sin errores JS ni llamadas operativas.
+
+S33 quedó implementado en laboratorio y aceptado funcionalmente por Sol con
+36/36 probes independientes. Perfil sólo operativo acepta revisión sin cuota y
+conserva target/peso; perfil mixto cambia sólo pesos de entregables; actores no
+autorizados se rechazan; el guardado fallido deja el formulario disponible. No
+hubo diferencias en Worker, servidor operativo, Supabase ni migraciones.
+La bandeja ya no exige objetivos operativos ni actualiza sus targets o pesos
+legacy; sólo cambia pesos de entregables. Un perfil con operativas solamente se
+puede revisar sin cuota, y coeficientes siguen en el panel versionado. Un fallo
+de persistencia conserva el formulario. Worker/site-policy y SQL Supabase
+permanecen intactos. La suite pasó 609/609 en 66 archivos; TypeScript, builds
+cliente/Worker, `git diff --check` y Edge correcciones pasan; Edge sin errores JS
+ni llamadas operativas.
+
+S40 quedó aceptado funcionalmente por Sol. En la revisión detectó un P2: una
+revisión v2 sin marcador propio podía omitir la validación de tipo de tarea al
+restaurar. La validación ahora hereda la versión del registro padre; pruebas
+cubren revisión sin marcador válida con entregable y rechazo de la adulterada
+con operativa, además de preservar obligaciones legacy. Sol revalidó y aceptó
+S40 con 37/37 probes focales. Suite completa: 611/611 en 66 archivos; TypeScript,
+build cliente/Worker, Edge de correcciones y `git diff --check` pasan. Los builds
+conservan avisos existentes de chunk cliente >500 kB, anotaciones Zod e imports
+mixtos de evidencia.
+
+S41 quedó aceptado funcionalmente por Sol. Usa `dateART` como fecha inicial al
+abrir el formulario y conserva lo seleccionado aunque el reloj cruce medianoche.
+La revisión independiente pasó 50/50 pruebas focales: incluye zona local
+`Pacific/Kiritimati`, cruce de año, conservación al avanzar el reloj y coeficiente
+de hoy en snapshot del movimiento de hoy. La suite posterior a S41 pasó 615/615
+en 66 archivos; TypeScript, builds cliente/Worker, Edge de correcciones y
+`git diff --check` pasan. El build cliente conserva avisos ya existentes de
+chunk >500 kB, anotaciones Zod e imports mixtos.
+
+S42 quedó aceptado funcionalmente por Sol con 18/18 probes focales. Notifica
+cambios de disponibilidad, dependencias y seguimiento comercial con un aviso
+genérico por destinatario autorizado; equivalencias normalizadas no avisan,
+revocaciones excluyen al destinatario y los cambios simultáneos no duplican.
+La suite posterior pasó 620/620 pruebas en 66 archivos; TypeScript, builds,
+Edge y `git diff --check` pasan. No cambia contratos del Worker ni Supabase.
+
+En ese corte, el siguiente bloque era S48, puntos y textos de metas operativas
+antiguas en ciclo e inducción; luego S52. La inducción conserva su revisión
+separada dentro de S48. El estado actualizado figura en las secciones superiores.
+Etapa 4 y aceptación global siguen abiertas; avance global orientativo ~45%.
+Evidencia: `docs/architecture/review-evidence/stage-4-partial-laboratory-20261014.json`.
+
+## Registro anterior — aceptación etapa 2 (14/10/2026)
+
+La etapa 2 quedó aceptada en revisión funcional independiente de Sol. Validación
+final: 588/588 pruebas en 65 archivos; TypeScript; build cliente y Worker;
+`git diff --check`; recorridos Edge principal, correcciones y respaldo; y
+benchmark de 24 perfiles/2.000 tareas con p95 de 591,87 ms (objetivo <1.000 ms).
+Los recorridos Edge informaron cero errores JS y llamadas operativas. No se
+indujo cuota física del disco; el navegador sí abortó una transacción IndexedDB
+nativa sin alterar metadata/blobs. Aceptación de etapa 2 no equivale a producto
+terminado. Evidencia: `docs/architecture/review-evidence/stage-2-final-acceptance-20261014.json`.
+
+En ese corte, la siguiente acción era continuar con etapa 3: revisar S04/S12/S19/S22/S26/S35/S61 en el árbol
+vigente, completar los escenarios requeridos que falten, volver a validar el
+conjunto y solicitar revisión Sol antes de aceptar la etapa. Las correcciones
+parciales y pruebas fechadas 12/10 no son aceptación final. Etapas 4–7 siguen
+abiertas. Sin commit, PR, actualización del Site, cuentas, API operativa ni
+despliegue.
+
+> Cierre 13/10/2026 — Sol aceptó la etapa 1 del laboratorio sin bloqueos
+> residuales (S02/S06/S14/S17/S18/S21/S23/S27/S28/S34/S43/S47/S50/S53).
+> Validación del árbol final: 565/565 pruebas en 62 archivos; corte focal
+> 93/93; TypeScript, cliente, Worker, `git diff --check` y recorridos Edge
+> general/correcciones aprobados, sin errores JS ni llamadas a API operativa.
+> Revisión Sol: una corrida independiente de dos workers quedó 174/178 por
+> esperas UI en dos archivos; la repetición estable quedó 56/56. Conservar la
+> variación como evidencia de sensibilidad temporal, no ocultar la primera.
+> El próximo bloque es continuar etapa 2 desde su evidencia parcial, priorizando
+> intercalados post-commit/notificación y fallos de compensación en S65, errores
+> físicos de IndexedDB y adversos restantes. Luego validar y pedir revisión Sol
+> de etapa 2. Etapas 3–7 permanecen abiertas; no commit, PR, publicación ni
+> cuentas. Evidencia de cierre etapa 1:
+> `docs/architecture/review-evidence/stage-1-final-acceptance-20261013.json`.
+
+> Actualización 13/10/2026 — etapa 2A aceptada por Sol, alcance S09/S16/S65
+> y estado durable de evidencia. La revisión observó que la inyección de UUID
+> alcanzaba un ID de notificación antes de labRevision; se aisló la fixture y
+> el corte focal pasó 23/23.
+> Se cerró el bloque de estado durable,
+> lock compartido entre adjuntos/restauración y resultados inciertos de
+> guardado. Última suite completa 579/579 en 65 archivos; foco 25/25;
+> TypeScript,
+> Vite, Worker y Edge aprobados. Edge confirmó que un cambio de otra pestaña
+> mientras la subida esperaba el lock detuvo la escritura. Edge también abortó
+> una transacción IndexedDB nativa y confirmó que los datos quedaron intactos;
+> no se simuló haber agotado cuota física del disco. El guard para un
+> cambio durante el almacenamiento se sustenta en regresión focal e inspección
+> Sol, no en ese E2E. Se corrigió el hallazgo P2 de UUID fuera del try y se
+> verificó rechazo/compensación segura. Evidencia:
+> `docs/architecture/review-evidence/stage-2-evidence-durable-20261013.json`.
+> Etapa 2 completa sigue abierta; sin commit, PR, publicación, cuentas ni API.
+
+> Actualización 13/10/2026 — seguimiento de evidencia de etapa 2: suite
+> completa 553/553 en 61 archivos, 76/76 focalizadas en seis archivos;
+> TypeScript, build cliente/Worker y `git diff --check` pasaron. Se añadieron
+> casos S03 para backups malformados v1/v2 y S65 para escritura confirmada,
+> rechazo compensado y readback ambiguo en el formulario operativo integrado.
+> Esto no acepta etapa 2: todavía faltan errores físicos de IndexedDB en
+> navegador, fallos tras commit/notificación y compensación, conjunto completo
+> de adversos, lector de pantalla y benchmark. Evidencia:
+> `docs/architecture/review-evidence/stage-2-partial-laboratory-20261012.json`.
+> El gate vigente sigue siendo revisión Sol independiente de etapa 1; no se
+> cierra etapa ni se publica.
+
+> Actualización 13/10/2026: la etapa 1 está implementada y revalidada en el árbol vigente; sus 14 hallazgos esperan revisión independiente de Sol. Tras añadir pruebas de privacidad de Planificación y avisos de cancelación, suite completa 547/547 en 60 archivos; TypeScript y builds de cliente y Worker pasaron. Los dos recorridos Edge anteriores también pasaron. Se corrigió la inducción de jefatura que generaba tareas sin equipo y la selección del responsable en el creador; la fixture de vencimientos preserva movimientos históricos. El detalle de validación está en `outputs/stage-1-permissions-20261013/stage1-rerun-20261013.json`. La etapa 2 conserva trabajo local parcial sin aceptación; también hay correcciones parciales de cierres/historia S04/S12/S19/S22/S26/S35/S61, sin declarar etapa 3. Próximo: GPT-6.1 Sol, esfuerzo alto, Standard, revisa etapa 1 antes de iniciar el siguiente bloque de implementación. No se hicieron commit, PR, publicación, cuentas ni llamadas a API operativa.
+
+## Etapa 2 — continuación en curso — 12/10/2026
+
+Ya quedaron cubiertos localmente controles semánticos de backups, URLs de
+previsualización obsoletas, referencias protegidas al reemplazar recurrencias,
+reconciliación del índice de evidencia al restaurar, fallos del almacenamiento
+en el inicio, selección concurrente de copias, rechazo de respuestas tardías,
+conservación de borradores, serialización del registro operativo y resultados
+explícitos `committed`, `rejected` y `unknown` para adjuntos. El bloque 2A pasó
+suite, TypeScript, build cliente/Worker y Edge; su dictamen final Sol está
+pendiente. La etapa completa no es aceptable: faltan pruebas de los demás
+intercalados, errores físicos de IndexedDB, los adversos restantes, lector de
+pantalla y benchmark. Etapas 3–7 siguen pendientes.
+
+## Etapa 1 implementada localmente — 12/10/2026
+
+Se incorporaron guardas actuales para el seguimiento comercial, comentarios,
+avisos de fechas compartidas, motivos de dependencias, presencia, consultas y
+asignaciones por empresa, obligaciones fiscales, edición de empresas del perfil,
+ausencias sin reemplazo y reenvío de propuestas. La creación de trabajo y Mi
+jornada vuelven a comprobar el ámbito al guardar/consultar. La jefatura conserva
+su alcance organizacional sin membresía directa donde lo permite el contrato.
+
+Regresiones focales iniciales: 94/94 en 7 archivos; integración de avisos/asignación
+y Mi jornada: 45/45 en 2 archivos (el test de avisos se comparte entre ambos
+cortes). En la revisión siguiente se corrigió S14 para revocar avisos y fechas
+compartidas cuando cambia la jefatura del autor; pruebas focales: 36/36 en 2
+archivos. Revisiones de permisos adicionales corrigieron S17 (proyección segura
+de dependencias y resolución del actor vigente) y permisos que retenían autoridad
+tras cambios de jerarquía o empresa (S18/S21/S34/S43/S50), con regresiones de
+presencia, adopción de propuestas, comentarios y reasignación. La suite completa
+actual de ese primer corte quedó en 518/518 en 58 archivos. El 12/10 se volvió
+a compilar y verificar el árbol ampliado: 544/544 en 59 archivos, TypeScript,
+cliente y Worker pasaron; los recorridos Edge general y de correcciones también
+pasaron, sin errores JavaScript ni llamadas a la API operativa. Se corrigió una
+ruta de inducción/creación de tareas que permitía persistir tareas de jefatura
+sin equipo. Este resultado sigue siendo un corte de implementación; requiere
+revisión Sol y aceptación posterior. No hubo commit ni publicación; no se
+conectaron servicios.
+
+## Registro histórico — inicio de auditoría integral Sol
+
+La auditoría descrita aquí comenzó antes del corte final del 11/10/2026. El
+resultado vigente, el inventario de cobertura, los 65 hallazgos y sus 95 casos
+reproducidos constan en `docs/architecture/SOL-AUDIT-20261008.md`,
+`docs/architecture/SOL-LUNA-CONTRACTS-20261011.md` y
+`outputs/sol-audit-20261008/final-audit-delivery-check-20261011.json`.
+
+## Validación más reciente — 08/10/2026
+
+El corte pasó nuevamente **500/500 pruebas en 58 archivos**, TypeScript, cliente/Worker y cuatro recorridos Edge (general, correcciones, tareas conjuntas y respaldo/restauración). Cero errores JavaScript y llamadas a la API operativa. El pre-commit pasó 130 pruebas rápidas y rechaza archivos parcialmente staged; una regresión ejecuta el hook en un Git temporal y confirma que aborta antes de otras comprobaciones. El cierre cuenta como listas sólo las unidades de grupos conjuntos que pueden cerrarse completas; tampoco se activa una tarea compartida ni se reasigna/traspasa trabajo a empresas cerradas para cualquiera de sus responsables. Edición de perfiles, recurrencias y cierre mensual exigen jefatura activa. Jefatura consulta y recibe avisos de tareas conjuntas según su acceso organizacional, incluso sin membresía directa de una empresa. Los encargados autorizados pueden reprogramar una instancia pendiente con motivo; se conserva período, vencimiento y regla recurrente, y se avisa al responsable. Se corrigieron claves React duplicadas en los paneles de detalle; la prueba integrada de búsqueda ahora exige cero advertencias. El recorrido de evidencia confirmó que el límite de tres archivos se mantiene frente a cargas simultáneas y después de restaurar una copia. La regresión de evidencia confirma que un adjunto guardado mientras se completa la tarea queda vinculado al timestamp de finalización vigente (ver docs/architecture/review-evidence/task-evidence-completion-race-lab-20261008.json). La actualización de IndexedDB agrega un índice por tarea/movimiento; respaldos v2 nuevos incluyen ese alcance y las copias v2 anteriores siguen siendo aceptadas. La auditoría de contraste cubrió 76 combinaciones: 5.943 textos evaluados, cero fallos, cero omitidos y cero muestras truncadas de gradientes. La auditoría accesible recorrió 38 rutas y 2.124 controles del árbol de Chromium: cero controles interactivos sin nombre, 877 paradas de teclado y cero fallos de foco en la heurística; no equivale a probar con lector de pantalla. Todos los paneles JSX tienen plegado disponible y las acciones del encabezado siguen accesibles. La historia usa cierres inmutables y Mi día incorpora búsqueda/filtros; evidencia de tarea se liga a su finalización. El estado vacío de la biblioteca de Anotaciones quedó más compacto y el recorrido Edge volvió a pasar. Benchmark repetido: 324,99 ms p95 con 24 perfiles/2.000 tareas. El bundle principal quedó en 486,52 kB. Evidencia: `docs/architecture/review-evidence/continuation-validation-lab-20261008.json`.
+
+El hook pre-commit local está configurado y `node scripts/validate-change.mjs` pasó 130 pruebas rápidas. `package.json` y `package-lock.json` coinciden. También se generó y verificó localmente el paquete Sites para el proyecto configurado; el artefacto, su SHA-256 y los límites del chequeo están en `docs/architecture/review-evidence/delivery-readiness-local-20261008.json`. CI aún no puede ejecutarse hasta contar con el repositorio GitHub propio.
+
+No están todos los cambios aceptados. Próximo paso de revisión: GPT-6.1 Sol, esfuerzo alto, Standard, para revisar permisos, cierres, historial y conservación de evidencias frente al contrato actual. Después, GPT-6 Luna, esfuerzo medio, Standard, implementará los defectos que confirme. Sigue la aceptación con lector de pantalla y la aceptación restante. La presencia real requiere sesiones autenticadas; no conectar cuentas antes de aceptar el producto. Sin commit, PR ni publicación.
+
+Mantener el mismo laboratorio privado. Implementación acotada: GPT-6 Luna, esfuerzo medio, Standard. Revisión: GPT-6.1 Sol, esfuerzo alto, Standard. Avance global orientativo ~45%.
+
+Evidencia completa en docs/architecture/review-evidence/continuation-ui-presence-performance-lab-20261008.json. Plegado de paneles: docs/architecture/review-evidence/cross-module-panel-folding-followup-lab-20261008.json. Atomicidad visual del cierre por grupo: docs/architecture/review-evidence/company-closure-group-readiness-lab-20261008.json. Bloqueos y permisos: docs/architecture/review-evidence/joint-task-partial-close-guard-lab-20261008.json, docs/architecture/review-evidence/orphan-transfer-recipient-closure-guard-lab-20261008.json, docs/architecture/review-evidence/inactive-manager-write-guard-lab-20261008.json y docs/architecture/review-evidence/monthly-close-role-guard-lab-20261008.json. Auditoría del árbol accesible: tests/browser-accessibility-audit.cjs y outputs/plan-validation-20261008/accessibility-panel-folding-final/accessibility-audit.json.
+
+# Próxima ejecución del proyecto
+
+## Revalidación de etapa 1 — 13/10/2026
+
+Se volvió a ejecutar el árbol actual: **547/547 pruebas en 60 archivos**,
+TypeScript, build cliente y Worker aprobados. Los recorridos Edge general y de
+correcciones pasaron sin errores JavaScript ni llamadas a `/api` operativa;
+`git diff --check` pasó. Evidencia de la corrida y capturas:
+`outputs/stage-1-permissions-20261013/stage1-rerun-20261013.json`.
+Esto revalida implementación, no completa revisión independiente ni aceptación.
+Los 14 hallazgos de etapa 1 siguen a revisión GPT-6.1 Sol; no continuar a otro
+bloque de implementación hasta esa revisión. Etapas posteriores y matriz de
+requisitos continúan abiertas. Sin commit ni publicación.
+
+## Registro histórico de ejecución — 07/10/2026
+
+La revisión del plan ya se ejecutó. **No todos los cambios están completos**:
+se reprodujeron once discrepancias (ocho probes de dominio y tres comprobaciones
+en Edge) y se identificaron otros requisitos incompletos en fuente. Ver la
+matriz y evidencia en `docs/architecture/PLAN-REVIEW-20261007.md`.
+
+**Seleccionar GPT-6 Luna, esfuerzo medio, Standard** para ejecutar
+`docs/architecture/PLAN-CORRECTIONS-NEXT-20261007.md`. El contrato abarca guardas
+por empresa/acción/unidad cerrada, readiness y confirmación comercial, cierres
+conjuntos/cobertura, evidencia y restauración, indicadores/historia y completitud
+de calendario, selector y recorrido. Conservar el árbol actual y corregir las
+rutas existentes; no sustituir el repositorio ni conectar servicios.
+
+Primero resolver permisos, cierre y pérdida de datos; luego las partes de
+interfaz pendientes. Incorporar regresiones de los casos reproducidos, ejecutar
+suite/build y recorridos ampliados y dejar evidencia. **Después GPT-6.1 Sol,
+esfuerzo alto, Standard** revisará el corte. No crear commit ni actualizar el
+Site con estas correcciones abiertas. El paquete para PC sigue pendiente hasta
+el commit validado. Avance orientativo **~45%**, sin aceptación final.
+
+## Registro anterior: revisión pendiente tras la implementación
+
+La implementación local del plan quedó validada: **442/442 pruebas en 109
+archivos**, TypeScript, cliente Vite, Worker y cuatro recorridos Edge aprobados.
+El rendimiento caliente con 24 perfiles y 2.000 tareas ficticias dio p95 de
+399,35 ms en 30 cambios de ruta, bajo el objetivo local de 1.000 ms. Evidencia:
+`docs/architecture/review-evidence/plan-implementation-lab-20261007.json`.
+No hubo llamadas a `/api` operativo. Los cambios siguen sin commit ni
+publicación; el Site conserva audiencia privada.
+
+El bundle cliente deja un aviso visible: entrada principal 554,46 kB (gzip
+167,34 kB); gráficos 423,74 kB (gzip 121,39 kB). Tampoco están comprobados
+Auth/MFA/RLS reales, persistencia y concurrencia entre dispositivos,
+notificaciones entre usuarios ni accesibilidad completa con tecnologías
+asistivas. Esos límites impiden considerar el producto aceptado o desplegable.
+
+**Siguiente paso: GPT-6.1 Sol, esfuerzo alto, Standard**, para una revisión
+crítica del código y la evidencia frente a los contratos, con prioridad en
+privacidad/permisos, reglas de puntuación, cierres por empresa, bloqueos y
+evidencia/restauración. Si encuentra defectos, GPT-6 Luna, esfuerzo medio,
+Standard implementará las correcciones y se repetirán las comprobaciones
+afectadas. Si Sol confirma el corte sin correcciones conocidas, preparar el
+commit y actualizar el mismo Site privado; no crear cuentas ni conectar
+servicios durante esta etapa.
+
+El entorno actual no permite seleccionar otro modelo desde esta ejecución; no
+se afirma que el código se haya implementado con Luna. El usuario debe elegir
+GPT-6.1 Sol antes del paso siguiente. **Avance orientativo: ~45%**, igual que
+antes del bloque. El 100% requiere aceptación sin correcciones conocidas,
+GitHub, Supabase dev y producción, hosting propio y automatización de commit,
+PR, comprobaciones, migraciones y deploy verificada.
+
+Repositorio: `work/site`. Continuar en el mismo proyecto y Git.
+
+## Registro previo — correcciones de interfaz verificadas 07/10/2026
+
+Se corrigieron roles del Resumen/Catálogo/Cierre, el catálogo plegable, la
+duplicación del avatar, el selector de tema y el tamaño/animación de arrastre.
+La suite completa aprobó **423/423 pruebas en 48 archivos**; TypeScript, Vite y
+Worker compilan. Cuatro recorridos Edge aprobaron y no registraron errores JS ni
+llamadas a `/api`. Evidencia:
+`docs/architecture/review-evidence/ui-corrections-lab-20261007.json`.
+El Site existente está en v81 antes de este corte, owner-only y sin cambios de
+audiencia. Fuente local `main`; el checkout conserva el laboratorio aislado.
+
+Siguiente paso de modelo: **GPT-6.1 Sol, esfuerzo alto, Standard**, para resolver
+los contratos que las correcciones dejan abiertos: cantidades operativas y KPI,
+agenda de eventos/ausencias, permisos y atomicidad de cierres por alcance,
+definiciones de series/gráficos mensuales y organización compacta de Consultas y
+Anotaciones. Mantener cuentas, invitaciones, API y Supabase fuera de esa etapa.
+Después del contrato, **GPT-6 Luna, esfuerzo medio, Standard**, implementa sólo
+las decisiones aprobadas en el laboratorio. Los apartados posteriores conservan
+la cronología.
+
+## Estado vigente
+
+El laboratorio privado conserva simulación y datos ficticios en
+`LaboratoryWorkspace` / `paris-state-lab`; no llamar a la API operativa, no
+activar `RemoteWorkspace`, no crear cuentas ni enviar invitaciones reales. SQL
+Supabase 001–011 y Worker/D1 siguen separados. Audiencia actual del Site:
+privada.
+
+La agenda de obligaciones fiscales por empresa ya está implementada en el
+laboratorio: separa período fiscal y vencimiento, registra fuente/revisión,
+vincula tareas exactas y deriva el cumplimiento. No contiene vencimientos
+oficiales ni consulta ARCA. Evidencia y límites en `docs/PROJECT-STATUS.md` y
+`docs/architecture/review-evidence/fiscal-obligations-lab-20261007.json`.
+
+El último bloque funcional es el flujo de propuestas de tareas habituales del
+onboarding: preserva título, empresa y frecuencia; jefatura revisa, pide cambios,
+vincula un estándar compatible o crea una versión y aprueba explícitamente antes
+de asignar tareas independientes por empresa. Sigue aislado en el laboratorio.
+El código quedó en `0ca71bb17da997251155d82d5e83355ab12a5c8c` y se publicó como
+Site v61 en el mismo sitio privado; la audiencia continúa owner-only. Ver
+`docs/PROJECT-STATUS.md`.
+
+El usuario quiere trabajar desde su PC personal antes de crear cuentas o
+conectar servicios. No hay GitHub propio y sigue pospuesto hasta la aceptación
+final. Para mover el código, generar `outputs/grupo-paris-site-personal.bundle`
+desde un commit limpio y copiarlo con `outputs/LEEME-PC-PERSONAL.md` por USB o
+una carpeta privada. Clonar ese bundle en Codex de la PC personal y mantener
+una sola copia activa a la vez; no sincronizar `.git` con OneDrive. El estado
+`paris-state-lab` vive en el almacenamiento local del navegador: descargarlo
+desde la banda «Vista de prueba» como JSON y restaurarlo en el otro equipo.
+La sincronización automática de código entre PCs requiere configurar GitHub
+privado durante la etapa de infraestructura final.
+
+El bloque Trello-like está implementado en `65ae477`. La responsabilidad
+conjunta está implementada en el laboratorio local; contrato, alcance y límites
+en `docs/architecture/JOINT-LABORATORY-CONTRACT-20261006.md`. No equivale a
+colaboración en línea o a permisos de producción.
+
+## Cobertura y bajas locales implementadas; siguiente trabajo
+
+La cobertura ya incluye tareas puntuales y reglas recurrentes seleccionadas;
+previsualiza ocurrencias y aplica acceso al materializarlas. Mantiene al titular,
+atribuye cronómetros al reemplazante, limita accesos por empresa/equipo y revoca
+relojes al cancelar o vencer. Contrato y evidencia en
+`docs/architecture/COVERAGE-LAB-CONTRACT-20261006.md`.
+
+La baja conserva cierres/historia, detiene relojes propios y pausa reglas
+recurrentes. El trabajo futuro limpio queda en la bandeja para reasignar;
+actividad existente se resuelve con un traspaso explícito auditable. Contrato:
+`docs/architecture/PROFILE-DEACTIVATION-LAB-CONTRACT-20261006.md`.
+
+El traspaso conserva el snapshot completo, sesiones atribuidas al actor,
+actividad, comentarios, motivo e identidades; actualiza propietario/equipo en la
+misma tarea y aparece en la bandeja, cierres, informes y CSV. No acredita el
+tiempo anterior al nuevo responsable. Las tareas conjuntas quedan para revisión
+manual porque modificar cuotas necesita un contrato separado.
+
+Auditoría de cierres y exportaciones completada en el laboratorio: las tareas
+conjuntas aparecen en el cierre de cada miembro, el cálculo respeta la cuota y
+el CSV separa contribución personal de peso global. También se impide cerrar con
+un perfil actor inactivo. Evidencia reciente en `docs/PROJECT-STATUS.md`.
+
+## Consultas y pedidos: alcance actual y revisión necesaria
+
+La interfaz local quedó implementada según el criterio funcional del bloque D:
+tipos separados, urgencia, módulo, destinatario explícito para sugerencias,
+visibilidad, estados, respuesta e historial. Evidencia y límites en
+`docs/PROJECT-STATUS.md` y
+`docs/architecture/review-evidence/internal-requests-lab-20261006.json`.
+No integrar su esquema en D1/Supabase todavía: la cola de soporte no tiene una
+cuenta de identidad, y persistencia/entrega entre dispositivos requiere revisión
+de permisos y diseño de servidor.
+
+Continuar revisando las rutas operativas restantes del laboratorio contra
+`docs/PRODUCT-ROADMAP.md` y los contratos vigentes, implementando sólo cambios ya
+definidos. Mantener fuera del alcance Auth, cuentas, `/api`, Worker/D1 y SQL
+remoto. Antes de portar al backend reglas nuevas sobre transferencia conjunta
+o retenciones, volver a GPT-6.1 Sol alto para revisar el contrato.
+Referencias: filas 4, 13 y 14 de
+`docs/product/CORRECTIONS-20261002.md` y regla de cobertura de
+`docs/product/CONSISTENCY-RULES.md`. Mantener el alcance en laboratorio antes de
+alterar relaciones o el backend activo.
+
+Si los criterios existentes de baja/reasignación bastan: GPT-6 Luna, esfuerzo
+medio, velocidad Standard, para implementar y verificar. Si aparece una decisión
+nueva de permisos/jerarquía, usar GPT-6.1 Sol, esfuerzo alto, Standard, sólo para
+revisar esa decisión antes de volver a Luna.
+
+Próximo cambio de modelo: **GPT-6.1 Sol, esfuerzo medio, Standard** para revisar
+el módulo de consultas local y definir qué funcionalidades pendientes pueden
+cerrarse en laboratorio sin crear un contrato de producción prematuro. Cualquier
+esquema/backend o identidad de soporte exige **esfuerzo alto** antes de volver a
+Luna.
+
+Evidencia del bloque más reciente: 371 pruebas en 36 archivos, TypeScript/Vite,
+Worker build, pre-commit 53/53 y Chromium desktop/móvil aprobados; cero errores
+JS y solicitudes a `/api` operativa. El Site privado v57 publicó el commit
+`c080a52ce5ca6b6d949be7fa3888e7bf85f1b8a0`; deployment confirmado y acceso
+owner-only. Ver `PROJECT-STATUS.md` para límites y avance.
+
+## Entrega
+
+Para cambios del Site: suite completa, build, Chromium desktop/móvil,
+pre-commit, commit, sincronizar la fuente interna y publicar el mismo Site
+privado. Guardar evidencia y actualizar `PROJECT-STATUS.md`, `AGENTS.md` y este
+archivo. No cambiar audiencia.
+
+## Avance y aceptación final
+
+Avance global orientativo: ~45%; no es una medición exacta ni sube por pasar
+pruebas. El 100% requiere producto aceptado sin correcciones conocidas, GitHub
+propio, dos proyectos Supabase dev/producción, hosting propio y automatización
+validada según `docs/ops/FINAL-ACCEPTANCE.md`. No conectar cuentas hasta aceptar
+el producto final.
+
+El empaquetado portable está disponible en `scripts/package-site-archive.mjs`
+(`node scripts/package-site-archive.mjs <ruta-absoluta>` o `npm run package:site
+-- <ruta>`). En esta PC el script del plugin puede fallar al invocar `bash`
+después de sincronizar la fuente; el helper resuelve la generación/validación del
+tar, no reemplaza la comprobación de push, commit ni despliegue nativo.
+
+## Ciclo de trabajo mensual — 06/10/2026
+
+Implementado sólo en el laboratorio local: vistas de día y semana, planificación
+por fecha de ocurrencia, ejecución por fecha real, tiempo repartido entre días
+ART, registros/cantidades operativas separados por unidad y desglose por persona,
+equipo, sector o empresa. Las cuotas conjuntas conservan una ocurrencia global;
+los nuevos cierres guardan actor y cierres históricos sin ese dato quedan sin
+atribución. No infiere capacidad ni tiempo libre, no activa API o sincronización.
+
+Evidencia: 378/378 pruebas en 37 archivos; TypeScript, Vite y Worker; Chromium
+Edge escritorio/móvil 390×844, 31 días del período y desglose de equipo; cero
+errores JS y llamadas a `/api`. Ver
+`architecture/review-evidence/work-cycle-lab-20261006.json`.
+
+Este corte se publicó como **Site v58** desde `c41bb7a9f9dcee2408b1b714af440f89914814dd`;
+el deployment privado terminó correctamente y sigue owner-only. Siguiente paso:
+**GPT-6.1 Sol, esfuerzo medio, Standard** para revisar atribución, cortes de fecha y límites del ciclo, y
+contrastar el contrato local de Kaizen/5S con la versionación actual del catálogo.
+Luego, si no aparece una decisión de permisos/esquema, volver a **GPT-6 Luna,
+esfuerzo medio, Standard** para implementar el contrato que quede confirmado.
+
+## Mejora Kaizen/5S y continuidad en otra PC — 06/10/2026
+
+El bloque de mejora de procesos está implementado localmente y validado: 385
+pruebas, TypeScript, Vite/Worker y Edge desktop/móvil; evidencia en
+`architecture/review-evidence/process-quality-lab-20261006.json`. Sigue aislado
+en el laboratorio; no se conectaron cuentas ni se habilitó sincronización.
+
+El checkout actual trabaja en `main` y no tiene remoto GitHub propio. La regla
+vigente posterga esa cuenta hasta aceptar el producto final. Para usar otra PC
+antes de esa etapa, transferir un snapshot Git portable después de dejar el
+checkout limpio; trabajar en una sola PC por vez y devolver el snapshot al
+finalizar. No sincronizar la carpeta `.git` con OneDrive ni editar dos copias en
+paralelo. La sincronización automática permanente entre PCs queda para el
+remoto privado de GitHub previsto en `docs/ops/FINAL-ACCEPTANCE.md`.
+
+El código quedó en `27918d3f7b311e2a596fa6961fb240b4fdf7b8ee` y publicado como
+Site v59, deployment `appgdep_6ac5b2ff99d481919f73e8cff76d16b5`; el estado owner-only
+no cambió. `package-lock.json` es el lockfile original del proyecto; mantener
+npm como gestor y usar `npm ci` al clonar en otra PC.
+
+Próxima acción: copiar `outputs/grupo-paris-site-personal.bundle` y
+`outputs/LEEME-PC-PERSONAL.md` a la PC personal, clonar el bundle y abrir la
+carpeta en Codex. Para traer commits de vuelta, crear allí un bundle actualizado
+e importarlo en este checkout. No existe sincronización automática entre equipos
+todavía; GitHub privado sigue pospuesto hasta la aceptación final. Para el
+próximo bloque de implementación ya definido: **GPT-6 Luna, esfuerzo medio,
+Standard**. Para revisar arquitectura, permisos o decidir sobre GitHub:
+**GPT-6.1 Sol, esfuerzo medio o alto según el riesgo, Standard**.
+
+## Transferencia actualizada — 07/10/2026
+
+El laboratorio local avanzó al commit 389528cbbd6ae1af668931f6bfdd05d499953d13,
+que agrega reportes imprimibles. La última transferencia anterior terminaba en
+c8db26d; fue reemplazada por el bundle completo descrito en
+outputs/LEEME-PC-PERSONAL.md y su ZIP contenedor. El checkout estaba limpio
+antes de documentar esta actualización.
+
+La transferencia incluye el historial Git y el código comprometido, pero no el
+estado ficticio guardado en el navegador ni dependencias instaladas. El usuario
+debe trabajar en una sola PC por vez. Clonar no publica ni conecta cuentas.
+La última publicación confirmada en el estado previo sigue siendo v61; no afirmar
+v62 hasta verificar un despliegue de ese commit.
+
+Próximo paso en la PC personal: extraer el ZIP, clonar el bundle según la guía,
+ejecutar npm ci y abrir la carpeta site en Codex. Luego continuar los
+pendientes documentados del laboratorio sin activar cuentas ni /api.
+
+## Transferencia personal preparada — 07/10/2026
+
+Se corrigió y validó el flujo de cierre secuencial de una tarea conjunta: la
+tabla de jefatura vuelve al ámbito completo después del cierre de una persona,
+y el compañero puede cerrar luego su reporte personal v2. Evidencia actualizada
+en `docs/PROJECT-STATUS.md` y
+`docs/architecture/review-evidence/joint-close-lab-20261007.json`.
+
+La suite aprobó 407/407 con `--testTimeout=20000`; también pasaron TypeScript,
+Vite, Worker y el recorrido Chromium sin errores JS ni llamadas a `/api`. El
+primer intento estándar tuvo tres timeouts, sin fallos de aserciones; por eso el
+timeout ampliado queda explícito en la evidencia.
+
+Para continuar desde la PC personal, copiar `outputs/grupo-paris-site-transfer-20261007.zip`
+por USB o carpeta de archivos, extraerlo, instalar Git for Windows y Node.js,
+clonar el bundle con el comando de `outputs/LEEME-PC-PERSONAL.md`, ejecutar
+`npm ci` y abrir la carpeta `site` en Codex. Trabajar una sola PC por vez; al
+volver, transferir commits con un bundle y aplicar `git merge --ff-only` en
+este checkout. No sincronizar `.git` con OneDrive. No se necesita GitHub ni
+crear cuentas para editar o ejecutar el laboratorio local. Publicar cambios en
+Sites requiere acceder al mismo proyecto privado desde la cuenta dueña; el
+paquete no contiene credenciales.
+
+El bundle incluye el historial hasta el commit documentado en la guía, pero no
+`node_modules` ni el `localStorage` del navegador. SQL 011 y Worker/D1 siguen
+separados; no conectar servicios ni invitar usuarios hasta la aceptación final.
+El avance global permanece aproximadamente en 45%.
+
+La corrección quedó publicada en el Site privado existente como **v62** desde
+`8d21e3245c6e4ee93aa741b4c3baf3ddc7b8b608`; deployment
+`appgdep_6ac5d2df02ec8191b861bfcee8d98934` terminó exitosamente. Relectura de
+Sites: versión 62, propietario, audiencia personalizada con una persona
+permitida, cero grupos y cero visitantes externos. No cambió el alcance de
+acceso.
+
+## Conversión de pedidos de trabajo — 07/10/2026
+
+El último cambio local implementa conversión opcional y explícita de un pedido
+de trabajo a una única tarea por jefatura. Se eligen responsable, empresa,
+fecha, tipo/controles y peso; se revalidan membresía, jerarquía, período abierto
+e idempotencia. El registro conserva el vínculo en ambos sentidos, cierra el
+pedido y notifica la asignación. Errores técnicos y sugerencias no se convierten.
+
+Verificación vigente: 408/408 pruebas, TypeScript/Vite/Worker y Chromium Edge
+escritorio/móvil; cero errores JS y llamadas a `/api`. Contrato y límites en
+`docs/architecture/review-evidence/internal-request-conversion-lab-20261007.json`.
+La interfaz y el guardado siguen en `paris-state-lab` y no sincronizan equipos.
+
+Seguir con rutas de laboratorio ya definidas en `docs/PRODUCT-ROADMAP.md` y
+`docs/product/CORRECTIONS-20261002.md`. No abrir identidad real, `/api`, Worker,
+D1, Supabase ni GitHub antes de aceptar el producto. Actualizar el bundle de PC
+personal después del commit y conservar una sola copia de trabajo activa.
+
+## Continuidad desde PC personal — 07/10/2026
+
+El bloque de conversión explícita de pedidos se comprometió en
+`f7b4c661d32a753b0ab34f4120c692c880efb8b0` y se publicó como Site v63 en el
+mismo proyecto privado. El deployment `appgdep_6ac5db13c9608191bd4ab52ee27f33b2`
+terminó correctamente; se confirmó acceso propietario, una cuenta permitida y
+cero visitantes externos.
+
+La transferencia vigente está en `outputs/grupo-paris-site-transfer-20261007-f7b4c66.zip`
+y `outputs/LEEME-PC-PERSONAL.md`. Incluye un bundle Git completo con los cambios
+comprometidos y el historial de `main`; no lleva dependencias ni el estado
+`paris-state-lab` guardado en el navegador. En la PC personal, instalar Git for
+Windows y Node.js, extraer el ZIP, clonar el bundle, ejecutar `npm ci` y abrir
+`site` en Codex. Trabajar una sola copia a la vez; devolver commits por otro
+bundle hasta configurar GitHub en la aceptación final. No sincronizar `.git`
+con OneDrive. El progreso global sigue aproximadamente en **45%**.
+
+## Búsqueda rápida y próximo corte — 07/10/2026
+
+Se implementó la búsqueda rápida de tareas del laboratorio. Revisa el alcance
+del perfil antes de mostrar y antes de abrir resultados; no agrega acceso a
+datos de compañeros. La suite completa aprobó 412/412, TypeScript, Vite, Worker
+y Chromium Edge escritorio/móvil, sin llamadas a `/api`. Evidencia en
+`docs/architecture/review-evidence/quick-task-search-lab-20261007.json`.
+
+Conservar el Site privado y el laboratorio local. Próximo corte: revisar con
+GPT-6.1 Sol, esfuerzo alto, los contratos pendientes de dependencias,
+delegación/aceptación y avisos; Luna implementa sólo los contratos aprobados.
+La infraestructura de cuentas sigue pospuesta hasta la aceptación final.
+El avance orientativo permanece en ~45%.
+La última versión publicada es la v64 del Site privado, desde el commit
+`5ecf94e9439a4d56ceab0990877451b3a5d6ca5a`; la audiencia permanece sin cambios.
+
+## Aviso conjunto validado y accesibilidad — 07/10/2026
+
+El disparador de activación conjunta ya está cerrado en el recorrido del
+laboratorio: una única notificación para cada otro perfil autorizado, apertura
+de la tarea desde la campana y lectura persistente tras recargar. El componente
+común `Dialog` vincula su título con `aria-labelledby`. Evidencia y límites en
+`docs/architecture/review-evidence/joint-notification-lab-20261007.json`.
+
+Validación: 412/412 pruebas en 45 archivos; TypeScript, Vite, Worker y Chromium
+Edge escritorio/móvil aprobados, cero errores JS y cero llamadas a `/api`.
+Vite conserva la advertencia informativa por un chunk principal de ~593 kB.
+El alcance continúa local en `paris-state-lab`; no se conectaron cuentas ni
+servicios. Publicación confirmada como Site **v65** desde
+`8d221ca4da4b32220fd1e49e176c7f01bc248e17`; deployment
+`appgdep_6ac5e81f55448191bf732b8f58d73147` exitoso. La audiencia siguió
+personalizada owner-only: una cuenta permitida, cero grupos y cero visitantes
+externos.
+
+Siguiente paso que requiere revisión de contrato: **GPT-6.1 Sol, esfuerzo alto,
+Standard** para evaluar dependencias, delegación/aceptación y notificaciones de
+servidor. Después, **GPT-6 Luna, esfuerzo medio, Standard** para implementar los
+contratos aprobados en laboratorio antes de conectar infraestructura.
+
+## Estado de rendimiento — 07/10/2026
+
+Se cerró la advertencia del bundle principal mediante carga diferida de rutas.
+Entrada actual: 489,53 kB (148,90 kB gzip), frente a ~593 kB anteriores. El
+chunk de gráficos de 405,70 kB sigue separado y usado por el resumen; no forma
+parte de la próxima decisión de permisos. Evidencia y límites en
+`docs/architecture/review-evidence/route-code-split-lab-20261007.json`.
+
+Próximo paso: **GPT-6.1 Sol, esfuerzo alto, Standard**, revisión acotada de
+contratos de dependencias, delegación/aceptación y avisos entre dispositivos;
+definir el borde de identidad, permisos, idempotencia y entrega antes de portar
+mutaciones del laboratorio al servidor. Después seleccionar **GPT-6 Luna,
+esfuerzo medio, Standard** para implementar sólo el contrato aprobado. En Plus,
+el uso de Work y Codex es compartido y los rangos publicados por cinco horas son
+estimaciones; consultar el panel antes de una revisión extensa. No crear cuentas
+ni activar integraciones reales hasta el 100% aceptado.
+
+Este corte quedó publicado como **Site v66** desde
+`806ff00696434f573ee0542e4710d8b383ab1406`, deployment
+`appgdep_6ac5f09cccb48191910a364ef6e8f998`. La audiencia personalizada sigue
+owner-only: una cuenta autorizada, cero grupos y cero visitantes externos.
+
+## Copia portable de la simulación — 07/10/2026
+
+La banda «Vista de prueba» permite descargar una copia JSON versionada del
+laboratorio y restaurarla en otra PC. La lectura valida formato, estado activo y
+tamaño (máximo 10 MB); muestra cantidades y requiere confirmación antes de
+reemplazar `paris-state-lab`. El espacio operativo queda intacto. El archivo no
+está cifrado; guardarlo de forma privada.
+
+Contrato: `docs/architecture/LABORATORY-BACKUP-CONTRACT-20261007.md`. Evidencia:
+`docs/architecture/review-evidence/laboratory-backup-lab-20261007.json`.
+416/416 pruebas, pre-commit 100/100, TypeScript, Vite/Worker y Chromium Edge de
+descarga/restauración aprobados; cero errores JS y solicitudes a `/api`.
+
+Para el próximo cambio usar **GPT-6 Luna, esfuerzo medio, Standard** en contratos
+locales ya definidos y revisión funcional. Cuentas, sincronización, respaldo de
+producción, permisos entre dispositivos y migraciones siguen pendientes para la
+aceptación final; si el próximo cambio define alguno de esos contratos, revisar
+primero con **GPT-6.1 Sol, esfuerzo alto, Standard**. Avance global continúa en
+~45%.
+
+## Corte vigente y siguiente revisión — 07/10/2026
+
+La documentación del laboratorio y los avisos locales quedó sincronizada en el
+commit `e9fd3f8b33b16366143d2bff413ff5b1fc939b90`, publicado en el mismo Site
+privado como **v69** (`appgdep_6ac6458abaec81919944f70b0530a8f6`). El Site sigue
+owner-only: una cuenta permitida, cero grupos y cero visitantes externos. Este
+corte no agrega funcionalidad ni cambia audiencia.
+
+La transferencia para PC personal se genera a partir del `HEAD` limpio actual,
+se valida clonando el bundle en una carpeta nueva y se entrega en
+`outputs/LEEME-PC-PERSONAL.md` junto con su ZIP. Pasar el JSON del laboratorio
+por separado desde la interfaz; no está cifrado. Trabajar en una sola PC a la
+vez y no sincronizar `.git` con OneDrive.
+
+Próximo paso que necesita razonamiento de arquitectura: seleccionar **GPT-6.1
+Sol, esfuerzo alto, Standard** para revisar los contratos de dependencias,
+delegación/aceptación y avisos entre dispositivos, con foco en identidad,
+permisos, idempotencia, historial y límites de notificación. No implementar
+escrituras de servidor ni conectar cuentas en esa revisión. Al cerrar el
+contrato, volver a **GPT-6 Luna, esfuerzo medio, Standard** para implementar y
+validar sólo las decisiones ya acordadas en el laboratorio. El avance total
+permanece orientativamente en **~45%**; no equivale a aceptación final.
+
+## Versión documental actualizada — 07/10/2026
+
+El registro anterior de v69 quedó actualizado por el commit
+`617536429bd9bcc6d8cb0cfd85eb62948437bdef`, publicado como **Site v70** con
+deployment `appgdep_6ac6465aee508191a879dc794316b54a`. La publicación conserva el
+mismo Site privado y la audiencia owner-only; es sólo sincronización documental.
+El corte funcional vigente continúa siendo el laboratorio de avisos locales,
+con verificación previa de 420/420 pruebas y revisión Edge desktop/móvil.
+
+El workflow preparado para GitHub también valida el paquete de despliegue Sites
+después del build. La verificación local confirma el formato y sus rutas; todavía
+no hay ejecución externa porque el repositorio propio no fue creado. El 100% del
+proyecto y el avance orientativo de ~45% no cambian por preparar esta comprobación.
+
+La transferencia portable vigente está en `outputs/LEEME-PC-PERSONAL.md` y el
+ZIP de igual nombre indicado en la guía. Bundle y JSON del navegador son
+artefactos separados. Para el contrato siguiente, detener implementación y
+seleccionar **GPT-6.1 Sol, esfuerzo alto, Standard** según las instrucciones del
+último apartado de este archivo.
+
+## Continuación local S39 — 14/10/2026
+
+Se corrigieron los objetivos del recorrido que todavía apuntaban al encabezado
+genérico o a la navegación lateral. Cada paso ahora apunta al contenido del
+módulo; el tablero conserva un objetivo para columnas vacías/plegadas, y los
+paneles o tarjetas se abren sólo mientras el recorrido los necesita. Al avanzar
+o pausar, se restaura el estado anterior salvo que la persona lo haya cambiado.
+No se crean datos ficticios adicionales ni se ejecutan escrituras de negocio.
+
+Validación registrada en ese corte: **659/659 pruebas en 67 archivos**, TypeScript,
+build cliente y Worker aprobados. La suite oficial-equivalente excluye `tmp/**`.
+La limitación de navegador descrita entonces quedó resuelta después: Edge pasó
+29/29; ver `review-evidence/s39-edge-browser-recheck-20261014.json`. Siguen
+pendientes la revisión independiente de Sol y la aceptación humana con lector
+de pantalla de etapa 5. Evidencia de la implementación:
+`review-evidence/s39-tour-module-targets-lab-20261014.json`.
+
+**Siguiente modelo:** GPT‑6.1 Sol, esfuerzo alto, Standard, para revisar S39 y
+reconciliar la aceptación pendiente de la etapa 5. Luego Luna implementa sólo si
+Sol marca correcciones concretas. El avance global continúa ~45%; no se conectó
+ninguna cuenta ni se publicó el Site.
+
+## Reauditoría del recorrido S39 — 14/10/2026
+
+La inspección del código detectó huecos que no estaban descritos por el corte
+anterior. Se agregaron destinos internos para vista/estado vacío de Calendario,
+acción y biblioteca de Anotaciones sin exponer contenido personal, filas/empty de
+Planificación, seguimiento de Consultas, propuestas de Mejora, distribución de
+Análisis, vista previa de cierres y fichas compactas del Catálogo. Los módulos y
+las acciones siguen sujetos a su rol. El tour no envía formularios, no confirma
+cierres y no cambia datos de negocio. El Catálogo puede abrir temporalmente su
+ficha para orientar y restaurarla al cambiar de paso o salir. El progreso se
+versionó a 6 para no saltar pasos recién ajustados.
+
+La revalidación incluyó una matriz Edge de empleado/encargado/jefe y una
+reducción de ventana escritorio→móvil. Detectó y corrigió que el coach quedara
+fuera de pantalla al cambiar el viewport. Estado final: suite 663/663 en 67
+archivos, TypeScript, cliente/Worker y `git diff --check` aprobados; Edge 31/31,
+cero errores JS y API operativa. No requiere instalar npm global: se usaron Node,
+Vitest, Playwright Core y Edge ya presentes en el entorno. Evidencia:
+`architecture/review-evidence/s39-tour-refresh-20261014.json` y
+`../outputs/s39-tour-refresh-20261014/browser-validation.json`.
+
+**Siguiente paso:** revisión independiente GPT‑6.1 Sol, esfuerzo alto, Standard,
+para aceptar el contrato S39 y comprobar la privacidad/estados vacíos. La
+aceptación humana con lector de pantalla sigue siendo un gate de etapa 5. Luego
+continuar sólo con hallazgos concretos; no conectar cuentas ni desplegar aún.
+
+## GitHub y continuidad desde PC personal — 16/10/2026
+
+La continuidad directa está en `main` de `tablerocontable-paris/TABLERO-CONTABLE`.
+El repositorio privado recibió una importación inicial nueva atribuida a
+**Tablero Contable**, sin arrastrar al historial publicado las fechas y autores
+del checkout local previo. Clonar `main` en la PC personal; no usar la PR
+bootstrap ni las ramas auxiliares de migración.
+
+Pendiente después de la clonación: instalar dependencias con `npm ci`, abrir el
+proyecto y comprobar su ejecución local. Supabase, Cloudflare y Gmail no están
+conectados; no hay despliegue operativo ni migraciones aplicadas.

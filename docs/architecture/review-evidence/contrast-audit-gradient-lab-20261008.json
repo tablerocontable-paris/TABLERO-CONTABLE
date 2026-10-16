@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-08",
+  "scope": "Re-audit visible text contrast across the laboratory's profiles, themes, and navigation routes, including gradient backgrounds.",
+  "changes": [
+    "Contrast audit now composites visible background layers from the document root toward each text node, evaluates gradient color stops and interpolated samples, and records explicit skip reasons.",
+    "Lightened the sidebar section label and laboratory profile label, and changed summary metric labels to the theme-aware muted text color after the expanded audit exposed contrast failures."
+  ],
+  "validation": {
+    "browser": "Microsoft Edge headless",
+    "profiles": ["boss", "m1", "e0"],
+    "themes": ["light", "dark"],
+    "routesAudited": 76,
+    "checkedTextElements": 5943,
+    "skippedTextElements": 0,
+    "contrastIssues": 0,
+    "javascriptErrors": 0,
+    "operationalApiCalls": 0,
+    "cappedGradientSampleSets": 0,
+    "report": "outputs/plan-validation-20261008/contrast-audit-final3/contrast-audit.json",
+    "build": "TypeScript and client build passed; Worker build passed after the changes."
+  },
+  "limits": [
+    "This computed-color audit samples gradient stops and interpolated colors without sample caps; it does not replace manual visual review or screen-reader acceptance."
+  ],
+  "releaseState": "Uncommitted local laboratory changes. No accounts, deployment, Site update, or API connection.",
+  "globalProgressEstimate": "about 45%; this slice does not constitute product acceptance."
+}

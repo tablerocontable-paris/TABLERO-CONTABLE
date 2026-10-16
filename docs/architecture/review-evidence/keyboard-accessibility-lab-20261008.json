@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-08",
+  "scope": "Recorrido secuencial de teclado y comprobación heurística de foco visible en el laboratorio",
+  "method": "Playwright con Edge sobre el build local. Se recorrieron las rutas disponibles para jefe, encargado y empleado. En cada ruta se avanzó con Tab desde el inicio del documento, hasta 180 paradas como máximo, y se inspeccionaron los estilos computados del elemento enfocado y sus ancestros.",
+  "checks": {
+    "profiles": ["jefe", "encargado", "empleado"],
+    "routes_visited": 38,
+    "focus_stops_observed": 876,
+    "focus_stops_without_detected_indicator": 0,
+    "controls_without_accessible_name": 0,
+    "javascript_errors": 0,
+    "operational_api_calls": 0,
+    "result": "passed"
+  },
+  "raw_evidence": "outputs/plan-validation-20261008/accessibility-keyboard-review-final/accessibility-audit.json",
+  "known_limits": [
+    "La detección del foco visible es heurística basada en estilos computados; no acredita conformidad WCAG.",
+    "No valida lector de pantalla, contraste sistemático, teclado dentro de cada diálogo ni todos los estados dinámicos posibles."
+  ]
+}

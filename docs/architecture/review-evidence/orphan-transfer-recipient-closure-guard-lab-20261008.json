@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-08",
+  "project": "Grupo Paris private laboratory",
+  "scope": "Apply person-company-month closure checks when reassigning or transferring orphaned work.",
+  "finding": "Both handoff flows checked that the replacement could access the company but did not check whether that replacement's company unit was already closed. This could move work into a closed unit where it could not be executed.",
+  "changes": [
+    "Reassignment now rejects a replacement whose exact company-period unit is closed.",
+    "Explicit transfer now uses the same person-company-month closure rule.",
+    "Regression assertions verify the task owner and transfer history remain unchanged after rejection."
+  ],
+  "validation": {
+    "regression": {
+      "file": "tests/scheduling-workforce.test.ts",
+      "result": "passed",
+      "cases": [
+        "Future task reassignment rejects a recipient with a partial company closure and leaves the task owned by the former employee.",
+        "Started task transfer rejects a recipient with a partial company closure and creates no transfer record."
+      ]
+    },
+    "focusedTests": { "result": "passed", "tests": 46, "files": 2 },
+    "typescript": "passed",
+    "fullSuite": { "result": "passed", "tests": 488, "files": 56 },
+    "clientBuild": { "result": "passed", "mainEntryKb": 485.39, "chartChunkKb": 423.74 },
+    "workerBuild": "passed",
+    "gitDiffCheck": "passed; informational LF-to-CRLF notices only"
+  },
+  "releaseState": {
+    "commitCreated": false,
+    "siteUpdated": false,
+    "externalAccountsConnected": false,
+    "estimatedGlobalProgress": "~45%"
+  }
+}

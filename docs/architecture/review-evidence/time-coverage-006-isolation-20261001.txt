@@ -1,0 +1,39 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> grupo-paris-nueva-generacion@0.4.0 test
+> vitest run --run tests/time-coverage-006.test.ts -t limpia el reloj propio
+
+
+ RUN  v3.2.7 /workspace/scratch/0de2d62eef9c/site
+
+ ❯ tests/time-coverage-006.test.ts (5 tests | 1 failed | 4 skipped) 1774ms
+   ↓ Contrato 006 con fixture propio > ultimo control operativo conserva En curso e inicia cronometro
+   ↓ Contrato 006 con fixture propio > resultado con control unico completa sin iniciar reloj
+   ↓ Contrato 006 con fixture propio > repetir la espera con reloj abierto finaliza la sesion y cambia revision
+   ↓ Contrato 006 con fixture propio > rechaza nuevas sesiones vinculadas con ausencia cancelada
+   × Contrato 006 con fixture propio > limpia el reloj propio vencido antes de iniciar otra tarea y deja auditoría efectiva 27ms
+     → Datos de ausencia inválidos
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/time-coverage-006.test.ts > Contrato 006 con fixture propio > limpia el reloj propio vencido antes de iniciar otra tarea y deja auditoría efectiva
+error: Datos de ausencia inválidos
+ ❯ pe.Ue node_modules/@electric-sql/pg-protocol/src/parser.ts:442:11
+ ❯ pe.tt node_modules/@electric-sql/pg-protocol/src/parser.ts:220:16
+ ❯ pe.parse node_modules/@electric-sql/pg-protocol/src/parser.ts:104:21
+ ❯ N.qe node_modules/@electric-sql/pglite/src/pglite.ts:753:26
+ ❯ node_modules/@electric-sql/pglite/src/pglite.ts:706:14
+ ❯ null.<anonymous> wasm:/wasm/0267bb86:1:5922000
+ ❯ null.<anonymous> wasm:/wasm/0267bb86:1:2616044
+ ❯ null.<anonymous> wasm:/wasm/0267bb86:1:2648530
+ ❯ null.<anonymous> wasm:/wasm/0267bb86:1:2649134
+ ❯ null.<anonymous> wasm:/wasm/0267bb86:1:5569870
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 skipped (5)
+   Start at  10:47:16
+   Duration  2.04s (transform 36ms, setup 0ms, collect 48ms, tests 1.77s, environment 0ms, prepare 61ms)
+

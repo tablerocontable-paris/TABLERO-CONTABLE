@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-08",
+  "project": "Grupo Paris private laboratory",
+  "scope": "Extend the shared fold control to every data/information Panel callsite while keeping actions reachable.",
+  "changes": [
+    "Annotations, workspace/company setup, simulated invitations, joint-responsibility details, internal-request composition, and the legacy closure report now expose the shared accessible fold control.",
+    "The annotation and internal-request header actions remain available while their panel body is folded.",
+    "All Panel callsites in App.tsx and src/components now opt into the fold control; forms that appear only after an explicit request remain initially expanded."
+  ],
+  "validation": {
+    "focusedTests": { "result": "passed", "tests": 20, "files": 4 },
+    "fullSuite": {
+      "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "result": "passed",
+      "tests": 486,
+      "files": 55
+    },
+    "typescript": "passed",
+    "clientBuild": { "result": "passed", "mainEntryKb": 485.01, "chartChunkKb": 423.74 },
+    "workerBuild": "passed",
+    "staticPanelInventory": {
+      "method": "TypeScript JSX AST scan for Panel elements without a collapsible prop in src/App.tsx and src/components",
+      "missingFoldControlCallsites": 0
+    },
+    "edge": [
+      {
+        "script": "tests/browser-corrections.cjs",
+        "result": "passed",
+        "apiCalls": 0,
+        "javascriptErrors": 0,
+        "evidence": "outputs/plan-validation-20261008/panel-folding-final"
+      },
+      {
+        "script": "tests/browser-accessibility-audit.cjs",
+        "result": "passed",
+        "routes": 38,
+        "accessibilityTreeControls": 2124,
+        "controlsWithoutAccessibleName": 0,
+        "keyboardFocusStops": 877,
+        "missingVisibleFocus": 0,
+        "apiCalls": 0,
+        "javascriptErrors": 0,
+        "evidence": "outputs/plan-validation-20261008/accessibility-panel-folding-final/accessibility-audit.json"
+      }
+    ],
+    "gitDiffCheck": "passed; informational LF-to-CRLF notices only"
+  },
+  "limits": [
+    "Automated Chromium accessibility-tree and keyboard checks are not a screen-reader acceptance or WCAG certification.",
+    "Visual density and usability still require final product acceptance."
+  ],
+  "releaseState": {
+    "commitCreated": false,
+    "siteUpdated": false,
+    "externalAccountsConnected": false,
+    "estimatedGlobalProgress": "~45%"
+  }
+}

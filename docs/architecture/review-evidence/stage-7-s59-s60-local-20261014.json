@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-14",
+  "status": "implemented-locally-review-pending",
+  "scope": ["S59", "S60"],
+  "migration": "supabase/migrations/202610140012_sql_receipt_and_onboarding_guards.sql",
+  "changes": {
+    "S59": [
+      "Reject null, non-positive, and stale revisions in onboarding approval and change requests.",
+      "Use null-safe revision comparisons.",
+      "Revalidate request revision/status and privileged actor scope after coordination locks before writes in both approval and change-request flows.",
+      "Change requests acquire the actor, owner-profile, and onboarding-request coordination snapshot; a revoked manager is rejected without changing request status, review history, or audit events.",
+      "Keep approved replay idempotent and preserve legacy RPC signatures."
+    ],
+    "S60": [
+      "Keep operation receipt actor/operation ID as the sole replay identity.",
+      "Reject reuse of an operation ID with changed arguments.",
+      "Allow separate operation IDs with identical activity data to create separate entries, revisions, and audit events.",
+      "Preserve record_activity_once and record_activity wrappers."
+    ]
+  },
+  "verification": {
+    "focused_command": "node node_modules/vitest/vitest.mjs run tests/database.test.ts --maxWorkers=1 --testTimeout=20000 --hookTimeout=30000 --reporter=dot",
+    "focused_result": "39/39 tests passed, including the revoked-manager authorization regression in tests/database.test.ts.",
+    "full_suite_command": "node node_modules/vitest/vitest.mjs run --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000 --reporter=dot",
+    "full_suite_result": "Latest integrated run after stage-5 focus corrections: 658/658 tests passed in 67 files on 2026-10-14; Vitest reported 128.56 seconds.",
+    "build_command": "node node_modules/typescript/bin/tsc --noEmit; node node_modules/vite/bin/vite.js build --outDir dist/client; node scripts/build-worker.mjs",
+    "build_result": "TypeScript, Vite client, and Worker build exited successfully",
+    "diff_check": "git diff --check exited successfully; line-ending conversion warnings only"
+  },
+  "latest_integrated_revalidation": "After S59 change-request lock and stage-5 focus corrections: 658/658 tests in 67 files, TypeScript, Vite client, Worker build, and git diff --check passed on 2026-10-14. PGlite remains sequential and does not replace independent Sol review or PostgreSQL MVCC concurrency validation.",
+  "limits": [
+    "PGlite sequential tests do not establish PostgreSQL MVCC concurrency; concurrent integration remains a separate gate.",
+    "No remote SQL was applied and no API, Auth, Supabase, or operational workspace was activated.",
+    "Independent GPT-6.1 Sol review of the full stage-7 contract remains pending; S59/S60 are locally implemented, not independently accepted.",
+    "No local PostgreSQL server/client or Docker runtime was available for concurrent MVCC probes."
+  ]
+}

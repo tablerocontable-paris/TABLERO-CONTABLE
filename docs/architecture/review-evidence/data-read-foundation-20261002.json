@@ -1,0 +1,22 @@
+{
+  "base_sha": "fbb4b8fa5dc594ab7b6b72b714cdbafc71bdc659",
+  "scope": "typed task/session reader only; no frontend activation, auth, policy, migration, gateway or repository changes",
+  "checks": {
+    "npm_test": { "status": "passed", "files": 17, "tests": 182 },
+    "npm_run_build": { "status": "passed" },
+    "git_diff_check": { "status": "passed" },
+    "accounting_lab_reads": { "status": "passed", "new_tests": 2, "transport": "fixed SQL allowlist, parameterized queries, authenticated RLS role" }
+  },
+  "files_sha256": {
+    "src/data/remote/task-reader.ts": "4e881925277e7af10828ad9d03ce02d747f47fb1ddcfd10c50c2927a26b47423",
+    "tests/task-reader.test.ts": "941a6ddb13a8b1d289f0da2159f494c9e1eaf39b2d54ced38281bbb08cb54fad",
+    "tests/task-reader-sql.test.ts": "cb1d834ceff8093bc7589c014275fb501f8696bf08d18483f3268a70b89d20f8",
+    "docs/EXECUTION-NEXT.md": "c1e65fa0c7d704df1f3be417e8081157c17e4ebab887d1116dfe9ef6b9d8e9e9",
+    "docs/PROJECT-STATUS.md": "be16dfc28ab5a01c595ccdec493e01b880ab76d3baa20ae4b62bcdd050b1a5d6",
+    "docs/PRODUCT-ROADMAP.md": "d748287b6a8381c957927e905f4388dd1d9094d87562848662be809854ed40fe"
+  },
+  "limitations": [
+    "The live Site remains a localStorage demonstration; the reader is not wired to a remote transport.",
+    "PGlite/AccountingLab checks are not live PostgreSQL concurrency or Supabase Auth/PostgREST integration."
+  ]
+}

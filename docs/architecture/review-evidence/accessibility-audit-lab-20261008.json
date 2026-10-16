@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-08",
+  "scope": "Auditoría estructural de controles visibles en rutas del laboratorio",
+  "method": "Recorrido Playwright en Edge sobre el build local; comprobación DOM de nombres mediante aria-label, aria-labelledby, labels asociados, texto visible y title. No utiliza axe ni tecnología asistiva.",
+  "checks": {
+    "profiles": ["jefe", "encargado", "empleado"],
+    "routes_visited": 38,
+    "visible_controls_without_name": 0,
+    "javascript_errors": 0,
+    "operational_api_calls": 0,
+    "result": "passed"
+  },
+  "raw_evidence": "outputs/plan-validation-20261008/accessibility-final/accessibility-audit.json",
+  "known_limits": [
+    "The name check is a DOM-level heuristic, not the browser accessibility tree or WCAG conformance proof.",
+    "Screen-reader behavior, full keyboard traversal, and systematic contrast checks remain unverified.",
+    "No dependency was added for automated accessibility checks."
+  ]
+}

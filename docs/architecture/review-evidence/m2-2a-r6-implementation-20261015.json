@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-15",
+  "scope": "M2.2A R6 NULL-safe validation correction; local synthetic databases only",
+  "baseCommit": "1124d0b56639aefbb8d08d35691683e75a883d24",
+  "candidateCommit": "08b74050c1ae1d16bb53578783dd8a698810ddba",
+  "migration": "supabase/migrations/202610150014_operational_api.sql",
+  "sha256": {
+    "migration014": "d0c4ebf747530529118af1c2525dec03e6d2f65d7dfbe46639a1ed8feaaa701e",
+    "r6Matrix": "10480e6dc28049c4e327455bbb95d8e2e35a260c26d95b035ab566f8ffdbbe88",
+    "independentR6": "4b2c256573a00d767ae9aa9175773b2415697ad1cbb7380328a06cca2f87e58e"
+  },
+  "results": {
+    "r6NullSafetyMatrix": { "passed": 30, "total": 30, "exitCode": 0, "evidence": "../../outputs/m2-2a-r6-validation-20261015/protocol-final/review.json" },
+    "independentR6Probe": { "passed": 9, "total": 9, "exitCode": 0, "evidence": "../../outputs/m2-2a-r6-validation-20261015/r6-independent/review.json" },
+    "priorProtocolProbes": { "passed": 15, "total": 15, "exitCode": 0, "evidence": "../../outputs/m2-2a-r6-validation-20261015/independent/review.json" },
+    "focusedVitest": { "passed": 17, "total": 17, "exitCode": 0, "command": "vitest run tests/supabase-operational-contract.test.ts tests/supabase-operational-migration.test.ts --maxWorkers=2" },
+    "postgresNative": {
+      "version": "PostgreSQL 17.11",
+      "rcRc": { "passed": 61, "total": 61, "exitCode": 0, "evidence": "../../outputs/m2-2a-r6-validation-20261015/native-rc/review.json" },
+      "rrRr": { "passed": 61, "total": 61, "exitCode": 0, "evidence": "../../outputs/m2-2a-r6-validation-20261015/native-rr/review.json" },
+      "rcRr": { "passed": 43, "total": 43, "exitCode": 0, "evidence": "../../outputs/m2-2a-r6-validation-20261015/cross-rc-rr/review.json" },
+      "rrRc": { "passed": 43, "total": 43, "exitCode": 0, "evidence": "../../outputs/m2-2a-r6-validation-20261015/cross-rr-rc/review.json" },
+      "emptyRevisionBypass": { "passed": true, "expectedSQLSTATE": "22023", "activityBefore": 4, "activityAfter": 4, "transaction": "rolled back", "evidence": "../../outputs/m2-2a-r6-validation-20261015/native-rc/r6-empty-revisions-probe.sql" }
+    },
+    "fullVitest": { "passed": 712, "total": 712, "files": 72, "exitCode": 0, "command": "vitest run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000" },
+    "typeScript": { "passed": true, "exitCode": 0, "command": "tsc --noEmit" },
+    "clientBuild": { "passed": true, "exitCode": 0, "command": "vite build --outDir dist/client" },
+    "workerBuild": { "passed": true, "exitCode": 0, "command": "node scripts/build-worker.mjs" },
+    "reviewerSyntax": { "passed": true, "exitCode": 0, "commands": ["node --check tests/review/m2-2a-final-acceptance-review.mjs", "node --check tests/review/m2-2a-r6-independent-review.mjs"] },
+    "diffCheck": { "passed": true, "exitCode": 0, "command": "git diff --check" }
+  },
+  "preCommitHook": { "passed": 196, "total": 196, "files": 19, "exitCode": 0, "command": "node scripts/validate-change.mjs", "commit": "08b74050c1ae1d16bb53578783dd8a698810ddba" },
+  "notValidated": [
+    "Supabase hosted project, Auth/MFA, remote permissions or migration application",
+    "GitHub, hosting, Site publication or production deployment",
+    "Human review and acceptance by GPT-6.1 Sol"
+  ],
+  "nextStep": "Verify the candidate bundle in a clean clone, then submit commit 08b74050c1ae1d16bb53578783dd8a698810ddba for independent GPT-6.1 Sol high-effort review. Keep M2.2B/C, deployment, and account connections gated."
+}

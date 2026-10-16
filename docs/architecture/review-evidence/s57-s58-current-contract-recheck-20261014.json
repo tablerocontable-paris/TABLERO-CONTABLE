@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-14",
+  "requirements": ["S57", "S58"],
+  "finding": "The verifier exposed overrides for the S57 p95 threshold, sample count, and exact fixture size. A caller could weaken the acceptance contract while still receiving a passing result.",
+  "correction": "Made the accepted constants internal and fixed: 30 samples, p95 strictly below 1000 ms, 24 profiles, and 2000 tasks. Updated the CommonJS declarations and added regressions that attempt to supply weakening runtime options.",
+  "sources": {
+    "contract": {
+      "path": "scripts/verification-contract.cjs",
+      "sha256": "0d235b75eaecf98c9679f13a26e949580d1c4d844f75497a08929efe3c56346f"
+    },
+    "types": {
+      "path": "scripts/verification-contract.d.cts",
+      "sha256": "7cfae06e70320097ce727ddaa5404873a53163c23bea16dd01c497d2fb4fe4c7"
+    },
+    "regressions": {
+      "path": "tests/verification-contract.test.ts",
+      "sha256": "ba1d1dfa81fb9eaf056e32a5c572b4e9cd25b979fcf334873e247d77785c3c3a"
+    },
+    "benchmarkRunner": {
+      "path": "scripts/benchmark-laboratory.cjs",
+      "sha256": "9b9321df5d779da7547893c9c23bc0c58db9506975363a1981f5f501c458781a"
+    },
+    "isolatedRunner": {
+      "path": "tests/review/run-time-coverage-008-isolation.mjs",
+      "sha256": "79e9910606a1361cadec4e71027d630a368900695e8f4d3a6af2c00312f7e2c6"
+    }
+  },
+  "effectiveTree": {
+    "sha256": "f3d0d7d4c3906f8cfbe48c0eb122dafb45c8dd29c4e53ec8c54c845286dfdf96",
+    "fileCount": 438,
+    "generatedOutputsExcluded": true
+  },
+  "validation": {
+    "focusedContractTests": { "passed": 14, "total": 14, "exitCode": 0 },
+    "fullSuite": { "passed": 665, "total": 665, "files": 67, "exitCode": 0 },
+    "typecheck": { "command": "node node_modules/typescript/bin/tsc --noEmit", "exitCode": 0 },
+    "clientBuild": { "command": "node node_modules/vite/bin/vite.js build --outDir dist/client", "exitCode": 0, "entryJavaScriptBytes": 332850, "warningLimitBytes": 500000 },
+    "workerBuild": { "command": "node scripts/build-worker.mjs", "exitCode": 0 },
+    "benchmark": {
+      "result": "passed",
+      "browser": "Microsoft Edge 155.0.4283.45",
+      "profiles": 24,
+      "tasks": 2000,
+      "samples": 30,
+      "p95RouteMs": 384.85,
+      "targetExclusiveMs": 1000,
+      "report": "outputs/performance-lab-2026-10-14T18-01-52-754Z-18312/navigation-benchmark.json"
+    },
+    "isolatedRunner": {
+      "result": "passed",
+      "executed": 7,
+      "passed": 7,
+      "skipped": 209,
+      "failed": 0,
+      "report": "outputs/time-coverage-008-isolation-2026-10-14T18-05-13-992Z-9604/isolation-run.json"
+    },
+    "diffCheck": { "exitCode": 0, "notes": "Only existing LF/CRLF working-copy notices." }
+  },
+  "result": "The S57 thresholds and fixture dimensions cannot be relaxed via function options. The measured benchmark and S58 isolated runner pass on the recorded effective tree.",
+  "limits": [
+    "The benchmark is local hot-navigation measurement; it does not establish cold-start, concurrent-user, or production-host performance.",
+    "Independent GPT-6.1 Sol review remains pending."
+  ],
+  "externalActions": "No account, API, remote SQL, commit, PR, Site update, or deployment was used."
+}

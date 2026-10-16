@@ -1,0 +1,206 @@
+{
+  "date": "2026-10-01",
+  "source_base": "640c376efd4aec6e7564227aa2d74fac4093a102",
+  "source_hash": "866b0489063417ab01f7ca0a17b44b05d8373afb1a7646fb68e797c40f45dd4a",
+  "source_hash_files": [
+    "supabase/migrations/202610010008_time_coverage_finalization.sql",
+    "tests/helpers/accounting-lab.ts",
+    "tests/time-coverage-008.test.ts",
+    "tests/report-isolation-008.test.ts",
+    "tests/upgrades-008.test.ts",
+    "tests/annotations-tour-app.test.tsx"
+  ],
+  "suite": {
+    "command": "npm test",
+    "exit_code": 0,
+    "passed": 151,
+    "files": 13
+  },
+  "critical": {
+    "command": "node tests/verify-008-completion.mjs",
+    "exit_code": 0,
+    "processes": 32,
+    "selected_passed": 32,
+    "zero_selection_rejected": true
+  },
+  "build": {
+    "command": "npm run build",
+    "exit_code": 0,
+    "typescript": "passed",
+    "vite": "passed",
+    "index_sha256": "37b2b4edee666c5a81dff0f262a667f2b6b392d63d1c7a3eec980e5d3d87543e"
+  },
+  "diff_check": {
+    "exit_code": 0
+  },
+  "guide": {
+    "command": "node tests/postgres-008/check-sql.mjs",
+    "exit_code": 0,
+    "sequential_pglite_cases": 22,
+    "prepared_postgresql_pairs": 24,
+    "postgresql_executed": false,
+    "concurrency_tested": false,
+    "real_art_boundary_tested": false,
+    "sql_emission_checked": true
+  },
+  "frozen_files": [
+    {
+      "path": "review-evidence/annotations-tour-008-20261001.json",
+      "sha256": "1063c714430e1e51f03b9ead5b07250e32a64962a35986a634d2cef3ea532957",
+      "unchanged": true
+    },
+    {
+      "path": "review-evidence/annotations-tour-20261001.json",
+      "sha256": "de78e4827398f4f69040321a11d24885081782b4cc41a2e66d803c47e428cff4",
+      "unchanged": true
+    },
+    {
+      "path": "review-evidence/time-coverage-007-isolation-20261001.jsonl",
+      "sha256": "20751ec33a795cef9fb06becdfde0c1c61e9d5532b0c7b31ed7a841f856f7834",
+      "unchanged": true
+    },
+    {
+      "path": "review-evidence/time-coverage-007-probes-20261001.jsonl",
+      "sha256": "8bbf1b109efeb710a98a4c9072f3df5c068260899e6cca06ad903e8d41d5f684",
+      "unchanged": true
+    },
+    {
+      "path": "review-evidence/time-coverage-007-report-isolation-20261001.jsonl",
+      "sha256": "19230cc4ed0d808f91dfdb2e8b322d1255312a333cfacd04baca2557d3070254",
+      "unchanged": true
+    },
+    {
+      "path": "review-evidence/time-coverage-008-isolation-20261001.jsonl",
+      "sha256": "b93dd94b457921d661703876af879ae7ffc752b96028d5508656585437e3ce3f",
+      "unchanged": true
+    },
+    {
+      "path": "review-evidence/time-coverage-008-probes-20261001.jsonl",
+      "sha256": "6a57d4584735c26faa25b51048e369c23545117554f0c289f5c6e71e4ff120ed",
+      "unchanged": true
+    },
+    {
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "sha256": "4ae00143f3740d21a828165139fa929dea0dcb8775849939a505ca5cb8bdf161",
+      "unchanged": true
+    },
+    {
+      "path": "supabase/migrations/202609300002_workflows.sql",
+      "sha256": "ec5aa503834dc8a10e0a7cf858c0c6c4f09a3b0c5bb0a53df9e34fd834697832",
+      "unchanged": true
+    },
+    {
+      "path": "supabase/migrations/202610010001_occurrence_contract.sql",
+      "sha256": "009e453942d2609f6f84913d2684015326fe5874eb39351a9e75a0525c4c17b0",
+      "unchanged": true
+    },
+    {
+      "path": "supabase/migrations/202610010002_onboarding_approval.sql",
+      "sha256": "f531cec7664a4e58b2575f8f8fb154ec933d53973f63a7a1036387e2b27c02f3",
+      "unchanged": true
+    },
+    {
+      "path": "supabase/migrations/202610010003_report_delivery.sql",
+      "sha256": "2ca30367916fe708464bae2a857c34b014089f1d7618d21c1a822dc16e5c7ff4",
+      "unchanged": true
+    },
+    {
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "sha256": "c4868ecc2a0ac7b440d459d80c06edb65b15ad2929517cfb178570412392a7e3",
+      "unchanged": true
+    },
+    {
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "sha256": "50a073aac2913d7ef3f5fe3d32d2879226dda19a4a15239cf02d65bd9d0179ac",
+      "unchanged": true
+    },
+    {
+      "path": "supabase/migrations/202610010006_time_coverage_acceptance.sql",
+      "sha256": "394e3354fab91ca3babd850f3e5b08e32513e08ccc172064f74cde16594d906b",
+      "unchanged": true
+    },
+    {
+      "path": "supabase/migrations/202610010007_time_coverage_completion.sql",
+      "sha256": "5fee47ab9a401a6d05a205431365bb3e5840cba98147e9950ab84ff18c1e454f",
+      "unchanged": true
+    },
+    {
+      "path": "tests/review/annotations-tour-008-probes.tsx",
+      "sha256": "73450444498d38245aa8547b123ace3a1bf4b998fc5fa56b239cbddf2980dbbd",
+      "unchanged": true
+    },
+    {
+      "path": "tests/review/annotations-tour-008.config.ts",
+      "sha256": "0457b3e197a3a3fb10dac5f3aafe64c2e2860e0f19746c2d70ff9900f449c1c5",
+      "unchanged": true
+    },
+    {
+      "path": "tests/review/annotations-tour-probes.tsx",
+      "sha256": "519159a50533cb94c9c9b574bf4c71daf2506eadf8b55a8edf10aea8fdd23deb",
+      "unchanged": true
+    },
+    {
+      "path": "tests/review/annotations-tour.config.ts",
+      "sha256": "f9184b180dd0f670476c1d5016739e658dc107942e51556ce77c615b87f853a1",
+      "unchanged": true
+    },
+    {
+      "path": "tests/review/run-annotations-tour-probes.mjs",
+      "sha256": "a4305fec0cc84865826fae0c7600ffd0e2f330c896a6554007c20c7c08c5fdb3",
+      "unchanged": true
+    },
+    {
+      "path": "tests/review/run-time-coverage-008-isolation.mjs",
+      "sha256": "abf710ddf0c089b3c81d1b3877cfc588cfe87b77dbd0a7645fa7a2e34c84d335",
+      "unchanged": true
+    },
+    {
+      "path": "tests/review/time-coverage-004-probes.mjs",
+      "sha256": "c85c10f426e0a2c96522abc506646f7640e54167d50434669648a8b2812f1a02",
+      "unchanged": true
+    },
+    {
+      "path": "tests/review/time-coverage-005-probes.mjs",
+      "sha256": "31243897f85a5020b73ae5aeb22938367e5a73e5d1c064c35daa52e001539ae5",
+      "unchanged": true
+    },
+    {
+      "path": "tests/review/time-coverage-006-probes.mjs",
+      "sha256": "7ba09eac3cef8a2d5f4527b67557db44f2c9ba560d8c4615576da7e808902c1a",
+      "unchanged": true
+    },
+    {
+      "path": "tests/review/time-coverage-007-postgres-fixture.sql",
+      "sha256": "b6e832b40ac22d27eb4095a47899b1d223953138c75cc91d7d93f3d71f8c1c40",
+      "unchanged": true
+    },
+    {
+      "path": "tests/review/time-coverage-007-probes.mjs",
+      "sha256": "34680835b278f2d8be9a93e582f90c2f9efaa0747de00615842ca859af957722",
+      "unchanged": true
+    },
+    {
+      "path": "tests/review/time-coverage-008-probes.mjs",
+      "sha256": "41095e5404261341ead7c3135e9dbf2951c3508e3caf424f63369a7c6be8299f",
+      "unchanged": true
+    },
+    {
+      "path": "tests/time-coverage-006.test.ts",
+      "sha256": "30b0fc02a6c65f132a4550a79c1a5efd8c9b1f8c30b5c22a55321b9a0bbe4769",
+      "unchanged": true
+    },
+    {
+      "path": "tests/time-coverage-007.test.ts",
+      "sha256": "8a2021e2a7a246c9a4974b753d995409580acf41bd9f22bf6c5c7bbaf59fb916",
+      "unchanged": true
+    }
+  ],
+  "limitations": [
+    "Synthetic JWT/aal, no live Auth/MFA",
+    "Function/membership corruption only in disposable fixtures",
+    "No Supabase connection or employee migration",
+    "No mail delivered",
+    "Frontend remains localStorage; no new visual QA"
+  ],
+  "next_model": "GPT-6.1 Sol, high, Standard — manual review"
+}

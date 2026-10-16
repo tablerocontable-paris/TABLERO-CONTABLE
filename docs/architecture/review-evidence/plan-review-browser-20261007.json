@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-08T02:46:15.719Z",
+  "reports": [
+    {
+      "id": "R07-day-metrics",
+      "expectedAssigned": 4,
+      "renderedStats": [
+        "Cumplimiento ponderado—0.0 de 0 puntos",
+        "Entregables completados0 / 0Tareas con resultado concreto",
+        "Entregas en fecha—Sobre entregables completados",
+        "Movimientos gestionados100100 facturas · trámites · pagos · Calidad sin evaluar · Orden sin evaluar · Oportunidad sin evaluar"
+      ]
+    },
+    {
+      "id": "R08-guided-tour",
+      "shadow": "rgba(159, 187, 223, 0.19) 0px 0px 0px 8px",
+      "coachPosition": "fixed",
+      "coachBottom": "25px",
+      "ariaModal": null,
+      "focusWithinCoach": false,
+      "escapeCloses": false
+    },
+    {
+      "id": "R09-boss-management",
+      "oldWeight": 5,
+      "requestedWeight": 8,
+      "storedWeight": 5,
+      "message": "Podés consultar esta tarea, pero sólo su responsable o cobertura autorizada puede ejecutarla."
+    }
+  ],
+  "errors": [],
+  "operationalApiCalls": []
+}

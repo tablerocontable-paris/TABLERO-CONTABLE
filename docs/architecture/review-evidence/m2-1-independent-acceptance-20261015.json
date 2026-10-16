@@ -1,0 +1,382 @@
+{
+  "sourceCommit": "a93f7d084b8f802499965df8b8677a59fedac364",
+  "engine": "postgres (PostgreSQL) 17.11",
+  "migrationSha256": "d013b82bfa1101ed11a35daeaf7a64b2e6063da9c09b55e7586ce67cc586bac2",
+  "candidate": null,
+  "total": 42,
+  "passed": 42,
+  "failed": 0,
+  "results": [
+    {
+      "name": "business missing AAL",
+      "passed": true,
+      "expectedSQLSTATE": "42501",
+      "observedSQLSTATE": "42501"
+    },
+    {
+      "name": "business null AAL",
+      "passed": true,
+      "expectedSQLSTATE": "42501",
+      "observedSQLSTATE": "42501"
+    },
+    {
+      "name": "business empty AAL",
+      "passed": true,
+      "expectedSQLSTATE": "42501",
+      "observedSQLSTATE": "42501"
+    },
+    {
+      "name": "business unknown AAL",
+      "passed": true,
+      "expectedSQLSTATE": "42501",
+      "observedSQLSTATE": "42501"
+    },
+    {
+      "name": "technical missing AAL",
+      "passed": true,
+      "expectedSQLSTATE": "42501",
+      "observedSQLSTATE": "42501"
+    },
+    {
+      "name": "technical null AAL",
+      "passed": true,
+      "expectedSQLSTATE": "42501",
+      "observedSQLSTATE": "42501"
+    },
+    {
+      "name": "technical empty AAL",
+      "passed": true,
+      "expectedSQLSTATE": "42501",
+      "observedSQLSTATE": "42501"
+    },
+    {
+      "name": "technical unknown AAL",
+      "passed": true,
+      "expectedSQLSTATE": "42501",
+      "observedSQLSTATE": "42501"
+    },
+    {
+      "name": "whitespace-only display name",
+      "passed": true,
+      "expected": "deny",
+      "observedSQLSTATE": "42501",
+      "decoded": null
+    },
+    {
+      "name": "Unicode code-point display name",
+      "passed": true,
+      "expected": "decode",
+      "observedSQLSTATE": "00000",
+      "decoded": true
+    },
+    {
+      "name": "mixed ECMAScript whitespace",
+      "passed": true,
+      "expected": "normalized",
+      "observedSQLSTATE": "00000",
+      "decoded": true
+    },
+    {
+      "name": "maximum 200 code points",
+      "passed": true,
+      "expected": "decode",
+      "observedSQLSTATE": "00000",
+      "decoded": true
+    },
+    {
+      "name": "over maximum 201 code points",
+      "passed": true,
+      "expected": "deny",
+      "observedSQLSTATE": "42501",
+      "decoded": null
+    },
+    {
+      "name": "corrupted dual identity with an inactive duplicate",
+      "passed": true,
+      "expectedSQLSTATE": "42501",
+      "observedSQLSTATE": "42501"
+    },
+    {
+      "name": "identity race read committed: business first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "23514",
+      "commitSQLSTATE": "00000",
+      "coexist": false
+    },
+    {
+      "name": "identity race read committed: technical first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "23514",
+      "commitSQLSTATE": "00000",
+      "coexist": false
+    },
+    {
+      "name": "identity race repeatable read: business first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "40001",
+      "commitSQLSTATE": "00000",
+      "coexist": false
+    },
+    {
+      "name": "identity race repeatable read: technical first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "40001",
+      "commitSQLSTATE": "00000",
+      "coexist": false
+    },
+    {
+      "name": "identity race serializable: business first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "40001",
+      "commitSQLSTATE": "00000",
+      "coexist": false
+    },
+    {
+      "name": "identity race serializable: technical first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "40001",
+      "commitSQLSTATE": "00000",
+      "coexist": false
+    },
+    {
+      "name": "identity UUID update race read committed/repeatable read: business first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "40001",
+      "commitSQLSTATE": "00000",
+      "finalPrincipalCount": "1",
+      "fenceRevision": "1"
+    },
+    {
+      "name": "identity UUID update race repeatable read/read committed: business first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "23514",
+      "commitSQLSTATE": "00000",
+      "finalPrincipalCount": "1",
+      "fenceRevision": "1"
+    },
+    {
+      "name": "identity UUID update race read committed/repeatable read: technical first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "40001",
+      "commitSQLSTATE": "00000",
+      "finalPrincipalCount": "1",
+      "fenceRevision": "1"
+    },
+    {
+      "name": "identity UUID update race repeatable read/read committed: technical first",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "23514",
+      "commitSQLSTATE": "00000",
+      "finalPrincipalCount": "1",
+      "fenceRevision": "1"
+    },
+    {
+      "name": "acceptance business insert/update read committed/read committed",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "23514",
+      "targetCount": 1,
+      "loserPreserved": 1,
+      "fenceRevision": "1"
+    },
+    {
+      "name": "acceptance business insert/update read committed/repeatable read",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "40001",
+      "targetCount": 1,
+      "loserPreserved": 1,
+      "fenceRevision": "1"
+    },
+    {
+      "name": "acceptance business insert/update repeatable read/read committed",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "23514",
+      "targetCount": 1,
+      "loserPreserved": 1,
+      "fenceRevision": "1"
+    },
+    {
+      "name": "acceptance business insert/update repeatable read/repeatable read",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "40001",
+      "targetCount": 1,
+      "loserPreserved": 1,
+      "fenceRevision": "1"
+    },
+    {
+      "name": "acceptance business update/update read committed/read committed",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "23514",
+      "targetCount": 1,
+      "loserPreserved": 1,
+      "fenceRevision": "1"
+    },
+    {
+      "name": "acceptance business update/update read committed/repeatable read",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "40001",
+      "targetCount": 1,
+      "loserPreserved": 1,
+      "fenceRevision": "1"
+    },
+    {
+      "name": "acceptance business update/update repeatable read/read committed",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "23514",
+      "targetCount": 1,
+      "loserPreserved": 1,
+      "fenceRevision": "1"
+    },
+    {
+      "name": "acceptance business update/update repeatable read/repeatable read",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "40001",
+      "targetCount": 1,
+      "loserPreserved": 1,
+      "fenceRevision": "1"
+    },
+    {
+      "name": "acceptance technical insert/update read committed/read committed",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "23514",
+      "targetCount": 1,
+      "loserPreserved": 1,
+      "fenceRevision": "1"
+    },
+    {
+      "name": "acceptance technical insert/update read committed/repeatable read",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "40001",
+      "targetCount": 1,
+      "loserPreserved": 1,
+      "fenceRevision": "1"
+    },
+    {
+      "name": "acceptance technical insert/update repeatable read/read committed",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "23514",
+      "targetCount": 1,
+      "loserPreserved": 1,
+      "fenceRevision": "1"
+    },
+    {
+      "name": "acceptance technical insert/update repeatable read/repeatable read",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "40001",
+      "targetCount": 1,
+      "loserPreserved": 1,
+      "fenceRevision": "1"
+    },
+    {
+      "name": "acceptance technical update/update read committed/read committed",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "23514",
+      "targetCount": 1,
+      "loserPreserved": 1,
+      "fenceRevision": "1"
+    },
+    {
+      "name": "acceptance technical update/update read committed/repeatable read",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "40001",
+      "targetCount": 1,
+      "loserPreserved": 1,
+      "fenceRevision": "1"
+    },
+    {
+      "name": "acceptance technical update/update repeatable read/read committed",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "23514",
+      "targetCount": 1,
+      "loserPreserved": 1,
+      "fenceRevision": "1"
+    },
+    {
+      "name": "acceptance technical update/update repeatable read/repeatable read",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "40001",
+      "targetCount": 1,
+      "loserPreserved": 1,
+      "fenceRevision": "1"
+    },
+    {
+      "name": "acceptance rollback winner business",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "00000",
+      "commitSQLSTATE": "00000",
+      "targetCount": 1,
+      "fenceRevision": "1"
+    },
+    {
+      "name": "acceptance rollback winner technical",
+      "passed": true,
+      "blocked": true,
+      "secondSQLSTATE": "00000",
+      "commitSQLSTATE": "00000",
+      "targetCount": 1,
+      "fenceRevision": "1"
+    }
+  ],
+  "providerAuth": "synthetic claims only; no hosted Supabase connection",
+  "references": [
+    "https://www.postgresql.org/docs/17/transaction-iso.html",
+    "https://www.postgresql.org/docs/17/xfunc-volatility.html"
+  ],
+  "verdict": "accepted_local",
+  "reviewDate": "2026-10-15",
+  "nativeCommand": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-1-sol-acceptance-20261015/native-full --port 55439 --review-matrix full",
+  "focused": {
+    "command": "node node_modules/vitest/vitest.mjs run tests/review/m2-1-independent-acceptance.test.ts tests/supabase-identity-foundation.test.ts tests/supabase-context-contract.test.ts --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+    "files": 3,
+    "passed": 27,
+    "failed": 0,
+    "exitCode": 0,
+    "independentTests": 5,
+    "durationSeconds": 27.82
+  },
+  "typeScript": {
+    "command": "node node_modules/typescript/bin/tsc --noEmit",
+    "exitCode": 0
+  },
+  "previousProductEvidence": {
+    "sourceCommit": "a93f7d084b8f802499965df8b8677a59fedac364",
+    "productPathsUnchanged": ["src", "supabase"],
+    "fullSuitePreviousPassed": 690,
+    "fullSuitePreviousFiles": 69,
+    "fullSuiteRepeated": false,
+    "clientWorkerBuildPreviousPassed": true,
+    "buildRepeated": false
+  },
+  "reviewFiles": {
+    "independentTestsSha256": "e3c1a36663f848dbb86b6ffafc21d0ebdc5554db94169e9488fee41088882a43",
+    "nativeRunnerSha256": "f22011db7034b7c0ca436edcbad981848cc8455d9d06aef4fde02002799667dc",
+    "sqlHashNormalization": "none; raw working-copy bytes"
+  },
+  "next": "M2.2A contract M2-2A-OPERATIVE-API-LUNA-20261015.md; M2.2B/C and hosted gates remain incomplete"
+}

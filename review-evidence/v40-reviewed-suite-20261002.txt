@@ -1,0 +1,15 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> grupo-paris-nueva-generacion@0.4.0 test
+> vitest run --reporter=dot
+
+
+ RUN  v3.2.7 /workspace/scratch/0de2d62eef9c/site
+
+··················································································································································································································
+
+ Test Files  18 passed (18)
+      Tests  210 passed (210)
+   Start at  14:54:33
+   Duration  26.33s (transform 1.76s, setup 0ms, collect 6.00s, tests 73.59s, environment 2.43s, prepare 1.61s)
+

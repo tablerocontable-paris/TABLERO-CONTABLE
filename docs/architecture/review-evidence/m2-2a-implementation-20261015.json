@@ -1,0 +1,91 @@
+{
+  "date": "2026-10-15",
+  "status": "implementation-in-progress; not Sol-reviewed or accepted",
+  "scope": "M2.2A local PostgreSQL API and versioned operational measurement only",
+  "sourceCommitAtStart": "bc6c0a476f9c284d4e843995f5b4e70bb1e3c33f",
+  "syntheticOnly": true,
+  "hostedSupabaseConnected": false,
+  "migrationDeployed": false,
+  "nativePostgres": {
+    "version": "PostgreSQL 17.11",
+    "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2a-mvcc-fix-20261015/native-final6 --port 55455 --through-014 yes --m2-2a-smoke yes",
+    "exitCode": 0,
+    "results": "35/35",
+    "report": "../../outputs/m2-2a-mvcc-fix-20261015/native-final6/review.json",
+    "coverage": [
+      "operation record with null/blank reference and without a configured rate",
+      "versioned rate creation and later effective date; activity/rate keyset pagination",
+      "summary with rated and unrated quantity; quality null and valid zero",
+      "strict extra payload rejection, superior cannot record for the owner, AAL1 cannot assess",
+      "private table RLS/ACL and API execute grants",
+      "legacy month close guard for v2 work",
+      "exact concurrent replay blocks and returns one receipt without duplicating an activity",
+      "first rate configuration racing a record under repeatable read aborts with 40001",
+      "assessment racing a stale record aborts the stale record with 40001",
+      "legacy close racing a record forces replan then rejects retry with 55000",
+      "stale RR actor snapshot after profile deactivation aborts with 40001 without a receipt or activity",
+      "stale RR task snapshot after month closure aborts with 40001 without a receipt or activity",
+      "coverage cancellation while waiting invalidates the command; retry is denied",
+      "existing M2.1 authentication and identity race matrix",
+      "employee denied foreign-organization reads and rate history; inactive owner and stale receipt denied",
+      "encargado with required AAL2 can consult assigned employee task but cannot consult an unassigned teammate task, execute, read private quality, or parameterize rates",
+      "operation.record, operation.rate, and operation.assess receipts are denied after active principal permission is revoked",
+      "employee denied foreign-organization reads and rate history; inactive owner and stale receipt denied",
+      "injected failures at activity, rate-version, and assessment-version writes roll back partial state, receipts, and operation fences"
+    ]
+  },
+  "populatedUpgrade": {
+    "command": "node node_modules/vitest/vitest.mjs run tests/supabase-operational-migration.test.ts tests/supabase-operational-contract.test.ts --testTimeout=20000",
+    "exitCode": 0,
+    "results": "17/17",
+    "preserved": [
+      "legacy activity columns",
+      "task row",
+      "closure snapshot",
+      "report snapshot",
+      "outbox event"
+      ,"time session","legacy task mutation receipt","private block note and version history","private note receipt",
+      "month fence seeded from the pre-existing closure"
+    ],
+    "newVersionedRows": "none invented"
+  },
+  "decoder": {
+    "command": "node_modules/.bin/vitest run tests/supabase-operational-contract.test.ts",
+    "exitCode": 0,
+    "results": "16/16"
+  },
+  "typecheck": {
+    "command": "node node_modules/typescript/bin/tsc --noEmit",
+    "exitCode": 0
+  },
+  "builds": {
+    "client": {
+      "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+      "exitCode": 0
+    },
+    "worker": {
+      "command": "node scripts/build-worker.mjs",
+      "exitCode": 0
+    }
+  },
+  "fullSuite": {
+    "command": "node node_modules/vitest/vitest.mjs run --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+    "exitCode": 0,
+    "results": "712/712 across 72 files",
+    "note": "A prior parallel attempt showed one intermittent Catálogo query; the focused file passed 29/29 and the corrected full run passed."
+  },
+  "pendingRequiredRaces": [
+    "independent GPT-6.1 Sol review of final migration, authorization locks, month fence, and decoder",
+    "additional READ COMMITTED/REPEATABLE READ orderings for each command race"
+  ],
+  "sha256": {
+    "supabase/migrations/202610150014_operational_api.sql": "bab9dd45c23e8c4fdaea96fcba3e2025693df8fa1cfca4cf95702142da259aaa",
+    "src/data/supabase/operational-contract.ts": "0f3528736b253f5e7d3d1e43d95286694a717de81b10023d13b9a8e3c13f6cec",
+    "tests/review/m2-1-native-review.mjs": "33174da161de75ce7a3c2234b2541fba8ef0ea825de790801f9b87cfc304e40c",
+    "tests/supabase-operational-contract.test.ts": "57413a9fc9c880bc8b2fb9bbe5600a4882c939e47d386aa6288499d88944b7ad",
+    "tests/supabase-operational-migration.test.ts": "f367951f4d91276f8fb00def71b02c9f07f28c667660fdb7bb75c1aae7eeaae1",
+    "tests/helpers/accounting-lab.ts": "9f38423b3baeb6354da46486f6e9a6332614ecec6efa7f89948a3389b5d3377b",
+    "docs/PROJECT-STATUS.md": "165ddaf72ebb801cb4c576cdc756e9f093a93c473b25439beebdccc2f99a584a",
+    "docs/EXECUTION-NEXT.md": "83c51d048e97bc2034661f82a10b03ccdcd6cc372e271797683dd0f17da4cc42"
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "date": "2026-10-08",
+  "scope": [
+    "Use immutable per-company closure snapshots for monthly history and consolidation.",
+    "Filter the suggested daily route by month, company, team, and sector.",
+    "Revalidate actor, permissions, task state, closure state, and operational limits before committing asynchronous evidence references.",
+    "Explain local storage quota/security failures and preserve the previous lab state on failed evidence restoration."
+  ],
+  "automated_checks": {
+    "unit_and_component_tests": {
+      "passed": 463,
+      "failed": 0,
+      "test_files": 53,
+      "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000"
+    },
+    "typescript": "passed",
+    "vite_client_build": "passed",
+    "worker_build": "passed",
+    "git_diff_check": "passed",
+    "post-refactor_and_closure_evidence_focused_tests": "32/32 passed",
+    "calendar_accessibility_component_tests": "4/4 passed"
+  },
+  "browser_validation": [
+    {
+      "script": "tests/browser-corrections.cjs",
+      "result": "passed",
+      "api_calls": 0,
+      "javascript_errors": 0,
+      "evidence": "outputs/plan-validation-20261008/browser-async-evidence-route-final/browser-validation.json"
+    },
+    {
+      "script": "tests/browser-laboratory-backup.cjs",
+      "result": "passed",
+      "api_calls": 0,
+      "javascript_errors": 0,
+      "quota_error_injected": true,
+      "quota_error_references_after_failure": 1,
+      "restore_state_write_failure_injected": true,
+      "rollback_preserved_previous_state": true,
+      "rollback_removed_temporary_blob": true,
+      "subsequent_restore_succeeded": true,
+      "company_and_month_closures_checked": true,
+      "evidence_blob_read_after_closure": true,
+      "evidence": "outputs/plan-validation-20261008/browser-close-evidence-final/laboratory-backup-browser.json"
+    },
+    {
+      "script": "tests/browser-corrections.cjs",
+      "result": "passed_after_error-ui-change",
+      "api_calls": 0,
+      "javascript_errors": 0,
+      "evidence": "outputs/plan-validation-20261008/browser-final-quota"
+    },
+    {
+      "script": "tests/browser-corrections.cjs",
+      "result": "passed_after_calendar_keyboard_a11y",
+      "calendar_keyboard_navigation": true,
+      "single_calendar_tab_stop": true,
+      "api_calls": 0,
+      "javascript_errors": 0,
+      "evidence": "outputs/plan-validation-20261008/browser-calendar-keyboard-final/browser-validation.json"
+    },
+    {
+      "script": "tests/browser.cjs",
+      "result": "passed",
+      "api_calls": 0,
+      "javascript_errors": 0,
+      "evidence": "outputs/plan-validation-20261008/browser-core-async-final"
+    },
+    {
+      "script": "tests/browser-corrections.cjs",
+      "result": "passed_rendered_control_name_scan",
+      "routes": [
+        "overview",
+        "day",
+        "tasks",
+        "operations",
+        "calendar",
+        "analytics",
+        "closing",
+        "team",
+        "catalog",
+        "quality",
+        "planning",
+        "absences",
+        "annotations",
+        "requests"
+      ],
+      "visible_controls_without_accessible_names": 0,
+      "api_calls": 0,
+      "javascript_errors": 0,
+      "evidence": "outputs/plan-validation-20261008/browser-rendered-accessibility-final/browser-validation.json"
+    }
+  ],
+  "known_limits": [
+    "A comprehensive accessibility audit remains pending; rendered button/form control names and calendar keyboard navigation were checked.",
+    "No authenticated multi-user or production Supabase/Worker behavior was exercised.",
+    "The Vite entry bundle remains above the configured size warning: 567159 bytes; chart chunk: 423739 bytes."
+  ],
+  "release_state": {
+    "commit_created": false,
+    "site_updated": false,
+    "external_accounts_connected": false,
+    "operational_api_calls": 0,
+    "estimated_global_completion_percent": 45,
+    "all_requested_changes_implemented_and_accepted": false
+  }
+}

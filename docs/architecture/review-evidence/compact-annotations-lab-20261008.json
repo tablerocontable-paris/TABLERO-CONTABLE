@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-08",
+  "scope": "Densidad y prioridad de Anotaciones en el laboratorio",
+  "changes": [
+    "La acción Nueva anotación se ubica en el encabezado del panel, sin ocupar el cuerpo de la página.",
+    "Tu biblioteca se muestra desplegada al entrar y conserva su control para plegar y abrir.",
+    "El formulario aparece sólo al crear o editar una anotación; siguen vigentes los límites de privacidad por perfil del laboratorio."
+  ],
+  "checks": {
+    "focused_tests": "43/43 tests passed across annotations, integrated tour, and UI acceptance",
+    "full_suite": "464/464 tests across 53 files passed",
+    "typescript": "passed",
+    "vite_client_build": "passed; main entry 569940 bytes, charts chunk 423739 bytes",
+    "worker_build": "passed",
+    "edge_browser_core": "passed",
+    "edge_browser_corrections": "passed; verified new action is in the panel header and library is expanded on entry",
+    "edge_browser_joint": "passed",
+    "edge_browser_backup": "passed",
+    "operational_api_calls": 0,
+    "javascript_errors": 0,
+    "git_diff_check": "passed; Git also printed informational LF-to-CRLF working-tree notices"
+  },
+  "visual_evidence": "outputs/plan-validation-20261008/final-current/annotations-prioritized.png",
+  "known_limits": [
+    "The library starts expanded; it can be folded when the user wants a shorter page.",
+    "No commit or Site update was made."
+  ]
+}
