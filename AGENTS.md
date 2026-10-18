@@ -24,8 +24,7 @@ El fix local posterior de replay `onboarding.submit` fue aceptado por Sol sólo
 para los casos enumerados (SQL014 SHA256 de checkout
 `13e88c8549f969187294367161c3ce6cf458d7f4618ddba40cb5058254982a26`; contenido
 normalizado LF `b593618d1fcc11fe0be5e6678574faba8a013e4ac587e303d7f00d49dbe05e49`;
-PostgreSQL 17.11 130/130, `40P01=0`). Está en commit local
-el commit local vigente; el remoto `main` permanece en
+PostgreSQL 17.11 130/130, `40P01=0`). Está en el commit local vigente; el remoto `main` permanece en
 `8cf5e8a3e6969cfe02d77c595698c5f60ddfa8f5`. Falta la revisión Sol del commit
 exacto antes del push directo; no abrir PR. Continuar Gate L local. 014 sigue sin aplicar. No tocar Supabase remoto
 hasta realizar y verificar el gate de exposición Data API. Producción,
