@@ -1,0 +1,37 @@
+{
+  "scope": "Local SQL014 onboarding.saveDraft/onboarding.submit commandReceipt authorization after company membership revocation",
+  "remoteChanges": false,
+  "migrationApplied": false,
+  "files": {
+    "supabase/migrations/202610150014_operational_api.sql": "b7576f6e371e574057b16484173de8c05ba4854fcb902c8df7af1aec135b8bfa",
+    "tests/m2-2c-contract.test.ts": "4c3c8aa1b8326a4dbb7296c3c6b67e0fea3ac972684e7515c66d9ac2fbbc7c84",
+    "tests/review/m2-1-native-review.mjs": "ab69d31a872e50bf9cd727cc35dfe5359edac318a5cd5b1fe6978d9f51ee5ea7"
+  },
+  "vitest": {
+    "command": "node node_modules/vitest/vitest.mjs run tests/m2-2c-contract.test.ts --maxWorkers=1 --testTimeout=20000 --hookTimeout=30000",
+    "result": "15/15 passed"
+  },
+  "nativePostgres": {
+    "engine": "PostgreSQL 17.11",
+    "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2c-onboarding-commandreceipt-20261018-r2 --port 55658 --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes",
+    "result": "140/140 passed",
+    "report": "../../outputs/m2-2c-onboarding-commandreceipt-20261018-r2/review.json",
+    "reportSha256": "cc96d0363f9f00bbcc9777f4f743beaed148cc81dfe755f0cc27223865c55c22",
+    "deadlocks40P01": 0,
+    "scenarios": {
+      "committedRevocation": "saveDraft and submit commandReceipt each return 42501; command replay also returns 42501",
+      "receiptFirstRC": "receipt query returns 00000; pg_blocking_pids confirms revocation waits; revocation commits; subsequent receipt query returns 42501",
+      "revocationFirstRR": "old repeatable-read snapshot aborts with 40001; fresh retry returns 42501",
+      "state": "membership false/revision 1; onboarding submitted; one immutable receipt per command; no extra fences"
+    }
+  },
+  "behavior": {
+    "submitPayload": "Read immutable onboarding_request_versions payload for requestId and exact revision in receipt result; never consult a later mutable draft for authorization.",
+    "locks": "Read-only _coordination_prepare/_coordination_acquire_m22b(false) with actor/profile locks and membership:<company>:<actor> scopes; no writer fence increment.",
+    "preserved": "Exact authorized receipt response; actor-scoped lookup (other actor found=false); changed command arguments still return 40001."
+  },
+  "limitations": [
+    "Local synthetic fixtures only; not applied to Supabase.",
+    "This closes only commandReceipt authorization for onboarding saveDraft/submit after company membership revocation; it is not complete Gate L acceptance."
+  ]
+}

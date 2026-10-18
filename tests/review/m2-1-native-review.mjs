@@ -1110,12 +1110,57 @@ try {
         await claims({ role: "authenticated", sub: revokedOwner, aal: "aal1" }, revokedOwner);
         const saveReplayAfterRevoke = await a.query(`select api.command_v1('${JSON.stringify(revokedSaveCommand).replaceAll("'", "''")}'::jsonb);`);
         const submitReplayAfterRevoke = await a.query(`select api.command_v1('${JSON.stringify(revokedSubmitCommand).replaceAll("'", "''")}'::jsonb);`);
-        const onboardingReplayDenied = saveReplayAfterRevoke.code === "42501" && submitReplayAfterRevoke.code === "42501";
-        record("M2.2C membership-revoked owner cannot replay exact onboarding draft/submit receipts", onboardingReplayDenied, { expectedSQLSTATE: "42501", saveDraftReplaySQLSTATE: saveReplayAfterRevoke.code, submitReplaySQLSTATE: submitReplayAfterRevoke.code, requestStatus: (await observer.ok(`select status from public.onboarding_requests where id=${lit(revokedRequestId)};`)).at(-1) });
+        const receiptQuery = operationId => ({ contractVersion: 1, kind: "commandReceipt", filters: { operationId }, cursor: null, limit: 1 });
+        const saveReceiptAfterRevoke = await a.query(`select api.query_v1('${JSON.stringify(receiptQuery(revokedRequestOp)).replaceAll("'", "''")}'::jsonb);`);
+        const submitReceiptAfterRevoke = await a.query(`select api.query_v1('${JSON.stringify(receiptQuery(revokedSubmitOp)).replaceAll("'", "''")}'::jsonb);`);
+        const onboardingReplayDenied = saveReplayAfterRevoke.code === "42501" && submitReplayAfterRevoke.code === "42501" && saveReceiptAfterRevoke.code === "42501" && submitReceiptAfterRevoke.code === "42501";
+        record("M2.2C membership-revoked owner cannot replay or query exact onboarding draft/submit receipts", onboardingReplayDenied, { expectedSQLSTATE: "42501", saveDraftReplaySQLSTATE: saveReplayAfterRevoke.code, submitReplaySQLSTATE: submitReplayAfterRevoke.code, saveDraftReceiptSQLSTATE: saveReceiptAfterRevoke.code, submitReceiptSQLSTATE: submitReceiptAfterRevoke.code, requestStatus: (await observer.ok(`select status from public.onboarding_requests where id=${lit(revokedRequestId)};`)).at(-1) });
         await a.ok("reset role;");
         const state = (await observer.ok(`select (select active::text||'|'||revision from public.company_memberships where profile_id=${lit(revokedOwner)} and company_id=${lit(company)})||'|'||(select status from public.onboarding_requests where id=${lit(revokedRequestId)})||'|'||(select count(*) from public.onboarding_activations where request_id=${lit(revokedRequestId)})||'|'||(select count(*) from public.task_assignments where owner_id=${lit(revokedOwner)})||'|'||(select count(*) from app_private.api_command_receipts where operation_id=${lit(revokedApproveOp)})||'|'||(select count(*) from app_private.api_command_receipts where operation_id=${lit(revokeOp)});`)).at(-1); assert.equal(state, "false|1|submitted|0|0|0|1", state);
         await a.ok("reset role;");
-        record("M2.2C revoke-first soft membership revocation fences RR approval; stale approval denies after retry", true, { blocked, revokeSQLSTATE: revokeResult.code, staleApprovalSQLSTATE: stale.code, retrySQLSTATE: retry.code, draftReplaySQLSTATE: saveReplayAfterRevoke.code, submitReplaySQLSTATE: submitReplayAfterRevoke.code, finalMembershipAndOnboardingState: state });
+        record("M2.2C revoke-first soft membership revocation fences RR approval; stale approval denies after retry", true, { blocked, revokeSQLSTATE: revokeResult.code, staleApprovalSQLSTATE: stale.code, retrySQLSTATE: retry.code, draftReplaySQLSTATE: saveReplayAfterRevoke.code, submitReplaySQLSTATE: submitReplayAfterRevoke.code, draftReceiptSQLSTATE: saveReceiptAfterRevoke.code, submitReceiptSQLSTATE: submitReceiptAfterRevoke.code, finalMembershipAndOnboardingState: state });
+      }
+      {
+        const receiptRaceOwner = uid(150010), receiptRaceRequest = await makeRequest(receiptRaceOwner, uid(150011), 150012), receiptRaceRevokeOp = uid(150014);
+        // The helper uses opBase + 1 for submit; construct the actual id used.
+        const submitOperationId = uid(150013);
+        const receiptQuery = { contractVersion: 1, kind: "commandReceipt", filters: { operationId: submitOperationId }, cursor: null, limit: 1 };
+        await claims({ role: "authenticated", sub: receiptRaceOwner, aal: "aal1" }, receiptRaceOwner);
+        await a.ok("begin isolation level read committed;");
+        const receiptPid = Number((await a.ok("select pg_backend_pid();")).at(-1));
+        const receiptFirst = await a.query(`select api.query_v1('${JSON.stringify(receiptQuery).replaceAll("'", "''")}'::jsonb);`);
+        assert.equal(receiptFirst.code, "00000", JSON.stringify(receiptFirst));
+        assert.match(receiptFirst.lines.at(-1), /"found": true/);
+        const revoke = { contractVersion: 1, operationId: receiptRaceRevokeOp, kind: "companyMembership.setActive", expectedRevisions: { [`membership:${company}:${receiptRaceOwner}`]: "0" }, payload: { companyId: company, profileId: receiptRaceOwner, active: false, reason: "Receipt read first" } };
+        await b.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(boss)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: boss, aal: "aal2" }))},false);set role authenticated;begin isolation level read committed;`);
+        const revokePid = Number((await b.ok("select pg_backend_pid();")).at(-1));
+        const pendingRevoke = b.query(`select api.command_v1('${JSON.stringify(revoke).replaceAll("'", "''")}'::jsonb);`);
+        let receiptBlockedRevocation = false; const receiptDeadline = Date.now() + 10000;
+        while (Date.now() < receiptDeadline) { if ((await observer.ok(`select ${receiptPid}=any(pg_catalog.pg_blocking_pids(${revokePid}));`)).at(-1) === "t") { receiptBlockedRevocation = true; break; } await new Promise(done => setTimeout(done, 20)); }
+        await a.ok("commit;"); const revokeAfterReceipt = await pendingRevoke; await b.ok(revokeAfterReceipt.code === "00000" ? "commit;" : "rollback;");
+        assert.equal(receiptBlockedRevocation, true); assert.equal(revokeAfterReceipt.code, "00000", JSON.stringify(revokeAfterReceipt));
+        await claims({ role: "authenticated", sub: receiptRaceOwner, aal: "aal1" }, receiptRaceOwner);
+        const staleReceipt = await a.query(`select api.query_v1('${JSON.stringify(receiptQuery).replaceAll("'", "''")}'::jsonb);`);
+        assert.equal(staleReceipt.code, "42501", JSON.stringify(staleReceipt));
+        await a.ok("reset role;"); await b.ok("reset role;");
+        const receiptRaceState = (await observer.ok(`select (select active::text||'|'||revision from public.company_memberships where company_id=${lit(company)} and profile_id=${lit(receiptRaceOwner)})||'|'||(select status from public.onboarding_requests where id=${lit(receiptRaceRequest)})||'|'||(select count(*) from app_private.api_command_receipts where operation_id=${lit(submitOperationId)})||'|'||(select count(*) from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id=${lit(receiptRaceOwner)});`)).at(-1);
+        assert.equal(receiptRaceState, "false|1|submitted|1|1", receiptRaceState);
+        record("M2.2C submit commandReceipt read-first serializes before membership revocation and is denied afterward", true, { receiptSQLSTATE: receiptFirst.code, revokeBlockedByReceipt: receiptBlockedRevocation, revokeSQLSTATE: revokeAfterReceipt.code, postRevocationReceiptSQLSTATE: staleReceipt.code, finalMembershipRequestReceiptFence: receiptRaceState });
+      }
+      {
+        const staleReceiptOwner = uid(150020), staleReceiptRequest = await makeRequest(staleReceiptOwner, uid(150021), 150022), staleReceiptRevokeOp = uid(150024);
+        const operationId = uid(150023), query = { contractVersion: 1, kind: "commandReceipt", filters: { operationId }, cursor: null, limit: 1 };
+        await b.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(staleReceiptOwner)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: staleReceiptOwner, aal: "aal1" }))},false);set role authenticated;begin isolation level repeatable read;select active,revision from public.company_memberships where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(staleReceiptOwner)};`);
+        await claims({ role: "authenticated", sub: boss, aal: "aal2" }, boss);
+        const revoke = { contractVersion: 1, operationId: staleReceiptRevokeOp, kind: "companyMembership.setActive", expectedRevisions: { [`membership:${company}:${staleReceiptOwner}`]: "0" }, payload: { companyId: company, profileId: staleReceiptOwner, active: false, reason: "Receipt stale snapshot" } };
+        const revoked = await a.query(`select api.command_v1('${JSON.stringify(revoke).replaceAll("'", "''")}'::jsonb);`); assert.equal(revoked.code, "00000", JSON.stringify(revoked));
+        const stale = await b.query(`select api.query_v1('${JSON.stringify(query).replaceAll("'", "''")}'::jsonb);`);
+        await b.ok("rollback;"); assert.equal(stale.code, "40001", JSON.stringify(stale));
+        const retry = await b.query(`select api.query_v1('${JSON.stringify(query).replaceAll("'", "''")}'::jsonb);`); assert.equal(retry.code, "42501", JSON.stringify(retry));
+        await b.ok("reset role;"); await a.ok("reset role;");
+        const state = (await observer.ok(`select (select active::text||'|'||revision from public.company_memberships where company_id=${lit(company)} and profile_id=${lit(staleReceiptOwner)})||'|'||(select status from public.onboarding_requests where id=${lit(staleReceiptRequest)})||'|'||(select count(*) from app_private.api_command_receipts where operation_id=${lit(operationId)})||'|'||(select count(*) from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id=${lit(staleReceiptOwner)});`)).at(-1);
+        assert.equal(state, "false|1|submitted|1|1", state);
+        record("M2.2C RR commandReceipt snapshot aborts after membership revocation and fresh retry denies", true, { revokeSQLSTATE: revoked.code, staleReceiptSQLSTATE: stale.code, retrySQLSTATE: retry.code, finalMembershipRequestReceiptFence: state });
       }
       {
         const firstSubmitOwner = uid(150000), firstSubmitLine = uid(150001), saveOp = uid(150002), submitOp = uid(150003), revokeOp = uid(150004);

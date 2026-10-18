@@ -1,24 +1,9 @@
-# Acción de migración vigente — actualización 17/10/2026
+# Acción de migración vigente — actualización 18/10/2026
 
-1. El replay exacto y la primera ejecución de `task.createOneOff` niegan un
-   encargado cuyo `manager_id` ya no apunta al responsable; la comparación
-   nullable se hizo null-safe. El replay sigue read-only y conserva R29.
-   Evidencia local: PostgreSQL 17.11 **138/138**, `40P01=0`; Vitest focal
-   **14/14**. Se observaron ambos órdenes de bloqueo RC y las denegaciones
-   tras revocación. Vitest/PGlite también rechaza altas nuevas con owner
-   inactivo o sin equipo (`42501`); esos dos casos no están en el runner nativo.
-   Reporte y hashes:
-   `architecture/review-evidence/m2-2c-oneoff-replay-20261017.json`.
-2. El checkpoint remoto `origin/main` es `7427240eda90a852507ada5490e0d30c1994a43a`.
-   Estado de CI de ese checkpoint: **pendiente de consulta**. No se aplicó SQL,
-   no se tocaron servicios remotos y 014 sigue sin aplicar.
-3. Siguiente revisión Sol: revisar el hash exacto actualizado y esta evidencia
-   nativa para decidir la aceptación acotada. Luego consultar/ejecutar CI y
-   continuar las familias aún pendientes de C/Gate L. No aplicar 014 ni declarar
-   completo M2.2C/Gate L.
-4. Esto no completa M2.2C/Gate L. Writers legacy, otras familias concurrentes
-   e inyección de fallos siguen abiertos.
-
+1. El commit `a08e35e3afc92e03d71ed4c2519cf2d8a4c37372` está publicado en `main`; GitHub Actions pasó: https://github.com/tablerocontable-paris/TABLERO-CONTABLE/actions/runs/39149013086.
+2. Sol aceptó el fix local de `commandReceipt` para onboarding. Suite focal 15/15; PostgreSQL 17.11 140/140, `40P01=0`; suite oficial completa 731/731 en 74 archivos; TypeScript, cliente y Worker pasan. Evidencia: `architecture/review-evidence/m2-2c-onboarding-commandreceipt-20261018.json`.
+3. Registrar y publicar este candidato en `main` directamente, sin PR. La prueba nativa cubre ambos órdenes para `submit`; ampliar en la siguiente revisión las carreras faltantes de `saveDraft` y las familias restantes C/Gate L.
+4. No aplicar SQL014 ni alterar Supabase remoto hasta terminar C/Gate L, la configuración segura de Data API y el preflight. Esta familia no completa la auditoría.
 # Acción de migración histórica — 17/10/2026
 
 1. **Aceptación acotada R90:** Sol aceptó los escenarios enumerados para SQL014 y runner, PostgreSQL 17.11 **128/128**, `40P01=0`. No cierra M2.2C/Gate L completos. Hashes y límites: `architecture/M2-2C-SOL-ACCEPTANCE-20261017.md`; evidencia `architecture/review-evidence/m2-2c-membership-r90-20261017.json`. Quedan matriz onboarding/creation, writers legacy y concurrencia/inyección de fallos del contrato §9.

@@ -1,37 +1,14 @@
-# Estado general de la migración — actualización 17/10/2026
+# Estado general de la migración — actualización 18/10/2026
 
-**Corte local pendiente de re-revisión Sol — replay `task.createOneOff`,
-17/10/2026:** el recibo exacto revalida perfil/relación empresarial y equipo
-mediante plan read-only, advisory locks antes de row locks y sin incrementar
-fences. Una revisión Sol encontró que la comparación nullable `manager_id <> actor`
-dejaba pasar encargados sin relación; ambos caminos (replay y primera ejecución)
-ahora usan comparación null-safe. Vitest `tests/m2-2c-contract.test.ts`:
-**14/14**. PostgreSQL 17.11 nativo: **138/138**, `40P01=0`; replay de encargado
-sin `manager_id`, alta nueva, owner inactivo y owner sin team membership
-denegados `42501`. Las permutaciones revoke-first y replay-first observaron
-bloqueo bajo READ COMMITTED y conservaron recibos, filas, revisiones, fences,
-auditoría y eventos; el replay posterior a revocación dio `42501`. También incluye
-R29 (`00000`), comando nuevo con catálogo obsoleto (`40001`), malformado
-(`22023`), revocación RC (`42501`), RR stale (`40001`) y retry fresco (`42501`).
-Los rechazos de owner inactivo/sin equipo son altas nuevas verificadas en
-Vitest/PGlite; el reporte nativo r11 no los incluye.
-Evidencia y SHA-256:
-`docs/architecture/review-evidence/m2-2c-oneoff-replay-20261017.json`.
-El remoto `origin/main` es `7427240eda90a852507ada5490e0d30c1994a43a`; CI para
-ese checkpoint no fue consultada en esta ejecución. Queda pendiente la revisión
-Sol del hash/evidencia actualizados y continuar las familias no cubiertas de
-C/Gate L. No aplicar 014 ni declarar completo M2.2C/Gate L. No se tocaron
-servicios remotos.
+**Checkpoint GitHub:** `main` está en `a08e35e3afc92e03d71ed4c2519cf2d8a4c37372`, autoría Tablero Contable; se publicó directamente, sin PR. GitHub Actions `Validar cambio` terminó **success**: https://github.com/tablerocontable-paris/TABLERO-CONTABLE/actions/runs/39149013086. El árbol local continúa sobre ese mismo commit.
 
-# Estado general de la migración — 17/10/2026
+**Familia `task.createOneOff`:** Sol aceptó los hashes exactos y evidencia; PostgreSQL 17.11 138/138, `40P01=0`; suite focal 14/14 y suite completa anterior 730/730. Evidencia: `docs/architecture/review-evidence/m2-2c-oneoff-replay-20261017.json`. Quedó incluida en `a08e35e`.
 
-El código está en el repositorio privado `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`, con autoría nueva **Tablero Contable**. La PC personal puede clonar y ejecutar el laboratorio; GitHub no traslada `localStorage`/IndexedDB. La guía vigente es `outputs/LEEME-PC-PERSONAL.md`.
+**Siguiente familia, local y todavía sin commit:** se corrige el acceso a `commandReceipt` de `onboarding.saveDraft` y `onboarding.submit` después de revocar la membresía empresarial. Sol aceptó este alcance acotado sin hallazgos P0–P2. Hashes y evidencia: `docs/architecture/review-evidence/m2-2c-onboarding-commandreceipt-20261018.json`; Vitest focal 15/15 y PostgreSQL 17.11 140/140, `40P01=0`. Se autoriza con locks de solo lectura; `submit` usa el payload inmutable de la revisión que figura en el recibo. La matriz nativa demuestra la carrera de `submit`; `saveDraft` tiene denegación secuencial, pero todavía no toda la matriz concurrente.
 
-Supabase está disponible mediante el conector autorizado. Se creó, con confirmación del usuario, el proyecto `grupo-paris-dev` en `sa-east-1`; el costo cotizado fue USD 0/mes. Está activo y vacío: no tiene migraciones ni tablas. La organización actual figura como `tablerocontable-paris DEV`. A y B tienen aceptación local Sol. De C, Sol aceptó sólo los escenarios locales R90 identificados por sus hashes y el fix local de replay `onboarding.submit` (SQL014 SHA256 de checkout `13e88c8549f969187294367161c3ce6cf458d7f4618ddba40cb5058254982a26`; normalizado LF `b593618d1fcc11fe0be5e6678574faba8a013e4ac587e303d7f00d49dbe05e49`; PostgreSQL 17.11 130/130). M2.2C y Gate L completos siguen abiertos, con familias de writers y concurrencia pendientes. El remoto `main` sigue en `8cf5e8a3e6969cfe02d77c595698c5f60ddfa8f5`; el fix está comprometido localmente y espera revisión Sol del commit exacto antes de publicación directa. Por contrato, 014 no se aplica hasta completar C/Gate L, cerrar el gate de exposición Data API y completar el preflight remoto. Supabase↔GitHub sigue pendiente.
+La suite oficial completa del candidato local pasó **731/731 en 74 archivos** (comando del package con exclusión `tmp/**`); TypeScript, build cliente y Worker pasaron. El run inicial sin excluir `tmp/**` fue interrumpido al incluir tests temporales externos al proyecto y fallar dos de ellos; no forma parte del resultado oficial.
 
-**Preferencia del propietario para las organizaciones Supabase:** en el futuro renombrar la organización existente a `dev` y crear una segunda organización `main`. Hoy existe una organización cuyo nombre visible es `tablerocontable-paris DEV`, con el proyecto `grupo-paris-dev`; aún no se renombró ni se creó la segunda organización. No confundir nombre de organización con proyecto. En el Dashboard se observó `public,extensions` expuestos y la creación automática de exposición activada; el usuario autorizó apagar únicamente la creación automática, pero el control de Windows no pudo leer el Dashboard con seguridad. La opción sigue sin cambio confirmado y no se aplican migraciones de negocio hasta cerrar la exposición.
-
-**M2.2C — revisión acotada R90, 17/10/2026:** Sol aceptó los escenarios locales enumerados para SQL014 (checkout/R90 `3ff379002c37c43fb8c91d2b41bd47658d73d0386b2c5bc1518f22c6b4cc86c6`; blob Git LF `7c96727b7f1ecd8c5bb2b457640b824deddc06346da3f1a70e9bdb879e730a56`) y runner (`7c48420ee61498418642ddbd2b734dc5b7d094eabed923417a2bfebf03059588`): PostgreSQL 17.11 **128/128**, `40P01=0`. No es aceptación completa de C/Gate L. Faltan matrices completas de replay/revocación para API de alta/creación y writers legacy, familias de concurrencia e inyección de fallos señaladas en el contrato y mapa. Evidencia: `docs/architecture/review-evidence/m2-2c-membership-r90-20261017.json`; registro: `docs/architecture/M2-2C-SOL-ACCEPTANCE-20261017.md`. La suite pasó **727/727 en 74 archivos**; TypeScript, build cliente y Worker también. El fix de replay posterior se aceptó sólo en el alcance enumerado y está en el commit local vigente; falta revisión Sol de ese commit exacto y push a `main`. 014 no está aplicada. Los claims son sintéticos; no prueban hosted Auth/HTTP. Quedan C/Gate L completo, gate Data API, ensayo Supabase dev, producción/hosting/correo e integración automatizada.
+**Límites y próximo paso:** solo está aceptada esta familia de `commandReceipt`; quedan otras familias C/Gate L. Mantener SQL014 sin aplicar en Supabase. No hubo cambios remotos de base de datos ni servicios. Después del registro/documentación, publicar el candidato local aceptado directamente en `main` y seguir con la siguiente familia de concurrencia; no declarar M2.2C/Gate L completo.
 # Estado histórico — A R7/R8 corregido localmente, 15/10/2026
 
 La migración 014 ahora parsea las revisiones obligatorias antes del lock del

@@ -185,14 +185,14 @@ describe("M2.2C versioned creation protocol", () => {
       const draft = { schemaVersion: 2, lines: [{ lineId: id(930), companyId: ids.company, teamId: ids.team, source: { type: "custom", definition: { kind: "operativa", title: "Revisión puntual", objective: "", sector: "IVA", unit: "comprobantes" } }, schedule }] };
       await lab.actor(ids.owner, "aal1", "authenticated");
       const save = { contractVersion: 1, operationId: id(931), kind: "onboarding.saveDraft", expectedRevisions: { [`onboardingOwner:${ids.owner}`]: "0" }, payload: { requestId: null, draft } };
-      const saved = (await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(save)])).result;
+      const saved = (await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(save)]).catch((e: Error) => { throw new Error(`save setup: ${e.message}`); })).result;
       expect(saved).toMatchObject({ kind: "onboarding.saveDraft", result: { revision: "0", draftRevision: "1", status: "draft" } });
       const requestId = saved.result.requestId as string;
       expect((await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(save)])).result).toEqual(saved);
       const own = (await lab.first("select api.query_v1($1::jsonb) result", [JSON.stringify({ contractVersion: 1, kind: "ownOnboarding", filters: {}, cursor: null, limit: 1 })])).result;
       expect(own.data.request.draft).toEqual(draft);
       const submit = { contractVersion: 1, operationId: id(932), kind: "onboarding.submit", expectedRevisions: { [`onboarding:${requestId}`]: "0", [`onboardingDraft:${requestId}`]: "1" }, payload: { requestId } };
-      const submitted = (await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(submit)])).result;
+      const submitted = (await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(submit)]).catch((e: Error) => { throw new Error(`submit setup: ${e.message}`); })).result;
       expect(submitted).toMatchObject({ kind: "onboarding.submit", result: { requestId, revision: "1", draftRevision: "1", status: "submitted" } });
       expect(await lab.first("select count(*)::integer count from onboarding_request_versions where request_id=$1", [requestId])).toEqual({ count: 1 });
       await lab.admin();
@@ -350,6 +350,38 @@ describe("M2.2C versioned creation protocol", () => {
       const malformed = { ...stale, operationId: id(984), payload: { ...stale.payload, scheduledOn: "not-a-date" } };
       const malformedResponse = await lab.rows("select api.command_v1($1::jsonb)", [JSON.stringify(malformed)]).catch((error: { code?: string }) => error);
       expect((malformedResponse as { code?: string }).code).toBe("22023");
+    } finally { await lab.close(); }
+  }, 20_000);
+
+  it("denies onboarding commandReceipt reads after company membership revocation", async () => {
+    const lab = await new AccountingLab().init(stages.m014);
+    try {
+      const draft = { schemaVersion: 2, lines: [{ lineId: id(990), companyId: ids.company, teamId: ids.team, source: { type: "custom", definition: { kind: "operativa", title: "Alta para recibo", objective: "", sector: "IVA", unit: "comprobantes" } }, schedule }] };
+      await lab.actor(ids.owner, "aal1", "authenticated");
+      const save = { contractVersion: 1, operationId: id(991), kind: "onboarding.saveDraft", expectedRevisions: { [`onboardingOwner:${ids.owner}`]: "0" }, payload: { requestId: null, draft } };
+      const saved = (await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(save)])).result;
+      const requestId = saved.result.requestId as string;
+      const submit = { contractVersion: 1, operationId: id(992), kind: "onboarding.submit", expectedRevisions: { [`onboarding:${requestId}`]: "0", [`onboardingDraft:${requestId}`]: "1" }, payload: { requestId } };
+      const submitted = (await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(submit)])).result;
+      const receiptQuery = (operationId: string) => ({ contractVersion: 1, kind: "commandReceipt", filters: { operationId }, cursor: null, limit: 1 });
+      for (const [command, expected] of [[save, saved], [submit, submitted]] as const) {
+        const found = (await lab.first("select api.query_v1($1::jsonb) result", [JSON.stringify(receiptQuery(command.operationId))])).result;
+        expect(found.data).toEqual({ found: true, command: expected });
+        const mismatch = { ...command, expectedRevisions: { ...command.expectedRevisions, [Object.keys(command.expectedRevisions)[0]]: "999" } };
+        const mismatchError = await lab.rows("select api.command_v1($1::jsonb)", [JSON.stringify(mismatch)]).catch((error: { code?: string }) => error);
+        expect((mismatchError as { code?: string }).code).toBe("40001");
+      }
+      await lab.actor(ids.peer, "aal1", "authenticated");
+      expect((await lab.first("select api.query_v1($1::jsonb) result", [JSON.stringify(receiptQuery(save.operationId))])).result.data).toEqual({ found: false });
+      await lab.admin();
+      await lab.db.query("update company_memberships set active=false where organization_id=$1 and company_id=$2 and profile_id=$3", [ids.org, ids.company, ids.owner]);
+      await lab.actor(ids.owner, "aal1", "authenticated");
+      for (const command of [save, submit]) {
+        const receiptDenied = await lab.rows("select api.query_v1($1::jsonb)", [JSON.stringify(receiptQuery(command.operationId))]).catch((error: { code?: string }) => error);
+        expect((receiptDenied as { code?: string }).code).toBe("42501");
+        const replayDenied = await lab.rows("select api.command_v1($1::jsonb)", [JSON.stringify(command)]).catch((error: { code?: string }) => error);
+        expect((replayDenied as { code?: string }).code).toBe("42501");
+      }
     } finally { await lab.close(); }
   }, 20_000);
 
