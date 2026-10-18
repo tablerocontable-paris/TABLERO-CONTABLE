@@ -327,8 +327,17 @@ describe("M2.2C versioned creation protocol", () => {
       expect(first.result).toMatchObject({ ownerId: ids.owner, period: lab.period, creationRevision: "2" });
       expect(first.result.createdTaskIds).toHaveLength(1);
       expect((await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(materialize)])).result).toEqual(first);
+      const nextMonthDate = new Date(`${lab.period}T00:00:00.000Z`);
+      nextMonthDate.setUTCMonth(nextMonthDate.getUTCMonth() + 1);
+      const nextPeriod = `${nextMonthDate.getUTCFullYear()}-${String(nextMonthDate.getUTCMonth() + 1).padStart(2, "0")}-01`;
+      await lab.actor(ids.boss, "aal2", "authenticated");
+      const nextMonthMaterialize = { ...materialize, operationId: id(962), expectedRevisions: { [`creation:${ids.owner}`]: "2" }, payload: { ownerId: ids.owner, period: nextPeriod } };
+      const nextMonth = (await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(nextMonthMaterialize)])).result;
+      expect(nextMonth.result).toMatchObject({ ownerId: ids.owner, period: nextPeriod, creationRevision: "3" });
+      expect(nextMonth.result.createdTaskIds).toHaveLength(1);
       await lab.admin();
-      expect(await lab.first("select count(*)::integer count from task_instances where assignment_id=$1", [made.result.assignmentId])).toEqual({ count: 1 });
+      expect(await lab.first("select frequency from task_assignments where id=$1", [made.result.assignmentId])).toEqual({ frequency: "mensual" });
+      expect(await lab.first("select count(*)::integer count from task_instances where assignment_id=$1", [made.result.assignmentId])).toEqual({ count: 2 });
     } finally { await lab.close(); }
   }, 20_000);
 });

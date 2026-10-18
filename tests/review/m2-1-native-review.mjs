@@ -2384,20 +2384,41 @@ try {
         await membershipCoverageRace(9880 + index * 20, "revoke", firstIso, secondIso);
       }
 
-      async function pendingCoverageFixture(base, label) {
+      async function pendingCoverageFixture(base, label, recurring = false) {
         const ownerId = uid(base), replacementId = uid(base + 1), assignmentId = uid(base + 2), taskId = uid(base + 3), planId = uid(base + 4);
         await memberTask(ownerId, assignmentId, taskId, `${label} owner`);
-        await observer.ok(`insert into auth.users(id) values(${lit(replacementId)}); insert into public.profiles(id,organization_id,name,role,sector,branch,position) values(${lit(replacementId)},${lit(org)},${lit(label+' replacement')},'empleado','Test','Test','Test'); insert into public.company_memberships(organization_id,company_id,profile_id) values(${lit(org)},${lit(company)},${lit(replacementId)}); insert into public.team_members(organization_id,team_id,profile_id) values(${lit(org)},${lit(team)},${lit(replacementId)}); insert into public.task_coverage_plans(id,organization_id,responsible_id,replacement_id,starts_on,ends_on,kind,created_by,sealed) values(${lit(planId)},${lit(org)},${lit(ownerId)},${lit(replacementId)},${lit(scheduledOn)}::date,${lit(scheduledOn)}::date,'otra',${lit(boss)},false); insert into public.task_coverage_plan_instances(plan_id,organization_id,instance_id,company_id_snapshot,period_snapshot,responsibility_set_id) select ${lit(planId)},${lit(org)},${lit(taskId)},${lit(company)},${lit(monthPeriod)}::date,h.set_id from public.task_responsibility_heads h where h.instance_id=${lit(taskId)}; update public.task_coverage_plans set sealed=true,sealed_by=${lit(boss)},sealed_at=clock_timestamp() where id=${lit(planId)};`);
-        return { ownerId, replacementId, assignmentId, taskId, planId };
+        await observer.ok(`insert into auth.users(id) values(${lit(replacementId)}); insert into public.profiles(id,organization_id,name,role,sector,branch,position) values(${lit(replacementId)},${lit(org)},${lit(label+' replacement')},'empleado','Test','Test','Test'); insert into public.company_memberships(organization_id,company_id,profile_id) values(${lit(org)},${lit(company)},${lit(replacementId)}); insert into public.team_members(organization_id,team_id,profile_id) values(${lit(org)},${lit(team)},${lit(replacementId)}); insert into public.task_coverage_plans(id,organization_id,responsible_id,replacement_id,starts_on,ends_on,kind,created_by,sealed) values(${lit(planId)},${lit(org)},${lit(ownerId)},${lit(replacementId)},${lit(scheduledOn)}::date,${lit(scheduledOn)}::date,'otra',${lit(boss)},false);`);
+        let siblingTaskId = null;
+        if (recurring) {
+          await observer.ok(`update public.task_assignments set start_date=${lit(monthPeriod)}::date,end_date=null,interval_count=1,month_day=extract(day from ${lit(scheduledOn)}::date)::smallint where id=${lit(assignmentId)}; insert into public.task_coverage_plan_assignment_rules(plan_id,organization_id,assignment_id,company_id_snapshot,assignment_snapshot) select ${lit(planId)},a.organization_id,a.id,a.company_id,to_jsonb(a) from public.task_assignments a where a.id=${lit(assignmentId)};`);
+          await claims({ role: "authenticated", sub: ownerId, aal: "aal1" }, ownerId);
+          const nextPeriod = (await a.ok(`select (date_trunc('month',${lit(monthPeriod)}::date+interval '1 month'))::date;`)).at(-1);
+          const materialized = await a.query(`select public.materialize_month(${lit(ownerId)},${lit(nextPeriod)}::date);`);
+          assert.equal(materialized.code, "00000", JSON.stringify(materialized));
+          siblingTaskId = (await observer.ok(`select id from public.task_instances where assignment_id=${lit(assignmentId)} and period=${lit(nextPeriod)}::date;`)).at(-1);
+          assert.match(siblingTaskId, /^[0-9a-f-]{36}$/iu, siblingTaskId);
+          const recurrenceProof = (await observer.ok(`select a.frequency||'|'||a.interval_count||'|'||(select count(*) from public.task_instances t where t.assignment_id=a.id)||'|'||(select count(*) from public.task_coverage_plan_assignment_rules r where r.plan_id=${lit(planId)} and r.assignment_id=a.id and r.assignment_snapshot=to_jsonb(a))||'|'||(select count(*) from public.task_coverage_plan_instances i where i.plan_id=${lit(planId)}) from public.task_assignments a where a.id=${lit(assignmentId)};`)).at(-1);
+          assert.equal(recurrenceProof, "mensual|1|2|1|0", recurrenceProof);
+        } else {
+          await observer.ok(`insert into public.task_coverage_plan_instances(plan_id,organization_id,instance_id,company_id_snapshot,period_snapshot,responsibility_set_id) select ${lit(planId)},${lit(org)},${lit(taskId)},${lit(company)},${lit(monthPeriod)}::date,h.set_id from public.task_responsibility_heads h where h.instance_id=${lit(taskId)};`);
+        }
+        await observer.ok(`update public.task_coverage_plans set sealed=true,sealed_by=${lit(boss)},sealed_at=clock_timestamp() where id=${lit(planId)};`);
+        await claims({ role: "authenticated", sub: boss, aal: "aal2" }, boss);
+        return { ownerId, replacementId, assignmentId, taskId, planId, siblingTaskId };
       }
-      for (const [base, firstAction, winnerIsolation, loserIsolation] of [
-        [9920, "approve", "read committed", "repeatable read"],
-        [9930, "revoke", "read committed", "repeatable read"],
-        [9940, "approve", "repeatable read", "read committed"],
-        [9950, "revoke", "repeatable read", "read committed"],
+      for (const [base, firstAction, winnerIsolation, loserIsolation, recurring] of [
+        [9920, "approve", "read committed", "repeatable read", false],
+        [9930, "revoke", "read committed", "repeatable read", false],
+        [9940, "approve", "repeatable read", "read committed", false],
+        [9950, "revoke", "repeatable read", "read committed", false],
+        [10100, "approve", "read committed", "repeatable read", true],
+        [10110, "revoke", "read committed", "repeatable read", true],
+        [10120, "approve", "repeatable read", "read committed", true],
+        [10130, "revoke", "repeatable read", "read committed", true],
       ]) {
-        const fixture = await pendingCoverageFixture(base, `M2.2C membership/coverage approval ${firstAction}`), approvalOp = uid(base + 5), revokeOp = uid(base + 6);
+        const fixture = await pendingCoverageFixture(base, `M2.2C membership/coverage approval ${firstAction}`, recurring), approvalOp = uid(base + 5), revokeOp = uid(base + 6);
         const revoke = { contractVersion: 1, operationId: revokeOp, kind: "companyMembership.setActive", expectedRevisions: { [`membership:${company}:${fixture.replacementId}`]: "0" }, payload: { companyId: company, profileId: fixture.replacementId, active: false, reason: `M2.2C approval race revoke ${firstAction}` } };
+        const membershipFenceBefore = Number((await observer.ok(`select coalesce((select fence_epoch from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id=${lit(fixture.replacementId)}),0);`)).at(-1));
         await claims({ role: "authenticated", sub: boss, aal: "aal2" }, boss);
         let approvalResult, revokeResult, blocked = false, winnerPid, loserPid, retryResult;
         if (firstAction === "approve") {
@@ -2427,10 +2448,20 @@ try {
           assert.equal(fenceStateAfterRetry, fenceStateBeforeRetry, "denied coverage retry must not leave fence writes");
         }
         assert.equal(blocked, true);
-        const final = (await observer.ok(`select (select active::text||'|'||revision from public.company_memberships where company_id=${lit(company)} and profile_id=${lit(fixture.replacementId)})||'|'||(select coalesce(string_agg(status||':'||coalesce(cancelled_by::text,'null')||':'||coalesce(cancel_reason,'null'),',' order by id),'none') from public.task_coverage_bindings where instance_id=${lit(fixture.taskId)})||'|'||(select count(*) from public.task_mutation_receipts where operation_id=${lit(approvalOp)})||'|'||(select count(*) from app_private.api_command_receipts where operation_id=${lit(revokeOp)})||'|'||(select count(*) from app_private.company_membership_events where company_id=${lit(company)} and profile_id=${lit(fixture.replacementId)})||'|'||(select count(*) from public.audit_events where action='companyMembership.setActive' and details->>'profileId'=${lit(fixture.replacementId)});`)).at(-1);
-        if (firstAction === "approve") assert.match(final, /^false\|1\|cancelled:[0-9a-f-]{36}:M2\.2C approval race revoke approve\|1\|1\|1\|1$/u, final);
-        else assert.equal(final, "false|1|none|0|1|1|1", final);
-        record(`M2.2C membership revocation versus coverage approve/reassignment (${firstAction}-first; ${winnerIsolation}/${loserIsolation})`, true, { isolationPair: `${winnerIsolation}/${loserIsolation}`, blockerObserved: blocked, approvalSQLSTATE: approvalResult.code, revokeSQLSTATE: revokeResult.code, retrySQLSTATE: retryResult.code, retryError: retryResult.errors.trim(), retryFenceStateUnchanged: firstAction === "revoke" ? true : null, finalState: final });
+        const final = (await observer.ok(`select (select active::text||'|'||revision from public.company_memberships where company_id=${lit(company)} and profile_id=${lit(fixture.replacementId)})||chr(31)||(select coalesce(string_agg(status||':'||coalesce(cancelled_by::text,'null')||':'||coalesce(cancel_reason,'null'),',' order by id),'none') from public.task_coverage_bindings where instance_id=${lit(fixture.taskId)})||chr(31)||(select coalesce(string_agg(status||':'||coalesce(cancelled_by::text,'null')||':'||coalesce(cancel_reason,'null'),',' order by id),'none') from public.task_coverage_bindings where plan_id=${lit(fixture.planId)} and assignment_id=${lit(fixture.assignmentId)} and instance_id is null)||chr(31)||(select count(*) from public.task_coverage_bindings child join public.task_coverage_bindings root on child.source_rule_id=root.id where root.plan_id=${lit(fixture.planId)} and root.assignment_id=${lit(fixture.assignmentId)} and root.instance_id is null and child.instance_id=${lit(fixture.taskId)})||chr(31)||(select count(*) from public.task_mutation_receipts where operation_id=${lit(approvalOp)})||chr(31)||(select count(*) from app_private.api_command_receipts where operation_id=${lit(revokeOp)})||chr(31)||(select count(*) from app_private.company_membership_events where company_id=${lit(company)} and profile_id=${lit(fixture.replacementId)})||chr(31)||(select count(*) from public.audit_events where action='companyMembership.setActive' and details->>'profileId'=${lit(fixture.replacementId)})||chr(31)||(select count(*) from public.task_coverage_bindings where instance_id=${lit(fixture.siblingTaskId ?? fixture.taskId)})||chr(31)||coalesce((select fence_epoch::text from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id=${lit(fixture.replacementId)}),'0');`)).at(-1);
+        const expectedSiblingBindings = recurring ? "0" : (firstAction === "approve" ? "1" : "0");
+        const finalParts = final.split("\u001f");
+        assert.equal(finalParts.length, 10, JSON.stringify(finalParts));
+        const expectedFenceDelta = firstAction === "approve" ? 2 : 1;
+        assert.equal(Number(finalParts[9]) - membershipFenceBefore, expectedFenceDelta, `membership fence delta for ${firstAction}-first: expected ${expectedFenceDelta}, observed ${membershipFenceBefore} -> ${finalParts[9]}`);
+        assert.equal(finalParts[0], "false|1", final);
+        if (firstAction === "approve") assert.match(finalParts[1], /^cancelled:[0-9a-f-]{36}:M2\.2C approval race revoke approve$/u, final);
+        else assert.equal(finalParts[1], "none", final);
+        if (recurring && firstAction === "approve") assert.equal(finalParts[2], `cancelled:${boss}:M2.2C approval race revoke approve`, final);
+        else assert.equal(finalParts[2], "none", final);
+        assert.equal(finalParts[3], recurring && firstAction === "approve" ? "1" : "0", `rule-to-occurrence source_rule_id link count: ${final}`);
+        assert.deepEqual(finalParts.slice(4, 9), [firstAction === "approve" ? "1" : "0", "1", "1", "1", expectedSiblingBindings], final);
+        record(`M2.2C membership revocation versus ${recurring ? "recurring-rule " : ""}coverage approve/reassignment (${firstAction}-first; ${winnerIsolation}/${loserIsolation})`, true, { recurring, recurrenceRuleAndOccurrenceCount: recurring ? "mensual|1|2; exact assignment snapshot; rule selected, no per-instance selection; child source_rule_id linked to root" : null, isolationPair: `${winnerIsolation}/${loserIsolation}`, blockerObserved: blocked, approvalSQLSTATE: approvalResult.code, revokeSQLSTATE: revokeResult.code, retrySQLSTATE: retryResult.code, retryError: retryResult.errors.trim(), retryFenceStateUnchanged: firstAction === "revoke" ? true : null, membershipFenceEpoch: `${membershipFenceBefore}->${finalParts[9]}`, finalState: final });
         await a.ok("reset role;"); await b.ok("reset role;");
       }
     }

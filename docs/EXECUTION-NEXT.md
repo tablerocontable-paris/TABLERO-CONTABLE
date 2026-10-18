@@ -1,4 +1,21 @@
-# Acción de migración vigente — 17/10/2026
+# Acción de migración vigente — actualización 17/10/2026
+
+1. La cobertura de reglas recurrentes para revocación de membresía está
+   implementada localmente y revisada sin hallazgos bloqueantes. PostgreSQL
+   17.11 **134/134**, `40P01=0`; suite completa **727/727** y foco M2.2C
+   **11/11**. Evidencia:
+   `architecture/review-evidence/m2-2c-gatel-recurrent-coverage-20261017.json`.
+   Sigue sin commit y no cierra Gate L.
+2. Sol revisa el replay de `task.createOneOff` tras revocar sólo la membresía
+   empresarial. No tocar Supabase remoto ni aplicar 014. Si se confirma el
+   defecto, Luna corrige SQL local y agrega las regresiones; luego Sol revisa
+   el hash exacto.
+3. Después de aceptación acotada, guardar esta familia en `main` directamente
+   (sin PR), ejecutar CI y continuar con la siguiente familia pendiente.
+4. El resto del estado y límites históricos se conserva debajo; A/B, writers
+   legacy, concurrencia e inyección de fallos siguen abiertos.
+
+# Acción de migración histórica — 17/10/2026
 
 1. **Aceptación acotada R90:** Sol aceptó los escenarios enumerados para SQL014 y runner, PostgreSQL 17.11 **128/128**, `40P01=0`. No cierra M2.2C/Gate L completos. Hashes y límites: `architecture/M2-2C-SOL-ACCEPTANCE-20261017.md`; evidencia `architecture/review-evidence/m2-2c-membership-r90-20261017.json`. Quedan matriz onboarding/creation, writers legacy y concurrencia/inyección de fallos del contrato §9.
 2. **Fix acotado de replay aceptado; Gate L abierto:** se corrigió el replay exacto `onboarding.submit` después de revocación y se agregó regresión de replays y primera ejecución bajo carrera. Sol aceptó sólo esos casos: SQL014 SHA256 checkout `13e88c8549f969187294367161c3ce6cf458d7f4618ddba40cb5058254982a26`, normalizado LF `b593618d1fcc11fe0be5e6678574faba8a013e4ac587e303d7f00d49dbe05e49`. PostgreSQL 17.11 pasó 130/130, `40P01=0`; Vitest focal 11/11 y suite completa 727/727 en 74 archivos; TypeScript, cliente, Worker, sintaxis del runner, diff-check y verificación de 001–013 también pasaron. Evidencia y hashes: `architecture/review-evidence/m2-2c-gatel-onboarding-replay-20261017.json`; repro/causa: `architecture/M2-2C-GATEL-REPLAY-DEFECT-20261017.md`. El commit local vigente espera revisión Sol de su contenido exacto antes del push. Esto no es aceptación Gate L. Siguen pendientes writers legacy, cobertura recurrente y las matrices completas de §9. Mantener 014 sin aplicar y no iniciar preflight alojado.

@@ -1,0 +1,85 @@
+{
+  "date": "2026-10-17",
+  "status": "local Gate L family coverage; not Sol-reviewed and not a Gate L acceptance",
+  "baseCommit": "d3c0d65a2f62073fe677d9b37c90628d8a277275",
+  "scope": "Recurring-rule coverage approval/reassignment versus company membership revocation, in both winner orders and mixed isolation directions",
+  "sourceHashes": {
+    "tests/review/m2-1-native-review.mjs": "e2d3cf5dbb57918dfb5eab34ac54256e5928c3463b9f6016f0a8260b05bfc90f",
+    "tests/m2-2c-contract.test.ts": "fe18ea2a490560109addf8d2ca33cb68e5d7d2b2671ef7aceea444571ccbde58",
+    "supabase/migrations/202610150014_operational_api.sql": "13e88c8549f969187294367161c3ce6cf458d7f4618ddba40cb5058254982a26"
+  },
+  "nativePostgres": {
+    "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir outputs/m2-2c-recurrent-rule-20261017-final --port 55634 --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes",
+    "engine": "PostgreSQL 17.11",
+    "total": 134,
+    "passed": 134,
+    "failed": 0,
+    "deadlocks40P01": 0,
+    "report": "outputs/m2-2c-recurrent-rule-20261017-final/review.json",
+    "recurringRaceCases": [
+      {
+        "order": "approve-first",
+        "isolation": "read committed/repeatable read",
+        "blockerObserved": true,
+        "approvalSQLSTATE": "00000",
+        "staleRevokeSQLSTATE": "40001",
+        "revokeRetrySQLSTATE": "00000",
+        "membershipFenceEpoch": "0->2",
+        "bindingOutcome": "recurring rule root and selected occurrence child both cancelled by membership revoke; child source_rule_id links to root; sibling occurrence remains unbound",
+        "receiptsEventsAudit": "approval receipt 1; membership receipt 1; membership event 1; membership audit 1"
+      },
+      {
+        "order": "revoke-first",
+        "isolation": "read committed/repeatable read",
+        "blockerObserved": true,
+        "revokeSQLSTATE": "00000",
+        "staleApprovalSQLSTATE": "40001",
+        "approvalRetrySQLSTATE": "42501",
+        "membershipFenceEpoch": "0->1",
+        "retryFenceStateUnchanged": true,
+        "bindingOutcome": "stale approval retry denied; no recurring rule root or occurrence child exists; sibling occurrence remains unbound",
+        "receiptsEventsAudit": "approval receipt 0; membership receipt 1; membership event 1; membership audit 1"
+      },
+      {
+        "order": "approve-first",
+        "isolation": "repeatable read/read committed",
+        "blockerObserved": true,
+        "approvalSQLSTATE": "00000",
+        "staleRevokeSQLSTATE": "40001",
+        "revokeRetrySQLSTATE": "00000",
+        "membershipFenceEpoch": "0->2",
+        "bindingOutcome": "recurring rule root and selected occurrence child both cancelled by membership revoke; child source_rule_id links to root; sibling occurrence remains unbound",
+        "receiptsEventsAudit": "approval receipt 1; membership receipt 1; membership event 1; membership audit 1"
+      },
+      {
+        "order": "revoke-first",
+        "isolation": "repeatable read/read committed",
+        "blockerObserved": true,
+        "revokeSQLSTATE": "00000",
+        "staleApprovalSQLSTATE": "40001",
+        "approvalRetrySQLSTATE": "42501",
+        "membershipFenceEpoch": "0->1",
+        "retryFenceStateUnchanged": true,
+        "bindingOutcome": "stale approval retry denied; no recurring rule root or occurrence child exists; sibling occurrence remains unbound",
+        "receiptsEventsAudit": "approval receipt 0; membership receipt 1; membership event 1; membership audit 1"
+      }
+    ],
+    "recurrenceFixture": "monthly interval 1; two task_instances linked to one assignment; exact assignment_snapshot rule row selected (one plan rule, zero per-instance selections); approval creates root and selected occurrence child with source_rule_id link"
+  },
+  "vitest": {
+    "command": "node node_modules/vitest/vitest.mjs run tests/m2-2c-contract.test.ts --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+    "result": "11/11 passed",
+    "scope": "monthly assignment materializes one occurrence in each of two consecutive periods"
+  },
+  "otherChecks": {
+    "nativeRunnerSyntax": "node --check tests/review/m2-1-native-review.mjs passed",
+    "fullVitestSuite": "not run",
+    "typescriptAndBuild": "not run; changes are test-only"
+  },
+  "limits": [
+    "No SQL014, remote database, or migration application changes were made.",
+    "The runner uses synthetic local PostgreSQL state, not hosted Supabase Auth or HTTP.",
+    "This covers the recurrent-rule-specific approval/reassignment versus membership revocation branch only; it does not complete M2.2C or Gate L.",
+    "Legacy writer revocation matrices and remaining §9 concurrency/failure-injection families remain open; independent Sol review is still required."
+  ]
+}

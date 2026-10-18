@@ -1,3 +1,20 @@
+# Estado general de la migración — actualización 17/10/2026
+
+**Corte vigente de cobertura local:** se añadió y revisó independientemente la
+familia de revocación de membresía frente a aprobación de reglas recurrentes de
+cobertura. Fixture ejecuta `task_coverage_plan_assignment_rules`, materializa dos
+ocurrencias y valida el enlace `source_rule_id`. PostgreSQL 17.11: **134/134**,
+`40P01=0`; Vitest completo **727/727 en 74 archivos**; Vitest M2.2C focal
+**11/11**; sintaxis y `git diff --check` pasan. Revisión independiente no halló
+bloqueantes en esta familia. Evidencia y hashes:
+`docs/architecture/review-evidence/m2-2c-gatel-recurrent-coverage-20261017.json`.
+Es una familia acotada; no acepta M2.2C/Gate L. Los archivos de prueba y
+evidencia siguen locales sin commit; no hubo cambios SQL ni acceso remoto.
+
+**Siguiente investigación:** Sol revisa si `task.createOneOff` devuelve un
+recibo exacto antes de revalidar una membresía revocada. Si se confirma, Luna
+implementará la corrección mínima y sus pruebas; 014 seguirá sin aplicarse.
+
 # Estado general de la migración — 17/10/2026
 
 El código está en el repositorio privado `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`, con autoría nueva **Tablero Contable**. La PC personal puede clonar y ejecutar el laboratorio; GitHub no traslada `localStorage`/IndexedDB. La guía vigente es `outputs/LEEME-PC-PERSONAL.md`.
