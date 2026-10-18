@@ -1433,6 +1433,114 @@ try {
         record("M2.2C assignment exact replay precedes stale catalogue eligibility; stale revision and malformed payload remain distinct", true, { replaySQLSTATE: replayResponse.code, staleSQLSTATE: staleResponse.code, malformedSQLSTATE: invalidResponse.code, receiptStable: JSON.stringify(JSON.parse(replayResponse.lines.at(-1))) === JSON.stringify(originalReceipt) });
       }
       {
+        // R29: one-off exact replay remains ahead of catalogue eligibility,
+        // while membership revocation denies replay without creating effects.
+        const templateOrgRevision = (await observer.ok(`select coalesce((select revision from app_private.api_catalogue_heads where organization_id=${lit(org)}),0);`)).at(-1);
+        await claims({ role: "authenticated", sub: boss, aal: "aal2" }, boss);
+        const createTemplate = { contractVersion: 1, operationId: uid(1100), kind: "catalogue.create", expectedRevisions: { [`catalogue:${org}`]: templateOrgRevision }, payload: { definition: { kind: "operativa", title: "M2.2C one-off replay R29", objective: "", sector: "Test", unit: "comprobantes" }, effectiveOn: scheduledOn, reason: "One-off replay R29" } };
+        const templateResponse = await a.query(`select api.command_v1('${JSON.stringify(createTemplate).replaceAll("'", "''")}'::jsonb);`); assert.equal(templateResponse.code, "00000", JSON.stringify(templateResponse));
+        const template = JSON.parse(templateResponse.lines.at(-1)).result;
+        const ownerRevision = (await observer.ok(`select coalesce((select revision from app_private.api_creation_heads where organization_id=${lit(org)} and owner_id=${lit(actor)}),0);`)).at(-1);
+        const oneOff = { contractVersion: 1, operationId: uid(1101), kind: "task.createOneOff", expectedRevisions: { [`creation:${actor}`]: ownerRevision, [`catalogue:${template.templateId}`]: "1" }, payload: { ownerId: actor, companyId: company, teamId: team, source: { type: "catalogue", templateVersionId: template.versionId }, scheduledOn, dueDate: null, priority: "Media" } };
+        await claims({ role: "authenticated", sub: actor, aal: "aal1" }, actor);
+        const oneOffResponse = await a.query(`select api.command_v1('${JSON.stringify(oneOff).replaceAll("'", "''")}'::jsonb);`); assert.equal(oneOffResponse.code, "00000", JSON.stringify(oneOffResponse));
+        const receipt = JSON.parse(oneOffResponse.lines.at(-1));
+        await claims({ role: "authenticated", sub: boss, aal: "aal2" }, boss);
+        const catalogueHead = (await observer.ok(`select revision from app_private.api_catalogue_heads where organization_id=${lit(org)};`)).at(-1);
+        const revise = { contractVersion: 1, operationId: uid(1102), kind: "catalogue.revise", expectedRevisions: { [`catalogue:${org}`]: catalogueHead, [`catalogue:${template.templateId}`]: "1" }, payload: { templateId: template.templateId, definition: { kind: "operativa", title: "M2.2C one-off replay R29 revisada", objective: "", sector: "Test", unit: "archivos" }, effectiveOn: scheduledOn, reason: "R29 revision" } };
+        const revised = await a.query(`select api.command_v1('${JSON.stringify(revise).replaceAll("'", "''")}'::jsonb);`); assert.equal(revised.code, "00000", JSON.stringify(revised));
+        await claims({ role: "authenticated", sub: actor, aal: "aal1" }, actor);
+        const exactReplay = await a.query(`select api.command_v1('${JSON.stringify(oneOff).replaceAll("'", "''")}'::jsonb);`); assert.equal(exactReplay.code, "00000", JSON.stringify(exactReplay)); assert.deepEqual(JSON.parse(exactReplay.lines.at(-1)), receipt);
+        const freshOwnerRevision = (await observer.ok(`select revision from app_private.api_creation_heads where organization_id=${lit(org)} and owner_id=${lit(actor)};`)).at(-1);
+        const stale = { ...oneOff, operationId: uid(1103), expectedRevisions: { [`creation:${actor}`]: freshOwnerRevision, [`catalogue:${template.templateId}`]: "1" } };
+        const staleResult = await a.query(`select api.command_v1('${JSON.stringify(stale).replaceAll("'", "''")}'::jsonb);`); assert.equal(staleResult.code, "40001", JSON.stringify(staleResult));
+        const malformed = { ...stale, operationId: uid(1104), payload: { ...stale.payload, scheduledOn: "not-a-date" } };
+        const malformedResult = await a.query(`select api.command_v1('${JSON.stringify(malformed).replaceAll("'", "''")}'::jsonb);`); assert.equal(malformedResult.code, "22023", JSON.stringify(malformedResult));
+        await observer.ok(`update public.company_memberships set active=false where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(actor)};`);
+        const beforeDeniedReplay = (await observer.ok(`select (select count(*) from app_private.api_command_receipts where actor_id=${lit(actor)} and operation_id=${lit(uid(1101))})||'|'||(select count(*) from public.task_assignments where id=${lit(receipt.result.assignmentId)})||'|'||(select count(*) from public.task_instances where id=${lit(receipt.result.taskId)})||'|'||(select revision from app_private.api_creation_heads where organization_id=${lit(org)} and owner_id=${lit(actor)})||'|'||(select count(*) from app_private.api_operation_fences where actor_id=${lit(actor)} and operation_id=${lit(uid(1101))})||'|'||(select count(*) from public.audit_events where actor_id=${lit(actor)} and action='task.createOneOff')||'|'||(select fence_epoch from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id=${lit(actor)})||'|'||(select count(*) from app_private.company_membership_events where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(actor)});`)).at(-1);
+        const denied = await a.query(`select api.command_v1('${JSON.stringify(oneOff).replaceAll("'", "''")}'::jsonb);`); assert.equal(denied.code, "42501", JSON.stringify(denied));
+        const afterDeniedReplay = (await observer.ok(`select (select count(*) from app_private.api_command_receipts where actor_id=${lit(actor)} and operation_id=${lit(uid(1101))})||'|'||(select count(*) from public.task_assignments where id=${lit(receipt.result.assignmentId)})||'|'||(select count(*) from public.task_instances where id=${lit(receipt.result.taskId)})||'|'||(select revision from app_private.api_creation_heads where organization_id=${lit(org)} and owner_id=${lit(actor)})||'|'||(select count(*) from app_private.api_operation_fences where actor_id=${lit(actor)} and operation_id=${lit(uid(1101))})||'|'||(select count(*) from public.audit_events where actor_id=${lit(actor)} and action='task.createOneOff')||'|'||(select fence_epoch from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id=${lit(actor)})||'|'||(select count(*) from app_private.company_membership_events where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(actor)});`)).at(-1);
+        assert.equal(afterDeniedReplay, beforeDeniedReplay);
+        await observer.ok(`update public.company_memberships set active=true where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(actor)};`);
+        {
+          const beforeRace = (await observer.ok(`select (select count(*) from app_private.api_command_receipts where actor_id=${lit(actor)} and operation_id=${lit(uid(1101))})||'|'||(select count(*) from public.task_assignments where id=${lit(receipt.result.assignmentId)})||'|'||(select count(*) from public.task_instances where id=${lit(receipt.result.taskId)})||'|'||(select revision from app_private.api_creation_heads where organization_id=${lit(org)} and owner_id=${lit(actor)})||'|'||(select count(*) from app_private.api_operation_fences where actor_id=${lit(actor)} and operation_id=${lit(uid(1101))})||'|'||(select count(*) from public.audit_events where actor_id=${lit(actor)} and action='task.createOneOff')||'|'||(select fence_epoch from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id=${lit(actor)})||'|'||(select count(*) from app_private.company_membership_events where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(actor)});`)).at(-1);
+          await observer.ok(`reset role;begin isolation level read committed;update public.company_memberships set active=false where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(actor)};`);
+          await a.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(actor)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: actor, aal: "aal1" }))},false);set role authenticated;begin isolation level read committed;`);
+          const revocationFirstPid = Number((await a.ok("select pg_backend_pid();")).at(-1));
+          const revocationBlockerPid = Number((await observer.ok("select pg_backend_pid();")).at(-1));
+          const revocationFirstPending = a.query(`select api.command_v1('${JSON.stringify(oneOff).replaceAll("'", "''")}'::jsonb);`);
+          let revocationFirstBlocked = false; const revocationFirstDeadline = Date.now() + 10000;
+          while (Date.now() < revocationFirstDeadline) {
+            if ((await b.ok(`select ${revocationBlockerPid}=any(pg_catalog.pg_blocking_pids(${revocationFirstPid}));`)).at(-1) === "t") { revocationFirstBlocked = true; break; }
+            await new Promise((done) => setTimeout(done, 20));
+          }
+          assert.equal(revocationFirstBlocked, true, "READ COMMITTED replay was not observably blocked by committed-first revocation");
+          await observer.ok("commit;");
+          const revocationFirstReplay = await revocationFirstPending; assert.equal(revocationFirstReplay.code, "42501", JSON.stringify(revocationFirstReplay));
+          await a.ok("rollback;");
+          const afterRace = (await observer.ok(`select (select count(*) from app_private.api_command_receipts where actor_id=${lit(actor)} and operation_id=${lit(uid(1101))})||'|'||(select count(*) from public.task_assignments where id=${lit(receipt.result.assignmentId)})||'|'||(select count(*) from public.task_instances where id=${lit(receipt.result.taskId)})||'|'||(select revision from app_private.api_creation_heads where organization_id=${lit(org)} and owner_id=${lit(actor)})||'|'||(select count(*) from app_private.api_operation_fences where actor_id=${lit(actor)} and operation_id=${lit(uid(1101))})||'|'||(select count(*) from public.audit_events where actor_id=${lit(actor)} and action='task.createOneOff')||'|'||(select fence_epoch from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id=${lit(actor)})||'|'||(select count(*) from app_private.company_membership_events where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(actor)});`)).at(-1);
+          assert.equal(afterRace, beforeRace, "denied replay must preserve receipt, business rows, creation revision, operation and membership fences, audit, and membership events");
+          record("M2.2C one-off revoke-first READ COMMITTED replay waits, then denies without side effects", true, { blocked: revocationFirstBlocked, replaySQLSTATE: revocationFirstReplay.code, beforeState: beforeRace, afterState: afterRace });
+          await observer.ok(`update public.company_memberships set active=true where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(actor)};`);
+
+          await a.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(actor)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: actor, aal: "aal1" }))},false);set role authenticated;begin isolation level read committed;`);
+          const replayFirst = await a.query(`select api.command_v1('${JSON.stringify(oneOff).replaceAll("'", "''")}'::jsonb);`); assert.equal(replayFirst.code, "00000", JSON.stringify(replayFirst)); assert.deepEqual(JSON.parse(replayFirst.lines.at(-1)), receipt);
+          const replayFirstPid = Number((await a.ok("select pg_backend_pid();")).at(-1));
+          const replayFirstBaseline = (await observer.ok(`select (select count(*) from app_private.api_command_receipts where actor_id=${lit(actor)} and operation_id=${lit(uid(1101))})||'|'||(select count(*) from public.task_assignments where id=${lit(receipt.result.assignmentId)})||'|'||(select count(*) from public.task_instances where id=${lit(receipt.result.taskId)})||'|'||(select revision from app_private.api_creation_heads where organization_id=${lit(org)} and owner_id=${lit(actor)})||'|'||(select count(*) from app_private.api_operation_fences where actor_id=${lit(actor)} and operation_id=${lit(uid(1101))})||'|'||(select count(*) from public.audit_events where actor_id=${lit(actor)} and action='task.createOneOff')||'|'||(select fence_epoch from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id=${lit(actor)})||'|'||(select count(*) from app_private.company_membership_events where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(actor)});`)).at(-1);
+          await observer.ok(`reset role;begin isolation level read committed;`);
+          const replayFirstBlockerPid = Number((await observer.ok("select pg_backend_pid();")).at(-1));
+          const revokeFirstRetryPending = observer.query(`update public.company_memberships set active=false where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(actor)};`);
+          let replayFirstBlocked = false; const replayFirstDeadline = Date.now() + 10000;
+          while (Date.now() < replayFirstDeadline) {
+            if ((await b.ok(`select ${replayFirstPid}=any(pg_catalog.pg_blocking_pids(${replayFirstBlockerPid}));`)).at(-1) === "t") { replayFirstBlocked = true; break; }
+            await new Promise((done) => setTimeout(done, 20));
+          }
+          assert.equal(replayFirstBlocked, true, "membership revocation was not observably blocked by replay-first transaction");
+          await a.ok("commit;");
+          const revocationAfterReplay = await revokeFirstRetryPending; assert.equal(revocationAfterReplay.code, "00000", JSON.stringify(revocationAfterReplay)); await observer.ok("commit;");
+          const revocationRetry = await observer.query(`update public.company_memberships set active=false where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(actor)};`); assert.equal(revocationRetry.code, "00000", JSON.stringify(revocationRetry));
+          await a.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(actor)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: actor, aal: "aal1" }))},false);set role authenticated;`);
+          const replayAfterRevocation = await a.query(`select api.command_v1('${JSON.stringify(oneOff).replaceAll("'", "''")}'::jsonb);`); assert.equal(replayAfterRevocation.code, "42501", JSON.stringify(replayAfterRevocation));
+          const finalRaceState = (await observer.ok(`select (select count(*) from app_private.api_command_receipts where actor_id=${lit(actor)} and operation_id=${lit(uid(1101))})||'|'||(select count(*) from public.task_assignments where id=${lit(receipt.result.assignmentId)})||'|'||(select count(*) from public.task_instances where id=${lit(receipt.result.taskId)})||'|'||(select revision from app_private.api_creation_heads where organization_id=${lit(org)} and owner_id=${lit(actor)})||'|'||(select count(*) from app_private.api_operation_fences where actor_id=${lit(actor)} and operation_id=${lit(uid(1101))})||'|'||(select count(*) from public.audit_events where actor_id=${lit(actor)} and action='task.createOneOff')||'|'||(select fence_epoch from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id=${lit(actor)})||'|'||(select count(*) from app_private.company_membership_events where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(actor)});`)).at(-1);
+          assert.equal(finalRaceState, replayFirstBaseline, "replay and revoked replay must preserve business state, receipts, fences, audit, and membership events");
+          record("M2.2C one-off replay-first blocks concurrent revocation; revocation commits/retries and later replay denies", true, { blocked: replayFirstBlocked, replaySQLSTATE: replayFirst.code, revocationSQLSTATE: revocationAfterReplay.code, revocationRetrySQLSTATE: revocationRetry.code, laterReplaySQLSTATE: replayAfterRevocation.code, state: finalRaceState, sqlstate40P01: 0 });
+          await observer.ok(`update public.company_memberships set active=true where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(actor)};`);
+        }
+        {
+          const manager = uid(1110), managerOperation = uid(1111);
+          await observer.ok(`insert into auth.users(id) values(${lit(manager)});
+            insert into public.profiles(id,organization_id,name,role,manager_id,sector,branch,position) values(${lit(manager)},${lit(org)},'Synthetic one-off manager','encargado',${lit(boss)},'Test','Test','Manager');
+            insert into public.team_members(organization_id,team_id,profile_id) values(${lit(org)},${lit(team)},${lit(manager)});
+            insert into public.company_memberships(organization_id,company_id,profile_id) values(${lit(org)},${lit(company)},${lit(manager)});
+            update public.profiles set manager_id=${lit(manager)} where id=${lit(actor)};`);
+          const ownerCreationRevision = (await observer.ok(`select revision from app_private.api_creation_heads where organization_id=${lit(org)} and owner_id=${lit(actor)};`)).at(-1);
+          const managedOneOff = { contractVersion: 1, operationId: managerOperation, kind: "task.createOneOff", expectedRevisions: { [`creation:${actor}`]: ownerCreationRevision }, payload: { ownerId: actor, companyId: company, teamId: team, source: { type: "custom", definition: { kind: "operativa", title: "M2.2C manager one-off null guard", objective: "", sector: "Test", unit: "comprobantes" } }, scheduledOn, dueDate: null, priority: "Media" } };
+          await claims({ role: "authenticated", sub: manager, aal: "aal2" }, manager);
+          const made = await a.query(`select api.command_v1('${JSON.stringify(managedOneOff).replaceAll("'", "''")}'::jsonb);`); assert.equal(made.code, "00000", JSON.stringify(made));
+          await a.ok("reset role;");
+          await observer.ok(`update public.profiles set manager_id=null where id=${lit(actor)};`);
+          await claims({ role: "authenticated", sub: manager, aal: "aal2" }, manager);
+          const replay = await a.query(`select api.command_v1('${JSON.stringify(managedOneOff).replaceAll("'", "''")}'::jsonb);`); assert.equal(replay.code, "42501", JSON.stringify(replay));
+          const freshRevision = (await observer.ok(`select revision from app_private.api_creation_heads where organization_id=${lit(org)} and owner_id=${lit(actor)};`)).at(-1);
+          const firstExecution = { ...managedOneOff, operationId: uid(1112), expectedRevisions: { [`creation:${actor}`]: freshRevision } };
+          const firstDenied = await a.query(`select api.command_v1('${JSON.stringify(firstExecution).replaceAll("'", "''")}'::jsonb);`); assert.equal(firstDenied.code, "42501", JSON.stringify(firstDenied));
+          const effectState = (await observer.ok(`select (select count(*) from public.task_assignments where owner_id=${lit(actor)} and title='M2.2C manager one-off null guard')||'|'||(select count(*) from public.task_instances where owner_id=${lit(actor)} and title='M2.2C manager one-off null guard')||'|'||(select revision from app_private.api_creation_heads where organization_id=${lit(org)} and owner_id=${lit(actor)})||'|'||(select count(*) from app_private.api_command_receipts where actor_id=${lit(manager)} and operation_id=${lit(managerOperation)})||'|'||(select count(*) from app_private.api_operation_fences where actor_id=${lit(manager)} and operation_id=${lit(managerOperation)});`)).at(-1);
+          assert.equal(effectState, "1|1|23|1|1");
+          await a.ok("reset role;");
+          record("M2.2C encargado loses manager_id; exact replay and first one-off execution deny null relationship", true, { replaySQLSTATE: replay.code, firstExecutionSQLSTATE: firstDenied.code, inertAfterDeniedCalls: effectState });
+        }
+        await claims({ role: "authenticated", sub: actor, aal: "aal1" }, actor);
+        await a.ok("reset role;begin isolation level repeatable read;");
+        await a.ok(`select active from public.company_memberships where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(actor)};`);
+        await observer.ok(`update public.company_memberships set active=false where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(actor)};`);
+        const staleSnapshot = await a.query(`select api.command_v1('${JSON.stringify(oneOff).replaceAll("'", "''")}'::jsonb);`);
+        assert.equal(staleSnapshot.code, "40001", JSON.stringify(staleSnapshot)); await a.ok("rollback;");
+        const freshDenied = await a.query(`select api.command_v1('${JSON.stringify(oneOff).replaceAll("'", "''")}'::jsonb);`); assert.equal(freshDenied.code, "42501", JSON.stringify(freshDenied));
+        await observer.ok(`update public.company_memberships set active=true where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(actor)};`);
+        await a.ok("reset role;");
+        record("M2.2C one-off replay reauthorizes revoked membership; R29, stale/malformed, RC/RR deny and inert-state controls", true, { r29ReplaySQLSTATE: exactReplay.code, staleCatalogueSQLSTATE: staleResult.code, malformedSQLSTATE: malformedResult.code, rcRevokedSQLSTATE: denied.code, rrStaleSnapshotSQLSTATE: staleSnapshot.code, rrFreshSQLSTATE: freshDenied.code, noEffectState: afterDeniedReplay, receiptStable: JSON.stringify(JSON.parse(exactReplay.lines.at(-1))) === JSON.stringify(receipt) });
+      }
+      {
         const owner = uid(660), lineId = uid(661), templateIdOp = uid(662), templateOrgRev = (await observer.ok(`select coalesce((select revision from app_private.api_catalogue_heads where organization_id=${lit(org)}),0);`)).at(-1);
         await claims({ role: "authenticated", sub: boss, aal: "aal2" }, boss);
         const create = { contractVersion: 1, operationId: uid(663), kind: "catalogue.create", expectedRevisions: { [`catalogue:${org}`]: templateOrgRev }, payload: { definition: { kind: "operativa", title: "M2.2C triad standard", objective: "", sector: "Test", unit: "documentos" }, effectiveOn: scheduledOn, reason: "Three way native race" } };

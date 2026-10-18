@@ -1,19 +1,27 @@
 # Estado general de la migración — actualización 17/10/2026
 
-**Corte vigente de cobertura local:** se añadió y revisó independientemente la
-familia de revocación de membresía frente a aprobación de reglas recurrentes de
-cobertura. Fixture ejecuta `task_coverage_plan_assignment_rules`, materializa dos
-ocurrencias y valida el enlace `source_rule_id`. PostgreSQL 17.11: **134/134**,
-`40P01=0`; Vitest completo **727/727 en 74 archivos**; Vitest M2.2C focal
-**11/11**; sintaxis y `git diff --check` pasan. Revisión independiente no halló
-bloqueantes en esta familia. Evidencia y hashes:
-`docs/architecture/review-evidence/m2-2c-gatel-recurrent-coverage-20261017.json`.
-Es una familia acotada; no acepta M2.2C/Gate L. Los archivos de prueba y
-evidencia siguen locales sin commit; no hubo cambios SQL ni acceso remoto.
-
-**Siguiente investigación:** Sol revisa si `task.createOneOff` devuelve un
-recibo exacto antes de revalidar una membresía revocada. Si se confirma, Luna
-implementará la corrección mínima y sus pruebas; 014 seguirá sin aplicarse.
+**Corte local pendiente de re-revisión Sol — replay `task.createOneOff`,
+17/10/2026:** el recibo exacto revalida perfil/relación empresarial y equipo
+mediante plan read-only, advisory locks antes de row locks y sin incrementar
+fences. Una revisión Sol encontró que la comparación nullable `manager_id <> actor`
+dejaba pasar encargados sin relación; ambos caminos (replay y primera ejecución)
+ahora usan comparación null-safe. Vitest `tests/m2-2c-contract.test.ts`:
+**14/14**. PostgreSQL 17.11 nativo: **138/138**, `40P01=0`; replay de encargado
+sin `manager_id`, alta nueva, owner inactivo y owner sin team membership
+denegados `42501`. Las permutaciones revoke-first y replay-first observaron
+bloqueo bajo READ COMMITTED y conservaron recibos, filas, revisiones, fences,
+auditoría y eventos; el replay posterior a revocación dio `42501`. También incluye
+R29 (`00000`), comando nuevo con catálogo obsoleto (`40001`), malformado
+(`22023`), revocación RC (`42501`), RR stale (`40001`) y retry fresco (`42501`).
+Los rechazos de owner inactivo/sin equipo son altas nuevas verificadas en
+Vitest/PGlite; el reporte nativo r11 no los incluye.
+Evidencia y SHA-256:
+`docs/architecture/review-evidence/m2-2c-oneoff-replay-20261017.json`.
+El remoto `origin/main` es `7427240eda90a852507ada5490e0d30c1994a43a`; CI para
+ese checkpoint no fue consultada en esta ejecución. Queda pendiente la revisión
+Sol del hash/evidencia actualizados y continuar las familias no cubiertas de
+C/Gate L. No aplicar 014 ni declarar completo M2.2C/Gate L. No se tocaron
+servicios remotos.
 
 # Estado general de la migración — 17/10/2026
 

@@ -294,6 +294,15 @@ describe("M2.2C versioned creation protocol", () => {
       expect(first.result).toMatchObject({ assignmentId: expect.any(String), taskId: expect.any(String), taskRevision: "0" });
       expect((await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(task)])).result).toEqual(first);
       await lab.admin();
+      await lab.db.query("update company_memberships set active=false where organization_id=$1 and company_id=$2 and profile_id=$3", [ids.org, ids.company, ids.owner]);
+      const inertBefore = await lab.first("select (select fence_epoch from app_private.api_membership_fences where organization_id=$1 and profile_id=$2) fence, (select count(*)::integer from app_private.company_membership_events where organization_id=$1 and company_id=$3 and profile_id=$2) events", [ids.org, ids.owner, ids.company]);
+      const revokedReplay = await lab.rows("select api.command_v1($1::jsonb)", [JSON.stringify(task)]).catch((error: { code?: string }) => error);
+      expect((revokedReplay as { code?: string }).code).toBe("42501");
+      expect(await lab.first("select count(*)::integer count from task_assignments where id=$1", [first.result.assignmentId])).toEqual({ count: 1 });
+      expect(await lab.first("select count(*)::integer count from task_instances where id=$1", [first.result.taskId])).toEqual({ count: 1 });
+      expect(await lab.first("select count(*)::integer count from app_private.api_command_receipts where operation_id=$1", [id(950)])).toEqual({ count: 1 });
+      expect(await lab.first("select (select fence_epoch from app_private.api_membership_fences where organization_id=$1 and profile_id=$2) fence, (select count(*)::integer from app_private.company_membership_events where organization_id=$1 and company_id=$3 and profile_id=$2) events", [ids.org, ids.owner, ids.company])).toEqual(inertBefore);
+      await lab.db.query("update company_memberships set active=true where organization_id=$1 and company_id=$2 and profile_id=$3", [ids.org, ids.company, ids.owner]);
       expect(await lab.first("select kind,measurement_version,weight,unit,target,priority from task_instances where id=$1", [first.result.taskId])).toEqual({ kind: "operativa", measurement_version: 2, weight: null, unit: "comprobantes", target: null, priority: "Alta" });
       expect(await lab.first("select frequency from task_assignments where id=$1", [first.result.assignmentId])).toEqual({ frequency: "unica" });
       await lab.actor(ids.owner, "aal1", "authenticated");
@@ -309,6 +318,82 @@ describe("M2.2C versioned creation protocol", () => {
       expect((receiptDenied as { code?: string }).code).toBe("42501");
       const replayDenied = await lab.rows("select api.command_v1($1::jsonb)", [JSON.stringify(task)]).catch((error: { code?: string }) => error);
       expect((replayDenied as { code?: string }).code).toBe("42501");
+    } finally { await lab.close(); }
+  }, 20_000);
+
+  it("keeps one-off exact replay ahead of catalogue revision while denying revoked membership", async () => {
+    const lab = await new AccountingLab().init(stages.m014);
+    try {
+      await lab.actor(ids.boss, "aal2", "authenticated");
+      await lab.admin();
+      const catalogueRevision = (await lab.first("select coalesce((select revision from app_private.api_catalogue_heads where organization_id=$1),0) revision", [ids.org])).revision;
+      await lab.actor(ids.boss, "aal2", "authenticated");
+      const catalogue = { contractVersion: 1, operationId: id(980), kind: "catalogue.create", expectedRevisions: { [`catalogue:${ids.org}`]: String(catalogueRevision) }, payload: { definition: { kind: "operativa", title: "Tarea puntual de catálogo", objective: "", sector: "IVA", unit: "comprobantes" }, effectiveOn: lab.day, reason: "Fixture R29" } };
+      const catalogueCall = await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(catalogue)]);
+      const created = catalogueCall.result.result;
+      await lab.admin();
+      await lab.actor(ids.owner, "aal1", "authenticated");
+      const command = { contractVersion: 1, operationId: id(981), kind: "task.createOneOff", expectedRevisions: { [`creation:${ids.owner}`]: "0", [`catalogue:${created.templateId}`]: "1" }, payload: { ownerId: ids.owner, companyId: ids.company, teamId: ids.team, source: { type: "catalogue", templateVersionId: created.versionId }, scheduledOn: lab.day, dueDate: null, priority: "Media" } };
+      const receipt = (await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(command)])).result;
+      await lab.actor(ids.boss, "aal2", "authenticated");
+      await lab.admin();
+      const catalogueHeadRevision = (await lab.first("select revision from app_private.api_catalogue_heads where organization_id=$1", [ids.org])).revision;
+      await lab.actor(ids.boss, "aal2", "authenticated");
+      const revised = { contractVersion: 1, operationId: id(982), kind: "catalogue.revise", expectedRevisions: { [`catalogue:${ids.org}`]: String(catalogueHeadRevision), [`catalogue:${created.templateId}`]: "1" }, payload: { templateId: created.templateId, definition: { kind: "operativa", title: "Tarea puntual revisada", objective: "", sector: "IVA", unit: "archivos" }, effectiveOn: lab.day, reason: "R29 test revision" } };
+      await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(revised)]);
+      await lab.admin();
+      await lab.actor(ids.owner, "aal1", "authenticated");
+      expect((await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(command)])).result).toEqual(receipt);
+      const stale = { ...command, operationId: id(983) };
+      const staleResponse = await lab.rows("select api.command_v1($1::jsonb)", [JSON.stringify(stale)]).catch((error: { code?: string }) => error);
+      expect((staleResponse as { code?: string }).code).toBe("40001");
+      const malformed = { ...stale, operationId: id(984), payload: { ...stale.payload, scheduledOn: "not-a-date" } };
+      const malformedResponse = await lab.rows("select api.command_v1($1::jsonb)", [JSON.stringify(malformed)]).catch((error: { code?: string }) => error);
+      expect((malformedResponse as { code?: string }).code).toBe("22023");
+    } finally { await lab.close(); }
+  }, 20_000);
+
+  it("denies an encargado whose owner relationship was removed on exact replay and first execution", async () => {
+    const lab = await new AccountingLab().init(stages.m014);
+    try {
+      await lab.actor(ids.manager, "aal2", "authenticated");
+      const command = { contractVersion: 1, operationId: id(985), kind: "task.createOneOff", expectedRevisions: { [`creation:${ids.owner}`]: "0" }, payload: { ownerId: ids.owner, companyId: ids.company, teamId: ids.team, source: { type: "custom", definition: { kind: "operativa", title: "Tarea encargada puntual", objective: "", sector: "IVA", unit: "comprobantes" } }, scheduledOn: lab.day, dueDate: null, priority: "Media" } };
+      const receipt = (await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(command)])).result;
+      expect(receipt.result.taskId).toEqual(expect.any(String));
+      await lab.admin();
+      await lab.db.query("update profiles set manager_id=null where id=$1 and organization_id=$2", [ids.owner, ids.org]);
+      await lab.actor(ids.manager, "aal2", "authenticated");
+      const replay = await lab.rows("select api.command_v1($1::jsonb)", [JSON.stringify(command)]).catch((error: { code?: string }) => error);
+      expect((replay as { code?: string }).code).toBe("42501");
+      const firstExecution = { ...command, operationId: id(986), expectedRevisions: { [`creation:${ids.owner}`]: "1" } };
+      const deniedFirstExecution = await lab.rows("select api.command_v1($1::jsonb)", [JSON.stringify(firstExecution)]).catch((error: { code?: string }) => error);
+      expect((deniedFirstExecution as { code?: string }).code).toBe("42501");
+      await lab.admin();
+      expect(await lab.first("select count(*)::integer count from task_assignments where owner_id=$1", [ids.owner])).toEqual({ count: 1 });
+      expect(await lab.first("select count(*)::integer count from task_instances where owner_id=$1", [ids.owner])).toEqual({ count: 1 });
+    } finally { await lab.close(); }
+  }, 20_000);
+
+  it("denies first one-off execution for inactive owners or missing team membership", async () => {
+    const lab = await new AccountingLab().init(stages.m014);
+    try {
+      const commandFor = (owner: string, operation: number) => ({ contractVersion: 1, operationId: id(operation), kind: "task.createOneOff", expectedRevisions: { [`creation:${owner}`]: "0" }, payload: { ownerId: owner, companyId: ids.company, teamId: ids.team, source: { type: "custom", definition: { kind: "operativa", title: `One-off membership guard ${operation}`, objective: "", sector: "IVA", unit: "comprobantes" } }, scheduledOn: lab.day, dueDate: null, priority: "Media" } });
+      await lab.actor(ids.owner, "aal1", "authenticated");
+      await lab.admin();
+      await lab.db.query("update profiles set active=false where id=$1 and organization_id=$2", [ids.owner, ids.org]);
+      await lab.actor(ids.owner, "aal1", "authenticated");
+      const inactiveFirst = commandFor(ids.owner, 987);
+      const inactiveFirstResult = await lab.rows("select api.command_v1($1::jsonb)", [JSON.stringify(inactiveFirst)]).catch((error: { code?: string }) => error);
+      expect((inactiveFirstResult as { code?: string }).code).toBe("42501");
+      await lab.admin();
+      const noTeamOwner = id(990);
+      await lab.db.query("insert into auth.users(id) values($1)", [noTeamOwner]);
+      await lab.db.query("insert into profiles(id,organization_id,name,role,sector,branch,position) values($1,$2,'Synthetic owner without team','empleado','Test','Test','Test')", [noTeamOwner, ids.org]);
+      await lab.db.query("insert into company_memberships(organization_id,company_id,profile_id) values($1,$2,$3)", [ids.org, ids.company, noTeamOwner]);
+      await lab.actor(noTeamOwner, "aal1", "authenticated");
+      const missingTeamFirst = commandFor(noTeamOwner, 988);
+      const missingTeamFirstResult = await lab.rows("select api.command_v1($1::jsonb)", [JSON.stringify(missingTeamFirst)]).catch((error: { code?: string }) => error);
+      expect((missingTeamFirstResult as { code?: string }).code).toBe("42501");
     } finally { await lab.close(); }
   }, 20_000);
 

@@ -1,19 +1,23 @@
 # Acción de migración vigente — actualización 17/10/2026
 
-1. La cobertura de reglas recurrentes para revocación de membresía está
-   implementada localmente y revisada sin hallazgos bloqueantes. PostgreSQL
-   17.11 **134/134**, `40P01=0`; suite completa **727/727** y foco M2.2C
-   **11/11**. Evidencia:
-   `architecture/review-evidence/m2-2c-gatel-recurrent-coverage-20261017.json`.
-   Sigue sin commit y no cierra Gate L.
-2. Sol revisa el replay de `task.createOneOff` tras revocar sólo la membresía
-   empresarial. No tocar Supabase remoto ni aplicar 014. Si se confirma el
-   defecto, Luna corrige SQL local y agrega las regresiones; luego Sol revisa
-   el hash exacto.
-3. Después de aceptación acotada, guardar esta familia en `main` directamente
-   (sin PR), ejecutar CI y continuar con la siguiente familia pendiente.
-4. El resto del estado y límites históricos se conserva debajo; A/B, writers
-   legacy, concurrencia e inyección de fallos siguen abiertos.
+1. El replay exacto y la primera ejecución de `task.createOneOff` niegan un
+   encargado cuyo `manager_id` ya no apunta al responsable; la comparación
+   nullable se hizo null-safe. El replay sigue read-only y conserva R29.
+   Evidencia local: PostgreSQL 17.11 **138/138**, `40P01=0`; Vitest focal
+   **14/14**. Se observaron ambos órdenes de bloqueo RC y las denegaciones
+   tras revocación. Vitest/PGlite también rechaza altas nuevas con owner
+   inactivo o sin equipo (`42501`); esos dos casos no están en el runner nativo.
+   Reporte y hashes:
+   `architecture/review-evidence/m2-2c-oneoff-replay-20261017.json`.
+2. El checkpoint remoto `origin/main` es `7427240eda90a852507ada5490e0d30c1994a43a`.
+   Estado de CI de ese checkpoint: **pendiente de consulta**. No se aplicó SQL,
+   no se tocaron servicios remotos y 014 sigue sin aplicar.
+3. Siguiente revisión Sol: revisar el hash exacto actualizado y esta evidencia
+   nativa para decidir la aceptación acotada. Luego consultar/ejecutar CI y
+   continuar las familias aún pendientes de C/Gate L. No aplicar 014 ni declarar
+   completo M2.2C/Gate L.
+4. Esto no completa M2.2C/Gate L. Writers legacy, otras familias concurrentes
+   e inyección de fallos siguen abiertos.
 
 # Acción de migración histórica — 17/10/2026
 

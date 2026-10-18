@@ -2203,14 +2203,38 @@ begin
  role_v:=c->'principal'->>'role';
  if kind_v in ('assignment.create','month.materialize') and (role_v<>'jefe' or c->'authentication'->>'aal'<>'aal2') then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
  if kind_v='task.createOneOff' and role_v<>'empleado' and c->'authentication'->>'aal'<>'aal2' then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
- perform 1 from public.profiles p where p.id=actor and p.organization_id=org and p.active for share;
- if not found then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
  select * into existing from app_private.api_command_receipts where actor_id=actor and operation_id=op;
  if existing.actor_id is not null then
   if existing.kind<>kind_v or existing.arguments is distinct from args then raise exception using errcode='40001',message='Identificador de operación ya utilizado'; end if;
   if existing.organization_id<>org then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
+  if kind_v='task.createOneOff' then
+   company_v:=app_private.api_uuid(payload,'companyId'); team_v:=app_private.api_uuid(payload,'teamId');
+   start_v:=app_private.api_date(payload,'scheduledOn'); period_v:=date_trunc('month',start_v)::date;
+   months:=jsonb_build_array(jsonb_build_object('ownerId',owner_v,'period',period_v));
+   -- Exact replay stays ahead of catalogue, month and revision eligibility,
+   -- but current actor/owner and company/team authorization still serialize
+   -- against revocation. The read-only plan takes advisory locks before rows
+   -- and must not create/increment membership fences.
+   plan:=public._coordination_prepare('{}'::uuid[],array[actor],array[actor,owner_v],months,array[]::text[],'{}'::jsonb);
+   perform app_private._coordination_acquire_m22b(plan,false);
+   c:=app_private.api_require_business(false);
+   if (c->'principal'->>'organizationId')::uuid<>org or c->'principal'->>'role'<>role_v then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
+   perform 1 from public.profiles p where p.id=actor and p.organization_id=org and p.active for share;
+   if not found then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
+   select p.active,p.role,p.manager_id into owner_active,owner_role,manager_v from public.profiles p where p.id=owner_v and p.organization_id=org for share;
+   if not found or not owner_active or owner_role<>'empleado' or (role_v='empleado' and owner_v<>actor) or (role_v='encargado' and manager_v is distinct from actor) then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
+   perform 1 from public.company_memberships cm where cm.organization_id=org and cm.profile_id=owner_v and cm.company_id=company_v and cm.active for share;
+   if not found then raise exception using errcode='42501',message='La empresa o el equipo no está asignado'; end if;
+   perform 1 from public.team_members tm where tm.organization_id=org and tm.profile_id=owner_v and tm.team_id=team_v for share;
+   if not found then raise exception using errcode='42501',message='La empresa o el equipo no está asignado'; end if;
+  else
+   perform 1 from public.profiles p where p.id=actor and p.organization_id=org and p.active for share;
+   if not found then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
+  end if;
   return existing.result;
  end if;
+ perform 1 from public.profiles p where p.id=actor and p.organization_id=org and p.active for share;
+ if not found then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
  if kind_v='month.materialize' then
   period_v:=app_private.api_date(payload,'period'); if extract(day from period_v)<>1 then raise exception using errcode='22023',message='Período inválido'; end if;
  else
@@ -2246,7 +2270,7 @@ begin
  end if;
  select p.active,p.role,p.manager_id into owner_active,owner_role,manager_v from public.profiles p where p.id=owner_v and p.organization_id=org for share;
  if not found or not owner_active or owner_role<>'empleado' then raise exception using errcode='42501',message='El responsable no está activo'; end if;
- if role_v='empleado' and owner_v<>actor or role_v='encargado' and manager_v<>actor then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
+ if role_v='empleado' and owner_v<>actor or role_v='encargado' and manager_v is distinct from actor then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
  if kind_v<>'month.materialize' then
   if not exists(select 1 from public.company_memberships cm where cm.organization_id=org and cm.profile_id=owner_v and cm.company_id=company_v and cm.active) or not exists(select 1 from public.team_members tm where tm.organization_id=org and tm.profile_id=owner_v and tm.team_id=team_v) then raise exception using errcode='42501',message='La empresa o el equipo no está asignado'; end if;
  end if;

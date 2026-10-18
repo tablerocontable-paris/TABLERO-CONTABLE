@@ -1,0 +1,70 @@
+{
+  "sourceCommit": "7427240eda90a852507ada5490e0d30c1994a43a",
+  "remoteMain": "7427240eda90a852507ada5490e0d30c1994a43a",
+  "ci": "pending; not queried in this local validation",
+  "engine": "PostgreSQL 17.11",
+  "nativeCommand": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2c-oneoff-replay-20261017-r11 --port 55649 --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes",
+  "nativeReport": "../../outputs/m2-2c-oneoff-replay-20261017-r11/review.json",
+  "nativeTotal": 138,
+  "nativePassed": 138,
+  "nativeFailed": 0,
+  "sqlstate40P01": 0,
+  "migration014Sha256": "c03f0fd019ea85d972fdcd52d38df24f595c6a671675742004e4454f774ea010",
+  "nativeRunnerSha256": "b12e7b062566383448e1e647ac6b20c6a4c9ff25d9269f1207f8f66b9eb24573",
+  "vitest": "tests/m2-2c-contract.test.ts: 14/14 passed",
+  "vitestCommand": "node node_modules/vitest/vitest.mjs run tests/m2-2c-contract.test.ts --maxWorkers=1 --testTimeout=20000 --hookTimeout=30000",
+  "contractTestSha256": "e2c5b97ea9cc4edfc6b05bb482b878ed3ca94e43c3de32a5c3f667b76ba70fff",
+  "replayCase": {
+    "r29ExactReplay": "00000",
+    "newStaleCatalogueCommand": "40001",
+    "readCommittedRevokedReplay": "42501",
+    "repeatableReadStaleSnapshot": "40001",
+    "repeatableReadFreshRetry": "42501",
+    "inertStateBeforeAfter": "1|1|1|22|1|17|40|0",
+    "inertStateFields": [
+      "receipt count",
+      "assignment count",
+      "task count",
+      "creation revision",
+      "operation fence count",
+      "task.createOneOff audit count",
+      "membership fence epoch",
+      "membership event count"
+    ],
+    "malformedNewCommand": "22023"
+  },
+  "racePermutations": {
+    "revokeFirstReadCommitted": {
+      "blockedObserved": true,
+      "replaySQLSTATE": "42501",
+      "beforeAfterState": "1|1|1|22|1|17|40|0",
+      "stateFields": ["receipt count", "assignment count", "task count", "creation revision", "operation fence count", "task.createOneOff audit count", "membership fence epoch", "membership event count"]
+    },
+    "replayFirstThenConcurrentRevocation": {
+      "blockedObserved": true,
+      "initialReplaySQLSTATE": "00000",
+      "revocationSQLSTATE": "00000",
+      "revocationRetrySQLSTATE": "00000",
+      "laterReplaySQLSTATE": "42501",
+      "state": "1|1|1|22|1|17|40|0",
+      "sqlstate40P01": 0
+    }
+  },
+  "ownerAuthorization": {
+    "inactiveOwnerNewCommand": "42501",
+    "ownerWithoutTeamMembershipNewCommand": "42501",
+    "vitest": "14/14 passed"
+  },
+  "managerNullRelationship": {
+    "exactReplay": "42501",
+    "newFirstExecution": "42501",
+    "inertState": "1|1|23|1|1",
+    "inertStateFields": [
+      "assignment count",
+      "task count",
+      "creation revision",
+      "receipt count",
+      "operation fence count"
+    ]
+  }
+}
