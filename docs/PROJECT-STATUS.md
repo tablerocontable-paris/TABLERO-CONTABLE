@@ -1,6 +1,6 @@
 # Estado general de la migración — actualización 18/10/2026
 
-**Checkpoint remoto:** el repo privado `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`, está en `5803b1e4434cfc46a4ab64a26da3f76ab9d12d3d`, autoría Tablero Contable y push directo sin PR. No se pudo verificar Actions para el evento push: el conector sólo devuelve runs de pull request. El run 18 exitoso es de un SHA anterior.
+**Checkpoint remoto:** el repo privado `tablerocontable-paris/TABLERO-CONTABLE` tiene publicado en `main` el corte funcional `5803b1e4434cfc46a4ab64a26da3f76ab9d12d3d`, autoría Tablero Contable y push directo sin PR; después se publicaron sincronizaciones documentales. El push está confirmado. No se pudo verificar Actions para el evento push: el conector sólo devuelve runs de pull request. El run 18 exitoso es de un SHA anterior.
 
 **Último corte publicado:** Sol aceptó el arreglo de `assignment.create` exact replay tras revocación. Evidencia `docs/architecture/review-evidence/m2-2c-assignment-replay-20261018.json`; PostgreSQL 17.11 144/144, `40P01=0`; Vitest focal 19/19 y suite 735/735; TypeScript, build de cliente y Worker, `node --check` y `git diff --check` aprobados. Revalida jefe AAL2, empleado activo, membresía de empresa y equipo antes de devolver el recibo; argumentos distintos conservan `40001`. Sol lo aceptó en alcance local acotado; dejó P3 no bloqueante: la carrera usa el mismo jefe en ambas sesiones y no aísla lock de actor vs lock de membresía.
 

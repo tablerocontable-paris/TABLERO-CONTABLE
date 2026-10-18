@@ -1,9 +1,10 @@
 # Estado operativo y precedencia — actualización 18/10/2026
 
 Este bloque tiene precedencia sobre el historial más abajo. GitHub privado
-`tablerocontable-paris/TABLERO-CONTABLE` está en `main` en
-`5803b1e4434cfc46a4ab64a26da3f76ab9d12d3d`; el push está confirmado, pero el
-conector disponible no permite verificar los runs de Actions para eventos push.
+`tablerocontable-paris/TABLERO-CONTABLE` tiene publicado en `main` el corte
+funcional `5803b1e4434cfc46a4ab64a26da3f76ab9d12d3d`, seguido de sincronización
+documental directa. El push está confirmado, pero el conector disponible no
+permite verificar los runs de Actions para eventos push.
 El único Supabase es `grupo-paris-dev`, activo y vacío. La última lectura del
 Dashboard mostró `public, extensions` expuestos y autoexposición activada; el
 usuario ya autorizó apagarla, pero aún no se modificó. No aplicar SQL014 hasta

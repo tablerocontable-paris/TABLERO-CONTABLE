@@ -1,6 +1,6 @@
 # Acción de migración vigente — actualización 18/10/2026
 
-1. `origin/main` está en `5803b1e4434cfc46a4ab64a26da3f76ab9d12d3d`. El conector de GitHub no permite listar Actions de push; run 18 corresponde a un SHA anterior y no acredita este commit.
+1. `origin/main` contiene el corte funcional `5803b1e4434cfc46a4ab64a26da3f76ab9d12d3d` y sincronización documental posterior. El conector de GitHub no permite listar Actions de push; run 18 corresponde a un SHA anterior y no acredita este corte.
 2. Sol aceptó `assignment.create` exact replay tras revocación en el alcance registrado en `architecture/review-evidence/m2-2c-assignment-replay-20261018.json`. PostgreSQL 17.11: 144/144, `40P01=0`; Vitest focal 19/19 y suite completa 735/735; TypeScript y builds cliente/Worker pasan. La carrera observada usa el mismo jefe en ambas sesiones, por lo que no aísla el lock de membresía del lock del actor (P3 no bloqueante). El corte está comprometido y publicado directamente en `main`.
 3. **Siguiente:** revisar con Sol el permiso/privacidad de `assignment.create commandReceipt` y `month.materialize`; ejecutar la familia local aprobada con Luna. No aplicar SQL014.
 4. Supabase dev está activo y vacío. Data API habilitada, expone `public,extensions` y mantiene activa la autoexposición (última lectura del Dashboard). El usuario ya autorizó desactivarla, pero el conector no puede cambiar ese ajuste. No aplicar SQL014 hasta apagar la autoexposición, repetir el preflight seguro y completar Gate L.
