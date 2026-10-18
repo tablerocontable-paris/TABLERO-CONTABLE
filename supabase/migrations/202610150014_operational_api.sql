@@ -2215,6 +2215,17 @@ begin
  args:=jsonb_build_object('kind',kind_v,'payload',payload,'expectedRevisions',expected);
  perform public._coordination_receipt_lock(actor,op);
  perform public._coordination_lock_keys(1102,array[actor::text]);
+ -- For this narrow replay family, compare the immutable receipt identity and
+ -- arguments before revalidating the current actor. A reused operation id with
+ -- changed arguments is always a conflict (40001), even if authorization has
+ -- changed since the original request.
+ if kind_v='assignment.create' then
+  select * into existing from app_private.api_command_receipts where actor_id=actor and operation_id=op;
+  if existing.actor_id is not null then
+   if existing.kind<>kind_v or existing.arguments is distinct from args then raise exception using errcode='40001',message='Identificador de operación ya utilizado'; end if;
+   if existing.organization_id<>org then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
+  end if;
+ end if;
  c:=app_private.api_require_business(false);
  if (c->'principal'->>'organizationId')::uuid<>org then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
  role_v:=c->'principal'->>'role';
@@ -2243,6 +2254,34 @@ begin
    perform 1 from public.company_memberships cm where cm.organization_id=org and cm.profile_id=owner_v and cm.company_id=company_v and cm.active for share;
    if not found then raise exception using errcode='42501',message='La empresa o el equipo no está asignado'; end if;
    perform 1 from public.team_members tm where tm.organization_id=org and tm.profile_id=owner_v and tm.team_id=team_v for share;
+   if not found then raise exception using errcode='42501',message='La empresa o el equipo no está asignado'; end if;
+  elsif kind_v='assignment.create' then
+   company_v:=app_private.api_uuid(payload,'companyId'); team_v:=app_private.api_uuid(payload,'teamId');
+   start_v:=app_private.api_date(payload->'schedule','startDate'); period_v:=date_trunc('month',start_v)::date;
+   -- An exact assignment replay is an authorized read of historical work.
+   -- Reuse the membership writer's actor/profile/month/scope locks so a revoke
+   -- serializes with the replay, without creating or advancing any fences.
+   plan:=public._coordination_prepare('{}'::uuid[],array[actor],array[actor,owner_v],
+    jsonb_build_array(jsonb_build_object('ownerId',owner_v,'period',period_v)),
+    array['membership:'||company_v::text||':'||owner_v::text],
+    jsonb_build_object('membership',owner_v,'company',company_v));
+   perform app_private._coordination_acquire_m22b(plan,false);
+   c:=app_private.api_require_business(false);
+   if (c->'principal'->>'organizationId')::uuid<>org or c->'principal'->>'role'<>'jefe'
+      or c->'authentication'->>'aal'<>'aal2'
+      or not exists(select 1 from public.profiles p where p.id=actor and p.organization_id=org and p.active and p.role='jefe') then
+    raise exception using errcode='42501',message='Contexto no autorizado';
+   end if;
+   select p.active,p.role into owner_active,owner_role from public.profiles p
+    where p.id=owner_v and p.organization_id=org for share;
+   if not found or not owner_active or owner_role<>'empleado' then
+    raise exception using errcode='42501',message='El responsable no está activo';
+   end if;
+   perform 1 from public.company_memberships cm
+    where cm.organization_id=org and cm.profile_id=owner_v and cm.company_id=company_v and cm.active for share;
+   if not found then raise exception using errcode='42501',message='La empresa o el equipo no está asignado'; end if;
+   perform 1 from public.team_members tm
+    where tm.organization_id=org and tm.profile_id=owner_v and tm.team_id=team_v for share;
    if not found then raise exception using errcode='42501',message='La empresa o el equipo no está asignado'; end if;
   else
    perform 1 from public.profiles p where p.id=actor and p.organization_id=org and p.active for share;

@@ -1,0 +1,77 @@
+{
+  "scope": "Local SQL014 assignment.create exact-replay reauthorization after company-membership revocation. This is not acceptance of M2.2C or Gate L as a whole.",
+  "sourceCommit": "b1b585a75ae63a5cb62bea180aede138951a4908",
+  "hostedSupabaseModified": false,
+  "migrationApplied": false,
+  "files": {
+    "supabase/migrations/202610150014_operational_api.sql": "26e2dd9b709a5579f540d8522a389a000d37d741ae150b124b4a117321b6c25d",
+    "tests/m2-2c-contract.test.ts": "5e6b7e5ecfd14d4908f4ec068ab8961264aa274bcdad2dc07412177a1194af78",
+    "tests/review/m2-1-native-review.mjs": "69852f6bac79c03a0d463dc92083821299c299557cc291dc319271c77ad3e60e"
+  },
+  "vitestFocal": {
+    "command": "node node_modules/vitest/vitest.mjs run tests/m2-2c-contract.test.ts --maxWorkers=2",
+    "passed": 19,
+    "failed": 0
+  },
+  "nativePostgres": {
+    "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../outputs/m2-2c-assignment-replay-20261018-r3 --port 55633 --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes",
+    "engine": "PostgreSQL 17.11",
+    "passed": 144,
+    "failed": 0,
+    "sqlstate40P01": 0,
+    "migration014Sha256": "26e2dd9b709a5579f540d8522a389a000d37d741ae150b124b4a117321b6c25d",
+    "report": "outputs/m2-2c-assignment-replay-20261018-r3/review.json",
+    "reportSha256": "c828198925925eb7bd558ae669217fe4f5f59d5a981e746a0f2722a71499ec33",
+    "regression": {
+      "name": "M2.2C exact assignment replay is read-only, serializes before membership revoke, and denies replay after revoke",
+      "passed": true,
+      "authorizedExactReplay": "00000",
+      "revokerBlockedByReplay": true,
+      "revocation": "00000",
+      "exactReplayAfterRevocation": "42501",
+      "changedArgumentsAfterRevocation": "40001",
+      "stateReadOnlyAcrossReplay": true,
+      "stateSnapshot": ["membership", "team membership", "assignment", "instances", "creation head", "membership fence", "month fence", "operation fence", "receipt", "audit", "membership events"]
+    }
+  },
+  "fullSuite": {
+    "command": "node node_modules/vitest/vitest.mjs run --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+    "filesPassed": 74,
+    "testsPassed": 735,
+    "failed": 0
+  },
+  "typecheck": {
+    "command": "node node_modules/typescript/bin/tsc --noEmit",
+    "exitCode": 0
+  },
+  "clientBuild": {
+    "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+    "exitCode": 0
+  },
+  "workerBuild": {
+    "command": "node scripts/build-worker.mjs",
+    "exitCode": 0
+  },
+  "diffCheck": "git diff --check passed",
+  "independentReview": {
+    "reviewer": "GPT-6.1 Sol",
+    "decision": "ACCEPT scoped assignment.create exact replay reauthorization after company-membership revocation",
+    "p0ToP2Findings": 0,
+    "p3": "The replay and revocation race uses the same jefe in both sessions, so the observed blocker may be the actor lock at 1102; it proves serialization for these calls but does not isolate the membership lock with distinct actors.",
+    "independentFocal": "19/19 passed, exit 0",
+    "nativeReportReviewed": "144/144 passed; postgres.log contains no 40P01 or deadlock detected"
+  },
+  "behavior": [
+    "Compares receipt kind and arguments before the locked current-actor revalidation; changed arguments produce SQLSTATE 40001.",
+    "For assignment.create replay, acquires the existing actor, owner, month and membership:<company>:<owner> lock scope with _coordination_acquire_m22b(plan,false).",
+    "Revalidates the active AAL2 jefe in the same organization and the active employee owner, active company membership and current team_members row.",
+    "Returns exact receipt before current catalogue eligibility, revision, or month-open checks.",
+    "The replay path does not write business rows, receipts, audit rows, operation fences, or membership/month fence epochs."
+  ],
+  "limitations": [
+    "The runner is local PostgreSQL with synthetic JWT claims; hosted Supabase Auth/HTTP and Data API settings were not tested.",
+    "Only assignment.create exact replay was changed. No changes were made to other command writers or commandReceipt query behavior.",
+    "SQL014 remains unapplied. Sol accepted this exact local family only; the acceptance does not cover other commands or hosted behavior.",
+    "M2.2C/Gate L and the remaining §9 writer, concurrency, and failure-injection families remain open."
+  ]
+}

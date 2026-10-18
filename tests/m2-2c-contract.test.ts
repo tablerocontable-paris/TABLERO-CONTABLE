@@ -656,4 +656,39 @@ describe("M2.2C versioned creation protocol", () => {
       expect(await lab.first("select count(*)::integer count from task_instances where assignment_id=$1", [made.result.assignmentId])).toEqual({ count: 2 });
     } finally { await lab.close(); }
   }, 20_000);
+
+  it("reauthorizes exact assignment replay after company membership revocation without writes", async () => {
+    const lab = await new AccountingLab().init(stages.m014);
+    try {
+      await lab.actor(ids.boss, "aal2", "authenticated");
+      const standard = { contractVersion: 1, operationId: id(1070), kind: "catalogue.create", expectedRevisions: { [`catalogue:${ids.org}`]: "0" }, payload: { definition: { kind: "operativa", title: "Replay con membresía", objective: "", sector: "IVA", unit: "comprobantes" }, effectiveOn: lab.day, reason: "Fixture replay" } };
+      const template = (await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(standard)])).result;
+      const assignment = { contractVersion: 1, operationId: id(1071), kind: "assignment.create", expectedRevisions: { [`creation:${ids.owner}`]: "0", [`catalogue:${template.result.templateId}`]: "1" }, payload: { ownerId: ids.owner, companyId: ids.company, teamId: ids.team, source: { type: "catalogue", templateVersionId: template.result.versionId }, schedule: { ...schedule, startDate: lab.day, endDate: null, frequency: "mensual", monthDay: Number(lab.day.slice(-2)) } } };
+      const created = (await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(assignment)])).result;
+
+      const revoke = { contractVersion: 1, operationId: id(1072), kind: "companyMembership.setActive", expectedRevisions: { [`membership:${ids.company}:${ids.owner}`]: "0" }, payload: { companyId: ids.company, profileId: ids.owner, active: false, reason: "Revocación para replay" } };
+      await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(revoke)]);
+      await lab.admin();
+      const state = async () => lab.first(`select jsonb_build_object(
+        'membership',(select jsonb_build_array(active,revision) from company_memberships where organization_id=$1 and company_id=$2 and profile_id=$3),
+        'assignmentCount',(select count(*) from task_assignments where id=$4),
+        'creationHead',(select revision from app_private.api_creation_heads where organization_id=$1 and owner_id=$3),
+        'creationFence',(select fence_epoch from app_private.api_membership_fences where organization_id=$1 and profile_id=$3),
+        'monthFence',(select fence_epoch from app_private.api_month_fences where organization_id=$1 and owner_id=$3 and period=date_trunc('month',$5::date)::date),
+        'operationFence',(select count(*) from app_private.api_operation_fences where actor_id=$6 and operation_id=$7),
+        'assignmentReceipt',(select count(*) from app_private.api_command_receipts where actor_id=$6 and operation_id=$7),
+        'assignmentAudit',(select count(*) from audit_events where organization_id=$1 and actor_id=$6 and action='assignment.create' and entity_id=$4)
+      ) state`, [ids.org, ids.company, ids.owner, created.result.assignmentId, lab.day, ids.boss, id(1071)]).then((rows) => rows.state);
+      const beforeReplay = await state();
+
+      await lab.actor(ids.boss, "aal2", "authenticated");
+      const exactReplay = await lab.rows("select api.command_v1($1::jsonb) result", [JSON.stringify(assignment)]).catch((error: { code?: string }) => error);
+      expect((exactReplay as { code?: string }).code).toBe("42501");
+      const changedArguments = { ...assignment, expectedRevisions: { ...assignment.expectedRevisions, [`creation:${ids.owner}`]: "99" } };
+      const mismatch = await lab.rows("select api.command_v1($1::jsonb) result", [JSON.stringify(changedArguments)]).catch((error: { code?: string }) => error);
+      expect((mismatch as { code?: string }).code).toBe("40001");
+      await lab.admin();
+      expect(await state()).toEqual(beforeReplay);
+    } finally { await lab.close(); }
+  }, 30_000);
 });

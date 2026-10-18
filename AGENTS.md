@@ -2,14 +2,18 @@
 
 Este bloque tiene precedencia sobre el historial más abajo. GitHub privado
 `tablerocontable-paris/TABLERO-CONTABLE` está en `main` en
-`54105def6f9eac4e62cdc16fb2de4afd36d37904`; Actions run 18 pasó. El único
-Supabase es `grupo-paris-dev`, activo y vacío. La última lectura del Dashboard
-mostró `public, extensions` expuestos y autoexposición activada; no aplicar
-SQL014 hasta cerrar ese ajuste y completar Gate L. Sol aceptó el alcance local
-de `task.createOneOff commandReceipt` R7; suite 734/734, TypeScript, builds
-cliente/Worker y diff-check pasan. Esto no cierra M2.2C/Gate L. No hay hosting Cloudflare propio, correo transaccional ni
-Supabase de producción configurados. Mantener datos ficticios y el Site
-privado; no abrir el espacio operativo.
+`b1b585a75ae63a5cb62bea180aede138951a4908`; el push está confirmado, pero el
+conector disponible no permite verificar los runs de Actions para eventos push.
+El único Supabase es `grupo-paris-dev`, activo y vacío. La última lectura del
+Dashboard mostró `public, extensions` expuestos y autoexposición activada; el
+usuario ya autorizó apagarla, pero aún no se modificó. No aplicar SQL014 hasta
+cerrar ese ajuste y completar Gate L. Sol aceptó el alcance local R7 de
+`task.createOneOff commandReceipt` y, en esta sesión, la corrección acotada de
+`assignment.create` exact replay tras revocación. La validación de este último
+corte fue suite 735/735, PostgreSQL 17.11 144/144 (`40P01=0`), TypeScript y
+builds cliente/Worker. Esto no cierra M2.2C/Gate L. No hay hosting Cloudflare
+propio, correo transaccional ni Supabase de producción configurados. Mantener
+datos ficticios y el Site privado; no abrir el espacio operativo.
 
 El estado detallado fechado 17/10/2026 que sigue es histórico donde contradice
 este checkpoint; conservarlo sólo como registro de decisiones/evidencia.

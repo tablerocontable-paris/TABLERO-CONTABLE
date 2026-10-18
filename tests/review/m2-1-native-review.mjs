@@ -1045,6 +1045,65 @@ try {
         assert.equal(state, "false|true|1|1|1", state);
         record("M2.2C exact submit replay authorizes immutable A and serializes before revoking its membership", true, { submitSQLSTATE: submitted.code, requestChangesSQLSTATE: changed.code, saveDraftBSQLSTATE: savedB.code, replayFirstSQLSTATE: replayFirst.code, revokerBlockedByReplay: replayBlockedRevocation, revokeSQLSTATE: revokedA.code, replayAfterRevocationSQLSTATE: replayDenied.code, storedReceipt: exactReceipt.result, finalMembershipsAndVersions: state });
       }
+      {
+        const replayOwner = uid(150520), createOp = uid(150521), revokeOp = uid(150522);
+        await observer.ok(`insert into auth.users(id) values(${lit(replayOwner)});insert into public.profiles(id,organization_id,name,role,sector,branch,position) values(${lit(replayOwner)},${lit(org)},'M2.2C assignment replay/revoke','empleado','Test','Test','Test');insert into public.company_memberships(organization_id,company_id,profile_id) values(${lit(org)},${lit(company)},${lit(replayOwner)});insert into public.team_members(organization_id,team_id,profile_id) values(${lit(org)},${lit(team)},${lit(replayOwner)});`);
+        const createRevision = (await observer.ok(`select coalesce((select revision from app_private.api_creation_heads where organization_id=${lit(org)} and owner_id=${lit(replayOwner)}),0);`)).at(-1);
+        const assignmentReplayCommand = { contractVersion: 1, operationId: createOp, kind: "assignment.create", expectedRevisions: { [`creation:${replayOwner}`]: createRevision, [`catalogue:${JSON.parse(standardCall.lines.at(-1)).result.templateId}`]: "1" }, payload: { ownerId: replayOwner, companyId: company, teamId: team, source: { type: "catalogue", templateVersionId: standardVersionId }, schedule: { frequency: "mensual", startDate: scheduledOn, endDate: null, interval: 1, weekdays: [], monthDay: dayOfMonth, hasDeadline: true, dueOffsetDays: 0 } } };
+        await claims({ role: "authenticated", sub: boss, aal: "aal2" }, boss);
+        const assignmentCreated = await a.query(`select api.command_v1('${JSON.stringify(assignmentReplayCommand).replaceAll("'", "''")}'::jsonb);`);
+        assert.equal(assignmentCreated.code, "00000", JSON.stringify(assignmentCreated));
+        const assignmentReceipt = JSON.parse(assignmentCreated.lines.at(-1));
+        const assignmentId = assignmentReceipt.result.assignmentId;
+        const snapshotSql = `select jsonb_build_object(
+          'membership',(select jsonb_build_array(active,revision) from public.company_memberships where company_id=${lit(company)} and profile_id=${lit(replayOwner)}),
+          'teamMemberships',(select count(*) from public.team_members where team_id=${lit(team)} and profile_id=${lit(replayOwner)}),
+          'assignments',(select count(*) from public.task_assignments where id=${lit(assignmentId)}),
+          'instances',(select count(*) from public.task_instances where assignment_id=${lit(assignmentId)}),
+          'creationHead',(select revision from app_private.api_creation_heads where organization_id=${lit(org)} and owner_id=${lit(replayOwner)}),
+          'membershipFence',(select fence_epoch from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id=${lit(replayOwner)}),
+          'monthFence',(select fence_epoch from app_private.api_month_fences where organization_id=${lit(org)} and owner_id=${lit(replayOwner)} and period=${lit(monthPeriod)}::date),
+          'operationFence',(select count(*) from app_private.api_operation_fences where actor_id=${lit(boss)} and operation_id=${lit(createOp)}),
+          'receipt',(select count(*) from app_private.api_command_receipts where actor_id=${lit(boss)} and operation_id=${lit(createOp)}),
+          'assignmentAudit',(select count(*) from public.audit_events where actor_id=${lit(boss)} and action='assignment.create' and entity_id=${lit(assignmentId)}),
+          'membershipEvents',(select count(*) from app_private.company_membership_events where company_id=${lit(company)} and profile_id=${lit(replayOwner)})
+        );`;
+        const beforeReplay = (await observer.ok(snapshotSql)).at(-1);
+        await a.ok("reset role;" );
+        await claims({ role: "authenticated", sub: boss, aal: "aal2" }, boss);
+        await a.ok("begin isolation level read committed;");
+        const replayPid = Number((await a.ok("select pg_backend_pid();")).at(-1));
+        const replaySuccess = await a.query(`select api.command_v1('${JSON.stringify(assignmentReplayCommand).replaceAll("'", "''")}'::jsonb);`);
+        assert.equal(replaySuccess.code, "00000", JSON.stringify(replaySuccess));
+        assert.deepEqual(JSON.parse(replaySuccess.lines.at(-1)).result, assignmentReceipt.result);
+        assert.equal((await observer.ok(snapshotSql)).at(-1), beforeReplay, "successful exact replay must be read-only");
+
+        const revoke = { contractVersion: 1, operationId: revokeOp, kind: "companyMembership.setActive", expectedRevisions: { [`membership:${company}:${replayOwner}`]: "0" }, payload: { companyId: company, profileId: replayOwner, active: false, reason: "Assignment replay race" } };
+        await b.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(boss)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: boss, aal: "aal2" }))},false);set role authenticated;begin isolation level read committed;`);
+        const revokerPid = Number((await b.ok("select pg_backend_pid();")).at(-1));
+        const pendingRevoke = b.query(`select api.command_v1('${JSON.stringify(revoke).replaceAll("'", "''")}'::jsonb);`);
+        let replayBlockedRevocation = false; const raceDeadline = Date.now() + 10000;
+        while (Date.now() < raceDeadline) {
+          if ((await observer.ok(`select ${replayPid}=any(pg_catalog.pg_blocking_pids(${revokerPid}));`)).at(-1) === "t") { replayBlockedRevocation = true; break; }
+          await new Promise(done => setTimeout(done, 20));
+        }
+        await a.ok("commit;");
+        const revoked = await pendingRevoke;
+        await b.ok(revoked.code === "00000" ? "commit;" : "rollback;");
+        assert.equal(replayBlockedRevocation, true, "revocation must wait on exact replay membership lock");
+        assert.equal(revoked.code, "00000", JSON.stringify(revoked));
+
+        const afterRevocation = (await observer.ok(snapshotSql)).at(-1);
+        await claims({ role: "authenticated", sub: boss, aal: "aal2" }, boss);
+        const deniedReplay = await a.query(`select api.command_v1('${JSON.stringify(assignmentReplayCommand).replaceAll("'", "''")}'::jsonb);`);
+        assert.equal(deniedReplay.code, "42501", JSON.stringify(deniedReplay));
+        const mismatch = { ...assignmentReplayCommand, expectedRevisions: { ...assignmentReplayCommand.expectedRevisions, [`creation:${replayOwner}`]: "999" } };
+        const mismatchResult = await a.query(`select api.command_v1('${JSON.stringify(mismatch).replaceAll("'", "''")}'::jsonb);`);
+        assert.equal(mismatchResult.code, "40001", JSON.stringify(mismatchResult));
+        await a.ok("reset role;"); await b.ok("reset role;");
+        assert.equal((await observer.ok(snapshotSql)).at(-1), afterRevocation, "denied/mismatched replay must preserve post-revocation read-only state");
+        record("M2.2C exact assignment replay is read-only, serializes before membership revoke, and denies replay after revoke", true, { createSQLSTATE: assignmentCreated.code, replaySQLSTATE: replaySuccess.code, replayReadOnlyBeforeRevoke: beforeReplay, revokerBlockedByReplay: replayBlockedRevocation, revokeSQLSTATE: revoked.code, revokedState: afterRevocation, exactReplayAfterRevokeSQLSTATE: deniedReplay.code, argumentMismatchSQLSTATE: mismatchResult.code, stateUnchangedByDeniedReplays: true });
+      }
       const saveRequest = { contractVersion: 1, operationId: uid(350), kind: "onboarding.saveDraft", expectedRevisions: { [`onboardingOwner:${actor}`]: onboardingRevision }, payload: { requestId: null, draft: requestDraft } };
       await claims({ role: "authenticated", sub: actor, aal: "aal1" });
       const savedRequestCall = await a.query(`select api.command_v1('${JSON.stringify(saveRequest).replaceAll("'", "''")}'::jsonb);`);
