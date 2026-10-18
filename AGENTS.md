@@ -1,4 +1,4 @@
-# Estado operativo y precedencia — 16/10/2026
+# Estado operativo y precedencia — 17/10/2026
 
 La cuenta y el repositorio GitHub privados ya están creados. El repositorio
 `tablerocontable-paris/TABLERO-CONTABLE` usa `main` como rama única y flujo de
@@ -8,20 +8,36 @@ Tablero Contable y con el árbol actual del laboratorio. El workflow valida
 pushes a `main`. La PR de bootstrap está cerrada y no se integró.
 
 La conexión a Supabase/hosting no autoriza desplegar producción ni datos reales.
-M2.2A-R7/R8 requiere la revisión Sol descrita abajo antes de iniciar B/C o
-aplicar migraciones. El laboratorio sigue siendo el producto activo.
+Precedencia vigente 17/10/2026: M2.2A-R7/R8 y M2.2B fueron aceptadas localmente
+por Sol. Sol aceptó únicamente los escenarios R90 enumerados para SQL014
+(checkout `3ff379002c37c43fb8c91d2b41bd47658d73d0386b2c5bc1518f22c6b4cc86c6`,
+blob Git LF `7c96727b7f1ecd8c5bb2b457640b824deddc06346da3f1a70e9bdb879e730a56`)
+y runner `7c48420ee61498418642ddbd2b734dc5b7d094eabed923417a2bfebf03059588`;
+R90 regeneró el reporte (PostgreSQL 17.11, **128/128**, `40P01=0`). El reporte acredita las filas
+6, 8, 11 y 12 en el alcance local revisado, incluida la revocación de lectura
+SQL009 para encargados y conflictos/rollback/reintentos bajo RC/RR. La matriz
+usa JWT sintéticos; no acredita Auth/HTTP alojado ni presencia de datos reales.
+Suite 727/727 en 74 archivos, TypeScript, build cliente y Worker pasaron sobre
+este corte. Esta aceptación acotada no cierra M2.2C ni Gate L completos: quedan
+familias API/legacy writer, concurrencia e inyección de fallos del contrato §9.
+El checkpoint está en commit local; revisar el hash corregido y luego push
+directo a `main`; no abrir PR. 014 sigue sin
+aplicar. No tocar Supabase remoto hasta realizar y verificar el gate de
+exposición Data API. Producción, Cloudflare y correo productivo siguen aparte.
 
-# Precedencia M2.2A-R7/R8 — implementación local lista para revisión, 15/10/2026
+# Precedencia histórica M2.2A-R7/R8 — revisión local, 15/10/2026
 
 R7/R8 están corregidos en la migración local 014 y el runner nativo. Evidencia
 vigente `docs/architecture/review-evidence/m2-2a-r7r8-implementation-20261015.json`.
-Preflight: 20/20 (18 originales + 2 de rateHistory); nativo con locks: 6/6;
-R6: 30/30 + independiente9/9; protocolo15/15; PostgreSQL17.11: RC/RC61/61,
-RR/RR61/61, RC/RR43/43, RR/RC43/43; suite712/712 en72 archivos, TypeScript,
-build cliente/Worker, sintaxis y diff-check aprobados. Revisión Sol pendiente.
-Siguiente **GPT‑6.1 Sol, esfuerzo alto, Standard** revisa M2.2A-R7/R8; no
-iniciar B/C, aplicar/desplegar014, conectar cuentas ni recalcular el ~45%
-histórico antes de esa decisión.
+El candidato actual de B registra 67/67 casos por par en PostgreSQL17.11
+(RC/RC, RC/RR, RR/RC, RR/RR), incluyendo timers y transiciones legacy RR
+stale→cierre con abort `40001`, retries cerrados sin filas parciales, y fence
+API `task.transition` incrementado exactamente una vez; `40P01=0`. Suite
+716/716 en73 archivos, focal
+44/44, TypeScript, builds cliente/Worker, sintaxis y diff-check aprobados.
+Esta nota es histórica para B y queda superada por el bloque operativo vigente
+de C al inicio de AGENTS.md. Evidencia B:
+`docs/architecture/review-evidence/m2-2b-sol-review-corrections-20261016.json`.
 
 > **Precedencia M2.2A — revisión R6 finalizada, 15/10/2026.** R6 original resuelto (30/30); candidato `ebe1633` aún NO aceptado por R7/R8 P2: valores de revisión/cursores validados después de locks y helper de claves que acepta un conjunto esperado con NULL. Sonda nueva 8/18, nativa 3/6, con estado sin cambios; los fallos son evidencia deliberada. Se corrigió la evidencia mixta previa: sus opciones erróneas produjeron RC/RC; nuevas ejecuciones reales RC/RR y RR/RC pasan 43/43 cada una. Focales17/17, protocolo15/15 y TypeScript pasan. Producto SQL/DTO/UI/Worker sin cambios en la revisión; suite712/builds son del mismo producto anterior. Siguiente **GPT‑6 Luna medio Standard** ejecuta `docs/architecture/M2-2A-PREFLIGHT-LUNA-20261015.md`; después Sol alto acepta A y define B/C. Informe/evidencia `M2-2A-R6-SOL-REVIEW-20261015.md` / `review-evidence/m2-2a-r6-sol-review-20261015.json`. No desplegar014, iniciar B/C ni conectar cuentas en este corte. Avance ~45% histórico.
 

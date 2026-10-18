@@ -1,4 +1,4 @@
-> **Secuencia actualizada 16/10/2026:** GitHub está migrado a un repositorio privado nuevo con `main` como rama única y push directo, sin PR. Supabase/hosting siguen pendientes. La revisión de M2.2A-R7/R8 y la paridad del producto son gates antes de aplicar SQL o publicar un entorno operativo. La infraestructura dev no supone aceptación funcional ni productiva; no enviar invitaciones ni usar datos reales.
+> **Secuencia actualizada 17/10/2026:** GitHub está migrado a un repositorio privado nuevo con `main` como rama única y push directo, sin PR. Supabase dev existe y sigue vacío; hosting y Supabase de producción están pendientes. Sol aceptó sólo escenarios locales R90; M2.2C/Gate L completos siguen abiertos por matrices pendientes. El checkpoint `93278d1` requiere corrección documental y revisión del nuevo hash antes del push. No aplicar SQL mientras C/Gate L y el gate de Data API sigan abiertos ni usar datos reales.
 
 > **Secuencia 14/10/2026 (histórica):** el usuario autorizó iniciar cuentas, Git y desarrollo conectado ahora. La cuenta GitHub nueva ya se conectó. Lector humano, paridad Supabase, piloto y recuperación continúan como gates.
 
@@ -18,8 +18,9 @@ No implica garantizar que nunca aparecerá un defecto futuro.
    No enviar invitaciones reales ahora. No pedir el correo del jefe en laboratorio.
 3. Integración: probar Auth, MFA, RLS, empresas, migraciones desde cero y upgrade
    en Supabase dev real; comprobar respaldo y restauración.
-4. Entrega: PR/checks/protecciones, preview, migración y deploy ordenados,
-   verificación posterior y recuperación. Probar el flujo completo con un cambio.
+4. Entrega: commit directo a `main` (sin PR), checks del SHA exacto,
+   migración/deploy ordenados, verificación posterior y recuperación. Probar el
+   flujo completo con un cambio.
 5. Producción: mismo código aceptado, Supabase producción separado, hosting
    y accesos verificados; cero correcciones conocidas pendientes de aceptación.
 
@@ -39,10 +40,9 @@ No aumentar el porcentaje por escribir un plan o preparar un workflow.
   validar el commit exacto. `.gitignore` excluye sólo rutas concretas de `outputs/`; el resto puede
   estar rastreado o sin seguimiento. Revisar `git status` y seleccionar evidencia
   expresamente antes de cada commit.
-- Preparado: workflow GitHub con suite completa, build y validación del paquete
-  de despliegue Sites del commit enviado. No ejecutado en GitHub: todavía no
-  existe ese repositorio propio.
-- Pendiente: creación automática de PR, promoción dev/main, migraciones
+- Configurado: workflow GitHub para pushes a `main`. El resultado del commit
+  final que contiene M2.2C debe registrarse tras el push directo.
+- Pendiente: protección/checks obligatorios, promoción dev/producción, migraciones
   Supabase por CI y deploy del hosting. No existen secretos/destinos conectados.
 - Sites: fuente y publicación se ejecutan mediante herramientas del asistente;
   no hay automatización permanente de publicación activada en este checkout.

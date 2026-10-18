@@ -1,0 +1,229 @@
+{
+  "title": "M2.2B Sol review corrections local evidence",
+  "date": "2026-10-16",
+  "status": "Corrected B candidate; awaiting independent Sol review; 014 unapplied; no remote changes",
+  "baseCommit": "3267e1a9798464c5c4c2c3f46c17582b76b2ee71",
+  "hashes": {
+    "migration014Sha256": "385698B927C8EE59484E90575049EA75F1BFE9DA78B15ED049007959506F34E0",
+    "operationalContractDtoSha256": "3C7C9AC7531AD12BC542E8D69C0E4E56839A966C9B5E731FB9E3174D885DA745"
+  },
+  "preservedMigrations": {
+    "count": 15,
+    "range": "001–013",
+    "command": "For each tracked migration 001–013: git rev-parse HEAD:<path> compared with git hash-object -- <path>",
+    "mismatches": 0
+  },
+  "solCorrections": [
+    {
+      "id": "R1",
+      "verified": true,
+      "result": "RR snapshot waits at month fence, aborts 40001; fresh retry rejects closed unit with 55000"
+    },
+    {
+      "id": "R2",
+      "verified": true,
+      "result": "task.transition shares graph-before-task lock order through a prepared plan; both conflict directions 40001"
+    },
+    {
+      "id": "R3",
+      "verified": true,
+      "result": "commercialMode command, replay, and receipt deny non-jefe with 42501"
+    },
+    {
+      "id": "R4",
+      "verified": true,
+      "result": "available_from activates legacy timer and transition executor protections; both deny 42501 without writes"
+    },
+    {
+      "id": "R5",
+      "verified": true,
+      "result": "exact task.transition replay and receipt return after closure despite stale expected revision"
+    },
+    {
+      "id": "R6",
+      "verified": true,
+      "result": "closed route tasks excluded from fresh items; old cursor fails fingerprint check with 40001"
+    },
+    {
+      "id": "R7",
+      "verified": true,
+      "result": "suggestedRoute DTO preserves legacy weight scale beyond six decimal places"
+    },
+    {
+      "id": "R8",
+      "verified": true,
+      "result": "rateHistory XOR is exact; neither and both scope values fail 22023 before query locks"
+    },
+    {
+      "id": "privacy",
+      "verified": true,
+      "result": "reason is absent from audit_events.details and retained in RLS-protected immutable task_reopen_events"
+    }
+  ],
+  "focusedValidation": {
+    "command": "node node_modules/vitest/vitest.mjs run tests/database.test.ts tests/m2-2b-contract.test.ts tests/supabase-operational-migration.test.ts --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+    "exitCode": 0,
+    "result": "4 files, 44 tests passed (including existing database compatibility tests)"
+  },
+  "fullValidation": {
+    "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+    "exitCode": 0,
+    "result": "73 files, 716 tests passed; duration 206.58s"
+  },
+  "typeScript": {
+    "command": "node node_modules/typescript/bin/tsc --noEmit",
+    "exitCode": 0
+  },
+  "clientBuild": {
+    "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+    "exitCode": 0,
+    "notes": "Rollup annotation warnings from Zod in node_modules only"
+  },
+  "workerBuild": {
+    "command": "node scripts/build-worker.mjs",
+    "exitCode": 0
+  },
+  "runnerSyntax": {
+    "command": "node --check tests/review/m2-1-native-review.mjs",
+    "exitCode": 0
+  },
+  "diffCheck": {
+    "command": "git diff --check",
+    "exitCode": 0,
+    "notes": "CRLF informational warnings only"
+  },
+  "nativeMatrix": [
+    {
+      "pair": "RC/RC",
+      "output": "../../outputs/m2-2b-sol-p1-core-rc-rc-20261016",
+      "port": 55581,
+      "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2b-sol-p1-core-rc-rc-20261016 --port 55581 --through-014 yes --m2-2a-smoke yes --m2-2b-smoke yes --m2-2a-first-isolation rc --m2-2a-second-isolation rc",
+      "exitCode": 0,
+      "total": 67,
+      "passed": 67,
+      "failed": 0,
+      "sqlstate40P01": 0,
+      "apiTransitionFenceDelta": 1,
+      "legacyTimerP1": {
+        "blocked": true,
+        "closeCommitted": "00000",
+        "staleSnapshotSQLSTATE": "40001",
+        "freshRetrySQLSTATE": "P0001",
+        "finalState": "1|0|0"
+      },
+      "legacyTransitionP1": {
+        "blocked": true,
+        "closeCommitted": "00000",
+        "staleSnapshotSQLSTATE": "40001",
+        "freshRetrySQLSTATE": "55000",
+        "finalState": "Pendiente|1|0|0"
+      }
+    },
+    {
+      "pair": "RC/RR",
+      "output": "../../outputs/m2-2b-sol-p1-core-rc-rr-20261016",
+      "port": 55582,
+      "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2b-sol-p1-core-rc-rr-20261016 --port 55582 --through-014 yes --m2-2a-smoke yes --m2-2b-smoke yes --m2-2a-first-isolation rc --m2-2a-second-isolation rr",
+      "exitCode": 0,
+      "total": 67,
+      "passed": 67,
+      "failed": 0,
+      "sqlstate40P01": 0,
+      "apiTransitionFenceDelta": 1,
+      "legacyTimerP1": {
+        "blocked": true,
+        "closeCommitted": "00000",
+        "staleSnapshotSQLSTATE": "40001",
+        "freshRetrySQLSTATE": "P0001",
+        "finalState": "1|0|0"
+      },
+      "legacyTransitionP1": {
+        "blocked": true,
+        "closeCommitted": "00000",
+        "staleSnapshotSQLSTATE": "40001",
+        "freshRetrySQLSTATE": "55000",
+        "finalState": "Pendiente|1|0|0"
+      }
+    },
+    {
+      "pair": "RR/RC",
+      "output": "../../outputs/m2-2b-sol-p1-core-rr-rc-20261016",
+      "port": 55583,
+      "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2b-sol-p1-core-rr-rc-20261016 --port 55583 --through-014 yes --m2-2a-smoke yes --m2-2b-smoke yes --m2-2a-first-isolation rr --m2-2a-second-isolation rc",
+      "exitCode": 0,
+      "total": 67,
+      "passed": 67,
+      "failed": 0,
+      "sqlstate40P01": 0,
+      "apiTransitionFenceDelta": 1,
+      "legacyTimerP1": {
+        "blocked": true,
+        "closeCommitted": "00000",
+        "staleSnapshotSQLSTATE": "40001",
+        "freshRetrySQLSTATE": "P0001",
+        "finalState": "1|0|0"
+      },
+      "legacyTransitionP1": {
+        "blocked": true,
+        "closeCommitted": "00000",
+        "staleSnapshotSQLSTATE": "40001",
+        "freshRetrySQLSTATE": "55000",
+        "finalState": "Pendiente|1|0|0"
+      }
+    },
+    {
+      "pair": "RR/RR",
+      "output": "../../outputs/m2-2b-sol-p1-core-rr-rr-20261016",
+      "port": 55584,
+      "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2b-sol-p1-core-rr-rr-20261016 --port 55584 --through-014 yes --m2-2a-smoke yes --m2-2b-smoke yes --m2-2a-first-isolation rr --m2-2a-second-isolation rr",
+      "exitCode": 0,
+      "total": 67,
+      "passed": 67,
+      "failed": 0,
+      "sqlstate40P01": 0,
+      "apiTransitionFenceDelta": 1,
+      "legacyTimerP1": {
+        "blocked": true,
+        "closeCommitted": "00000",
+        "staleSnapshotSQLSTATE": "40001",
+        "freshRetrySQLSTATE": "P0001",
+        "finalState": "1|0|0"
+      },
+      "legacyTransitionP1": {
+        "blocked": true,
+        "closeCommitted": "00000",
+        "staleSnapshotSQLSTATE": "40001",
+        "freshRetrySQLSTATE": "55000",
+        "finalState": "Pendiente|1|0|0"
+      }
+    }
+  ],
+  "scope": {
+    "migration014Applied": false,
+    "remoteTouched": false,
+    "migrations001to013Changed": false,
+    "m2_2cStarted": false,
+    "commitOrPush": false
+  },
+  "solAdditionalP1": {
+    "id": "legacy-writers-month-fence-centralization",
+    "verified": true,
+    "implementation": "_coordination_apply_task_control_m22b touches plan month fences once after plan acquisition/preparation and before task/session row locks. api.command_v1 task.transition no longer touches externally; start_task_timer retains one independent touch after its own plan acquisition.",
+    "evidence": "../../outputs/m2-2b-sol-p1-core-rr-r3-20261016/review.json",
+    "apiTransitionFence": {
+      "before": "8",
+      "after": "9",
+      "delta": 1
+    },
+    "legacyTimer": {
+      "staleSnapshotSQLSTATE": "40001",
+      "freshRetrySQLSTATE": "P0001",
+      "finalState": "1|0|0"
+    },
+    "legacyTransition": {
+      "staleSnapshotSQLSTATE": "40001",
+      "freshRetrySQLSTATE": "55000",
+      "finalState": "Pendiente|1|0|0"
+    }
+  }
+}

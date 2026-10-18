@@ -1,10 +1,20 @@
-# Acción de migración vigente — 16/10/2026
+# Acción de migración vigente — 17/10/2026
 
-1. Sol aceptó M2.2A R7/R8 localmente. Está definiendo los contratos ejecutables B/C; completar y aceptar A/B/C antes de desplegar 014.
-2. GitHub privado ya es fuente del proyecto: `tablerocontable-paris/TABLERO-CONTABLE`, `main`; trabajar directamente en `main`, sin PR. La guía correcta de PC personal es `outputs/LEEME-PC-PERSONAL.md`.
-3. Proyecto Supabase dev `grupo-paris-dev` creado en `sa-east-1`, USD 0/mes cotizados, activo y vacío. No aplicar migraciones ni habilitar GitHub integration hasta cerrar el contrato A/B/C, para que no se ejecute 014 prematuramente. Luego conectar la integración sólo al entorno dev y validar el flujo directo desde main.
-4. Cloudflare/hosting propio y correo productivo siguen sin configurar. El Site privado existente permanece separado y no debe abrir su audiencia.
-# Acción vigente — GPT‑6.1 Sol revisa M2.2A-R7/R8, 15/10/2026
+1. **Aceptación acotada R90:** Sol aceptó los escenarios enumerados para SQL014 y runner, PostgreSQL 17.11 **128/128**, `40P01=0`. No cierra M2.2C/Gate L completos. Hashes y límites: `architecture/M2-2C-SOL-ACCEPTANCE-20261017.md`; evidencia `architecture/review-evidence/m2-2c-membership-r90-20261017.json`. Quedan matriz onboarding/creation, writers legacy y concurrencia/inyección de fallos del contrato §9.
+2. GPT‑6 Luna, esfuerzo medio, implementa/verifica las familias pendientes de C; GPT‑6.1 Sol, esfuerzo alto, acepta el contrato completo y hashes exactos. No aplicar 014 ni iniciar preflight alojado hasta cerrar Gate L y Data API. El checkpoint `93278d1` ya está local; tras corregir su documentación, Sol revisa el nuevo hash. Luego push directo a `origin/main`, sin PR.
+3. El repositorio fuente ya está en GitHub privado `tablerocontable-paris/TABLERO-CONTABLE`, rama única `main`. La guía de PC personal es `outputs/LEEME-PC-PERSONAL.md`; el contenido de IndexedDB/localStorage no se sincroniza con GitHub.
+4. Proyecto Supabase `grupo-paris-dev` existe en la organización visible `tablerocontable-paris DEV`, región `sa-east-1`, cotización consultada USD 0/mes, activo y vacío. Preferencia: dos organizaciones Free `dev` y `main`; todavía no se renombró ni creó la segunda. La Data API aún muestra `public,extensions` expuestos y autoexposición activada según la última observación. El usuario autorizó apagar autoexposición; verificar el cambio. No aplicar migraciones hasta confirmar la exposición segura y el preflight en proyecto vacío.
+5. Cloudflare/hosting propio, correo productivo, Supabase de producción y flujo de release permanecen pendientes. El Site privado existente sigue separado; no abrir audiencia ni activar la app operativa.
+# Acción vigente — completar M2.2C localmente, 16/10/2026
+
+**Registro histórico supersedido — R51 (no usar como estado actual).** R51
+reportó 96/96 sobre un candidato anterior que todavía no tenía el writer soft
+de membresía. Su probe hacía `DELETE` y recibía `23503`; no describe el árbol
+actual. También son históricos sus gates de suite/build. Ver el primer punto
+vigente y el JSON consolidado para R35 y las correcciones posteriores. No
+aplicar 014 ni inferir cobertura actual desde R51.
+
+# Acción histórica — GPT‑6.1 Sol revisa M2.2A-R7/R8, 15/10/2026
 
 La implementación local está completa. Evidencia:
 `architecture/review-evidence/m2-2a-r7r8-implementation-20261015.json` y los

@@ -1,6 +1,6 @@
 # Grupo París · tablero contable en laboratorio
 
-El repositorio continúa el mismo Site privado de Grupo París. La interfaz publicada durante esta etapa entra por `LaboratoryWorkspace` y usa datos ficticios guardados en `localStorage` bajo `paris-state-lab`. No está habilitada para trabajo contable real.
+El repositorio mantiene el mismo proyecto privado de Grupo París. La interfaz publicada durante esta etapa entra por `LaboratoryWorkspace` y usa datos ficticios guardados en `localStorage` bajo `paris-state-lab`. No está habilitada para trabajo contable real.
 
 ## Qué se puede probar
 
@@ -13,9 +13,11 @@ El repositorio continúa el mismo Site privado de Grupo París. La interfaz publ
 
 El Site conserva audiencia personalizada owner-only. Los perfiles e invitaciones de la interfaz son simulaciones; no crean cuentas, no envían correo y no conceden acceso al Site. Los datos del laboratorio permanecen en el navegador actual, no se sincronizan entre computadoras y no deben contener información de clientes.
 
-La ruta de laboratorio no llama a la API operativa. El código Worker/D1 y las migraciones históricas de Supabase permanecen separados: no afirmar que están integrados ni aplicar SQL remoto. No hay autenticación de empleados, notificaciones entre dispositivos, correo, fuente ARCA, hosting propio ni despliegue final. La cuenta de GitHub, los dos proyectos Supabase y la automatización se difieren hasta que el producto se acepte.
+La ruta de laboratorio no llama a la API operativa. El código Worker/D1 y las migraciones históricas de Supabase permanecen separados. El código está publicado en el repositorio privado `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`, con commits directos atribuidos a Tablero Contable. El proyecto Supabase `grupo-paris-dev` existe en la organización `tablerocontable-paris`, está vacío y todavía no tiene migraciones aplicadas ni integración GitHub.
 
-El paquete Git portable conserva fuente e historial, no `localStorage`. Para cambiar de PC antes de crear el remoto privado, transferir un bundle actualizado y trabajar con una sola copia activa. Ver `docs/EXECUTION-NEXT.md`.
+No hay autenticación de empleados, notificaciones entre dispositivos, correo transaccional, fuente ARCA, hosting propio ni despliegue final. No aplicar migraciones ni habilitar despliegues automáticos hasta cerrar y aceptar el contrato M2.2A/B/C; producción, cuentas reales e invitaciones siguen deshabilitadas.
+
+El repositorio privado conserva fuente e historial, no `localStorage`. Para continuar desde otra PC, clonar `https://github.com/tablerocontable-paris/TABLERO-CONTABLE.git` y trabajar sobre `main`, de a una PC por vez. El estado ficticio del navegador debe exportarse e importarse por separado desde la interfaz del laboratorio. Ver `outputs/LEEME-PC-PERSONAL.md` y `docs/EXECUTION-NEXT.md`.
 
 ## Desarrollo y validación
 

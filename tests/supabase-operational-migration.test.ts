@@ -56,7 +56,7 @@ describe("Supabase M2.2A migration 014", () => {
         [activity],
       );
       const taskBefore = await lab.first(
-        "select to_jsonb(t)::text row from task_instances t where id=$1",
+        "select (to_jsonb(t)-'priority'-'measurement_version')::text row from task_instances t where id=$1",
         [task],
       );
       const closeBefore = await lab.first(
@@ -88,9 +88,13 @@ describe("Supabase M2.2A migration 014", () => {
         [activity],
       )).toEqual({ measurement_version: 1, operational_rate_id: null, operational_unit_weight: null, unit_snapshot: null });
       expect(await lab.first(
-        "select to_jsonb(t)::text row from task_instances t where id=$1",
+        "select (to_jsonb(t)-'priority'-'measurement_version')::text row from task_instances t where id=$1",
         [task],
       )).toEqual(taskBefore);
+      expect(await lab.first(
+        "select priority from task_instances where id=$1",
+        [task],
+      )).toEqual({ priority: "Media" });
       expect(await lab.first(
         "select snapshot::text snapshot from monthly_closures where id=$1",
         [closure],

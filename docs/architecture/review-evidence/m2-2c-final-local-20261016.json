@@ -1,0 +1,1113 @@
+{
+  "title": "M2.2C final local concurrency and validation evidence",
+  "date": "2026-10-16",
+  "status": "C remains local and not Sol-ready; RLS policy fixes verified in R33, acceptance gaps remain",
+  "baseCommit": "3267e1a9798464c5c4c2c3f46c17582b76b2ee71",
+  "hashes": {
+    "migration014Sha256": "1443e9316424ba3a42f1964c920d009387d1a8dc963e72a3e0add048e0839808",
+    "dtoSha256": "E38F391B2180C0260598FE88063A5F6BF4C38C5DB2B25CC43049CD4E7F6F410F"
+  },
+  "native": {
+    "command": "& 'C:\\Users\\Vmagni\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe' tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir outputs/m2-2c-membership-r35-20261016 --port 55502 --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes",
+    "exitCode": 0,
+    "engine": "postgres (PostgreSQL) 17.11",
+    "total": 101,
+    "passed": 101,
+    "failed": 0,
+    "sqlstate40P01": 0,
+    "json": "outputs/m2-2c-membership-r35-20261016/review.json",
+    "cases": [
+      {
+        "name": "M2.2A rate and assessment receipts are reauthorized before replay",
+        "passed": true,
+        "revokedRateReplay": "42501",
+        "revokedAssessmentReplay": "42501"
+      },
+      {
+        "name": "M2.2A concurrent exact replay serializes without duplicate activity",
+        "passed": true,
+        "isolationPair": "read committed/read committed",
+        "blocked": true,
+        "replaySQLSTATE": "00000",
+        "retrySQLSTATE": null,
+        "measurementV2Entries": 3
+      },
+      {
+        "name": "M2.2A first rate configuration racing an operational record preserves the winning entry snapshot",
+        "passed": true,
+        "isolation": "read committed",
+        "blocked": true,
+        "rateSQLSTATE": "00000",
+        "rateRetrySQLSTATE": null,
+        "rateVersionsAfterRace": "1",
+        "originalActivity": "null|2"
+      },
+      {
+        "name": "M2.2A first rate commits before a blocked record and its coefficient is snapshotted",
+        "passed": true,
+        "isolation": "read committed",
+        "blocked": true,
+        "rateSQLSTATE": "00000",
+        "recordSQLSTATE": "00000",
+        "recordRetrySQLSTATE": null,
+        "activitySnapshot": "4.000000|2"
+      },
+      {
+        "name": "M2.2A assessment racing a stale operational record serializes with one revision",
+        "passed": true,
+        "blocked": true,
+        "recordSQLSTATE": "40001",
+        "activityEntries": 2
+      },
+      {
+        "name": "M2.2A record-first race rejects the stale assessment without a partial revision",
+        "passed": true,
+        "blocked": true,
+        "recordSQLSTATE": "00000",
+        "assessmentSQLSTATE": "40001",
+        "assessmentRevision": "1"
+      },
+      {
+        "name": "M2.2A record-first rate change preserves the entry coefficient and updates future rate",
+        "passed": true,
+        "isolation": "read committed",
+        "blocked": true,
+        "recordSQLSTATE": "00000",
+        "rateSQLSTATE": "00000",
+        "rateRetrySQLSTATE": null,
+        "entryWeight": "4.000000",
+        "currentWeight": "5.000000"
+      },
+      {
+        "name": "M2.2A rate-change-first race applies the new coefficient only to the later record",
+        "passed": true,
+        "isolation": "read committed",
+        "blocked": true,
+        "rateSQLSTATE": "00000",
+        "recordSQLSTATE": "00000",
+        "recordRetrySQLSTATE": null,
+        "activitySnapshot": "6.000000"
+      },
+      {
+        "name": "M2.2A record-first legacy close rejects v2 without closure, report, or outbox",
+        "passed": true,
+        "blocked": true,
+        "recordSQLSTATE": "00000",
+        "closeSQLSTATE": "40001",
+        "closeRetrySQLSTATE": "0A000",
+        "artifacts": "0|0|0"
+      },
+      {
+        "name": "M2.2A public monthly close revalidates a coordinated concurrent record and denies its retry",
+        "passed": true,
+        "closeBlocked": true,
+        "recordBlocked": true,
+        "closeSQLSTATE": "00000",
+        "firstSQLSTATE": "40001",
+        "retrySQLSTATE": "55000",
+        "activityEntries": 0
+      },
+      {
+        "name": "M2.2A public coverage cancellation revalidates a coordinated waiting record",
+        "passed": true,
+        "cancellationBlocked": true,
+        "recordBlocked": true,
+        "cancellationSQLSTATE": "00000",
+        "firstSQLSTATE": "40001",
+        "retrySQLSTATE": "42501",
+        "activityEntries": 0
+      },
+      {
+        "name": "M2.2A record-first coverage cancellation preserves the real executor and completes on retry",
+        "passed": true,
+        "blocked": true,
+        "recordSQLSTATE": "00000",
+        "cancellationSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "activityAndCoverage": "00000000-0000-0000-0000-000000000002|cancelled"
+      },
+      {
+        "name": "M2.2A stale RR snapshot cannot write into a newly closed month",
+        "passed": true,
+        "writeSQLSTATE": "40001",
+        "artifacts": "0|0"
+      },
+      {
+        "name": "M2.2A stale RR actor snapshot cannot write after profile deactivation",
+        "passed": true,
+        "writeSQLSTATE": "40001",
+        "activityAndReceipt": "3|0"
+      },
+      {
+        "name": "M2.2A manager can consult only assigned scope; execution, private quality, foreign, and inactive access deny",
+        "passed": true,
+        "managerActivity": "00000",
+        "managerOutOfScopeDenied": "42501",
+        "managerQualityDenied": "42501",
+        "managerRecordDenied": "42501",
+        "employeeRateHistory": "42501",
+        "foreignTaskDenied": "42501",
+        "foreignOwnerRead": "00000",
+        "inactiveOwnerDenied": "42501",
+        "revokedReceiptDenied": "42501"
+      },
+      {
+        "name": "M2.2A operation, rate, assessment, and query smoke",
+        "passed": true,
+        "task": "00000000-0000-0000-0000-000000000026",
+        "quantity": 7
+      },
+      {
+        "name": "M2.2A injected failures roll back all partial writes for record, rate, and assessment",
+        "passed": true,
+        "record": "0|0|0",
+        "rate": "2|4|0|0|0",
+        "assessment": "4|1|0|0|0"
+      },
+      {
+        "name": "M2.2C concurrent one-off creation serializes and retries (read committed/read committed)",
+        "passed": true,
+        "isolationPair": "read committed/read committed",
+        "firstBackend": "A",
+        "blocked": true,
+        "firstSQLSTATE": "00000",
+        "secondSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "finalAssignments": "2"
+      },
+      {
+        "name": "M2.2C concurrent one-off creation serializes and retries (read committed/read committed)",
+        "passed": true,
+        "isolationPair": "read committed/read committed",
+        "firstBackend": "B",
+        "blocked": true,
+        "firstSQLSTATE": "00000",
+        "secondSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "finalAssignments": "2"
+      },
+      {
+        "name": "M2.2C concurrent one-off creation serializes and retries (repeatable read/repeatable read)",
+        "passed": true,
+        "isolationPair": "repeatable read/repeatable read",
+        "firstBackend": "A",
+        "blocked": true,
+        "firstSQLSTATE": "00000",
+        "secondSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "finalAssignments": "2"
+      },
+      {
+        "name": "M2.2C concurrent one-off creation serializes and retries (repeatable read/repeatable read)",
+        "passed": true,
+        "isolationPair": "repeatable read/repeatable read",
+        "firstBackend": "B",
+        "blocked": true,
+        "firstSQLSTATE": "00000",
+        "secondSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "finalAssignments": "2"
+      },
+      {
+        "name": "M2.2C concurrent one-off creation serializes and retries (read committed/repeatable read)",
+        "passed": true,
+        "isolationPair": "read committed/repeatable read",
+        "firstBackend": "A",
+        "blocked": true,
+        "firstSQLSTATE": "00000",
+        "secondSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "finalAssignments": "2"
+      },
+      {
+        "name": "M2.2C concurrent one-off creation serializes and retries (repeatable read/read committed)",
+        "passed": true,
+        "isolationPair": "repeatable read/read committed",
+        "firstBackend": "B",
+        "blocked": true,
+        "firstSQLSTATE": "00000",
+        "secondSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "finalAssignments": "2"
+      },
+      {
+        "name": "M2.2C concurrent one-off creation serializes and retries (repeatable read/read committed)",
+        "passed": true,
+        "isolationPair": "repeatable read/read committed",
+        "firstBackend": "A",
+        "blocked": true,
+        "firstSQLSTATE": "00000",
+        "secondSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "finalAssignments": "2"
+      },
+      {
+        "name": "M2.2C concurrent one-off creation serializes and retries (read committed/repeatable read)",
+        "passed": true,
+        "isolationPair": "read committed/repeatable read",
+        "firstBackend": "B",
+        "blocked": true,
+        "firstSQLSTATE": "00000",
+        "secondSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "finalAssignments": "2"
+      },
+      {
+        "name": "M2.2C concurrent approvals serialize, reject a competing approval and replay exact receipt (read committed/read committed)",
+        "passed": true,
+        "isolationPair": "read committed/read committed",
+        "firstBackend": "A",
+        "blocked": true,
+        "winnerSQLSTATE": "00000",
+        "loserSQLSTATE": "40001",
+        "exactReplaySQLSTATE": "00000",
+        "finalStatusActivationsReceipts": "approved|1|1"
+      },
+      {
+        "name": "M2.2C exact onboarding receipt replay serializes across mixed RC/RR and returns one activation",
+        "passed": true,
+        "isolationPair": "read committed/repeatable read",
+        "blocked": true,
+        "firstSQLSTATE": "00000",
+        "secondSQLSTATE": "00000",
+        "state": "1|1"
+      },
+      {
+        "name": "M2.2C exact onboarding receipt replay serializes across reverse mixed RR/RC and returns one activation",
+        "passed": true,
+        "isolationPair": "repeatable read/read committed",
+        "blocked": true,
+        "firstSQLSTATE": "00000",
+        "secondSQLSTATE": "00000",
+        "state": "1|1"
+      },
+      {
+        "name": "M2.2C concurrent approvals serialize, reject a competing approval and replay exact receipt (repeatable read/repeatable read)",
+        "passed": true,
+        "isolationPair": "repeatable read/repeatable read",
+        "firstBackend": "B",
+        "blocked": true,
+        "winnerSQLSTATE": "00000",
+        "loserSQLSTATE": "40001",
+        "exactReplaySQLSTATE": "00000",
+        "finalStatusActivationsReceipts": "approved|1|1"
+      },
+      {
+        "name": "M2.2C revoke-first soft membership revocation fences RR approval; retry denies without partial activation",
+        "passed": true,
+        "blocked": true,
+        "revokeSQLSTATE": "00000",
+        "staleApprovalSQLSTATE": "40001",
+        "retrySQLSTATE": "42501",
+        "finalMembershipAndOnboardingState": "false|1|submitted|0|0|0|1"
+      },
+      {
+        "name": "M2.2C approval-first membership soft revocation waits, stale RR aborts, retry preserves approved activation",
+        "passed": true,
+        "isolationPair": "read committed/repeatable read",
+        "blocked": true,
+        "approvalSQLSTATE": "00000",
+        "staleRevocationSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "protectingAssignments": "1",
+        "finalMembershipStatusActivationReceiptsAssignments": "false|1|approved|1|1|1|1"
+      },
+      {
+        "name": "M2.2C profile inactivation waits for RR approval and retry denies without activation",
+        "passed": true,
+        "blocked": true,
+        "staleSQLSTATE": "40001",
+        "retrySQLSTATE": "42501",
+        "state": "false|submitted|0|0"
+      },
+      {
+        "name": "M2.2C approval-first profile inactivation waits, retries and preserves committed activation",
+        "passed": true,
+        "isolationPair": "read committed/repeatable read",
+        "blocked": true,
+        "approvalSQLSTATE": "00000",
+        "inactivationSQLSTATE": "00000",
+        "retrySQLSTATE": "00000",
+        "finalActiveStatusActivationReceipt": "false|approved|1|1"
+      },
+      {
+        "name": "M2.2C responsibility revision fences RR onboarding approval footprint and stale retry succeeds",
+        "passed": true,
+        "blocked": true,
+        "responsibilitySQLSTATE": "00000",
+        "staleApprovalSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "state": "approved|2|1|1"
+      },
+      {
+        "name": "M2.2C coverage cancellation fences mixed RR/RC onboarding approval footprint and stale retry succeeds",
+        "passed": true,
+        "isolationPair": "repeatable read/read committed",
+        "blocked": true,
+        "cancellationSQLSTATE": "00000",
+        "staleApprovalSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "state": "cancelled|approved|1|1"
+      },
+      {
+        "name": "M2.2C approval-first responsibility waits, stale RR aborts, then retry applies",
+        "passed": true,
+        "isolationPair": "read committed/repeatable read",
+        "blocked": true,
+        "approvalSQLSTATE": "00000",
+        "mutationSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "state": "approved|2|1|1"
+      },
+      {
+        "name": "M2.2C approval-first coverage cancellation waits, stale RR aborts, then retry applies",
+        "passed": true,
+        "isolationPair": "read committed/repeatable read",
+        "blocked": true,
+        "approvalSQLSTATE": "00000",
+        "cancellationSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "state": "cancelled|approved|1|1"
+      },
+      {
+        "name": "M2.2C submit/requestChanges/approve race approve-first (read committed/read committed)",
+        "passed": true,
+        "isolationPair": "read committed/read committed",
+        "blocked": true,
+        "winner": "onboarding.approve",
+        "winnerSQLSTATE": "00000",
+        "staleSQLSTATE": "40001",
+        "retrySQLSTATE": "40001",
+        "finalStatusActivationsReceipts": "approved|1|1"
+      },
+      {
+        "name": "M2.2C submit/requestChanges/approve race changes-first (read committed/read committed)",
+        "passed": true,
+        "isolationPair": "read committed/read committed",
+        "blocked": true,
+        "winner": "onboarding.requestChanges",
+        "winnerSQLSTATE": "00000",
+        "staleSQLSTATE": "40001",
+        "retrySQLSTATE": "40001",
+        "finalStatusActivationsReceipts": "changes_requested|0|1"
+      },
+      {
+        "name": "M2.2C submit/requestChanges/approve race approve-first (repeatable read/repeatable read)",
+        "passed": true,
+        "isolationPair": "repeatable read/repeatable read",
+        "blocked": true,
+        "winner": "onboarding.approve",
+        "winnerSQLSTATE": "00000",
+        "staleSQLSTATE": "40001",
+        "retrySQLSTATE": "40001",
+        "finalStatusActivationsReceipts": "approved|1|1"
+      },
+      {
+        "name": "M2.2C submit/requestChanges/approve race changes-first (repeatable read/repeatable read)",
+        "passed": true,
+        "isolationPair": "repeatable read/repeatable read",
+        "blocked": true,
+        "winner": "onboarding.requestChanges",
+        "winnerSQLSTATE": "00000",
+        "staleSQLSTATE": "40001",
+        "retrySQLSTATE": "40001",
+        "finalStatusActivationsReceipts": "changes_requested|0|1"
+      },
+      {
+        "name": "M2.2C draft/save vs submit save-first (read committed/read committed)",
+        "passed": true,
+        "isolationPair": "read committed/read committed",
+        "firstAction": "save",
+        "blocked": true,
+        "firstSQLSTATE": "00000",
+        "secondSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "finalStatusAndVersions": "submitted|2|1|2"
+      },
+      {
+        "name": "M2.2C draft/save vs submit submit-first (read committed/read committed)",
+        "passed": true,
+        "isolationPair": "read committed/read committed",
+        "firstAction": "submit",
+        "blocked": true,
+        "firstSQLSTATE": "00000",
+        "secondSQLSTATE": "40001",
+        "retrySQLSTATE": null,
+        "finalStatusAndVersions": "submitted|1|1|1"
+      },
+      {
+        "name": "M2.2C draft/save vs submit save-first (repeatable read/repeatable read)",
+        "passed": true,
+        "isolationPair": "repeatable read/repeatable read",
+        "firstAction": "save",
+        "blocked": true,
+        "firstSQLSTATE": "00000",
+        "secondSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "finalStatusAndVersions": "submitted|2|1|3"
+      },
+      {
+        "name": "M2.2C draft/save vs submit submit-first (repeatable read/repeatable read)",
+        "passed": true,
+        "isolationPair": "repeatable read/repeatable read",
+        "firstAction": "submit",
+        "blocked": true,
+        "firstSQLSTATE": "00000",
+        "secondSQLSTATE": "40001",
+        "retrySQLSTATE": null,
+        "finalStatusAndVersions": "submitted|1|1|2"
+      },
+      {
+        "name": "M2.2C catalogue revision/assignment revision-first (read committed/read committed)",
+        "passed": true,
+        "isolationPair": "read committed/read committed",
+        "firstAction": "revision",
+        "blocked": true,
+        "firstSQLSTATE": "00000",
+        "secondSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "versionsAssignments": "2|1|0"
+      },
+      {
+        "name": "M2.2C catalogue revision/assignment assignment-first (read committed/read committed)",
+        "passed": true,
+        "isolationPair": "read committed/read committed",
+        "firstAction": "assignment",
+        "blocked": true,
+        "firstSQLSTATE": "00000",
+        "secondSQLSTATE": "00000",
+        "retrySQLSTATE": null,
+        "versionsAssignments": "2|1|1"
+      },
+      {
+        "name": "M2.2C catalogue revision/assignment revision-first (repeatable read/repeatable read)",
+        "passed": true,
+        "isolationPair": "repeatable read/repeatable read",
+        "firstAction": "revision",
+        "blocked": true,
+        "firstSQLSTATE": "00000",
+        "secondSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "versionsAssignments": "2|1|0"
+      },
+      {
+        "name": "M2.2C catalogue revision/assignment assignment-first (repeatable read/repeatable read)",
+        "passed": true,
+        "isolationPair": "repeatable read/repeatable read",
+        "firstAction": "assignment",
+        "blocked": true,
+        "firstSQLSTATE": "00000",
+        "secondSQLSTATE": "00000",
+        "retrySQLSTATE": null,
+        "versionsAssignments": "2|1|1"
+      },
+      {
+        "name": "M2.2C assignment exact replay precedes stale catalogue eligibility; stale revision and malformed payload remain distinct",
+        "passed": true,
+        "replaySQLSTATE": "00000",
+        "staleSQLSTATE": "40001",
+        "malformedSQLSTATE": "22023",
+        "receiptStable": true
+      },
+      {
+        "name": "M2.2C catalogue revision fences simultaneous assignment creation and approval; assignment retries on v2",
+        "passed": true,
+        "reviseSQLSTATE": "00000",
+        "assignmentSQLSTATE": "40001",
+        "approvalSQLSTATE": "40001",
+        "assignmentRetrySQLSTATE": "00000",
+        "approvalRetrySQLSTATE": "40001",
+        "backendPids": {
+          "revision": 7272,
+          "assignment": 18296,
+          "approval": 2828
+        },
+        "revisionLockHeld": true,
+        "blockers": {
+          "assignment": true,
+          "approval": true
+        },
+        "approvalActivity": "Lock|advisory|7272,18296",
+        "approvalStaleError": "ERROR:  40001: Cambió el ámbito de la operación; reintente en una transacción nueva\r\nCONTEXT:  PL/pgSQL function public._coordination_revalidate(jsonb) line 5 at RAISE\r\nSQL statement \"SELECT public._coordination_revalidate(p_plan)\"\r\nPL/pgSQL function app_private._coordination_acquire_m22b(jsonb) line 45 at PERFORM\r\nSQL statement \"SELECT app_private._coordination_acquire_m22b(plan)\"\r\nPL/pgSQL function app_private.api_onboarding_approve(jsonb) line 43 at PERFORM\r\nPL/pgSQL function api.command_v1_membership_base(jsonb) line 5 at RETURN\r\nPL/pgSQL function api.command_v1(jsonb) line 4 at RETURN\r\nLOCATION:  exec_stmt_raise, pl_exec.c:3911\r\n",
+        "finalVersionAssignmentsRequestActivationReceipt": "2|1|submitted|0|0"
+      },
+      {
+        "name": "M2.2C triad inverse: assignment and approval win before catalogue revision (read committed/read committed)",
+        "passed": true,
+        "isolationPair": "read committed/read committed",
+        "blocked": true,
+        "assignmentSQLSTATE": "00000",
+        "approvalSQLSTATE": "00000",
+        "revisionSQLSTATE": "00000",
+        "finalVersionStatusActivationReceipts": "2|approved|1|3"
+      },
+      {
+        "name": "M2.2C triad inverse: assignment and approval win before catalogue revision (repeatable read/repeatable read)",
+        "passed": true,
+        "isolationPair": "repeatable read/repeatable read",
+        "blocked": true,
+        "assignmentSQLSTATE": "00000",
+        "approvalSQLSTATE": "00000",
+        "revisionSQLSTATE": "00000",
+        "finalVersionStatusActivationReceipts": "2|approved|1|3"
+      },
+      {
+        "name": "M2.2C materialize/materialize both writers (read committed/read committed, first backend A)",
+        "passed": true,
+        "isolationPair": "read committed/read committed",
+        "firstBackend": "A",
+        "blocked": true,
+        "firstSQLSTATE": "00000",
+        "secondSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "taskInstancesForAssignment": "1"
+      },
+      {
+        "name": "M2.2C materialize/materialize both writers (read committed/read committed, first backend B)",
+        "passed": true,
+        "isolationPair": "read committed/read committed",
+        "firstBackend": "B",
+        "blocked": true,
+        "firstSQLSTATE": "00000",
+        "secondSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "taskInstancesForAssignment": "1"
+      },
+      {
+        "name": "M2.2C materialize/materialize both writers (repeatable read/repeatable read, first backend A)",
+        "passed": true,
+        "isolationPair": "repeatable read/repeatable read",
+        "firstBackend": "A",
+        "blocked": true,
+        "firstSQLSTATE": "00000",
+        "secondSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "taskInstancesForAssignment": "1"
+      },
+      {
+        "name": "M2.2C materialize/materialize both writers (repeatable read/repeatable read, first backend B)",
+        "passed": true,
+        "isolationPair": "repeatable read/repeatable read",
+        "firstBackend": "B",
+        "blocked": true,
+        "firstSQLSTATE": "00000",
+        "secondSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "taskInstancesForAssignment": "1"
+      },
+      {
+        "name": "M2.2C close-first one-off race (read committed/read committed)",
+        "passed": true,
+        "isolationPair": "read committed/read committed",
+        "firstAction": "close",
+        "blocked": true,
+        "closeSQLSTATE": "00000",
+        "staleOneOffSQLSTATE": "40001",
+        "retrySQLSTATE": "55000",
+        "finalClosureAssignmentsReceipt": "1|0|0"
+      },
+      {
+        "name": "M2.2C one-off-first legacy close race (read committed/read committed)",
+        "passed": true,
+        "isolationPair": "read committed/read committed",
+        "firstAction": "oneOff",
+        "blocked": true,
+        "oneOffSQLSTATE": "00000",
+        "staleCloseSQLSTATE": "40001",
+        "retrySQLSTATE": "0A000",
+        "finalClosureAssignmentsReceipt": "0|1|1"
+      },
+      {
+        "name": "M2.2C close-first one-off race (repeatable read/repeatable read)",
+        "passed": true,
+        "isolationPair": "repeatable read/repeatable read",
+        "firstAction": "close",
+        "blocked": true,
+        "closeSQLSTATE": "00000",
+        "staleOneOffSQLSTATE": "40001",
+        "retrySQLSTATE": "55000",
+        "finalClosureAssignmentsReceipt": "1|0|0"
+      },
+      {
+        "name": "M2.2C one-off-first legacy close race (repeatable read/repeatable read)",
+        "passed": true,
+        "isolationPair": "repeatable read/repeatable read",
+        "firstAction": "oneOff",
+        "blocked": true,
+        "oneOffSQLSTATE": "00000",
+        "staleCloseSQLSTATE": "40001",
+        "retrySQLSTATE": "0A000",
+        "finalClosureAssignmentsReceipt": "0|1|1"
+      },
+      {
+        "name": "M2.2C close-first one-off race (read committed/repeatable read)",
+        "passed": true,
+        "isolationPair": "read committed/repeatable read",
+        "firstAction": "close",
+        "blocked": true,
+        "closeSQLSTATE": "00000",
+        "staleOneOffSQLSTATE": "40001",
+        "retrySQLSTATE": "55000",
+        "finalClosureAssignmentsReceipt": "1|0|0"
+      },
+      {
+        "name": "M2.2C one-off-first legacy close race (repeatable read/read committed)",
+        "passed": true,
+        "isolationPair": "repeatable read/read committed",
+        "firstAction": "oneOff",
+        "blocked": true,
+        "oneOffSQLSTATE": "00000",
+        "staleCloseSQLSTATE": "40001",
+        "retrySQLSTATE": "0A000",
+        "finalClosureAssignmentsReceipt": "0|1|1"
+      },
+      {
+        "name": "M2.2C close-first materialization (read committed/read committed) rejects after wait and retry rejects closed month",
+        "passed": true,
+        "isolationPair": "read committed/read committed",
+        "firstAction": "close",
+        "blocked": true,
+        "closeSQLSTATE": "00000",
+        "staleSQLSTATE": "55000",
+        "retrySQLSTATE": "55000",
+        "finalClosureTasksReceipt": "1|1|0"
+      },
+      {
+        "name": "M2.2C materialize-first legacy close rejects v2 (read committed/read committed)",
+        "passed": true,
+        "isolationPair": "read committed/read committed",
+        "firstAction": "materialize",
+        "blocked": true,
+        "materializeSQLSTATE": "00000",
+        "closeSQLSTATE": "0A000",
+        "retrySQLSTATE": "0A000",
+        "finalClosureTasksReceiptV2": "0|2|1|1"
+      },
+      {
+        "name": "M2.2C close-first materialization (repeatable read/repeatable read) rejects after wait and retry rejects closed month",
+        "passed": true,
+        "isolationPair": "repeatable read/repeatable read",
+        "firstAction": "close",
+        "blocked": true,
+        "closeSQLSTATE": "00000",
+        "staleSQLSTATE": "40001",
+        "retrySQLSTATE": "55000",
+        "finalClosureTasksReceipt": "1|1|0"
+      },
+      {
+        "name": "M2.2C materialize-first legacy close rejects v2 (repeatable read/repeatable read)",
+        "passed": true,
+        "isolationPair": "repeatable read/repeatable read",
+        "firstAction": "materialize",
+        "blocked": true,
+        "materializeSQLSTATE": "00000",
+        "closeSQLSTATE": "40001",
+        "retrySQLSTATE": "0A000",
+        "finalClosureTasksReceiptV2": "0|2|1|1"
+      },
+      {
+        "name": "M2.2C one-off injected failure rolls back assignment, receipt and owner revision",
+        "passed": true,
+        "failureSQLSTATE": "23514",
+        "rollbackState": "0|0|30",
+        "retrySQLSTATE": "00000"
+      },
+      {
+        "name": "M2.2C injected catalogue failure rolls back template, version, epoch and receipt",
+        "passed": true,
+        "failureSQLSTATE": "23514",
+        "rollbackState": "0|0|17|0",
+        "retrySQLSTATE": "00000"
+      },
+      {
+        "name": "M2.2C injected draft failure rolls back request, owner fence, receipt and audit",
+        "passed": true,
+        "failureSQLSTATE": "23514",
+        "rollbackState": "0|0|0|0",
+        "retrySQLSTATE": "00000"
+      },
+      {
+        "name": "M2.2C injected approval/materialization failure rolls back assignments, occurrences, activation, receipt and owner revision",
+        "passed": true,
+        "failureSQLSTATE": "23514",
+        "rollbackState": "0|0|0|submitted|0|0",
+        "retrySQLSTATE": "00000"
+      },
+      {
+        "name": "M2.2C injected month.materialize failure after occurrence insert rolls back occurrence, receipt and owner revision",
+        "passed": true,
+        "failureSQLSTATE": "23514",
+        "rollbackState": "0|0|31",
+        "retrySQLSTATE": "00000",
+        "retryInstances": "1"
+      },
+      {
+        "name": "M2.2C membership revoke fences stale RR legacy timer and retry has no session",
+        "passed": true,
+        "staleSQLSTATE": "40001",
+        "retrySQLSTATE": "P0001",
+        "revokeSQLSTATE": "00000",
+        "finalState": "false|1|0|0"
+      },
+      {
+        "name": "M2.2C one-of-two company revoke preserves B, stops A timer once, cancels live coverage without restore resurrection, authenticated RLS hides revoked activity/session/membership and whole multi-company closure/report, restore preserves snapshot without backfill",
+        "passed": true,
+        "initialCompanies": [
+          "00000000-0000-0000-0000-000000000021",
+          "00000000-0000-0000-0000-000000000895"
+        ],
+        "remainingCompanies": [
+          "00000000-0000-0000-0000-000000000895"
+        ],
+        "secondCompanyActive": "true",
+        "taskAccess": "false|true",
+        "stoppedSession": "0|1",
+        "coverageAfterRevoke": "cancelled",
+        "coverageAfterRestore": "cancelled",
+        "deniedTimerA": "P0001",
+        "timerBStart": "00000",
+        "firstMaterializeSQLSTATE": "00000",
+        "instancesDuringLapse": "0|1",
+        "rlsBefore": "1|1|2|1|1",
+        "rlsAfterRevoke": "0|0|1|0|0",
+        "bossClosureReport": "1|1",
+        "rlsAfterRestore": "1|1|1|1|{\"probe\": \"immutable-membership-rls\", \"tasks\": [{\"taskId\": \"00000000-0000-0000-0000-000000000897\", \"companyId\": \"00000000-0000-0000-0000-000000000021\"}, {\"taskId\": \"00000000-0000-0000-0000-000000000899\", \"companyId\": \"00000000-0000-0000-0000-000000000895\"}]}",
+        "restoredSQLSTATE": "00000",
+        "restoredAAccess": "t",
+        "rematerializeSQLSTATE": "00000",
+        "finalInstances": "0|1"
+      },
+      {
+        "name": "M2.2C revoke-first membership fence stale-aborts assignment.create and retry denies without partial writes",
+        "passed": true,
+        "blocked": true,
+        "revokeSQLSTATE": "00000",
+        "staleSQLSTATE": "40001",
+        "retrySQLSTATE": "42501",
+        "finalState": "false|1|0|0|0"
+      },
+      {
+        "name": "M2.2C revoke-first membership fence stale-aborts month.materialize and retry creates no occurrence",
+        "passed": true,
+        "blocked": true,
+        "revokeSQLSTATE": "00000",
+        "staleSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "finalState": "false|1|0|1"
+      },
+      {
+        "name": "business missing AAL",
+        "passed": true,
+        "expectedSQLSTATE": "42501",
+        "observedSQLSTATE": "42501"
+      },
+      {
+        "name": "business null AAL",
+        "passed": true,
+        "expectedSQLSTATE": "42501",
+        "observedSQLSTATE": "42501"
+      },
+      {
+        "name": "business empty AAL",
+        "passed": true,
+        "expectedSQLSTATE": "42501",
+        "observedSQLSTATE": "42501"
+      },
+      {
+        "name": "business unknown AAL",
+        "passed": true,
+        "expectedSQLSTATE": "42501",
+        "observedSQLSTATE": "42501"
+      },
+      {
+        "name": "technical missing AAL",
+        "passed": true,
+        "expectedSQLSTATE": "42501",
+        "observedSQLSTATE": "42501"
+      },
+      {
+        "name": "technical null AAL",
+        "passed": true,
+        "expectedSQLSTATE": "42501",
+        "observedSQLSTATE": "42501"
+      },
+      {
+        "name": "technical empty AAL",
+        "passed": true,
+        "expectedSQLSTATE": "42501",
+        "observedSQLSTATE": "42501"
+      },
+      {
+        "name": "technical unknown AAL",
+        "passed": true,
+        "expectedSQLSTATE": "42501",
+        "observedSQLSTATE": "42501"
+      },
+      {
+        "name": "whitespace-only display name",
+        "passed": true,
+        "expected": "deny",
+        "observedSQLSTATE": "42501",
+        "decoded": null
+      },
+      {
+        "name": "Unicode code-point display name",
+        "passed": true,
+        "expected": "decode",
+        "observedSQLSTATE": "00000",
+        "decoded": true
+      },
+      {
+        "name": "mixed ECMAScript whitespace",
+        "passed": true,
+        "expected": "normalized",
+        "observedSQLSTATE": "00000",
+        "decoded": true
+      },
+      {
+        "name": "maximum 200 code points",
+        "passed": true,
+        "expected": "decode",
+        "observedSQLSTATE": "00000",
+        "decoded": true
+      },
+      {
+        "name": "over maximum 201 code points",
+        "passed": true,
+        "expected": "deny",
+        "observedSQLSTATE": "42501",
+        "decoded": null
+      },
+      {
+        "name": "corrupted dual identity with an inactive duplicate",
+        "passed": true,
+        "expectedSQLSTATE": "42501",
+        "observedSQLSTATE": "42501"
+      },
+      {
+        "name": "identity race read committed: business first",
+        "passed": true,
+        "blocked": true,
+        "secondSQLSTATE": "23514",
+        "commitSQLSTATE": "00000",
+        "coexist": false
+      },
+      {
+        "name": "identity race read committed: technical first",
+        "passed": true,
+        "blocked": true,
+        "secondSQLSTATE": "23514",
+        "commitSQLSTATE": "00000",
+        "coexist": false
+      },
+      {
+        "name": "identity race repeatable read: business first",
+        "passed": true,
+        "blocked": true,
+        "secondSQLSTATE": "40001",
+        "commitSQLSTATE": "00000",
+        "coexist": false
+      },
+      {
+        "name": "identity race repeatable read: technical first",
+        "passed": true,
+        "blocked": true,
+        "secondSQLSTATE": "40001",
+        "commitSQLSTATE": "00000",
+        "coexist": false
+      },
+      {
+        "name": "identity race serializable: business first",
+        "passed": true,
+        "blocked": true,
+        "secondSQLSTATE": "40001",
+        "commitSQLSTATE": "00000",
+        "coexist": false
+      },
+      {
+        "name": "identity race serializable: technical first",
+        "passed": true,
+        "blocked": true,
+        "secondSQLSTATE": "40001",
+        "commitSQLSTATE": "00000",
+        "coexist": false
+      },
+      {
+        "name": "identity UUID update race read committed/repeatable read: business first",
+        "passed": true,
+        "blocked": true,
+        "secondSQLSTATE": "40001",
+        "commitSQLSTATE": "00000",
+        "finalPrincipalCount": "1",
+        "fenceRevision": "1",
+        "profileFenceMigration": "0|1|1"
+      },
+      {
+        "name": "identity UUID update race repeatable read/read committed: business first",
+        "passed": true,
+        "blocked": true,
+        "secondSQLSTATE": "23514",
+        "commitSQLSTATE": "00000",
+        "finalPrincipalCount": "1",
+        "fenceRevision": "1",
+        "profileFenceMigration": "0|1|1"
+      },
+      {
+        "name": "identity UUID update race read committed/repeatable read: technical first",
+        "passed": true,
+        "blocked": true,
+        "secondSQLSTATE": "40001",
+        "commitSQLSTATE": "00000",
+        "finalPrincipalCount": "1",
+        "fenceRevision": "1",
+        "profileFenceMigration": "0|0|0"
+      },
+      {
+        "name": "identity UUID update race repeatable read/read committed: technical first",
+        "passed": true,
+        "blocked": true,
+        "secondSQLSTATE": "23514",
+        "commitSQLSTATE": "00000",
+        "finalPrincipalCount": "1",
+        "fenceRevision": "1",
+        "profileFenceMigration": "0|0|0"
+      },
+      {
+        "name": "native PostgreSQL deadlock log check",
+        "passed": true,
+        "sqlstate40P01": 0,
+        "checked": "postgres.log"
+      }
+    ],
+    "nodeExecutable": "C:\\Users\\Vmagni\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe"
+  },
+  "validation": {
+    "status": "Previous full suite/focal/tsc/build entries are from an earlier hash and are not current validation",
+    "currentR33Focused": "3 files, 16 tests passed, exit 0",
+    "currentFullSuite": "pending",
+    "currentTypeScriptAndBuilds": "pending",
+    "currentDiffCheck": "pending"
+  },
+  "migration001to013": {
+    "count": 15,
+    "mismatches": 0,
+    "comparison": "git rev-parse HEAD:path vs git hash-object working path",
+    "files": [
+      {
+        "file": "202609300001_foundation.sql",
+        "headBlob": "57bf365d10e78c273690fdfde5edf41e4a23d7ff",
+        "worktreeBlob": "57bf365d10e78c273690fdfde5edf41e4a23d7ff",
+        "identical": true
+      },
+      {
+        "file": "202609300002_workflows.sql",
+        "headBlob": "3e59b14be8f4c0482dd9b6b0b76d4d12cd2e4403",
+        "worktreeBlob": "3e59b14be8f4c0482dd9b6b0b76d4d12cd2e4403",
+        "identical": true
+      },
+      {
+        "file": "202610010001_occurrence_contract.sql",
+        "headBlob": "7478e667c32a9b72bc061909ca48a62ac7aa97a0",
+        "worktreeBlob": "7478e667c32a9b72bc061909ca48a62ac7aa97a0",
+        "identical": true
+      },
+      {
+        "file": "202610010002_onboarding_approval.sql",
+        "headBlob": "8341a0360af6fd78168dcc52121c64a5ed6726f6",
+        "worktreeBlob": "8341a0360af6fd78168dcc52121c64a5ed6726f6",
+        "identical": true
+      },
+      {
+        "file": "202610010003_report_delivery.sql",
+        "headBlob": "fca9120d38a9b878e18765ecce325d8991c2b617",
+        "worktreeBlob": "fca9120d38a9b878e18765ecce325d8991c2b617",
+        "identical": true
+      },
+      {
+        "file": "202610010004_time_coverage.sql",
+        "headBlob": "8e41378168bdf137e0c72c0f7cc238e7b8ed60e0",
+        "worktreeBlob": "8e41378168bdf137e0c72c0f7cc238e7b8ed60e0",
+        "identical": true
+      },
+      {
+        "file": "202610010005_time_coverage_hardening.sql",
+        "headBlob": "63e53838bc85a1f4166742507f2ab2dde610505a",
+        "worktreeBlob": "63e53838bc85a1f4166742507f2ab2dde610505a",
+        "identical": true
+      },
+      {
+        "file": "202610010006_time_coverage_acceptance.sql",
+        "headBlob": "df6de8f9a3f4e429b04307e2b78c726c9db66ce2",
+        "worktreeBlob": "df6de8f9a3f4e429b04307e2b78c726c9db66ce2",
+        "identical": true
+      },
+      {
+        "file": "202610010007_time_coverage_completion.sql",
+        "headBlob": "d2ba1c1cb610225c4a239c67d96df41446b5db41",
+        "worktreeBlob": "d2ba1c1cb610225c4a239c67d96df41446b5db41",
+        "identical": true
+      },
+      {
+        "file": "202610010008_time_coverage_finalization.sql",
+        "headBlob": "90d5038b963056b96ce895aadf584c0153054dda",
+        "worktreeBlob": "90d5038b963056b96ce895aadf584c0153054dda",
+        "identical": true
+      },
+      {
+        "file": "202610020009_private_block_notes.sql",
+        "headBlob": "3c1d13e6ddb27eeb8c497de48f4e8be124e05736",
+        "worktreeBlob": "3c1d13e6ddb27eeb8c497de48f4e8be124e05736",
+        "identical": true
+      },
+      {
+        "file": "202610040010_coordination_foundation.sql",
+        "headBlob": "c0ea297dd153cec205d364d1382d27dd8ab9e2b4",
+        "worktreeBlob": "c0ea297dd153cec205d364d1382d27dd8ab9e2b4",
+        "identical": true
+      },
+      {
+        "file": "202610060011_coordination_activation.sql",
+        "headBlob": "3c8202175c8f99d1fd96848cd74f0982c08e5a34",
+        "worktreeBlob": "3c8202175c8f99d1fd96848cd74f0982c08e5a34",
+        "identical": true
+      },
+      {
+        "file": "202610140012_sql_receipt_and_onboarding_guards.sql",
+        "headBlob": "311f89a6139c8863a959696934402c8f5d48cf93",
+        "worktreeBlob": "311f89a6139c8863a959696934402c8f5d48cf93",
+        "identical": true
+      },
+      {
+        "file": "202610140013_api_identity_foundation.sql",
+        "headBlob": "c5c701049c3c3b414bdef59c1db6a32fcb0c8841",
+        "worktreeBlob": "c5c701049c3c3b414bdef59c1db6a32fcb0c8841",
+        "identical": true
+      }
+    ]
+  },
+  "findings": [
+    {
+      "severity": "pending",
+      "area": "membership soft-revocation acceptance coverage",
+      "details": "The DELETE/23503 result below is historical and superseded by the soft companyMembership.setActive writer. R35 proves approval-first soft revoke: approve 00000, blocker true, stale RR revoke 40001, retry 00000, assignment retained. Remaining acceptance rows: multi-session exact-once; membership revoke vs movement/transition; revoke vs live coverage cancellation/reassignment and no-resurrection on restore; complete authenticated RLS/API role matrix; replay/no-op/stale/args-conflict/fence rollback mixed isolation.",
+      "observed": {
+        "approvalFirst": "00000",
+        "blocker": true,
+        "staleRevocation": "40001",
+        "retry": "00000",
+        "final": "false|1|approved|1|1|1|1",
+        "RLSBefore": "1|1|2|1|1",
+        "RLSAfterRevoke": "0|0|1|0|0",
+        "bossClosureReport": "1|1",
+        "RLSAfterRestore": "1|1|1|1",
+        "deadlocks40P01": 0
+      }
+    }
+  ],
+  "scope": {
+    "migration014Applied": false,
+    "remoteTouched": false,
+    "commitOrPush": false,
+    "migrations001to013Changed": false
+  }
+}

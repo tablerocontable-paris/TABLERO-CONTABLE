@@ -1,0 +1,116 @@
+{
+  "title": "M2.2B local implementation evidence",
+  "date": "2026-10-16",
+  "status": "Ready for independent Sol review; B only; no remote application",
+  "baseCommit": "3267e1a9798464c5c4c2c3f46c17582b76b2ee71",
+  "hashes": {
+    "migration014Sha256": "4F33E201210A683571F11428D37FBF16672CB565631AAED5A13DCCFAF9415C49",
+    "operationalContractDtoSha256": "4874897137D637177C79542057E5227054290123BA4B4451F2076068993197B6"
+  },
+  "preservedMigrations": {
+    "count": 15,
+    "range": "001–013",
+    "verification": "git rev-parse HEAD:<path> matched git hash-object -- <path> for all 15 files"
+  },
+  "validation": [
+    {
+      "name": "focused Vitest",
+      "command": "node node_modules/vitest/vitest.mjs run tests/database.test.ts tests/m2-2b-contract.test.ts tests/supabase-operational-migration.test.ts --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "exitCode": 0,
+      "result": "4 files, 44 tests passed"
+    },
+    {
+      "name": "full Vitest",
+      "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "exitCode": 0,
+      "result": "73 files, 716 tests passed"
+    },
+    {
+      "name": "TypeScript",
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "exitCode": 0
+    },
+    {
+      "name": "client build",
+      "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+      "exitCode": 0,
+      "notes": "Rollup annotation warnings and bundle-size notice only"
+    },
+    {
+      "name": "Worker build",
+      "command": "node scripts/build-worker.mjs",
+      "exitCode": 0
+    },
+    {
+      "name": "runner syntax",
+      "command": "node --check tests/review/m2-1-native-review.mjs",
+      "exitCode": 0
+    },
+    {
+      "name": "diff check",
+      "command": "git diff --check",
+      "exitCode": 0,
+      "notes": "LF to CRLF informational warnings only"
+    }
+  ],
+  "nativeMatrix": [
+    {
+      "pair": "RC/RC",
+      "output": "../../outputs/m2-2b-native-smoke-20261016-rc-rc-r17",
+      "port": 55543,
+      "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2b-native-smoke-20261016-rc-rc-r17 --port 55543 --through-014 yes --m2-2a-smoke yes --m2-2b-smoke yes --m2-2a-first-isolation rc --m2-2a-second-isolation rc",
+      "exitCode": 0,
+      "total": 56,
+      "passed": 56,
+      "failed": 0,
+      "m22bCases": 15,
+      "sqlstate40P01": 0
+    },
+    {
+      "pair": "RC/RR",
+      "output": "../../outputs/m2-2b-native-smoke-20261016-rc-rr-r18",
+      "port": 55544,
+      "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2b-native-smoke-20261016-rc-rr-r18 --port 55544 --through-014 yes --m2-2a-smoke yes --m2-2b-smoke yes --m2-2a-first-isolation rc --m2-2a-second-isolation rr",
+      "exitCode": 0,
+      "total": 56,
+      "passed": 56,
+      "failed": 0,
+      "m22bCases": 15,
+      "sqlstate40P01": 0
+    },
+    {
+      "pair": "RR/RC",
+      "output": "../../outputs/m2-2b-native-smoke-20261016-rr-rc-r18",
+      "port": 55545,
+      "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2b-native-smoke-20261016-rr-rc-r18 --port 55545 --through-014 yes --m2-2a-smoke yes --m2-2b-smoke yes --m2-2a-first-isolation rr --m2-2a-second-isolation rc",
+      "exitCode": 0,
+      "total": 56,
+      "passed": 56,
+      "failed": 0,
+      "m22bCases": 15,
+      "sqlstate40P01": 0
+    },
+    {
+      "pair": "RR/RR",
+      "output": "../../outputs/m2-2b-native-smoke-20261016-rr-rr-r18",
+      "port": 55546,
+      "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2b-native-smoke-20261016-rr-rr-r18 --port 55546 --through-014 yes --m2-2a-smoke yes --m2-2b-smoke yes --m2-2a-first-isolation rr --m2-2a-second-isolation rr",
+      "exitCode": 0,
+      "total": 56,
+      "passed": 56,
+      "failed": 0,
+      "m22bCases": 15,
+      "sqlstate40P01": 0
+    }
+  ],
+  "scope": {
+    "postgresql": "17.11 local native runtime with synthetic claims and fixtures",
+    "migration014AppliedRemotely": false,
+    "supabaseGitHubIntegrationChanged": false,
+    "dashboardSettingsOrSecretsChanged": false,
+    "commitOrPush": false,
+    "m22cImplemented": false,
+    "preserved": ["lab UI and entry", "src/data/remote", "Worker/D1", "Site"]
+  },
+  "limitation": "Local native evidence does not validate hosted Supabase behavior."
+}
