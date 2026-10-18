@@ -61,3 +61,37 @@ The current R90 report and full local checks are recorded above and in
 `M2-2C-SOL-ACCEPTANCE-20261017.md`. M2.2C is accepted only for the listed local
 scope; hosted Auth/HTTP, recurring-rule-specific coverage, Data API preflight,
 and remote application remain separate gates.
+
+## Local follow-up after R90 — 17/10/2026 (scoped acceptance by Sol)
+
+An expanded native case exposed a concrete receipt reauthorization defect:
+after an employee's company membership was revoked, exact `onboarding.submit`
+replay returned the old receipt (`00000`) instead of denying with `42501`.
+Exact `onboarding.saveDraft` replay already denied (`42501`). The cause was
+that submit's company/team membership check ran after the exact-receipt return.
+The minimal local 014 change repeats active company membership and team
+membership checks after the coordination locks and before receipt return for
+both saveDraft and submit. The migration remains unapplied remotely.
+
+The first follow-up candidate passed 129/129 but was rejected by Sol because
+it used stale request data for replay and had removed the first-execution guard.
+The corrected candidate re-reads the request under `FOR UPDATE`, reauthorizes
+before receipt return, and preserves the guard after the first-execution
+`FOR UPDATE`. PostgreSQL 17.11 passed **130/130**, `40P01=0`; exact replay
+observes `42501` for both saveDraft and submit, and the first-submit race
+preserves authorization under a stale RR snapshot. Focused Vitest: **11/11**.
+Exact commands, hashes, and the
+pre-fix repro are recorded in
+`review-evidence/m2-2c-gatel-onboarding-replay-20261017.json` and
+`M2-2C-GATEL-REPLAY-DEFECT-20261017.md`. Corrected candidate SQL014 SHA256 is
+`13e88c8549f969187294367161c3ce6cf458d7f4618ddba40cb5058254982a26`.
+The full local suite also passed **727/727 in 74 files**; TypeScript, client
+and Worker builds, runner syntax, `git diff --check`, and the unchanged status
+of migrations 001–013 were verified on this tree.
+The candidate is committed locally; Sol accepted only the
+enumerated replay cases. R90 acceptance does not transfer to these changed
+hashes. This follow-up closes only the specific exact submit replay case. Gate L remains open: onboarding/creation
+replay matrix is not exhaustive; legacy assignment/responsibility/absence/
+coverage/movement/transition races, recurrent-rule-specific coverage, and
+remaining §9 concurrency/failure-injection families still lack complete native
+coverage. No claim is made that the entire §9 matrix ran.
