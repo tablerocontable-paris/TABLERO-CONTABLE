@@ -2381,7 +2381,7 @@ end $$;
 
 create function app_private.api_onboarding_query(p jsonb) returns jsonb
 language plpgsql security definer set search_path='' as $$
-declare c jsonb; actor uuid:=auth.uid(); org uuid; role_v text; k text; f jsonb; cur text; curj jsonb; lim integer; status_v text; owner_filter uuid; owner_v uuid; owner_revision bigint; creation_revision bigint; req public.onboarding_requests%rowtype; draft_v jsonb; submitted_v jsonb; payload_version integer; items jsonb; next_cursor text; last_at timestamptz; last_id uuid; cursor_at timestamptz; cursor_id uuid; op uuid; receipt app_private.api_command_receipts%rowtype; receipt_owner uuid; receipt_request uuid; receipt_plan jsonb; receipt_draft jsonb; receipt_lines jsonb; receipt_scopes text[]; receipt_req_revision bigint; receipt_line jsonb;
+declare c jsonb; actor uuid:=auth.uid(); org uuid; role_v text; k text; f jsonb; cur text; curj jsonb; lim integer; status_v text; owner_filter uuid; owner_v uuid; owner_revision bigint; creation_revision bigint; req public.onboarding_requests%rowtype; draft_v jsonb; submitted_v jsonb; payload_version integer; items jsonb; next_cursor text; last_at timestamptz; last_id uuid; cursor_at timestamptz; cursor_id uuid; op uuid; receipt app_private.api_command_receipts%rowtype; receipt_owner uuid; receipt_request uuid; receipt_plan jsonb; receipt_draft jsonb; receipt_lines jsonb; receipt_scopes text[]; receipt_req_revision bigint; receipt_line jsonb; receipt_company uuid; receipt_team uuid; receipt_period date; owner_active boolean; owner_role text; manager_v uuid;
 begin
  if actor is null then raise exception using errcode='28000',message='Autenticación requerida'; end if;
  if octet_length(coalesce(p::text,''))>32768 or not app_private.api_exact_keys(p,array['contractVersion','kind','filters','cursor','limit']) or jsonb_typeof(p->'contractVersion') is distinct from 'number' or p->>'contractVersion'<>'1' or jsonb_typeof(p->'kind') is distinct from 'string' then raise exception using errcode='22023',message='Consulta inválida'; end if;
@@ -2451,6 +2451,47 @@ begin
     perform 1 from public.team_members tm where tm.organization_id=org and tm.team_id=app_private.api_uuid(receipt_line,'teamId') and tm.profile_id=actor for share;
     if not found then raise exception using errcode='42501',message='Consulta no disponible'; end if;
    end loop;
+   return jsonb_build_object('contractVersion',1,'kind',k,'data',jsonb_build_object('found',true,'command',receipt.result));
+  end if;
+  if receipt.kind='task.createOneOff' then
+   receipt_owner:=app_private.api_uuid(receipt.arguments->'payload','ownerId');
+   receipt_company:=app_private.api_uuid(receipt.arguments->'payload','companyId');
+   receipt_team:=app_private.api_uuid(receipt.arguments->'payload','teamId');
+   receipt_period:=date_trunc('month',app_private.api_date(receipt.arguments->'payload','scheduledOn'))::date;
+   if receipt.organization_id<>org then return jsonb_build_object('contractVersion',1,'kind',k,'data',jsonb_build_object('found',false)); end if;
+   -- A one-off receipt is an authorized read of the assigned work. Use the
+   -- same membership coordination key and profile/month locks as creation and
+   -- revocation, without writing fences. This makes RC reads serialize with a
+   -- revoker and forces a stale RR snapshot to abort before revealing the row.
+   receipt_scopes:=array['membership:'||receipt_company::text||':'||receipt_owner::text];
+   receipt_plan:=public._coordination_prepare('{}'::uuid[],array[actor],array[actor,receipt_owner],
+    jsonb_build_array(jsonb_build_object('ownerId',receipt_owner,'period',receipt_period)),receipt_scopes,'{}'::jsonb);
+   perform app_private._coordination_acquire_m22b(receipt_plan,false);
+   perform app_private.api_revalidate_actor(actor,c);
+   role_v:=c->'principal'->>'role';
+   select * into receipt from app_private.api_command_receipts where actor_id=actor and operation_id=op;
+   if not found or receipt.organization_id<>org or receipt.kind<>'task.createOneOff' then
+    return jsonb_build_object('contractVersion',1,'kind',k,'data',jsonb_build_object('found',false));
+   end if;
+   if role_v not in ('empleado','encargado','jefe')
+      or role_v<>'empleado' and c->'authentication'->>'aal'<>'aal2' then
+    raise exception using errcode='42501',message='Consulta no disponible';
+   end if;
+   perform 1 from public.profiles p where p.id=actor and p.organization_id=org and p.active for share;
+   if not found then raise exception using errcode='42501',message='Consulta no disponible'; end if;
+   select p.active,p.role,p.manager_id into owner_active,owner_role,manager_v
+    from public.profiles p where p.id=receipt_owner and p.organization_id=org for share;
+   if not found or not owner_active or owner_role<>'empleado'
+      or (role_v='empleado' and receipt_owner<>actor)
+      or (role_v='encargado' and manager_v is distinct from actor) then
+    raise exception using errcode='42501',message='Consulta no disponible';
+   end if;
+   perform 1 from public.company_memberships cm where cm.organization_id=org
+    and cm.profile_id=receipt_owner and cm.company_id=receipt_company and cm.active for share;
+   if not found then raise exception using errcode='42501',message='Consulta no disponible'; end if;
+   perform 1 from public.team_members tm where tm.organization_id=org
+    and tm.profile_id=receipt_owner and tm.team_id=receipt_team for share;
+   if not found then raise exception using errcode='42501',message='Consulta no disponible'; end if;
    return jsonb_build_object('contractVersion',1,'kind',k,'data',jsonb_build_object('found',true,'command',receipt.result));
   end if;
   if receipt.organization_id<>org or receipt.kind not in ('onboarding.saveDraft','onboarding.submit','onboarding.requestChanges','onboarding.approve','assignment.create','task.createOneOff','month.materialize') then return null; end if;

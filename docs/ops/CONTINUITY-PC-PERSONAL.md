@@ -1,5 +1,7 @@
 > **Guía vigente 16/10/2026:** clonar directamente `https://github.com/tablerocontable-paris/TABLERO-CONTABLE.git`; `main` contiene la importación inicial con autor Tablero Contable. El flujo es push directo a `main`, sin PR. Autenticarse con la cuenta nueva y usar Node 24/npm: `npm ci`, `npm run hooks:install`, `npm test`, `npm run build`. El JSON ficticio de `paris-state-lab`/IndexedDB no viaja en Git; transferirlo sólo con el respaldo v2 y mantenerlo privado. No copiar `.git` por OneDrive. La guía Sites que sigue es histórica.
 
+> El procedimiento Sites debajo quedó supersedido el 16/10/2026. Para la PC personal se usa el clon GitHub indicado arriba; no seguir los pasos que dicen que GitHub no hace falta ni que la conexión queda para después.
+
 > Actualización de continuidad — 11/10/2026: el checkout local work/site y su Git son la fuente de esta auditoría. La guía de apertura desde Sites que sigue es histórica y no acredita que una segunda PC contenga los cambios locales aún sin commit. La transferencia vigente debe prepararse después del commit validado mediante bundle Git y guía local, conservando el mismo proyecto. El paquete actualizado sigue pendiente mientras existan las correcciones abiertas registradas en SOL-AUDIT-20261008.md y EXECUTION-NEXT.md. Los datos ficticios de paris-state-lab y la evidencia IndexedDB requieren respaldo versión 2 separado si se desea trasladarlos; el bundle de código no los incluye. No transferir credenciales ni asumir sincronización de datos entre navegadores.
 # Continuar el mismo proyecto desde otra PC
 

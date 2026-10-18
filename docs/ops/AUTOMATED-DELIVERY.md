@@ -1,4 +1,6 @@
-> **Precedencia 16/10/2026:** el repositorio privado `tablerocontable-paris/TABLERO-CONTABLE` existe y sólo usa `main`; se trabaja con push directo a esa rama, sin PRs ni aprobación manual. `.github/workflows/validate.yml` corre al actualizar `main` o manualmente; no ejecuta SQL ni despliega. La conexión de GitHub no implica que los checks del commit inicial ya estén aceptados.
+> **Estado vigente 18/10/2026:** el repositorio privado `tablerocontable-paris/TABLERO-CONTABLE` y su CI están activos; `main` está en `54105def6f9eac4e62cdc16fb2de4afd36d37904` y Actions run 18 pasó. El único Supabase conectado es `grupo-paris-dev`, vacío. La Data API sigue con `public, extensions` expuestos y autoexposición activada según la última lectura del Dashboard; no aplicar SQL014. No hay hosting Cloudflare propio, correo transaccional ni Supabase de producción configurados. El usuario pidió push directo a `main`, sin PR ni aprobación manual.
+
+> Los apartados inferiores que afirman que GitHub/Supabase no existen o que el flujo requiere PR son históricos y no describen el estado actual. El diseño que sigue debe ejecutarse con push directo a `main`; CI valida el SHA, pero migración y despliegue aún no están configurados.
 
 > **Precedencia 14/10/2026 (histórica):** M1 local consolidado; contrato de migración en ../architecture/SUPABASE-M2-CONTRACT-20261014.md. El plan de PR y ramas `dev/main` de abajo queda reemplazado por la instrucción directa del usuario del 16/10. Workers Static Assets con Access sigue como candidato de hosting. Producción/datos reales/invitaciones requieren gates posteriores.
 
@@ -16,13 +18,13 @@ Estado: decisión de producto acordada; configuración pendiente hasta la etapa 
 
 ## Automatización que pidió Valentino
 
-Una solicitud de cambio debe permitir que el asistente analice el alcance, implemente la modificación, ejecute validaciones, cree un commit, haga push a la rama correspondiente y despliegue preview sin pedirle a Valentino pasos manuales. El flujo objetivo será:
+Una solicitud de cambio debe permitir que el asistente analice el alcance, implemente la modificación, ejecute validaciones, cree un commit y haga push directo a `main`, sin PR ni aprobación manual. El despliegue privado seguirá condicionado a que CI pase y a que los gates de Supabase/hosting estén verificados. El flujo objetivo será:
 
 1. Crear/actualizar rama de trabajo; hooks pre-commit verifican tipos, pruebas rápidas y diff staged.
-2. Push y apertura de PR hacia `dev`; CI corre pruebas, build, validación SQL desde cero/upgrade y chequeos de seguridad/dependencias.
-3. Preview automático de la aplicación. Cambios SQL se prueban contra Supabase dev; nunca se ejecutan migraciones productivas desde la laptop.
-4. Al pasar todos los checks, promoción automática de `dev` a `main` según la política acordada. Si los checks fallan, no se promueve ni despliega.
-5. Despliegue de `main` y migración de Supabase producción como pasos CI ordenados, con registro de commit, migración y versión publicada. Health check posterior y rollback documentado.
+2. Push directo a `main`; CI corre pruebas, build, validación SQL desde cero/upgrade y chequeos de seguridad/dependencias.
+3. Preview privado automático cuando el hosting quede conectado. Cambios SQL se prueban primero contra Supabase dev; nunca se ejecutan migraciones productivas desde la laptop.
+4. Si CI falla, no se despliega. Producción requiere Supabase separado y gates de aceptación.
+5. Despliegue de `main` y migración productiva sólo cuando el flujo esté configurado y aprobado, con registro de commit, migración y versión publicada. Health check posterior y rollback documentado.
 
 El objetivo es que el pedido de cambio sea la única tarea rutinaria de Valentino. El alta inicial sí exige crear/verificar la cuenta de Gmail dedicada, repositorio GitHub, dos proyectos Supabase, dominio/hosting, secretos o federación y políticas de ramas. Esto se prepara cuando el producto y piloto estén aprobados; no se inventan ni exponen credenciales ahora.
 
@@ -35,7 +37,9 @@ El objetivo es que el pedido de cambio sea la única tarea rutinaria de Valentin
 - Cambios irreversibles de esquema, restauraciones, acceso a datos productivos o migración real de empleados requieren revisar y autorizar ese cambio concreto. La automatización rutinaria no debe convertir esos actos en implícitos.
 - Nunca se aplican desde CI cambios de infraestructura o facturación no definidos en código y aprobados para el proyecto correcto.
 
-## Estado actual
+## Estado histórico — corte 08/10/2026
+
+El siguiente inventario refleja el corte de octubre 8, anterior a la creación del repositorio privado y del Supabase dev; no usarlo para decidir si esos servicios existen hoy.
 
 - Git y deploy del prototipo siguen dentro de Sites; el sitio actual es privado. No existe aún el remoto GitHub ni los entornos Supabase dev/prod de la cuenta dedicada.
 - La infraestructura y secretos no están configurados; por eso el flujo descrito es plan, no una capacidad activa.

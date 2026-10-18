@@ -385,6 +385,145 @@ describe("M2.2C versioned creation protocol", () => {
     } finally { await lab.close(); }
   }, 20_000);
 
+  it("denies one-off commandReceipt reads after company membership revocation", async () => {
+    const lab = await new AccountingLab().init(stages.m014);
+    try {
+      await lab.actor(ids.owner, "aal1", "authenticated");
+      const command = { contractVersion: 1, operationId: id(993), kind: "task.createOneOff", expectedRevisions: { [`creation:${ids.owner}`]: "0" }, payload: { ownerId: ids.owner, companyId: ids.company, teamId: ids.team, source: { type: "custom", definition: { kind: "operativa", title: "One-off receipt membership guard", objective: "", sector: "IVA", unit: "comprobantes" } }, scheduledOn: "2026-10-20", dueDate: null, priority: "Media" } };
+      const created = (await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(command)])).result;
+      const receiptQuery = { contractVersion: 1, kind: "commandReceipt", filters: { operationId: command.operationId }, cursor: null, limit: 1 };
+      expect((await lab.first("select api.query_v1($1::jsonb) result", [JSON.stringify(receiptQuery)])).result.data).toEqual({ found: true, command: created });
+
+      await lab.admin();
+      await lab.db.query("update company_memberships set active=false where organization_id=$1 and company_id=$2 and profile_id=$3", [ids.org, ids.company, ids.owner]);
+      await lab.actor(ids.owner, "aal1", "authenticated");
+      const receiptDenied = await lab.rows("select api.query_v1($1::jsonb)", [JSON.stringify(receiptQuery)]).catch((error: { code?: string }) => error);
+      expect((receiptDenied as { code?: string }).code).toBe("42501");
+      const replayDenied = await lab.rows("select api.command_v1($1::jsonb)", [JSON.stringify(command)]).catch((error: { code?: string }) => error);
+      expect((replayDenied as { code?: string }).code).toBe("42501");
+      await lab.admin();
+      expect(await lab.first("select count(*)::integer count from task_instances where id=$1", [created.result.taskId])).toEqual({ count: 1 });
+      expect(await lab.first("select count(*)::integer count from app_private.api_command_receipts where actor_id=$1 and operation_id=$2", [ids.owner, command.operationId])).toEqual({ count: 1 });
+    } finally { await lab.close(); }
+  }, 20_000);
+
+  it("enforces one-off commandReceipt role, scope, liveness, privacy, and read-only matrix", async () => {
+    const lab = await new AccountingLab().init(stages.m014);
+    try {
+      const receiptQuery = (operationId: string) => ({ contractVersion: 1, kind: "commandReceipt", filters: { operationId }, cursor: null, limit: 1 });
+      const make = async (actor: string, owner: string, operation: number, aal: "aal1" | "aal2") => {
+        await lab.admin();
+        const revision = (await lab.first("select coalesce((select revision from app_private.api_creation_heads where organization_id=$1 and owner_id=$2),0)::text revision", [ids.org, owner])).revision;
+        const command = { contractVersion: 1, operationId: id(operation), kind: "task.createOneOff", expectedRevisions: { [`creation:${owner}`]: revision }, payload: { ownerId: owner, companyId: ids.company, teamId: ids.team, source: { type: "custom", definition: { kind: "operativa", title: `Receipt scope ${operation}`, objective: "", sector: "IVA", unit: "comprobantes" } }, scheduledOn: lab.day, dueDate: null, priority: "Media" } };
+        await lab.actor(actor, aal, "authenticated");
+        return { command, created: (await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(command)])).result };
+      };
+      const managed = await make(ids.manager, ids.owner, 994, "aal2");
+      const chief = await make(ids.boss, ids.peer, 995, "aal2");
+
+      await lab.actor(ids.manager, "aal2", "authenticated");
+      expect((await lab.first("select api.query_v1($1::jsonb) result", [JSON.stringify(receiptQuery(managed.command.operationId))])).result.data).toEqual({ found: true, command: managed.created });
+      await lab.actor(ids.boss, "aal2", "authenticated");
+      expect((await lab.first("select api.query_v1($1::jsonb) result", [JSON.stringify(receiptQuery(chief.command.operationId))])).result.data).toEqual({ found: true, command: chief.created });
+
+      // Receipt ownership and organization are both hidden from unrelated actors.
+      await lab.actor(ids.peer, "aal1", "authenticated");
+      expect((await lab.first("select api.query_v1($1::jsonb) result", [JSON.stringify(receiptQuery(managed.command.operationId))])).result.data).toEqual({ found: false });
+      await lab.actor(ids.outsider, "aal2", "authenticated");
+      expect((await lab.first("select api.query_v1($1::jsonb) result", [JSON.stringify(receiptQuery(managed.command.operationId))])).result.data).toEqual({ found: false });
+
+      const expectDenied = async (actor: string, operationId: string, aal: "aal1" | "aal2" = "aal2") => {
+        await lab.actor(actor, aal, "authenticated");
+        const result = await lab.rows("select api.query_v1($1::jsonb)", [JSON.stringify(receiptQuery(operationId))]).catch((error: { code?: string }) => error);
+        expect((result as { code?: string }).code).toBe("42501");
+      };
+      await lab.admin();
+      await lab.db.query("update profiles set manager_id=null where id=$1", [ids.owner]);
+      await expectDenied(ids.manager, managed.command.operationId);
+      await lab.admin();
+      await lab.db.query("update profiles set manager_id=$2 where id=$1", [ids.owner, ids.manager]);
+      await lab.db.query("update company_memberships set active=false where organization_id=$1 and company_id=$2 and profile_id=$3", [ids.org, ids.company, ids.owner]);
+      await expectDenied(ids.manager, managed.command.operationId);
+      await lab.admin();
+      await lab.db.query("update company_memberships set active=true where organization_id=$1 and company_id=$2 and profile_id=$3", [ids.org, ids.company, ids.owner]);
+      await lab.db.query("update profiles set active=false where id=$1", [ids.owner]);
+      await expectDenied(ids.manager, managed.command.operationId);
+      await lab.admin();
+      await lab.db.query("update profiles set active=true where id=$1", [ids.owner]);
+      await lab.db.query("update profiles set active=false where id=$1", [ids.manager]);
+      await expectDenied(ids.manager, managed.command.operationId);
+      await lab.admin();
+      await lab.db.query("update profiles set active=true where id=$1", [ids.manager]);
+      await lab.db.query("update profiles set active=false where id=$1", [ids.boss]);
+      await expectDenied(ids.boss, chief.command.operationId);
+      await lab.admin();
+      await lab.db.query("update profiles set active=true where id=$1", [ids.boss]);
+
+      await lab.admin();
+      const before = await lab.first(`select jsonb_build_object(
+        'profiles',(select coalesce(jsonb_agg(to_jsonb(p) order by p.id),'[]'::jsonb) from profiles p where p.id in ($2,$3,$4)),
+        'memberships',(select coalesce(jsonb_agg(to_jsonb(m) order by m.company_id,m.profile_id),'[]'::jsonb) from company_memberships m where m.organization_id=$1 and m.profile_id in ($2,$3,$4)),
+        'teamMembers',(select coalesce(jsonb_agg(to_jsonb(t) order by t.profile_id),'[]'::jsonb) from team_members t where t.organization_id=$1 and t.profile_id in ($2,$3,$4)),
+        'creationHeads',(select coalesce(jsonb_agg(to_jsonb(h) order by h.owner_id),'[]'::jsonb) from app_private.api_creation_heads h where h.organization_id=$1 and h.owner_id in ($3,$4)),
+        'monthFences',(select coalesce(jsonb_agg(to_jsonb(f) order by f.owner_id,f.period),'[]'::jsonb) from app_private.api_month_fences f where f.owner_id in ($3,$4)),
+        'membershipFences',(select coalesce(jsonb_agg(to_jsonb(f) order by f.profile_id),'[]'::jsonb) from app_private.api_membership_fences f where f.organization_id=$1 and f.profile_id in ($2,$3,$4)),
+        'operationFences',(select coalesce(jsonb_agg(to_jsonb(f) order by f.actor_id,f.operation_id),'[]'::jsonb) from app_private.api_operation_fences f where f.actor_id in ($2,$3)),
+        'receipts',(select coalesce(jsonb_agg(to_jsonb(r) order by r.actor_id,r.operation_id),'[]'::jsonb) from app_private.api_command_receipts r where r.operation_id in ($5,$6)),
+        'audit',(select coalesce(jsonb_agg(to_jsonb(a) order by a.id),'[]'::jsonb) from audit_events a where a.organization_id=$1 and a.action='task.createOneOff' and a.actor_id in ($2,$3)),
+        'tasks',(select coalesce(jsonb_agg(to_jsonb(t) order by t.id),'[]'::jsonb) from task_instances t where t.id in (select (r.result->'result'->>'taskId')::uuid from app_private.api_command_receipts r where r.operation_id in ($5,$6)))
+      ) snapshot`, [ids.org, ids.manager, ids.owner, ids.peer, managed.command.operationId, chief.command.operationId]);
+
+      await lab.actor(ids.manager, "aal2", "authenticated");
+      expect((await lab.first("select api.query_v1($1::jsonb) result", [JSON.stringify(receiptQuery(managed.command.operationId))])).result.data.found).toBe(true);
+      await lab.actor(ids.boss, "aal2", "authenticated");
+      expect((await lab.first("select api.query_v1($1::jsonb) result", [JSON.stringify(receiptQuery(chief.command.operationId))])).result.data.found).toBe(true);
+      await lab.admin();
+      const after = await lab.first(`select jsonb_build_object(
+        'profiles',(select coalesce(jsonb_agg(to_jsonb(p) order by p.id),'[]'::jsonb) from profiles p where p.id in ($2,$3,$4)),
+        'memberships',(select coalesce(jsonb_agg(to_jsonb(m) order by m.company_id,m.profile_id),'[]'::jsonb) from company_memberships m where m.organization_id=$1 and m.profile_id in ($2,$3,$4)),
+        'teamMembers',(select coalesce(jsonb_agg(to_jsonb(t) order by t.profile_id),'[]'::jsonb) from team_members t where t.organization_id=$1 and t.profile_id in ($2,$3,$4)),
+        'creationHeads',(select coalesce(jsonb_agg(to_jsonb(h) order by h.owner_id),'[]'::jsonb) from app_private.api_creation_heads h where h.organization_id=$1 and h.owner_id in ($3,$4)),
+        'monthFences',(select coalesce(jsonb_agg(to_jsonb(f) order by f.owner_id,f.period),'[]'::jsonb) from app_private.api_month_fences f where f.owner_id in ($3,$4)),
+        'membershipFences',(select coalesce(jsonb_agg(to_jsonb(f) order by f.profile_id),'[]'::jsonb) from app_private.api_membership_fences f where f.organization_id=$1 and f.profile_id in ($2,$3,$4)),
+        'operationFences',(select coalesce(jsonb_agg(to_jsonb(f) order by f.actor_id,f.operation_id),'[]'::jsonb) from app_private.api_operation_fences f where f.actor_id in ($2,$3)),
+        'receipts',(select coalesce(jsonb_agg(to_jsonb(r) order by r.actor_id,r.operation_id),'[]'::jsonb) from app_private.api_command_receipts r where r.operation_id in ($5,$6)),
+        'audit',(select coalesce(jsonb_agg(to_jsonb(a) order by a.id),'[]'::jsonb) from audit_events a where a.organization_id=$1 and a.action='task.createOneOff' and a.actor_id in ($2,$3)),
+        'tasks',(select coalesce(jsonb_agg(to_jsonb(t) order by t.id),'[]'::jsonb) from task_instances t where t.id in (select (r.result->'result'->>'taskId')::uuid from app_private.api_command_receipts r where r.operation_id in ($5,$6)))
+      ) snapshot`, [ids.org, ids.manager, ids.owner, ids.peer, managed.command.operationId, chief.command.operationId]);
+      expect(after.snapshot).toEqual(before.snapshot);
+
+      // The FK assignment_team_member makes a real task receipt with no current
+      // team member impossible: immutable responsibility sets also reference
+      // task_instances. Use a separate employee with no assignments and seed a
+      // structurally exact synthetic receipt once; never mutate its arguments.
+      const teamOperation = id(996);
+      const teamCommand = { contractVersion: 1, operationId: teamOperation, kind: "task.createOneOff", expectedRevisions: { [`creation:${ids.sourceOwner}`]: "0" }, payload: { ownerId: ids.sourceOwner, companyId: ids.company, teamId: ids.team, source: { type: "custom", definition: { kind: "operativa", title: "Synthetic historical receipt team guard", objective: "", sector: "IVA", unit: "comprobantes" } }, scheduledOn: lab.day, dueDate: null, priority: "Media" } };
+      const teamResult = { contractVersion: 1, operationId: teamOperation, kind: "task.createOneOff", result: { assignmentId: id(1996), taskId: id(2996), taskRevision: "1" } };
+      await lab.admin();
+      await lab.db.query("update profiles set manager_id=$2 where id=$1", [ids.sourceOwner, ids.manager]);
+      await lab.db.query("insert into app_private.api_command_receipts(actor_id,operation_id,organization_id,kind,arguments,result) values($1,$2,$3,'task.createOneOff',$4::jsonb,$5::jsonb)", [ids.manager, teamOperation, ids.org, JSON.stringify(teamCommand), JSON.stringify(teamResult)]);
+      await lab.db.query("delete from team_members where organization_id=$1 and team_id=$2 and profile_id=$3", [ids.org, ids.team, ids.sourceOwner]);
+      await lab.admin();
+      const snapshot = async () => { await lab.admin(); return (await lab.first(`select jsonb_build_object(
+        'profile',(select to_jsonb(p) from profiles p where p.id=$2),
+        'head',(select to_jsonb(h) from app_private.api_creation_heads h where h.organization_id=$1 and h.owner_id=$2),
+        'monthFences',(select coalesce(jsonb_agg(to_jsonb(f) order by f.period),'[]'::jsonb) from app_private.api_month_fences f where f.owner_id=$2),
+        'membershipFence',(select to_jsonb(f) from app_private.api_membership_fences f where f.organization_id=$1 and f.profile_id=$2),
+        'operationFence',(select to_jsonb(f) from app_private.api_operation_fences f where f.actor_id=$3 and f.operation_id=$4),
+        'receipt',(select to_jsonb(r) from app_private.api_command_receipts r where r.actor_id=$3 and r.operation_id=$4),
+        'audit',(select coalesce(jsonb_agg(to_jsonb(a) order by a.id),'[]'::jsonb) from audit_events a where a.actor_id=$3 and a.action='task.createOneOff' and a.entity_id=$5),
+        'businessRows',(select jsonb_build_array((select count(*) from task_instances where id=$5),(select count(*) from task_assignments where id=$6),(select count(*) from team_members where organization_id=$1 and team_id=$7 and profile_id=$2)))
+      ) state`, [ids.org, ids.sourceOwner, ids.manager, teamOperation, teamResult.result.assignmentId, teamResult.result.assignmentId, ids.team])).state; };
+      const beforeTeamDeniedRead = await snapshot();
+      await expectDenied(ids.manager, teamOperation);
+      const afterTeamDeniedRead = await snapshot();
+      expect(afterTeamDeniedRead).toEqual(beforeTeamDeniedRead);
+      await lab.admin();
+      await lab.db.query("insert into team_members(organization_id,team_id,profile_id) values($1,$2,$3)", [ids.org, ids.team, ids.sourceOwner]);
+      await lab.db.query("update profiles set manager_id=$2 where id=$1", [ids.sourceOwner, ids.boss]);
+    } finally { await lab.close(); }
+  }, 30_000);
+
   it("authorizes an exact onboarding submit replay against its immutable submitted version", async () => {
     const run = async (operationBase: number, revokeSubmittedVersion: boolean, revokeLaterDraft: boolean, emptyLaterDraft = false) => {
       const lab = await new AccountingLab().init(stages.m014);

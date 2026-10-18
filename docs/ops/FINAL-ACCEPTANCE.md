@@ -1,4 +1,4 @@
-> **Secuencia actualizada 17/10/2026:** GitHub está migrado a un repositorio privado nuevo con `main` como rama única y push directo, sin PR. Supabase dev existe y sigue vacío; hosting y Supabase de producción están pendientes. Sol aceptó sólo escenarios locales R90; M2.2C/Gate L completos siguen abiertos por matrices pendientes. El checkpoint `93278d1` requiere corrección documental y revisión del nuevo hash antes del push. No aplicar SQL mientras C/Gate L y el gate de Data API sigan abiertos ni usar datos reales.
+> **Estado vigente 18/10/2026:** GitHub privado `tablerocontable-paris/TABLERO-CONTABLE` está en `main` (`54105def6f9eac4e62cdc16fb2de4afd36d37904`); Actions run 18 pasó. Supabase `grupo-paris-dev` existe y está vacío. La Data API aún expone `public, extensions` y tiene autoexposición activada según la última lectura del Dashboard. Hosting propio, correo transaccional y Supabase de producción faltan. Sol aceptó el alcance local de `task.createOneOff commandReceipt` en R7; suite 734/734, TypeScript y builds cliente/Worker pasaron. M2.2C/Gate L siguen abiertos. No aplicar SQL014 ni usar datos reales. Los bloques fechados abajo son historial, salvo que se indique lo contrario.
 
 > **Secuencia 14/10/2026 (histórica):** el usuario autorizó iniciar cuentas, Git y desarrollo conectado ahora. La cuenta GitHub nueva ya se conectó. Lector humano, paridad Supabase, piloto y recuperación continúan como gates.
 
@@ -47,6 +47,6 @@ No aumentar el porcentaje por escribir un plan o preparar un workflow.
 - Sites: fuente y publicación se ejecutan mediante herramientas del asistente;
   no hay automatización permanente de publicación activada en este checkout.
 
-Objetivo rutinario: pedir un cambio y recibir commit, PR, checks, migraciones
-y sitio actualizado sin pegar SQL. El alta inicial y verificación de cuentas
+Objetivo rutinario: pedir un cambio y recibir commit directo a `main`, checks,
+migraciones y sitio actualizado sin pegar SQL. El alta inicial y verificación de cuentas
 propias se realiza una vez; las credenciales no se incluyen en Git.

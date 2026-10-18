@@ -1,0 +1,46 @@
+{
+  "scope": "Local SQL014 task.createOneOff commandReceipt permission matrix, read-only state, and company membership revocation",
+  "remoteChanges": false,
+  "migrationApplied": false,
+  "files": {
+    "supabase/migrations/202610150014_operational_api.sql": "f88e54f469d0beb07048081dea91227e7f1645e7f6629929a19c0fae98fbff22",
+    "tests/m2-2c-contract.test.ts": "bfea6e8073ac7bf67756f9cc44850c63cc33707d7542956dfc1189782aca082c",
+    "tests/review/m2-1-native-review.mjs": "8411afe3b9c60077457db98fc4ddaa10a82ffcbdc2933285fe67cf8e773b2edc"
+  },
+  "vitest": {
+    "command": "node node_modules/vitest/vitest.mjs run tests/m2-2c-contract.test.ts -t \"one-off commandReceipt role\" --maxWorkers=1 --testTimeout=30000 --hookTimeout=30000",
+    "result": "1/1 passed; 17 unrelated tests skipped",
+    "matrix": "boss and manager own-receipt allow; same-organization other actor and other-organization privacy return found:false; owner/actor inactive, manager inactive, and manager_id NULL deny with 42501; full business/fence/head/audit/receipt snapshot is unchanged across reads; synthetic exact-shape receipt denies with 42501 when team_members is absent, with a stable read-only snapshot"
+  },
+  "nativePostgres": {
+    "engine": "PostgreSQL 17.11",
+    "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2c-oneoff-commandreceipt-20261018-r7 --port 55668 --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes",
+    "result": "143/143 passed",
+    "report": "../../outputs/m2-2c-oneoff-commandreceipt-20261018-r7/review.json",
+    "deadlocks40P01": 0,
+    "scenario": {
+      "name": "M2.2C one-off commandReceipt serializes read-first RC and aborts stale revoke-first RR",
+      "readFirstRC": "query returns 00000; pg_blocking_pids confirms revocation waits; revocation commits; subsequent query returns 42501",
+      "revokeFirstRR": "revocation returns 00000; stale snapshot query returns 40001; fresh retry returns 42501",
+      "finalState": "false|3|1|1|43"
+    },
+    "permissionMatrix": {
+      "bossAndManagerOwnReceipts": "00000, found:true",
+      "otherActor": "00000, found:false",
+      "managerAfterOwnerManagerIdNull": "42501",
+      "readOnlySnapshot": "creation heads, month/membership/operation fences, audit rows, and receipts unchanged",
+      "missingTeamMember": "42501 against a synthetic exact-shape commandReceipt inserted once for an employee with no assignments; arguments/result are not modified, no assignment or constraint is disabled"
+    }
+  },
+  "behavior": {
+    "authorization": "Revalidates current actor/owner relationship, company membership, and team membership before returning the exact immutable receipt.",
+    "locking": "Read-only coordination plan includes actor/owner profile and month locks plus membership:<company>:<owner>; no fence writes on query.",
+    "preserved": "Exact receipt response when authorized; current membership revocation denies; no business rows or receipt mutation. Synthetic absent-team case exercises the same SQL authorization guard but is not a command_v1-emitted receipt."
+  },
+  "limitations": [
+    "Synthetic local fixtures only; not applied to Supabase.",
+    "A command_v1-emitted receipt cannot coexist with absent team_members while its task assignment is live: assignment_team_member requires membership, and immutable task-responsibility rows also bind the assignment's task instance. The team guard is covered using a structurally exact synthetic receipt for a no-assignment employee, with arguments/result kept unchanged and a stable no-write snapshot. This verifies the query denial branch but does not claim an application-generated receipt in an unreachable live-assignment state.",
+    "Covers task.createOneOff commandReceipt only; does not close M2.2C/Gate L or other receipt families.",
+    "No hosted Supabase Auth/HTTP behavior is tested."
+  ]
+}

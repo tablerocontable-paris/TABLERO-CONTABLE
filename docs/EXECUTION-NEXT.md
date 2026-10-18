@@ -1,9 +1,10 @@
 # Acción de migración vigente — actualización 18/10/2026
 
-1. `origin/main` está en `979a3d3f827553fabbb75634db89115bf48e8615`; GitHub Actions run 16 sigue ejecutándose: https://github.com/tablerocontable-paris/TABLERO-CONTABLE/actions/runs/39151270747.
+1. `origin/main` está en `54105def6f9eac4e62cdc16fb2de4afd36d37904`; GitHub Actions run 18 terminó `success`: https://github.com/tablerocontable-paris/TABLERO-CONTABLE/actions/runs/39151592703.
 2. Sol aceptó el replay de `onboarding.submit` ligado a la versión inmutable enviada. R3: PostgreSQL 17.11 141/141, `40P01=0`, carrera replay-first confirmada por PID bloqueador; Vitest focal 16/16. Suite completa 732/732 en 74 archivos; TypeScript, cliente y Worker pasan. Evidencia: `architecture/review-evidence/m2-2c-onboarding-submit-version-replay-20261018.json`.
-3. Próxima familia de riesgo identificada por Sol: `task.createOneOff` commandReceipt query bajo revocación concurrente. Falta matriz de ambos órdenes y cobertura nativa equivalente antes del fix.
-4. No aplicar SQL014 ni cambiar Supabase remoto hasta terminar C/Gate L, verificar Data API y completar preflight. Esta aceptación es acotada.
+3. Sol aceptó el alcance local de `task.createOneOff commandReceipt`: PostgreSQL 17.11 R7 143/143, `40P01=0`, Vitest focal 1/1 y hashes exactos en `architecture/review-evidence/m2-2c-oneoff-commandreceipt-20261018.json`. La ausencia de `team_members` se cubre con un recibo sintético exacto, porque la FK y responsabilidad inmutable impiden retirar esa fila mientras exista una asignación viva. Suite 734/734 en 74 archivos, TypeScript, build cliente/Worker, `node --check` y `git diff --check` pasaron. Siguiente: commit directo a `main`, push y comprobar Actions para el SHA publicado.
+4. Supabase dev está activo y vacío. Data API habilitada, expone `public,extensions` y mantiene activa la autoexposición (última lectura del Dashboard). El usuario ya autorizó desactivar esa opción, pero los conectores disponibles no exponen una operación para cambiar ese ajuste; no se modificó. No aplicar SQL014 hasta cerrar la autoexposición y repetir el preflight seguro, además de terminar Gate L.
+5. No se encontró un plugin Cloudflare disponible ni credenciales locales de despliegue. Seguir con el build de release sólo después de aceptar C/Gate L; el hosting dev debe quedar privado y protegido antes de publicar contenido.
 
 # Acción de migración histórica — 17/10/2026
 

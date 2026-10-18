@@ -1,6 +1,6 @@
 # Estado general de la migración — actualización 18/10/2026
 
-**Checkpoint GitHub:** `main` está en `979a3d3f827553fabbb75634db89115bf48e8615`, autoría Tablero Contable, publicación directa sin PR. GitHub Actions run 16 está ejecutándose: https://github.com/tablerocontable-paris/TABLERO-CONTABLE/actions/runs/39151270747.
+**Checkpoint GitHub:** `main` está en `54105def6f9eac4e62cdc16fb2de4afd36d37904`, autoría Tablero Contable, publicación directa sin PR. GitHub Actions run 18 del checkpoint terminó `success`: https://github.com/tablerocontable-paris/TABLERO-CONTABLE/actions/runs/39151592703.
 
 **Familias revisadas localmente:**
 
@@ -8,9 +8,11 @@
 - `onboarding.saveDraft/submit commandReceipt` tras revocar membresía: Sol aceptó el alcance exacto, incluido en `3db7028`. PostgreSQL 17.11 140/140, `40P01=0`; Vitest focal 15/15. `submit` se autoriza con la versión inmutable del recibo.
 - `onboarding.submit` replay tras cambios de borrador: fix incluido en `979a3d3`, aceptado por Sol. Revalida la versión inmutable enviada ligada al recibo. R3 PostgreSQL 17.11 141/141, `40P01=0`; incluye ambos órdenes RC de replay y revocación A con bloqueo observado. Vitest focal 16/16 cubre A revocada/B activa (`42501`), A activa/B revocada (recibo exacto), borrador posterior vacío y argumentos alterados (`40001`). Evidencia: `docs/architecture/review-evidence/m2-2c-onboarding-submit-version-replay-20261018.json`.
 
-La suite completa del checkout pasó **732/732 en 74 archivos**; TypeScript, build del cliente y Worker pasaron. Los tests nuevos no comparan un snapshot completo de todos los fences/auditoría; el retorno del replay antes de las escrituras se verificó en SQL. La inversa A activa/B revocada está en PGlite, no en el runner PostgreSQL nativo.
+En esta actualización la suite completa pasó **734/734 en 74 archivos**, TypeScript, build del cliente y Worker pasaron. Esto valida el checkout local; el CI de GitHub todavía corresponde al checkpoint anterior hasta publicar el próximo commit.
 
-**Límites y siguiente paso:** el CI del commit `979a3d3` sigue pendiente. La auditoría Sol identificó como siguiente familia `task.createOneOff` commandReceipt query bajo revocación concurrente: la consulta valida snapshot de membresías, pero no usa locks/fences de coordinación; el runner cubre replay de `api.command_v1`, no esta ruta query. Preparar matriz acotada y que Luna implemente tras revisión del contrato. No declarar M2.2C/Gate L completo. SQL014 no se aplicó en Supabase: el proyecto dev sigue sin migraciones, y no hubo cambios en servicios remotos.
+**Supabase dev verificado:** organización `tablerocontable-paris DEV` (plan FREE), proyecto `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`), PostgreSQL 17.11, activo. El conector lista un solo proyecto; está vacío, sin tablas ni migraciones, y security/performance advisors no reportan hallazgos. El Dashboard confirma Data API habilitada, schemas expuestos `public, extensions` y “Automatically expose new tables” activado. Esa opción no fue modificada; no aplicar SQL014 ni crear tablas antes de cerrarla y repetir el preflight.
+
+**Límites y siguiente paso:** Sol aceptó el alcance local de `task.createOneOff commandReceipt` sobre los hashes registrados en `docs/architecture/review-evidence/m2-2c-oneoff-commandreceipt-20261018.json`. PostgreSQL 17.11 R7 143/143, `40P01=0`; Vitest focal 1/1; suite completa 734/734; TypeScript, cliente, Worker, `node --check` y `git diff --check` pasan. La matriz cubre lectura jefe/encargado, privacidad de otro actor/organización, perfiles inactivos, `manager_id` nulo, membresía de empresa revocada y snapshot sin cambios en heads/fences/audit/receipts. En RC la consulta bloquea al revocador y luego se deniega; en RR el snapshot obsoleto aborta `40001` y el reintento fresco da `42501`. La falta de `team_members` se prueba con un recibo sintético estructuralmente exacto: FK e historial de responsabilidad inmutable impiden recrearla junto a una asignación real viva. Tras el commit directo, comprobar CI del SHA publicado. Esto no afirma Gate L/M2.2C, Auth/HTTP hospedado ni Supabase aplicado. No hubo cambios remotos.
 
 # Estado histórico — A R7/R8 corregido localmente, 15/10/2026
 

@@ -1585,10 +1585,61 @@ try {
           const revocationRetry = await observer.query(`update public.company_memberships set active=false where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(actor)};`); assert.equal(revocationRetry.code, "00000", JSON.stringify(revocationRetry));
           await a.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(actor)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: actor, aal: "aal1" }))},false);set role authenticated;`);
           const replayAfterRevocation = await a.query(`select api.command_v1('${JSON.stringify(oneOff).replaceAll("'", "''")}'::jsonb);`); assert.equal(replayAfterRevocation.code, "42501", JSON.stringify(replayAfterRevocation));
+          const receiptQuery = { contractVersion: 1, kind: "commandReceipt", filters: { operationId: uid(1101) }, cursor: null, limit: 1 };
+          const receiptAfterRevocation = await a.query(`select api.query_v1('${JSON.stringify(receiptQuery).replaceAll("'", "''")}'::jsonb);`); assert.equal(receiptAfterRevocation.code, "42501", JSON.stringify(receiptAfterRevocation));
           const finalRaceState = (await observer.ok(`select (select count(*) from app_private.api_command_receipts where actor_id=${lit(actor)} and operation_id=${lit(uid(1101))})||'|'||(select count(*) from public.task_assignments where id=${lit(receipt.result.assignmentId)})||'|'||(select count(*) from public.task_instances where id=${lit(receipt.result.taskId)})||'|'||(select revision from app_private.api_creation_heads where organization_id=${lit(org)} and owner_id=${lit(actor)})||'|'||(select count(*) from app_private.api_operation_fences where actor_id=${lit(actor)} and operation_id=${lit(uid(1101))})||'|'||(select count(*) from public.audit_events where actor_id=${lit(actor)} and action='task.createOneOff')||'|'||(select fence_epoch from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id=${lit(actor)})||'|'||(select count(*) from app_private.company_membership_events where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(actor)});`)).at(-1);
           assert.equal(finalRaceState, replayFirstBaseline, "replay and revoked replay must preserve business state, receipts, fences, audit, and membership events");
           record("M2.2C one-off replay-first blocks concurrent revocation; revocation commits/retries and later replay denies", true, { blocked: replayFirstBlocked, replaySQLSTATE: replayFirst.code, revocationSQLSTATE: revocationAfterReplay.code, revocationRetrySQLSTATE: revocationRetry.code, laterReplaySQLSTATE: replayAfterRevocation.code, state: finalRaceState, sqlstate40P01: 0 });
           await observer.ok(`update public.company_memberships set active=true where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(actor)};`);
+        }
+        {
+          const query = { contractVersion: 1, kind: "commandReceipt", filters: { operationId: uid(1101) }, cursor: null, limit: 1 };
+          const membershipCommand = (operationId, active, revision, reason) => ({ contractVersion: 1, operationId, kind: "companyMembership.setActive", expectedRevisions: { [`membership:${company}:${actor}`]: String(revision) }, payload: { companyId: company, profileId: actor, active, reason } });
+          const membershipFenceBeforeQueries = Number((await observer.ok(`select fence_epoch from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id=${lit(actor)};`)).at(-1));
+          const membershipAccessFromBeforeQueries = (await observer.ok(`select coalesce(access_valid_from::text,'') from public.company_memberships where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(actor)};`)).at(-1);
+          await claims({ role: "authenticated", sub: actor, aal: "aal1" }, actor);
+          await a.ok("begin isolation level read committed;");
+          const readFirst = await a.query(`select api.query_v1('${JSON.stringify(query).replaceAll("'", "''")}'::jsonb);`);
+          assert.equal(readFirst.code, "00000", JSON.stringify(readFirst));
+          assert.equal(JSON.parse(readFirst.lines.at(-1)).data.found, true);
+          const queryPid = Number((await a.ok("select pg_backend_pid();")).at(-1));
+          await b.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(boss)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: boss, aal: "aal2" }))},false);set role authenticated;begin isolation level read committed;`);
+          const revokePid = Number((await b.ok("select pg_backend_pid();")).at(-1));
+          const revoke = membershipCommand(uid(1120), false, 0, "Receipt query race, read first");
+          const revokePending = b.query(`select api.command_v1('${JSON.stringify(revoke).replaceAll("'", "''")}'::jsonb);`);
+          let queryBlockedRevoker = false; const queryBlockDeadline = Date.now() + 10000;
+          while (Date.now() < queryBlockDeadline) {
+            if ((await observer.ok(`select ${queryPid}=any(pg_catalog.pg_blocking_pids(${revokePid}));`)).at(-1) === "t") { queryBlockedRevoker = true; break; }
+            await new Promise((done) => setTimeout(done, 20));
+          }
+          assert.equal(queryBlockedRevoker, true, "one-off receipt query did not serialize against membership revocation");
+          await a.ok("commit;");
+          const revokeAfterQuery = await revokePending; assert.equal(revokeAfterQuery.code, "00000", JSON.stringify(revokeAfterQuery)); await b.ok("commit;");
+          const queryAfterRevocation = await a.query(`select api.query_v1('${JSON.stringify(query).replaceAll("'", "''")}'::jsonb);`);
+          assert.equal(queryAfterRevocation.code, "42501", JSON.stringify(queryAfterRevocation));
+          await a.ok("reset role;");
+          const restore = membershipCommand(uid(1121), true, 1, "Restore for RR receipt query race");
+          await b.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(boss)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: boss, aal: "aal2" }))},false);set role authenticated;`);
+          const restored = await b.query(`select api.command_v1('${JSON.stringify(restore).replaceAll("'", "''")}'::jsonb);`); assert.equal(restored.code, "00000", JSON.stringify(restored));
+
+          await claims({ role: "authenticated", sub: actor, aal: "aal1" }, actor);
+          await a.ok(`begin isolation level repeatable read;select active,revision from public.company_memberships where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(actor)};`);
+          const revokeRR = membershipCommand(uid(1122), false, 2, "Receipt query race, revoke first");
+          const revokedRR = await b.query(`select api.command_v1('${JSON.stringify(revokeRR).replaceAll("'", "''")}'::jsonb);`); assert.equal(revokedRR.code, "00000", JSON.stringify(revokedRR));
+          const staleQuery = await a.query(`select api.query_v1('${JSON.stringify(query).replaceAll("'", "''")}'::jsonb);`);
+          await a.ok("rollback;");
+          assert.equal(staleQuery.code, "40001", JSON.stringify(staleQuery));
+          const freshQuery = await a.query(`select api.query_v1('${JSON.stringify(query).replaceAll("'", "''")}'::jsonb);`);
+          assert.equal(freshQuery.code, "42501", JSON.stringify(freshQuery));
+          const finalQueryState = (await observer.ok(`select (select active::text||'|'||revision from public.company_memberships where company_id=${lit(company)} and profile_id=${lit(actor)})||'|'||(select count(*) from app_private.api_command_receipts where actor_id=${lit(actor)} and operation_id=${lit(uid(1101))})||'|'||(select count(*) from public.task_instances where id=${lit(receipt.result.taskId)})||'|'||(select fence_epoch from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id=${lit(actor)});`)).at(-1);
+          assert.deepEqual(finalQueryState.split("|"), ["false", "3", "1", "1", String(membershipFenceBeforeQueries + 3)], finalQueryState);
+          record("M2.2C one-off commandReceipt serializes read-first RC and aborts stale revoke-first RR", true, { readFirstSQLSTATE: readFirst.code, revocationBlockedByQuery: queryBlockedRevoker, revokeAfterQuerySQLSTATE: revokeAfterQuery.code, postRevocationSQLSTATE: queryAfterRevocation.code, revokeFirstSQLSTATE: revokedRR.code, staleRRSQLSTATE: staleQuery.code, freshRetrySQLSTATE: freshQuery.code, state: finalQueryState, sqlstate40P01: 0 });
+          await b.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(boss)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: boss, aal: "aal2" }))},false);set role authenticated;`);
+          const restoreFinal = membershipCommand(uid(1123), true, 3, "Restore after RR receipt query test");
+          const finalRestore = await b.query(`select api.command_v1('${JSON.stringify(restoreFinal).replaceAll("'", "''")}'::jsonb);`); assert.equal(finalRestore.code, "00000", JSON.stringify(finalRestore));
+          // Restore this shared synthetic fixture's pre-test effective-date setting
+          // so later unrelated scenarios retain their original month-start access.
+          await observer.ok(`update public.company_memberships set access_valid_from=${membershipAccessFromBeforeQueries ? `${lit(membershipAccessFromBeforeQueries)}::timestamptz` : "null"} where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(actor)};`);
         }
         {
           const manager = uid(1110), managerOperation = uid(1111);
@@ -1598,20 +1649,84 @@ try {
             insert into public.company_memberships(organization_id,company_id,profile_id) values(${lit(org)},${lit(company)},${lit(manager)});
             update public.profiles set manager_id=${lit(manager)} where id=${lit(actor)};`);
           const ownerCreationRevision = (await observer.ok(`select revision from app_private.api_creation_heads where organization_id=${lit(org)} and owner_id=${lit(actor)};`)).at(-1);
-          const managedOneOff = { contractVersion: 1, operationId: managerOperation, kind: "task.createOneOff", expectedRevisions: { [`creation:${actor}`]: ownerCreationRevision }, payload: { ownerId: actor, companyId: company, teamId: team, source: { type: "custom", definition: { kind: "operativa", title: "M2.2C manager one-off null guard", objective: "", sector: "Test", unit: "comprobantes" } }, scheduledOn, dueDate: null, priority: "Media" } };
+          const managerScheduledOn = (await observer.ok("select (date_trunc('month',now() at time zone 'America/Argentina/Buenos_Aires')+interval '1 month')::date::text;")).at(-1);
+          const managedOneOff = { contractVersion: 1, operationId: managerOperation, kind: "task.createOneOff", expectedRevisions: { [`creation:${actor}`]: ownerCreationRevision }, payload: { ownerId: actor, companyId: company, teamId: team, source: { type: "custom", definition: { kind: "operativa", title: "M2.2C manager one-off null guard", objective: "", sector: "Test", unit: "comprobantes" } }, scheduledOn: managerScheduledOn, dueDate: null, priority: "Media" } };
           await claims({ role: "authenticated", sub: manager, aal: "aal2" }, manager);
           const made = await a.query(`select api.command_v1('${JSON.stringify(managedOneOff).replaceAll("'", "''")}'::jsonb);`); assert.equal(made.code, "00000", JSON.stringify(made));
+          const receiptQuery = operationId => ({ contractVersion: 1, kind: "commandReceipt", filters: { operationId }, cursor: null, limit: 1 });
+          const managedReceipt = await a.query(`select api.query_v1('${JSON.stringify(receiptQuery(managerOperation)).replaceAll("'", "''")}'::jsonb);`);
+          assert.equal(managedReceipt.code, "00000", JSON.stringify(managedReceipt)); assert.equal(JSON.parse(managedReceipt.lines.at(-1)).data.found, true);
+          await a.ok("reset role;");
+          const bossOperation = uid(1114), bossCreationRevision = (await observer.ok(`select revision from app_private.api_creation_heads where organization_id=${lit(org)} and owner_id=${lit(actor)};`)).at(-1);
+          const bossOneOff = { ...managedOneOff, operationId: bossOperation, expectedRevisions: { [`creation:${actor}`]: bossCreationRevision }, payload: { ...managedOneOff.payload, source: { ...managedOneOff.payload.source, definition: { ...managedOneOff.payload.source.definition, title: "M2.2C jefe one-off receipt read" } } } };
+          await claims({ role: "authenticated", sub: boss, aal: "aal2" }, boss);
+          const bossMade = await a.query(`select api.command_v1('${JSON.stringify(bossOneOff).replaceAll("'", "''")}'::jsonb);`); assert.equal(bossMade.code, "00000", JSON.stringify(bossMade));
+          const bossReceipt = await a.query(`select api.query_v1('${JSON.stringify(receiptQuery(bossOperation)).replaceAll("'", "''")}'::jsonb);`);
+          assert.equal(bossReceipt.code, "00000", JSON.stringify(bossReceipt)); assert.equal(JSON.parse(bossReceipt.lines.at(-1)).data.found, true);
+          await a.ok("reset role;");
+          const receiptState = async () => (await observer.ok(`select jsonb_build_object(
+            'creationHeads',(select coalesce(jsonb_agg(to_jsonb(h) order by owner_id),'[]'::jsonb) from app_private.api_creation_heads h where organization_id=${lit(org)} and owner_id=${lit(actor)}),
+            'monthFences',(select coalesce(jsonb_agg(to_jsonb(f) order by period),'[]'::jsonb) from app_private.api_month_fences f where owner_id=${lit(actor)}),
+            'membershipFences',(select to_jsonb(f) from app_private.api_membership_fences f where organization_id=${lit(org)} and profile_id=${lit(actor)}),
+            'operationFences',(select coalesce(jsonb_agg(to_jsonb(f) order by actor_id,operation_id),'[]'::jsonb) from app_private.api_operation_fences f where (actor_id,operation_id) in ((${lit(manager)},${lit(managerOperation)}),(${lit(boss)},${lit(bossOperation)}))),
+            'receipts',(select coalesce(jsonb_agg(to_jsonb(r) order by actor_id,operation_id),'[]'::jsonb) from app_private.api_command_receipts r where (actor_id,operation_id) in ((${lit(manager)},${lit(managerOperation)}),(${lit(boss)},${lit(bossOperation)}))),
+            'audit',(select coalesce(jsonb_agg(to_jsonb(e) order by at),'[]'::jsonb) from public.audit_events e where actor_id in (${lit(manager)},${lit(boss)}) and action='task.createOneOff')
+          )::text;`)).at(-1);
+          const receiptSnapshotBefore = await receiptState();
+          await claims({ role: "authenticated", sub: actor, aal: "aal1" }, actor);
+          const managerReceiptHidden = await a.query(`select api.query_v1('${JSON.stringify(receiptQuery(managerOperation)).replaceAll("'", "''")}'::jsonb);`);
+          assert.equal(managerReceiptHidden.code, "00000", JSON.stringify(managerReceiptHidden)); assert.equal(JSON.parse(managerReceiptHidden.lines.at(-1)).data.found, false);
+          await claims({ role: "authenticated", sub: manager, aal: "aal2" }, manager);
+          const managedReceiptAgain = await a.query(`select api.query_v1('${JSON.stringify(receiptQuery(managerOperation)).replaceAll("'", "''")}'::jsonb);`);
+          assert.equal(managedReceiptAgain.code, "00000", JSON.stringify(managedReceiptAgain)); assert.equal(JSON.parse(managedReceiptAgain.lines.at(-1)).data.found, true);
+          await claims({ role: "authenticated", sub: boss, aal: "aal2" }, boss);
+          const bossReceiptAgain = await a.query(`select api.query_v1('${JSON.stringify(receiptQuery(bossOperation)).replaceAll("'", "''")}'::jsonb);`);
+          assert.equal(bossReceiptAgain.code, "00000", JSON.stringify(bossReceiptAgain)); assert.equal(JSON.parse(bossReceiptAgain.lines.at(-1)).data.found, true);
+          await a.ok("reset role;");
+          const receiptSnapshotAfter = await receiptState(); assert.equal(receiptSnapshotAfter, receiptSnapshotBefore, "receipt reads must not change heads, fences, audit, or receipts");
           await a.ok("reset role;");
           await observer.ok(`update public.profiles set manager_id=null where id=${lit(actor)};`);
           await claims({ role: "authenticated", sub: manager, aal: "aal2" }, manager);
+          const managerReceiptOutOfScope = await a.query(`select api.query_v1('${JSON.stringify(receiptQuery(managerOperation)).replaceAll("'", "''")}'::jsonb);`); assert.equal(managerReceiptOutOfScope.code, "42501", JSON.stringify(managerReceiptOutOfScope));
           const replay = await a.query(`select api.command_v1('${JSON.stringify(managedOneOff).replaceAll("'", "''")}'::jsonb);`); assert.equal(replay.code, "42501", JSON.stringify(replay));
           const freshRevision = (await observer.ok(`select revision from app_private.api_creation_heads where organization_id=${lit(org)} and owner_id=${lit(actor)};`)).at(-1);
           const firstExecution = { ...managedOneOff, operationId: uid(1112), expectedRevisions: { [`creation:${actor}`]: freshRevision } };
           const firstDenied = await a.query(`select api.command_v1('${JSON.stringify(firstExecution).replaceAll("'", "''")}'::jsonb);`); assert.equal(firstDenied.code, "42501", JSON.stringify(firstDenied));
           const effectState = (await observer.ok(`select (select count(*) from public.task_assignments where owner_id=${lit(actor)} and title='M2.2C manager one-off null guard')||'|'||(select count(*) from public.task_instances where owner_id=${lit(actor)} and title='M2.2C manager one-off null guard')||'|'||(select revision from app_private.api_creation_heads where organization_id=${lit(org)} and owner_id=${lit(actor)})||'|'||(select count(*) from app_private.api_command_receipts where actor_id=${lit(manager)} and operation_id=${lit(managerOperation)})||'|'||(select count(*) from app_private.api_operation_fences where actor_id=${lit(manager)} and operation_id=${lit(managerOperation)});`)).at(-1);
-          assert.equal(effectState, "1|1|23|1|1");
+          assert.equal(effectState, `1|1|${Number(bossCreationRevision) + 1}|1|1`);
           await a.ok("reset role;");
-          record("M2.2C encargado loses manager_id; exact replay and first one-off execution deny null relationship", true, { replaySQLSTATE: replay.code, firstExecutionSQLSTATE: firstDenied.code, inertAfterDeniedCalls: effectState });
+          record("M2.2C one-off commandReceipt permits jefe/encargado own receipts, hides actor-private receipts, is read-only, and denies manager_id NULL", true, { managerReadSQLSTATE: managedReceipt.code, bossReadSQLSTATE: bossReceipt.code, foreignActorFound: JSON.parse(managerReceiptHidden.lines.at(-1)).data.found, managerOutOfScopeSQLSTATE: managerReceiptOutOfScope.code, snapshotStable: receiptSnapshotBefore === receiptSnapshotAfter, replaySQLSTATE: replay.code, firstExecutionSQLSTATE: firstDenied.code, inertAfterDeniedCalls: effectState });
+
+          // The live assignment FK and sealed responsibility-set references
+          // make a real receipt without team_members unreachable. Use a fresh
+          // no-assignment employee and seed a structurally exact synthetic
+          // receipt once; never modify its arguments or weaken constraints.
+          const teamOwner = uid(1117), teamOperation = uid(1118), syntheticTask = uid(2117), syntheticAssignment = uid(2118);
+          const teamCommand = { contractVersion: 1, operationId: teamOperation, kind: "task.createOneOff", expectedRevisions: { [`creation:${teamOwner}`]: "0" }, payload: { ownerId: teamOwner, companyId: company, teamId: team, source: { type: "custom", definition: { kind: "operativa", title: "Synthetic historical receipt team guard", objective: "", sector: "Test", unit: "comprobantes" } }, scheduledOn: managerScheduledOn, dueDate: null, priority: "Media" } };
+          const teamResult = { contractVersion: 1, operationId: teamOperation, kind: "task.createOneOff", result: { assignmentId: syntheticAssignment, taskId: syntheticTask, taskRevision: "1" } };
+          await observer.ok(`insert into auth.users(id) values(${lit(teamOwner)});
+            insert into public.profiles(id,organization_id,name,role,manager_id,sector,branch,position) values(${lit(teamOwner)},${lit(org)},'Synthetic no-assignment employee','empleado',${lit(manager)},'Test','Test','Employee');
+            insert into public.company_memberships(organization_id,company_id,profile_id) values(${lit(org)},${lit(company)},${lit(teamOwner)});
+            insert into public.team_members(organization_id,team_id,profile_id) values(${lit(org)},${lit(team)},${lit(teamOwner)});
+            insert into app_private.api_command_receipts(actor_id,operation_id,organization_id,kind,arguments,result) values(${lit(manager)},${lit(teamOperation)},${lit(org)},'task.createOneOff','${JSON.stringify(teamCommand)}'::jsonb,'${JSON.stringify(teamResult)}'::jsonb);
+            delete from public.team_members where organization_id=${lit(org)} and team_id=${lit(team)} and profile_id=${lit(teamOwner)};`);
+          const teamReadSnapshot = async () => (await observer.ok(`select jsonb_build_object(
+            'profile',(select to_jsonb(p) from public.profiles p where id=${lit(teamOwner)}),
+            'head',(select to_jsonb(h) from app_private.api_creation_heads h where organization_id=${lit(org)} and owner_id=${lit(teamOwner)}),
+            'monthFences',(select coalesce(jsonb_agg(to_jsonb(f) order by period),'[]'::jsonb) from app_private.api_month_fences f where owner_id=${lit(teamOwner)}),
+            'membershipFence',(select to_jsonb(f) from app_private.api_membership_fences f where organization_id=${lit(org)} and profile_id=${lit(teamOwner)}),
+            'operationFence',(select to_jsonb(f) from app_private.api_operation_fences f where actor_id=${lit(manager)} and operation_id=${lit(teamOperation)}),
+            'receipt',(select to_jsonb(r) from app_private.api_command_receipts r where actor_id=${lit(manager)} and operation_id=${lit(teamOperation)}),
+            'audit',(select coalesce(jsonb_agg(to_jsonb(e) order by at),'[]'::jsonb) from public.audit_events e where actor_id=${lit(manager)} and entity_id=${lit(syntheticAssignment)} and action='task.createOneOff'),
+            'businessRows',jsonb_build_array((select count(*) from public.task_instances where id=${lit(syntheticTask)}),(select count(*) from public.task_assignments where id=${lit(syntheticAssignment)}),(select count(*) from public.team_members where organization_id=${lit(org)} and team_id=${lit(team)} and profile_id=${lit(teamOwner)}))
+          )::text;`)).at(-1);
+          const teamBeforeRead = await teamReadSnapshot();
+          await claims({ role: "authenticated", sub: manager, aal: "aal2" }, manager);
+          const teamDenied = await a.query(`select api.query_v1('${JSON.stringify(receiptQuery(teamOperation)).replaceAll("'", "''")}'::jsonb);`); assert.equal(teamDenied.code, "42501", JSON.stringify(teamDenied));
+          await a.ok("reset role;");
+          const teamAfterRead = await teamReadSnapshot(); assert.equal(teamAfterRead, teamBeforeRead, "synthetic team-out-of-scope denied receipt query must not write");
+          await observer.ok(`insert into public.team_members(organization_id,team_id,profile_id) values(${lit(org)},${lit(team)},${lit(teamOwner)});`);
+          record("M2.2C synthetic commandReceipt read denies with missing team_members; no assignment/constraint disabled", true, { deniedSQLSTATE: teamDenied.code, receiptFixture: "synthetic exact-version shape; not emitted by command_v1", argumentsUntampered: true, noAssignmentRows: true, snapshotStable: teamBeforeRead === teamAfterRead, membershipRestored: true });
         }
         await claims({ role: "authenticated", sub: actor, aal: "aal1" }, actor);
         await a.ok("reset role;begin isolation level repeatable read;");
