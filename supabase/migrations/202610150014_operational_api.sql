@@ -1917,7 +1917,7 @@ end $$;
 create function app_private.api_onboarding_command(p jsonb) returns jsonb
 language plpgsql security definer set search_path='' as $$
 declare actor uuid:=auth.uid(); c jsonb; org uuid; role_v text; k text; op uuid; payload jsonb; expected jsonb; args jsonb;
- existing app_private.api_command_receipts%rowtype; req public.onboarding_requests%rowtype; req_id uuid; owner_v uuid; owner_rev bigint; expected_owner bigint; expected_rev bigint; expected_draft bigint; next_rev integer; next_draft integer; reason_v text; draft_v jsonb; template_ids uuid[]:='{}'; scopes text[]; result_v jsonb; owner_profile public.profiles%rowtype; membership_line jsonb;
+ existing app_private.api_command_receipts%rowtype; req public.onboarding_requests%rowtype; req_id uuid; owner_v uuid; owner_rev bigint; expected_owner bigint; expected_rev bigint; expected_draft bigint; next_rev integer; next_draft integer; reason_v text; draft_v jsonb; receipt_revision integer; template_ids uuid[]:='{}'; scopes text[]; result_v jsonb; owner_profile public.profiles%rowtype; membership_line jsonb;
 begin
  if actor is null then raise exception using errcode='28000',message='Autenticación requerida'; end if;
  if octet_length(coalesce(p::text,''))>32768 or not app_private.api_exact_keys(p,array['contractVersion','operationId','kind','expectedRevisions','payload']) or jsonb_typeof(p->'contractVersion') is distinct from 'number' or p->>'contractVersion'<>'1' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
@@ -1947,7 +1947,6 @@ begin
   expected_rev:=app_private.api_expected(expected,'onboarding:'||req_id); expected_draft:=app_private.api_expected(expected,'onboardingDraft:'||req_id);
   select * into req from public.onboarding_requests where id=req_id and owner_id=actor and organization_id=org;
   if not found then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
-  template_ids:=app_private.api_validate_onboarding_v2(req.draft_payload,true,org);
  elsif k='onboarding.requestChanges' then
   if role_v not in ('jefe','encargado') or c->'authentication'->>'aal'<>'aal2' or not app_private.api_exact_keys(payload,array['requestId','reason']) then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
   req_id:=app_private.api_uuid(payload,'requestId'); reason_v:=app_private.api_text(payload,'reason',5,1000);
@@ -1963,11 +1962,29 @@ begin
  args:=jsonb_build_object('kind',k,'payload',payload,'expectedRevisions',expected);
  perform public._coordination_receipt_lock(actor,op);
  select * into existing from app_private.api_command_receipts where actor_id=actor and operation_id=op;
+ if existing.actor_id is not null then
+  if existing.kind<>k or existing.arguments is distinct from args then raise exception using errcode='40001',message='Identificador de operación ya utilizado'; end if;
+  if existing.organization_id<>org then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
+  if k='onboarding.submit' then
+   if existing.result#>>'{result,requestId}' is distinct from req_id::text then raise exception using errcode='40001',message='Recibo de inducción inválido'; end if;
+   begin receipt_revision:=(existing.result#>>'{result,revision}')::integer; exception when others then raise exception using errcode='40001',message='Recibo de inducción inválido'; end;
+   if receipt_revision is null or receipt_revision<1 then raise exception using errcode='40001',message='Recibo de inducción inválido'; end if;
+   select v.payload into draft_v from public.onboarding_request_versions v where v.organization_id=org and v.request_id=req_id and v.revision=receipt_revision and v.submitted_by=actor;
+   if not found then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
+  end if;
+ end if;
+ if k='onboarding.submit' then
+  if existing.actor_id is null then draft_v:=req.draft_payload; end if;
+  if existing.actor_id is null then template_ids:=app_private.api_validate_onboarding_v2(draft_v,true,org); end if;
+ end if;
  perform public._coordination_lock_keys(1102,array[actor::text]);
  perform public._coordination_lock_keys(1103,array(select distinct x::text from unnest(array[actor,owner_v]) x order by x::text));
  scopes:=case when k='onboarding.requestChanges' then array['onboarding:'||req_id] else array['onboarding:'||req_id,'onboardingDraft:'||req_id] end;
  if k='onboarding.saveDraft' then scopes:=array['onboardingOwner:'||actor]||case when req_id is null then '{}'::text[] else scopes end; end if;
- if k='onboarding.submit' then scopes:=scopes||coalesce((select array_agg(distinct 'template:'||v.template_id::text) from public.task_template_versions v where v.id=any(template_ids)),'{}'::text[]); end if;
+ if k='onboarding.submit' then
+  scopes:=scopes||coalesce((select array_agg(distinct 'template:'||v.template_id::text) from public.task_template_versions v where v.id=any(template_ids)),'{}'::text[])
+   ||coalesce((select array_agg(distinct 'membership:'||(line->>'companyId')||':'||actor::text) from jsonb_array_elements(draft_v->'lines') line),'{}'::text[]);
+ end if;
  perform public._coordination_lock_keys(1105,scopes);
  if k in ('onboarding.submit','onboarding.requestChanges') then
   select * into req from public.onboarding_requests where id=req_id and organization_id=org and owner_id=owner_v for update;
@@ -1983,7 +2000,7 @@ begin
   end loop;
  end if;
  if k='onboarding.submit' then
-  for membership_line in select value from jsonb_array_elements(req.draft_payload->'lines') order by value->>'companyId',value->>'teamId' loop
+  for membership_line in select value from jsonb_array_elements(draft_v->'lines') order by value->>'companyId',value->>'teamId' loop
    perform 1 from public.company_memberships cm where cm.organization_id=org and cm.company_id=(membership_line->>'companyId')::uuid and cm.profile_id=actor and cm.active for share;
    if not found then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
    perform 1 from public.team_members tm where tm.organization_id=org and tm.team_id=(membership_line->>'teamId')::uuid and tm.profile_id=actor for share;

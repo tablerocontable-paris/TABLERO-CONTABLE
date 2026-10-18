@@ -1006,6 +1006,45 @@ try {
         const submitted = await a.query(`select api.command_v1('${JSON.stringify(submit).replaceAll("'", "''")}'::jsonb);`); assert.equal(submitted.code, "00000", JSON.stringify(submitted)); await a.ok("reset role;");
         return requestId;
       };
+      {
+        const owner = uid(150500), companyB = uid(150501), teamB = uid(150502), lineA = uid(150503), lineB = uid(150504);
+        await observer.ok(`insert into auth.users(id) values(${lit(owner)});insert into public.profiles(id,organization_id,name,role,sector,branch,position) values(${lit(owner)},${lit(org)},'M2.2C immutable submit version replay','empleado','Test','Test','Test');insert into public.companies(id,organization_id,name) values(${lit(companyB)},${lit(org)},'Replay version B');insert into public.teams(id,organization_id,name,manager_id) values(${lit(teamB)},${lit(org)},'Replay version team B',${lit(boss)});insert into public.company_memberships(organization_id,company_id,profile_id) values(${lit(org)},${lit(company)},${lit(owner)}),(${lit(org)},${lit(companyB)},${lit(owner)});insert into public.team_members(organization_id,team_id,profile_id) values(${lit(org)},${lit(team)},${lit(owner)}),(${lit(org)},${lit(teamB)},${lit(owner)});`);
+        const draftA = { ...requestDraft, lines: [{ ...requestDraft.lines[0], lineId: lineA }] };
+        await claims({ role: "authenticated", sub: owner, aal: "aal1" }, owner);
+        const saveA = { contractVersion: 1, operationId: uid(150505), kind: "onboarding.saveDraft", expectedRevisions: { [`onboardingOwner:${owner}`]: "0" }, payload: { requestId: null, draft: draftA } };
+        const savedA = await a.query(`select api.command_v1('${JSON.stringify(saveA).replaceAll("'", "''")}'::jsonb);`); assert.equal(savedA.code, "00000", JSON.stringify(savedA));
+        const request = JSON.parse(savedA.lines.at(-1)).result.requestId, submitOp = uid(150506);
+        const submit = { contractVersion: 1, operationId: submitOp, kind: "onboarding.submit", expectedRevisions: { [`onboarding:${request}`]: "0", [`onboardingDraft:${request}`]: "1" }, payload: { requestId: request } };
+        const submitted = await a.query(`select api.command_v1('${JSON.stringify(submit).replaceAll("'", "''")}'::jsonb);`); assert.equal(submitted.code, "00000", JSON.stringify(submitted));
+        const exactReceipt = JSON.parse(submitted.lines.at(-1));
+        await claims({ role: "authenticated", sub: boss, aal: "aal2" }, boss);
+        const changes = { contractVersion: 1, operationId: uid(150507), kind: "onboarding.requestChanges", expectedRevisions: { [`onboarding:${request}`]: "1" }, payload: { requestId: request, reason: "Cambiar a B" } };
+        const changed = await a.query(`select api.command_v1('${JSON.stringify(changes).replaceAll("'", "''")}'::jsonb);`); assert.equal(changed.code, "00000", JSON.stringify(changed));
+        const draftB = { ...requestDraft, lines: [{ ...requestDraft.lines[0], lineId: lineB, companyId: companyB, teamId: teamB }] };
+        await claims({ role: "authenticated", sub: owner, aal: "aal1" }, owner);
+        const saveB = { contractVersion: 1, operationId: uid(150508), kind: "onboarding.saveDraft", expectedRevisions: { [`onboardingOwner:${owner}`]: "3", [`onboarding:${request}`]: "1", [`onboardingDraft:${request}`]: "1" }, payload: { requestId: request, draft: draftB } };
+        const savedB = await a.query(`select api.command_v1('${JSON.stringify(saveB).replaceAll("'", "''")}'::jsonb);`); assert.equal(savedB.code, "00000", JSON.stringify(savedB));
+        await claims({ role: "authenticated", sub: owner, aal: "aal1" }, owner);
+        const revokeA = { contractVersion: 1, operationId: uid(150509), kind: "companyMembership.setActive", expectedRevisions: { [`membership:${company}:${owner}`]: "0" }, payload: { companyId: company, profileId: owner, active: false, reason: "Submitted A revoked" } };
+        await a.ok("begin isolation level read committed;");
+        const replayPid = Number((await a.ok("select pg_backend_pid();")).at(-1));
+        const replayFirst = await a.query(`select api.command_v1('${JSON.stringify(submit).replaceAll("'", "''")}'::jsonb);`);
+        assert.equal(replayFirst.code, "00000", JSON.stringify(replayFirst));
+        assert.deepEqual(JSON.parse(replayFirst.lines.at(-1)).result, exactReceipt.result);
+        await b.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(boss)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: boss, aal: "aal2" }))},false);set role authenticated;begin isolation level read committed;`);
+        const revokerPid = Number((await b.ok("select pg_backend_pid();")).at(-1));
+        const revokePending = b.query(`select api.command_v1('${JSON.stringify(revokeA).replaceAll("'", "''")}'::jsonb);`);
+        let replayBlockedRevocation = false; const replayDeadline = Date.now() + 10000;
+        while (Date.now() < replayDeadline) { if ((await observer.ok(`select ${replayPid}=any(pg_catalog.pg_blocking_pids(${revokerPid}));`)).at(-1) === "t") { replayBlockedRevocation = true; break; } await new Promise(done => setTimeout(done, 20)); }
+        await a.ok("commit;"); const revokedA = await revokePending; await b.ok(revokedA.code === "00000" ? "commit;" : "rollback;");
+        assert.equal(replayBlockedRevocation, true); assert.equal(revokedA.code, "00000", JSON.stringify(revokedA));
+        await claims({ role: "authenticated", sub: owner, aal: "aal1" }, owner);
+        const replayDenied = await a.query(`select api.command_v1('${JSON.stringify(submit).replaceAll("'", "''")}'::jsonb);`); assert.equal(replayDenied.code, "42501", JSON.stringify(replayDenied));
+        await a.ok("reset role;"); await b.ok("reset role;");
+        const state = (await observer.ok(`select (select active::text from public.company_memberships where company_id=${lit(company)} and profile_id=${lit(owner)})||'|'||(select active::text from public.company_memberships where company_id=${lit(companyB)} and profile_id=${lit(owner)})||'|'||(select revision::text from public.onboarding_request_versions where request_id=${lit(request)} and revision=1)||'|'||(select count(*) from public.onboarding_request_versions where request_id=${lit(request)})||'|'||(select count(*) from app_private.api_command_receipts where operation_id=${lit(submitOp)});`)).at(-1);
+        assert.equal(state, "false|true|1|1|1", state);
+        record("M2.2C exact submit replay authorizes immutable A and serializes before revoking its membership", true, { submitSQLSTATE: submitted.code, requestChangesSQLSTATE: changed.code, saveDraftBSQLSTATE: savedB.code, replayFirstSQLSTATE: replayFirst.code, revokerBlockedByReplay: replayBlockedRevocation, revokeSQLSTATE: revokedA.code, replayAfterRevocationSQLSTATE: replayDenied.code, storedReceipt: exactReceipt.result, finalMembershipsAndVersions: state });
+      }
       const saveRequest = { contractVersion: 1, operationId: uid(350), kind: "onboarding.saveDraft", expectedRevisions: { [`onboardingOwner:${actor}`]: onboardingRevision }, payload: { requestId: null, draft: requestDraft } };
       await claims({ role: "authenticated", sub: actor, aal: "aal1" });
       const savedRequestCall = await a.query(`select api.command_v1('${JSON.stringify(saveRequest).replaceAll("'", "''")}'::jsonb);`);

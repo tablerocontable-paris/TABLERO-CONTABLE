@@ -1,14 +1,16 @@
 # Estado general de la migración — actualización 18/10/2026
 
-**Checkpoint GitHub:** `main` está en `a08e35e3afc92e03d71ed4c2519cf2d8a4c37372`, autoría Tablero Contable; se publicó directamente, sin PR. GitHub Actions `Validar cambio` terminó **success**: https://github.com/tablerocontable-paris/TABLERO-CONTABLE/actions/runs/39149013086. El árbol local continúa sobre ese mismo commit.
+**Checkpoint GitHub:** `main` está en `3db70282c323ff344c43d8695671f6933bc7efd9`, autoría Tablero Contable, publicación directa sin PR. GitHub Actions del checkpoint terminó **success**: https://github.com/tablerocontable-paris/TABLERO-CONTABLE/actions/runs/39150112299.
 
-**Familia `task.createOneOff`:** Sol aceptó los hashes exactos y evidencia; PostgreSQL 17.11 138/138, `40P01=0`; suite focal 14/14 y suite completa anterior 730/730. Evidencia: `docs/architecture/review-evidence/m2-2c-oneoff-replay-20261017.json`. Quedó incluida en `a08e35e`.
+**Familias revisadas localmente:**
 
-**Siguiente familia, local y todavía sin commit:** se corrige el acceso a `commandReceipt` de `onboarding.saveDraft` y `onboarding.submit` después de revocar la membresía empresarial. Sol aceptó este alcance acotado sin hallazgos P0–P2. Hashes y evidencia: `docs/architecture/review-evidence/m2-2c-onboarding-commandreceipt-20261018.json`; Vitest focal 15/15 y PostgreSQL 17.11 140/140, `40P01=0`. Se autoriza con locks de solo lectura; `submit` usa el payload inmutable de la revisión que figura en el recibo. La matriz nativa demuestra la carrera de `submit`; `saveDraft` tiene denegación secuencial, pero todavía no toda la matriz concurrente.
+- `task.createOneOff` replay y permisos de owner: Sol aceptó el alcance exacto, incluido en `a08e35e`. PostgreSQL 17.11 138/138, `40P01=0`; Vitest focal 14/14.
+- `onboarding.saveDraft/submit commandReceipt` tras revocar membresía: Sol aceptó el alcance exacto, incluido en `3db7028`. PostgreSQL 17.11 140/140, `40P01=0`; Vitest focal 15/15. `submit` se autoriza con la versión inmutable del recibo.
+- `onboarding.submit` replay tras cambios de borrador: fix local aprobado por Sol. Tras submit de A, requestChanges y draft B, el replay valida la versión original indicada en el recibo. R3 PostgreSQL 17.11 141/141, `40P01=0`; incluye ambos órdenes RC de replay y revocación A con bloqueo observado. Vitest focal 16/16 cubre A revocada/B activa (`42501`), A activa/B revocada (recibo exacto), borrador posterior vacío y argumentos alterados (`40001`). Evidencia: `docs/architecture/review-evidence/m2-2c-onboarding-submit-version-replay-20261018.json`.
 
-La suite oficial completa del candidato local pasó **731/731 en 74 archivos** (comando del package con exclusión `tmp/**`); TypeScript, build cliente y Worker pasaron. El run inicial sin excluir `tmp/**` fue interrumpido al incluir tests temporales externos al proyecto y fallar dos de ellos; no forma parte del resultado oficial.
+La suite completa del checkout pasó **732/732 en 74 archivos**; TypeScript, build del cliente y Worker pasaron. Los tests nuevos no comparan un snapshot completo de todos los fences/auditoría; el retorno del replay antes de las escrituras se verificó en SQL. La inversa A activa/B revocada está en PGlite, no en el runner PostgreSQL nativo.
 
-**Límites y próximo paso:** solo está aceptada esta familia de `commandReceipt`; quedan otras familias C/Gate L. Mantener SQL014 sin aplicar en Supabase. No hubo cambios remotos de base de datos ni servicios. Después del registro/documentación, publicar el candidato local aceptado directamente en `main` y seguir con la siguiente familia de concurrencia; no declarar M2.2C/Gate L completo.
+**Límites y siguiente paso:** el candidato local aún no tiene commit; después de guardar estado/evidencia, publicar directamente en `main` y continuar con las restantes familias C/Gate L. No declarar M2.2C/Gate L completo. SQL014 no se aplicó en Supabase: el proyecto dev sigue sin migraciones, y no hubo cambios en servicios remotos.
 # Estado histórico — A R7/R8 corregido localmente, 15/10/2026
 
 La migración 014 ahora parsea las revisiones obligatorias antes del lock del

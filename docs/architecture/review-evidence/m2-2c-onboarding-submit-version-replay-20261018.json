@@ -1,0 +1,40 @@
+{
+  "scope": "Local SQL014 exact onboarding.submit replay authorizes against immutable submitted version, not a later mutable draft",
+  "remoteChanges": false,
+  "migrationApplied": false,
+  "sourceCommit": "3db70282c323ff344c43d8695671f6933bc7efd9",
+  "files": {
+    "supabase/migrations/202610150014_operational_api.sql": "68c8e8a671b4b40ebf779655a0985c217feb0464eff57872c293e73bfde1e0de",
+    "tests/m2-2c-contract.test.ts": "88d6f548dde568bc6e5e427d62682e8434278d532c990722f7796ea38039ed7f",
+    "tests/review/m2-1-native-review.mjs": "e86b5f9bb977b420d8fb4a9030236dc01617f78397a585db1c0590819e569608"
+  },
+  "vitest": {
+    "command": "node node_modules/vitest/vitest.mjs run tests/m2-2c-contract.test.ts --maxWorkers=1 --testTimeout=20000 --hookTimeout=30000",
+    "result": "16/16 passed",
+    "regressionCases": {
+      "submittedARevokedLaterBActive": "42501",
+      "submittedAActiveLaterBRevoked": "returns exact original receipt",
+      "laterEmptyDraft": "returns exact original receipt",
+      "sameOperationIdAlteredArguments": "40001"
+    }
+  },
+  "nativePostgres": {
+    "engine": "PostgreSQL 17.11",
+    "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2c-submit-immutable-replay-20261018-r3 --port 55663 --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes",
+    "result": "141/141 passed",
+    "deadlocks40P01": 0,
+    "scenario": "After submitting A, requesting changes, and saving B, exact replay returns the original receipt; pg_blocking_pids confirms revoking A waits for replay to commit; revocation then succeeds and subsequent replay returns 42501. B remains active and one immutable A version/receipt remain.",
+    "report": "../../outputs/m2-2c-submit-immutable-replay-20261018-r3/review.json",
+    "reportSha256": "2c73b26bda5731bcfa715961134400de238ccde4dd46aff622b5c7c792ff1332"
+  },
+  "behavior": {
+    "receiptVersion": "Resolve requestId and revision from the exact receipt; load onboarding_request_versions for that organization/request/revision and require submitted_by=actor.",
+    "authorization": "For replay, check company/team membership from the immutable submitted payload. Do not validate or authorize against a later draft, and do not revalidate mutable catalogue eligibility.",
+    "locking": "Include membership:<company>:<actor> identities from the selected payload in the ordered advisory lock scopes before FOR SHARE membership checks; exact receipt path writes no command, operation, or membership fence."
+  },
+  "limitations": [
+    "Synthetic local data only; SQL014 was not applied remotely.",
+    "The native PostgreSQL runner covers replay-first serialization and then A revocation; inverse membership and empty-later-draft cases are in PGlite only.",
+    "This fix covers exact onboarding.submit replay only; it does not close remaining M2.2C/Gate L families."
+  ]
+}

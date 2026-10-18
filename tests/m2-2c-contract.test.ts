@@ -385,6 +385,66 @@ describe("M2.2C versioned creation protocol", () => {
     } finally { await lab.close(); }
   }, 20_000);
 
+  it("authorizes an exact onboarding submit replay against its immutable submitted version", async () => {
+    const run = async (operationBase: number, revokeSubmittedVersion: boolean, revokeLaterDraft: boolean, emptyLaterDraft = false) => {
+      const lab = await new AccountingLab().init(stages.m014);
+      try {
+        const companyB = id(operationBase + 10);
+        const teamB = id(operationBase + 11);
+        await lab.admin();
+        await lab.db.query("insert into companies(id,organization_id,name) values($1,$2,'Replay B')", [companyB, ids.org]);
+        await lab.db.query("insert into teams(id,organization_id,name,manager_id) values($1,$2,'Replay team B',$3)", [teamB, ids.org, ids.boss]);
+        await lab.db.query("insert into company_memberships(organization_id,company_id,profile_id) values($1,$2,$3)", [ids.org, companyB, ids.owner]);
+        await lab.db.query("insert into team_members(organization_id,team_id,profile_id) values($1,$2,$3)", [ids.org, teamB, ids.owner]);
+
+        const makeDraft = (lineId: number, companyId: string, teamId: string, title: string) => ({ schemaVersion: 2, lines: [{ lineId: id(lineId), companyId, teamId, source: { type: "custom", definition: { kind: "operativa", title, objective: "", sector: "IVA", unit: "comprobantes" } }, schedule }] });
+        const draftA = makeDraft(operationBase + 1, ids.company, ids.team, "Submitted A");
+        await lab.actor(ids.owner, "aal1", "authenticated");
+        const saveA = { contractVersion: 1, operationId: id(operationBase + 2), kind: "onboarding.saveDraft", expectedRevisions: { [`onboardingOwner:${ids.owner}`]: "0" }, payload: { requestId: null, draft: draftA } };
+        const savedA = (await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(saveA)])).result;
+        const requestId = savedA.result.requestId as string;
+        const submit = { contractVersion: 1, operationId: id(operationBase + 3), kind: "onboarding.submit", expectedRevisions: { [`onboarding:${requestId}`]: "0", [`onboardingDraft:${requestId}`]: "1" }, payload: { requestId } };
+        const submitted = (await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(submit)])).result;
+        const submittedVersion = (await lab.first("select revision,payload from onboarding_request_versions where request_id=$1", [requestId]));
+        expect(submittedVersion).toMatchObject({ revision: 1, payload: draftA });
+
+        await lab.actor(ids.boss, "aal2", "authenticated");
+        const changes = { contractVersion: 1, operationId: id(operationBase + 4), kind: "onboarding.requestChanges", expectedRevisions: { [`onboarding:${requestId}`]: "1" }, payload: { requestId, reason: "Corregir borrador" } };
+        await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(changes)]);
+        const draftB = emptyLaterDraft ? { schemaVersion: 2, lines: [] } : makeDraft(operationBase + 5, companyB, teamB, "Later B");
+        await lab.actor(ids.owner, "aal1", "authenticated");
+        const saveB = { contractVersion: 1, operationId: id(operationBase + 6), kind: "onboarding.saveDraft", expectedRevisions: { [`onboardingOwner:${ids.owner}`]: "3", [`onboarding:${requestId}`]: "1", [`onboardingDraft:${requestId}`]: "1" }, payload: { requestId, draft: draftB } };
+        await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(saveB)]);
+
+        await lab.admin();
+        const companyToRevoke = revokeSubmittedVersion ? ids.company : revokeLaterDraft ? companyB : null;
+        if (companyToRevoke) await lab.db.query("update company_memberships set active=false where organization_id=$1 and company_id=$2 and profile_id=$3", [ids.org, companyToRevoke, ids.owner]);
+        if (companyToRevoke) await lab.db.query("delete from team_members where organization_id=$1 and team_id=$2 and profile_id=$3", [ids.org, revokeSubmittedVersion ? ids.team : teamB, ids.owner]);
+        await lab.actor(ids.owner, "aal1", "authenticated");
+        const replay = await lab.rows("select api.command_v1($1::jsonb) result", [JSON.stringify(submit)]).catch((error: { code?: string }) => error);
+        return { replay, submitted, submit, lab };
+      } catch (error) {
+        await lab.close();
+        throw error;
+      }
+    };
+
+    const revokedA = await run(1000, true, false);
+    try { expect((revokedA.replay as { code?: string }).code).toBe("42501"); } finally { await revokedA.lab.close(); }
+
+    const revokedB = await run(1020, false, true);
+    try {
+      expect(Array.isArray(revokedB.replay)).toBe(true);
+      expect((revokedB.replay as [{ result: unknown }])[0].result).toEqual(revokedB.submitted);
+      const altered = { ...revokedB.submit, expectedRevisions: { ...revokedB.submit.expectedRevisions, [`onboarding:${revokedB.submitted.result.requestId}`]: "99" } };
+      const mismatch = await revokedB.lab.rows("select api.command_v1($1::jsonb) result", [JSON.stringify(altered)]).catch((error: { code?: string }) => error);
+      expect((mismatch as { code?: string }).code).toBe("40001");
+    } finally { await revokedB.lab.close(); }
+
+    const emptyB = await run(1040, false, false, true);
+    try { expect(Array.isArray(emptyB.replay)).toBe(true); expect((emptyB.replay as [{ result: unknown }])[0].result).toEqual(emptyB.submitted); } finally { await emptyB.lab.close(); }
+  }, 60_000);
+
   it("denies an encargado whose owner relationship was removed on exact replay and first execution", async () => {
     const lab = await new AccountingLab().init(stages.m014);
     try {

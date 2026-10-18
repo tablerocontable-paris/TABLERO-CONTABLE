@@ -1,9 +1,9 @@
 # Acción de migración vigente — actualización 18/10/2026
 
-1. El commit `a08e35e3afc92e03d71ed4c2519cf2d8a4c37372` está publicado en `main`; GitHub Actions pasó: https://github.com/tablerocontable-paris/TABLERO-CONTABLE/actions/runs/39149013086.
-2. Sol aceptó el fix local de `commandReceipt` para onboarding. Suite focal 15/15; PostgreSQL 17.11 140/140, `40P01=0`; suite oficial completa 731/731 en 74 archivos; TypeScript, cliente y Worker pasan. Evidencia: `architecture/review-evidence/m2-2c-onboarding-commandreceipt-20261018.json`.
-3. Registrar y publicar este candidato en `main` directamente, sin PR. La prueba nativa cubre ambos órdenes para `submit`; ampliar en la siguiente revisión las carreras faltantes de `saveDraft` y las familias restantes C/Gate L.
-4. No aplicar SQL014 ni alterar Supabase remoto hasta terminar C/Gate L, la configuración segura de Data API y el preflight. Esta familia no completa la auditoría.
+1. `origin/main` en `3db70282c323ff344c43d8695671f6933bc7efd9` pasó GitHub Actions: https://github.com/tablerocontable-paris/TABLERO-CONTABLE/actions/runs/39150112299.
+2. Sol aceptó localmente el replay de `onboarding.submit` ligado a la versión inmutable enviada. R3: PostgreSQL 17.11 141/141, `40P01=0`, carrera replay-first confirmada por PID bloqueador; Vitest focal 16/16. Suite completa 732/732 en 74 archivos; TypeScript, cliente y Worker pasan. Evidencia: `architecture/review-evidence/m2-2c-onboarding-submit-version-replay-20261018.json`.
+3. Siguiente paso: guardar el candidato con commit y publicarlo directamente en `main`, sin PR; luego continuar las familias C/Gate L aún no cubiertas.
+4. No aplicar SQL014 ni cambiar Supabase remoto hasta terminar C/Gate L, verificar Data API y completar el preflight. Esta aceptación es acotada.
 # Acción de migración histórica — 17/10/2026
 
 1. **Aceptación acotada R90:** Sol aceptó los escenarios enumerados para SQL014 y runner, PostgreSQL 17.11 **128/128**, `40P01=0`. No cierra M2.2C/Gate L completos. Hashes y límites: `architecture/M2-2C-SOL-ACCEPTANCE-20261017.md`; evidencia `architecture/review-evidence/m2-2c-membership-r90-20261017.json`. Quedan matriz onboarding/creation, writers legacy y concurrencia/inyección de fallos del contrato §9.
