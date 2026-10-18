@@ -10,7 +10,9 @@
 
 La suite completa del checkout pasó **732/732 en 74 archivos**; TypeScript, build del cliente y Worker pasaron. Los tests nuevos no comparan un snapshot completo de todos los fences/auditoría; el retorno del replay antes de las escrituras se verificó en SQL. La inversa A activa/B revocada está en PGlite, no en el runner PostgreSQL nativo.
 
-**Límites y siguiente paso:** el CI del commit `979a3d3` sigue pendiente. La auditoría Sol identificó como siguiente familia `task.createOneOff` commandReceipt query bajo revocación concurrente: la consulta valida snapshot de membresías, pero no usa locks/fences de coordinación; el runner cubre replay de `api.command_v1`, no esta ruta query. Preparar matriz acotada y que Luna implemente tras revisión del contrato. No declarar M2.2C/Gate L completo. SQL014 no se aplicó en Supabase: el proyecto dev sigue sin migraciones, y no hubo cambios en servicios remotos.`r`n`r`n# Estado histórico — A R7/R8 corregido localmente, 15/10/2026
+**Límites y siguiente paso:** el CI del commit `979a3d3` sigue pendiente. La auditoría Sol identificó como siguiente familia `task.createOneOff` commandReceipt query bajo revocación concurrente: la consulta valida snapshot de membresías, pero no usa locks/fences de coordinación; el runner cubre replay de `api.command_v1`, no esta ruta query. Preparar matriz acotada y que Luna implemente tras revisión del contrato. No declarar M2.2C/Gate L completo. SQL014 no se aplicó en Supabase: el proyecto dev sigue sin migraciones, y no hubo cambios en servicios remotos.
+
+# Estado histórico — A R7/R8 corregido localmente, 15/10/2026
 
 La migración 014 ahora parsea las revisiones obligatorias antes del lock del
 recibo y compara revisiones bien formadas sólo después de la reautorización y
