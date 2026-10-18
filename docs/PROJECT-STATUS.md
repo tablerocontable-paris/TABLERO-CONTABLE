@@ -1,14 +1,14 @@
 # Estado general de la migración — actualización 18/10/2026
 
-**Checkpoint remoto:** el repo privado `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`, está en `b1b585a75ae63a5cb62bea180aede138951a4908`, autoría Tablero Contable y push directo sin PR. No se pudo verificar Actions para el evento push: el conector sólo devuelve runs de pull request. El run 18 exitoso es de un SHA anterior.
+**Checkpoint remoto:** el repo privado `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`, está en `5803b1e4434cfc46a4ab64a26da3f76ab9d12d3d`, autoría Tablero Contable y push directo sin PR. No se pudo verificar Actions para el evento push: el conector sólo devuelve runs de pull request. El run 18 exitoso es de un SHA anterior.
 
-**Último corte local aceptado:** Sol aceptó el arreglo de `assignment.create` exact replay tras revocación. Evidencia `docs/architecture/review-evidence/m2-2c-assignment-replay-20261018.json`; PostgreSQL 17.11 144/144, `40P01=0`; Vitest focal 19/19 y suite 735/735; TypeScript, build de cliente y Worker, `node --check` y `git diff --check` aprobados. Revalida jefe AAL2, empleado activo, membresía de empresa y equipo antes de devolver el recibo; argumentos distintos conservan `40001`. Sol lo aceptó en alcance local acotado; dejó P3 no bloqueante: la carrera usa el mismo jefe en ambas sesiones y no aísla lock de actor vs lock de membresía.
+**Último corte publicado:** Sol aceptó el arreglo de `assignment.create` exact replay tras revocación. Evidencia `docs/architecture/review-evidence/m2-2c-assignment-replay-20261018.json`; PostgreSQL 17.11 144/144, `40P01=0`; Vitest focal 19/19 y suite 735/735; TypeScript, build de cliente y Worker, `node --check` y `git diff --check` aprobados. Revalida jefe AAL2, empleado activo, membresía de empresa y equipo antes de devolver el recibo; argumentos distintos conservan `40001`. Sol lo aceptó en alcance local acotado; dejó P3 no bloqueante: la carrera usa el mismo jefe en ambas sesiones y no aísla lock de actor vs lock de membresía.
 
 Los cortes previos de `task.createOneOff commandReceipt`, `onboarding.saveDraft/submit commandReceipt` y `onboarding.submit` replay tienen aceptaciones locales acotadas y evidencias propias. Ninguna de estas revisiones cierra M2.2C/Gate L.
 
 **Supabase dev verificado:** organización `tablerocontable-paris DEV` (plan FREE), proyecto `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`), PostgreSQL 17.11, activo y vacío, sin tablas ni migraciones; advisors sin hallazgos. Data API habilitada, expone `public, extensions` y “Automatically expose new tables” sigue activado. El usuario ya autorizó apagar esa opción; no hay una operación conector segura disponible para cambiarla. No aplicar SQL014.
 
-**Siguiente paso:** actualizar el registro de aceptación con el diff revisado, ejecutar `git diff --check`, confirmar hashes/árbol; luego commit y push directo a `main`, sin PR, y verificar `origin/main`. Actions de push seguirá sin verificarse con el conector actual. Gate L, preflight Data API, Auth/HTTP alojado, hosting Cloudflare, correo productivo y Supabase de producción siguen pendientes.
+**Siguiente paso:** continuar Gate L con una revisión acotada del permiso de `assignment.create commandReceipt` y `month.materialize`. Mantener SQL014 sin aplicar. Actions del push actual sigue sin verificarse con el conector disponible. Gate L, preflight Data API, Auth/HTTP alojado, hosting Cloudflare, correo productivo y Supabase de producción siguen pendientes.
 
 # Estado histórico — A R7/R8 corregido localmente, 15/10/2026
 

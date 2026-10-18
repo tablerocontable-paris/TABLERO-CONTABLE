@@ -2,7 +2,7 @@
 
 Este bloque tiene precedencia sobre el historial más abajo. GitHub privado
 `tablerocontable-paris/TABLERO-CONTABLE` está en `main` en
-`b1b585a75ae63a5cb62bea180aede138951a4908`; el push está confirmado, pero el
+`5803b1e4434cfc46a4ab64a26da3f76ab9d12d3d`; el push está confirmado, pero el
 conector disponible no permite verificar los runs de Actions para eventos push.
 El único Supabase es `grupo-paris-dev`, activo y vacío. La última lectura del
 Dashboard mostró `public, extensions` expuestos y autoexposición activada; el
