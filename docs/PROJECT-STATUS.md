@@ -1,17 +1,16 @@
 # Estado general de la migración — actualización 18/10/2026
 
-**Checkpoint GitHub:** `main` está en `3db70282c323ff344c43d8695671f6933bc7efd9`, autoría Tablero Contable, publicación directa sin PR. GitHub Actions del checkpoint terminó **success**: https://github.com/tablerocontable-paris/TABLERO-CONTABLE/actions/runs/39150112299.
+**Checkpoint GitHub:** `main` está en `979a3d3f827553fabbb75634db89115bf48e8615`, autoría Tablero Contable, publicación directa sin PR. GitHub Actions run 16 está ejecutándose: https://github.com/tablerocontable-paris/TABLERO-CONTABLE/actions/runs/39151270747.
 
 **Familias revisadas localmente:**
 
 - `task.createOneOff` replay y permisos de owner: Sol aceptó el alcance exacto, incluido en `a08e35e`. PostgreSQL 17.11 138/138, `40P01=0`; Vitest focal 14/14.
 - `onboarding.saveDraft/submit commandReceipt` tras revocar membresía: Sol aceptó el alcance exacto, incluido en `3db7028`. PostgreSQL 17.11 140/140, `40P01=0`; Vitest focal 15/15. `submit` se autoriza con la versión inmutable del recibo.
-- `onboarding.submit` replay tras cambios de borrador: fix local aprobado por Sol. Tras submit de A, requestChanges y draft B, el replay valida la versión original indicada en el recibo. R3 PostgreSQL 17.11 141/141, `40P01=0`; incluye ambos órdenes RC de replay y revocación A con bloqueo observado. Vitest focal 16/16 cubre A revocada/B activa (`42501`), A activa/B revocada (recibo exacto), borrador posterior vacío y argumentos alterados (`40001`). Evidencia: `docs/architecture/review-evidence/m2-2c-onboarding-submit-version-replay-20261018.json`.
+- `onboarding.submit` replay tras cambios de borrador: fix incluido en `979a3d3`, aceptado por Sol. Revalida la versión inmutable enviada ligada al recibo. R3 PostgreSQL 17.11 141/141, `40P01=0`; incluye ambos órdenes RC de replay y revocación A con bloqueo observado. Vitest focal 16/16 cubre A revocada/B activa (`42501`), A activa/B revocada (recibo exacto), borrador posterior vacío y argumentos alterados (`40001`). Evidencia: `docs/architecture/review-evidence/m2-2c-onboarding-submit-version-replay-20261018.json`.
 
 La suite completa del checkout pasó **732/732 en 74 archivos**; TypeScript, build del cliente y Worker pasaron. Los tests nuevos no comparan un snapshot completo de todos los fences/auditoría; el retorno del replay antes de las escrituras se verificó en SQL. La inversa A activa/B revocada está en PGlite, no en el runner PostgreSQL nativo.
 
-**Límites y siguiente paso:** el candidato local aún no tiene commit; después de guardar estado/evidencia, publicar directamente en `main` y continuar con las restantes familias C/Gate L. No declarar M2.2C/Gate L completo. SQL014 no se aplicó en Supabase: el proyecto dev sigue sin migraciones, y no hubo cambios en servicios remotos.
-# Estado histórico — A R7/R8 corregido localmente, 15/10/2026
+**Límites y siguiente paso:** el CI del commit `979a3d3` sigue pendiente. La auditoría Sol identificó como siguiente familia `task.createOneOff` commandReceipt query bajo revocación concurrente: la consulta valida snapshot de membresías, pero no usa locks/fences de coordinación; el runner cubre replay de `api.command_v1`, no esta ruta query. Preparar matriz acotada y que Luna implemente tras revisión del contrato. No declarar M2.2C/Gate L completo. SQL014 no se aplicó en Supabase: el proyecto dev sigue sin migraciones, y no hubo cambios en servicios remotos.`r`n`r`n# Estado histórico — A R7/R8 corregido localmente, 15/10/2026
 
 La migración 014 ahora parsea las revisiones obligatorias antes del lock del
 recibo y compara revisiones bien formadas sólo después de la reautorización y
