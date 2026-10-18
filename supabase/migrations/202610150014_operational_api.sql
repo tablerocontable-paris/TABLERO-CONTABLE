@@ -105,7 +105,7 @@ create table app_private.task_completion_events (
 create function app_private.guard_task_tracking_scope() returns trigger
 language plpgsql security definer set search_path='' as $$
 declare task_row public.task_instances%rowtype;
-begin
+ begin
  select * into task_row from public.task_instances where id=new.instance_id and organization_id=new.organization_id;
  if not found or (new.available_from is not null and date_trunc('month',new.available_from)::date<>task_row.period) then
   raise exception using errcode='22023',message='Seguimiento inválido';
@@ -1917,7 +1917,7 @@ end $$;
 create function app_private.api_onboarding_command(p jsonb) returns jsonb
 language plpgsql security definer set search_path='' as $$
 declare actor uuid:=auth.uid(); c jsonb; org uuid; role_v text; k text; op uuid; payload jsonb; expected jsonb; args jsonb;
- existing app_private.api_command_receipts%rowtype; req public.onboarding_requests%rowtype; req_id uuid; owner_v uuid; owner_rev bigint; expected_owner bigint; expected_rev bigint; expected_draft bigint; next_rev integer; next_draft integer; reason_v text; draft_v jsonb; template_ids uuid[]:='{}'; scopes text[]; result_v jsonb; owner_profile public.profiles%rowtype;
+ existing app_private.api_command_receipts%rowtype; req public.onboarding_requests%rowtype; req_id uuid; owner_v uuid; owner_rev bigint; expected_owner bigint; expected_rev bigint; expected_draft bigint; next_rev integer; next_draft integer; reason_v text; draft_v jsonb; template_ids uuid[]:='{}'; scopes text[]; result_v jsonb; owner_profile public.profiles%rowtype; membership_line jsonb;
 begin
  if actor is null then raise exception using errcode='28000',message='Autenticación requerida'; end if;
  if octet_length(coalesce(p::text,''))>32768 or not app_private.api_exact_keys(p,array['contractVersion','operationId','kind','expectedRevisions','payload']) or jsonb_typeof(p->'contractVersion') is distinct from 'number' or p->>'contractVersion'<>'1' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
@@ -1969,7 +1969,27 @@ begin
  if k='onboarding.saveDraft' then scopes:=array['onboardingOwner:'||actor]||case when req_id is null then '{}'::text[] else scopes end; end if;
  if k='onboarding.submit' then scopes:=scopes||coalesce((select array_agg(distinct 'template:'||v.template_id::text) from public.task_template_versions v where v.id=any(template_ids)),'{}'::text[]); end if;
  perform public._coordination_lock_keys(1105,scopes);
+ if k in ('onboarding.submit','onboarding.requestChanges') then
+  select * into req from public.onboarding_requests where id=req_id and organization_id=org and owner_id=owner_v for update;
+  if not found then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
+ end if;
  if k in ('onboarding.saveDraft','onboarding.submit') and not exists(select 1 from public.profiles where id=actor and organization_id=org and active and role='empleado') then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
+ if k='onboarding.saveDraft' then
+  for membership_line in select value from jsonb_array_elements(draft_v->'lines') order by value->>'companyId',value->>'teamId' loop
+   perform 1 from public.company_memberships cm where cm.organization_id=org and cm.company_id=(membership_line->>'companyId')::uuid and cm.profile_id=actor and cm.active for share;
+   if not found then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
+   perform 1 from public.team_members tm where tm.organization_id=org and tm.team_id=(membership_line->>'teamId')::uuid and tm.profile_id=actor for share;
+   if not found then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
+  end loop;
+ end if;
+ if k='onboarding.submit' then
+  for membership_line in select value from jsonb_array_elements(req.draft_payload->'lines') order by value->>'companyId',value->>'teamId' loop
+   perform 1 from public.company_memberships cm where cm.organization_id=org and cm.company_id=(membership_line->>'companyId')::uuid and cm.profile_id=actor and cm.active for share;
+   if not found then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
+   perform 1 from public.team_members tm where tm.organization_id=org and tm.team_id=(membership_line->>'teamId')::uuid and tm.profile_id=actor for share;
+   if not found then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
+  end loop;
+ end if;
  if k='onboarding.requestChanges' and role_v='encargado' and not exists(select 1 from public.profiles p where p.id=owner_v and p.organization_id=org and p.active and p.manager_id=actor) then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
  if k<>'onboarding.saveDraft' and not exists(select 1 from public.onboarding_requests where id=req_id and organization_id=org and owner_id=owner_v) then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
  if existing.actor_id is not null then

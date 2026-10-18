@@ -1,0 +1,106 @@
+{
+  "date": "2026-10-17",
+  "status": "historical validation snapshot: candidate was uncommitted and Sol review was pending when captured; scoped Sol acceptance was later granted; candidate was committed locally and documentation status was subsequently updated",
+  "baseCommit": "8cf5e8a3e6969cfe02d77c595698c5f60ddfa8f5",
+  "scope": "Exact onboarding.saveDraft and onboarding.submit replay after confirmed company-membership revocation",
+  "preFix": {
+    "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir outputs/m2-2c-gatel-replay-20261017-r2 --port 55622 --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes",
+    "engine": "PostgreSQL 17.11",
+    "total": 129,
+    "passed": 128,
+    "failed": 1,
+    "deadlocks40P01": 0,
+    "migration014Sha256": "3ff379002c37c43fb8c91d2b41bd47658d73d0386b2c5bc1518f22c6b4cc86c6",
+    "finding": {
+      "name": "M2.2C membership-revoked owner cannot replay exact onboarding draft/submit receipts",
+      "expected": {
+        "saveDraft": "42501",
+        "submit": "42501"
+      },
+      "actual": {
+        "saveDraft": "42501",
+        "submit": "00000"
+      },
+      "requestStatus": "submitted",
+      "activationCount": 0,
+      "assignmentCount": 0
+    },
+    "report": "outputs/m2-2c-gatel-replay-20261017-r2/review.json"
+  },
+  "fixture": {
+    "actor": "00000000-0000-0000-0000-000000000390",
+    "syntheticJwt": true,
+    "draftOperationId": "00000000-0000-0000-0000-000000000392",
+    "submitOperationId": "00000000-0000-0000-0000-000000000393",
+    "revokeOperationId": "00000000-0000-0000-0000-000000000395",
+    "initialMembership": "active=true,revision=0",
+    "membershipAfterCommittedRevoke": "active=false,revision=1",
+    "submitIsolation": "autocommit / READ COMMITTED after revocation commit",
+    "writesBeforeRevoke": "saveDraft and submit each returned 00000; submit status became submitted"
+  },
+  "change": "Recheck current active company membership and team membership after coordination locks and before exact-receipt return for saveDraft and submit. Keep the submit execution check and exact-replay behavior guarded by the same authorization requirement.",
+  "postFix": {
+    "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir outputs/m2-2c-gatel-locked-20261017-r2 --port 55625 --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes",
+    "engine": "PostgreSQL 17.11",
+    "total": 130,
+    "passed": 130,
+    "failed": 0,
+    "deadlocks40P01": 0,
+    "migration014Sha256": "13e88c8549f969187294367161c3ce6cf458d7f4618ddba40cb5058254982a26",
+    "migration014NormalizedLfSha256": "b593618d1fcc11fe0be5e6678574faba8a013e4ac587e303d7f00d49dbe05e49",
+    "replaySQLSTATEs": {
+      "saveDraft": "42501",
+      "submit": "42501"
+    },
+    "firstSubmitRace": {
+      "revokerBlocksSubmit": true,
+      "staleSnapshotSQLSTATE": "40001",
+      "freshRetrySQLSTATE": "42501",
+      "finalState": "false|1|draft|0|0"
+    },
+    "report": "outputs/m2-2c-gatel-locked-20261017-r2/review.json"
+  },
+  "focusedVitest": {
+    "command": "node_modules/.bin/vitest run tests/m2-2c-contract.test.ts --maxWorkers=1 --testTimeout=20000",
+    "testFiles": 1,
+    "passed": 11,
+    "failed": 0
+  },
+  "fullLocalValidation": {
+    "vitestCommand": "node_modules/.bin/vitest.CMD run --exclude \"tmp/**\" --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+    "testFilesPassed": 74,
+    "testsPassed": 727,
+    "testsFailed": 0,
+    "typescriptCommand": "node_modules/.bin/tsc.CMD --noEmit",
+    "typescriptExitCode": 0,
+    "clientBuildCommand": "node_modules/.bin/vite.CMD build --outDir dist/client",
+    "clientBuildExitCode": 0,
+    "workerBuildCommand": "node scripts/build-worker.mjs",
+    "workerBuildExitCode": 0,
+    "runnerSyntaxCommand": "node --check tests/review/m2-1-native-review.mjs",
+    "runnerSyntaxExitCode": 0,
+    "gitDiffCheckExitCode": 0,
+    "migrations001to013Changed": false,
+    "changedMigrationFiles": [
+      "supabase/migrations/202610150014_operational_api.sql"
+    ],
+    "note": "npm alias is unavailable in PATH; local node_modules binaries and Node were used directly."
+  },
+  "hashesSha256": {
+    "supabase/migrations/202610150014_operational_api.sql": "13e88c8549f969187294367161c3ce6cf458d7f4618ddba40cb5058254982a26",
+    "tests/review/m2-1-native-review.mjs": "ff20fcbe1f77bee132b655a913fa0777807208af54a415e3c913cf4827b13b58",
+    "tests/m2-2c-contract.test.ts": "42d04a87c4053eb3fe5fd0f3787760260506e4a830e63d7574ebad19ced290a9",
+    "outputs/m2-2c-gatel-fixed-20261017/review.json": "7b36fb2388c7714c2a626e6071b2ddc53dba2e31ef3a86baee0c848a5d10adfe",
+    "outputs/m2-2c-gatel-locked-20261017-r2/review.json": "a97d43c8b2cff533074e32a5c50aad0191ebcfee264092edbeedfe6d283c4e1f"
+  },
+  "gitBlobSha1": {
+    "supabase/migrations/202610150014_operational_api.sql": "e67b634d91db86a902b00e4a1c4c2c7b968f5c82"
+  },
+  "limits": [
+    "Synthetic local PostgreSQL/JWT only; no hosted Supabase Auth/HTTP.",
+    "This validates only exact saveDraft/submit replay after committed membership revocation; it does not complete the onboarding/creation replay matrix.",
+    "Legacy assignment/responsibility/absence/coverage/movement/transition revocation races, recurrent-rule-specific coverage, and the remaining §9 concurrency/failure-injection families remain incomplete.",
+    "No Supabase remote changes, migration application, Data API setting change, deploy, or push was performed.",
+    "R90 acceptance applies only to its earlier hashes; this local candidate awaits Sol review and does not close Gate L."
+  ]
+}
