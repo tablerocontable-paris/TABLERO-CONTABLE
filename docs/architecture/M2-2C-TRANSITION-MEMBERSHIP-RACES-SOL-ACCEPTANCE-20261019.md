@@ -32,7 +32,7 @@ autoriza aplicar SQL014.
 Comprobaciones adicionales reejecutadas por el agente principal sobre el árbol
 del candidato: Vitest **738/738 en 74 archivos**; `tsc --noEmit`, build Vite de
 cliente, build Worker, `node --check` del runner y `git diff --check`, todos con
-código 0. El hook completo queda ligado al commit en el que se publique.
+código 0. Hook completo **196/196**.
 
 ## Límites P3 conservados
 
@@ -44,7 +44,7 @@ código 0. El hook completo queda ligado al commit en el que se publique.
 - Se conserva `review.json`, no `postgres.log`; el cero deadlock está respaldado
   por el resultado y log del runner con hashes verificados, pero el log nativo
   no pudo releerse durante la revisión.
-- La revisión Sol cubre estos cuatro casos y sus hashes. No certifica hook, CI
-  ni el resto del Gate L. El hook completo requiere ejecutarse en el commit.
+- La revisión Sol cubre estos cuatro casos y sus hashes. No certifica CI ni el
+  resto del Gate L.
 
 Evidencia primaria: `review-evidence/m2-2c-transition-membership-races-luna-20261019.json`.

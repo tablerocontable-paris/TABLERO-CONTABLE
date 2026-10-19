@@ -9,9 +9,10 @@ runner SHA256 `d00b0ddd7c1fb0820da7b5b341e897b8c74519416ce24e7129c32a60e88d7ce7`
 SQL014 sigue idéntica al baseline; no hubo llamadas remotas. Aceptación y límites
 P3: `architecture/M2-2C-TRANSITION-MEMBERSHIP-RACES-SOL-ACCEPTANCE-20261019.md`.
 La suite completa pasó 738/738 en 74 archivos; TypeScript, build cliente/Worker,
-sintaxis del runner y diff-check terminaron con código 0. El hook se ejecuta
-con el commit. Aún no hay commit/push y CI no está verificado. Gate L y §9
-permanecen abiertos.
+sintaxis del runner y diff-check terminaron con código 0; hook **196/196**.
+Publicado directo a `main`, sin PR, y confirmado por SHA remoto:
+`6d014381cf5888fe4aafa79e4be3ae0248e74531`. GitHub devolvió `statuses=[]`; CI no
+está verificado. Gate L y §9 permanecen abiertos.
 
 **Último bloque aceptado por GPT-6.1 Sol y publicado (alcance acotado):** cuatro
 carreras de aprobación de cobertura recurrente frente a revocación de membresía,
@@ -32,7 +33,7 @@ familia de concurrencia sin cubrir completamente; después preparar el contrato
 exacto para Luna. Las familias de cobertura recurrente y task.transition aquí
 enumeradas ya tienen aceptación acotada; no repetirlas.
 
-**Infraestructura sin cambios:** GitHub `main` está en `8646f10ee90371748054830ef4af81cf4904f577`; SHA remoto confirmado. CI de este SHA no aparece en el conector. Supabase dev sigue activo/vacío; falta apagar la autoexposición. No hay Cloudflare, correo productivo ni Supabase de producción configurados. Site privado y datos ficticios.
+**Infraestructura sin cambios:** GitHub `main` está en `6d014381cf5888fe4aafa79e4be3ae0248e74531`; SHA remoto confirmado. CI de este SHA no aparece en el conector. Supabase dev sigue activo/vacío; falta apagar la autoexposición. No hay Cloudflare, correo productivo ni Supabase de producción configurados. Site privado y datos ficticios.
 
 # Estado general de la migración — actualización 19/10/2026
 

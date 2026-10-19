@@ -7,10 +7,11 @@ observó bloqueo real con `pg_blocking_pids`, actores autorizados distintos,
 SQLSTATE de conflicto/retry y snapshots antes, tras el conflicto y tras retry.
 Evidencia y hashes: `docs/architecture/review-evidence/m2-2c-transition-membership-races-luna-20261019.json`;
 runner SHA256 `d00b0ddd7c1fb0820da7b5b341e897b8c74519416ce24e7129c32a60e88d7ce7`;
-SQL014 sin cambios. Decisión, hashes y límites P3: `docs/architecture/M2-2C-TRANSITION-MEMBERSHIP-RACES-SOL-ACCEPTANCE-20261019.md`.
-Suite/build/hook fueron informados por Luna, pero no forman parte de esa
-aceptación Sol. Este corte aún no tiene commit ni push; el CI de la rama vigente
-no está verificado. No aplicar SQL014.
+SQL014 sin cambios. Decisión, hashes y límites P3:
+`docs/architecture/M2-2C-TRANSITION-MEMBERSHIP-RACES-SOL-ACCEPTANCE-20261019.md`.
+Publicado directo a `main`, sin PR: `6d014381cf5888fe4aafa79e4be3ae0248e74531`;
+SHA remoto confirmado. Suite/build/sintaxis/diff-check reejecutados; hook
+196/196. GitHub devuelve checks vacíos, CI no verificado. No aplicar SQL014.
 
 ## Base previamente aceptada
 

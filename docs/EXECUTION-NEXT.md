@@ -10,9 +10,11 @@ Evidencia y hashes en
 `architecture/review-evidence/m2-2c-transition-membership-races-luna-20261019.json`.
 Sol aceptó este alcance tras revisar hashes, SQL014 y el reporte. Decisión y
 límites P3: `architecture/M2-2C-TRANSITION-MEMBERSHIP-RACES-SOL-ACCEPTANCE-20261019.md`.
-El candidato aún no tiene commit/push; suite, TypeScript, builds y hook son
-resultados informados por Luna y no parte de la aceptación Sol. Mantener Gate L
-y §9 abiertos; no aplicar SQL014.
+Publicado directo a `main`, sin PR, en
+`6d014381cf5888fe4aafa79e4be3ae0248e74531`; SHA remoto confirmado. Suite,
+TypeScript, builds, sintaxis, diff-check y hook 196/196 pasaron. GitHub devolvió
+checks vacíos, por lo que CI no está verificado. Mantener Gate L y §9 abiertos;
+no aplicar SQL014.
 
 ## Próximo paso
 
