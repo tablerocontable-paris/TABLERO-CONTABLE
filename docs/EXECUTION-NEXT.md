@@ -12,8 +12,9 @@ El runner vigente tiene SHA256 `756295076e72cb35981d5ae30ac282bf5b508846c822b3cc
 los logs crudos están en `../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final4/`.
 Aceptación y límites P3:
 `architecture/M2-2C-OPERATION-RECORD-MEMBERSHIP-REVOCATION-RACES-SOL-ACCEPTANCE-20261019.md`.
-Commit/push aún pendiente. SQL011/014 siguen sin cambios; Gate L/§9 permanece
-abierto.
+Publicado directamente a `origin/main`, sin PR, en
+`cf37b7fe220befa5317e4ae3295514288e96ff6e`; SHA remoto confirmado. CI no está
+verificado. SQL011/014 siguen sin cambios; Gate L/§9 permanece abierto.
 
 ## Próximo paso
 

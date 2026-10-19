@@ -41,7 +41,7 @@ contrato y estado actual: `8646f10ee90371748054830ef4af81cf4904f577`. Ambos est�
 SHA; no hay CI verificado en esta sesión. El hook local pasó 196/196. SQL014 no
 se aplicó remotamente.
 
-**Último bloque aceptado localmente por Sol, alcance acotado:** cuatro carreras
+**Último bloque aceptado por Sol y publicado, alcance acotado:** cuatro carreras
 `operation.record` frente a revocación de membresía, RC/RC y RR/RR, ambos órdenes.
 PostgreSQL 17.11 321/321, cuatro blockers reales, cero deadlocks; Vitest 738/738,
 TypeScript, builds cliente/Worker, sintaxis y diff-check aprobados. Aceptación:
@@ -51,7 +51,9 @@ Runner `756295076e72cb35981d5ae30ac282bf5b508846c822b3cc4cf14b5032643ea9`;
 SQL011/014 sin cambios. Logs locales en
 `../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final4/`.
 No se hicieron llamadas remotas ni se activó el espacio operativo. Gate L y §9
-siguen abiertos. Publicación directa en main pendiente.
+siguen abiertos. Commit directo a `origin/main`, sin PR:
+`cf37b7fe220befa5317e4ae3295514288e96ff6e`; `git ls-remote` confirmó el SHA.
+CI del push no está verificado.
 
 **Siguiente vigente:** auditar con Sol la matriz `public.start_task_timer` frente
 a `companyMembership.setActive(false)` y redactar contrato antes de encargar la
