@@ -1,17 +1,18 @@
 # Estado operativo y precedencia — actualización 19/10/2026
 
-**Último bloque Luna aceptado localmente por Sol, alcance acotado:** cuatro carreras
-`task.transition` vs `companyMembership.setActive`, RC/RC y RR/RR con ambos
-ganadores. PostgreSQL 17.11: 305/305 en el runner focal, `40P01=0`; cada caso
-observó bloqueo real con `pg_blocking_pids`, actores autorizados distintos,
-SQLSTATE de conflicto/retry y snapshots antes, tras el conflicto y tras retry.
-Evidencia y hashes: `docs/architecture/review-evidence/m2-2c-transition-membership-races-luna-20261019.json`;
-runner SHA256 `d00b0ddd7c1fb0820da7b5b341e897b8c74519416ce24e7129c32a60e88d7ce7`;
-SQL014 sin cambios. Decisión, hashes y límites P3:
-`docs/architecture/M2-2C-TRANSITION-MEMBERSHIP-RACES-SOL-ACCEPTANCE-20261019.md`.
-Publicado directo a `main`, sin PR: `6d014381cf5888fe4aafa79e4be3ae0248e74531`;
-SHA remoto confirmado. Suite/build/sintaxis/diff-check reejecutados; hook
-196/196. GitHub devuelve checks vacíos, CI no verificado. No aplicar SQL014.
+**Último bloque Luna aceptado y publicado por Sol, alcance acotado:** cuatro
+carreras entre `approve_task_coverage_plan` y `month.materialize`, ambos órdenes
+ganadores bajo RC/RC y RR/RR. PostgreSQL 17.11: 309/309, `40P01=0`; blocker real,
+`40001`, estados intermedios, retry `00000`, respuestas/recibos y vínculo hijo
+comprobados. Evidencia y hashes:
+`docs/architecture/review-evidence/m2-2c-recurring-coverage-materialize-races-luna-20261019.json`;
+runner SHA256 `288f304c8574278ce4e1130ef4c1b9710e2882875df17f6afe0a759b87833860`;
+SQL011/014 sin cambios. Decisión y límites P3:
+`docs/architecture/M2-2C-RECURRING-COVERAGE-MATERIALIZE-RACES-SOL-ACCEPTANCE-20261019.md`.
+Publicado directo a `main`, sin PR: `63bc5c78dd3274a5d6c0d1e1ef089f06f24baa75`;
+SHA remoto confirmado. Hook 196/196; suite 738/738 y build cliente/Worker
+pasaron; GitHub devuelve checks vacíos, CI no verificado. Gate L y §9 siguen
+abiertos. No aplicar SQL014.
 
 ## Base previamente aceptada
 

@@ -22,7 +22,10 @@ Auditar §9 contra el runner y las aceptaciones Sol vigentes para escoger la
 siguiente familia de concurrencia incompleta. La aprobación de cobertura
 recurrente frente a `month.materialize` fue aceptada sólo para cuatro casos; ver
 `architecture/M2-2C-RECURRING-COVERAGE-MATERIALIZE-RACES-SOL-ACCEPTANCE-20261019.md`.
-Mantener SQL014 sin aplicar y no hacer llamadas remotas.
+El bloque está publicado directo en `main`, sin PR, en
+`63bc5c78dd3274a5d6c0d1e1ef089f06f24baa75`; SHA remoto confirmado. GitHub devolvió
+checks vacíos, CI no verificado. Mantener SQL014 sin aplicar y no hacer llamadas
+remotas.
 
 ## Último bloque local aceptado — cobertura recurrente RC/RC y RR/RR
 

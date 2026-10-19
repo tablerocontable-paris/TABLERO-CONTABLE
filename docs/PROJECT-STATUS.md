@@ -11,7 +11,7 @@ P3: `architecture/M2-2C-TRANSITION-MEMBERSHIP-RACES-SOL-ACCEPTANCE-20261019.md`.
 La suite completa pasó 738/738 en 74 archivos; TypeScript, build cliente/Worker,
 sintaxis del runner y diff-check terminaron con código 0; hook **196/196**.
 Publicado directo a `main`, sin PR, y confirmado por SHA remoto:
-`6d014381cf5888fe4aafa79e4be3ae0248e74531`. GitHub devolvió `statuses=[]`; CI no
+`63bc5c78dd3274a5d6c0d1e1ef089f06f24baa75`. GitHub devolvió `statuses=[]`; CI no
 está verificado. Gate L y §9 permanecen abiertos.
 
 **Último bloque aceptado por GPT-6.1 Sol y publicado (alcance acotado):** cuatro
@@ -41,6 +41,10 @@ suite/build. SQL011/014 intactas, sin llamadas remotas. Esto no cierra §9 ni Ga
 **Siguiente vigente:** auditar §9 frente al runner aceptado para elegir la próxima
 familia incompleta; después preparar contrato Luna acotado. No repetir las
 familias ya aceptadas. Mantener SQL014 sin aplicar.
+
+El bloque cobertura recurrente/materialización quedó publicado directamente en
+`main` (sin PR) como `63bc5c78dd3274a5d6c0d1e1ef089f06f24baa75`; el SHA remoto
+coincide. Checks de GitHub vacíos; CI no verificado.
 
 **Infraestructura sin cambios:** GitHub `main` está en `6d014381cf5888fe4aafa79e4be3ae0248e74531`; SHA remoto confirmado. CI de este SHA no aparece en el conector. Supabase dev sigue activo/vacío; falta apagar la autoexposición. No hay Cloudflare, correo productivo ni Supabase de producción configurados. Site privado y datos ficticios.
 
