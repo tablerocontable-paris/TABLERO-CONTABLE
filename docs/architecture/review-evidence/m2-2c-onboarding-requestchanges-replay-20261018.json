@@ -1,0 +1,93 @@
+{
+  "contract": "onboarding.requestChanges exact replay and commandReceipt",
+  "scope": "local SQL014 candidate only; migrations 001-013 preserved",
+  "remoteCalls": false,
+  "database": "fresh synthetic PostgreSQL 17.11 cluster; no Supabase project access",
+  "artifacts": {
+    "migration": {
+      "path": "supabase/migrations/202610150014_operational_api.sql",
+      "sha256": "ac8cca582cf366b0cf143fd63d99c490c664b00b368eb473757017eebef26315"
+    },
+    "focusedTest": {
+      "path": "tests/m2-2c-contract.test.ts",
+      "sha256": "8ce790b04c59f91ee55f39dbeec7c4f683bf22e5d672b67a59e60cc5116fdbde6",
+      "result": "22/22 passed"
+    },
+    "nativeRunner": {
+      "path": "tests/review/m2-1-native-review.mjs",
+      "sha256": "87c435a8e3476656c54139e8a9e7affb16e5b9824161fdc1e2def9e5654fe799",
+      "result": "297/297 passed; SQLSTATE 40P01 count 0"
+    },
+    "nativeReport": {
+      "pathBase": "work/site",
+      "path": "../../outputs/requestchanges-native-matrix-20261018-r3/review.json",
+      "sha256": "e781fbb735f1c87a19defcf57df4d56acfbaba1ac1471aa759a74ff7f8463ed7"
+    }
+  },
+  "requestChangesNativeCases": {
+    "passed": 97,
+    "total": 97,
+    "positiveJefeWithInactiveOwner": 1,
+    "raceMatrix": {
+      "passed": 96,
+      "actions": ["exact replay", "commandReceipt"],
+      "revocations": [
+        "jefe actor deactivation",
+        "jefe actor demotion",
+        "encargado actor deactivation",
+        "encargado actor demotion",
+        "encargado manager change",
+        "encargado owner deactivation"
+      ],
+      "orders": ["read-first", "writer-first"],
+      "isolationPairs": [
+        "read committed/read committed",
+        "repeatable read/repeatable read",
+        "read committed/repeatable read",
+        "repeatable read/read committed"
+      ],
+      "readFirstWriterBlocked": true,
+      "writerFirstRC": "42501, followed by fresh retry 42501",
+      "writerFirstRR": "40001, followed by fresh retry 42501",
+      "writerConnectionDistinctFromReader": true,
+      "snapshotObservations": {
+        "readFirst": "snapshot before read equals snapshot after read while writer remains blocked and before writer commit",
+        "writerFirst": "snapshot after writer commit equals snapshot after stale read and fresh denied retry"
+      }
+    }
+  },
+  "focusedAssertions": [
+    "encargado replay and receipt allowed while owner active and still managed",
+    "encargado replay and receipt denied after owner deactivation",
+    "same receipt actor promoted to jefe may replay and read despite inactive owner",
+    "company and team memberships removed after submission do not gate this read",
+    "mutable draft changed after requestChanges; replay returns the original receipt",
+    "changed arguments with same operation id return SQLSTATE 40001",
+    "no duplicate requestChanges review, receipt, or audit writes"
+  ],
+  "limitations": [
+    "The local PostgreSQL runner applies SQL014 only to its disposable synthetic cluster; SQL014 remains unapplied remotely.",
+    "Legacy-version compatibility is preserved by reading the receipt-named submitted version without schema revalidation; this test block did not construct a legacy requestChanges fixture.",
+    "Catalogue deactivation and month closure after submission are outside the focused requestChanges fixture; the replay and receipt branches do not consult catalogue or month eligibility.",
+    "Native read-first snapshots are compared before the writer commits; they prove the read itself made no observed state change at that point. Writer-first snapshots are compared after writer commit against the stale and retry reads. There is no native same-transaction post-reader snapshot taken after the blocked writer is subsequently allowed to commit.",
+    "For commandReceipt, the submitted-version row is checked for existence before current actor/owner authorization; its FOR SHARE lock is taken after that authorization predicate. The focused read-only snapshots and SQL inspection support the no-write claim; the native snapshot timing is limited as described above."
+  ],
+  "independentReview": {
+    "reviewer": "GPT-6.1 Sol",
+    "result": "accepted scoped block; no P0-P2 findings",
+    "p3EvidenceLimits": [
+      "native read-first snapshot is observed before blocked writer commits; no subsequent same-transaction post-reader snapshot",
+      "legacy requestChanges fixture absent",
+      "catalogue deactivation and month closure mutations after submission not instantiated in this test block"
+    ]
+  },
+  "additionalValidation": {
+    "fullVitest": "738/738 passed across 74 files, exit 0; independently rerun by parent after the final assertion edit",
+    "focusedVitestAfterFinalTestEdit": "1/1 requestChanges test passed; 21 unrelated tests skipped",
+    "typescript": "tsc --noEmit exit 0",
+    "clientBuild": "vite build --outDir dist/client exit 0 (two upstream Zod annotation warnings)",
+    "workerBuild": "scripts/build-worker.mjs exit 0",
+    "runnerSyntax": "node --check tests/review/m2-1-native-review.mjs exit 0",
+    "diffCheck": "git diff --check exit 0"
+  }
+}

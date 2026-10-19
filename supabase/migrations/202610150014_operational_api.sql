@@ -1917,7 +1917,7 @@ end $$;
 create function app_private.api_onboarding_command(p jsonb) returns jsonb
 language plpgsql security definer set search_path='' as $$
 declare actor uuid:=auth.uid(); c jsonb; org uuid; role_v text; k text; op uuid; payload jsonb; expected jsonb; args jsonb;
- existing app_private.api_command_receipts%rowtype; req public.onboarding_requests%rowtype; req_id uuid; owner_v uuid; owner_rev bigint; expected_owner bigint; expected_rev bigint; expected_draft bigint; next_rev integer; next_draft integer; reason_v text; draft_v jsonb; receipt_revision integer; template_ids uuid[]:='{}'; scopes text[]; result_v jsonb; owner_profile public.profiles%rowtype; membership_line jsonb;
+ existing app_private.api_command_receipts%rowtype; req public.onboarding_requests%rowtype; version_row public.onboarding_request_versions%rowtype; req_id uuid; owner_v uuid; owner_rev bigint; expected_owner bigint; expected_rev bigint; expected_draft bigint; next_rev integer; next_draft integer; reason_v text; draft_v jsonb; receipt_revision integer; template_ids uuid[]:='{}'; scopes text[]; result_v jsonb; owner_profile public.profiles%rowtype; membership_line jsonb;
 begin
  if actor is null then raise exception using errcode='28000',message='Autenticación requerida'; end if;
  if octet_length(coalesce(p::text,''))>32768 or not app_private.api_exact_keys(p,array['contractVersion','operationId','kind','expectedRevisions','payload']) or jsonb_typeof(p->'contractVersion') is distinct from 'number' or p->>'contractVersion'<>'1' then raise exception using errcode='22023',message='Solicitud inválida'; end if;
@@ -1965,6 +1965,31 @@ begin
  if existing.actor_id is not null then
   if existing.kind<>k or existing.arguments is distinct from args then raise exception using errcode='40001',message='Identificador de operación ya utilizado'; end if;
   if existing.organization_id<>org then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
+  if k='onboarding.requestChanges' then
+   if existing.result#>>'{result,requestId}' is distinct from req_id::text then raise exception using errcode='40001',message='Recibo de inducción inválido'; end if;
+   begin receipt_revision:=(existing.result#>>'{result,revision}')::integer; exception when others then raise exception using errcode='40001',message='Recibo de inducción inválido'; end;
+   if receipt_revision is null or receipt_revision<1 then raise exception using errcode='40001',message='Recibo de inducción inválido'; end if;
+   perform public._coordination_lock_keys(1102,array[actor::text]);
+   perform public._coordination_lock_keys(1103,array(select distinct x::text from unnest(array[actor,owner_v]) x order by x::text));
+   perform public._coordination_lock_keys(1105,array['onboarding:'||req_id::text]);
+   c:=app_private.api_require_business(false);
+   if (c->'principal'->>'organizationId')::uuid<>org then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
+   role_v:=c->'principal'->>'role';
+   perform app_private.api_revalidate_actor(actor,c);
+   select * into existing from app_private.api_command_receipts where actor_id=actor and operation_id=op;
+   if not found or existing.organization_id<>org or existing.kind<>k or existing.arguments is distinct from args then raise exception using errcode='40001',message='Identificador de operación ya utilizado'; end if;
+   select * into req from public.onboarding_requests where id=req_id and organization_id=org and owner_id=owner_v for share;
+   if not found then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
+   select * into owner_profile from public.profiles where id=owner_v and organization_id=org for share;
+   if not found or role_v not in ('jefe','encargado') or c->'authentication'->>'aal'<>'aal2'
+      or not exists(select 1 from public.profiles a where a.id=actor and a.organization_id=org and a.active and a.role=role_v)
+      or (role_v='encargado' and (not owner_profile.active or owner_profile.manager_id is distinct from actor)) then
+    raise exception using errcode='42501',message='Contexto no autorizado';
+   end if;
+   select * into version_row from public.onboarding_request_versions where organization_id=org and request_id=req_id and revision=receipt_revision and submitted_by=owner_v for share;
+   if not found then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
+   return existing.result;
+  end if;
   if k='onboarding.submit' then
    if existing.result#>>'{result,requestId}' is distinct from req_id::text then raise exception using errcode='40001',message='Recibo de inducción inválido'; end if;
    begin receipt_revision:=(existing.result#>>'{result,revision}')::integer; exception when others then raise exception using errcode='40001',message='Recibo de inducción inválido'; end;
@@ -2474,7 +2499,7 @@ end $$;
 
 create function app_private.api_onboarding_query(p jsonb) returns jsonb
 language plpgsql security definer set search_path='' as $$
-declare c jsonb; actor uuid:=auth.uid(); org uuid; role_v text; k text; f jsonb; cur text; curj jsonb; lim integer; status_v text; owner_filter uuid; owner_v uuid; owner_revision bigint; creation_revision bigint; req public.onboarding_requests%rowtype; draft_v jsonb; submitted_v jsonb; payload_version integer; items jsonb; next_cursor text; last_at timestamptz; last_id uuid; cursor_at timestamptz; cursor_id uuid; op uuid; receipt app_private.api_command_receipts%rowtype; receipt_owner uuid; receipt_request uuid; receipt_plan jsonb; receipt_draft jsonb; receipt_lines jsonb; receipt_scopes text[]; receipt_req_revision bigint; receipt_line jsonb; receipt_company uuid; receipt_team uuid; receipt_period date; owner_active boolean; owner_role text; manager_v uuid;
+declare c jsonb; actor uuid:=auth.uid(); org uuid; role_v text; k text; f jsonb; cur text; curj jsonb; lim integer; status_v text; owner_filter uuid; owner_v uuid; owner_revision bigint; creation_revision bigint; req public.onboarding_requests%rowtype; draft_v jsonb; submitted_v jsonb; payload_version integer; items jsonb; next_cursor text; last_at timestamptz; last_id uuid; cursor_at timestamptz; cursor_id uuid; op uuid; receipt app_private.api_command_receipts%rowtype; receipt_args_snapshot jsonb; receipt_owner uuid; receipt_request uuid; receipt_plan jsonb; receipt_draft jsonb; receipt_lines jsonb; receipt_scopes text[]; receipt_req_revision bigint; receipt_line jsonb; receipt_company uuid; receipt_team uuid; receipt_period date; owner_active boolean; owner_role text; manager_v uuid;
 begin
  if actor is null then raise exception using errcode='28000',message='Autenticación requerida'; end if;
  if octet_length(coalesce(p::text,''))>32768 or not app_private.api_exact_keys(p,array['contractVersion','kind','filters','cursor','limit']) or jsonb_typeof(p->'contractVersion') is distinct from 'number' or p->>'contractVersion'<>'1' or jsonb_typeof(p->'kind') is distinct from 'string' then raise exception using errcode='22023',message='Consulta inválida'; end if;
@@ -2485,6 +2510,7 @@ begin
   if not app_private.api_exact_keys(f,array['operationId']) or lim<>1 or cur is not null then raise exception using errcode='22023',message='Consulta inválida'; end if;
   op:=app_private.api_uuid(f,'operationId'); select * into receipt from app_private.api_command_receipts where actor_id=actor and operation_id=op;
   if not found then return jsonb_build_object('contractVersion',1,'kind',k,'data',jsonb_build_object('found',false)); end if;
+ if receipt.kind='onboarding.requestChanges' then receipt_args_snapshot:=receipt.arguments; end if;
   if receipt.kind='companyMembership.setActive' then
    -- Keep the lookup actor-scoped and hide receipts from another organization.
    if receipt.organization_id<>org then return jsonb_build_object('contractVersion',1,'kind',k,'data',jsonb_build_object('found',false)); end if;
@@ -2629,6 +2655,34 @@ begin
   if receipt.organization_id<>org or receipt.kind not in ('onboarding.saveDraft','onboarding.submit','onboarding.requestChanges','onboarding.approve','assignment.create','task.createOneOff','month.materialize') then return null; end if;
   if receipt.kind in ('onboarding.saveDraft','onboarding.submit') and role_v<>'empleado' then raise exception using errcode='42501',message='Consulta no disponible'; end if;
   if receipt.kind in ('onboarding.requestChanges','onboarding.approve','assignment.create','month.materialize') and (role_v<>'jefe' and not (receipt.kind='onboarding.requestChanges' and role_v='encargado') or c->'authentication'->>'aal'<>'aal2') then raise exception using errcode='42501',message='Consulta no disponible'; end if;
+  if receipt.kind='onboarding.requestChanges' then
+   receipt_request:=app_private.api_uuid(receipt.arguments->'payload','requestId');
+   receipt_req_revision:=app_private.api_expected(receipt.result->'result','revision');
+   if receipt_req_revision<1 or receipt.result#>>'{result,requestId}' is distinct from receipt_request::text then raise exception using errcode='42501',message='Consulta no disponible'; end if;
+   select r.owner_id into receipt_owner from public.onboarding_requests r where r.id=receipt_request and r.organization_id=org;
+   if not found then raise exception using errcode='42501',message='Consulta no disponible'; end if;
+   perform public._coordination_lock_keys(1102,array[actor::text]);
+   perform public._coordination_lock_keys(1103,array(select distinct x::text from unnest(array[actor,receipt_owner]) x order by x::text));
+   perform public._coordination_lock_keys(1105,array['onboarding:'||receipt_request::text]);
+   c:=app_private.api_require_business(false);
+   if (c->'principal'->>'organizationId')::uuid<>org then raise exception using errcode='42501',message='Consulta no disponible'; end if;
+   perform app_private.api_revalidate_actor(actor,c);
+   role_v:=c->'principal'->>'role';
+   select * into receipt from app_private.api_command_receipts where actor_id=actor and operation_id=op;
+   if not found or receipt.organization_id<>org or receipt.kind<>'onboarding.requestChanges' then return jsonb_build_object('contractVersion',1,'kind',k,'data',jsonb_build_object('found',false)); end if;
+   if receipt.arguments is distinct from receipt_args_snapshot then raise exception using errcode='40001',message='Recibo cambiado'; end if;
+   select * into req from public.onboarding_requests where id=receipt_request and organization_id=org and owner_id=receipt_owner for share;
+   if not found then raise exception using errcode='42501',message='Consulta no disponible'; end if;
+   select p.active,p.role,p.manager_id into owner_active,owner_role,manager_v from public.profiles p where p.id=receipt_owner and p.organization_id=org for share;
+   if not found or role_v not in ('jefe','encargado') or c->'authentication'->>'aal'<>'aal2'
+      or not exists(select 1 from public.profiles a where a.id=actor and a.organization_id=org and a.active and a.role=role_v)
+      or (role_v='encargado' and (not owner_active or manager_v is distinct from actor))
+      or not exists(select 1 from public.onboarding_request_versions v where v.organization_id=org and v.request_id=receipt_request and v.revision=receipt_req_revision and v.submitted_by=receipt_owner) then
+    raise exception using errcode='42501',message='Consulta no disponible';
+   end if;
+   perform 1 from public.onboarding_request_versions v where v.organization_id=org and v.request_id=receipt_request and v.revision=receipt_req_revision and v.submitted_by=receipt_owner for share;
+   return jsonb_build_object('contractVersion',1,'kind',k,'data',jsonb_build_object('found',true,'command',receipt.result));
+  end if;
   if receipt.kind='onboarding.approve' then
    receipt_request:=app_private.api_uuid(receipt.arguments->'payload','requestId');
    receipt_req_revision:=app_private.api_expected(receipt.result->'result','revision');

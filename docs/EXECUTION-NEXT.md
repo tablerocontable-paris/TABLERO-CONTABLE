@@ -1,9 +1,9 @@
-# Acción de migración vigente — actualización 18/10/2026
+# Registro anterior supersedido — siguiente paso previo a requestChanges
 
-1. **Último bloque aceptado y publicado directamente en `main`:** `onboarding.approve` replay exacto + `commandReceipt`; evidencia `architecture/review-evidence/m2-2c-onboarding-approve-replay-20261018.json`. SQL014 SHA256 `d8b3a12d903698270ba06f32746dc90328f8a34439f15794799405772a8ae454`; PostgreSQL 17.11 200/200, 40P01=0 (32 casos nuevos); focal 21/21; Sol no halló P0–P2. Límites P3 de evidencia están detallados en el JSON. Commit `ad64854091505a2770cb93478fc34467e2aeae05`; Actions run 39181886848 success. No cierra Gate L.
-2. Suite completa **737/737 en 74 archivos**; TypeScript, builds cliente/Worker, sintaxis del runner y `git diff --check` finalizaron código 0 sobre el corte. El reporte nativo está fuera del repo en `outputs/m2-2c-onboarding-approve-replay-20261018-final/review.json`, SHA256 `001295eaab91adf22d44aec09a5694ab144b5ff9e0f56f05a1634141422284e6`.
-3. Siguiente: GPT-6 Luna, medio Standard, implementa el contrato Sol separado de `onboarding.requestChanges`; revisar con Sol antes de publicarlo.
-5. Supabase dev está vacío. El usuario ya autorizó apagar la autoexposición; queda ejecutar ese ajuste en Dashboard cuando la sesión esté disponible y volver a comprobar Data API/preflight. No aplicar SQL014 hasta completar Gate L y la revisión de seguridad.
+1. **Último bloque aceptado por Sol (local; pendiente de publicar):** `onboarding.requestChanges` exact replay + `commandReceipt`; evidencia `architecture/review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json` e informe `architecture/M2-2C-REQUESTCHANGES-REPLAY-LUNA-20261018.md`. SQL014 SHA256 `ac8cca582cf366b0cf143fd63d99c490c664b00b368eb473757017eebef26315`; PostgreSQL 17.11 297/297, 40P01=0; focal 22/22; Sol no halló P0–P2. Límites P3 de evidencia están detallados en el JSON. `origin/main` sigue en `156e9821255cce42adec36136333efbf74640d5b`. No cierra Gate L.
+2. Suite completa **738/738 en 74 archivos**; TypeScript, builds cliente/Worker, sintaxis del runner y `git diff --check` finalizaron código 0 sobre el corte local. El reporte nativo está en `../../outputs/requestchanges-native-matrix-20261018-r3/review.json`, SHA256 `e781fbb735f1c87a19defcf57df4d56acfbaba1ac1471aa759a74ff7f8463ed7`.
+3. Siguiente acción inmediata: actualizar el registro de Gate L, hacer commit y push directo a `main` sin PR, y verificar Actions para el SHA publicado. Después solicitar a Sol el contrato de la siguiente familia local.
+4. Supabase dev está vacío. El usuario ya autorizó apagar la autoexposición; queda ejecutar ese ajuste en Dashboard cuando la sesión esté disponible y volver a comprobar Data API/preflight. No aplicar SQL014 hasta completar Gate L y la revisión de seguridad.
 
 # Acción de migración vigente — actualización 18/10/2026
 

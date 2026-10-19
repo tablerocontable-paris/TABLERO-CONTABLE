@@ -285,6 +285,54 @@ describe("M2.2C versioned creation protocol", () => {
     } finally { await lab.close(); }
   }, 20_000);
 
+  it("replays requestChanges and reads its receipt from the submitted version under current role policy", async () => {
+    const lab = await new AccountingLab().init(stages.m014);
+    try {
+      const draft = { schemaVersion: 2, lines: [{ lineId: id(995), companyId: ids.company, teamId: ids.team, source: { type: "custom", definition: { kind: "operativa", title: "Histórico", objective: "", sector: "IVA", unit: "comprobantes" } }, schedule: { ...schedule, startDate: lab.day, endDate: lab.day, monthDay: Number(lab.day.slice(-2)) } }] };
+      await lab.actor(ids.owner, "aal1", "authenticated");
+      const save = { contractVersion: 1, operationId: id(996), kind: "onboarding.saveDraft", expectedRevisions: { [`onboardingOwner:${ids.owner}`]: "0" }, payload: { requestId: null, draft } };
+      const saved = (await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(save)])).result;
+      const requestId = saved.result.requestId as string;
+      const submit = { contractVersion: 1, operationId: id(997), kind: "onboarding.submit", expectedRevisions: { [`onboarding:${requestId}`]: "0", [`onboardingDraft:${requestId}`]: "1" }, payload: { requestId } };
+      await lab.first("select api.command_v1($1::jsonb)", [JSON.stringify(submit)]);
+      await lab.actor(ids.manager, "aal2", "authenticated");
+      const change = { contractVersion: 1, operationId: id(998), kind: "onboarding.requestChanges", expectedRevisions: { [`onboarding:${requestId}`]: "1" }, payload: { requestId, reason: "Aclarar alcance" } };
+      const first = (await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(change)])).result;
+      await lab.admin();
+      await lab.actor(ids.manager, "aal2", "authenticated");
+      expect((await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(change)])).result).toEqual(first);
+      const receiptQuery = { contractVersion: 1, kind: "commandReceipt", filters: { operationId: change.operationId }, cursor: null, limit: 1 };
+      expect((await lab.first("select api.query_v1($1::jsonb) result", [JSON.stringify(receiptQuery)])).result.data).toEqual({ found: true, command: first });
+      await lab.admin();
+      await lab.db.query("delete from company_memberships where organization_id=$1 and profile_id=$2", [ids.org, ids.owner]);
+      await lab.db.query("delete from team_members where organization_id=$1 and profile_id=$2", [ids.org, ids.owner]);
+      await lab.db.query("update onboarding_requests set draft_payload=$2 where id=$1", [requestId, JSON.stringify({ schemaVersion: 2, lines: [] })]);
+      await lab.actor(ids.manager, "aal2", "authenticated");
+      expect((await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(change)])).result).toEqual(first);
+      expect((await lab.first("select api.query_v1($1::jsonb) result", [JSON.stringify(receiptQuery)])).result.data).toEqual({ found: true, command: first });
+      await lab.admin();
+      await lab.db.query("update profiles set active=false where id=$1", [ids.owner]);
+      await lab.actor(ids.manager, "aal2", "authenticated");
+      const replayDenied = await lab.rows("select api.command_v1($1::jsonb)", [JSON.stringify(change)]).catch((error: { code?: string }) => error);
+      expect((replayDenied as { code?: string }).code).toBe("42501");
+      const receiptDenied = await lab.rows("select api.query_v1($1::jsonb)", [JSON.stringify(receiptQuery)]).catch((error: { code?: string }) => error);
+      expect((receiptDenied as { code?: string }).code).toBe("42501");
+      const mismatch = { ...change, payload: { ...change.payload, reason: "Distinto" } };
+      const mismatchError = await lab.rows("select api.command_v1($1::jsonb)", [JSON.stringify(mismatch)]).catch((error: { code?: string }) => error);
+      expect((mismatchError as { code?: string }).code).toBe("40001");
+      await lab.admin();
+      await lab.db.query("update profiles set role='jefe',manager_id=null where id=$1", [ids.manager]);
+      await lab.actor(ids.manager, "aal2", "authenticated");
+      expect((await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(change)])).result).toEqual(first);
+      expect((await lab.first("select api.query_v1($1::jsonb) result", [JSON.stringify(receiptQuery)])).result.data).toEqual({ found: true, command: first });
+      await lab.admin();
+      expect(await lab.first("select status,draft_payload from onboarding_requests where id=$1", [requestId])).toMatchObject({ status: "changes_requested", draft_payload: { schemaVersion: 2, lines: [] } });
+      expect(await lab.first("select count(*)::integer count from onboarding_reviews where request_id=$1 and action='changes_requested'", [requestId])).toEqual({ count: 1 });
+      expect(await lab.first("select count(*)::integer count from app_private.api_command_receipts where actor_id=$1 and operation_id=$2", [ids.manager, change.operationId])).toEqual({ count: 1 });
+      expect(await lab.first("select count(*)::integer count from audit_events where actor_id=$1 and entity_id=$2 and action='onboarding.changes_requested'", [ids.manager, requestId])).toEqual({ count: 1 });
+    } finally { await lab.close(); }
+  }, 20_000);
+
   it("replays approval and exposes its receipt from the immutable submitted version", async () => {
     const lab = await new AccountingLab().init(stages.m014);
     try {

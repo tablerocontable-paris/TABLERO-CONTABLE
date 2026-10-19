@@ -1006,6 +1006,108 @@ try {
         const submitted = await a.query(`select api.command_v1('${JSON.stringify(submit).replaceAll("'", "''")}'::jsonb);`); assert.equal(submitted.code, "00000", JSON.stringify(submitted)); await a.ok("reset role;");
         return requestId;
       };
+      // requestChanges historical replay/receipt race matrix. Each fixture is
+      // synthetic and uses a separate observer connection as the writer.
+      const requestChangesCases = [
+        { name: "jefe actor deactivation", role: "jefe", mutation: actorId => `update public.profiles set active=false where id=${lit(actorId)};`, deny: true },
+        { name: "jefe actor demotion", role: "jefe", mutation: actorId => `update public.profiles set role='empleado' where id=${lit(actorId)};`, deny: true },
+        { name: "encargado actor deactivation", role: "encargado", mutation: actorId => `update public.profiles set active=false where id=${lit(actorId)};`, deny: true },
+        { name: "encargado actor demotion", role: "encargado", mutation: actorId => `update public.profiles set role='empleado' where id=${lit(actorId)};`, deny: true },
+        { name: "encargado manager change", role: "encargado", mutation: (_actorId, ownerId) => `update public.profiles set manager_id=null where id=${lit(ownerId)};`, deny: true },
+        { name: "encargado owner deactivation", role: "encargado", mutation: (_actorId, ownerId) => `update public.profiles set active=false where id=${lit(ownerId)};`, deny: true },
+      ];
+      const requestChangesActions = [
+        { name: "exact replay", run: f => a.query(`select api.command_v1('${JSON.stringify(f.command).replaceAll("'", "''")}'::jsonb);`) },
+        { name: "commandReceipt", run: f => a.query(`select api.query_v1('${JSON.stringify(f.receipt).replaceAll("'", "''")}'::jsonb);`) },
+      ];
+      const requestChangesPairs = [["read committed", "read committed"], ["repeatable read", "repeatable read"], ["read committed", "repeatable read"], ["repeatable read", "read committed"]];
+      const waitRequestChangesWriterBlocked = async (blockedPid, blockerPid) => {
+        const until = Date.now() + 10000;
+        while (Date.now() < until) {
+          if ((await reviewer.ok(`select ${blockerPid}=any(pg_catalog.pg_blocking_pids(${blockedPid}));`)).at(-1) === "t") return true;
+          await new Promise(done => setTimeout(done, 20));
+        }
+        return false;
+      };
+      let requestChangesRace = 0;
+      const makeRequestChangesFixture = async seed => {
+        const actorId = uid(seed), ownerId = uid(seed + 1), opBase = seed + 2;
+        const role = seed % 2 ? "encargado" : "jefe";
+        await observer.ok(`insert into auth.users(id) values(${lit(actorId)});insert into public.profiles(id,organization_id,name,role,sector,branch,position) values(${lit(actorId)},${lit(org)},'requestChanges ${seed}',${lit(role)},'Test','Test','Test');`);
+        await observer.ok(`update public.profiles set role=${lit(role)} where id=${lit(actorId)};`);
+        const requestId = await makeRequest(ownerId, uid(seed + 3), opBase);
+        if (role === "encargado") await observer.ok(`update public.profiles set manager_id=${lit(actorId)} where id=${lit(ownerId)};`);
+        const command = { contractVersion: 1, operationId: uid(seed + 4), kind: "onboarding.requestChanges", expectedRevisions: { [`onboarding:${requestId}`]: "1" }, payload: { requestId, reason: "Race fixture" } };
+        await claims({ role: "authenticated", sub: actorId, aal: "aal2" }, actorId);
+        const created = await a.query(`select api.command_v1('${JSON.stringify(command).replaceAll("'", "''")}'::jsonb);`);
+        assert.equal(created.code, "00000", JSON.stringify(created));
+        const receipt = { contractVersion: 1, kind: "commandReceipt", filters: { operationId: command.operationId }, cursor: null, limit: 1 };
+        await a.ok("reset role;");
+        const snapshotSql = `select jsonb_build_object(
+          'actor',(select to_jsonb(p) from public.profiles p where p.id=${lit(actorId)}),
+          'owner',(select to_jsonb(p) from public.profiles p where p.id=${lit(ownerId)}),
+          'request',(select to_jsonb(r) from public.onboarding_requests r where r.id=${lit(requestId)}),
+          'versions',(select coalesce(jsonb_agg(to_jsonb(v) order by v.revision),'[]'::jsonb) from public.onboarding_request_versions v where v.request_id=${lit(requestId)}),
+          'reviews',(select coalesce(jsonb_agg(to_jsonb(x) order by x.id),'[]'::jsonb) from public.onboarding_reviews x where x.request_id=${lit(requestId)}),
+          'receipt',(select to_jsonb(x) from app_private.api_command_receipts x where x.actor_id=${lit(actorId)} and x.operation_id=${lit(command.operationId)}),
+          'fences',(select count(*) from app_private.api_operation_fences x where x.actor_id=${lit(actorId)} and x.operation_id=${lit(command.operationId)}),
+          'audit',(select count(*) from public.audit_events x where x.actor_id=${lit(actorId)} and x.entity_id=${lit(requestId)} and x.action='onboarding.changes_requested'));`;
+        return { actorId, ownerId, requestId, role, command, receipt, created, snapshotSql };
+      };
+      {
+        const f = await makeRequestChangesFixture(29990);
+        await observer.ok(`update public.profiles set role='jefe' where id=${lit(f.actorId)};`);
+        await observer.ok(`update public.profiles set active=false where id=${lit(f.ownerId)};`);
+        await claims({ role: "authenticated", sub: f.actorId, aal: "aal2" }, f.actorId);
+        const replay = await a.query(`select api.command_v1('${JSON.stringify(f.command).replaceAll("'", "''")}'::jsonb);`);
+        const receipt = await a.query(`select api.query_v1('${JSON.stringify(f.receipt).replaceAll("'", "''")}'::jsonb);`);
+        assert.equal(replay.code, "00000", JSON.stringify(replay));
+        assert.equal(receipt.code, "00000", JSON.stringify(receipt));
+        assert.equal(JSON.parse(receipt.lines.at(-1)).data.found, true, JSON.stringify(receipt));
+        await a.ok("reset role;");
+        record("requestChanges jefe replay and commandReceipt remain org-wide after owner deactivation", true, { replaySQLSTATE: replay.code, receiptSQLSTATE: receipt.code, receiptFound: true });
+      }
+      for (const mutationCase of requestChangesCases) for (const action of requestChangesActions) for (const [readerIso, writerIso] of requestChangesPairs) {
+        for (const writerFirst of [false, true]) {
+          const f = await makeRequestChangesFixture(30000 + requestChangesRace++ * 10);
+          await observer.ok(`update public.profiles set role=${lit(mutationCase.role)} where id=${lit(f.actorId)};`);
+          if (mutationCase.role === "encargado") await observer.ok(`update public.profiles set manager_id=${lit(f.actorId)} where id=${lit(f.ownerId)};`);
+          const writerSql = mutationCase.mutation(f.actorId, f.ownerId);
+          if (!writerFirst) {
+            const before = (await observer.ok(f.snapshotSql)).at(-1);
+            await claims({ role: "authenticated", sub: f.actorId, aal: "aal2" }, f.actorId);
+            await a.ok(`begin isolation level ${readerIso};`);
+            const readerPid = Number((await a.ok("select pg_backend_pid();")).at(-1));
+            const read = await action.run(f); assert.equal(read.code, "00000", JSON.stringify(read));
+            await observer.ok(`begin isolation level ${writerIso};`);
+            const writerPid = Number((await observer.ok("select pg_backend_pid();")).at(-1));
+            const pending = observer.query(writerSql);
+            const blocked = await waitRequestChangesWriterBlocked(writerPid, readerPid);
+            await a.ok("commit;"); const write = await pending; await observer.ok(write.code === "00000" ? "commit;" : "rollback;");
+            assert.equal(blocked, true, `${mutationCase.name} ${action.name} did not block read-first writer`);
+            assert.equal(write.code, "00000", JSON.stringify(write));
+            const after = (await observer.ok(f.snapshotSql)).at(-1);
+            assert.notEqual(after, before, "writer commit must be visible after read-first commit");
+            await a.ok("reset role;");
+            record(`requestChanges ${action.name} ${mutationCase.name} read-first ${readerIso}/${writerIso}`, true, { blocked, readerSQLSTATE: read.code, writerSQLSTATE: write.code, committedSnapshotChanged: true });
+          } else {
+            await claims({ role: "authenticated", sub: f.actorId, aal: "aal2" }, f.actorId);
+            await a.ok(`begin isolation level ${readerIso};select active,role from public.profiles where id=${lit(f.actorId)};`);
+            const readPid = Number((await a.ok("select pg_backend_pid();")).at(-1));
+            await observer.ok(`begin isolation level ${writerIso};${writerSql}`);
+            await observer.ok("commit;");
+            const after = (await observer.ok(f.snapshotSql)).at(-1);
+            const stale = await action.run(f);
+            assert.equal(stale.code, readerIso === "repeatable read" ? "40001" : "42501", JSON.stringify(stale));
+            await a.ok("rollback;");
+            await claims({ role: "authenticated", sub: f.actorId, aal: "aal2" }, f.actorId);
+            const retry = await action.run(f); assert.equal(retry.code, "42501", JSON.stringify(retry));
+            assert.equal((await observer.ok(f.snapshotSql)).at(-1), after, "denied stale/fresh reads changed post-commit snapshot");
+            await a.ok("reset role;");
+            record(`requestChanges ${action.name} ${mutationCase.name} writer-first ${readerIso}/${writerIso}`, true, { writerSQLSTATE: "00000", staleReaderSQLSTATE: stale.code, freshRetrySQLSTATE: retry.code, postCommitSnapshotUnchanged: true, readerBackend: readPid });
+          }
+        }
+      }
       {
         const owner = uid(150500), companyB = uid(150501), teamB = uid(150502), lineA = uid(150503), lineB = uid(150504);
         await observer.ok(`insert into auth.users(id) values(${lit(owner)});insert into public.profiles(id,organization_id,name,role,sector,branch,position) values(${lit(owner)},${lit(org)},'M2.2C immutable submit version replay','empleado','Test','Test','Test');insert into public.companies(id,organization_id,name) values(${lit(companyB)},${lit(org)},'Replay version B');insert into public.teams(id,organization_id,name,manager_id) values(${lit(teamB)},${lit(org)},'Replay version team B',${lit(boss)});insert into public.company_memberships(organization_id,company_id,profile_id) values(${lit(org)},${lit(company)},${lit(owner)}),(${lit(org)},${lit(companyB)},${lit(owner)});insert into public.team_members(organization_id,team_id,profile_id) values(${lit(org)},${lit(team)},${lit(owner)}),(${lit(org)},${lit(teamB)},${lit(owner)});`);
