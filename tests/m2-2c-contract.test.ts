@@ -285,6 +285,63 @@ describe("M2.2C versioned creation protocol", () => {
     } finally { await lab.close(); }
   }, 20_000);
 
+  it("replays approval and exposes its receipt from the immutable submitted version", async () => {
+    const lab = await new AccountingLab().init(stages.m014);
+    try {
+      const line = { lineId: id(944), companyId: ids.company, teamId: ids.team, source: { type: "custom", definition: { kind: "operativa", title: "Versión aprobada A", objective: "", sector: "IVA", unit: "comprobantes" } }, schedule: { ...schedule, startDate: lab.day, endDate: lab.day, monthDay: Number(lab.day.slice(-2)) } };
+      const draft = { schemaVersion: 2, lines: [line] };
+      await lab.actor(ids.peer, "aal1", "authenticated");
+      const save = { contractVersion: 1, operationId: id(945), kind: "onboarding.saveDraft", expectedRevisions: { [`onboardingOwner:${ids.peer}`]: "0" }, payload: { requestId: null, draft } };
+      const saved = (await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(save)])).result;
+      const requestId = saved.result.requestId as string;
+      const submit = { contractVersion: 1, operationId: id(946), kind: "onboarding.submit", expectedRevisions: { [`onboarding:${requestId}`]: "0", [`onboardingDraft:${requestId}`]: "1" }, payload: { requestId } };
+      await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(submit)]);
+      const approve = { contractVersion: 1, operationId: id(947), kind: "onboarding.approve", expectedRevisions: { [`onboarding:${requestId}`]: "1" }, payload: { requestId, weightOverrides: [], period: lab.period } };
+      await lab.actor(ids.boss, "aal2", "authenticated");
+      const first = (await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(approve)])).result;
+      const mismatched = { ...approve, expectedRevisions: { [`onboarding:${requestId}`]: "9" } };
+      const changedArgs = await lab.rows("select api.command_v1($1::jsonb)", [JSON.stringify(mismatched)]).catch((error: { code?: string }) => error);
+      expect((changedArgs as { code?: string }).code).toBe("40001");
+
+      // Simulate a later mutable draft/catalogue state. The immutable submitted
+      // revision and current owner scope remain the authority for replay.
+      await lab.admin();
+      const changedDraft = { schemaVersion: 2, lines: [{ ...line, source: { type: "custom", definition: { ...line.source.definition, title: "Borrador posterior B" } } }] };
+      await lab.db.query("update onboarding_requests set draft_payload=$2::jsonb where id=$1", [requestId, JSON.stringify(changedDraft)]);
+      const before = await lab.first(`select jsonb_build_object(
+        'request',(select to_jsonb(r) from onboarding_requests r where r.id=$1),
+        'assignments',(select coalesce(jsonb_agg(to_jsonb(a) order by a.id),'[]'::jsonb) from task_assignments a where a.owner_id=$2),
+        'receipts',(select count(*)::integer from app_private.api_command_receipts where actor_id=$3 and operation_id=$4),
+        'audits',(select count(*)::integer from audit_events where actor_id=$3 and entity_id=$1 and action='onboarding.approved'),
+        'creationHead',(select to_jsonb(h) from app_private.api_creation_heads h where organization_id=$5 and owner_id=$2),
+        'monthFence',(select to_jsonb(f) from app_private.api_month_fences f where organization_id=$5 and owner_id=$2 and period=$6::date),
+        'membershipFence',(select to_jsonb(f) from app_private.api_membership_fences f where organization_id=$5 and profile_id=$2)
+      ) state`, [requestId, ids.peer, ids.boss, id(947), ids.org, lab.period]).then((row) => row.state);
+      await lab.actor(ids.boss, "aal2", "authenticated");
+      expect((await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify(approve)])).result).toEqual(first);
+      const receipt = { contractVersion: 1, kind: "commandReceipt", filters: { operationId: id(947) }, cursor: null, limit: 1 };
+      expect((await lab.first("select api.query_v1($1::jsonb) result", [JSON.stringify(receipt)])).result.data).toEqual({ found: true, command: first });
+      await lab.admin();
+      const after = await lab.first(`select jsonb_build_object(
+        'request',(select to_jsonb(r) from onboarding_requests r where r.id=$1),
+        'assignments',(select coalesce(jsonb_agg(to_jsonb(a) order by a.id),'[]'::jsonb) from task_assignments a where a.owner_id=$2),
+        'receipts',(select count(*)::integer from app_private.api_command_receipts where actor_id=$3 and operation_id=$4),
+        'audits',(select count(*)::integer from audit_events where actor_id=$3 and entity_id=$1 and action='onboarding.approved'),
+        'creationHead',(select to_jsonb(h) from app_private.api_creation_heads h where organization_id=$5 and owner_id=$2),
+        'monthFence',(select to_jsonb(f) from app_private.api_month_fences f where organization_id=$5 and owner_id=$2 and period=$6::date),
+        'membershipFence',(select to_jsonb(f) from app_private.api_membership_fences f where organization_id=$5 and profile_id=$2)
+      ) state`, [requestId, ids.peer, ids.boss, id(947), ids.org, lab.period]).then((row) => row.state);
+      expect(after).toEqual(before);
+
+      await lab.db.query("update company_memberships set active=false where organization_id=$1 and company_id=$2 and profile_id=$3", [ids.org, ids.company, ids.peer]);
+      await lab.actor(ids.boss, "aal2", "authenticated");
+      const deniedReplay = await lab.rows("select api.command_v1($1::jsonb)", [JSON.stringify(approve)]).catch((error: { code?: string }) => error);
+      expect((deniedReplay as { code?: string }).code).toBe("42501");
+      const deniedReceipt = await lab.rows("select api.query_v1($1::jsonb)", [JSON.stringify(receipt)]).catch((error: { code?: string }) => error);
+      expect((deniedReceipt as { code?: string }).code).toBe("42501");
+    } finally { await lab.close(); }
+  }, 30_000);
+
   it("creates a private one-off v2 operative occurrence and replays it", async () => {
     const lab = await new AccountingLab().init(stages.m014);
     try {

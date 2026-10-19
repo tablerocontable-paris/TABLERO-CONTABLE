@@ -1,0 +1,91 @@
+{
+  "scope": "Local SQL014 onboarding.approve exact replay and commandReceipt authorization",
+  "recordedAt": "2026-10-18",
+  "hostedSupabaseModified": false,
+  "migrationApplied": false,
+  "changes": [
+    {
+      "file": "supabase/migrations/202610150014_operational_api.sql",
+      "sha256": "d8b3a12d903698270ba06f32746dc90328f8a34439f15794799405772a8ae454"
+    },
+    {
+      "file": "tests/m2-2c-contract.test.ts",
+      "sha256": "61084843d9b66288966152258914d597f1ddf2b22e8088327496df700c32a169"
+    },
+    {
+      "file": "tests/review/m2-1-native-review.mjs",
+      "sha256": "260da228cd5d4fd89c3d596ba3967dde296aad5258cb06e259dc07c4ceb7ab8e"
+    }
+  ],
+  "behavior": {
+    "exactReplay": "Resolve the submitted revision from the approval receipt, load its immutable onboarding_request_versions payload, and authorize against its owner and company/team lines. The current draft, request status and mutable catalogue eligibility do not determine the replay result.",
+    "commandReceipt": "Use the immutable receipt revision and line scopes; require a current active jefe at AAL2, an active empleado owner, and current company membership/team rows.",
+    "locking": "Acquire coordination locks in read-only mode before permission rechecks; take row share locks on the owner and relevant memberships/teams. The read paths create no fences or business writes.",
+    "conflictingArguments": "The same actor/operationId with different arguments returns SQLSTATE 40001."
+  },
+  "focusedContractTest": {
+    "command": "node node_modules/vitest/vitest.mjs run tests/m2-2c-contract.test.ts --maxWorkers=1 --testTimeout=30000 --hookTimeout=30000",
+    "exitCode": 0,
+    "filesPassed": 1,
+    "testsPassed": 21,
+    "testsFailed": 0,
+    "durationSeconds": 45.94
+  },
+  "nativePostgres": {
+    "report": "../../../../../outputs/m2-2c-onboarding-approve-replay-20261018-final/review.json",
+    "reportSha256": "001295eaab91adf22d44aec09a5694ab144b5ff9e0f56f05a1634141422284e6",
+    "engine": "PostgreSQL 17.11",
+      "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2c-onboarding-approve-replay-20261018-final --port 55675 --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes",
+    "result": {
+      "total": 200,
+      "passed": 200,
+      "failed": 0,
+      "sqlstate40P01": 0,
+      "migration014Sha256": "d8b3a12d903698270ba06f32746dc90328f8a34439f15794799405772a8ae454"
+    },
+    "approvalReplayCases": 32,
+    "matrix": {
+      "isolationPairs": [
+        "read committed/read committed",
+        "repeatable read/repeatable read",
+        "read committed/repeatable read",
+        "repeatable read/read committed"
+      ],
+      "orders": ["reader first", "writer first"],
+      "readOperations": ["onboarding.approve exact replay", "commandReceipt"],
+      "writers": ["distinct active chief revokes owner company membership", "owner profile deactivation"],
+      "assertions": [
+        "reader-first revocation/deactivation waits for the read to finish",
+        "writer-first repeatable-read stale snapshots return 40001 and fresh retries return 42501",
+        "read committed writer-first reads deny with 42501",
+        "read snapshots preserve request/version/activation/assignment/receipt/audit state",
+        "exact replay and receipt reads succeed while the referenced catalogue template is inactive and a later mutable draft exists"
+      ]
+    }
+  },
+  "staticChecks": {
+    "typescript": {"command": "node node_modules/typescript/bin/tsc --noEmit", "exitCode": 0},
+    "runnerSyntax": {"command": "node --check tests/review/m2-1-native-review.mjs", "exitCode": 0},
+    "diffCheck": {"command": "git diff --check", "exitCode": 0}
+  },
+  "fullValidation": {
+    "vitest": {"command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000", "exitCode": 0, "filesPassed": 74, "testsPassed": 737, "testsFailed": 0},
+    "clientBuild": {"command": "node node_modules/vite/bin/vite.js build --outDir dist/client", "exitCode": 0},
+    "workerBuild": {"command": "node scripts/build-worker.mjs", "exitCode": 0}
+  },
+  "solReview": {
+    "model": "GPT-6.1 Sol",
+    "decision": "ACCEPT scoped; no P0-P2",
+    "limitations": [
+      "Native reader-first observer snapshots are taken before reader commit; the focused autocommit test checks read-only state, and SQL inspection found no writes.",
+      "Later draft mutation changes the title only; no distinct company/team mutation case.",
+      "No dedicated replay/receipt after later month closure case."
+    ],
+    "doesNotClose": ["M2.2C", "Gate L"]
+  },
+  "limits": [
+    "All data is synthetic and local. No hosted Supabase/Auth/HTTP behavior was exercised.",
+    "Migration 014 remains unapplied; migrations 001-013, UI, Worker and Site were not modified.",
+    "The evidence covers only the specified onboarding.approve replay and commandReceipt paths; it does not close M2.2C or Gate L."
+  ]
+}
