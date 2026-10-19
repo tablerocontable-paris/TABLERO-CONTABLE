@@ -42,6 +42,16 @@ SHA; no hay CI verificado en esta sesión. El hook local pasó 196/196. SQL014 n
 se aplicó remotamente.
 
 **Último bloque aceptado por Sol y publicado, alcance acotado:** cuatro carreras
+`public.start_task_timer` frente a revocación, RC/RC y RR/RR, ambos órdenes.
+PostgreSQL 17.11 325/325, cuatro blockers, cero deadlocks; Vitest 738/738,
+TypeScript, builds cliente/Worker, sintaxis y diff-check aprobados. Aceptación:
+`docs/architecture/M2-2C-TIMER-START-MEMBERSHIP-REVOCATION-RACES-SOL-ACCEPTANCE-20261019.md`;
+manifiesto `docs/architecture/review-evidence/m2-2c-timer-start-membership-revocation-races-luna-20261019.json`.
+SQL011/014 sin cambios; no hubo llamadas remotas. Commit directo a `origin/main`,
+sin PR: `0ff1df0eebc1237d60b08fed6450f6f21f401006`; SHA remoto confirmado. CI no
+está verificado.
+
+**Bloque aceptado anterior, publicado:** cuatro carreras
 `operation.record` frente a revocación de membresía, RC/RC y RR/RR, ambos órdenes.
 PostgreSQL 17.11 321/321, cuatro blockers reales, cero deadlocks; Vitest 738/738,
 TypeScript, builds cliente/Worker, sintaxis y diff-check aprobados. Aceptación:
@@ -55,11 +65,11 @@ siguen abiertos. Commit directo a `origin/main`, sin PR:
 `cf37b7fe220befa5317e4ae3295514288e96ff6e`; `git ls-remote` confirmó el SHA.
 CI del push no está verificado.
 
-**Siguiente vigente:** auditar con Sol otra familia incompleta de §9 y redactar
-un contrato acotado antes de pedir la implementación a Luna. El bloque
-`public.start_task_timer`/revocación ya quedó aceptado localmente; su publicación
-se registra en PROJECT-STATUS y EXECUTION-NEXT. No tocar SQL011/014 ni Supabase
-alojado.
+**Siguiente vigente:** Sol auditó como próxima matriz incompleta
+`assignment.create` frente a revocación de membresía (RC/RC y RR/RR, ambos
+órdenes). Antes de Luna, fijar en un contrato los fences exactos del creation
+head y los actores, ya que la fila inicial cambia el delta. No tocar SQL011/014
+ni Supabase alojado.
 
 **Bloques anteriores aceptados y publicados:** onboarding.requestChanges exact replay/commandReceipt y cuatro carreras mixtas de cobertura recurrente (RC/RR, RR/RC, ambos ganadores). Evidencias: `docs/architecture/review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json` y `m2-2c-gatel-recurrent-coverage-20261019.json`. El run 39184344731 corresponde al commit 873829271463b4f3bf4bbb5ad39dad978908a8d2. Gate L sigue abierto.
 

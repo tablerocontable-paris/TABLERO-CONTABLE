@@ -1,25 +1,23 @@
 # Estado general de la migración — actualización 19/10/2026
 
-**Último bloque aceptado localmente por Sol, todavía sin publicar:** cuatro
-carreras `public.start_task_timer` frente a revocación de membresía, RC/RC y
-RR/RR, ambos órdenes. PostgreSQL nativo 17.11: **325/325**, cuatro bloqueos
-reales, SQLSTATE/reintentos exactos y cero deadlocks. Fences, sesión, recibos y
-auditoría verificados. Evidencia y hashes en
-`architecture/review-evidence/m2-2c-timer-start-membership-revocation-races-luna-20261019.json`;
-logs crudos en `../../outputs/m2-2c-timer-start-membership-revocation-races-luna-20261019-attempt4/`.
+**Último bloque aceptado por Sol y publicado, alcance acotado:** cuatro
+carreras `public.start_task_timer` frente a revocación, RC/RC y RR/RR, ambos
+órdenes. PostgreSQL nativo 17.11: **325/325**, cuatro blockers reales, cero
+deadlocks; Vitest **738/738 en 74 archivos**; TypeScript, builds cliente/Worker,
+sintaxis y diff-check aprobados. Aceptación y límites P3:
+`architecture/M2-2C-TIMER-START-MEMBERSHIP-REVOCATION-RACES-SOL-ACCEPTANCE-20261019.md`.
+Manifiesto final:
+`architecture/review-evidence/m2-2c-timer-start-membership-revocation-races-luna-20261019.json`
+(SHA256 `82e6c67ad663e0310e36cae33d8bd0fc049845ec941ea61b33355222c390d16a`).
 Runner SHA256 `fa7bf8da251a9fce4b0a4cc31f5152fdd2cbb5bc30c1d1e5b2ca48b03b9a4b23`;
-manifiesto SHA256 `0409cfdb36c1e50626773c305e97fad4a81330226d64d1cc875b589ae5f9667b`;
-tras la anotación de aceptación su SHA es `82e6c67ad663e0310e36cae33d8bd0fc049845ec941ea61b33355222c390d16a`.
-La suite completa pasó **738/738 en 74 archivos**; TypeScript, builds
-cliente/Worker, `node --check` y diff-check terminaron con exit 0. No se cambió
-SQL ni hubo llamadas remotas. Aceptación y límites P3:
-`architecture/M2-2C-TIMER-START-MEMBERSHIP-REVOCATION-RACES-SOL-ACCEPTANCE-20261019.md`.
-Aceptación y límites P3:
-`architecture/M2-2C-TIMER-START-MEMBERSHIP-REVOCATION-RACES-SOL-ACCEPTANCE-20261019.md`.
-Commit/push de este bloque aún pendiente; Gate L y §9 siguen abiertos.
+SQL011/014 sin cambios. Publicado directamente a `origin/main`, sin PR, en
+`0ff1df0eebc1237d60b08fed6450f6f21f401006`; SHA remoto confirmado. CI no está
+verificado. Gate L y §9 siguen abiertos.
 
-**Siguiente vigente:** auditar con Sol otra familia incompleta de §9 y redactar
-su contrato acotado antes de la siguiente implementación Luna.
+**Siguiente vigente:** Sol identificó `assignment.create` frente a revocación
+de membresía como próxima matriz incompleta. Redactar y revisar con Sol el
+contrato, incluyendo creación-head/fences y actores distintos, antes de pedir
+otra implementación Luna.
 
 **Último bloque aceptado por Sol y publicado, alcance acotado:** matriz de cuatro
 carreras `operation.record`/revocación de membresía bajo RC/RC y RR/RR, ambos

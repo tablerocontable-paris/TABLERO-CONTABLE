@@ -11,10 +11,12 @@ TypeScript, builds cliente/Worker, sintaxis y diff-check terminaron con exit 0.
 Los hashes y resultados se registran en el manifiesto
 `architecture/review-evidence/m2-2c-timer-start-membership-revocation-races-luna-20261019.json`.
 Runner SHA256 `fa7bf8da251a9fce4b0a4cc31f5152fdd2cbb5bc30c1d1e5b2ca48b03b9a4b23`;
-manifiesto SHA256 `0409cfdb36c1e50626773c305e97fad4a81330226d64d1cc875b589ae5f9667b`.
+manifiesto SHA256 `82e6c67ad663e0310e36cae33d8bd0fc049845ec941ea61b33355222c390d16a`.
 Aceptación y límites P3:
 `architecture/M2-2C-TIMER-START-MEMBERSHIP-REVOCATION-RACES-SOL-ACCEPTANCE-20261019.md`.
-Commit/push aún pendiente; SQL011/014 siguen intactas.
+Publicado directamente a `origin/main`, sin PR, en
+`0ff1df0eebc1237d60b08fed6450f6f21f401006`; SHA remoto confirmado. CI no está
+verificado; SQL011/014 siguen intactas.
 
 ## Último bloque aceptado localmente por Sol — operation.record/revocación
 
@@ -34,9 +36,10 @@ verificado. SQL011/014 siguen sin cambios; Gate L/§9 permanece abierto.
 
 ## Próximo paso
 
-Continuar auditoría de §9 con GPT-6.1 Sol para elegir la siguiente matriz
-incompleta; redactar y revisar su contrato antes de pedir otra implementación
-Luna. No tocar SQL ni Supabase alojado.
+Siguiente matriz identificada por GPT-6.1 Sol: `assignment.create` frente a
+revocación de membresía, RC/RC y RR/RR con ambos órdenes. Redactar y revisar con
+Sol un contrato que fije creation-head inicial/fences y actores antes de pedir
+otra implementación Luna. No tocar SQL ni Supabase alojado.
 
 ## Último bloque local aceptado por Sol — cobertura contra onboarding
 
