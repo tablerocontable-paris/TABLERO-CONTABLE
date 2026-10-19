@@ -36,10 +36,12 @@ verificado. SQL011/014 siguen sin cambios; Gate L/§9 permanece abierto.
 
 ## Próximo paso
 
-Siguiente matriz identificada por GPT-6.1 Sol: `assignment.create` frente a
-revocación de membresía, RC/RC y RR/RR con ambos órdenes. Redactar y revisar con
-Sol un contrato que fije creation-head inicial/fences y actores antes de pedir
-otra implementación Luna. No tocar SQL ni Supabase alojado.
+Pedir a GPT-6 Luna que implemente el contrato Sol-aprobado
+`architecture/M2-2C-ASSIGNMENT-CREATE-MEMBERSHIP-REVOCATION-RACES-LUNA-20261019.md`
+(SHA256 `9de273684735d6c075bb0800b24d933238afbd6d24fcf55aec59f3e74a25b8df`):
+cuatro carreras RC/RC y RR/RR frente a revocación, ambos órdenes. Respetar
+creation head y fences precreados en cero; incluir las precisiones P3 de schedule
+y persistencia v2. No tocar SQL ni Supabase alojado.
 
 ## Último bloque local aceptado por Sol — cobertura contra onboarding
 

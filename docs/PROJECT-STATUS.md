@@ -14,10 +14,11 @@ SQL011/014 sin cambios. Publicado directamente a `origin/main`, sin PR, en
 `0ff1df0eebc1237d60b08fed6450f6f21f401006`; SHA remoto confirmado. CI no está
 verificado. Gate L y §9 siguen abiertos.
 
-**Siguiente vigente:** Sol identificó `assignment.create` frente a revocación
-de membresía como próxima matriz incompleta. Redactar y revisar con Sol el
-contrato, incluyendo creación-head/fences y actores distintos, antes de pedir
-otra implementación Luna.
+**Siguiente vigente:** implementación Luna del contrato aprobado por Sol
+`architecture/M2-2C-ASSIGNMENT-CREATE-MEMBERSHIP-REVOCATION-RACES-LUNA-20261019.md`
+(SHA256 `9de273684735d6c075bb0800b24d933238afbd6d24fcf55aec59f3e74a25b8df`).
+Cuatro carreras RC/RC y RR/RR, ambos órdenes; creation head y fences se
+precrean en cero. Aplicar las precisiones P3 del contrato; no tocar SQL.
 
 **Último bloque aceptado por Sol y publicado, alcance acotado:** matriz de cuatro
 carreras `operation.record`/revocación de membresía bajo RC/RC y RR/RR, ambos

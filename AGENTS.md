@@ -65,11 +65,11 @@ siguen abiertos. Commit directo a `origin/main`, sin PR:
 `cf37b7fe220befa5317e4ae3295514288e96ff6e`; `git ls-remote` confirmó el SHA.
 CI del push no está verificado.
 
-**Siguiente vigente:** Sol auditó como próxima matriz incompleta
-`assignment.create` frente a revocación de membresía (RC/RC y RR/RR, ambos
-órdenes). Antes de Luna, fijar en un contrato los fences exactos del creation
-head y los actores, ya que la fila inicial cambia el delta. No tocar SQL011/014
-ni Supabase alojado.
+**Siguiente vigente:** implementar el contrato Sol-aprobado
+`docs/architecture/M2-2C-ASSIGNMENT-CREATE-MEMBERSHIP-REVOCATION-RACES-LUNA-20261019.md`
+(SHA256 `9de273684735d6c075bb0800b24d933238afbd6d24fcf55aec59f3e74a25b8df`).
+Cuatro carreras RC/RC y RR/RR, ambos órdenes; respetar creation-head/fence
+preexistentes y P3 de schedule/definición v2. No tocar SQL ni Supabase alojado.
 
 **Bloques anteriores aceptados y publicados:** onboarding.requestChanges exact replay/commandReceipt y cuatro carreras mixtas de cobertura recurrente (RC/RR, RR/RC, ambos ganadores). Evidencias: `docs/architecture/review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json` y `m2-2c-gatel-recurrent-coverage-20261019.json`. El run 39184344731 corresponde al commit 873829271463b4f3bf4bbb5ad39dad978908a8d2. Gate L sigue abierto.
 
