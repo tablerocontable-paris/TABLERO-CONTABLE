@@ -1,0 +1,1306 @@
+{
+  "title": "M2.2C legacy activity replay authorization evidence",
+  "date": "2026-10-19",
+  "status": "ready_for_independent_Sol_review_not_accepted",
+  "baseline": {
+    "commit": "e3e18c2053367812fd78b21a786d13143030098d",
+    "sql014Sha256": "BC83666B4FFD916FA8E7FA7EBC03800C6F61E0A3B852C851BE70C5BE1498F3C3",
+    "contractSha256": "F4113A701BF4E8C075CAF12F95535BAC7B5A0BFC8D307E17EC17CF40010D665A"
+  },
+  "candidate": {
+    "sql014Sha256": "7BF6F10E8703A2044708C9E37AD72021F07B6CD3C7E803C3D9313A0E170A5C7E",
+    "changedProductFiles": [
+      "supabase/migrations/202610150014_operational_api.sql"
+    ],
+    "sql001to013UnchangedByGitDiff": true,
+    "coreAutocrlf": true,
+    "eolObservation": "Exact Git blob hashes and raw checkout hashes are listed separately for SQL001-014; git ls-files --eol records index/worktree EOL. SQL001-013 remain diff-clean; SQL014 is the sole product diff.",
+    "sql001to013": {
+      "gitDiffFromHead": "clean",
+      "hashes": {
+        "supabase/migrations/202609300001_foundation.sql": {
+          "gitBlobSha256": "4AE00143F3740D21A828165139FA929DEA0DCB8775849939A505CA5CB8BDF161",
+          "checkoutSha256": "2B1115E1E043883D3284613D2367B7228A5C443925829FF09EE5D32322189DD9",
+          "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202609300001_foundation.sql",
+          "unchangedFromBaseline": true
+        },
+        "supabase/migrations/202609300002_workflows.sql": {
+          "gitBlobSha256": "EC5AA503834DC8A10E0A7CF858C0C6C4F09A3B0C5BB0A53DF9E34FD834697832",
+          "checkoutSha256": "7472D4AE996C827412E5F7DAAEFDA498206349BBF49D02A8C90E3542F8EECCBE",
+          "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202609300002_workflows.sql",
+          "unchangedFromBaseline": true
+        },
+        "supabase/migrations/202610010001_occurrence_contract.sql": {
+          "gitBlobSha256": "009E453942D2609F6F84913D2684015326FE5874EB39351A9E75A0525C4C17B0",
+          "checkoutSha256": "3A9C3B92A241FC4A6569FEA2549FA179CA96E7FAAC50832C5841EFC90DB5CA2F",
+          "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010001_occurrence_contract.sql",
+          "unchangedFromBaseline": true
+        },
+        "supabase/migrations/202610010002_onboarding_approval.sql": {
+          "gitBlobSha256": "F531CEC7664A4E58B2575F8F8FB154EC933D53973F63A7A1036387E2B27C02F3",
+          "checkoutSha256": "9560644D1304DD5123D6B295BC9E4E5EC07D91BB07024174AED979B3A425D897",
+          "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010002_onboarding_approval.sql",
+          "unchangedFromBaseline": true
+        },
+        "supabase/migrations/202610010003_report_delivery.sql": {
+          "gitBlobSha256": "2CA30367916FE708464BAE2A857C34B014089F1D7618D21C1A822DC16E5C7FF4",
+          "checkoutSha256": "39C8B92F41D00FB96174978BE8903120424CBABE4D0378761746148E57B38731",
+          "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010003_report_delivery.sql",
+          "unchangedFromBaseline": true
+        },
+        "supabase/migrations/202610010004_time_coverage.sql": {
+          "gitBlobSha256": "C4868ECC2A0AC7B440D459D80C06EDB65B15AD2929517CFB178570412392A7E3",
+          "checkoutSha256": "FA49AA77BB8A7FC9B153C8AF9B27225ED6500D0489D7C396D9C7128B393E7630",
+          "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010004_time_coverage.sql",
+          "unchangedFromBaseline": true
+        },
+        "supabase/migrations/202610010005_time_coverage_hardening.sql": {
+          "gitBlobSha256": "50A073AAC2913D7EF3F5FE3D32D2879226DDA19A4A15239CF02D65BD9D0179AC",
+          "checkoutSha256": "400C671934E0FA050907AEA78C3DA28248255068F0E8AD16F0007081421D8A33",
+          "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010005_time_coverage_hardening.sql",
+          "unchangedFromBaseline": true
+        },
+        "supabase/migrations/202610010006_time_coverage_acceptance.sql": {
+          "gitBlobSha256": "394E3354FAB91CA3BABD850F3E5B08E32513E08CCC172064F74CDE16594D906B",
+          "checkoutSha256": "A47942D0281ADB517AA7BC5E1123769DD77F415B58CF97748B97FCE376314FBF",
+          "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010006_time_coverage_acceptance.sql",
+          "unchangedFromBaseline": true
+        },
+        "supabase/migrations/202610010007_time_coverage_completion.sql": {
+          "gitBlobSha256": "5FEE47AB9A401A6D05A205431365BB3E5840CBA98147E9950AB84FF18C1E454F",
+          "checkoutSha256": "34886FF8E7CCB947D8E68754F68AC9155F4E012DC4200B395C95967D2710160B",
+          "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010007_time_coverage_completion.sql",
+          "unchangedFromBaseline": true
+        },
+        "supabase/migrations/202610010008_time_coverage_finalization.sql": {
+          "gitBlobSha256": "AD0DA14254585C341C3F0846EA21E9FD7F8F71020F44A4079D4D5E1424E45A3E",
+          "checkoutSha256": "3CDE522CBF9DF98A05BEE0F1C6FD510377324A9551FF2AD396756A397BC70A46",
+          "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010008_time_coverage_finalization.sql",
+          "unchangedFromBaseline": true
+        },
+        "supabase/migrations/202610020009_private_block_notes.sql": {
+          "gitBlobSha256": "7E4B0E179C8B0D058FD08DCC4127EB16EA4577F432F358A0D133C334E6820A80",
+          "checkoutSha256": "CF2B2BABF4A0FF8B144A643ABA5D71796D9062559CDD201C989BA754640D6269",
+          "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610020009_private_block_notes.sql",
+          "unchangedFromBaseline": true
+        },
+        "supabase/migrations/202610040010_coordination_foundation.sql": {
+          "gitBlobSha256": "93A161ED5949C02E3067C080E80AAF3E8AE917A8DF66FCC4E788B58FBFAB16F8",
+          "checkoutSha256": "84BA65311535E85F5B1AB3A991308193CE634C79F031978DC020B15B683AD7B1",
+          "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610040010_coordination_foundation.sql",
+          "unchangedFromBaseline": true
+        },
+        "supabase/migrations/202610060011_coordination_activation.sql": {
+          "gitBlobSha256": "9729A6800E93DEDC43AB5F0840309B7C0D222343898CC8D5B43EEB4A387F4210",
+          "checkoutSha256": "9729A6800E93DEDC43AB5F0840309B7C0D222343898CC8D5B43EEB4A387F4210",
+          "eolStatus": "i/lf    w/lf    attr/                 \tsupabase/migrations/202610060011_coordination_activation.sql",
+          "unchangedFromBaseline": true
+        },
+        "supabase/migrations/202610140012_sql_receipt_and_onboarding_guards.sql": {
+          "gitBlobSha256": "CABFE95DBD04AE65EA82C787BC5E3EC8E638E4620456366B7EEB8A5D715DFBF4",
+          "checkoutSha256": "CABFE95DBD04AE65EA82C787BC5E3EC8E638E4620456366B7EEB8A5D715DFBF4",
+          "eolStatus": "i/lf    w/lf    attr/                 \tsupabase/migrations/202610140012_sql_receipt_and_onboarding_guards.sql",
+          "unchangedFromBaseline": true
+        },
+        "supabase/migrations/202610140013_api_identity_foundation.sql": {
+          "gitBlobSha256": "D013B82BFA1101ED11A35DAEAF7A64B2E6063DA9C09B55E7586CE67CC586BAC2",
+          "checkoutSha256": "D013B82BFA1101ED11A35DAEAF7A64B2E6063DA9C09B55E7586CE67CC586BAC2",
+          "eolStatus": "i/lf    w/lf    attr/                 \tsupabase/migrations/202610140013_api_identity_foundation.sql",
+          "unchangedFromBaseline": true
+        }
+      },
+      "source": "Same migration hash records as externalManifest.migrations; exact Git blob and raw checkout hashes plus EOL status."
+    }
+  },
+  "reproduction": {
+    "actual": {
+      "result": "RED_CONFIRMED",
+      "route": "actual",
+      "revokedReplaySQLSTATE": "00000",
+      "inactiveReplaySQLSTATE": "00000",
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final13-red-actual/reproduction.json",
+      "sha256": "a01fc9084f3ba94de66a27cd95a57ea34cfa9bea0821dad81c69fc1ad8fdc847"
+    },
+    "upgrade": {
+      "result": "RED_CONFIRMED",
+      "route": "upgrade",
+      "revokedReplaySQLSTATE": "00000",
+      "inactiveReplaySQLSTATE": "00000",
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final13-red-upgrade/reproduction.json",
+      "sha256": "d5d6b47a543f83621430f44275b77ca0014681fc14e140efa7c51e339b732dbe"
+    }
+  },
+  "green": {
+    "actual": {
+      "result": "GREEN_DENIED",
+      "route": "actual",
+      "raceCount": 8,
+      "raceEvents": 8,
+      "sequentialSnapshotKinds": [
+        "authorizedImmediate",
+        "afterAdvancedRevision",
+        "periodClosed",
+        "revoked",
+        "reactivated",
+        "inactiveProfile",
+        "malformedReceipt"
+      ],
+      "connectionContextCount": 79,
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final15-green-actual/replay.json",
+      "sha256": "728EC02EF5FDBD842A5033F9AF74E0236A867A62F90343158EE10EE2AE60EAA4"
+    },
+    "upgrade": {
+      "result": "GREEN_DENIED",
+      "route": "upgrade",
+      "raceCount": 8,
+      "raceEvents": 8,
+      "sequentialSnapshotKinds": [
+        "authorizedImmediate",
+        "afterAdvancedRevision",
+        "periodClosed",
+        "revoked",
+        "reactivated",
+        "inactiveProfile",
+        "malformedReceipt"
+      ],
+      "connectionContextCount": 79,
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final15-green-upgrade/replay.json",
+      "sha256": "B68C30E7982E9312013AFE795DF4C4C5C4B7B556CD6C69E8B1C5C1C5FE1DA2A1"
+    },
+    "argumentConflicts": {
+      "actual": {
+        "active": 5,
+        "revokedReplayFirst": 5,
+        "revokedRevocationFirst": 5,
+        "inactive": 5
+      },
+      "upgrade": {
+        "active": 5,
+        "revokedReplayFirst": 5,
+        "revokedRevocationFirst": 5,
+        "inactive": 5
+      }
+    },
+    "corruptionExpected": {
+      "sqlstate": "40001",
+      "message": "El recibo de actividad es inconsistente; reintente desde otra transacción"
+    }
+  },
+  "nativeMatrix": {
+    "command": "node tests/review/m2-1-native-review.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-native-final --port 55993 --review-matrix full --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes",
+    "engine": "postgres (PostgreSQL) 17.11",
+    "total": 351,
+    "passed": 351,
+    "failed": 0,
+    "m2cSmoke": true,
+    "exitCode": 0,
+    "priorBaselineReport": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-baseline/review.json",
+      "sha256": "6DE617A3931D71F7A4631E437B95FC9DDEE5E2349596F083FB1E339D63779876",
+      "passed": 351,
+      "total": 351,
+      "m2cSmoke": true
+    },
+    "candidateCurrentReport": "review.json",
+    "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-final/review.json",
+    "sha256": "71E52897CDD2843AC6527EECCCCD620FA90F9B63E3B966A866712A307158F7BF"
+  },
+  "checks": {
+    "initialParallelSuite": {
+      "passed": 737,
+      "total": 738,
+      "exitCode": 1,
+      "classification": "one timing-sensitive catalogue-panel lookup failure; exact focused tests then passed 29/29; source test and UI files unchanged from baseline"
+    },
+    "serialSuite": {
+      "passed": 738,
+      "total": 738,
+      "filesPassed": 74,
+      "exitCode": 0,
+      "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=1 --testTimeout=20000 --hookTimeout=30000"
+    },
+    "typescript": {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "exitCode": 0
+    },
+    "clientBuild": {
+      "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+      "exitCode": 0
+    },
+    "workerBuild": {
+      "command": "node scripts/build-worker.mjs",
+      "exitCode": 0
+    },
+    "runnerSyntax": {
+      "command": "node --check tests/review/m2-2c-legacy-activity-replay.mjs && node --check tests/review/m2-2c-legacy-activity-replay-red.mjs",
+      "exitCode": 0
+    },
+    "diffCheck": {
+      "command": "git diff --check",
+      "exitCode": 0
+    },
+    "nativePostgres": "PostgreSQL 17.11"
+  },
+  "failedAttempts": [
+    "m2-2c-legacy-activity-replay-luna-20261019-green-attempt1",
+    "m2-2c-legacy-activity-replay-luna-20261019-green-attempt2",
+    "m2-2c-legacy-activity-replay-luna-20261019-green-attempt3",
+    "m2-2c-legacy-activity-replay-luna-20261019-green-attempt4",
+    "m2-2c-legacy-activity-replay-luna-20261019-green-attempt5",
+    "m2-2c-legacy-activity-replay-luna-20261019-green-attempt6",
+    "m2-2c-legacy-activity-replay-luna-20261019-green-upgrade-attempt1",
+    "m2-2c-legacy-activity-replay-luna-20261019-green-upgrade-attempt2",
+    "m2-2c-legacy-activity-replay-luna-20261019-green-upgrade-attempt3",
+    "m2-2c-legacy-activity-replay-luna-20261019-races-attempt1",
+    "m2-2c-legacy-activity-replay-luna-20261019-races-attempt2",
+    "m2-2c-legacy-activity-replay-luna-20261019-races-attempt3",
+    "m2-2c-legacy-activity-replay-luna-20261019-races-attempt4",
+    "m2-2c-legacy-activity-replay-luna-20261019-races-attempt5",
+    "m2-2c-legacy-activity-replay-luna-20261019-races-attempt6",
+    "m2-2c-legacy-activity-replay-luna-20261019-races-attempt7",
+    "m2-2c-legacy-activity-replay-luna-20261019-races-attempt8",
+    "m2-2c-legacy-activity-replay-luna-20261019-red-actual-attempt3",
+    "m2-2c-legacy-activity-replay-luna-20261019-red-attempt1",
+    "m2-2c-legacy-activity-replay-luna-20261019-red-attempt2",
+    "m2-2c-legacy-activity-replay-luna-20261019-red-final-actual-harness-error",
+    "m2-2c-legacy-activity-replay-luna-20261019-red-upgrade-attempt1",
+    "m2-2c-legacy-activity-replay-luna-20261019-suite-final",
+    "m2-2c-legacy-activity-replay-luna-20261019-final-red-actual-head",
+    "m2-2c-legacy-activity-replay-luna-20261019-final-red-upgrade-head",
+    "m2-2c-legacy-activity-replay-luna-20261019-final-green-actual",
+    "m2-2c-legacy-activity-replay-luna-20261019-final-green-upgrade",
+    "m2-2c-legacy-activity-replay-luna-20261019-final2-green-actual",
+    "m2-2c-legacy-activity-replay-luna-20261019-final2-green-upgrade",
+    "m2-2c-legacy-activity-replay-luna-20261019-final3-green-actual",
+    "m2-2c-legacy-activity-replay-luna-20261019-final3-green-upgrade",
+    "m2-2c-legacy-activity-replay-luna-20261019-final4-green-actual",
+    "m2-2c-legacy-activity-replay-luna-20261019-final4-green-upgrade",
+    {
+      "id": "final7",
+      "kind": "green_harness_error",
+      "route": "actual",
+      "command": "node tests/review/m2-2c-legacy-activity-replay.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-final7-green-actual --port 56093",
+      "classification": "Preserved failed harness attempt: assertRevokeDelta timestamp assertion; corrected in final14; no SQL or application change.",
+      "report": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final7-green-actual/reproduction.json",
+      "reportSha256": "CE23CAAAF5BE5AE37F96FCF1B8042F52D6F725A0DA468CCC2C6D5D7421D616A3",
+      "combinedShellCapture": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final7-green-actual/console.log",
+        "sha256": "E98D30C227DD2227AD1B94DAD1E1753924401F7E4F5FCD69D1BE1C474E7031B2"
+      },
+      "exitCodeFile": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final7-green-actual/exit-code.txt",
+        "sha256": "53C234E5E8472B6AC51C1AE1CAB3FE06FAD053BEB8EBFD8977B010655BFDD3C3",
+        "value": 2
+      }
+    },
+    {
+      "id": "final8",
+      "kind": "green_harness_error",
+      "route": "actual",
+      "command": "node tests/review/m2-2c-legacy-activity-replay.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-final8-green-actual --port 56094",
+      "classification": "Preserved failed harness attempt: assertRevokeDelta timestamp assertion; corrected in final14; no SQL or application change.",
+      "report": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final8-green-actual/reproduction.json",
+      "reportSha256": "A46DA660281C58C2227F6D25E380B48691D0955B74F629F3F5A89BD912C5D142",
+      "combinedShellCapture": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final8-green-actual/console.log",
+        "sha256": "CFD93692387904E1AD86E8DD5460502F55ED491383E215907846D1B1ED477502"
+      },
+      "exitCodeFile": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final8-green-actual/exit-code.txt",
+        "sha256": "53C234E5E8472B6AC51C1AE1CAB3FE06FAD053BEB8EBFD8977B010655BFDD3C3",
+        "value": 2
+      }
+    },
+    {
+      "id": "final9",
+      "kind": "green_harness_error",
+      "route": "actual",
+      "command": "node tests/review/m2-2c-legacy-activity-replay.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-final9-green-actual --port 56095",
+      "classification": "Preserved failed harness attempt: assertRevokeDelta timestamp assertion; corrected in final14; no SQL or application change.",
+      "report": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final9-green-actual/reproduction.json",
+      "reportSha256": "92E203BCB11289C9D03F118522537B5CE5FA9A723F241F0DE0C232CA2A1FC8F4",
+      "combinedShellCapture": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final9-green-actual/console.log",
+        "sha256": "2F5CAD2D88986A68878891E2D8EB1A926C1B7D33D134E1E6A27564FF60172A14"
+      },
+      "exitCodeFile": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final9-green-actual/exit-code.txt",
+        "sha256": "53C234E5E8472B6AC51C1AE1CAB3FE06FAD053BEB8EBFD8977B010655BFDD3C3",
+        "value": 2
+      }
+    },
+    {
+      "id": "final10",
+      "kind": "green_harness_error",
+      "route": "actual",
+      "command": "node tests/review/m2-2c-legacy-activity-replay.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-final10-green-actual --port 56096",
+      "classification": "Preserved failed harness attempt: API command receipt arguments assertion; corrected in final14; no SQL or application change.",
+      "report": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final10-green-actual/reproduction.json",
+      "reportSha256": "920647238CEAD47234F8E21F9329851B1DD1A5CE7530245A693B4DA515E28FD8",
+      "combinedShellCapture": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final10-green-actual/console.log",
+        "sha256": "6C9ECAA961072E363D6602121785372233EAE8BBA7779704483925877E903AF9"
+      },
+      "exitCodeFile": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final10-green-actual/exit-code.txt",
+        "sha256": "53C234E5E8472B6AC51C1AE1CAB3FE06FAD053BEB8EBFD8977B010655BFDD3C3",
+        "value": 2
+      }
+    },
+    {
+      "id": "final11",
+      "kind": "green_harness_error",
+      "route": "actual",
+      "command": "node tests/review/m2-2c-legacy-activity-replay.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-final11-green-actual --port 56097",
+      "classification": "Preserved failed harness attempt: API command receipt arguments assertion; corrected in final14; no SQL or application change.",
+      "report": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final11-green-actual/reproduction.json",
+      "reportSha256": "7C17E7DBBBB87A1F942EE3EBAAE5D6FF45E8F89823CC34D9E5E56CA1F2EE3549",
+      "combinedShellCapture": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final11-green-actual/console.log",
+        "sha256": "505F68EE483FCC99788CC8CC9EDBCAAECF3380F5C9BD12324B8983AE47BC002F"
+      },
+      "exitCodeFile": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final11-green-actual/exit-code.txt",
+        "sha256": "53C234E5E8472B6AC51C1AE1CAB3FE06FAD053BEB8EBFD8977B010655BFDD3C3",
+        "value": 2
+      }
+    },
+    {
+      "id": "final12",
+      "kind": "green_harness_error",
+      "route": "actual",
+      "command": "node tests/review/m2-2c-legacy-activity-replay.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-final12-green-actual --port 56098",
+      "classification": "Preserved failed harness attempt: API command receipt arguments assertion; corrected in final14; no SQL or application change.",
+      "report": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final12-green-actual/reproduction.json",
+      "reportSha256": "D68A58B1BF3EE326ABD777B7332E59A05580F05C10EBE21D8ACFE47C97D6456B",
+      "combinedShellCapture": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final12-green-actual/console.log",
+        "sha256": "CD82B6C5188EA77BA6677588430E805BB9DC688A28A96370F6507706175D071D"
+      },
+      "exitCodeFile": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final12-green-actual/exit-code.txt",
+        "sha256": "53C234E5E8472B6AC51C1AE1CAB3FE06FAD053BEB8EBFD8977B010655BFDD3C3",
+        "value": 2
+      }
+    }
+  ],
+  "commandsAndLogs": {
+    "nativeFinal": {
+      "stdout": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-final/stdout.log",
+        "sha256": "77F21FD1FBC99C039627426C044F1EF9AA91DB909BAC36FA04BE40970F376529",
+        "bytes": 1898797
+      },
+      "stderr": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-final/stderr.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "bytes": 0
+      },
+      "exitCode": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-final/exit-code.txt",
+        "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+        "bytes": 3
+      }
+    },
+    "suiteFailed": {
+      "stdout": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-final/stdout.log",
+        "sha256": "2D967208A7AE04282612F7D676AD8D44717A10D30CA707AB9022F2A6AB3133B9",
+        "bytes": 44104
+      },
+      "stderr": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-final/stderr.log",
+        "sha256": "6ABF32325A4820DC8D02C39F5DA70A9B8C4BE833DC4E070AFA199EF3B510F937",
+        "bytes": 10954
+      },
+      "exitCode": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-final/exit-code.txt",
+        "sha256": "6B86B273FF34FCE19D6B804EFF5A3F5747ADA4EAA22F1D49C01E52DDB7875B4B",
+        "bytes": 1
+      }
+    },
+    "suiteSerial": {
+      "stdout": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/stdout.log",
+        "sha256": "3479B0D9A4BBEB54E6E5E138CE9F4B7FCC0C5E878950C63003FAF18519885BC8",
+        "bytes": 20846
+      },
+      "stderr": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/stderr.log",
+        "sha256": "03574087F63CBD7924C3196B65366AD167E2BFEDC842A79617E898482D669A6D",
+        "bytes": 897
+      },
+      "exitCode": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/exit-code.txt",
+        "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+        "bytes": 3
+      }
+    }
+  },
+  "migrations": {
+    "supabase/migrations/202609300001_foundation.sql": {
+      "gitBlobSha256": "4AE00143F3740D21A828165139FA929DEA0DCB8775849939A505CA5CB8BDF161",
+      "checkoutSha256": "2B1115E1E043883D3284613D2367B7228A5C443925829FF09EE5D32322189DD9",
+      "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202609300001_foundation.sql",
+      "unchangedFromBaseline": true
+    },
+    "supabase/migrations/202609300002_workflows.sql": {
+      "gitBlobSha256": "EC5AA503834DC8A10E0A7CF858C0C6C4F09A3B0C5BB0A53DF9E34FD834697832",
+      "checkoutSha256": "7472D4AE996C827412E5F7DAAEFDA498206349BBF49D02A8C90E3542F8EECCBE",
+      "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202609300002_workflows.sql",
+      "unchangedFromBaseline": true
+    },
+    "supabase/migrations/202610010001_occurrence_contract.sql": {
+      "gitBlobSha256": "009E453942D2609F6F84913D2684015326FE5874EB39351A9E75A0525C4C17B0",
+      "checkoutSha256": "3A9C3B92A241FC4A6569FEA2549FA179CA96E7FAAC50832C5841EFC90DB5CA2F",
+      "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010001_occurrence_contract.sql",
+      "unchangedFromBaseline": true
+    },
+    "supabase/migrations/202610010002_onboarding_approval.sql": {
+      "gitBlobSha256": "F531CEC7664A4E58B2575F8F8FB154EC933D53973F63A7A1036387E2B27C02F3",
+      "checkoutSha256": "9560644D1304DD5123D6B295BC9E4E5EC07D91BB07024174AED979B3A425D897",
+      "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010002_onboarding_approval.sql",
+      "unchangedFromBaseline": true
+    },
+    "supabase/migrations/202610010003_report_delivery.sql": {
+      "gitBlobSha256": "2CA30367916FE708464BAE2A857C34B014089F1D7618D21C1A822DC16E5C7FF4",
+      "checkoutSha256": "39C8B92F41D00FB96174978BE8903120424CBABE4D0378761746148E57B38731",
+      "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010003_report_delivery.sql",
+      "unchangedFromBaseline": true
+    },
+    "supabase/migrations/202610010004_time_coverage.sql": {
+      "gitBlobSha256": "C4868ECC2A0AC7B440D459D80C06EDB65B15AD2929517CFB178570412392A7E3",
+      "checkoutSha256": "FA49AA77BB8A7FC9B153C8AF9B27225ED6500D0489D7C396D9C7128B393E7630",
+      "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010004_time_coverage.sql",
+      "unchangedFromBaseline": true
+    },
+    "supabase/migrations/202610010005_time_coverage_hardening.sql": {
+      "gitBlobSha256": "50A073AAC2913D7EF3F5FE3D32D2879226DDA19A4A15239CF02D65BD9D0179AC",
+      "checkoutSha256": "400C671934E0FA050907AEA78C3DA28248255068F0E8AD16F0007081421D8A33",
+      "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010005_time_coverage_hardening.sql",
+      "unchangedFromBaseline": true
+    },
+    "supabase/migrations/202610010006_time_coverage_acceptance.sql": {
+      "gitBlobSha256": "394E3354FAB91CA3BABD850F3E5B08E32513E08CCC172064F74CDE16594D906B",
+      "checkoutSha256": "A47942D0281ADB517AA7BC5E1123769DD77F415B58CF97748B97FCE376314FBF",
+      "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010006_time_coverage_acceptance.sql",
+      "unchangedFromBaseline": true
+    },
+    "supabase/migrations/202610010007_time_coverage_completion.sql": {
+      "gitBlobSha256": "5FEE47AB9A401A6D05A205431365BB3E5840CBA98147E9950AB84FF18C1E454F",
+      "checkoutSha256": "34886FF8E7CCB947D8E68754F68AC9155F4E012DC4200B395C95967D2710160B",
+      "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010007_time_coverage_completion.sql",
+      "unchangedFromBaseline": true
+    },
+    "supabase/migrations/202610010008_time_coverage_finalization.sql": {
+      "gitBlobSha256": "AD0DA14254585C341C3F0846EA21E9FD7F8F71020F44A4079D4D5E1424E45A3E",
+      "checkoutSha256": "3CDE522CBF9DF98A05BEE0F1C6FD510377324A9551FF2AD396756A397BC70A46",
+      "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010008_time_coverage_finalization.sql",
+      "unchangedFromBaseline": true
+    },
+    "supabase/migrations/202610020009_private_block_notes.sql": {
+      "gitBlobSha256": "7E4B0E179C8B0D058FD08DCC4127EB16EA4577F432F358A0D133C334E6820A80",
+      "checkoutSha256": "CF2B2BABF4A0FF8B144A643ABA5D71796D9062559CDD201C989BA754640D6269",
+      "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610020009_private_block_notes.sql",
+      "unchangedFromBaseline": true
+    },
+    "supabase/migrations/202610040010_coordination_foundation.sql": {
+      "gitBlobSha256": "93A161ED5949C02E3067C080E80AAF3E8AE917A8DF66FCC4E788B58FBFAB16F8",
+      "checkoutSha256": "84BA65311535E85F5B1AB3A991308193CE634C79F031978DC020B15B683AD7B1",
+      "eolStatus": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610040010_coordination_foundation.sql",
+      "unchangedFromBaseline": true
+    },
+    "supabase/migrations/202610060011_coordination_activation.sql": {
+      "gitBlobSha256": "9729A6800E93DEDC43AB5F0840309B7C0D222343898CC8D5B43EEB4A387F4210",
+      "checkoutSha256": "9729A6800E93DEDC43AB5F0840309B7C0D222343898CC8D5B43EEB4A387F4210",
+      "eolStatus": "i/lf    w/lf    attr/                 \tsupabase/migrations/202610060011_coordination_activation.sql",
+      "unchangedFromBaseline": true
+    },
+    "supabase/migrations/202610140012_sql_receipt_and_onboarding_guards.sql": {
+      "gitBlobSha256": "CABFE95DBD04AE65EA82C787BC5E3EC8E638E4620456366B7EEB8A5D715DFBF4",
+      "checkoutSha256": "CABFE95DBD04AE65EA82C787BC5E3EC8E638E4620456366B7EEB8A5D715DFBF4",
+      "eolStatus": "i/lf    w/lf    attr/                 \tsupabase/migrations/202610140012_sql_receipt_and_onboarding_guards.sql",
+      "unchangedFromBaseline": true
+    },
+    "supabase/migrations/202610140013_api_identity_foundation.sql": {
+      "gitBlobSha256": "D013B82BFA1101ED11A35DAEAF7A64B2E6063DA9C09B55E7586CE67CC586BAC2",
+      "checkoutSha256": "D013B82BFA1101ED11A35DAEAF7A64B2E6063DA9C09B55E7586CE67CC586BAC2",
+      "eolStatus": "i/lf    w/lf    attr/                 \tsupabase/migrations/202610140013_api_identity_foundation.sql",
+      "unchangedFromBaseline": true
+    },
+    "supabase/migrations/202610150014_operational_api.sql": {
+      "gitBlobSha256": "BC83666B4FFD916FA8E7FA7EBC03800C6F61E0A3B852C851BE70C5BE1498F3C3",
+      "checkoutSha256": "7BF6F10E8703A2044708C9E37AD72021F07B6CD3C7E803C3D9313A0E170A5C7E",
+      "eolStatus": "i/lf    w/mixed attr/                 \tsupabase/migrations/202610150014_operational_api.sql",
+      "unchangedFromBaseline": false
+    }
+  },
+  "artifacts": {
+    "contract": {
+      "path": "docs/architecture/M2-2C-LEGACY-ACTIVITY-REPLAY-AUTHORIZATION-SOL-CONTRACT-20261019.md",
+      "sha256": "F4113A701BF4E8C075CAF12F95535BAC7B5A0BFC8D307E17EC17CF40010D665A",
+      "bytes": 16369
+    },
+    "candidate": {
+      "path": "supabase/migrations/202610150014_operational_api.sql",
+      "sha256": "7BF6F10E8703A2044708C9E37AD72021F07B6CD3C7E803C3D9313A0E170A5C7E",
+      "bytes": 349559
+    },
+    "runnerGreen": {
+      "path": "tests/review/m2-2c-legacy-activity-replay.mjs",
+      "sha256": "F720C36080889F184EFD737DB2541366D0CEDCF4B73F18B00EAAECA777E49C87",
+      "bytes": 50704
+    },
+    "runnerRed": {
+      "path": "tests/review/m2-2c-legacy-activity-replay-red.mjs",
+      "sha256": "89997F5D3535A9582A784F5CB037349EBD118233D4880D3E6592E8658786ADD8",
+      "bytes": 26196
+    },
+    "actualRed": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final6-red-actual/reproduction.json",
+      "sha256": "E53870DE7A85FF674A58D1249FFE6D12CA55D2EAC15FA1E345FE6129258A24CD"
+    },
+    "upgradeRed": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final6-red-upgrade/reproduction.json",
+      "sha256": "E3784D0AB1EF7DD93E825390E2CEA7F4F518A55D6F9E5AFB0A45DEBF35FE3855"
+    },
+    "actualGreen": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final6-green-actual/replay.json",
+      "sha256": "AAB06FA345C0001F3BB0C4833B17CC17E1902C2401FB035C8DF60C9EC2FC4757"
+    },
+    "upgradeGreen": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final6-green-upgrade/replay.json",
+      "sha256": "45E1C84AC50CBFCB552D7FCB0D06D3DDFEB5FEDB6E9CA11CDF4251C6019AB40E"
+    },
+    "nativeBaseline": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-baseline/review.json",
+      "sha256": "6DE617A3931D71F7A4631E437B95FC9DDEE5E2349596F083FB1E339D63779876",
+      "bytes": 2720823
+    },
+    "nativePreviousCandidate": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-candidate/review.json",
+      "sha256": "15EEB2A5EA545DC74B17C1C06AB9C4355675ABE77FEE95FED1F92DFDA619A563",
+      "bytes": 2720774
+    },
+    "nativeFinal": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-final/review.json",
+      "sha256": "71E52897CDD2843AC6527EECCCCD620FA90F9B63E3B966A866712A307158F7BF",
+      "bytes": 2720786
+    },
+    "nativeStdout": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-final/stdout.log",
+      "sha256": "77F21FD1FBC99C039627426C044F1EF9AA91DB909BAC36FA04BE40970F376529",
+      "bytes": 1898797
+    },
+    "nativeStderr": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-final/stderr.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    "nativeExit": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-final/exit-code.txt",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "bytes": 3
+    },
+    "suiteFailedStdout": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-final/stdout.log",
+      "sha256": "2D967208A7AE04282612F7D676AD8D44717A10D30CA707AB9022F2A6AB3133B9",
+      "bytes": 44104
+    },
+    "suiteFailedStderr": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-final/stderr.log",
+      "sha256": "6ABF32325A4820DC8D02C39F5DA70A9B8C4BE833DC4E070AFA199EF3B510F937",
+      "bytes": 10954
+    },
+    "suiteFailedExit": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-final/exit-code.txt",
+      "sha256": "6B86B273FF34FCE19D6B804EFF5A3F5747ADA4EAA22F1D49C01E52DDB7875B4B",
+      "bytes": 1
+    },
+    "suiteSerialStdout": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/stdout.log",
+      "sha256": "3479B0D9A4BBEB54E6E5E138CE9F4B7FCC0C5E878950C63003FAF18519885BC8",
+      "bytes": 20846
+    },
+    "suiteSerialStderr": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/stderr.log",
+      "sha256": "03574087F63CBD7924C3196B65366AD167E2BFEDC842A79617E898482D669A6D",
+      "bytes": 897
+    },
+    "suiteSerialExit": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/exit-code.txt",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "bytes": 3
+    },
+    "tscExit": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/tsc.exit-code.txt",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "bytes": 3
+    },
+    "clientExit": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/client.exit-code.txt",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "bytes": 3
+    },
+    "workerExit": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/worker.exit-code.txt",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "bytes": 3
+    },
+    "tscStdout": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/tsc.stdout.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    "clientStdout": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/client.stdout.log",
+      "sha256": "151CD8354CBA5EFBE9447228CE9C17B4C12C3CD8EAC3F160E1F7F8CDE4C8FD0F",
+      "bytes": 2403
+    },
+    "workerStdout": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/worker.stdout.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    "actualRedPostgresLog": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-red-final-actual-baseline/postgres.log",
+      "sha256": "898D92B25461B0C21B02F8AEC1BFD1F8BC007E6E18FE5E9568A8A5A3211CFB25",
+      "bytes": 1789
+    },
+    "actualRedStdout": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-red-final-actual-baseline/stdout.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    "actualRedStderr": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-red-final-actual-baseline/stderr.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    "actualRedExitCode": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-red-final-actual-baseline/exit-code.txt",
+      "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9",
+      "bytes": 1
+    },
+    "actualRedReport": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final13-red-actual/reproduction.json",
+      "sha256": "a01fc9084f3ba94de66a27cd95a57ea34cfa9bea0821dad81c69fc1ad8fdc847",
+      "bytes": 370772
+    },
+    "upgradeRedPostgresLog": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-red-final-upgrade/postgres.log",
+      "sha256": "A868D3567548BDB26458A6428098C0574FC9C6883B1098E4D777C9DA2917C378",
+      "bytes": 1787
+    },
+    "upgradeRedStdout": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-red-final-upgrade/stdout.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    "upgradeRedStderr": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-red-final-upgrade/stderr.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    "upgradeRedExitCode": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-red-final-upgrade/exit-code.txt",
+      "sha256": "9A271F2A916B0B6EE6CECB2426F0B3206EF074578BE55D9BC94F6F3FE3AB86AA",
+      "bytes": 2
+    },
+    "upgradeRedReport": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final13-red-upgrade/reproduction.json",
+      "sha256": "d5d6b47a543f83621430f44275b77ca0014681fc14e140efa7c51e339b732dbe",
+      "bytes": 393460
+    },
+    "actualGreenPostgresLog": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-races-final-actual/postgres.log",
+      "sha256": "A71ABCAC5A32F900D1C466E0732710FE885C46961214A9FBC547994728700186",
+      "bytes": 13406
+    },
+    "actualGreenStdout": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-races-final-actual/stdout.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    "actualGreenStderr": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-races-final-actual/stderr.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    "actualGreenExitCode": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-races-final-actual/exit-code.txt",
+      "sha256": "9A271F2A916B0B6EE6CECB2426F0B3206EF074578BE55D9BC94F6F3FE3AB86AA",
+      "bytes": 2
+    },
+    "actualGreenReport": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final15-green-actual/replay.json",
+      "sha256": "728EC02EF5FDBD842A5033F9AF74E0236A867A62F90343158EE10EE2AE60EAA4",
+      "bytes": 6376488
+    },
+    "upgradeGreenPostgresLog": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-races-final-upgrade/postgres.log",
+      "sha256": "75CF382F50065740530A19EA68474FE329949A6AF793FF3DAA563A188E77AD10",
+      "bytes": 13400
+    },
+    "upgradeGreenStdout": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-races-final-upgrade/stdout.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    "upgradeGreenStderr": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-races-final-upgrade/stderr.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    "upgradeGreenExitCode": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-races-final-upgrade/exit-code.txt",
+      "sha256": "9A271F2A916B0B6EE6CECB2426F0B3206EF074578BE55D9BC94F6F3FE3AB86AA",
+      "bytes": 2
+    },
+    "upgradeGreenReport": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final15-green-upgrade/replay.json",
+      "sha256": "B68C30E7982E9312013AFE795DF4C4C5C4B7B556CD6C69E8B1C5C1C5FE1DA2A1",
+      "bytes": 6398557
+    },
+    "native-baselinereview_json": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-baseline/review.json",
+      "sha256": "6DE617A3931D71F7A4631E437B95FC9DDEE5E2349596F083FB1E339D63779876",
+      "bytes": 2720823
+    },
+    "native-baselinestdout_log": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-baseline/stdout.log",
+      "sha256": "01F4A58FB3E78A84883A8DBD809104D3DB51FC4B08A51EE1F1A3388DC668F27A",
+      "bytes": 1898834
+    },
+    "native-baselinestderr_log": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-baseline/stderr.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    "native-baselinepostgres_log": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-baseline/postgres.log",
+      "sha256": "7B4059C2C1BCB09BD8360C88EE86258868DD6F6D55A3381B46C5FCAA55D8AA91",
+      "bytes": 345155
+    },
+    "native-baselineinitdb_log": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-baseline/initdb.log",
+      "sha256": "D25D5866D6A1B2977C63697FB8229B110931F457671D64CC27D5807CD086CBD4",
+      "bytes": 1282
+    },
+    "native-finalreview_json": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-final/review.json",
+      "sha256": "71E52897CDD2843AC6527EECCCCD620FA90F9B63E3B966A866712A307158F7BF",
+      "bytes": 2720786
+    },
+    "native-finalstdout_log": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-final/stdout.log",
+      "sha256": "77F21FD1FBC99C039627426C044F1EF9AA91DB909BAC36FA04BE40970F376529",
+      "bytes": 1898797
+    },
+    "native-finalstderr_log": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-final/stderr.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    "native-finalpostgres_log": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-final/postgres.log",
+      "sha256": "F58DA658C329A78A74264D1358C41C977C48E9A8CAE743DF0FDC32D4E7C2C3F7",
+      "bytes": 345313
+    },
+    "native-finalinitdb_log": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-final/initdb.log",
+      "sha256": "E75B64F0B8E029B97ACCA580AF0780F20009C220F9A181911724C23089F558FA",
+      "bytes": 1276
+    },
+    "native-finalexit-code_txt": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-final/exit-code.txt",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "bytes": 3
+    },
+    "suite-finalexit-code_txt": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-final/exit-code.txt",
+      "sha256": "6B86B273FF34FCE19D6B804EFF5A3F5747ADA4EAA22F1D49C01E52DDB7875B4B",
+      "bytes": 1
+    },
+    "suite-finalstderr_log": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-final/stderr.log",
+      "sha256": "6ABF32325A4820DC8D02C39F5DA70A9B8C4BE833DC4E070AFA199EF3B510F937",
+      "bytes": 10954
+    },
+    "suite-finalstdout_log": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-final/stdout.log",
+      "sha256": "2D967208A7AE04282612F7D676AD8D44717A10D30CA707AB9022F2A6AB3133B9",
+      "bytes": 44104
+    },
+    "suite-serialclient_exit-code_txt": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/client.exit-code.txt",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "bytes": 3
+    },
+    "suite-serialclient_stderr_log": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/client.stderr.log",
+      "sha256": "233FCD81A1BD111AF4AFA23E7585784528D149F851002D837B9A77277229DF83",
+      "bytes": 1049
+    },
+    "suite-serialclient_stdout_log": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/client.stdout.log",
+      "sha256": "151CD8354CBA5EFBE9447228CE9C17B4C12C3CD8EAC3F160E1F7F8CDE4C8FD0F",
+      "bytes": 2403
+    },
+    "suite-serialexit-code_txt": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/exit-code.txt",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "bytes": 3
+    },
+    "suite-serialstderr_log": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/stderr.log",
+      "sha256": "03574087F63CBD7924C3196B65366AD167E2BFEDC842A79617E898482D669A6D",
+      "bytes": 897
+    },
+    "suite-serialstdout_log": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/stdout.log",
+      "sha256": "3479B0D9A4BBEB54E6E5E138CE9F4B7FCC0C5E878950C63003FAF18519885BC8",
+      "bytes": 20846
+    },
+    "suite-serialtsc_exit-code_txt": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/tsc.exit-code.txt",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "bytes": 3
+    },
+    "suite-serialtsc_stderr_log": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/tsc.stderr.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    "suite-serialtsc_stdout_log": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/tsc.stdout.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    "suite-serialworker_exit-code_txt": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/worker.exit-code.txt",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "bytes": 3
+    },
+    "suite-serialworker_stderr_log": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/worker.stderr.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    "suite-serialworker_stdout_log": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-suite-serial/worker.stdout.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    "nativeWrongPathAttempt": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-native-final-invocation-error/attempt.json",
+      "sha256": "10E598491C94E45F0015EFB7E9706B6FE01835537CCAC449E4D32FDBCD41B701",
+      "bytes": 775
+    },
+    "redActual": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final6-red-actual/reproduction.json",
+      "sha256": "E53870DE7A85FF674A58D1249FFE6D12CA55D2EAC15FA1E345FE6129258A24CD"
+    },
+    "redUpgrade": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final6-red-upgrade/reproduction.json",
+      "sha256": "E3784D0AB1EF7DD93E825390E2CEA7F4F518A55D6F9E5AFB0A45DEBF35FE3855"
+    },
+    "greenActual": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final6-green-actual/replay.json",
+      "sha256": "AAB06FA345C0001F3BB0C4833B17CC17E1902C2401FB035C8DF60C9EC2FC4757"
+    },
+    "greenUpgrade": {
+      "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final6-green-upgrade/replay.json",
+      "sha256": "45E1C84AC50CBFCB552D7FCB0D06D3DDFEB5FEDB6E9CA11CDF4251C6019AB40E"
+    }
+  },
+  "limitations": [
+    "No hosted Supabase/API, migrations, service changes, commit or push.",
+    "The eight focused races are in focused JSON reports, not inferred from native smoke matrix.",
+    "Independent Sol review remains pending."
+  ],
+  "commands": {
+    "focusedRuns": [
+      {
+        "id": "redActual",
+        "kind": "red",
+        "route": "actual",
+        "command": "node tests/review/m2-2c-legacy-activity-replay-red.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-final13-red-actual --port 56100 --sql014-path ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-baseline-SQL014.sql",
+        "report": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final13-red-actual/reproduction.json",
+        "reportSha256": "a01fc9084f3ba94de66a27cd95a57ea34cfa9bea0821dad81c69fc1ad8fdc847",
+        "result": "RED_CONFIRMED",
+        "contractSha256": "f4113a701bf4e8c075caf12f95535bac7b5a0bfc8d307e17ec17cf40010d665a",
+        "runnerSha256": "89997f5d3535a9582a784f5cb037349ebd118233d4880d3e6592e8658786add8",
+        "port": "56100",
+        "exitCode": 0,
+        "logs": {
+          "stdout": {
+            "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final13-red-actual/stdout.log",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "bytes": 0
+          },
+          "stderr": {
+            "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final13-red-actual/stderr.log",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "bytes": 0
+          },
+          "postgres": {
+            "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final13-red-actual/postgres.log",
+            "sha256": "d887c46224d9360d1fd3fe2c94af2900c138d1547d55c40c41794f55d6b81443",
+            "bytes": 10705
+          },
+          "exitCode": {
+            "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final13-red-actual/exit-code.txt",
+            "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+            "bytes": 2
+          }
+        }
+      },
+      {
+        "id": "redUpgrade",
+        "kind": "red",
+        "route": "upgrade",
+        "command": "node tests/review/m2-2c-legacy-activity-replay-red.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-final13-red-upgrade --port 56101 --path upgrade --sql014-path ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-baseline-SQL014.sql",
+        "report": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final13-red-upgrade/reproduction.json",
+        "reportSha256": "d5d6b47a543f83621430f44275b77ca0014681fc14e140efa7c51e339b732dbe",
+        "result": "RED_CONFIRMED",
+        "contractSha256": "f4113a701bf4e8c075caf12f95535bac7b5a0bfc8d307e17ec17cf40010d665a",
+        "runnerSha256": "89997f5d3535a9582a784f5cb037349ebd118233d4880d3e6592e8658786add8",
+        "port": "56101",
+        "exitCode": 0,
+        "logs": {
+          "stdout": {
+            "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final13-red-upgrade/stdout.log",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "bytes": 0
+          },
+          "stderr": {
+            "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final13-red-upgrade/stderr.log",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "bytes": 0
+          },
+          "postgres": {
+            "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final13-red-upgrade/postgres.log",
+            "sha256": "08f329be4d2fe5001524aa60588fa42a152add506142054b7c3cbdff5721bed1",
+            "bytes": 10701
+          },
+          "exitCode": {
+            "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final13-red-upgrade/exit-code.txt",
+            "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+            "bytes": 2
+          }
+        }
+      },
+      {
+        "id": "greenActual",
+        "kind": "green",
+        "route": "actual",
+        "command": "node tests/review/m2-2c-legacy-activity-replay.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-final15-green-actual --port 56105",
+        "report": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final15-green-actual/replay.json",
+        "reportSha256": "728EC02EF5FDBD842A5033F9AF74E0236A867A62F90343158EE10EE2AE60EAA4",
+        "result": "GREEN_DENIED",
+        "contractSha256": "f4113a701bf4e8c075caf12f95535bac7b5a0bfc8d307e17ec17cf40010d665a",
+        "runnerSha256": "F720C36080889F184EFD737DB2541366D0CEDCF4B73F18B00EAAECA777E49C87",
+        "port": "56105",
+        "exitCode": 0,
+        "logs": {
+          "stdout": {
+            "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final15-green-actual/stdout.log",
+            "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+            "bytes": 0
+          },
+          "stderr": {
+            "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final15-green-actual/stderr.log",
+            "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+            "bytes": 0
+          },
+          "postgres": {
+            "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final15-green-actual/postgres.log",
+            "sha256": "136A3DD8F39B4E4516DB52EDFDB4AA3F694E2F488CB0F102655EB7D7698AF147",
+            "bytes": 25317
+          },
+          "exitCode": {
+            "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final15-green-actual/exit-code.txt",
+            "sha256": "9A271F2A916B0B6EE6CECB2426F0B3206EF074578BE55D9BC94F6F3FE3AB86AA",
+            "bytes": 2
+          }
+        }
+      },
+      {
+        "id": "greenUpgrade",
+        "kind": "green",
+        "route": "upgrade",
+        "command": "node tests/review/m2-2c-legacy-activity-replay.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-final15-green-upgrade --port 56106 --path upgrade",
+        "report": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final15-green-upgrade/replay.json",
+        "reportSha256": "B68C30E7982E9312013AFE795DF4C4C5C4B7B556CD6C69E8B1C5C1C5FE1DA2A1",
+        "result": "GREEN_DENIED",
+        "contractSha256": "f4113a701bf4e8c075caf12f95535bac7b5a0bfc8d307e17ec17cf40010d665a",
+        "runnerSha256": "F720C36080889F184EFD737DB2541366D0CEDCF4B73F18B00EAAECA777E49C87",
+        "port": "56106",
+        "exitCode": 0,
+        "logs": {
+          "stdout": {
+            "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final15-green-upgrade/stdout.log",
+            "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+            "bytes": 0
+          },
+          "stderr": {
+            "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final15-green-upgrade/stderr.log",
+            "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+            "bytes": 0
+          },
+          "postgres": {
+            "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final15-green-upgrade/postgres.log",
+            "sha256": "6AA9F6AB7C9F62420E7F50F5EA5155749948FC5E3CB4BFD5B363993604E07650",
+            "bytes": 25317
+          },
+          "exitCode": {
+            "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final15-green-upgrade/exit-code.txt",
+            "sha256": "9A271F2A916B0B6EE6CECB2426F0B3206EF074578BE55D9BC94F6F3FE3AB86AA",
+            "bytes": 2
+          }
+        }
+      }
+    ],
+    "native": "node tests/review/m2-1-native-review.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-native-final --port 55993 --review-matrix full --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes",
+    "suite": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=1 --testTimeout=20000 --hookTimeout=30000",
+    "typescript": "node node_modules/typescript/bin/tsc --noEmit",
+    "clientBuild": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+    "workerBuild": "node scripts/build-worker.mjs"
+  },
+  "externalManifest": {
+    "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019/manifest.json",
+    "sha256": "4542C804E3C7788C68523C14CAB7FD145BAF66623089AD672DD8677C62A8CF68"
+  },
+  "acceptancePrep": {
+    "p2_1": "closed: authoritative exact BC8366 baseline RR red Actual+Upgrade; each effective auth session records queried uid/claims/isolation/snapshot; historical C6 reports explicitly non-authoritative",
+    "p2_2": "closed: complete ordered snapshots include API command receipts; all five argument conflicts covered by active/revoked in both orders/inactive; Upgrade preserves every legacy entry/task column and full receipt",
+    "p2_3": "closed: 8/8 races each on Actual and Upgrade, with real connection contexts, PID/blocker sets, complete baseline/winner/rollback/final/post-retry snapshots and exact asserted deltas; replay-first post-revoke command replay uses a fresh authenticated session",
+    "p2_4": "closed: manifests contain exact commands, stdout/stderr/PostgreSQL logs, exit codes, report paths and hashes; migration blob/checkout/EOL hashes preserved",
+    "solReview": "pending independent Sol review; no commit/push or hosted changes",
+    "p2_documental": "closed: sequentialSnapshots now serialize full before/after snapshots for authorized, advanced-revision, closed-period, revoked, reactivated, inactive-profile, and malformed-receipt replay in both Actual and Upgrade reports"
+  },
+  "failedAttemptDetails": [
+    {
+      "id": "redActualWrongActorProbe",
+      "dir": "m2-2c-legacy-activity-replay-luna-20261019-final-red-actual-head",
+      "exit": 1,
+      "route": "actual",
+      "args": "node tests/review/m2-2c-legacy-activity-replay-red.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-final-red-actual-head --port 56071 --sql014-path ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-baseline-SQL014.sql",
+      "classification": "Harness error: inactive argument probe ran with chief claims; corrected to employee and rerun.",
+      "report": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final-red-actual-head/reproduction.json",
+      "reportSha256": "E64B9ED4C4BCE3076F54DF60375B9216C0A04AA2D5D925D3FF8CA748D4ECF963",
+      "stdout": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final-red-actual-head/stdout.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "stderr": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final-red-actual-head/stderr.log",
+        "sha256": "C836A3BB7BDC0FA476FBDEB5450E0B6BFBC509081EEF887BC98D182B352B1170"
+      },
+      "exitCodeFile": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final-red-actual-head/exit-code.txt",
+        "sha256": "4355A46B19D348DC2F57C046F8EF63D4538EBB936000F3C9EE954A27460DD865"
+      }
+    },
+    {
+      "id": "redUpgradeWrongActorProbe",
+      "dir": "m2-2c-legacy-activity-replay-luna-20261019-final-red-upgrade-head",
+      "exit": 1,
+      "route": "upgrade",
+      "args": "node tests/review/m2-2c-legacy-activity-replay-red.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-final-red-upgrade-head --port 56072 --path upgrade --sql014-path ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-baseline-SQL014.sql",
+      "classification": "Harness error: inactive argument probe ran with chief claims; corrected to employee and rerun.",
+      "report": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final-red-upgrade-head/reproduction.json",
+      "reportSha256": "32575E77C17964EF53B201E6DA8A7FD039E09330AAC5F52E92B29F119FDCD838",
+      "stdout": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final-red-upgrade-head/stdout.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "stderr": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final-red-upgrade-head/stderr.log",
+        "sha256": "7F87CD5E6EF1BE8ECCE0FE5C0A64EC837BCA2FCB2E7E65D03F0399A289223685"
+      },
+      "exitCodeFile": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final-red-upgrade-head/exit-code.txt",
+        "sha256": "4355A46B19D348DC2F57C046F8EF63D4538EBB936000F3C9EE954A27460DD865"
+      }
+    },
+    {
+      "id": "greenFirstExpectation",
+      "dir": "m2-2c-legacy-activity-replay-luna-20261019-final-green-actual",
+      "exit": 1,
+      "route": "actual",
+      "args": "node tests/review/m2-2c-legacy-activity-replay.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-final-green-actual --port 56075",
+      "classification": "Harness coverage update: expected Sin permiso for changed arguments on inactive profile; contract §5 requires the legacy mismatch error. Product returned contract result.",
+      "report": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final-green-actual/reproduction.json",
+      "reportSha256": "9A4893230830A9EE99D6A780DB0BB459E390577128FBEF7B5CA78CEE1D9F78B6",
+      "stdout": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final-green-actual/stdout.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "stderr": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final-green-actual/stderr.log",
+        "sha256": "251C6825FFB10AF3DEE21C54AB2BC1627725518B04160E45AEDCD8DC1A2558E5"
+      },
+      "exitCodeFile": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final-green-actual/exit-code.txt",
+        "sha256": "4355A46B19D348DC2F57C046F8EF63D4538EBB936000F3C9EE954A27460DD865"
+      }
+    },
+    {
+      "id": "greenUpgradeFirstExpectation",
+      "dir": "m2-2c-legacy-activity-replay-luna-20261019-final-green-upgrade",
+      "exit": 1,
+      "route": "upgrade",
+      "args": "node tests/review/m2-2c-legacy-activity-replay.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-final-green-upgrade --port 56076 --path upgrade",
+      "classification": "Harness coverage update: expected Sin permiso for changed arguments on inactive profile; contract §5 requires the legacy mismatch error. Product returned contract result.",
+      "report": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final-green-upgrade/reproduction.json",
+      "reportSha256": "4BCC18A37622F07499F948DA075BFE1BF2829D8CABB822061C3EC71BF0B5D92C",
+      "stdout": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final-green-upgrade/stdout.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "stderr": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final-green-upgrade/stderr.log",
+        "sha256": "251C6825FFB10AF3DEE21C54AB2BC1627725518B04160E45AEDCD8DC1A2558E5"
+      },
+      "exitCodeFile": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final-green-upgrade/exit-code.txt",
+        "sha256": "4355A46B19D348DC2F57C046F8EF63D4538EBB936000F3C9EE954A27460DD865"
+      }
+    },
+    {
+      "id": "greenLegacyExpectedMessage",
+      "dir": "m2-2c-legacy-activity-replay-luna-20261019-final2-green-actual",
+      "exit": 1,
+      "route": "actual",
+      "args": "node tests/review/m2-2c-legacy-activity-replay.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-final2-green-actual --port 56077",
+      "classification": "Harness expectation error: existing inactiveConflict assertion used Sin permiso for an argument mismatch; corrected.",
+      "report": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final2-green-actual/reproduction.json",
+      "reportSha256": "134627274EDB7505683359B01E33BEC706A117F89472B1F6277B97190976A346",
+      "stdout": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final2-green-actual/stdout.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "stderr": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final2-green-actual/stderr.log",
+        "sha256": "1A160381CF2D7C16A60DE4B4C39EFFB45231A9FA57F468FF0C14BDFD8875D8A7"
+      },
+      "exitCodeFile": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final2-green-actual/exit-code.txt",
+        "sha256": "4355A46B19D348DC2F57C046F8EF63D4538EBB936000F3C9EE954A27460DD865"
+      }
+    },
+    {
+      "id": "greenUpgradeLegacyExpectedMessage",
+      "dir": "m2-2c-legacy-activity-replay-luna-20261019-final2-green-upgrade",
+      "exit": 1,
+      "route": "upgrade",
+      "args": "node tests/review/m2-2c-legacy-activity-replay.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-final2-green-upgrade --port 56078 --path upgrade",
+      "classification": "Harness expectation error: existing inactiveConflict assertion used Sin permiso for an argument mismatch; corrected.",
+      "report": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final2-green-upgrade/reproduction.json",
+      "reportSha256": "8E529719369AB34D8DD1B1D28915A8387B452D039F413FEC37E3A462E57DDCF5",
+      "stdout": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final2-green-upgrade/stdout.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "stderr": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final2-green-upgrade/stderr.log",
+        "sha256": "1A160381CF2D7C16A60DE4B4C39EFFB45231A9FA57F468FF0C14BDFD8875D8A7"
+      },
+      "exitCodeFile": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final2-green-upgrade/exit-code.txt",
+        "sha256": "4355A46B19D348DC2F57C046F8EF63D4538EBB936000F3C9EE954A27460DD865"
+      }
+    },
+    {
+      "id": "greenIncompleteConflicts",
+      "dir": "m2-2c-legacy-activity-replay-luna-20261019-final3-green-actual",
+      "exit": 0,
+      "route": "actual",
+      "args": "node tests/review/m2-2c-legacy-activity-replay.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-final3-green-actual --port 56079",
+      "classification": "GREEN_DENIED and 8 races, but report lacked revoked-state conflict probe; incomplete attempt retained and rerun.",
+      "report": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final3-green-actual/replay.json",
+      "reportSha256": "6AA3CCA15D9465B2E76426D45D45C9A46C096E25F01F013E767E7D9220BE0B70",
+      "stdout": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final3-green-actual/stdout.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "stderr": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final3-green-actual/stderr.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "exitCodeFile": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final3-green-actual/exit-code.txt",
+        "sha256": "9A271F2A916B0B6EE6CECB2426F0B3206EF074578BE55D9BC94F6F3FE3AB86AA"
+      }
+    },
+    {
+      "id": "greenUpgradeIncompleteConflicts",
+      "dir": "m2-2c-legacy-activity-replay-luna-20261019-final3-green-upgrade",
+      "exit": 0,
+      "route": "upgrade",
+      "args": "node tests/review/m2-2c-legacy-activity-replay.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-final3-green-upgrade --port 56080 --path upgrade",
+      "classification": "GREEN_DENIED and 8 races, but report lacked revoked-state conflict probe; incomplete attempt retained and rerun.",
+      "report": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final3-green-upgrade/replay.json",
+      "reportSha256": "6D54186DFFDF8022BFED3F21F05A19A7D9A0BCC6308121F46375130B930DD47A",
+      "stdout": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final3-green-upgrade/stdout.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "stderr": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final3-green-upgrade/stderr.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "exitCodeFile": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final3-green-upgrade/exit-code.txt",
+        "sha256": "9A271F2A916B0B6EE6CECB2426F0B3206EF074578BE55D9BC94F6F3FE3AB86AA"
+      }
+    },
+    {
+      "id": "greenOneRevokedOrder",
+      "dir": "m2-2c-legacy-activity-replay-luna-20261019-final4-green-actual",
+      "exit": 0,
+      "route": "actual",
+      "args": "node tests/review/m2-2c-legacy-activity-replay.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-final4-green-actual --port 56081",
+      "classification": "GREEN_DENIED and 8 races, but conflict matrix covered only one revoked winner order; final5 has both.",
+      "report": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final4-green-actual/replay.json",
+      "reportSha256": "0A4D8AAE1525A6B4AF539AEB748B9A08248824CC1A2BA56BA4E8A48F8EE8C321",
+      "stdout": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final4-green-actual/stdout.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "stderr": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final4-green-actual/stderr.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "exitCodeFile": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final4-green-actual/exit-code.txt",
+        "sha256": "9A271F2A916B0B6EE6CECB2426F0B3206EF074578BE55D9BC94F6F3FE3AB86AA"
+      }
+    },
+    {
+      "id": "greenUpgradeOneRevokedOrder",
+      "dir": "m2-2c-legacy-activity-replay-luna-20261019-final4-green-upgrade",
+      "exit": 0,
+      "route": "upgrade",
+      "args": "node tests/review/m2-2c-legacy-activity-replay.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-activity-replay-luna-20261019-final4-green-upgrade --port 56082 --path upgrade",
+      "classification": "GREEN_DENIED and 8 races, but conflict matrix covered only one revoked winner order; final5 has both.",
+      "report": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final4-green-upgrade/replay.json",
+      "reportSha256": "AB9392236A0399D57B4A01856E5A0C8E95BB37556421F68D7F1AFC21362BAC54",
+      "stdout": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final4-green-upgrade/stdout.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "stderr": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final4-green-upgrade/stderr.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      "exitCodeFile": {
+        "path": "../../outputs/m2-2c-legacy-activity-replay-luna-20261019-final4-green-upgrade/exit-code.txt",
+        "sha256": "9A271F2A916B0B6EE6CECB2426F0B3206EF074578BE55D9BC94F6F3FE3AB86AA"
+      }
+    }
+  ],
+  "failedAttemptsPreserved": true
+}

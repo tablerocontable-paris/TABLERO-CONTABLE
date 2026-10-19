@@ -1,3 +1,25 @@
+# Continuidad vigente — replay legacy de movimientos aceptado, 19/10/2026
+
+GPT-6.1 Sol aceptó el replay legacy de `public.record_activity_once` en alcance
+local. Contrato y aceptación están en `docs/architecture/M2-2C-LEGACY-ACTIVITY-REPLAY-AUTHORIZATION-SOL-CONTRACT-20261019.md`
+(SHA `F4113A701BF4E8C075CAF12F95535BAC7B5A0BFC8D307E17EC17CF40010D665A`) y
+`docs/architecture/M2-2C-LEGACY-ACTIVITY-REPLAY-SOL-ACCEPTANCE-20261019.md`.
+SQL014 candidata SHA `7BF6F10E8703A2044708C9E37AD72021F07B6CD3C7E803C3D9313A0E170A5C7E`.
+Baseline rojo Actual/Upgrade; candidata verde Actual/Upgrade, ocho carreras cada
+una; siete secuencias con snapshots; 67/67 referencias. `node --check` y
+diff-check exit 0. Manifiesto versionado SHA
+`6EF709F05E8D44CF0520257E45EA9E0B6EC326E8EC724E9F45C200BA2D50CFD4`.
+
+El bloque local aceptado se publicará directo a `origin/main`, sin PR. No aplicar
+SQL014 ni iniciar Gate H: Gate L/§9 y sus requisitos de exposición siguen
+pendientes. Auth/HTTP, Data API, Storage/restore, CI, hosting, correo y
+producción también permanecen abiertos. El replay de
+`assign_task_responsibility` sigue siendo la próxima familia; Sol define su
+contrato antes de Luna.
+
+Esta cabecera supersede el estado anterior de cronómetro. El historial siguiente
+se conserva como evidencia; sus instrucciones previas de próximo paso quedan
+supersedidas.
 # Continuidad vigente — replay legacy de cronómetro aceptado, 19/10/2026
 
 Sol aceptó en alcance local limitado la reautorización del replay legacy de

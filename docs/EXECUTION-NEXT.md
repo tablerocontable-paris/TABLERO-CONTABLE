@@ -1,3 +1,21 @@
+# Continuidad vigente — replay legacy de movimientos aceptado, 19/10/2026
+
+Sol aceptó el corte local `public.record_activity_once`. Contrato:
+`architecture/M2-2C-LEGACY-ACTIVITY-REPLAY-AUTHORIZATION-SOL-CONTRACT-20261019.md`;
+aceptación: `architecture/M2-2C-LEGACY-ACTIVITY-REPLAY-SOL-ACCEPTANCE-20261019.md`.
+SQL014 SHA `7BF6F10E8703A2044708C9E37AD72021F07B6CD3C7E803C3D9313A0E170A5C7E`;
+manifiesto versionado SHA `6EF709F05E8D44CF0520257E45EA9E0B6EC326E8EC724E9F45C200BA2D50CFD4`.
+Baseline rojo Actual/Upgrade; verde Actual/Upgrade con 8/8 carreras cada una;
+snapshots completos y 67/67 referencias. Sin llamadas alojadas; SQL014 no se
+aplicó. El bloque revisado queda listo para publicación directa en `origin/main`.
+
+Después del commit/push, GPT-6.1 Sol cruza §9 con la evidencia acumulada y
+selecciona la próxima familia legacy pendiente (`assign_task_responsibility`).
+Luna implementa sólo el contrato Sol resultante. Gate L/§9, Auth/HTTP, Data API,
+Storage/restore, CI, hosting, correo y producción siguen abiertos.
+
+Esta actualización supersede el encabezado anterior; los registros siguientes
+son historial.
 # Continuidad vigente — replay legacy de cronómetro aceptado, 19/10/2026
 
 Sol aceptó en alcance local acotado la reautorización del replay legacy de

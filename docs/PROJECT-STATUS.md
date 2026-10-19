@@ -1,3 +1,21 @@
+# Continuidad vigente — replay legacy de movimientos aceptado, 19/10/2026
+
+Sol aceptó localmente el replay de `public.record_activity_once`. Contrato y
+aceptación: `architecture/M2-2C-LEGACY-ACTIVITY-REPLAY-AUTHORIZATION-SOL-CONTRACT-20261019.md`
+y `architecture/M2-2C-LEGACY-ACTIVITY-REPLAY-SOL-ACCEPTANCE-20261019.md`.
+SQL014 candidata SHA `7BF6F10E8703A2044708C9E37AD72021F07B6CD3C7E803C3D9313A0E170A5C7E`;
+manifiesto SHA `6EF709F05E8D44CF0520257E45EA9E0B6EC326E8EC724E9F45C200BA2D50CFD4`.
+Baseline rojo Actual/Upgrade; candidata verde con 8/8 carreras por ruta,
+siete secuencias con snapshots y 67/67 referencias. SQL001–013 intactos.
+Este bloque aceptado está pendiente de commit y push; SQL014 no se aplicó.
+
+Supabase dev continúa separado y sin migraciones aplicadas. Gate L/§9, otros
+replays, Auth/HTTP, Data API, Storage/restore, CI, hosting, correo y producción
+siguen abiertos. El siguiente paso es publicar este corte directo a `origin/main`
+y luego revisar con Sol el inventario residual §9.
+
+Esta actualización supersede el encabezado anterior; los registros siguientes
+son historial.
 # Continuidad vigente — replay legacy de cronómetro aceptado, 19/10/2026
 
 Sol aceptó localmente y en alcance acotado la reautorización del replay legacy
