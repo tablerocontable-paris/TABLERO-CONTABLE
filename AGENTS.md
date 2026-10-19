@@ -1,8 +1,22 @@
 # Estado operativo y precedencia — actualización 19/10/2026
 
-**Últimos bloques aceptados por GPT-6.1 Sol en alcances acotados y publicados:** onboarding.requestChanges exact replay/commandReceipt y cuatro carreras de cobertura recurrente. Evidencia requestChanges: docs/architecture/review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json; cobertura: docs/architecture/review-evidence/m2-2c-gatel-recurrent-coverage-20261019.json. SQL014 SHA256 ac8cca582cf366b0cf143fd3d99c490c664b00b368eb473757017eebef26315; PostgreSQL 17.11 297/297, 40P01=0; suite 738/738 en 74 archivos. Las carreras aceptadas son RC/RR y RR/RC, ambos ganadores. Commit 873829271463b4f3bf4bbb5ad39dad978908a8d2; Actions 39184344731 success. Gate L sigue abierto.
+**Último bloque local aceptado por GPT-6.1 Sol (alcance acotado):** cuatro
+carreras adicionales entre aprobación de cobertura recurrente y revocación de
+membresía, RC/RC y RR/RR con ambos ganadores. PostgreSQL 17.11: 301/301;
+`40P01=0`; suite 738/738 en 74 archivos; TypeScript, build cliente/Worker,
+sintaxis del runner y diff-check aprobados. Evidencia:
+`docs/architecture/review-evidence/m2-2c-recurrent-same-isolation-luna-20261019.json`.
+Sol acepta sólo esos cuatro casos. Sus límites P3 están en el manifiesto; Gate L
+y §9 siguen abiertos. El cambio aún no está publicado ni tiene CI verificado.
+SQL014 no se aplicó remotamente.
 
-**Validación:** requestChanges pasó suite 738/738, TypeScript, builds cliente/Worker y PostgreSQL 297/297; commit 873829271463b4f3bf4bbb5ad39dad978908a8d2 está publicado y Actions 39184344731 terminó success. Sol acepta las cuatro carreras recurrentes sólo en RC/RR y RR/RC, con ambos ganadores. P3: el reporte registra sourceCommit 156e982 (el contenido actual se enlaza por hashes), ambas sesiones usan el mismo jefe y el snapshot de estado es acotado. Esto no cierra Gate L. Próxima ejecución: GPT-6 Luna medio Standard, según docs/architecture/M2-2C-RECURRENT-COVERAGE-RC-RR-LUNA-20261019.md. No aplicar SQL014; Supabase dev sigue vacío y queda su configuración Data API/preflight.
+**Siguiente:** revisión Sol de la siguiente familia pendiente de Gate L y
+contrato acotado para GPT-6 Luna medio Standard. No tocar Supabase ni activar el
+espacio operativo.
+
+**Bloques anteriores aceptados y publicados:** onboarding.requestChanges exact replay/commandReceipt y cuatro carreras mixtas de cobertura recurrente (RC/RR, RR/RC, ambos ganadores). Evidencias: `docs/architecture/review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json` y `m2-2c-gatel-recurrent-coverage-20261019.json`. El run 39184344731 corresponde al commit 873829271463b4f3bf4bbb5ad39dad978908a8d2. El nuevo bloque local está descrito arriba y aún no se publica. Gate L sigue abierto.
+
+**Validación previa:** requestChanges y las carreras mixtas pasaron en los alcances documentados. Esto no cierra Gate L. No aplicar SQL014; Supabase dev sigue vacío y queda su configuración Data API/preflight.
 
 El corte `onboarding.approve` publicado como `ad64854091505a2770cb93478fc34467e2aeae05` tiene Actions `39181886848` en success; esto no acredita el siguiente commit. Mantener separado SQL014 del Worker/D1. El resto del historial de este archivo conserva su valor histórico.
 

@@ -1,0 +1,116 @@
+{
+  "contract": "M2.2C recurrent coverage approval versus membership revocation",
+  "scope": "four local synthetic PostgreSQL races for RC/RC and RR/RR; does not close Gate L or all of section 9",
+  "remoteCalls": false,
+  "sql014AppliedRemotely": false,
+  "reviewedHead": "2b60c219cc18c120948b536fd28c9ab8a0213ecd",
+  "artifacts": {
+    "migration014Sha256": "ac8cca582cf366b0cf143fd63d99c490c664b00b368eb473757017eebef26315",
+    "runnerSha256": "2a9db2709269170da6d67db91e346c4ff3f81f3b2f221a2ac63d9515cd818469",
+    "focusedTestSha256": "8ce790b04c59f91ee55f39dbee7c4f683bf22e5d672b67a59e60cc5116fdbde6",
+    "nativeReport": {
+      "pathBase": "work/site",
+      "path": "../outputs/m2-2c-recurrent-same-isolation-luna-20261019-final-r3/review.json",
+      "sha256": "8e631a8833ba21365d07532ec723d4aab8b3b4829a6cb4e9ff69c96a81ded425",
+      "runLogPath": "../outputs/m2-2c-recurrent-same-isolation-luna-20261019-final-r3-run.log",
+      "runLogSha256": "b94af2c330e10e8c9b1b0cb0a48577c304e51da1ceb99e83adf1a36f0d733ade",
+      "sourceCommit": "2b60c219cc18c120948b536fd28c9ab8a0213ecd"
+    }
+  },
+  "result": {
+    "engine": "PostgreSQL 17.11",
+    "nativeTotal": "301/301",
+    "deadlocks40P01": 0,
+    "previouslyAcceptedMixedCasesReproduced": [
+      {
+        "winner": "approval",
+        "isolationPair": "read committed/repeatable read",
+        "blockerObserved": true,
+        "approvalSQLSTATE": "00000",
+        "revokeSQLSTATE": "40001",
+        "retrySQLSTATE": "00000"
+      },
+      {
+        "winner": "revocation",
+        "isolationPair": "read committed/repeatable read",
+        "blockerObserved": true,
+        "revokeSQLSTATE": "00000",
+        "approvalSQLSTATE": "40001",
+        "retrySQLSTATE": "42501"
+      },
+      {
+        "winner": "approval",
+        "isolationPair": "repeatable read/read committed",
+        "blockerObserved": true,
+        "approvalSQLSTATE": "00000",
+        "revokeSQLSTATE": "40001",
+        "retrySQLSTATE": "00000"
+      },
+      {
+        "winner": "revocation",
+        "isolationPair": "repeatable read/read committed",
+        "blockerObserved": true,
+        "revokeSQLSTATE": "00000",
+        "approvalSQLSTATE": "40001",
+        "retrySQLSTATE": "42501"
+      }
+    ],
+    "newCases": [
+      {
+        "winner": "approval",
+        "isolationPair": "read committed/read committed",
+        "blockerObserved": true,
+        "approvalSQLSTATE": "00000",
+        "revokeSQLSTATE": "40001",
+        "retryConnection": "new session",
+        "retrySQLSTATE": "00000",
+        "approvalActor": "00000000-0000-0000-0000-000000000020",
+        "revocationActor": "00000000-0000-0000-0000-000000010147",
+        "bothBossesActiveAndCompanyAuthorized": true
+      },
+      {
+        "winner": "revocation",
+        "isolationPair": "read committed/read committed",
+        "blockerObserved": true,
+        "revokeSQLSTATE": "00000",
+        "approvalSQLSTATE": "40001",
+        "retryConnection": "new session",
+        "retrySQLSTATE": "42501",
+        "approvalActor": "00000000-0000-0000-0000-000000010157",
+        "revocationActor": "00000000-0000-0000-0000-000000000020",
+        "bothBossesActiveAndCompanyAuthorized": true
+      },
+      {
+        "winner": "approval",
+        "isolationPair": "repeatable read/repeatable read",
+        "blockerObserved": true,
+        "approvalSQLSTATE": "00000",
+        "revokeSQLSTATE": "40001",
+        "retryConnection": "new session",
+        "retrySQLSTATE": "00000",
+        "approvalActor": "00000000-0000-0000-0000-000000000020",
+        "revocationActor": "00000000-0000-0000-0000-000000010167",
+        "bothBossesActiveAndCompanyAuthorized": true
+      },
+      {
+        "winner": "revocation",
+        "isolationPair": "repeatable read/repeatable read",
+        "blockerObserved": true,
+        "revokeSQLSTATE": "00000",
+        "approvalSQLSTATE": "40001",
+        "retryConnection": "new session",
+        "retrySQLSTATE": "42501",
+        "approvalActor": "00000000-0000-0000-0000-000000010177",
+        "revocationActor": "00000000-0000-0000-0000-000000000020",
+        "bothBossesActiveAndCompanyAuthorized": true
+      }
+    ],
+    "snapshots": "The native report stores before, post-conflict/pre-retry, and post-retry snapshots for sessions, assignments, tasks and revisions, responsibility heads/sets, coverage plan/rules/instances, root and child bindings/source_rule_id, graph fences, membership fences, command/mutation receipts, membership events, and relevant audit rows.",
+    "suite": "Vitest 738/738 in 74 files",
+    "typescriptAndBuild": "npm run build passed (tsc, Vite client, Worker)",
+    "runnerSyntax": "node --check passed",
+    "diffCheck": "git diff --check passed"
+  },
+  "sqlstateBasis": "SQL011 _coordination_revalidate compares a fresh coordination plan with the acquired snapshot and raises 40001 when the plan changed, including READ COMMITTED. SQL014 expands the membership-revocation plan to include related coordination scope. PostgreSQL run confirmed the stale loser is 40001 in both same-isolation pairs.",
+  "gateStatus": "Gate L remains open; this report covers only the four listed recurrent coverage races and does not claim full section 9 completion."
+}

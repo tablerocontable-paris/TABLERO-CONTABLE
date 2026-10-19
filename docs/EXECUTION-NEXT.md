@@ -1,9 +1,19 @@
 # Acción vigente de migración — actualización 19/10/2026
 
-1. Sol aceptó en alcance local onboarding.requestChanges exact replay/commandReceipt y cuatro carreras de cobertura recurrente. Evidencias: architecture/review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json y architecture/review-evidence/m2-2c-gatel-recurrent-coverage-20261019.json.
-2. SQL014 SHA256 ac8cca582cf366b0cf143fd3d99c490c664b00b368eb473757017eebef26315; PostgreSQL 17.11 297/297, 40P01=0; suite 738/738 en 74 archivos; TypeScript/builds aprobados. En recurrentes se acepta estrictamente RC/RR y RR/RC, ambos ganadores. P3 documentados; Gate L sigue abierto.
-3. Commit 873829271463b4f3bf4bbb5ad39dad978908a8d2 está en origin/main; Actions run 39184344731 terminó success; hook pre-commit 196/196.
-4. Próxima ejecución: GPT-6 Luna, esfuerzo medio, Standard; ampliar el runner según `architecture/M2-2C-RECURRENT-COVERAGE-RC-RR-LUNA-20261019.md`. Si el resultado SQL esperado no es claro o aparece un defecto, detenerse y devolverlo a Sol. No aplicar SQL014.
+## Último bloque local aceptado — cobertura recurrente RC/RC y RR/RR
+
+GPT-6.1 Sol aceptó únicamente las cuatro carreras agregadas para ambos
+ganadores bajo RC/RC y RR/RR. PostgreSQL 17.11 **301/301**, `40P01=0`; suite
+**738/738** en 74 archivos; TypeScript, build cliente/Worker, sintaxis del runner
+y diff-check aprobados. Evidencia y límites:
+`architecture/review-evidence/m2-2c-recurrent-same-isolation-luna-20261019.json`.
+La revisión usa hashes del contenido sobre baseline `2b60c21…`; no acredita
+commit, push ni CI. SQL014 sigue sin aplicar; Gate L/§9 sigue abierto.
+
+1. Los bloques anteriores de onboarding y cuatro carreras mixtas están publicados y aceptados en sus alcances.
+2. Sol aceptó localmente cuatro carreras adicionales RC/RC y RR/RR. PostgreSQL 17.11 **301/301**, `40P01=0`; suite **738/738 en 74 archivos**; TypeScript y builds cliente/Worker aprobados. Ver manifiesto vigente arriba.
+3. Este bloque aún requiere hook, commit directo a `main`, push y verificación de SHA/CI. No abrir PR ni aplicar SQL014.
+4. Próxima ejecución técnica: revisión Sol alto del contrato §9 y definición de la familia pendiente para el siguiente contrato Luna medio Standard.
 
 # Acción de migración histórica — 17/10/2026
 

@@ -3109,35 +3109,69 @@ try {
         [10110, "revoke", "read committed", "repeatable read", true],
         [10120, "approve", "repeatable read", "read committed", true],
         [10130, "revoke", "repeatable read", "read committed", true],
+        [10140, "approve", "read committed", "read committed", true],
+        [10150, "revoke", "read committed", "read committed", true],
+        [10160, "approve", "repeatable read", "repeatable read", true],
+        [10170, "revoke", "repeatable read", "repeatable read", true],
       ]) {
         const fixture = await pendingCoverageFixture(base, `M2.2C membership/coverage approval ${firstAction}`, recurring), approvalOp = uid(base + 5), revokeOp = uid(base + 6);
+        const secondBoss = recurring && winnerIsolation === loserIsolation ? uid(base + 7) : boss;
+        if (secondBoss !== boss) await observer.ok(`insert into auth.users(id) values(${lit(secondBoss)}); insert into public.profiles(id,organization_id,name,role,sector,branch,position) values(${lit(secondBoss)},${lit(org)},'Independent coverage jefe','jefe','Test','Test','Test'); insert into public.company_memberships(organization_id,company_id,profile_id) values(${lit(org)},${lit(company)},${lit(secondBoss)});`);
+        const snapshotSql = `select jsonb_build_object(
+          'membership',(select to_jsonb(m) from public.company_memberships m where m.company_id=${lit(company)} and m.profile_id=${lit(fixture.replacementId)}),
+          'sessions',(select coalesce(jsonb_agg(to_jsonb(s) order by s.id),'[]'::jsonb) from public.task_time_sessions s where s.instance_id in (${lit(fixture.taskId)},${lit(fixture.siblingTaskId ?? fixture.taskId)})),
+          'assignments',(select coalesce(jsonb_agg(to_jsonb(a) order by a.id),'[]'::jsonb) from public.task_assignments a where a.id=${lit(fixture.assignmentId)}),
+          'tasks',(select coalesce(jsonb_agg(to_jsonb(t) order by t.id),'[]'::jsonb) from public.task_instances t where t.assignment_id=${lit(fixture.assignmentId)}),
+          'heads',(select coalesce(jsonb_agg(to_jsonb(h) order by h.instance_id),'[]'::jsonb) from public.task_responsibility_heads h where h.instance_id in (${lit(fixture.taskId)},${lit(fixture.siblingTaskId ?? fixture.taskId)})),
+          'sets',(select coalesce(jsonb_agg(to_jsonb(s) order by s.id),'[]'::jsonb) from public.task_responsibility_sets s where s.id in(select h.set_id from public.task_responsibility_heads h where h.instance_id in (${lit(fixture.taskId)},${lit(fixture.siblingTaskId ?? fixture.taskId)}))),
+          'plan',(select to_jsonb(p) from public.task_coverage_plans p where p.id=${lit(fixture.planId)}),
+          'rules',(select coalesce(jsonb_agg(to_jsonb(r) order by r.assignment_id),'[]'::jsonb) from public.task_coverage_plan_assignment_rules r where r.plan_id=${lit(fixture.planId)}),
+          'planInstances',(select coalesce(jsonb_agg(to_jsonb(i) order by i.instance_id),'[]'::jsonb) from public.task_coverage_plan_instances i where i.plan_id=${lit(fixture.planId)}),
+          'bindings',(select coalesce(jsonb_agg(to_jsonb(b) order by b.id),'[]'::jsonb) from public.task_coverage_bindings b where b.plan_id=${lit(fixture.planId)} or b.source_rule_id in(select id from public.task_coverage_bindings where plan_id=${lit(fixture.planId)})),
+          'graphs',(select coalesce(jsonb_agg(to_jsonb(g) order by g.company_id,g.period),'[]'::jsonb) from app_private.task_dependency_graphs g where g.organization_id=${lit(org)} and g.company_id=${lit(company)} and g.period=${lit(monthPeriod)}::date),
+          'fences',(select coalesce(jsonb_agg(to_jsonb(f) order by f.profile_id),'[]'::jsonb) from app_private.api_membership_fences f where f.organization_id=${lit(org)} and f.profile_id in (${lit(fixture.ownerId)},${lit(fixture.replacementId)},${lit(boss)},${lit(secondBoss)})),
+          'approvalReceipt',(select to_jsonb(r) from public.task_mutation_receipts r where r.operation_id=${lit(approvalOp)}),
+          'revokeReceipt',(select to_jsonb(r) from app_private.api_command_receipts r where r.operation_id=${lit(revokeOp)}),
+          'membershipEvents',(select coalesce(jsonb_agg(to_jsonb(e) order by e.id),'[]'::jsonb) from app_private.company_membership_events e where e.company_id=${lit(company)} and e.profile_id=${lit(fixture.replacementId)}),
+          'audit',(select coalesce(jsonb_agg(to_jsonb(e) order by e.id),'[]'::jsonb) from public.audit_events e where e.organization_id=${lit(org)} and (e.entity_id=${lit(fixture.planId)} or e.entity_id=${lit(fixture.replacementId)} or (e.entity_id=${lit(company)} and e.details->>'profileId'=${lit(fixture.replacementId)}))));`;
+        const preConflictSnapshot = (await observer.ok(snapshotSql)).at(-1);
+        const retryInNewSession = async (subject, sql) => {
+          const session = new Session();
+          await session.ok(`select set_config('request.jwt.claim.sub',${lit(subject)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: subject, aal: "aal2" }))},false);set role authenticated;`);
+          const result = await session.query(sql);
+          await session.close();
+          return result;
+        };
         const revoke = { contractVersion: 1, operationId: revokeOp, kind: "companyMembership.setActive", expectedRevisions: { [`membership:${company}:${fixture.replacementId}`]: "0" }, payload: { companyId: company, profileId: fixture.replacementId, active: false, reason: `M2.2C approval race revoke ${firstAction}` } };
         const membershipFenceBefore = Number((await observer.ok(`select coalesce((select fence_epoch from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id=${lit(fixture.replacementId)}),0);`)).at(-1));
         await claims({ role: "authenticated", sub: boss, aal: "aal2" }, boss);
-        let approvalResult, revokeResult, blocked = false, winnerPid, loserPid, retryResult;
+        let approvalResult, revokeResult, blocked = false, winnerPid, loserPid, retryResult, winnerIsolationObserved, loserIsolationObserved, conflictSnapshot;
         if (firstAction === "approve") {
-          await a.ok(`begin isolation level ${winnerIsolation};`); winnerPid = Number((await a.ok("select pg_backend_pid();")).at(-1));
+          await a.ok(`begin isolation level ${winnerIsolation};`); winnerIsolationObserved = (await a.ok("show transaction_isolation;")).at(-1); winnerPid = Number((await a.ok("select pg_backend_pid();")).at(-1));
+          assert.equal(winnerIsolationObserved, winnerIsolation);
           approvalResult = await a.query(`select public.approve_task_coverage_plan(${lit(fixture.planId)},${lit(approvalOp)});`); assert.equal(approvalResult.code, "00000", JSON.stringify(approvalResult));
-          await b.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(boss)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: boss, aal: "aal2" }))},false);set role authenticated;begin isolation level ${loserIsolation};select active,revision from public.company_memberships where company_id=${lit(company)} and profile_id=${lit(fixture.replacementId)};`);
+          await b.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(secondBoss)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: secondBoss, aal: "aal2" }))},false);set role authenticated;begin isolation level ${loserIsolation};select active,revision from public.company_memberships where company_id=${lit(company)} and profile_id=${lit(fixture.replacementId)};`);
+          loserIsolationObserved = (await b.ok("show transaction_isolation;")).at(-1); assert.equal(loserIsolationObserved, loserIsolation);
           loserPid = Number((await b.ok("select pg_backend_pid();")).at(-1)); const pending = b.query(`select api.command_v1('${JSON.stringify(revoke).replaceAll("'", "''")}'::jsonb);`);
           const deadline = Date.now() + 10000; while (Date.now() < deadline) { if ((await observer.ok(`select ${winnerPid}=any(pg_catalog.pg_blocking_pids(${loserPid}));`)).at(-1) === "t") { blocked = true; break; } await new Promise((done) => setTimeout(done, 20)); }
-          await a.ok("commit;"); revokeResult = await pending; await b.ok(revokeResult.code === "00000" ? "commit;" : "rollback;"); assert.equal(revokeResult.code, "40001", JSON.stringify(revokeResult));
-          retryResult = await b.query(`select api.command_v1('${JSON.stringify(revoke).replaceAll("'", "''")}'::jsonb);`); assert.equal(retryResult.code, "00000", JSON.stringify(retryResult));
+          await a.ok("commit;"); revokeResult = await pending; await b.ok(revokeResult.code === "00000" ? "commit;" : "rollback;"); assert.equal(revokeResult.code, "40001", JSON.stringify(revokeResult)); conflictSnapshot = (await observer.ok(snapshotSql)).at(-1);
+          retryResult = await retryInNewSession(secondBoss, `select api.command_v1('${JSON.stringify(revoke).replaceAll("'", "''")}'::jsonb);`); assert.equal(retryResult.code, "00000", JSON.stringify(retryResult));
         } else {
-          await b.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(boss)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: boss, aal: "aal2" }))},false);set role authenticated;begin isolation level ${loserIsolation};select active,revision from public.company_memberships where company_id=${lit(company)} and profile_id=${lit(fixture.replacementId)};`);
-          await a.ok(`begin isolation level ${winnerIsolation};`); winnerPid = Number((await a.ok("select pg_backend_pid();")).at(-1));
+          await b.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(secondBoss)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: secondBoss, aal: "aal2" }))},false);set role authenticated;begin isolation level ${loserIsolation};select active,revision from public.company_memberships where company_id=${lit(company)} and profile_id=${lit(fixture.replacementId)};`);
+          loserIsolationObserved = (await b.ok("show transaction_isolation;")).at(-1); assert.equal(loserIsolationObserved, loserIsolation);
+          await a.ok(`begin isolation level ${winnerIsolation};`); winnerIsolationObserved = (await a.ok("show transaction_isolation;")).at(-1); assert.equal(winnerIsolationObserved, winnerIsolation); winnerPid = Number((await a.ok("select pg_backend_pid();")).at(-1));
           revokeResult = await a.query(`select api.command_v1('${JSON.stringify(revoke).replaceAll("'", "''")}'::jsonb);`); assert.equal(revokeResult.code, "00000", JSON.stringify(revokeResult));
           loserPid = Number((await b.ok("select pg_backend_pid();")).at(-1)); const pending = b.query(`select public.approve_task_coverage_plan(${lit(fixture.planId)},${lit(approvalOp)});`);
           const deadline = Date.now() + 10000; while (Date.now() < deadline) { if ((await observer.ok(`select ${winnerPid}=any(pg_catalog.pg_blocking_pids(${loserPid}));`)).at(-1) === "t") { blocked = true; break; } await new Promise((done) => setTimeout(done, 20)); }
-          await a.ok("commit;"); approvalResult = await pending; await b.ok(approvalResult.code === "00000" ? "commit;" : "rollback;"); assert.equal(approvalResult.code, "40001", JSON.stringify(approvalResult));
+          await a.ok("commit;"); approvalResult = await pending; await b.ok(approvalResult.code === "00000" ? "commit;" : "rollback;"); assert.equal(approvalResult.code, "40001", JSON.stringify(approvalResult)); conflictSnapshot = (await observer.ok(snapshotSql)).at(-1);
           const fenceStateBeforeRetry = (await observer.ok(`select
-            coalesce((select string_agg(profile_id::text||':'||fence_epoch::text,',' order by profile_id) from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id in (${lit(fixture.ownerId)},${lit(fixture.replacementId)},${lit(boss)})),'')||'|'||
+            coalesce((select string_agg(profile_id::text||':'||fence_epoch::text,',' order by profile_id) from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id in (${lit(fixture.ownerId)},${lit(fixture.replacementId)},${lit(boss)},${lit(secondBoss)})),'')||'|'||
             coalesce((select string_agg(company_id::text||':'||period::text||':'||fence_epoch::text,',' order by company_id,period) from app_private.task_dependency_graphs where organization_id=${lit(org)} and company_id=${lit(company)} and period=${lit(monthPeriod)}::date),'');`)).at(-1);
-          retryResult = await b.query(`select public.approve_task_coverage_plan(${lit(fixture.planId)},${lit(approvalOp)});`);
+          retryResult = await retryInNewSession(secondBoss, `select public.approve_task_coverage_plan(${lit(fixture.planId)},${lit(approvalOp)});`);
           assert.equal(retryResult.code, "42501", JSON.stringify(retryResult));
           assert.match(retryResult.errors, /Membres[ií]a de empresa inactiva/u, JSON.stringify(retryResult));
           const fenceStateAfterRetry = (await observer.ok(`select
-            coalesce((select string_agg(profile_id::text||':'||fence_epoch::text,',' order by profile_id) from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id in (${lit(fixture.ownerId)},${lit(fixture.replacementId)},${lit(boss)})),'')||'|'||
+            coalesce((select string_agg(profile_id::text||':'||fence_epoch::text,',' order by profile_id) from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id in (${lit(fixture.ownerId)},${lit(fixture.replacementId)},${lit(boss)},${lit(secondBoss)})),'')||'|'||
             coalesce((select string_agg(company_id::text||':'||period::text||':'||fence_epoch::text,',' order by company_id,period) from app_private.task_dependency_graphs where organization_id=${lit(org)} and company_id=${lit(company)} and period=${lit(monthPeriod)}::date),'');`)).at(-1);
           assert.equal(fenceStateAfterRetry, fenceStateBeforeRetry, "denied coverage retry must not leave fence writes");
         }
@@ -3151,11 +3185,33 @@ try {
         assert.equal(finalParts[0], "false|1", final);
         if (firstAction === "approve") assert.match(finalParts[1], /^cancelled:[0-9a-f-]{36}:M2\.2C approval race revoke approve$/u, final);
         else assert.equal(finalParts[1], "none", final);
-        if (recurring && firstAction === "approve") assert.equal(finalParts[2], `cancelled:${boss}:M2.2C approval race revoke approve`, final);
+        if (recurring && firstAction === "approve") assert.equal(finalParts[2], `cancelled:${secondBoss}:M2.2C approval race revoke approve`, final);
         else assert.equal(finalParts[2], "none", final);
         assert.equal(finalParts[3], recurring && firstAction === "approve" ? "1" : "0", `rule-to-occurrence source_rule_id link count: ${final}`);
         assert.deepEqual(finalParts.slice(4, 9), [firstAction === "approve" ? "1" : "0", "1", "1", "1", expectedSiblingBindings], final);
-        record(`M2.2C membership revocation versus ${recurring ? "recurring-rule " : ""}coverage approve/reassignment (${firstAction}-first; ${winnerIsolation}/${loserIsolation})`, true, { recurring, recurrenceRuleAndOccurrenceCount: recurring ? "mensual|1|2; exact assignment snapshot; rule selected, no per-instance selection; child source_rule_id linked to root" : null, isolationPair: `${winnerIsolation}/${loserIsolation}`, blockerObserved: blocked, approvalSQLSTATE: approvalResult.code, revokeSQLSTATE: revokeResult.code, retrySQLSTATE: retryResult.code, retryError: retryResult.errors.trim(), retryFenceStateUnchanged: firstAction === "revoke" ? true : null, membershipFenceEpoch: `${membershipFenceBefore}->${finalParts[9]}`, finalState: final });
+        const finalSnapshot = (await observer.ok(snapshotSql)).at(-1);
+        assert.notEqual(conflictSnapshot, preConflictSnapshot, "winner commit must change the relevant snapshot");
+        if (firstAction === "approve") assert.notEqual(finalSnapshot, conflictSnapshot, "successful fresh retry must change the relevant snapshot");
+        else assert.equal(finalSnapshot, conflictSnapshot, "denied fresh retry must leave the conflict snapshot unchanged");
+        const newSameIsolationCase = recurring && winnerIsolation === loserIsolation;
+        const approvalActor = firstAction === "approve" ? boss : secondBoss;
+        const revocationActor = firstAction === "approve" ? secondBoss : boss;
+        let bothBossesActiveAndCompanyAuthorized = null;
+        if (newSameIsolationCase) {
+          assert.notEqual(approvalActor, revocationActor, "same-isolation recurrent sessions must use distinct jefes");
+          bothBossesActiveAndCompanyAuthorized = (await observer.ok(`select count(*)=2 from public.profiles p join public.company_memberships m on m.profile_id=p.id and m.organization_id=p.organization_id where p.id in (${lit(approvalActor)},${lit(revocationActor)}) and p.organization_id=${lit(org)} and p.role='jefe' and p.active and m.company_id=${lit(company)} and m.active;`)).at(-1) === "t";
+          assert.equal(bothBossesActiveAndCompanyAuthorized, true, "both jefes must be active in this organization and company");
+          if (firstAction === "approve") {
+            assert.equal(approvalResult.code, "00000", "approval winner was authorized");
+            assert.equal(retryResult.code, "00000", "revocation retry by the other jefe was authorized");
+          } else {
+            assert.equal(revokeResult.code, "00000", "revocation winner was authorized");
+            assert.equal(approvalResult.code, "40001", "stale approval reached coordination revalidation");
+            assert.equal(retryResult.code, "42501", "fresh approval denial follows the membership revocation");
+            assert.match(retryResult.errors, /Membres[ií]a de empresa inactiva/u, JSON.stringify(retryResult));
+          }
+        }
+        record(`M2.2C membership revocation versus ${recurring ? "recurring-rule " : ""}coverage approve/reassignment (${firstAction}-first; ${winnerIsolation}/${loserIsolation})`, true, { recurring, recurrenceRuleAndOccurrenceCount: recurring ? "mensual|1|2; exact assignment snapshot; rule selected, no per-instance selection; child source_rule_id linked to root" : null, actors: { approvalActor, revocationActor, distinct: approvalActor !== revocationActor, bothBossesActiveAndCompanyAuthorized }, isolationPair: `${winnerIsolation}/${loserIsolation}`, actualIsolationLevels: { winner: winnerIsolationObserved, loser: loserIsolationObserved }, blockerObserved: blocked, approvalSQLSTATE: approvalResult.code, revokeSQLSTATE: revokeResult.code, retryActor: firstAction === "approve" ? revocationActor : approvalActor, retrySQLSTATE: retryResult.code, retryConnectionWasNew: true, retryError: retryResult.errors.trim(), retryFenceStateUnchanged: firstAction === "revoke" ? true : null, membershipFenceEpoch: `${membershipFenceBefore}->${finalParts[9]}`, snapshots: { before: JSON.parse(preConflictSnapshot), afterConflictBeforeRetry: JSON.parse(conflictSnapshot), afterFreshRetry: JSON.parse(finalSnapshot) }, finalState: final });
         await a.ok("reset role;"); await b.ok("reset role;");
       }
     }

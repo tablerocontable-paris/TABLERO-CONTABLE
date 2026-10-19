@@ -1,10 +1,19 @@
 # Estado general de la migración — actualización 19/10/2026
 
-**Últimos bloques aceptados por Sol y publicados directamente a main (alcances acotados): onboarding.requestChanges exact replay/commandReceipt y cuatro carreras de cobertura recurrente. Gate L/M2.2C sigue abierto. Evidencias: review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json y review-evidence/m2-2c-gatel-recurrent-coverage-20261019.json. SQL014 SHA256 ac8cca582cf366b0cf143fd3d99c490c664b00b368eb473757017eebef26315; PostgreSQL 17.11 297/297, 40P01=0; suite 738/738 en 74 archivos. Sol acepta sólo RC/RR y RR/RC con ambos ganadores para recurrentes. P3 y sourceCommit anterior están registrados. Commit 873829271463b4f3bf4bbb5ad39dad978908a8d2; Actions 39184344731 success.
+**Último bloque local aceptado por GPT-6.1 Sol (alcance acotado):** cuatro
+carreras de aprobación de cobertura recurrente frente a revocación de membresía,
+RC/RC y RR/RR con ambos ganadores. PostgreSQL 17.11 **301/301**, `40P01=0`;
+suite Vitest **738/738 en 74 archivos**; TypeScript, build cliente/Worker,
+sintaxis del runner y `git diff --check` aprobados. Manifiesto y hashes:
+`architecture/review-evidence/m2-2c-recurrent-same-isolation-luna-20261019.json`.
+Sol acepta sólo estos casos; límites P3 y snapshot acotado constan en el
+manifiesto. Gate L/§9 sigue abierto. SQL014 no se aplicó remotamente.
 
-**Siguiente:** GPT-6 Luna, medio Standard, implementa las cuatro carreras restantes RC/RC y RR/RR según architecture/M2-2C-RECURRENT-COVERAGE-RC-RR-LUNA-20261019.md. Si no puede determinar SQLSTATE/retry sin ambigüedad, detener y volver a Sol.
+**Bloques anteriores publicados y aceptados por Sol:** onboarding.requestChanges exact replay/commandReceipt y cuatro carreras mixtas de cobertura recurrente. Se suma el bloque local descrito arriba; sus resultados no deben atribuirse al commit remoto anterior. Gate L/M2.2C sigue abierto. SQL014 SHA256 ac8cca582cf366b0cf143fd3d99c490c664b00b368eb473757017eebef26315. El run 39184344731 corresponde al commit 873829271463b4f3bf4bbb5ad39dad978908a8d2 y no valida cambios posteriores.
 
-**Infraestructura sin cambios:** GitHub main está en 873829271463b4f3bf4bbb5ad39dad978908a8d2; Actions 39184344731 terminó success. Supabase dev sigue activo/vacío; falta apagar la autoexposición. No hay Cloudflare, correo productivo ni Supabase de producción configurados. Site privado y datos ficticios.
+**Siguiente:** Sol revisa el contrato §9 vigente y define el próximo bloque pendiente del Gate L para Luna medio Standard. Las cuatro carreras recurrentes ya están aceptadas localmente; no repetirlas.
+
+**Infraestructura sin cambios:** mientras se registra este bloque local, GitHub main sigue en 873829271463b4f3bf4bbb5ad39dad978908a8d2; falta publicar el cambio y verificar su CI. Supabase dev sigue activo/vacío; falta apagar la autoexposición. No hay Cloudflare, correo productivo ni Supabase de producción configurados. Site privado y datos ficticios.
 
 # Estado general de la migración — actualización 19/10/2026
 
