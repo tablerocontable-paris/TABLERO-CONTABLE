@@ -11,6 +11,10 @@ manifiesto `docs/architecture/review-evidence/m2-2c-responsibility-onboarding-ap
 La rama RC aprobación-primero confirma responsabilidad `00000` porque actualiza
 una tarea distinta; el replay exacto prueba idempotencia. Gate L y §9 siguen
 abiertos. No aplicar SQL014.
+Publicado directo a `origin/main`, sin PR: `5425d99589f5edfcca1b2224753a0c5c1d2c1332`;
+`git ls-remote` confirmó el mismo SHA. El hook local reportó 196/196, aunque el
+proceso `git commit` terminó con código 1 después de crear el commit y dejar el
+árbol limpio. CI del push no está verificado.
 
 ## Base previamente aceptada
 

@@ -26,6 +26,10 @@ Supabase alojado y el espacio operativo intactos hasta cerrar los gates.
 El último bloque `assign_task_responsibility`/`onboarding.approve` quedó aceptado
 localmente por Sol; ver
 `architecture/M2-2C-RESPONSIBILITY-ONBOARDING-APPROVAL-RACES-SOL-ACCEPTANCE-20261019.md`.
+El código y su evidencia están publicados directo a `main`, sin PR, en
+`5425d99589f5edfcca1b2224753a0c5c1d2c1332`; el SHA remoto fue verificado. El
+hook terminó 196/196 pero devolvió código 1 después de crear el commit; CI no
+está verificado.
 
 ## Último bloque local aceptado — cobertura recurrente RC/RC y RR/RR
 

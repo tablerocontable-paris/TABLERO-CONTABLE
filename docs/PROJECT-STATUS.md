@@ -48,6 +48,10 @@ manifiesto y hashes:
 `architecture/review-evidence/m2-2c-responsibility-onboarding-approval-races-luna-20261019.json`.
 No se modificaron SQL011/013/014 ni se hicieron llamadas remotas. Esto no cierra
 §9/Gate L; SQL014 sigue sin aplicar.
+Commit publicado directamente a `origin/main`, sin PR:
+`5425d99589f5edfcca1b2224753a0c5c1d2c1332`; `git ls-remote` confirmó el SHA.
+El hook local ejecutó 196/196, aunque `git commit` devolvió código 1 después de
+crear el commit; el árbol quedó limpio. CI del push no está verificado.
 
 **Siguiente vigente:** auditar §9 frente al runner/aceptaciones y escoger la
 próxima familia local incompleta; redactar un contrato acotado antes de pedir a
