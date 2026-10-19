@@ -3217,6 +3217,126 @@ try {
         await claims({ role: "authenticated", sub: boss, aal: "aal2" }, boss);
         return { ownerId, replacementId, assignmentId, taskId, planId, siblingTaskId };
       }
+      // Same-isolation approval/materialization races. The assignment exists
+      // without its current-month occurrence so the winner determines whether
+      // approval binds an existing occurrence or materialization binds from
+      // the newly-created recurring rule.
+      for (const [index, [iso, firstAction]] of [
+        ["read committed", "approve"], ["read committed", "materialize"],
+        ["repeatable read", "approve"], ["repeatable read", "materialize"],
+      ].entries()) {
+        const base = 10500 + index * 20;
+        const ownerId = uid(base), replacementId = uid(base + 1), assignmentId = uid(base + 2), planId = uid(base + 3);
+        const approvalOp = uid(base + 4), materializeOp = uid(base + 5);
+        const approvalBoss = uid(base + 6), materializeBoss = uid(base + 7);
+        await observer.ok(`insert into auth.users(id) values(${lit(ownerId)}),(${lit(replacementId)}),(${lit(approvalBoss)}),(${lit(materializeBoss)});
+          insert into public.profiles(id,organization_id,name,role,sector,branch,position) values
+            (${lit(ownerId)},${lit(org)},'Recurring assignment owner ${index}','empleado','Test','Test','Test'),
+            (${lit(replacementId)},${lit(org)},'Synthetic replacement ${index}','empleado','Test','Test','Test'),
+            (${lit(approvalBoss)},${lit(org)},'Coverage approval chief ${index}','jefe','Test','Test','Test'),
+            (${lit(materializeBoss)},${lit(org)},'Materialize chief ${index}','jefe','Test','Test','Test');
+          insert into public.company_memberships(organization_id,company_id,profile_id) values(${lit(org)},${lit(company)},${lit(ownerId)}),(${lit(org)},${lit(company)},${lit(replacementId)});
+          insert into public.team_members(organization_id,team_id,profile_id) values(${lit(org)},${lit(team)},${lit(ownerId)});
+          insert into public.task_assignments(id,organization_id,company_id,owner_id,team_id,title,kind,weight,unit,target,frequency,start_month,due_day,checklist,start_date,end_date,interval_count,weekdays,month_day,has_deadline,due_offset_days,measurement_version,definition_revision)
+            values(${lit(assignmentId)},${lit(org)},${lit(company)},${lit(ownerId)},${lit(team)},'M2.2C recurring coverage/materialize ${index}','resultado',1,null,null,'mensual',${lit(monthPeriod)}::date,${dayOfMonth},'[]',${lit(monthPeriod)}::date,null,1,array[1]::smallint[],${dayOfMonth},true,0,1,0);
+          insert into public.task_coverage_plans(id,organization_id,responsible_id,replacement_id,starts_on,ends_on,kind,created_by,sealed)
+            values(${lit(planId)},${lit(org)},${lit(ownerId)},${lit(replacementId)},${lit(scheduledOn)}::date,${lit(scheduledOn)}::date,'otra',${lit(approvalBoss)},false);
+          insert into public.task_coverage_plan_assignment_rules(plan_id,organization_id,assignment_id,company_id_snapshot,assignment_snapshot)
+            select ${lit(planId)},organization_id,id,company_id,to_jsonb(a) from public.task_assignments a where id=${lit(assignmentId)};
+          update public.task_coverage_plans set sealed=true,sealed_by=${lit(approvalBoss)},sealed_at=clock_timestamp() where id=${lit(planId)};`);
+        const materializeCommand = { contractVersion: 1, operationId: materializeOp, kind: "month.materialize", expectedRevisions: { [`creation:${ownerId}`]: "0" }, payload: { ownerId, period: monthPeriod } };
+        const snapshotSql = `select jsonb_build_object(
+          'assignment',(select to_jsonb(x) from public.task_assignments x where id=${lit(assignmentId)}),
+          'occurrences',(select coalesce(jsonb_agg(to_jsonb(x) order by x.id),'[]'::jsonb) from public.task_instances x where assignment_id=${lit(assignmentId)} and period=${lit(monthPeriod)}::date),
+          'plan',(select to_jsonb(x) from public.task_coverage_plans x where id=${lit(planId)}),
+          'rule',(select to_jsonb(x) from public.task_coverage_plan_assignment_rules x where plan_id=${lit(planId)}),
+          'bindings',(select coalesce(jsonb_agg(to_jsonb(x) order by x.id),'[]'::jsonb) from public.task_coverage_bindings x where plan_id=${lit(planId)} or source_rule_id in(select id from public.task_coverage_bindings where plan_id=${lit(planId)})),
+          'creationHead',(select to_jsonb(x) from app_private.api_creation_heads x where organization_id=${lit(org)} and owner_id=${lit(ownerId)}),
+          'monthFence',(select to_jsonb(x) from app_private.api_month_fences x where organization_id=${lit(org)} and owner_id=${lit(ownerId)} and period=${lit(monthPeriod)}::date),
+          'membershipFences',(select coalesce(jsonb_agg(to_jsonb(x) order by x.profile_id),'[]'::jsonb) from app_private.api_membership_fences x where organization_id=${lit(org)} and profile_id in (${lit(ownerId)},${lit(replacementId)},${lit(approvalBoss)},${lit(materializeBoss)})),
+          'approvalReceipt',(select to_jsonb(x) from public.task_mutation_receipts x where actor_id=${lit(approvalBoss)} and operation_id=${lit(approvalOp)}),
+          'materializeReceipt',(select to_jsonb(x) from app_private.api_command_receipts x where actor_id=${lit(materializeBoss)} and operation_id=${lit(materializeOp)}),
+          'audit',(select coalesce(jsonb_agg(to_jsonb(x) order by x.id),'[]'::jsonb) from public.audit_events x where x.organization_id=${lit(org)} and x.actor_id in (${lit(approvalBoss)},${lit(materializeBoss)}) and (x.entity_id in (${lit(ownerId)},${lit(planId)}) or x.action='month.materialized')));`;
+        const before = (await observer.ok(snapshotSql)).at(-1);
+        const approvalSql = `select public.approve_task_coverage_plan(${lit(planId)},${lit(approvalOp)});`;
+        const materializeSql = `select api.command_v1('${JSON.stringify(materializeCommand).replaceAll("'", "''")}'::jsonb);`;
+        const first = firstAction === "approve" ? a : b, second = firstAction === "approve" ? b : a;
+        const firstActor = firstAction === "approve" ? approvalBoss : materializeBoss;
+        const secondActor = firstAction === "approve" ? materializeBoss : approvalBoss;
+        const firstSql = firstAction === "approve" ? approvalSql : materializeSql;
+        const secondSql = firstAction === "approve" ? materializeSql : approvalSql;
+        const jwt = subject => `reset role;select set_config('request.jwt.claim.sub',${lit(subject)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: subject, aal: "aal2" }))},false);set role authenticated;`;
+        await first.ok(`${jwt(firstActor)}begin isolation level ${iso};`);
+        const firstPid = Number((await first.ok("select pg_backend_pid();")).at(-1));
+        const firstResult = await first.query(firstSql); assert.equal(firstResult.code, "00000", JSON.stringify(firstResult));
+        await second.ok(`${jwt(secondActor)}begin isolation level ${iso}; select count(*) from public.task_assignments where id=${lit(assignmentId)};`);
+        const secondPid = Number((await second.ok("select pg_backend_pid();")).at(-1));
+        const pending = second.query(secondSql);
+        let blocked = false; const deadline = Date.now() + 10000;
+        while (Date.now() < deadline) {
+          if ((await observer.ok(`select ${firstPid}=any(pg_catalog.pg_blocking_pids(${secondPid}));`)).at(-1) === "t") { blocked = true; break; }
+          await new Promise(done => setTimeout(done, 20));
+        }
+        await first.ok("commit;");
+        const secondResult = await pending;
+        assert.equal(secondResult.code, "40001", `blocked ${firstAction === "approve" ? "materialize" : "approval"} must abort for ${iso}/${iso}: ${JSON.stringify(secondResult)}`);
+        await second.ok(secondResult.code === "00000" ? "commit;" : "rollback;");
+        const afterConflict = (await observer.ok(snapshotSql)).at(-1);
+        const conflictState = JSON.parse(afterConflict);
+        if (firstAction === "approve") {
+          assert.equal(conflictState.occurrences.length, 0, `approval-first must not materialize before retry: ${afterConflict}`);
+          assert.equal(conflictState.bindings.length, 1, `approval-first must leave only the coverage root before retry: ${afterConflict}`);
+          assert.ok(conflictState.bindings[0].instance_id === null && conflictState.bindings[0].status === "active", afterConflict);
+        } else {
+          assert.equal(conflictState.occurrences.length, 1, `materialize-first must create exactly one occurrence before retry: ${afterConflict}`);
+          assert.equal(conflictState.bindings.length, 0, `materialize-first must not bind coverage before approval retry: ${afterConflict}`);
+        }
+        const retrySession = new Session(); await retrySession.ok(jwt(secondActor));
+        let retryResult;
+        if (firstAction === "approve" && secondResult.code !== "00000") {
+          const freshCreationRevision = (await observer.ok(`select coalesce((select revision from app_private.api_creation_heads where organization_id=${lit(org)} and owner_id=${lit(ownerId)}),0);`)).at(-1);
+          retryResult = await retrySession.query(`select api.command_v1('${JSON.stringify({ ...materializeCommand, expectedRevisions: { [`creation:${ownerId}`]: freshCreationRevision } }).replaceAll("'", "''")}'::jsonb);`);
+        } else retryResult = await retrySession.query(firstAction === "approve" ? materializeSql : approvalSql);
+        assert.equal(retryResult.code, "00000", `fresh-session retry must converge: ${JSON.stringify(retryResult)}`); await retrySession.close();
+        const finalSnapshot = (await observer.ok(snapshotSql)).at(-1);
+        const final = JSON.parse(finalSnapshot);
+        assert.equal(final.occurrences.length, 1, JSON.stringify(final));
+        assert.equal(final.bindings.length, 2, JSON.stringify(final));
+        const root = final.bindings.find(x => x.instance_id === null && x.status === "active");
+        const child = final.bindings.find(x => x.instance_id !== null && x.status === "active");
+        assert.ok(root && child, JSON.stringify(final.bindings)); assert.equal(child.source_rule_id, root.id);
+        assert.equal(final.approvalReceipt?.operation_id, approvalOp, JSON.stringify(final.approvalReceipt));
+        assert.equal(final.materializeReceipt?.operation_id, materializeOp, JSON.stringify(final.materializeReceipt));
+        const approvalResponseResult = firstAction === "approve" ? firstResult : retryResult;
+        const materializeResponseResult = firstAction === "approve" ? retryResult : firstResult;
+        const approvalResponse = Number(approvalResponseResult.lines.at(-1));
+        const expectedApprovalCount = firstAction === "approve" ? 1 : 2;
+        assert.equal(approvalResponse, expectedApprovalCount, `approval response must equal expected bind count: ${JSON.stringify(approvalResponseResult)}`);
+        assert.equal(final.approvalReceipt.result.count, approvalResponse, `approval response/receipt count mismatch: ${JSON.stringify({ approvalResponse, receipt: final.approvalReceipt })}`);
+        const materializeResponse = JSON.parse(materializeResponseResult.lines.at(-1));
+        assert.equal(materializeResponse.operationId, materializeOp, JSON.stringify(materializeResponse));
+        assert.equal(materializeResponse.kind, "month.materialize", JSON.stringify(materializeResponse));
+        assert.deepEqual(materializeResponse, final.materializeReceipt.result, `materialization response/receipt mismatch: ${JSON.stringify({ materializeResponse, receipt: final.materializeReceipt })}`);
+        assert.deepEqual(materializeResponse.result.createdTaskIds, final.occurrences.map(x => x.id), JSON.stringify({ materializeResponse, occurrences: final.occurrences }));
+        assert.equal(materializeResponse.result.createdTaskIds.length, 1, JSON.stringify(materializeResponse));
+        assert.equal(materializeResponse.result.creationRevision, String(final.creationHead.revision), JSON.stringify({ materializeResponse, creationHead: final.creationHead }));
+        assert.equal(materializeResponse.result.ownerId, ownerId, JSON.stringify(materializeResponse));
+        assert.equal(materializeResponse.result.period, monthPeriod, JSON.stringify(materializeResponse));
+        assert.equal(blocked, true, `expected lock wait ${iso}/${firstAction}, pids ${firstPid}->${secondPid}`);
+        record(`M2.2C recurring coverage approval versus month.materialize (${firstAction}-first; ${iso}/${iso})`, true, {
+          winner: { action: firstAction, actor: firstActor, pid: firstPid, isolation: iso, sqlstate: firstResult.code },
+          loser: { action: firstAction === "approve" ? "materialize" : "approve", actor: secondActor, pid: secondPid, isolation: iso, blockedByWinner: blocked, sqlstate: secondResult.code, message: secondResult.errors.trim() },
+          retry: { action: firstAction === "approve" ? "materialize" : "approve", actor: secondActor, newSession: true, sqlstate: retryResult.code },
+          responsesAndReceipts: {
+            approval: { response: approvalResponse, expectedCount: expectedApprovalCount, receipt: final.approvalReceipt },
+            materialize: { response: materializeResponse, receipt: final.materializeReceipt },
+          },
+          snapshots: { before: JSON.parse(before), afterConflict: conflictState, final },
+          intermediateState: firstAction === "approve" ? "one active rule root; zero occurrences and zero children" : "one occurrence; zero roots and zero children",
+          finalCardinality: { occurrences: final.occurrences.length, activeRoots: 1, activeChildren: 1, childSourceRuleId: child.source_rule_id },
+        });
+        await first.ok("reset role;"); await second.ok("reset role;");
+      }
       for (const [base, firstAction, winnerIsolation, loserIsolation, recurring] of [
         [9920, "approve", "read committed", "repeatable read", false],
         [9930, "revoke", "read committed", "repeatable read", false],

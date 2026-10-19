@@ -18,13 +18,11 @@ no aplicar SQL014.
 
 ## Próximo paso
 
-Implementar el contrato
-`architecture/M2-2C-RECURRING-COVERAGE-MATERIALIZE-RACES-LUNA-20261019.md`:
-cuatro carreras de aprobación de una regla de cobertura recurrente contra
-`month.materialize`, ambos ganadores bajo RC/RC y RR/RR. El auditor read-only
-confirmó que no hay un caso equivalente en el runner; Luna debe medir el SQLSTATE
-real, no asumirlo. Sólo runner/evidencia/docs; mantener SQL014 y Supabase remoto
-intactos. Después revisión Sol independiente sobre hashes exactos.
+Auditar §9 contra el runner y las aceptaciones Sol vigentes para escoger la
+siguiente familia de concurrencia incompleta. La aprobación de cobertura
+recurrente frente a `month.materialize` fue aceptada sólo para cuatro casos; ver
+`architecture/M2-2C-RECURRING-COVERAGE-MATERIALIZE-RACES-SOL-ACCEPTANCE-20261019.md`.
+Mantener SQL014 sin aplicar y no hacer llamadas remotas.
 
 ## Último bloque local aceptado — cobertura recurrente RC/RC y RR/RR
 

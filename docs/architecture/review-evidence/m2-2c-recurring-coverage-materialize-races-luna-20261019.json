@@ -1,0 +1,206 @@
+{
+  "contract": "M2.2C recurring coverage approval versus month.materialize races",
+  "scope": "four local synthetic PostgreSQL races, RC/RC and RR/RR, both winners; does not close Gate L or section 9",
+  "remoteCalls": false,
+  "sql011Or014Modified": false,
+  "candidateStatus": "local uncommitted runner/evidence candidate; awaiting Sol review",
+  "sourceCommit": "f9496d81b3249d43d762d3855178f58ac3baba49",
+  "artifacts": {
+    "runner": {
+      "path": "tests/review/m2-1-native-review.mjs",
+      "sha256": "288f304c8574278ce4e1130ef4c1b9710e2882875df17f6afe0a759b87833860"
+    },
+    "sql011": {
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "sha256": "9729a6800e93dedc43ab5f0840309b7c0d222343898cc8d5b43eeb4a387f4210",
+      "unchanged": true
+    },
+    "sql014": {
+      "path": "supabase/migrations/202610150014_operational_api.sql",
+      "sha256": "ac8cca582cf366b0cf143fd63d99c490c664b00b368eb473757017eebef26315",
+      "unchanged": true
+    },
+    "nativeReport": {
+      "pathBase": "work/site",
+      "path": "../outputs/m2-2c-recurring-coverage-materialize-races-20261019-final-r3/review.json",
+      "sha256": "eb870a28a0fe0e50c747922bd344e0e3b350090a4be0da96ea5f4d945b1c666a",
+      "sourceCommit": "f9496d81b3249d43d762d3855178f58ac3baba49"
+    },
+    "runnerOutput": {
+      "pathBase": "work/site",
+      "path": "../outputs/m2-2c-recurring-coverage-materialize-races-20261019-final-r3-run.log",
+      "sha256": "90febbfe224257867ce75214b317953303e4fcd426c707c7861c7fbbf7e8f770"
+    },
+    "postgresLog": {
+      "pathBase": "work/site",
+      "path": "../outputs/m2-2c-recurring-coverage-materialize-races-20261019-final-r3/postgres.log",
+      "sha256": "9ac087312dc10a02b028aca23584fa908dd589fcaabb925ae49b1534466cc247"
+    },
+    "buildLog": {
+      "pathBase": "work/site",
+      "path": "../outputs/m2-2c-recurring-coverage-materialize-races-20261019-build.log",
+      "sha256": "52e1b9a5b04fdaa3ffd6f0e7d014513594ccfb7673691aa9e034f993e568cf9b"
+    }
+  },
+  "result": {
+    "engine": "PostgreSQL 17.11",
+    "nativeTotal": "309/309",
+    "failures": 0,
+    "deadlocks40P01": 0,
+    "cases": [
+      {
+        "winner": "approval",
+        "isolationPair": "read committed/read committed",
+        "blockerObserved": true,
+        "loserSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "finalOccurrences": 1,
+        "activeRoots": 1,
+        "activeChildren": 1,
+        "childSourceRuleLinked": true,
+        "intermediateState": "one active rule root; zero occurrences and zero children",
+        "approvalResponse": 1,
+        "approvalReceiptResult": { "count": 1 },
+        "materializeResponse": {
+          "kind": "month.materialize",
+          "result": {
+            "period": "2026-10-01",
+            "ownerId": "00000000-0000-0000-0000-000000010500",
+            "createdTaskIds": ["31ed9a7b-90d0-49b8-bd9b-e04fa8577dbb"],
+            "creationRevision": "1"
+          },
+          "operationId": "00000000-0000-0000-0000-000000010505",
+          "contractVersion": 1
+        },
+        "materializeReceiptResult": {
+          "kind": "month.materialize",
+          "result": {
+            "period": "2026-10-01",
+            "ownerId": "00000000-0000-0000-0000-000000010500",
+            "createdTaskIds": ["31ed9a7b-90d0-49b8-bd9b-e04fa8577dbb"],
+            "creationRevision": "1"
+          },
+          "operationId": "00000000-0000-0000-0000-000000010505",
+          "contractVersion": 1
+        }
+      },
+      {
+        "winner": "materialization",
+        "isolationPair": "read committed/read committed",
+        "blockerObserved": true,
+        "loserSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "finalOccurrences": 1,
+        "activeRoots": 1,
+        "activeChildren": 1,
+        "childSourceRuleLinked": true,
+        "intermediateState": "one occurrence; zero roots and zero children",
+        "approvalResponse": 2,
+        "approvalReceiptResult": { "count": 2 },
+        "materializeResponse": {
+          "kind": "month.materialize",
+          "result": {
+            "period": "2026-10-01",
+            "ownerId": "00000000-0000-0000-0000-000000010520",
+            "createdTaskIds": ["f6024ccb-5869-45c8-ae3b-9b7fbb085a4e"],
+            "creationRevision": "1"
+          },
+          "operationId": "00000000-0000-0000-0000-000000010525",
+          "contractVersion": 1
+        },
+        "materializeReceiptResult": {
+          "kind": "month.materialize",
+          "result": {
+            "period": "2026-10-01",
+            "ownerId": "00000000-0000-0000-0000-000000010520",
+            "createdTaskIds": ["f6024ccb-5869-45c8-ae3b-9b7fbb085a4e"],
+            "creationRevision": "1"
+          },
+          "operationId": "00000000-0000-0000-0000-000000010525",
+          "contractVersion": 1
+        }
+      },
+      {
+        "winner": "approval",
+        "isolationPair": "repeatable read/repeatable read",
+        "blockerObserved": true,
+        "loserSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "finalOccurrences": 1,
+        "activeRoots": 1,
+        "activeChildren": 1,
+        "childSourceRuleLinked": true,
+        "intermediateState": "one active rule root; zero occurrences and zero children",
+        "approvalResponse": 1,
+        "approvalReceiptResult": { "count": 1 },
+        "materializeResponse": {
+          "kind": "month.materialize",
+          "result": {
+            "period": "2026-10-01",
+            "ownerId": "00000000-0000-0000-0000-000000010540",
+            "createdTaskIds": ["f4e44c33-c867-4da9-9f77-f023f5f5d30b"],
+            "creationRevision": "1"
+          },
+          "operationId": "00000000-0000-0000-0000-000000010545",
+          "contractVersion": 1
+        },
+        "materializeReceiptResult": {
+          "kind": "month.materialize",
+          "result": {
+            "period": "2026-10-01",
+            "ownerId": "00000000-0000-0000-0000-000000010540",
+            "createdTaskIds": ["f4e44c33-c867-4da9-9f77-f023f5f5d30b"],
+            "creationRevision": "1"
+          },
+          "operationId": "00000000-0000-0000-0000-000000010545",
+          "contractVersion": 1
+        }
+      },
+      {
+        "winner": "materialization",
+        "isolationPair": "repeatable read/repeatable read",
+        "blockerObserved": true,
+        "loserSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "finalOccurrences": 1,
+        "activeRoots": 1,
+        "activeChildren": 1,
+        "childSourceRuleLinked": true,
+        "intermediateState": "one occurrence; zero roots and zero children",
+        "approvalResponse": 2,
+        "approvalReceiptResult": { "count": 2 },
+        "materializeResponse": {
+          "kind": "month.materialize",
+          "result": {
+            "period": "2026-10-01",
+            "ownerId": "00000000-0000-0000-0000-000000010560",
+            "createdTaskIds": ["d79f93aa-5820-4051-9a8c-7e1ed4ad11d1"],
+            "creationRevision": "1"
+          },
+          "operationId": "00000000-0000-0000-0000-000000010565",
+          "contractVersion": 1
+        },
+        "materializeReceiptResult": {
+          "kind": "month.materialize",
+          "result": {
+            "period": "2026-10-01",
+            "ownerId": "00000000-0000-0000-0000-000000010560",
+            "createdTaskIds": ["d79f93aa-5820-4051-9a8c-7e1ed4ad11d1"],
+            "creationRevision": "1"
+          },
+          "operationId": "00000000-0000-0000-0000-000000010565",
+          "contractVersion": 1
+        }
+      }
+    ],
+    "suite": "738/738 tests in 74 files",
+    "build": "npm run build exit 0: TypeScript, Vite client, Worker bundle",
+    "runnerSyntax": "node --check exit 0",
+    "diffCheck": "git diff --check exit 0 after final edits"
+  },
+  "limitations": [
+    "Synthetic claims and local PostgreSQL only; no hosted Supabase/Auth/HTTP evidence.",
+    "Candidate has not received Sol review and is not committed or pushed.",
+    "Gate L and the full M2.2C section 9 matrix remain open."
+  ]
+}

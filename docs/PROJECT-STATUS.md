@@ -28,12 +28,19 @@ verificado. Hook local 196/196. Gate L/§9 sigue abierto. SQL014 no se aplicó r
 
 **Bloques anteriores publicados y aceptados por Sol:** onboarding.requestChanges exact replay/commandReceipt y cuatro carreras mixtas de cobertura recurrente. El run 39184344731 corresponde al commit 873829271463b4f3bf4bbb5ad39dad978908a8d2 y no valida cambios posteriores. Gate L/M2.2C sigue abierto.
 
-**Siguiente vigente:** auditar §9 frente al runner actual y elegir la siguiente
-familia de concurrencia sin cubrir completamente; después preparar el contrato
-exacto para Luna. La auditoría read-only identificó aprobación de cobertura
-recurrente frente a `month.materialize` como el siguiente par no cubierto; el
-contrato Luna está en `architecture/M2-2C-RECURRING-COVERAGE-MATERIALIZE-RACES-LUNA-20261019.md`.
-El resultado es aún local y no implementado.
+**Último bloque aceptado localmente por Sol, sólo este alcance:** cuatro carreras
+entre aprobación de cobertura recurrente y `month.materialize`, ambos ganadores
+bajo RC/RC y RR/RR. PostgreSQL 17.11 309/309, cero fallas/deadlocks; blocker,
+`40001`, estado intermedio, retry `00000`, respuestas y recibos comparados, y
+estado final 1 ocurrencia/1 raíz/1 hijo enlazado. Aceptación y límites P3:
+`architecture/M2-2C-RECURRING-COVERAGE-MATERIALIZE-RACES-SOL-ACCEPTANCE-20261019.md`;
+manifiesto y hashes en `architecture/review-evidence/m2-2c-recurring-coverage-materialize-races-luna-20261019.json`.
+Suite 738/738 y build de Luna pasaron; Sol repitió sintaxis y diff-check, no la
+suite/build. SQL011/014 intactas, sin llamadas remotas. Esto no cierra §9 ni Gate L.
+
+**Siguiente vigente:** auditar §9 frente al runner aceptado para elegir la próxima
+familia incompleta; después preparar contrato Luna acotado. No repetir las
+familias ya aceptadas. Mantener SQL014 sin aplicar.
 
 **Infraestructura sin cambios:** GitHub `main` está en `6d014381cf5888fe4aafa79e4be3ae0248e74531`; SHA remoto confirmado. CI de este SHA no aparece en el conector. Supabase dev sigue activo/vacío; falta apagar la autoexposición. No hay Cloudflare, correo productivo ni Supabase de producción configurados. Site privado y datos ficticios.
 
