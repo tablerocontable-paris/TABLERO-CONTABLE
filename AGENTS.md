@@ -1,17 +1,15 @@
 # Estado operativo y precedencia — actualización 19/10/2026
 
-**Último bloque Luna aceptado y publicado por Sol, alcance acotado:** cuatro
-carreras entre `approve_task_coverage_plan` y `month.materialize`, ambos órdenes
-ganadores bajo RC/RC y RR/RR. PostgreSQL 17.11: 309/309, `40P01=0`; blocker real,
-`40001`, estados intermedios, retry `00000`, respuestas/recibos y vínculo hijo
-comprobados. Evidencia y hashes:
-`docs/architecture/review-evidence/m2-2c-recurring-coverage-materialize-races-luna-20261019.json`;
-runner SHA256 `288f304c8574278ce4e1130ef4c1b9710e2882875df17f6afe0a759b87833860`;
-SQL011/014 sin cambios. Decisión y límites P3:
-`docs/architecture/M2-2C-RECURRING-COVERAGE-MATERIALIZE-RACES-SOL-ACCEPTANCE-20261019.md`.
-Publicado directo a `main`, sin PR: `63bc5c78dd3274a5d6c0d1e1ef089f06f24baa75`;
-SHA remoto confirmado. Hook 196/196; suite 738/738 y build cliente/Worker
-pasaron; GitHub devuelve checks vacíos, CI no verificado. Gate L y §9 siguen
+**Último bloque local aceptado por Sol, alcance acotado:** cuatro carreras entre
+`assign_task_responsibility` y `onboarding.approve`, ambos órdenes bajo RC/RC y
+RR/RR. PostgreSQL 17.11: 313/313, cero fallos/deadlocks; cuatro bloqueos reales,
+resultados/replays exactos y estados finales sin duplicados. Suite 738/738;
+TypeScript, builds cliente/Worker, `node --check` y diff-check con exit 0. SQL011,
+013 y 014 sin cambios. Aceptación y límites:
+`docs/architecture/M2-2C-RESPONSIBILITY-ONBOARDING-APPROVAL-RACES-SOL-ACCEPTANCE-20261019.md`;
+manifiesto `docs/architecture/review-evidence/m2-2c-responsibility-onboarding-approval-races-luna-20261019.json`.
+La rama RC aprobación-primero confirma responsabilidad `00000` porque actualiza
+una tarea distinta; el replay exacto prueba idempotencia. Gate L y §9 siguen
 abiertos. No aplicar SQL014.
 
 ## Base previamente aceptada
@@ -29,9 +27,11 @@ contrato y estado actual: `8646f10ee90371748054830ef4af81cf4904f577`. Ambos est�
 SHA; no hay CI verificado en esta sesión. El hook local pasó 196/196. SQL014 no
 se aplicó remotamente.
 
-**Siguiente vigente:** elegir, mediante auditoría §9 sobre el runner actual, la
-siguiente familia de concurrencia aún incompleta; preparar un contrato acotado
-para GPT-6 Luna. No tocar Supabase ni activar el espacio operativo.
+**Siguiente vigente:** auditar §9 del contrato M2.2B/C frente al runner y las
+aceptaciones Sol para elegir la próxima familia local incompleta y redactar un
+contrato acotado para Luna. No tocar Supabase alojado ni activar el espacio
+operativo. Los logs crudos del bloque recién aceptado están en `../../outputs/`
+y quedan fuera del Git root; el manifiesto versionado conserva hashes y resumen.
 
 **Bloques anteriores aceptados y publicados:** onboarding.requestChanges exact replay/commandReceipt y cuatro carreras mixtas de cobertura recurrente (RC/RR, RR/RC, ambos ganadores). Evidencias: `docs/architecture/review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json` y `m2-2c-gatel-recurrent-coverage-20261019.json`. El run 39184344731 corresponde al commit 873829271463b4f3bf4bbb5ad39dad978908a8d2. Gate L sigue abierto.
 

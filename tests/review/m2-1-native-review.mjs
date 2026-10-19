@@ -208,6 +208,7 @@ class Session {
 }
 
 const results = [];
+const auxiliarySessions = [];
 const record = (name, passed, details) => {
   const row = { name, passed, ...details };
   results.push(row);
@@ -1669,6 +1670,206 @@ try {
         assert.equal(retry.code, "00000", JSON.stringify(retry)); await a.ok("reset role;"); await b.ok("reset role;");
         const state = (await observer.ok(`select (select active::text from public.profiles where id=${lit(owner)})||'|'||(select status from public.onboarding_requests where id=${lit(request)})||'|'||(select count(*) from public.onboarding_activations where request_id=${lit(request)})||'|'||(select count(*) from app_private.api_command_receipts where operation_id=${lit(approveOp)});`)).at(-1); assert.equal(state, "false|approved|1|1", state);
         record("M2.2C approval-first profile inactivation waits, retries and preserves committed activation", true, { isolationPair: "read committed/repeatable read", blocked, approvalSQLSTATE: approveResult.code, inactivationSQLSTATE: mutationResult.code, retrySQLSTATE: retry.code, finalActiveStatusActivationReceipt: state });
+      }
+      // Same-isolation responsibility/onboarding approval races. Each case has
+      // its own task, request, operation IDs, and two distinct AAL2 chiefs.
+      // The winner stays uncommitted until pg_blocking_pids proves the other
+      // operation is waiting. Depending on order/isolation, the loser either
+      // aborts stale state and retries in a new session, or approval-first RC
+      // applies responsibility to the unchanged pre-existing task.
+      for (let i = 0; i < 4; i++) {
+        const base = 50000 + i * 20;
+        const owner = uid(base), lineId = uid(base + 1), assignment = uid(base + 2), taskId = uid(base + 3);
+        const responsibilityChief = uid(base + 4), approvalChief = uid(base + 5);
+        const saveOp = uid(base + 6), submitOp = uid(base + 7), responsibilityOp = uid(base + 8), approvalOp = uid(base + 9);
+        const iso = i < 2 ? "read committed" : "repeatable read";
+        const order = i % 2 === 0 ? "responsibility-first" : "approval-first";
+        const members = [{ profileId: owner, shareBps: 5000 }, { profileId: actor, shareBps: 5000 }];
+        await observer.ok(`insert into auth.users(id) values(${lit(owner)}),(${lit(responsibilityChief)}),(${lit(approvalChief)});
+          insert into public.profiles(id,organization_id,name,role,sector,branch,position) values
+            (${lit(owner)},${lit(org)},${lit(`M2.2C responsibility approval owner ${i}`)},'empleado','Test','Test','Test'),
+            (${lit(responsibilityChief)},${lit(org)},${lit(`M2.2C responsibility chief ${i}`)},'jefe','Test','Test','Jefe'),
+            (${lit(approvalChief)},${lit(org)},${lit(`M2.2C approval chief ${i}`)},'jefe','Test','Test','Jefe');
+          insert into public.company_memberships(organization_id,company_id,profile_id) values
+            (${lit(org)},${lit(company)},${lit(owner)}),(${lit(org)},${lit(company)},${lit(responsibilityChief)}),(${lit(org)},${lit(company)},${lit(approvalChief)});
+          insert into public.team_members(organization_id,team_id,profile_id) values
+            (${lit(org)},${lit(team)},${lit(owner)}),(${lit(org)},${lit(team)},${lit(responsibilityChief)}),(${lit(org)},${lit(team)},${lit(approvalChief)});
+          insert into public.task_assignments(id,organization_id,company_id,owner_id,team_id,title,kind,weight,unit,target,frequency,start_month,due_day,checklist,start_date,end_date,interval_count,weekdays,month_day,has_deadline,due_offset_days)
+            values(${lit(assignment)},${lit(org)},${lit(company)},${lit(owner)},${lit(team)},'M2.2C same-isolation responsibility approval ${i}','resultado',1,null,null,'unica',date_trunc('month',${lit(scheduledOn)}::date)::date,extract(day from ${lit(scheduledOn)}::date)::integer,'[]',${lit(scheduledOn)},${lit(scheduledOn)},1,array[1]::smallint[],extract(day from ${lit(scheduledOn)}::date)::smallint,true,0);
+          insert into public.task_instances(id,organization_id,assignment_id,company_id,owner_id,team_id,period,scheduled_on,title,kind,weight,due_date,unit,target,checklist,status)
+            values(${lit(taskId)},${lit(org)},${lit(assignment)},${lit(company)},${lit(owner)},${lit(team)},date_trunc('month',${lit(scheduledOn)}::date)::date,${lit(scheduledOn)},'M2.2C same-isolation responsibility approval ${i}','resultado',1,${lit(scheduledOn)},null,null,'[]','Pendiente');`);
+        const draft = { ...requestDraft, lines: [{ lineId, companyId: company, teamId: team,
+          source: { type: "custom", definition: { kind: "operativa", title: `M2.2C same-isolation onboarding ${i}`, objective: "", sector: "Test", unit: "documentos" } },
+          schedule: { ...requestDraft.lines[0].schedule, frequency: "unica", startDate: scheduledOn, endDate: scheduledOn } }] };
+        await claims({ role: "authenticated", sub: owner, aal: "aal1" }, owner);
+        const saved = await a.query(`select api.command_v1('${JSON.stringify({ contractVersion: 1, operationId: saveOp, kind: "onboarding.saveDraft", expectedRevisions: { [`onboardingOwner:${owner}`]: "0" }, payload: { requestId: null, draft } }).replaceAll("'", "''")}'::jsonb);`);
+        assert.equal(saved.code, "00000", JSON.stringify(saved));
+        const request = JSON.parse(saved.lines.at(-1)).result.requestId;
+        const submitted = await a.query(`select api.command_v1('${JSON.stringify({ contractVersion: 1, operationId: submitOp, kind: "onboarding.submit", expectedRevisions: { [`onboarding:${request}`]: "0", [`onboardingDraft:${request}`]: "1" }, payload: { requestId: request } }).replaceAll("'", "''")}'::jsonb);`);
+        assert.equal(submitted.code, "00000", JSON.stringify(submitted)); await a.ok("reset role;");
+        const approve = { contractVersion: 1, operationId: approvalOp, kind: "onboarding.approve", expectedRevisions: { [`onboarding:${request}`]: "1" }, payload: { requestId: request, weightOverrides: [], period: monthPeriod } };
+        const responsibilitySql = `select public.assign_task_responsibility(${lit(taskId)},'${JSON.stringify(members)}'::jsonb,'M2.2C same-isolation onboarding approval race',1,${lit(responsibilityOp)});`;
+        const approvalSql = `select api.command_v1('${JSON.stringify(approve).replaceAll("'", "''")}'::jsonb);`;
+        const snapshot = async () => JSON.parse((await observer.ok(`select jsonb_build_object(
+          'request',(select to_jsonb(r) from public.onboarding_requests r where r.id=${lit(request)}),
+          'requestVersion',(select to_jsonb(v) from public.onboarding_request_versions v where v.request_id=${lit(request)} and v.revision=1),
+          'sourceAssignment',(select to_jsonb(a) from public.task_assignments a where a.id=${lit(assignment)}),
+          'sourceTask',(select to_jsonb(t) from public.task_instances t where t.id=${lit(taskId)}),
+          'responsibility',(select jsonb_build_object('head',to_jsonb(h),'set',to_jsonb(s),'members',(select coalesce(jsonb_agg(to_jsonb(m) order by m.profile_id),'[]'::jsonb) from public.task_responsibility_members m where m.set_id=s.id)) from public.task_responsibility_heads h join public.task_responsibility_sets s on s.id=h.set_id where h.instance_id=${lit(taskId)}),
+          'activations',(select coalesce(jsonb_agg(to_jsonb(x) order by x.line_id),'[]'::jsonb) from public.onboarding_activations x where x.request_id=${lit(request)}),
+          'onboardingAssignments',(select coalesce(jsonb_agg(to_jsonb(a) order by a.id),'[]'::jsonb) from public.onboarding_activations x join public.task_assignments a on a.id=x.assignment_id where x.request_id=${lit(request)}),
+          'onboardingTasks',(select coalesce(jsonb_agg(to_jsonb(t) order by t.id),'[]'::jsonb) from public.onboarding_activations x join public.task_instances t on t.assignment_id=x.assignment_id and t.period=${lit(monthPeriod)}::date where x.request_id=${lit(request)}),
+          'commandReceipts',(select coalesce(jsonb_agg(to_jsonb(r) order by r.operation_id),'[]'::jsonb) from app_private.api_command_receipts r where r.actor_id=${lit(approvalChief)} and r.operation_id=${lit(approvalOp)}),
+          'responsibilityReceipts',(select coalesce(jsonb_agg(to_jsonb(r) order by r.operation_id),'[]'::jsonb) from public.task_mutation_receipts r where r.actor_id=${lit(responsibilityChief)} and r.operation_id=${lit(responsibilityOp)}),
+          'creationHead',(select to_jsonb(h) from app_private.api_creation_heads h where h.organization_id=${lit(org)} and h.owner_id=${lit(owner)}),
+          'monthFence',(select coalesce(jsonb_agg(to_jsonb(f) order by f.period),'[]'::jsonb) from app_private.api_month_fences f where f.organization_id=${lit(org)} and f.owner_id=${lit(owner)} and f.period=${lit(monthPeriod)}::date),
+          'audit',(select coalesce(jsonb_agg(to_jsonb(e) order by e.at,e.id),'[]'::jsonb) from public.audit_events e where e.entity_id in (${lit(request)},${lit(taskId)}) and e.actor_id in (${lit(responsibilityChief)},${lit(approvalChief)}) and e.action in ('task.responsibility_assigned','onboarding.approved'))
+        )::text;`)).at(-1));
+        const before = await snapshot();
+        assert.equal(before.request.status, "submitted");
+        assert.equal(before.responsibility.set.revision, 1);
+        assert.equal(before.responsibility.set.origin, "baseline_legacy");
+        assert.equal(before.activations.length, 0);
+        const first = order === "responsibility-first" ? a : b;
+        const second = order === "responsibility-first" ? b : a;
+        const firstActor = order === "responsibility-first" ? responsibilityChief : approvalChief;
+        const secondActor = order === "responsibility-first" ? approvalChief : responsibilityChief;
+        const firstSql = order === "responsibility-first" ? responsibilitySql : approvalSql;
+        const secondSql = order === "responsibility-first" ? approvalSql : responsibilitySql;
+        const firstIsolation = iso;
+        const loserIsolation = iso;
+        const setSessionActor = (session, principal) => session.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(principal)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: principal, aal: "aal2" }))},false);set role authenticated;`);
+        await setSessionActor(first, firstActor);
+        await first.ok(`begin isolation level ${firstIsolation};`);
+        const firstPid = Number((await first.ok("select pg_backend_pid();")).at(-1));
+        const firstPending = first.query(firstSql);
+        const firstResult = await firstPending; assert.equal(firstResult.code, "00000", JSON.stringify(firstResult));
+        await setSessionActor(second, secondActor);
+        await second.ok(`begin isolation level ${loserIsolation};select status from public.onboarding_requests where id=${lit(request)};select state_revision from public.task_instances where id=${lit(taskId)};`);
+        const loserPid = Number((await second.ok("select pg_backend_pid();")).at(-1));
+        const loserPending = second.query(secondSql);
+        let blocked = false; const blockDeadline = Date.now() + 10000;
+        while (Date.now() < blockDeadline) {
+          if ((await observer.ok(`select ${firstPid}=any(pg_catalog.pg_blocking_pids(${loserPid}));`)).at(-1) === "t") { blocked = true; break; }
+          await new Promise(done => setTimeout(done, 20));
+        }
+        assert.equal(blocked, true, `${order} ${iso}: loser PID ${loserPid} must be blocked by winner PID ${firstPid}`);
+        const blockerPids = (await observer.ok(`select pg_catalog.pg_blocking_pids(${loserPid})::text;`)).at(-1);
+        await first.ok("commit;");
+        const loserResult = await loserPending;
+        const afterWinnerCommit = await snapshot();
+        const expectedLoserSuccess = order === "approval-first" && iso === "read committed";
+        if (expectedLoserSuccess) {
+          assert.equal(loserResult.code, "00000", JSON.stringify(loserResult));
+          assert.equal(afterWinnerCommit.request.status, "approved");
+          assert.equal(afterWinnerCommit.activations.length, 1);
+          assert.equal(afterWinnerCommit.onboardingAssignments.length, 1);
+          assert.equal(afterWinnerCommit.onboardingTasks.length, 1);
+          assert.deepEqual(afterWinnerCommit.sourceTask, before.sourceTask, "approval must not mutate the pre-existing task");
+          assert.deepEqual(afterWinnerCommit.sourceAssignment, before.sourceAssignment, "approval must not mutate the pre-existing assignment");
+          assert.deepEqual(afterWinnerCommit.responsibility, before.responsibility, "approval must leave the pre-existing responsibility footprint unchanged");
+          assert.equal(afterWinnerCommit.commandReceipts.length, 1);
+          assert.equal(afterWinnerCommit.responsibilityReceipts.length, 0);
+          const loserCommit = await second.query("commit;");
+          assert.equal(loserCommit.code, "00000", JSON.stringify(loserCommit));
+          const afterLoserCommit = await snapshot();
+          assert.equal(afterLoserCommit.sourceTask.state_revision, 1);
+          assert.equal(afterLoserCommit.responsibility.set.revision, 2);
+          assert.equal(afterLoserCommit.responsibilityReceipts.length, 1);
+          const replaySession = new Session(); auxiliarySessions.push(replaySession);
+          await replaySession.ok("\\set VERBOSITY verbose\nset statement_timeout='15s';");
+          await replaySession.ok(`select set_config('request.jwt.claim.sub',${lit(secondActor)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: secondActor, aal: "aal2" }))},false);set role authenticated;begin isolation level ${iso};`);
+          const replayResult = await replaySession.query(secondSql);
+          assert.equal(replayResult.code, "00000", JSON.stringify(replayResult));
+          assert.equal(replayResult.lines.at(-1), loserResult.lines.at(-1), "exact responsibility replay must return the stored result");
+          await replaySession.ok("commit;"); await replaySession.ok("reset role;"); await replaySession.close(); auxiliarySessions.splice(auxiliarySessions.indexOf(replaySession), 1);
+          const afterReplay = await snapshot();
+          assert.deepEqual(afterReplay, afterLoserCommit, "exact replay must not duplicate tasks, receipts, responsibility, or audit rows");
+          await a.ok("reset role;"); await b.ok("reset role;");
+          assert.equal(afterReplay.activations.length, 1);
+           assert.equal(afterReplay.activations[0].line_id, lineId);
+          assert.equal(afterReplay.onboardingAssignments.length, 1);
+          assert.equal(afterReplay.onboardingTasks.length, 1);
+           assert.equal(afterReplay.responsibility.set.revision, 2);
+           assert.equal(afterReplay.responsibility.set.mode, "conjunta");
+           assert.deepEqual(afterReplay.responsibility.members.map(m => [m.profile_id, Number(m.share_bps)]).sort(), members.map(m => [m.profileId, m.shareBps]).sort());
+          assert.equal(afterReplay.commandReceipts.length, 1);
+          assert.equal(afterReplay.responsibilityReceipts.length, 1);
+          assert.equal(afterReplay.audit.filter(e => e.action === "onboarding.approved").length, 1);
+          assert.equal(afterReplay.audit.filter(e => e.action === "task.responsibility_assigned").length, 1);
+          const winnerResponse = JSON.parse(firstResult.lines.at(-1));
+          const loserResponse = JSON.parse(loserResult.lines.at(-1));
+          record(`M2.2C responsibility/onboarding approval same-isolation ${order} (${iso}/${iso})`, true, {
+            isolationPair: `${iso}/${iso}`, order, actors: { responsibilityChief, approvalChief }, backendPids: { winner: firstPid, loser: loserPid }, blocked, blockerPids,
+            before, winner: { sqlstate: firstResult.code, response: winnerResponse }, loser: { sqlstate: loserResult.code, response: loserResponse, commitSQLSTATE: loserCommit.code },
+            intermediate: afterWinnerCommit, replay: { connection: "new PostgreSQL session", sqlstate: replayResult.code, response: JSON.parse(replayResult.lines.at(-1)) }, after: afterReplay,
+            footprint: { activations: afterReplay.activations.length, onboardingAssignments: afterReplay.onboardingAssignments.length, onboardingTasks: afterReplay.onboardingTasks.length,
+              jointResponsibilityRevision: afterReplay.responsibility.set.revision, responsibilityReceipts: afterReplay.responsibilityReceipts.length, approvalReceipts: afterReplay.commandReceipts.length }
+          });
+          continue;
+        }
+        if (loserResult.code !== "40001") {
+          const loserCommit = await second.query(loserResult.code === "00000" ? "commit;" : "rollback;");
+          const unexpectedFinal = await snapshot();
+          const diagnostic = {
+            scenario: `M2.2C responsibility/onboarding approval same-isolation ${order} (${iso}/${iso})`,
+            ids: { owner, request, lineId, assignment, taskId, responsibilityChief, approvalChief, responsibilityOp, approvalOp },
+            isolation: iso, order, backendPids: { winner: firstPid, loser: loserPid }, blockerPids, blocked,
+            before, winner: { sqlstate: firstResult.code, response: firstResult.lines.at(-1) },
+            loser: { sqlstate: loserResult.code, error: loserResult.errors, response: loserResult.lines.at(-1) },
+            afterWinnerCommitBeforeLoserCommit: afterWinnerCommit,
+            loserCommitSQLSTATE: loserCommit.code, final: unexpectedFinal,
+            postgresLog: join(out, "postgres.log"),
+          };
+          writeFileSync(join(out, "responsibility-onboarding-approval-race-diagnostic.json"), JSON.stringify(diagnostic, null, 2));
+          record(`M2.2C unexpected loser outcome: responsibility/onboarding approval (${order}, ${iso}/${iso})`, false, diagnostic);
+          throw Error(`Unexpected loser SQLSTATE ${loserResult.code} for ${order}/${iso}; diagnostic saved to ${join(out, "responsibility-onboarding-approval-race-diagnostic.json")}`);
+        }
+        await second.ok("rollback;");
+        const intermediate = await snapshot();
+        if (order === "responsibility-first") {
+          assert.equal(intermediate.request.status, "submitted");
+          assert.equal(intermediate.responsibility.set.revision, 2);
+          assert.equal(intermediate.responsibility.set.mode, "conjunta");
+          assert.equal(intermediate.activations.length, 0);
+          assert.equal(intermediate.commandReceipts.length, 0);
+          assert.equal(intermediate.responsibilityReceipts.length, 1);
+        } else {
+          assert.equal(intermediate.request.status, "approved");
+          assert.equal(intermediate.responsibility.set.revision, 1);
+          assert.equal(intermediate.activations.length, 1);
+          assert.equal(intermediate.commandReceipts.length, 1);
+          assert.equal(intermediate.responsibilityReceipts.length, 0);
+        }
+        const retrySession = new Session(); auxiliarySessions.push(retrySession);
+        await retrySession.ok("\\set VERBOSITY verbose\nset statement_timeout='15s';");
+        await retrySession.ok(`select set_config('request.jwt.claim.sub',${lit(secondActor)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: secondActor, aal: "aal2" }))},false);set role authenticated;begin isolation level ${iso};`);
+        const retryResult = await retrySession.query(secondSql);
+        assert.equal(retryResult.code, "00000", JSON.stringify(retryResult));
+        await retrySession.ok("commit;"); await retrySession.ok("reset role;"); await retrySession.close(); auxiliarySessions.splice(auxiliarySessions.indexOf(retrySession), 1);
+        await a.ok("reset role;"); await b.ok("reset role;");
+        const after = await snapshot();
+        assert.equal(after.request.status, "approved");
+        assert.equal(after.activations.length, 1);
+        assert.equal(after.activations[0].line_id, lineId);
+        assert.equal(after.onboardingAssignments.length, 1);
+        assert.equal(after.onboardingTasks.length, 1, JSON.stringify(after.onboardingTasks));
+        assert.equal(after.responsibility.set.revision, 2);
+        assert.equal(after.responsibility.set.mode, "conjunta");
+        assert.deepEqual(after.responsibility.members.map(m => [m.profile_id, Number(m.share_bps)]).sort(), [[owner, 5000], [actor, 5000]].sort());
+        assert.equal(after.commandReceipts.length, 1);
+        assert.equal(after.responsibilityReceipts.length, 1);
+        assert.equal(after.audit.filter(e => e.action === "onboarding.approved").length, 1);
+        assert.equal(after.audit.filter(e => e.action === "task.responsibility_assigned").length, 1);
+        const winnerResponse = JSON.parse(firstResult.lines.at(-1));
+        const retryResponse = JSON.parse(retryResult.lines.at(-1));
+        record(`M2.2C responsibility/onboarding approval same-isolation ${order} (${iso}/${iso})`, true, {
+          isolationPair: `${iso}/${iso}`, order, actors: { responsibilityChief, approvalChief }, backendPids: { winner: firstPid, loser: loserPid }, blocked, blockerPids,
+          before, winner: { sqlstate: firstResult.code, response: winnerResponse }, staleLoser: { sqlstate: loserResult.code, error: loserResult.errors }, intermediate,
+          retry: { connection: "new PostgreSQL session", sqlstate: retryResult.code, response: retryResponse }, after,
+          footprint: { activations: after.activations.length, onboardingAssignments: after.onboardingAssignments.length, onboardingTasks: after.onboardingTasks.length,
+            jointResponsibilityRevision: after.responsibility.set.revision, responsibilityReceipts: after.responsibilityReceipts.length, approvalReceipts: after.commandReceipts.length }
+        });
       }
       {
         const responsibilityOwner = uid(880), responsibilityAssignment = uid(881), responsibilityTask = uid(882), responsibilityLine = uid(883), responsibilitySaveOp = uid(884), responsibilitySubmitOp = uid(885), responsibilityApproveOp = uid(886), responsibilityMutationOp = uid(887);
@@ -4621,7 +4822,7 @@ try {
   console.error(error);
   process.exitCode = 2;
 } finally {
-  for (const session of [a, b, observer, reviewer])
+  for (const session of [a, b, observer, reviewer, ...auxiliarySessions])
     if (session && !session.pending) await session.close();
   if (started) control(["-D", cluster, "-m", "fast", "-w", "stop"]);
 }

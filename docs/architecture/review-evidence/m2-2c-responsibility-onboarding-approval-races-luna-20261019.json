@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-19",
+  "scope": "Local synthetic PostgreSQL race review only; no hosted Supabase, migration application, or remote API calls.",
+  "sourceCommit": "2cfb38c62b7c5bec1db72a00805b1e734648d150",
+  "engine": "PostgreSQL 17.11",
+  "nativeRun": {
+    "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2c-responsibility-approval-races-luna-20261019-sol-fix --port 55725 --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes",
+    "exitCode": 0,
+    "passed": 313,
+    "failed": 0,
+    "deadlocks40P01": 0,
+    "report": "../../outputs/m2-2c-responsibility-approval-races-luna-20261019-sol-fix/review.json",
+    "consoleLog": "../../outputs/m2-2c-responsibility-approval-races-luna-20261019-sol-fix/runner-summary.log",
+    "postgresLog": "../../outputs/m2-2c-responsibility-approval-races-luna-20261019-sol-fix/postgres.log",
+    "stdoutCapture": "Structured summary generated from review.json; raw runner stdout was not separately captured."
+  },
+  "focusedCases": [
+    {
+      "order": "responsibility-first",
+      "isolation": "read committed/read committed",
+      "blockedByPid": true,
+      "winnerSQLSTATE": "00000",
+      "loserSQLSTATE": "40001",
+      "freshSessionRetrySQLSTATE": "00000",
+      "activationLineId": "00000000-0000-0000-0000-000000050001",
+      "finalResponsibilityMode": "conjunta",
+      "finalResponsibilityRevision": 2,
+      "finalMemberShareBps": [
+        5000,
+        5000
+      ]
+    },
+    {
+      "order": "approval-first",
+      "isolation": "read committed/read committed",
+      "blockedByPid": true,
+      "winnerSQLSTATE": "00000",
+      "loserSQLSTATE": "00000",
+      "loserCommitSQLSTATE": "00000",
+      "replayResponseMatches": true,
+      "winnerOnlySnapshotShowsOriginalTaskAssignmentAndResponsibilityUnchanged": true,
+      "finalSnapshotUnchangedByReplay": true,
+      "activationLineId": "00000000-0000-0000-0000-000000050021",
+      "finalResponsibilityMode": "conjunta",
+      "finalResponsibilityRevision": 2,
+      "freshSessionExactReplaySQLSTATE": "00000",
+      "freshReplayNoDuplicateEffects": true,
+      "finalMemberShareBps": [
+        5000,
+        5000
+      ]
+    },
+    {
+      "order": "responsibility-first",
+      "isolation": "repeatable read/repeatable read",
+      "blockedByPid": true,
+      "winnerSQLSTATE": "00000",
+      "loserSQLSTATE": "40001",
+      "freshSessionRetrySQLSTATE": "00000",
+      "activationLineId": "00000000-0000-0000-0000-000000050041",
+      "finalResponsibilityMode": "conjunta",
+      "finalResponsibilityRevision": 2,
+      "finalMemberShareBps": [
+        5000,
+        5000
+      ]
+    },
+    {
+      "order": "approval-first",
+      "isolation": "repeatable read/repeatable read",
+      "blockedByPid": true,
+      "winnerSQLSTATE": "00000",
+      "loserSQLSTATE": "40001",
+      "freshSessionRetrySQLSTATE": "00000",
+      "activationLineId": "00000000-0000-0000-0000-000000050061",
+      "finalResponsibilityMode": "conjunta",
+      "finalResponsibilityRevision": 2,
+      "finalMemberShareBps": [
+        5000,
+        5000
+      ]
+    }
+  ],
+  "finalFootprintEachCase": {
+    "onboardingActivationsPerLine": 1,
+    "onboardingAssignments": 1,
+    "onboardingOccurrences": 1,
+    "responsibilityMode": "conjunta",
+    "responsibilityRevision": 2,
+    "responsibilityMembers": "owner and original employee at 5000 bps each",
+    "approvalReceiptsPerOperation": 1,
+    "responsibilityReceiptsPerOperation": 1,
+    "auditEventsPerAction": 1,
+    "duplicates": 0
+  },
+  "validation": {
+    "vitest": {
+      "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "exitCode": 0,
+      "filesPassed": 74,
+      "testsPassed": 738,
+      "log": "../../outputs/m2-2c-responsibility-approval-races-luna-20261019-sol-fix/vitest.log"
+    },
+    "typescript": {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "exitCode": 0,
+      "log": "../../outputs/m2-2c-responsibility-approval-races-luna-20261019-sol-fix/typescript-build.log"
+    },
+    "clientBuild": {
+      "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+      "exitCode": 0,
+      "log": "../../outputs/m2-2c-responsibility-approval-races-luna-20261019-sol-fix/vite-build.log",
+      "note": "Vite completed; only existing dependency annotation warnings were emitted."
+    },
+    "workerBuild": {
+      "command": "node scripts/build-worker.mjs",
+      "exitCode": 0,
+      "log": "../../outputs/m2-2c-responsibility-approval-races-luna-20261019-sol-fix/worker-build.log"
+    },
+    "nodeSyntax": {
+      "command": "node --check tests/review/m2-1-native-review.mjs",
+      "exitCode": 0
+    },
+    "diffCheck": {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "note": "Only PowerShell line-ending conversion warnings were printed for pre-existing edited documentation and the runner."
+    },
+    "npmScriptAvailability": "npm was not available in this workstation environment; package build scripts were executed directly with the bundled local Node runtime. No dependency was installed."
+  },
+  "sha256": {
+    "tests/review/m2-1-native-review.mjs": "0abd05693274c04199576421540d4712844450c5c1bccdf58947017f4b3fba83",
+    "docs/architecture/M2-2C-RESPONSIBILITY-ONBOARDING-APPROVAL-RACES-LUNA-20261019.md": "ecae277d8ffcd37a5817921cd386064186ba358f4de3b16ede31653b90b0b438",
+    "supabase/migrations/202610060011_coordination_activation.sql": "9729a6800e93dedc43ab5f0840309b7c0d222343898cc8d5b43eeb4a387f4210",
+    "supabase/migrations/202610140013_api_identity_foundation.sql": "d013b82bfa1101ed11a35daeaf7a64b2e6063da9c09b55e7586ce67cc586bac2",
+    "supabase/migrations/202610150014_operational_api.sql": "ac8cca582cf366b0cf143fd63d99c490c664b00b368eb473757017eebef26315",
+    "../../outputs/m2-2c-responsibility-approval-races-luna-20261019-sol-fix/review.json": "3dc77fed979bdaeb0fab6dc446e9f313dfd65b633a495d0f56c9d083286eb442",
+    "../../outputs/m2-2c-responsibility-approval-races-luna-20261019-sol-fix/postgres.log": "f14b257a5a981b04959b52d8d067c947e49676407c469fb10cb19f76a5244722",
+    "../../outputs/m2-2c-responsibility-approval-races-luna-20261019-sol-fix/vitest.log": "08231b4ef6ecc17fbe155d53145f6805a7c3069a639c902ba6f30774c9587ca1",
+    "../../outputs/m2-2c-responsibility-approval-races-luna-20261019-sol-fix/typescript-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "../../outputs/m2-2c-responsibility-approval-races-luna-20261019-sol-fix/vite-build.log": "9b9f0f40b58824437edc37a372df190be43471b37dfa4a8eae36cdc738650bd4",
+    "../../outputs/m2-2c-responsibility-approval-races-luna-20261019-sol-fix/worker-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "../../outputs/m2-2c-responsibility-approval-races-luna-20261019-sol-fix/runner-summary.log": "14223da40c508ae37f72a6437a53a18d235fb56208c4963714c5502095ed3356",
+    "../../outputs/m2-2c-responsibility-approval-races-luna-20261019-sol-fix/initdb.log": "aa7f70a741b5b972f2fa672d24be437641a05f596cc76762e78655477e502173"
+  },
+  "reviewBoundary": "GPT-6.1 Sol accepted only these four local synthetic cases. Raw outputs are stored outside the Git root under ../../outputs and are not transported by cloning; this does not close M2.2C/Gate L or authorize remote migration."
+}

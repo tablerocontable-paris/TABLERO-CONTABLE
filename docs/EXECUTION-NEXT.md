@@ -18,14 +18,14 @@ no aplicar SQL014.
 
 ## Próximo paso
 
-Auditar §9 contra el runner y las aceptaciones Sol vigentes para escoger la
-siguiente familia de concurrencia incompleta. La aprobación de cobertura
-recurrente frente a `month.materialize` fue aceptada sólo para cuatro casos; ver
-`architecture/M2-2C-RECURRING-COVERAGE-MATERIALIZE-RACES-SOL-ACCEPTANCE-20261019.md`.
-El bloque está publicado directo en `main`, sin PR, en
-`63bc5c78dd3274a5d6c0d1e1ef089f06f24baa75`; SHA remoto confirmado. GitHub devolvió
-checks vacíos, CI no verificado. Mantener SQL014 sin aplicar y no hacer llamadas
-remotas.
+Auditar §9 del contrato M2.2B/C frente al runner vigente y las aceptaciones Sol
+para escoger la próxima familia local incompleta. Registrar el análisis y
+contrato acotado antes de pedir la implementación a Luna. Mantener SQL014,
+Supabase alojado y el espacio operativo intactos hasta cerrar los gates.
+
+El último bloque `assign_task_responsibility`/`onboarding.approve` quedó aceptado
+localmente por Sol; ver
+`architecture/M2-2C-RESPONSIBILITY-ONBOARDING-APPROVAL-RACES-SOL-ACCEPTANCE-20261019.md`.
 
 ## Último bloque local aceptado — cobertura recurrente RC/RC y RR/RR
 

@@ -38,9 +38,22 @@ manifiesto y hashes en `architecture/review-evidence/m2-2c-recurring-coverage-ma
 Suite 738/738 y build de Luna pasaron; Sol repitió sintaxis y diff-check, no la
 suite/build. SQL011/014 intactas, sin llamadas remotas. Esto no cierra §9 ni Gate L.
 
-**Siguiente vigente:** auditar §9 frente al runner aceptado para elegir la próxima
-familia incompleta; después preparar contrato Luna acotado. No repetir las
-familias ya aceptadas. Mantener SQL014 sin aplicar.
+**Último bloque local aceptado por Sol, sólo este alcance:** cuatro carreras de
+`assign_task_responsibility` vs `onboarding.approve`, ambos órdenes bajo RC/RC y
+RR/RR. PostgreSQL 17.11 **313/313**, cero deadlocks; suite **738/738** en 74
+archivos; TypeScript, builds cliente/Worker, sintaxis y diff-check con exit 0.
+Aceptación y límites:
+`architecture/M2-2C-RESPONSIBILITY-ONBOARDING-APPROVAL-RACES-SOL-ACCEPTANCE-20261019.md`;
+manifiesto y hashes:
+`architecture/review-evidence/m2-2c-responsibility-onboarding-approval-races-luna-20261019.json`.
+No se modificaron SQL011/013/014 ni se hicieron llamadas remotas. Esto no cierra
+§9/Gate L; SQL014 sigue sin aplicar.
+
+**Siguiente vigente:** auditar §9 frente al runner/aceptaciones y escoger la
+próxima familia local incompleta; redactar un contrato acotado antes de pedir a
+Luna la implementación. Los logs crudos de este bloque están fuera del Git root
+en `../../outputs/`; el manifiesto conservado en el repositorio registra sus
+hashes y resultados resumidos.
 
 El bloque cobertura recurrente/materialización quedó publicado directamente en
 `main` (sin PR) como `63bc5c78dd3274a5d6c0d1e1ef089f06f24baa75`; el SHA remoto
