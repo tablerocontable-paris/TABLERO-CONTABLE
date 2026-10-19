@@ -30,8 +30,10 @@ verificado. Hook local 196/196. Gate L/§9 sigue abierto. SQL014 no se aplicó r
 
 **Siguiente vigente:** auditar §9 frente al runner actual y elegir la siguiente
 familia de concurrencia sin cubrir completamente; después preparar el contrato
-exacto para Luna. Las familias de cobertura recurrente y task.transition aquí
-enumeradas ya tienen aceptación acotada; no repetirlas.
+exacto para Luna. La auditoría read-only identificó aprobación de cobertura
+recurrente frente a `month.materialize` como el siguiente par no cubierto; el
+contrato Luna está en `architecture/M2-2C-RECURRING-COVERAGE-MATERIALIZE-RACES-LUNA-20261019.md`.
+El resultado es aún local y no implementado.
 
 **Infraestructura sin cambios:** GitHub `main` está en `6d014381cf5888fe4aafa79e4be3ae0248e74531`; SHA remoto confirmado. CI de este SHA no aparece en el conector. Supabase dev sigue activo/vacío; falta apagar la autoexposición. No hay Cloudflare, correo productivo ni Supabase de producción configurados. Site privado y datos ficticios.
 
