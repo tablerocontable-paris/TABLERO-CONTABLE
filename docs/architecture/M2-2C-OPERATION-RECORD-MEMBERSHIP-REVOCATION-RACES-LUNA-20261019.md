@@ -65,6 +65,13 @@ intercambiables.
   movimiento: el evento puede usar la identidad del movimiento y no la tarea.
   Verificar evento de `companyMembership.setActive`, fences de membresía/
   operación y ausencia de duplicados.
+- **Fences confirmados en revisión Sol (19/10/2026):** comparar las cinco claves
+  contra el snapshot inicial. Registro-primero, incluido retry de revocación:
+  `membership +2` (un incremento por cada comando), `month +1`, `graph +0`,
+  `recordOperation +1`, `revokeOperation +1`. Revocación-primero, incluido el
+  retry `42501` sin escritura: `membership +1`, `month +0`, `graph +0`,
+  `recordOperation +0`, `revokeOperation +1`. El `40001` perdedor no altera el
+  snapshot del ganador. No inferir un solo incremento de membresía por carrera.
 - Registrar estado previo, winner-only, primer intento y retry, claims/AAL,
   PIDs/blockers, SQLSTATE/respuestas, tarea/asignación, membresía, actividad,
   receipts y auditoría pertinente.

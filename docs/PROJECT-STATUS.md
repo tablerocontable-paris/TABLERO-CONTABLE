@@ -1,5 +1,20 @@
 # Estado general de la migración — actualización 19/10/2026
 
+**Último bloque aceptado localmente por Sol, todavía sin publicar:** matriz de cuatro
+carreras `operation.record`/revocación de membresía bajo RC/RC y RR/RR, ambos
+órdenes. PostgreSQL 17.11 **321/321**, sin deadlocks; blockers reales en los
+cuatro casos y outcomes del contrato exactos. Suite **738/738 en 74 archivos**;
+TypeScript, builds cliente/Worker, `node --check` y diff-check con exit 0.
+Fences comparados en las cinco claves según aclaración de Sol. Manifiesto e
+informe con snapshots/respuestas/receipts:
+`architecture/review-evidence/m2-2c-operation-record-membership-revocation-races-luna-20261019.json`.
+Runner SHA256 `756295076e72cb35981d5ae30ac282bf5b508846c822b3cc4cf14b5032643ea9`;
+SQL011 `9729a680…` y SQL014 `ac8cca58…` permanecen intactas. Logs locales en
+`../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final4/`.
+Aceptación y límites P3: `architecture/M2-2C-OPERATION-RECORD-MEMBERSHIP-REVOCATION-RACES-SOL-ACCEPTANCE-20261019.md`.
+Commit/push de este bloque aún pendiente; no hubo llamadas remotas ni se activó
+el espacio operativo. Gate L y §9 siguen abiertos.
+
 **Último bloque aceptado por Sol y publicado, alcance acotado:** cuatro carreras
 `cancel_task_coverage_binding`/`onboarding.approve` con binding de instancia
 única y dos jefes AAL2 distintos. PostgreSQL 17.11: **317/317**, cero fallos y

@@ -41,11 +41,21 @@ contrato y estado actual: `8646f10ee90371748054830ef4af81cf4904f577`. Ambos est�
 SHA; no hay CI verificado en esta sesión. El hook local pasó 196/196. SQL014 no
 se aplicó remotamente.
 
-**Siguiente vigente:** implementar el contrato
-`docs/architecture/M2-2C-OPERATION-RECORD-MEMBERSHIP-REVOCATION-RACES-LUNA-20261019.md`.
-Matriz local `operation.record` vs `companyMembership.setActive(false)`, cuatro
-casos RC/RC y RR/RR, con outcomes exactos. No tocar SQL011/014, Supabase alojado
-ni activar el espacio operativo.
+**Último bloque aceptado localmente por Sol, alcance acotado:** cuatro carreras
+`operation.record` frente a revocación de membresía, RC/RC y RR/RR, ambos órdenes.
+PostgreSQL 17.11 321/321, cuatro blockers reales, cero deadlocks; Vitest 738/738,
+TypeScript, builds cliente/Worker, sintaxis y diff-check aprobados. Aceptación:
+`docs/architecture/M2-2C-OPERATION-RECORD-MEMBERSHIP-REVOCATION-RACES-SOL-ACCEPTANCE-20261019.md`;
+manifiesto `docs/architecture/review-evidence/m2-2c-operation-record-membership-revocation-races-luna-20261019.json`.
+Runner `756295076e72cb35981d5ae30ac282bf5b508846c822b3cc4cf14b5032643ea9`;
+SQL011/014 sin cambios. Logs locales en
+`../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final4/`.
+No se hicieron llamadas remotas ni se activó el espacio operativo. Gate L y §9
+siguen abiertos. Publicación directa en main pendiente.
+
+**Siguiente vigente:** auditar con Sol la matriz `public.start_task_timer` frente
+a `companyMembership.setActive(false)` y redactar contrato antes de encargar la
+implementación a Luna. No tocar SQL011/014 ni Supabase alojado.
 
 **Bloques anteriores aceptados y publicados:** onboarding.requestChanges exact replay/commandReceipt y cuatro carreras mixtas de cobertura recurrente (RC/RR, RR/RC, ambos ganadores). Evidencias: `docs/architecture/review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json` y `m2-2c-gatel-recurrent-coverage-20261019.json`. El run 39184344731 corresponde al commit 873829271463b4f3bf4bbb5ad39dad978908a8d2. Gate L sigue abierto.
 

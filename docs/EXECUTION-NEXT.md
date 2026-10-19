@@ -1,5 +1,26 @@
 # Acción vigente de migración — actualización 19/10/2026
 
+## Último bloque aceptado localmente por Sol — operation.record/revocación
+
+GPT-6 Luna implementó los cuatro escenarios RC/RC y RR/RR. PostgreSQL nativo
+321/321, cuatro blockers reales y outcomes SQLSTATE/retry conformes; Vitest
+738/738, TypeScript, builds cliente/Worker, sintaxis y diff-check con exit 0.
+La aclaración de Sol sobre fences está incorporada en el contrato y las cinco
+claves se validan en cada snapshot. Informe y hashes:
+`architecture/review-evidence/m2-2c-operation-record-membership-revocation-races-luna-20261019.json`.
+El runner vigente tiene SHA256 `756295076e72cb35981d5ae30ac282bf5b508846c822b3cc4cf14b5032643ea9`;
+los logs crudos están en `../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final4/`.
+Aceptación y límites P3:
+`architecture/M2-2C-OPERATION-RECORD-MEMBERSHIP-REVOCATION-RACES-SOL-ACCEPTANCE-20261019.md`.
+Commit/push aún pendiente. SQL011/014 siguen sin cambios; Gate L/§9 permanece
+abierto.
+
+## Próximo paso
+
+Auditar la matriz incompleta `public.start_task_timer` frente a
+`companyMembership.setActive(false)` con Sol y redactar un contrato acotado
+antes de pedir la implementación Luna. No tocar SQL ni Supabase alojado.
+
 ## Último bloque local aceptado por Sol — cobertura contra onboarding
 
 Luna implementó el contrato

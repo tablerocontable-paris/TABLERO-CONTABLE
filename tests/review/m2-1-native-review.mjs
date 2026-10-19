@@ -3143,6 +3143,156 @@ try {
       assert.equal(revokeFirstTransitionFinal, "false|1|Pendiente|1|1|1", revokeFirstTransitionFinal);
       record("M2.2C revoke-first stale RR task.transition aborts then API authorization denies with 42501 without partial status or receipt", true, { revokeSQLSTATE: revokeBeforeTransitionResult.code, staleTransitionSQLSTATE: staleTransition.code, retrySQLSTATE: retryTransition.code, finalState: revokeFirstTransitionFinal });
 
+      // Same-isolation operation.record/membership-revocation races. Both
+      // orders hold their winner open until a live PostgreSQL blocker is seen.
+      async function operationRecordMembershipRace({ order, isolation, base }) {
+        const owner = uid(base), assignment = uid(base + 1), task = uid(base + 2);
+        const recordOp = uid(base + 3), revokeOp = uid(base + 4), iso = isolation === "RC" ? "read committed" : "repeatable read";
+        const reference = `M2.2C ${order} ${isolation} operation record race`;
+        const recordCommand = { contractVersion: 1, operationId: recordOp, kind: "operation.record", expectedRevisions: { [`task:${task}`]: "0" }, payload: { taskId: task, workDate: scheduledOn, quantity: 1, reference } };
+        const revokeCommand = { contractVersion: 1, operationId: revokeOp, kind: "companyMembership.setActive", expectedRevisions: { [`membership:${company}:${owner}`]: "0" }, payload: { companyId: company, profileId: owner, active: false, reason: `M2.2C ${order} ${isolation} operation record race` } };
+        await observer.ok(`insert into auth.users(id) values(${lit(owner)});insert into public.profiles(id,organization_id,name,role,sector,branch,position) values(${lit(owner)},${lit(org)},${lit(reference)},'empleado','Test','Test','Test');insert into public.company_memberships(organization_id,company_id,profile_id) values(${lit(org)},${lit(company)},${lit(owner)});insert into public.team_members(organization_id,team_id,profile_id) values(${lit(org)},${lit(team)},${lit(owner)});insert into public.task_assignments(id,organization_id,company_id,owner_id,team_id,title,kind,weight,unit,target,frequency,start_month,due_day,checklist,measurement_version) values(${lit(assignment)},${lit(org)},${lit(company)},${lit(owner)},${lit(team)},${lit(reference)},'operativa',null,'documentos',null,'mensual',${lit(monthPeriod)}::date,15,'[]',2);insert into public.task_instances(id,organization_id,assignment_id,company_id,owner_id,team_id,period,scheduled_on,title,kind,weight,unit,target,due_date,checklist,status,measurement_version) values(${lit(task)},${lit(org)},${lit(assignment)},${lit(company)},${lit(owner)},${lit(team)},${lit(monthPeriod)}::date,${lit(scheduledOn)}::date,${lit(reference)},'operativa',null,'documentos',null,${lit(scheduledOn)}::date,'[]','Pendiente',2);`);
+        const actorCheck = (await observer.ok(`select (select role='empleado' and active from public.profiles where id=${lit(owner)})||'|'||(select active from public.company_memberships where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(owner)})||'|'||(select role='jefe' and active from public.profiles where id=${lit(boss)})||'|'||(select count(*)=1 from public.company_memberships where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(boss)} and active);`)).at(-1);
+        assert.equal(actorCheck, "true|true|true|true", `${order}/${isolation}: distinct active authorized employee and chief`);
+        const snapshot = async () => JSON.parse((await reviewer.ok(`select jsonb_build_object(
+          'membership',(select to_jsonb(m) from public.company_memberships m where m.organization_id=${lit(org)} and m.company_id=${lit(company)} and m.profile_id=${lit(owner)}),
+          'task',(select to_jsonb(t) from public.task_instances t where t.id=${lit(task)}),
+          'assignment',(select to_jsonb(a) from public.task_assignments a where a.id=${lit(assignment)}),
+          'activity',(select coalesce(jsonb_agg(to_jsonb(e) order by e.id),'[]'::jsonb) from public.activity_entries e where e.instance_id=${lit(task)}),
+          'receipts',(select coalesce(jsonb_agg(to_jsonb(r) order by r.operation_id),'[]'::jsonb) from app_private.api_command_receipts r where r.operation_id in (${lit(recordOp)},${lit(revokeOp)})),
+          'membershipEvents',(select coalesce(jsonb_agg(to_jsonb(e) order by e.revision),'[]'::jsonb) from app_private.company_membership_events e where e.organization_id=${lit(org)} and e.company_id=${lit(company)} and e.profile_id=${lit(owner)}),
+          'activityAudit',(select coalesce(jsonb_agg(to_jsonb(e) order by e.at,e.id),'[]'::jsonb) from public.audit_events e where e.organization_id=${lit(org)} and e.action='activity.created' and e.details->>'instance'=${lit(task)}),
+          'membershipAudit',(select coalesce(jsonb_agg(to_jsonb(e) order by e.at,e.id),'[]'::jsonb) from public.audit_events e where e.organization_id=${lit(org)} and e.action='companyMembership.setActive' and e.entity_id=${lit(company)} and e.details->>'profileId'=${lit(owner)}),
+          'fences',jsonb_build_object(
+            'membership',coalesce((select f.fence_epoch from app_private.api_membership_fences f where f.organization_id=${lit(org)} and f.profile_id=${lit(owner)}),0),
+            'recordOperation',coalesce((select f.fence_epoch from app_private.api_operation_fences f where f.actor_id=${lit(owner)} and f.operation_id=${lit(recordOp)}),0),
+            'revokeOperation',coalesce((select f.fence_epoch from app_private.api_operation_fences f where f.actor_id=${lit(boss)} and f.operation_id=${lit(revokeOp)}),0),
+            'month',coalesce((select f.fence_epoch from app_private.api_month_fences f where f.organization_id=${lit(org)} and f.owner_id=${lit(owner)} and f.period=${lit(monthPeriod)}::date),0),
+            'graph',coalesce((select g.fence_epoch from app_private.task_dependency_graphs g where g.organization_id=${lit(org)} and g.company_id=${lit(company)} and g.period=${lit(monthPeriod)}::date),0)
+          )
+        )::text;`)).at(-1));
+        const baseline = await snapshot();
+        assert.equal(baseline.membership.active, true); assert.equal(baseline.membership.revision, 0);
+        assert.equal(baseline.task.status, "Pendiente"); assert.equal(baseline.task.state_revision, 0); assert.equal(baseline.task.measurement_version, 2);
+        assert.equal(baseline.task.unit, "documentos"); assert.equal(baseline.task.target, null); assert.equal(baseline.task.weight, null);
+        assert.equal(baseline.assignment.measurement_version, 2); assert.equal(baseline.assignment.unit, "documentos");
+        assert.equal(baseline.assignment.target, null); assert.equal(baseline.assignment.weight, null);
+        assert.deepEqual(baseline.activity, []); assert.deepEqual(baseline.receipts, []);
+        const beginAs = async (session, actor, aal) => {
+          await session.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(actor)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: actor, aal }))},false);set role authenticated;begin isolation level ${iso};`);
+          assert.equal((await session.ok("select current_setting('transaction_isolation');")).at(-1), iso, `${order}/${isolation}: effective isolation`);
+          return Number((await session.ok("select pg_backend_pid();")).at(-1));
+        };
+        const diagnostic = async (state) => {
+          const data = { order, isolation, actorCheck, actors: { employee: owner, chief: boss }, operationIds: { record: recordOp, revoke: revokeOp }, baseline, ...state, postgresLog: join(out, "postgres.log") };
+          const path = join(out, `m2-2c-operation-record-membership-revocation-race-${order}-${isolation.toLowerCase()}-diagnostic.json`);
+          writeFileSync(path, JSON.stringify(data, null, 2));
+          record(`M2.2C operation.record/membership revoke diagnostic ${order}/${isolation}`, false, { path, data });
+          return data;
+        };
+        const firstAction = order === "record-first" ? "record" : "revoke";
+        const winnerActor = firstAction === "record" ? owner : boss;
+        const winnerAal = firstAction === "record" ? "aal1" : "aal2";
+        const loserActor = firstAction === "record" ? boss : owner;
+        const loserAal = firstAction === "record" ? "aal2" : "aal1";
+        const winnerCommand = firstAction === "record" ? recordCommand : revokeCommand;
+        const loserCommand = firstAction === "record" ? revokeCommand : recordCommand;
+        const expectedLoser = "40001";
+        const winnerPid = await beginAs(a, winnerActor, winnerAal);
+        const winnerResult = await a.query(`select api.command_v1('${JSON.stringify(winnerCommand).replaceAll("'", "''")}'::jsonb);`);
+        if (winnerResult.code !== "00000") { const after = await snapshot(); await diagnostic({ winnerResult, after }); throw Error(`M2.2C unexpected winner SQLSTATE ${order}/${isolation}: ${winnerResult.code}`); }
+        const loserPid = await beginAs(b, loserActor, loserAal);
+        await b.ok(`select active,revision from public.company_memberships where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(owner)};select status,state_revision from public.task_instances where id=${lit(task)};`);
+        const pendingLoser = b.query(`select api.command_v1('${JSON.stringify(loserCommand).replaceAll("'", "''")}'::jsonb);`);
+        let blocked = false; const deadline = Date.now() + 10000;
+        while (Date.now() < deadline) { if ((await reviewer.ok(`select ${winnerPid}=any(pg_catalog.pg_blocking_pids(${loserPid}));`)).at(-1) === "t") { blocked = true; break; } await new Promise(done => setTimeout(done, 20)); }
+        const blockerPids = (await reviewer.ok(`select pg_catalog.pg_blocking_pids(${loserPid})::text;`)).at(-1);
+        if (!blocked) {
+          await a.ok("commit;"); const loserResult = await pendingLoser; await b.ok(loserResult.code === "00000" ? "commit;" : "rollback;");
+          await diagnostic({ winnerPid, loserPid, blockerPids, blocked, winnerSQLSTATE: winnerResult.code, loserSQLSTATE: loserResult.code, loserResponse: loserResult.lines.at(-1), loserErrors: loserResult.errors, afterWinnerAndLoser: await snapshot() });
+          throw Error(`M2.2C no real concurrent blocker ${order}/${isolation}`);
+        }
+        await a.ok("commit;");
+        const winnerOnly = await snapshot();
+        const loserResult = await pendingLoser;
+        const actualFirstLoserSQLSTATE = loserResult.code;
+        await b.ok(actualFirstLoserSQLSTATE === "00000" ? "commit;" : "rollback;");
+        const afterFirstAttempt = await snapshot();
+        if (actualFirstLoserSQLSTATE !== expectedLoser) {
+          await diagnostic({ winnerPid, loserPid, blockerPids, blocked, winnerSQLSTATE: winnerResult.code, winnerResponse: winnerResult.lines.at(-1), winnerOnly, loserSQLSTATE: actualFirstLoserSQLSTATE, loserResponse: loserResult.lines.at(-1), loserErrors: loserResult.errors, afterFirstAttempt });
+          throw Error(`M2.2C SQLSTATE mismatch ${order}/${isolation}: expected ${expectedLoser}, observed ${actualFirstLoserSQLSTATE}`);
+        }
+        assert.deepEqual(afterFirstAttempt, winnerOnly, "the stale losing command must leave winner-only state unchanged");
+        let retryResult, retryResponse = null, recordResponse = null, revokeResponse = null;
+        const retry = new Session(); auxiliarySessions.push(retry);
+        await retry.ok("\\set VERBOSITY verbose\nset statement_timeout='15s';");
+        const retryActor = firstAction === "record" ? boss : owner;
+        await beginAs(retry, retryActor, firstAction === "record" ? "aal2" : "aal1");
+        const retryCommand = firstAction === "record" ? revokeCommand : recordCommand;
+        retryResult = await retry.query(`select api.command_v1('${JSON.stringify(retryCommand).replaceAll("'", "''")}'::jsonb);`);
+        const expectedRetry = firstAction === "record" ? "00000" : "42501";
+        if (retryResult.code !== expectedRetry) {
+          await retry.ok(retryResult.code === "00000" ? "commit;" : "rollback;");
+          await retry.ok("reset role;"); await retry.close(); auxiliarySessions.splice(auxiliarySessions.indexOf(retry), 1);
+          await diagnostic({ winnerPid, loserPid, blockerPids, blocked, winnerSQLSTATE: winnerResult.code, winnerOnly, loserSQLSTATE: actualFirstLoserSQLSTATE, loserErrors: loserResult.errors, afterFirstAttempt, retrySQLSTATE: retryResult.code, expectedRetrySQLSTATE: expectedRetry, retryResponse: retryResult.lines.at(-1), retryErrors: retryResult.errors, afterRetryUnexpected: await snapshot() });
+          throw Error(`M2.2C retry SQLSTATE mismatch ${order}/${isolation}: expected ${expectedRetry}, observed ${retryResult.code}`);
+        }
+        if (expectedRetry === "00000") await retry.ok("commit;"); else await retry.ok("rollback;");
+        retryResponse = retryResult.lines.at(-1);
+        await retry.ok("reset role;"); await retry.close(); auxiliarySessions.splice(auxiliarySessions.indexOf(retry), 1);
+        if (firstAction === "record") { recordResponse = winnerResult.lines.at(-1); revokeResponse = retryResponse; }
+        else { revokeResponse = winnerResult.lines.at(-1); }
+        const final = await snapshot();
+        const fenceExpectations = firstAction === "record"
+          ? { membership: baseline.fences.membership + 2, recordOperation: baseline.fences.recordOperation + 1, revokeOperation: baseline.fences.revokeOperation + 1, month: baseline.fences.month + 1, graph: baseline.fences.graph }
+          : { membership: baseline.fences.membership + 1, recordOperation: baseline.fences.recordOperation, revokeOperation: baseline.fences.revokeOperation + 1, month: baseline.fences.month, graph: baseline.fences.graph };
+        try { assert.deepEqual(final.fences, fenceExpectations); }
+        catch {
+          await diagnostic({ winnerPid, loserPid, blockerPids, blocked, winnerSQLSTATE: winnerResult.code, winnerResponse: winnerResult.lines.at(-1), winnerOnly, loserSQLSTATE: actualFirstLoserSQLSTATE, loserResponse: loserResult.lines.at(-1), loserErrors: loserResult.errors, retrySQLSTATE: retryResult.code, retryResponse, afterFirstAttempt, final, fenceExpectations });
+          throw Error(`M2.2C fence footprint differs ${order}/${isolation}: observed ${JSON.stringify(final.fences)}, expected ${JSON.stringify(fenceExpectations)}`);
+        }
+        if (firstAction === "record") {
+          const envelope = JSON.parse(recordResponse), activity = final.activity[0], recordReceipt = final.receipts.find(r => r.operation_id === recordOp), revokeReceipt = final.receipts.find(r => r.operation_id === revokeOp);
+          assert.equal(final.membership.active, false); assert.equal(final.membership.revision, 1);
+          assert.equal(final.activity.length, 1); assert.equal(activity.actor_id, owner); assert.equal(activity.quantity, 1); assert.equal(activity.reference, reference);
+          assert.equal(activity.measurement_version, 2); assert.equal(activity.unit_snapshot, "documentos"); assert.equal(activity.operational_rate_id, null); assert.equal(activity.operational_unit_weight, null);
+          assert.equal(envelope.result.entryId, activity.id); assert.equal(envelope.result.taskRevision, "1"); assert.equal(envelope.result.measurementVersion, 2); assert.equal(envelope.result.rateId, null); assert.equal(envelope.result.unitWeight, null); assert.equal(envelope.result.weightedLoad, null);
+          assert.deepEqual(envelope, recordReceipt.result); assert.equal(final.task.state_revision, 2);
+          assert.equal(final.receipts.length, 2); assert.deepEqual(final.receipts.map(r => r.operation_id).sort(), [recordOp, revokeOp].sort());
+          assert.equal(final.membershipEvents.length, 1); assert.equal(final.activityAudit.length, 1); assert.equal(final.membershipAudit.length, 1);
+          assert.equal(final.activityAudit[0].entity_id, activity.id); assert.equal(final.activityAudit[0].details.instance, task);
+          assert.equal(revokeReceipt.actor_id, boss); assert.equal(revokeReceipt.operation_id, revokeOp);
+          assert.equal(revokeReceipt.result.kind, "companyMembership.setActive"); assert.equal(revokeReceipt.result.result.active, false);
+          assert.deepEqual(JSON.parse(revokeResponse), revokeReceipt.result, "full companyMembership.setActive response must equal its receipt result");
+          assert.equal(afterFirstAttempt.membership.active, true); assert.equal(afterFirstAttempt.membership.revision, 0);
+          assert.equal(afterFirstAttempt.activity.length, 1); assert.equal(afterFirstAttempt.task.state_revision, 1);
+          assert.equal(afterFirstAttempt.receipts.length, 1); assert.equal(afterFirstAttempt.receipts[0].operation_id, recordOp);
+          assert.equal(winnerOnly.activity.length, 1); assert.equal(winnerOnly.membership.active, true);
+          const recordReceiptResult = recordReceipt.result;
+          assert.deepEqual(recordReceiptResult, envelope);
+          record(`M2.2C operation.record-first membership revoke ${isolation} blocks, stale-aborts, retry commits exact once`, true, { order, isolation: iso, actors: { employee: owner, chief: boss }, actorCheck, winnerPid, loserPid, blockerPids, blocked, winnerSQLSTATE: winnerResult.code, loserSQLSTATE: actualFirstLoserSQLSTATE, retrySQLSTATE: retryResult.code, baseline, winnerOnly, afterFirstAttempt, responses: { record: envelope, revoke: JSON.parse(revokeResponse) }, receipts: { record: recordReceipt, revoke: revokeReceipt }, activityEntry: activity, final });
+        } else {
+          const recordReceipt = final.receipts.find(r => r.operation_id === recordOp), revokeReceipt = final.receipts.find(r => r.operation_id === revokeOp);
+          assert.equal(winnerOnly.membership.active, false); assert.equal(winnerOnly.membership.revision, 1);
+          assert.equal(winnerOnly.task.state_revision, 1); assert.deepEqual(winnerOnly.activity, []);
+          assert.equal(winnerOnly.receipts.length, 1); assert.equal(winnerOnly.receipts[0].operation_id, revokeOp);
+          assert.deepEqual(final, winnerOnly, "freshly denied record retry must be inert");
+          assert.equal(final.membership.active, false); assert.equal(final.membership.revision, 1); assert.equal(final.task.state_revision, 1);
+          assert.deepEqual(final.activity, []); assert.equal(final.receipts.length, 1); assert.equal(recordReceipt, undefined);
+          assert.equal(revokeReceipt.actor_id, boss); assert.equal(revokeReceipt.operation_id, revokeOp);
+          assert.equal(final.membershipEvents.length, 1); assert.equal(final.activityAudit.length, 0); assert.equal(final.membershipAudit.length, 1);
+          assert.deepEqual(JSON.parse(revokeResponse), revokeReceipt.result, "full companyMembership.setActive response must equal its receipt result");
+          assert.equal(final.fences.membership, baseline.fences.membership + 1); assert.equal(final.fences.recordOperation, baseline.fences.recordOperation); assert.equal(final.fences.revokeOperation, baseline.fences.revokeOperation + 1);
+          assert.deepEqual(afterFirstAttempt, winnerOnly); assert.deepEqual(winnerOnly.activity, []);
+          record(`M2.2C membership revoke-first operation.record ${isolation} blocks, stale-aborts and fresh retry denies without writes`, true, { order, isolation: iso, actors: { employee: owner, chief: boss }, actorCheck, winnerPid, loserPid, blockerPids, blocked, winnerSQLSTATE: winnerResult.code, loserSQLSTATE: actualFirstLoserSQLSTATE, retrySQLSTATE: retryResult.code, retryResponse, retryErrors: retryResult.errors, baseline, winnerOnly, afterFirstAttempt, final, revokeResponse: JSON.parse(revokeResponse), revokeReceipt });
+        }
+        await a.ok("reset role;"); await b.ok("reset role;");
+      }
+      await operationRecordMembershipRace({ order: "record-first", isolation: "RC", base: 22000 });
+      await operationRecordMembershipRace({ order: "revoke-first", isolation: "RC", base: 22010 });
+      await operationRecordMembershipRace({ order: "record-first", isolation: "RR", base: 22020 });
+      await operationRecordMembershipRace({ order: "revoke-first", isolation: "RR", base: 22030 });
+
       // Same-isolation transition/membership races. The winning command stays
       // open while the competing command starts; pg_blocking_pids proves the
       // second session actually waits before the winner commits.

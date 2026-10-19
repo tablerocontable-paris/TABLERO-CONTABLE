@@ -1,0 +1,204 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-19",
+  "scope": "Local synthetic PostgreSQL only; no remote calls, hosted Supabase, SQL application, or operational workspace activation.",
+  "baselineCommit": "5ca0f1d4b7aac0f3fc29a5ac56d69c6e72895efc",
+  "engine": "PostgreSQL 17.11",
+  "nativeRun": {
+    "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final4 --port 55734 --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes",
+    "exitCode": 0,
+    "passed": 321,
+    "failed": 0,
+    "deadlocks40P01": 0,
+    "report": "../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final4/review.json",
+    "stdoutLog": "../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final4/runner.stdout.log",
+    "postgresLog": "../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final4/postgres.log",
+    "reportContains": "Before, winner-only, after-conflict, retry/final snapshots; actual isolation; actor IDs/AAL; winner/waiter PIDs and blocker PIDs; command response envelopes, activity rows, receipts, membership events, audit events, five fence keys, and duplicate/effect counts."
+  },
+  "confirmedFenceDeltas": {
+    "record-first including successful revocation retry": {
+      "membership": 2,
+      "month": 1,
+      "graph": 0,
+      "recordOperation": 1,
+      "revokeOperation": 1,
+      "reason": "One membership fence increment for operation.record and one for revocation."
+    },
+    "revoke-first including denied operation.record retry": {
+      "membership": 1,
+      "month": 0,
+      "graph": 0,
+      "recordOperation": 0,
+      "revokeOperation": 1,
+      "reason": "The stale 40001 and fresh 42501 record attempts make no writes."
+    }
+  },
+  "focusedCases": [
+    {
+      "order": "record-first",
+      "isolation": "read committed/read committed",
+      "realBlockerObserved": true,
+      "winnerSQLSTATE": "00000",
+      "loserSQLSTATE": "40001",
+      "freshSessionRetrySQLSTATE": "00000",
+      "activityVersion": 2,
+      "quantity": 1,
+      "unit": "documentos",
+      "rateAndWeight": null,
+      "entryIdMatchesActivityRow": true,
+      "successfulResponsesMatchReceipts": true,
+      "final": {
+        "membershipActive": false,
+        "membershipRevision": 1,
+        "taskRevision": 2,
+        "activityEntries": 1,
+        "receipts": 2,
+        "membershipEvents": 1,
+        "activityCreatedAudit": 1,
+        "membershipAudit": 1
+      },
+      "fenceDeltas": {
+        "membership": 2,
+        "month": 1,
+        "graph": 0,
+        "recordOperation": 1,
+        "revokeOperation": 1
+      }
+    },
+    {
+      "order": "revoke-first",
+      "isolation": "read committed/read committed",
+      "realBlockerObserved": true,
+      "winnerSQLSTATE": "00000",
+      "loserSQLSTATE": "40001",
+      "freshSessionRetrySQLSTATE": "42501",
+      "retryHasNoWrites": true,
+      "final": {
+        "membershipActive": false,
+        "membershipRevision": 1,
+        "taskRevision": 1,
+        "activityEntries": 0,
+        "receipts": 1,
+        "membershipEvents": 1,
+        "activityCreatedAudit": 0,
+        "membershipAudit": 1
+      },
+      "fenceDeltas": {
+        "membership": 1,
+        "month": 0,
+        "graph": 0,
+        "recordOperation": 0,
+        "revokeOperation": 1
+      }
+    },
+    {
+      "order": "record-first",
+      "isolation": "repeatable read/repeatable read",
+      "realBlockerObserved": true,
+      "winnerSQLSTATE": "00000",
+      "loserSQLSTATE": "40001",
+      "freshSessionRetrySQLSTATE": "00000",
+      "activityVersion": 2,
+      "quantity": 1,
+      "unit": "documentos",
+      "rateAndWeight": null,
+      "entryIdMatchesActivityRow": true,
+      "successfulResponsesMatchReceipts": true,
+      "final": {
+        "membershipActive": false,
+        "membershipRevision": 1,
+        "taskRevision": 2,
+        "activityEntries": 1,
+        "receipts": 2,
+        "membershipEvents": 1,
+        "activityCreatedAudit": 1,
+        "membershipAudit": 1
+      },
+      "fenceDeltas": {
+        "membership": 2,
+        "month": 1,
+        "graph": 0,
+        "recordOperation": 1,
+        "revokeOperation": 1
+      }
+    },
+    {
+      "order": "revoke-first",
+      "isolation": "repeatable read/repeatable read",
+      "realBlockerObserved": true,
+      "winnerSQLSTATE": "00000",
+      "loserSQLSTATE": "40001",
+      "freshSessionRetrySQLSTATE": "42501",
+      "retryHasNoWrites": true,
+      "final": {
+        "membershipActive": false,
+        "membershipRevision": 1,
+        "taskRevision": 1,
+        "activityEntries": 0,
+        "receipts": 1,
+        "membershipEvents": 1,
+        "activityCreatedAudit": 0,
+        "membershipAudit": 1
+      },
+      "fenceDeltas": {
+        "membership": 1,
+        "month": 0,
+        "graph": 0,
+        "recordOperation": 0,
+        "revokeOperation": 1
+      }
+    }
+  ],
+  "validation": {
+    "vitest": {
+      "command": "node node_modules/vitest/vitest.mjs run --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "exitCode": 0,
+      "filesPassed": 74,
+      "testsPassed": 738,
+      "log": "../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final2/vitest.log"
+    },
+    "typescript": {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "exitCode": 0,
+      "log": "../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final2/typescript.log"
+    },
+    "clientBuild": {
+      "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+      "exitCode": 0,
+      "log": "../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final2/vite.log"
+    },
+    "workerBuild": {
+      "command": "node scripts/build-worker.mjs",
+      "exitCode": 0,
+      "log": "../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final2/worker.log"
+    },
+    "nodeSyntax": {
+      "command": "node --check tests/review/m2-1-native-review.mjs",
+      "exitCode": 0,
+      "log": "../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final2/node-check.log"
+    },
+    "diffCheck": {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "log": "../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final2/diff-check.log"
+    },
+    "runtimeNote": "npm is unavailable in this workstation. Commands used the bundled local Node runtime; no dependencies were installed."
+  },
+  "sha256": {
+    "tests/review/m2-1-native-review.mjs": "756295076e72cb35981d5ae30ac282bf5b508846c822b3cc4cf14b5032643ea9",
+    "docs/architecture/M2-2C-OPERATION-RECORD-MEMBERSHIP-REVOCATION-RACES-LUNA-20261019.md": "c58ea17f2960e59c2a859a709a29aa48a31e2130c3aa75b59578c72307621c5a",
+    "supabase/migrations/202610060011_coordination_activation.sql": "9729a6800e93dedc43ab5f0840309b7c0d222343898cc8d5b43eeb4a387f4210",
+    "supabase/migrations/202610150014_operational_api.sql": "ac8cca582cf366b0cf143fd63d99c490c664b00b368eb473757017eebef26315",
+    "../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final2/vitest.log": "9c105c409a42869c1891408a8f65b9014f8cd257f5b448fabdc11beae3485874",
+    "../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final2/typescript.log": "cc258d839e50d5e0cf220528399d5c29a6bcc5c3a9ee2616a915627e0363d91d",
+    "../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final2/vite.log": "8cac1de69ee0822c7074f90d5a4e1abe6abe4c88fcfe68b3021da99798cd3904",
+    "../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final2/worker.log": "cc258d839e50d5e0cf220528399d5c29a6bcc5c3a9ee2616a915627e0363d91d",
+    "../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final2/node-check.log": "cc258d839e50d5e0cf220528399d5c29a6bcc5c3a9ee2616a915627e0363d91d",
+    "../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final2/diff-check.log": "c9dbaedfff0689b244ce9cd12063405e725f095a1c3c5f2df11f00c31c6ec425",
+    "../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final4/review.json": "04d924e8bb3afa4a5e574695b02221474380f0933078560ececb622df0282786",
+    "../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final4/runner.stdout.log": "21569c8cad3bec6475e91b70987d3432f16ddb3068d0bab7f3f6a0723e427c3f",
+    "../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final4/postgres.log": "907c40bc0444c500e45eabb751062e3d41dd3a6955c083666c4e300a0b616629",
+    "../../outputs/m2-2c-operation-record-membership-revocation-races-luna-20261019-final4/initdb.log": "32e5b65ce38f5cac6e1976b94c207d533807005718a1af71597ca3b85aac5b65"
+  },
+  "reviewBoundary": "GPT-6.1 Sol accepted final4 for exactly these four local race cases; P2 closed. No SQL changed and no remote calls were made. This does not close M2.2C/Gate L or authorize remote migration."
+}
