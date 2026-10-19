@@ -53,10 +53,12 @@ Commit publicado directamente a `origin/main`, sin PR:
 El hook local ejecutó 196/196, aunque `git commit` devolvió código 1 después de
 crear el commit; el árbol quedó limpio. CI del push no está verificado.
 
-**Siguiente vigente:** auditar §9 frente al runner/aceptaciones y escoger la
-próxima familia local incompleta; redactar un contrato acotado antes de pedir a
-Luna la implementación. Los logs crudos de este bloque están fuera del Git root
-en `../../outputs/`; el manifiesto conservado en el repositorio registra sus
+**Siguiente vigente:** cuatro carreras faltantes RC/RC y RR/RR para
+`cancel_task_coverage_binding` frente a `onboarding.approve`, ambos órdenes.
+Contrato Sol:
+`architecture/M2-2C-COVERAGE-CANCEL-ONBOARDING-APPROVAL-RACES-LUNA-20261019.md`.
+Esperar `40001` o éxito sólo según el caso definido; sin cambiar SQL. Los logs
+crudos del bloque anterior permanecen fuera del Git root; su manifiesto conserva
 hashes y resultados resumidos.
 
 El bloque cobertura recurrente/materialización quedó publicado directamente en

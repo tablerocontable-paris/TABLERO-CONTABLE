@@ -31,11 +31,11 @@ contrato y estado actual: `8646f10ee90371748054830ef4af81cf4904f577`. Ambos est�
 SHA; no hay CI verificado en esta sesión. El hook local pasó 196/196. SQL014 no
 se aplicó remotamente.
 
-**Siguiente vigente:** auditar §9 del contrato M2.2B/C frente al runner y las
-aceptaciones Sol para elegir la próxima familia local incompleta y redactar un
-contrato acotado para Luna. No tocar Supabase alojado ni activar el espacio
-operativo. Los logs crudos del bloque recién aceptado están en `../../outputs/`
-y quedan fuera del Git root; el manifiesto versionado conserva hashes y resumen.
+**Siguiente vigente:** implementar el contrato acotado
+`docs/architecture/M2-2C-COVERAGE-CANCEL-ONBOARDING-APPROVAL-RACES-LUNA-20261019.md`.
+Agregar las cuatro carreras faltantes RC/RC y RR/RR entre cancelación de
+coverage binding y onboarding.approve, con expectativas específicas por orden.
+No tocar SQL011/014, Supabase alojado ni activar el espacio operativo.
 
 **Bloques anteriores aceptados y publicados:** onboarding.requestChanges exact replay/commandReceipt y cuatro carreras mixtas de cobertura recurrente (RC/RR, RR/RC, ambos ganadores). Evidencias: `docs/architecture/review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json` y `m2-2c-gatel-recurrent-coverage-20261019.json`. El run 39184344731 corresponde al commit 873829271463b4f3bf4bbb5ad39dad978908a8d2. Gate L sigue abierto.
 

@@ -18,10 +18,12 @@ no aplicar SQL014.
 
 ## Próximo paso
 
-Auditar §9 del contrato M2.2B/C frente al runner vigente y las aceptaciones Sol
-para escoger la próxima familia local incompleta. Registrar el análisis y
-contrato acotado antes de pedir la implementación a Luna. Mantener SQL014,
-Supabase alojado y el espacio operativo intactos hasta cerrar los gates.
+Implementar el contrato
+`architecture/M2-2C-COVERAGE-CANCEL-ONBOARDING-APPROVAL-RACES-LUNA-20261019.md`:
+cuatro carreras de `cancel_task_coverage_binding` frente a
+`onboarding.approve`, RC/RC y RR/RR en ambos órdenes. Mantener las expectativas
+específicas por caso y detenerse ante cualquier outcome inesperado. No tocar
+SQL014 ni Supabase alojado.
 
 El último bloque `assign_task_responsibility`/`onboarding.approve` quedó aceptado
 localmente por Sol; ver
