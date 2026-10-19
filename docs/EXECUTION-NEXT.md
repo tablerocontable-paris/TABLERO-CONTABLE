@@ -13,6 +13,8 @@ Aceptación acotada y límites P3:
 `architecture/M2-2C-COVERAGE-CANCEL-ONBOARDING-APPROVAL-RACES-SOL-ACCEPTANCE-20261019.md`.
 Los logs crudos están fuera del Git root. No se cambió SQL ni hubo llamadas
 remotas. Esto no cierra §9/Gate L.
+Commit directo a `main`, sin PR, en `4c598f575d1465ba3218af4b2da6ef3bca93aed4`;
+el SHA remoto está confirmado. CI de este push no está verificado.
 
 ## Último bloque local aceptado — transición frente a revocación
 
@@ -32,10 +34,11 @@ no aplicar SQL014.
 
 ## Próximo paso
 
-Auditar §9 del contrato M2.2B/C contra el runner y las aceptaciones Sol para
-seleccionar la siguiente familia incompleta; dejar registro y contrato acotado
-antes de encargar la implementación a Luna. No tocar Supabase alojado ni el
-espacio operativo.
+Implementar el contrato
+`architecture/M2-2C-OPERATION-RECORD-MEMBERSHIP-REVOCATION-RACES-LUNA-20261019.md`:
+cuatro carreras de `operation.record` frente a revocación de membresía bajo
+RC/RC y RR/RR, ambos órdenes. Los retries deben conservar actor/args/operationId;
+respetar SQLSTATE exactos del contrato. No tocar SQL ni Supabase alojado.
 
 El último bloque `assign_task_responsibility`/`onboarding.approve` quedó aceptado
 localmente por Sol; ver

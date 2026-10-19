@@ -1,6 +1,6 @@
 # Estado general de la migración — actualización 19/10/2026
 
-**Último bloque local aceptado por Sol, alcance acotado:** se agregaron cuatro carreras
+**Último bloque aceptado por Sol y publicado, alcance acotado:** cuatro carreras
 `cancel_task_coverage_binding`/`onboarding.approve` con binding de instancia
 única y dos jefes AAL2 distintos. PostgreSQL 17.11: **317/317**, cero fallos y
 deadlocks; cada caso bloqueó realmente. En RC/RC el cancel-first tuvo `40001`
@@ -17,6 +17,9 @@ SQL011/014 no cambiaron. Evidencia local adicional está bajo
 `../../outputs/m2-2c-coverage-cancel-onboarding-approval-races-luna-20261019-attempt3/`,
 fuera del Git root. No se modificó SQL ni hubo llamadas remotas. Gate L y §9
 siguen abiertos; esta aceptación no autoriza migración.
+Commit directo a `origin/main`, sin PR:
+`4c598f575d1465ba3218af4b2da6ef3bca93aed4`; `git ls-remote` confirmó el SHA.
+CI del push no está verificado.
 
 **Último bloque Luna aceptado localmente por Sol, sólo este alcance:** cuatro
 carreras `task.transition`/revocación de membresía para RC/RC y RR/RR, ambos
@@ -71,9 +74,10 @@ Commit publicado directamente a `origin/main`, sin PR:
 El hook local ejecutó 196/196, aunque `git commit` devolvió código 1 después de
 crear el commit; el árbol quedó limpio. CI del push no está verificado.
 
-**Siguiente vigente:** auditar §9 frente al runner y aceptaciones Sol para
-seleccionar la próxima familia local incompleta; registrar análisis y contrato
-antes de pedir la implementación Luna.
+**Siguiente vigente:** cuatro carreras RC/RC y RR/RR de `operation.record` frente
+a `companyMembership.setActive(false)`, ambos órdenes. Contrato:
+`architecture/M2-2C-OPERATION-RECORD-MEMBERSHIP-REVOCATION-RACES-LUNA-20261019.md`.
+Registrar y auditar el resultado por SQLSTATE esperado antes de cambiar SQL.
 
 El bloque cobertura recurrente/materialización quedó publicado directamente en
 `main` (sin PR) como `63bc5c78dd3274a5d6c0d1e1ef089f06f24baa75`; el SHA remoto
