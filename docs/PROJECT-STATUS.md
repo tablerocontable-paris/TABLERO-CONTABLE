@@ -11,7 +11,7 @@ manifiesto. Gate L/§9 sigue abierto. SQL014 no se aplicó remotamente.
 
 **Bloques anteriores publicados y aceptados por Sol:** onboarding.requestChanges exact replay/commandReceipt y cuatro carreras mixtas de cobertura recurrente. Se suma el bloque local descrito arriba; sus resultados no deben atribuirse al commit remoto anterior. Gate L/M2.2C sigue abierto. SQL014 SHA256 ac8cca582cf366b0cf143fd3d99c490c664b00b368eb473757017eebef26315. El run 39184344731 corresponde al commit 873829271463b4f3bf4bbb5ad39dad978908a8d2 y no valida cambios posteriores.
 
-**Siguiente:** Sol revisa el contrato §9 vigente y define el próximo bloque pendiente del Gate L para Luna medio Standard. Las cuatro carreras recurrentes ya están aceptadas localmente; no repetirlas.
+**Siguiente:** GPT-6 Luna, esfuerzo medio, Standard, implementa la matriz acotada `architecture/M2-2C-TRANSITION-MEMBERSHIP-RACES-LUNA-20261019.md`: cuatro carreras de transición/revocación para ambos ganadores bajo RC/RC y RR/RR. Sol revisa hashes y evidencia antes de publicar. Las cuatro carreras recurrentes ya están aceptadas localmente; no repetirlas.
 
 **Infraestructura sin cambios:** mientras se registra este bloque local, GitHub main sigue en 873829271463b4f3bf4bbb5ad39dad978908a8d2; falta publicar el cambio y verificar su CI. Supabase dev sigue activo/vacío; falta apagar la autoexposición. No hay Cloudflare, correo productivo ni Supabase de producción configurados. Site privado y datos ficticios.
 

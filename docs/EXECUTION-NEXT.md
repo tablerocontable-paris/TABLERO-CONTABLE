@@ -13,7 +13,7 @@ commit, push ni CI. SQL014 sigue sin aplicar; Gate L/§9 sigue abierto.
 1. Los bloques anteriores de onboarding y cuatro carreras mixtas están publicados y aceptados en sus alcances.
 2. Sol aceptó localmente cuatro carreras adicionales RC/RC y RR/RR. PostgreSQL 17.11 **301/301**, `40P01=0`; suite **738/738 en 74 archivos**; TypeScript y builds cliente/Worker aprobados. Ver manifiesto vigente arriba.
 3. Este bloque aún requiere hook, commit directo a `main`, push y verificación de SHA/CI. No abrir PR ni aplicar SQL014.
-4. Próxima ejecución técnica: revisión Sol alto del contrato §9 y definición de la familia pendiente para el siguiente contrato Luna medio Standard.
+4. Próxima ejecución: **GPT-6 Luna, esfuerzo medio, Standard**, implementa `architecture/M2-2C-TRANSITION-MEMBERSHIP-RACES-LUNA-20261019.md`. Alcance: cuatro carreras de transición/revocación para RC/RC y RR/RR, ambos ganadores; sólo local. Luego **GPT-6.1 Sol, esfuerzo alto**, revisa los hashes exactos antes de publicar. Si hay ambigüedad o defecto de SQL, detener y regresar a Sol. No aplicar SQL014.
 
 # Acción de migración histórica — 17/10/2026
 

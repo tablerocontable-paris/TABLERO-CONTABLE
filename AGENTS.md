@@ -10,9 +10,10 @@ Sol acepta sólo esos cuatro casos. Sus límites P3 están en el manifiesto; Gat
 y §9 siguen abiertos. El cambio aún no está publicado ni tiene CI verificado.
 SQL014 no se aplicó remotamente.
 
-**Siguiente:** revisión Sol de la siguiente familia pendiente de Gate L y
-contrato acotado para GPT-6 Luna medio Standard. No tocar Supabase ni activar el
-espacio operativo.
+**Siguiente:** GPT-6 Luna, esfuerzo medio, Standard, implementa únicamente
+`docs/architecture/M2-2C-TRANSITION-MEMBERSHIP-RACES-LUNA-20261019.md`. GPT-6.1
+Sol revisa los hashes y evidencia de esos cuatro casos antes de cualquier push.
+No tocar Supabase ni activar el espacio operativo.
 
 **Bloques anteriores aceptados y publicados:** onboarding.requestChanges exact replay/commandReceipt y cuatro carreras mixtas de cobertura recurrente (RC/RR, RR/RC, ambos ganadores). Evidencias: `docs/architecture/review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json` y `m2-2c-gatel-recurrent-coverage-20261019.json`. El run 39184344731 corresponde al commit 873829271463b4f3bf4bbb5ad39dad978908a8d2. El nuevo bloque local está descrito arriba y aún no se publica. Gate L sigue abierto.
 
