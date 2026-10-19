@@ -1,12 +1,12 @@
-# Estado general de la migración — actualización 18/10/2026
+# Estado general de la migración — actualización 19/10/2026
 
-**Último bloque aceptado por Sol (alcance local acotado, aún sin publicar):** `onboarding.requestChanges` exact replay y `commandReceipt`. Sin P0–P2; Gate L/M2.2C sigue abierto. Evidencia `docs/architecture/review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json` e informe `docs/architecture/M2-2C-REQUESTCHANGES-REPLAY-LUNA-20261018.md`: PostgreSQL 17.11 **297/297**, 40P01=0; focal **22/22**; suite completa **738/738 en 74 archivos**; TypeScript y builds cliente/Worker, sintaxis y diff-check con código 0. Sol registró límites P3 de evidencia en el JSON. SQL014 SHA256 `ac8cca582cf366b0cf143fd63d99c490c664b00b368eb473757017eebef26315`. El bloque está local; `origin/main` aún apunta a `156e9821255cce42adec36136333efbf74640d5b`.
+**Últimos bloques aceptados por Sol y publicados directamente a main (alcances acotados): onboarding.requestChanges exact replay/commandReceipt y cuatro carreras de cobertura recurrente. Gate L/M2.2C sigue abierto. Evidencias: review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json y review-evidence/m2-2c-gatel-recurrent-coverage-20261019.json. SQL014 SHA256 ac8cca582cf366b0cf143fd3d99c490c664b00b368eb473757017eebef26315; PostgreSQL 17.11 297/297, 40P01=0; suite 738/738 en 74 archivos. Sol acepta sólo RC/RR y RR/RC con ambos ganadores para recurrentes. P3 y sourceCommit anterior están registrados. Commit 873829271463b4f3bf4bbb5ad39dad978908a8d2; Actions 39184344731 success.
 
-**Siguiente:** actualizar el registro de Gate L, publicar directamente a `main` y verificar Actions por SHA; luego Sol debe delimitar la siguiente familia local. No aplicar SQL014; Supabase dev permanece vacío hasta completar el ajuste de Data API y Gate L.
+**Siguiente:** Sol delimita la próxima familia faltante de Gate L para revisión e implementación local acotada. No aplicar SQL014.
 
-**Infraestructura sin cambios:** GitHub remoto `main` sigue en `156e9821255cce42adec36136333efbf74640d5b` hasta publicar el bloque local descrito arriba. El Actions run `39181886848` terminó success para el corte anterior `ad64854091505a2770cb93478fc34467e2aeae05`; no acredita el HEAD actual ni el próximo push. Supabase dev `grupo-paris-dev` sigue activo/vacío; autoexposición debe apagarse. No hay hosting Cloudflare ni correo productivo conectados, y no existe Supabase de producción. Site privado, datos ficticios.
+**Infraestructura sin cambios:** GitHub main está en 873829271463b4f3bf4bbb5ad39dad978908a8d2; Actions 39184344731 terminó success. Supabase dev sigue activo/vacío; falta apagar la autoexposición. No hay Cloudflare, correo productivo ni Supabase de producción configurados. Site privado y datos ficticios.
 
-# Estado general de la migración — actualización 18/10/2026
+# Estado general de la migración — actualización 19/10/2026
 
 **Checkpoint remoto:** el repo privado `tablerocontable-paris/TABLERO-CONTABLE` tiene publicado en `main` el corte funcional `d5f4e15045d097701b680b62789440310f6112ca`, autoría Tablero Contable y push directo sin PR. El push y el SHA remoto están confirmados. No se pudo verificar Actions para el evento push: el conector disponible filtra los runs por pull request; no usar un run anterior como evidencia de este corte.
 

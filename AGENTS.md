@@ -1,12 +1,12 @@
-# Estado operativo y precedencia — actualización 18/10/2026
+# Estado operativo y precedencia — actualización 19/10/2026
 
-**Último corte aceptado por GPT-6.1 Sol:** `onboarding.requestChanges` exact replay y `commandReceipt`, en alcance local acotado, sin P0–P2 y sin cerrar M2.2C/Gate L. Evidencia `docs/architecture/review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json`; informe `docs/architecture/M2-2C-REQUESTCHANGES-REPLAY-LUNA-20261018.md`. SQL014 SHA256 `ac8cca582cf366b0cf143fd63d99c490c664b00b368eb473757017eebef26315`; PostgreSQL 17.11 297/297, 40P01=0; focal 22/22; suite completa 738/738 en 74 archivos; TypeScript, builds cliente/Worker, sintaxis del runner y diff-check aprobados. Sol registró límites P3 de evidencia en el JSON. El bloque está local, aún sin commit/publicación; el último remoto verificado es `156e9821255cce42adec36136333efbf74640d5b`.
+**Últimos bloques aceptados por GPT-6.1 Sol en alcances acotados y publicados:** onboarding.requestChanges exact replay/commandReceipt y cuatro carreras de cobertura recurrente. Evidencia requestChanges: docs/architecture/review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json; cobertura: docs/architecture/review-evidence/m2-2c-gatel-recurrent-coverage-20261019.json. SQL014 SHA256 ac8cca582cf366b0cf143fd3d99c490c664b00b368eb473757017eebef26315; PostgreSQL 17.11 297/297, 40P01=0; suite 738/738 en 74 archivos. Las carreras aceptadas son RC/RR y RR/RC, ambos ganadores. Commit 873829271463b4f3bf4bbb5ad39dad978908a8d2; Actions 39184344731 success. Gate L sigue abierto.
 
-**Validación de `requestChanges`:** suite completa 738/738 en 74 archivos; TypeScript y builds cliente/Worker con código 0; PostgreSQL 17.11 297/297 sin deadlocks; focal 22/22; `git diff --check` con código 0. Sol aceptó el bloque local con límites P3 documentados. Siguiente: sincronizar los documentos de Gate L y publicar este commit directamente a `main`; después verificar Actions por SHA. No aplicar SQL014: Supabase dev sigue vacío y su configuración de exposición debe corregirse/prevalidarse primero. No tocar datos reales, cuentas de producción ni el Site público.
+**Validación:** requestChanges pasó suite 738/738, TypeScript, builds cliente/Worker y PostgreSQL 297/297; commit 873829271463b4f3bf4bbb5ad39dad978908a8d2 está publicado y Actions 39184344731 terminó success. Sol acepta las cuatro carreras recurrentes sólo en RC/RR y RR/RC, con ambos ganadores. P3: el reporte registra sourceCommit 156e982 (el contenido actual se enlaza por hashes), ambas sesiones usan el mismo jefe y el snapshot de estado es acotado. Esto no cierra Gate L. No aplicar SQL014; Supabase dev sigue vacío y queda su configuración Data API/preflight.
 
 El corte `onboarding.approve` publicado como `ad64854091505a2770cb93478fc34467e2aeae05` tiene Actions `39181886848` en success; esto no acredita el siguiente commit. Mantener separado SQL014 del Worker/D1. El resto del historial de este archivo conserva su valor histórico.
 
-# Estado operativo y precedencia — actualización 18/10/2026
+# Estado operativo y precedencia — actualización 19/10/2026
 
 Este bloque tiene precedencia sobre el historial más abajo. GitHub privado
 `tablerocontable-paris/TABLERO-CONTABLE` tiene publicado en `main` el corte

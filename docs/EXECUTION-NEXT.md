@@ -1,17 +1,9 @@
-# Registro anterior supersedido — siguiente paso previo a requestChanges
+# Acción vigente de migración — actualización 19/10/2026
 
-1. **Último bloque aceptado por Sol (local; pendiente de publicar):** `onboarding.requestChanges` exact replay + `commandReceipt`; evidencia `architecture/review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json` e informe `architecture/M2-2C-REQUESTCHANGES-REPLAY-LUNA-20261018.md`. SQL014 SHA256 `ac8cca582cf366b0cf143fd63d99c490c664b00b368eb473757017eebef26315`; PostgreSQL 17.11 297/297, 40P01=0; focal 22/22; Sol no halló P0–P2. Límites P3 de evidencia están detallados en el JSON. `origin/main` sigue en `156e9821255cce42adec36136333efbf74640d5b`. No cierra Gate L.
-2. Suite completa **738/738 en 74 archivos**; TypeScript, builds cliente/Worker, sintaxis del runner y `git diff --check` finalizaron código 0 sobre el corte local. El reporte nativo está en `../../outputs/requestchanges-native-matrix-20261018-r3/review.json`, SHA256 `e781fbb735f1c87a19defcf57df4d56acfbaba1ac1471aa759a74ff7f8463ed7`.
-3. Siguiente acción inmediata: actualizar el registro de Gate L, hacer commit y push directo a `main` sin PR, y verificar Actions para el SHA publicado. Después solicitar a Sol el contrato de la siguiente familia local.
-4. Supabase dev está vacío. El usuario ya autorizó apagar la autoexposición; queda ejecutar ese ajuste en Dashboard cuando la sesión esté disponible y volver a comprobar Data API/preflight. No aplicar SQL014 hasta completar Gate L y la revisión de seguridad.
-
-# Acción de migración vigente — actualización 18/10/2026
-
-1. `origin/main` contiene el corte funcional `5803b1e4434cfc46a4ab64a26da3f76ab9d12d3d` y sincronización documental posterior. El conector de GitHub no permite listar Actions de push; run 18 corresponde a un SHA anterior y no acredita este corte.
-2. Sol aceptó `assignment.create` exact replay tras revocación en el alcance registrado en `architecture/review-evidence/m2-2c-assignment-replay-20261018.json`. PostgreSQL 17.11: 144/144, `40P01=0`; Vitest focal 19/19 y suite completa 735/735; TypeScript y builds cliente/Worker pasan. La carrera observada usa el mismo jefe en ambas sesiones, por lo que no aísla el lock de membresía del lock del actor (P3 no bloqueante). El corte está comprometido y publicado directamente en `main`.
-3. **Siguiente:** revisar con Sol el permiso/privacidad de `assignment.create commandReceipt` y `month.materialize`; ejecutar la familia local aprobada con Luna. No aplicar SQL014.
-4. Supabase dev está activo y vacío. Data API habilitada, expone `public,extensions` y mantiene activa la autoexposición (última lectura del Dashboard). El usuario ya autorizó desactivarla, pero el conector no puede cambiar ese ajuste. No aplicar SQL014 hasta apagar la autoexposición, repetir el preflight seguro y completar Gate L.
-5. No hay hosting Cloudflare propio, correo transaccional ni Supabase de producción configurados. Continuar con preparación de release sólo después de aceptar C/Gate L; mantener el hosting dev privado y protegido.
+1. Sol aceptó en alcance local onboarding.requestChanges exact replay/commandReceipt y cuatro carreras de cobertura recurrente. Evidencias: architecture/review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json y architecture/review-evidence/m2-2c-gatel-recurrent-coverage-20261019.json.
+2. SQL014 SHA256 ac8cca582cf366b0cf143fd3d99c490c664b00b368eb473757017eebef26315; PostgreSQL 17.11 297/297, 40P01=0; suite 738/738 en 74 archivos; TypeScript/builds aprobados. En recurrentes se acepta estrictamente RC/RR y RR/RC, ambos ganadores. P3 documentados; Gate L sigue abierto.
+3. Commit 873829271463b4f3bf4bbb5ad39dad978908a8d2 está en origin/main; Actions run 39184344731 terminó success; hook pre-commit 196/196.
+4. Siguiente: GPT-6.1 Sol, esfuerzo alto, delimita la próxima familia Gate L a revisar e implementar localmente. No aplicar SQL014.
 
 # Acción de migración histórica — 17/10/2026
 

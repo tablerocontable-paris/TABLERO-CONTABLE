@@ -1,0 +1,57 @@
+{
+  "contract": "Gate L recurring coverage revocation race review",
+  "scope": "four enumerated local PostgreSQL races only; does not close M2.2C, Gate L, or all of section 9",
+  "remoteCalls": false,
+  "reviewedHead": "873829271463b4f3bf4bbb5ad39dad978908a8d2",
+  "artifacts": {
+    "migrationSha256": "ac8cca582cf366b0cf143fd3d99c490c664b00b368eb473757017eebef26315",
+    "runnerSha256": "87c435a8e3476656c54139e8a9e7affb16e5b9824161fdc1e2def9e5654fe799",
+    "focusedTestSha256": "8ce790b04c59f91ee55f39dbee7c4f683bf22e5d672b67a59e60cc5116fdbde6",
+    "nativeReport": {
+      "pathBase": "work/site",
+      "path": "../../outputs/requestchanges-native-matrix-20261018-r3/review.json",
+      "sha256": "e781fbb735f1c87a19decf57df4d56acfbcaba1ac1471aa759a74ff7f8463ed7",
+      "sourceCommit": "156e9821255cce42adec36136333efbf74640d5b"
+    }
+  },
+  "result": {
+    "reviewer": "GPT-6.1 Sol",
+    "verdict": "ACCEPT",
+    "findingsP0ToP2": [],
+    "nativeTotal": "297/297",
+    "deadlocks40P01": 0,
+    "acceptedRecurringCases": [
+      {
+        "winner": "approval",
+        "isolationPair": "read committed/repeatable read",
+        "reviewReportLine": 2612,
+        "outcomes": ["approval 00000", "stale revocation 40001", "revocation retry 00000"]
+      },
+      {
+        "winner": "revocation",
+        "isolationPair": "read committed/repeatable read",
+        "reviewReportLine": 2627,
+        "outcomes": ["revocation 00000", "stale approval 40001", "approval retry 42501"]
+      },
+      {
+        "winner": "approval",
+        "isolationPair": "repeatable read/read committed",
+        "reviewReportLine": 2642,
+        "outcomes": ["approval 00000", "stale revocation 40001", "revocation retry 00000"]
+      },
+      {
+        "winner": "revocation",
+        "isolationPair": "repeatable read/read committed",
+        "reviewReportLine": 2657,
+        "outcomes": ["revocation 00000", "stale approval 40001", "approval retry 42501"]
+      }
+    ],
+    "notCoveredByThisAcceptance": ["read committed/read committed", "repeatable read/repeatable read"]
+  },
+  "p3EvidenceLimits": [
+    "The report sourceCommit is 156e982; current artifacts are bound by exact SHA256 values, not by claiming execution from reviewedHead.",
+    "Both sessions use the same jefe, so the observed blocking does not isolate the membership lock from the actor lock.",
+    "The state snapshot checks the enumerated root/child bindings, source_rule_id, sibling, receipts, membership event/audit and fences; it is not an exhaustive snapshot of sessions, every revision, or all audit data.",
+    "The prior dedicated recurrent evidence file uses historical artifact hashes; this record binds the accepted result to the current artifact hashes and shared native report."
+  ]
+}
