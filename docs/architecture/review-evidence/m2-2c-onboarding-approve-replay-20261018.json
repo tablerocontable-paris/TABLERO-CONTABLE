@@ -83,6 +83,20 @@
     ],
     "doesNotClose": ["M2.2C", "Gate L"]
   },
+  "publication": {
+    "commit": "ad64854091505a2770cb93478fc34467e2aeae05",
+    "branch": "main",
+    "pushMode": "direct; no pull request",
+    "remoteShaVerified": true,
+    "githubActions": {
+      "runId": 39181886848,
+      "url": "https://github.com/tablerocontable-paris/TABLERO-CONTABLE/actions/runs/39181886848",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "checks": ["npm ci", "npm test", "npm run build", "Sites deployment package validation"]
+    }
+  },
   "limits": [
     "All data is synthetic and local. No hosted Supabase/Auth/HTTP behavior was exercised.",
     "Migration 014 remains unapplied; migrations 001-013, UI, Worker and Site were not modified.",

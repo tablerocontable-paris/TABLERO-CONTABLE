@@ -1,10 +1,10 @@
 # Estado general de la migración — actualización 18/10/2026
 
-**Último corte local aceptado por Sol (alcance acotado):** `onboarding.approve` exact replay y `commandReceipt`. Sin P0–P2; Gate L/M2.2C continúa abierto. Evidencia `docs/architecture/review-evidence/m2-2c-onboarding-approve-replay-20261018.json`: PostgreSQL 17.11 **200/200**, 40P01=0 (32 casos nuevos); focal **21/21**; suite completa **737/737 en 74 archivos**; TypeScript y builds cliente/Worker, sintaxis y diff-check con código 0. Sol dejó tres límites P3 de evidencia, registrados en el JSON. SQL014 SHA256 `d8b3a12d903698270ba06f32746dc90328f8a34439f15794799405772a8ae454`. Aún no comprometido ni publicado.
+**Último corte aceptado por Sol y publicado (alcance acotado):** `onboarding.approve` exact replay y `commandReceipt`. Sin P0–P2; Gate L/M2.2C continúa abierto. Evidencia `docs/architecture/review-evidence/m2-2c-onboarding-approve-replay-20261018.json`: PostgreSQL 17.11 **200/200**, 40P01=0 (32 casos nuevos); focal **21/21**; suite completa **737/737 en 74 archivos**; TypeScript y builds cliente/Worker, sintaxis y diff-check con código 0. Sol dejó tres límites P3 de evidencia, registrados en el JSON. SQL014 SHA256 `d8b3a12d903698270ba06f32746dc90328f8a34439f15794799405772a8ae454`. Commit `ad64854091505a2770cb93478fc34467e2aeae05`, verificado en `origin/main`; Actions run 39181886848 completó success.
 
-**Siguiente:** commit y push directo a `main` del corte revisado, sin PR; verificar SHA remoto y Actions del commit de código. Después implementar con Luna `onboarding.requestChanges` en bloque separado. No aplicar SQL014; Supabase dev permanece vacío hasta completar el ajuste de Data API y Gate L.
+**Siguiente:** implementar con Luna `onboarding.requestChanges` en un bloque separado y revisar con Sol antes de publicar. No aplicar SQL014; Supabase dev permanece vacío hasta completar el ajuste de Data API y Gate L.
 
-**Infraestructura sin cambios:** GitHub remoto `main` está en el commit documental `9916a124e724ccad0805d880a32fc7a0f156ff04`; Actions push de ese SHA terminó success, pero no incluye el código local sin publicar. Supabase dev `grupo-paris-dev` sigue activo/vacío; autoexposición debe apagarse. No hay hosting Cloudflare ni correo productivo conectados, y no existe Supabase de producción. Site privado, datos ficticios.
+**Infraestructura sin cambios:** GitHub remoto `main` está en `ad64854091505a2770cb93478fc34467e2aeae05`; su Actions push terminó success. Supabase dev `grupo-paris-dev` sigue activo/vacío; autoexposición debe apagarse. No hay hosting Cloudflare ni correo productivo conectados, y no existe Supabase de producción. Site privado, datos ficticios.
 
 # Estado general de la migración — actualización 18/10/2026
 

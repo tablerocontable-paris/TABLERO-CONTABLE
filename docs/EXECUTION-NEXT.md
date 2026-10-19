@@ -1,9 +1,8 @@
 # Acción de migración vigente — actualización 18/10/2026
 
-1. **Último bloque aceptado localmente por Sol:** `onboarding.approve` replay exacto + `commandReceipt`; evidencia `architecture/review-evidence/m2-2c-onboarding-approve-replay-20261018.json`. SQL014 SHA256 `d8b3a12d903698270ba06f32746dc90328f8a34439f15794799405772a8ae454`; PostgreSQL 17.11 200/200, 40P01=0 (32 casos nuevos); focal 21/21; Sol no halló P0–P2. Límites P3 de evidencia están detallados en el JSON. No cierra Gate L.
+1. **Último bloque aceptado y publicado directamente en `main`:** `onboarding.approve` replay exacto + `commandReceipt`; evidencia `architecture/review-evidence/m2-2c-onboarding-approve-replay-20261018.json`. SQL014 SHA256 `d8b3a12d903698270ba06f32746dc90328f8a34439f15794799405772a8ae454`; PostgreSQL 17.11 200/200, 40P01=0 (32 casos nuevos); focal 21/21; Sol no halló P0–P2. Límites P3 de evidencia están detallados en el JSON. Commit `ad64854091505a2770cb93478fc34467e2aeae05`; Actions run 39181886848 success. No cierra Gate L.
 2. Suite completa **737/737 en 74 archivos**; TypeScript, builds cliente/Worker, sintaxis del runner y `git diff --check` finalizaron código 0 sobre el corte. El reporte nativo está fuera del repo en `outputs/m2-2c-onboarding-approve-replay-20261018-final/review.json`, SHA256 `001295eaab91adf22d44aec09a5694ab144b5ff9e0f56f05a1634141422284e6`.
-3. Siguiente: commit/push directo de este corte a `main`, sin PR; verificar remoto y Actions del SHA de código. El push previo `9916a124e724ccad0805d880a32fc7a0f156ff04` sí pasó Actions `39180463502` (success), pero era sólo documental.
-4. Luego GPT-6 Luna, medio Standard, implementa el contrato Sol separado de `onboarding.requestChanges`; revisar con Sol antes de publicarlo.
+3. Siguiente: GPT-6 Luna, medio Standard, implementa el contrato Sol separado de `onboarding.requestChanges`; revisar con Sol antes de publicarlo.
 5. Supabase dev está vacío. El usuario ya autorizó apagar la autoexposición; queda ejecutar ese ajuste en Dashboard cuando la sesión esté disponible y volver a comprobar Data API/preflight. No aplicar SQL014 hasta completar Gate L y la revisión de seguridad.
 
 # Acción de migración vigente — actualización 18/10/2026
