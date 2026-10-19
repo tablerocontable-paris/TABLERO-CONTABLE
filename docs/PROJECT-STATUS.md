@@ -2,7 +2,7 @@
 
 **Últimos bloques aceptados por Sol y publicados directamente a main (alcances acotados): onboarding.requestChanges exact replay/commandReceipt y cuatro carreras de cobertura recurrente. Gate L/M2.2C sigue abierto. Evidencias: review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json y review-evidence/m2-2c-gatel-recurrent-coverage-20261019.json. SQL014 SHA256 ac8cca582cf366b0cf143fd3d99c490c664b00b368eb473757017eebef26315; PostgreSQL 17.11 297/297, 40P01=0; suite 738/738 en 74 archivos. Sol acepta sólo RC/RR y RR/RC con ambos ganadores para recurrentes. P3 y sourceCommit anterior están registrados. Commit 873829271463b4f3bf4bbb5ad39dad978908a8d2; Actions 39184344731 success.
 
-**Siguiente:** Sol delimita la próxima familia faltante de Gate L para revisión e implementación local acotada. No aplicar SQL014.
+**Siguiente:** GPT-6 Luna, medio Standard, implementa las cuatro carreras restantes RC/RC y RR/RR según architecture/M2-2C-RECURRENT-COVERAGE-RC-RR-LUNA-20261019.md. Si no puede determinar SQLSTATE/retry sin ambigüedad, detener y volver a Sol.
 
 **Infraestructura sin cambios:** GitHub main está en 873829271463b4f3bf4bbb5ad39dad978908a8d2; Actions 39184344731 terminó success. Supabase dev sigue activo/vacío; falta apagar la autoexposición. No hay Cloudflare, correo productivo ni Supabase de producción configurados. Site privado y datos ficticios.
 

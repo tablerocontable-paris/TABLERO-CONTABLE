@@ -3,7 +3,7 @@
 1. Sol aceptó en alcance local onboarding.requestChanges exact replay/commandReceipt y cuatro carreras de cobertura recurrente. Evidencias: architecture/review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json y architecture/review-evidence/m2-2c-gatel-recurrent-coverage-20261019.json.
 2. SQL014 SHA256 ac8cca582cf366b0cf143fd3d99c490c664b00b368eb473757017eebef26315; PostgreSQL 17.11 297/297, 40P01=0; suite 738/738 en 74 archivos; TypeScript/builds aprobados. En recurrentes se acepta estrictamente RC/RR y RR/RC, ambos ganadores. P3 documentados; Gate L sigue abierto.
 3. Commit 873829271463b4f3bf4bbb5ad39dad978908a8d2 está en origin/main; Actions run 39184344731 terminó success; hook pre-commit 196/196.
-4. Siguiente: GPT-6.1 Sol, esfuerzo alto, delimita la próxima familia Gate L a revisar e implementar localmente. No aplicar SQL014.
+4. Próxima ejecución: GPT-6 Luna, esfuerzo medio, Standard; ampliar el runner según `architecture/M2-2C-RECURRENT-COVERAGE-RC-RR-LUNA-20261019.md`. Si el resultado SQL esperado no es claro o aparece un defecto, detenerse y devolverlo a Sol. No aplicar SQL014.
 
 # Acción de migración histórica — 17/10/2026
 
