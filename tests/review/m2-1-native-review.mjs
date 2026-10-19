@@ -3293,6 +3293,216 @@ try {
       await operationRecordMembershipRace({ order: "record-first", isolation: "RR", base: 22020 });
       await operationRecordMembershipRace({ order: "revoke-first", isolation: "RR", base: 22030 });
 
+      // Native timer-start/membership-revocation matrix. Each case owns its
+      // company, team, employee, chief, task, responsibility, graph and month
+      // fence rows so the asserted epochs are exact deltas from a zero base.
+      async function timerStartMembershipRace({ order, isolation, base }) {
+        const iso = isolation === "RC" ? "read committed" : "repeatable read";
+        const firstAction = order === "timer-first" ? "timer" : "revoke";
+        const owner = uid(base), chief = uid(base + 1), companyId = uid(base + 2), teamId = uid(base + 3);
+        const assignment = uid(base + 4), task = uid(base + 5), timerOp = uid(base + 6), revokeOp = uid(base + 7);
+        const label = `M2.2C timer start ${order} ${isolation}`;
+        const period = monthPeriod, date = scheduledOn;
+        await observer.ok(`insert into auth.users(id) values(${lit(owner)}),(${lit(chief)});
+          insert into public.profiles(id,organization_id,name,role,sector,branch,position) values
+            (${lit(owner)},${lit(org)},${lit(label)}||' employee','empleado','Timer race','Timer race','Employee'),
+            (${lit(chief)},${lit(org)},${lit(label)}||' chief','jefe','Timer race','Timer race','Chief');
+          insert into public.companies(id,organization_id,name) values(${lit(companyId)},${lit(org)},${lit(label)}||' company');
+          insert into public.teams(id,organization_id,name,manager_id) values(${lit(teamId)},${lit(org)},${lit(label)}||' team',${lit(chief)});
+          insert into public.company_memberships(organization_id,company_id,profile_id) values
+            (${lit(org)},${lit(companyId)},${lit(owner)}),(${lit(org)},${lit(companyId)},${lit(chief)});
+          insert into public.team_members(organization_id,team_id,profile_id) values(${lit(org)},${lit(teamId)},${lit(owner)}),(${lit(org)},${lit(teamId)},${lit(chief)});
+          insert into public.task_assignments(id,organization_id,company_id,owner_id,team_id,title,kind,weight,unit,target,frequency,start_month,due_day,checklist)
+            values(${lit(assignment)},${lit(org)},${lit(companyId)},${lit(owner)},${lit(teamId)},${lit(label)},'resultado',1,null,null,'unica',${lit(period)}::date,extract(day from ${lit(date)}::date)::integer,'[]');
+          insert into public.task_instances(id,organization_id,assignment_id,company_id,owner_id,team_id,period,scheduled_on,title,kind,weight,unit,target,due_date,checklist,status)
+            values(${lit(task)},${lit(org)},${lit(assignment)},${lit(companyId)},${lit(owner)},${lit(teamId)},${lit(period)}::date,${lit(date)}::date,${lit(label)},'resultado',1,null,null,${lit(date)}::date,'[]','Pendiente');
+          insert into app_private.task_dependency_graphs(organization_id,company_id,period,config_revision,fence_epoch) values(${lit(org)},${lit(companyId)},${lit(period)}::date,0,0);
+          insert into app_private.api_month_fences(organization_id,owner_id,period,fence_epoch) values(${lit(org)},${lit(owner)},${lit(period)}::date,0) on conflict(owner_id,period) do update set fence_epoch=0;`);
+        const actorCheck = (await observer.ok(`select
+          (select role='empleado' and active from public.profiles where id=${lit(owner)})||'|'||
+          (select role='jefe' and active from public.profiles where id=${lit(chief)})||'|'||
+          (select count(*)=1 from public.company_memberships where organization_id=${lit(org)} and company_id=${lit(companyId)} and profile_id=${lit(owner)} and active)||'|'||
+          (select count(*)=1 from public.company_memberships where organization_id=${lit(org)} and company_id=${lit(companyId)} and profile_id=${lit(chief)} and active)||'|'||
+          (select count(*)=1 from public.task_responsibility_heads h join public.task_responsibility_members m on m.set_id=h.set_id where h.instance_id=${lit(task)} and m.profile_id=${lit(owner)})||'|'||
+          (select count(*)=1 from public.task_assignments where id=${lit(assignment)} and frequency='unica')||'|'||
+          (select count(*)=0 from public.task_time_sessions where actor_id=${lit(owner)} and ended_at is null);`)).at(-1);
+        assert.equal(actorCheck, "true|true|true|true|true|true|true", `${order}/${isolation}: fixture actors/task/responsibility must be valid and isolated`);
+        const timerArgs = { instance: task, revision: 0, switch: false };
+        const revokeCommand = { contractVersion: 1, operationId: revokeOp, kind: "companyMembership.setActive", expectedRevisions: { [`membership:${companyId}:${owner}`]: "0" }, payload: { companyId, profileId: owner, active: false, reason: `${label} synthetic revocation` } };
+        const snapshotSql = `select jsonb_build_object(
+          'task',(select to_jsonb(t) from public.task_instances t where t.id=${lit(task)}),
+          'assignment',(select to_jsonb(a) from public.task_assignments a where a.id=${lit(assignment)}),
+          'responsibility',(select jsonb_build_object('head',to_jsonb(h),'set',to_jsonb(s),'members',(select coalesce(jsonb_agg(to_jsonb(m) order by m.profile_id),'[]'::jsonb) from public.task_responsibility_members m where m.set_id=s.id)) from public.task_responsibility_heads h join public.task_responsibility_sets s on s.id=h.set_id where h.instance_id=${lit(task)}),
+          'memberships',(select coalesce(jsonb_agg(to_jsonb(m) order by m.profile_id),'[]'::jsonb) from public.company_memberships m where m.organization_id=${lit(org)} and m.company_id=${lit(companyId)} and m.profile_id in (${lit(owner)},${lit(chief)})),
+          'profiles',(select coalesce(jsonb_agg(to_jsonb(p) order by p.id),'[]'::jsonb) from public.profiles p where p.id in (${lit(owner)},${lit(chief)})),
+          'sessions',(select coalesce(jsonb_agg(to_jsonb(s) order by s.id),'[]'::jsonb) from public.task_time_sessions s where s.organization_id=${lit(org)} and (s.actor_id=${lit(owner)} or s.instance_id=${lit(task)})),
+          'timerReceipts',(select coalesce(jsonb_agg(to_jsonb(r) order by r.actor_id),'[]'::jsonb) from public.task_mutation_receipts r where r.operation_id=${lit(timerOp)}),
+          'commandReceipts',(select coalesce(jsonb_agg(to_jsonb(r) order by r.operation_id),'[]'::jsonb) from app_private.api_command_receipts r where r.organization_id=${lit(org)} and r.operation_id=${lit(revokeOp)}),
+          'membershipEvents',(select coalesce(jsonb_agg(to_jsonb(e) order by e.revision),'[]'::jsonb) from app_private.company_membership_events e where e.organization_id=${lit(org)} and e.company_id=${lit(companyId)} and e.profile_id=${lit(owner)}),
+          'audit',(select coalesce(jsonb_agg(to_jsonb(e) order by e.at,e.id),'[]'::jsonb) from public.audit_events e where e.organization_id=${lit(org)} and ((e.action='task.timer_started' and e.details->>'instance'=${lit(task)}) or (e.action='companyMembership.setActive' and e.entity_id=${lit(companyId)} and e.details->>'profileId'=${lit(owner)}))),
+          'fences',jsonb_build_object(
+            'membershipEmployee',coalesce((select f.fence_epoch from app_private.api_membership_fences f where f.organization_id=${lit(org)} and f.profile_id=${lit(owner)}),0),
+            'membershipChief',coalesce((select f.fence_epoch from app_private.api_membership_fences f where f.organization_id=${lit(org)} and f.profile_id=${lit(chief)}),0),
+            'month',coalesce((select f.fence_epoch from app_private.api_month_fences f where f.organization_id=${lit(org)} and f.owner_id=${lit(owner)} and f.period=${lit(period)}::date),0),
+            'graph',coalesce((select g.fence_epoch from app_private.task_dependency_graphs g where g.organization_id=${lit(org)} and g.company_id=${lit(companyId)} and g.period=${lit(period)}::date),0),
+            'graphConfig',coalesce((select g.config_revision from app_private.task_dependency_graphs g where g.organization_id=${lit(org)} and g.company_id=${lit(companyId)} and g.period=${lit(period)}::date),0),
+            'timerOperation',(select f.fence_epoch from app_private.api_operation_fences f where f.actor_id=${lit(owner)} and f.operation_id=${lit(timerOp)}),
+            'revokeOperation',(select f.fence_epoch from app_private.api_operation_fences f where f.actor_id=${lit(chief)} and f.operation_id=${lit(revokeOp)})
+          ),
+          'otherEffects',jsonb_build_object(
+            'activity',(select count(*) from public.activity_entries where instance_id=${lit(task)}),
+            'assessments',(select count(*) from app_private.operational_assessments where instance_id=${lit(task)}),
+            'coverage',(select count(*) from public.task_coverage_bindings where instance_id=${lit(task)}),
+            'closures',(select count(*) from public.monthly_closures where owner_id=${lit(owner)} and period=${lit(period)}::date),
+            'assignmentCount',(select count(*) from public.task_assignments where company_id=${lit(companyId)}),
+            'responsibilityMembers',(select count(*) from public.task_responsibility_members m join public.task_responsibility_heads h on h.set_id=m.set_id where h.instance_id=${lit(task)})
+          )
+        )::text;`;
+        const snapshot = async () => JSON.parse((await reviewer.ok(snapshotSql)).at(-1));
+        const baseline = await snapshot();
+        assert.equal(baseline.task.status, "Pendiente"); assert.equal(baseline.task.state_revision, 0);
+        assert.equal(baseline.assignment.frequency, "unica"); assert.equal(baseline.responsibility.members.length, 1);
+        assert.deepEqual(baseline.sessions, []); assert.deepEqual(baseline.timerReceipts, []); assert.deepEqual(baseline.commandReceipts, []);
+        assert.deepEqual(baseline.fences, { membershipEmployee: 0, membershipChief: 0, month: 0, graph: 0, graphConfig: 0, timerOperation: null, revokeOperation: null });
+        assert.deepEqual(baseline.otherEffects, { activity: 0, assessments: 0, coverage: 0, closures: 0, assignmentCount: 1, responsibilityMembers: 1 });
+        const diagnosticPath=join(out,`m2-2c-timer-start-membership-revocation-race-${order}-${isolation.toLowerCase()}-diagnostic.json`);
+        const persistDiagnostic=(phase,state,error=null)=>{const data={phase,error:error?String(error.stack||error):null,order,isolation,actorCheck,actors:{employee:owner,chief},operationIds:{timer:timerOp,revoke:revokeOp},claims:state.claims??null,winnerPid:state.winnerPid??null,loserPid:state.loserPid??null,blockerPids:state.blockerPids??null,blocked:state.blocked??null,winnerSQLSTATE:state.winnerResult?.code??null,winnerResponse:state.winnerResult?.lines?.at(-1)??null,loserSQLSTATE:state.loserResult?.code??null,loserResponse:state.loserResult?.lines?.at(-1)??null,loserErrors:state.loserResult?.errors??null,retrySQLSTATE:state.retryResult?.code??null,retryResponse:state.retryResult?.lines?.at(-1)??null,retryErrors:state.retryResult?.errors??null,baseline,winnerOnly:state.winnerOnly??null,afterConflict:state.afterConflict??null,final:state.final??null,postgresLog:join(out,"postgres.log")};writeFileSync(diagnosticPath,JSON.stringify(data,null,2));};
+        const verifyPhase=(phase,state,check)=>{try{check();}catch(error){persistDiagnostic(phase,state,error);throw Error(`${order}/${isolation} ${phase} assertion failed; diagnostic ${diagnosticPath}: ${error.message}`);}};
+        const winnerSession = firstAction === "timer" ? a : a, loserSession = b;
+        const winnerActor = firstAction === "timer" ? owner : chief, loserActor = firstAction === "timer" ? chief : owner;
+        const winnerAal = firstAction === "timer" ? "aal1" : "aal2", loserAal = firstAction === "timer" ? "aal2" : "aal1";
+        const beginAs = async (session, who, aal) => {
+          await session.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(who)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: who, aal }))},false);set role authenticated;begin isolation level ${iso};`);
+          const effective = JSON.parse((await session.ok(`select jsonb_build_object('uid',auth.uid(),'sub',current_setting('request.jwt.claim.sub',true),'jwtSub',auth.jwt()->>'sub','aal',auth.jwt()->>'aal','isolation',current_setting('transaction_isolation'))::text;`)).at(-1));
+          try{assert.deepEqual(effective,{uid:who,sub:who,jwtSub:who,aal,isolation:iso},`${order}/${isolation} effective identity/AAL/isolation`);}catch(error){persistDiagnostic("effective claims",{claims:{who,requestedAal:aal,effective}} ,error);throw error;}
+          return { pid:Number((await session.ok("select pg_backend_pid();")).at(-1)), effective };
+        };
+        const winnerIdentity = await beginAs(winnerSession, winnerActor, winnerAal), winnerPid = winnerIdentity.pid;
+        const winnerSql = firstAction === "timer"
+          ? `select public.start_task_timer(${lit(task)},0,${lit(timerOp)},false);`
+          : `select api.command_v1('${JSON.stringify(revokeCommand).replaceAll("'", "''")}'::jsonb);`;
+        const winnerResult = await winnerSession.query(winnerSql);
+        if (winnerResult.code !== "00000") {persistDiagnostic("winner outcome",{winnerPid,winnerResult,claims:{winner:winnerIdentity.effective}},new Error(winnerResult.errors));throw Error(`${order}/${isolation}: unexpected winner SQLSTATE ${winnerResult.code}: ${winnerResult.errors}; diagnostic ${diagnosticPath}`);}
+        const winnerResponse = winnerResult.lines.at(-1);
+        const loserIdentity = await beginAs(loserSession, loserActor, loserAal), loserPid = loserIdentity.pid;
+        await loserSession.ok(`select active,revision from public.company_memberships where organization_id=${lit(org)} and company_id=${lit(companyId)} and profile_id=${lit(owner)};select status,state_revision from public.task_instances where id=${lit(task)};`);
+        const loserSql = firstAction === "timer"
+          ? `select api.command_v1('${JSON.stringify(revokeCommand).replaceAll("'", "''")}'::jsonb);`
+          : `select public.start_task_timer(${lit(task)},0,${lit(timerOp)},false);`;
+        const pendingLoser = loserSession.query(loserSql);
+        let blocked = false; const deadline = Date.now() + 10000;
+        while (Date.now() < deadline) { if ((await reviewer.ok(`select ${winnerPid}=any(pg_catalog.pg_blocking_pids(${loserPid}));`)).at(-1) === "t") { blocked = true; break; } await new Promise(done => setTimeout(done,20)); }
+        const blockerPids = (await reviewer.ok(`select pg_catalog.pg_blocking_pids(${loserPid})::text;`)).at(-1);
+        if (!blocked) {
+          await winnerSession.ok("commit;"); const loserResult = await pendingLoser; await loserSession.ok(loserResult.code === "00000" ? "commit;" : "rollback;");
+          const data = { order,isolation,actorCheck,actors:{employee:owner,chief},operationIds:{timer:timerOp,revoke:revokeOp},winnerPid,loserPid,blockerPids,blocked,winnerSQLSTATE:winnerResult.code,winnerResponse,loserSQLSTATE:loserResult.code,loserErrors:loserResult.errors,claims:{winner:winnerIdentity.effective,loser:loserIdentity.effective},baseline,after:await snapshot(),postgresLog:join(out,"postgres.log") };
+          writeFileSync(diagnosticPath,JSON.stringify(data,null,2));
+          throw Error(`M2.2C no real blocker ${order}/${isolation}; diagnostic ${diagnosticPath}`);
+        }
+        await winnerSession.ok("commit;");
+        const winnerOnly = await snapshot();
+        const loserResult = await pendingLoser;
+        await loserSession.ok(loserResult.code === "00000" ? "commit;" : "rollback;");
+        const afterConflict = await snapshot();
+        const expectedLoser = "40001";
+        if (loserResult.code !== expectedLoser) {
+          const data={order,isolation,actorCheck,actors:{employee:owner,chief},operationIds:{timer:timerOp,revoke:revokeOp},winnerPid,loserPid,blockerPids,blocked,winnerSQLSTATE:winnerResult.code,winnerResponse,winnerOnly,loserSQLSTATE:loserResult.code,loserResponse:loserResult.lines.at(-1),loserErrors:loserResult.errors,afterConflict,baseline,postgresLog:join(out,"postgres.log")};
+          const path=join(out,`m2-2c-timer-start-membership-revocation-race-${order}-${isolation.toLowerCase()}-diagnostic.json`);writeFileSync(path,JSON.stringify(data,null,2));
+          throw Error(`${order}/${isolation}: expected stale loser 40001, got ${loserResult.code}; diagnostic ${path}`);
+        }
+        const raceState={winnerPid,loserPid,blockerPids,blocked,winnerResult,loserResult,winnerOnly,afterConflict,claims:{winner:winnerIdentity.effective,loser:loserIdentity.effective}};
+        verifyPhase("winner-only and conflict rollback",raceState,()=>{
+          assert.deepEqual(afterConflict,winnerOnly,"loser rollback leaves exact winner-only snapshot");
+          assert.deepEqual(winnerOnly.assignment,baseline.assignment,"winner must not mutate full assignment");
+          assert.deepEqual(winnerOnly.responsibility,baseline.responsibility,"winner must not mutate full responsibility/head/member rows");
+          assert.deepEqual(winnerOnly.profiles,baseline.profiles,"winner must not mutate profiles");
+          assert.deepEqual(winnerOnly.otherEffects,baseline.otherEffects);
+          if(firstAction==="timer"){
+            const employee=winnerOnly.memberships.find(m=>m.profile_id===owner), manager=winnerOnly.memberships.find(m=>m.profile_id===chief), session=winnerOnly.sessions[0], receipt=winnerOnly.timerReceipts[0];
+            assert.equal(employee.active,true);assert.equal(employee.revision,0);assert.equal(manager.active,true);assert.equal(manager.revision,0);
+            assert.equal(winnerOnly.task.status,"En curso");assert.equal(winnerOnly.task.state_revision,1);assert.ok(winnerOnly.task.started_at);
+            assert.equal(winnerOnly.sessions.length,1);assert.equal(session.id,winnerResponse);assert.equal(session.actor_id,owner);assert.equal(session.instance_id,task);assert.equal(session.contribution_kind,"responsible");assert.equal(session.absence_id,null);assert.equal(session.coverage_binding_id,null);assert.ok(session.started_at);assert.equal(session.ended_at,null);
+            assert.equal(winnerOnly.timerReceipts.length,1);assert.equal(receipt.actor_id,owner);assert.equal(receipt.organization_id,org);assert.equal(receipt.operation_id,timerOp);assert.equal(receipt.operation_kind,"start_timer");assert.deepEqual(receipt.arguments,timerArgs);assert.deepEqual(receipt.result,{session_id:session.id});
+            assert.deepEqual(winnerOnly.commandReceipts,[]);assert.deepEqual(winnerOnly.membershipEvents,[]);assert.equal(winnerOnly.audit.length,1);
+            assert.deepEqual(Object.keys(receipt).sort(),["actor_id","arguments","created_at","operation_id","operation_kind","organization_id","result"]);
+            assert.equal(winnerOnly.audit.length,1);assert.equal(winnerOnly.audit[0].action,"task.timer_started");assert.equal(winnerOnly.audit[0].actor_id,owner);assert.equal(winnerOnly.audit[0].organization_id,org);assert.equal(winnerOnly.audit[0].entity_id,session.id);assert.deepEqual(winnerOnly.audit[0].details,{instance:task,contribution:"responsible",binding:null});
+            assert.deepEqual(winnerOnly.fences,{membershipEmployee:1,membershipChief:0,month:1,graph:1,graphConfig:0,timerOperation:null,revokeOperation:null});
+          }else{
+            const employee=winnerOnly.memberships.find(m=>m.profile_id===owner),manager=winnerOnly.memberships.find(m=>m.profile_id===chief),receipt=winnerOnly.commandReceipts[0],event=winnerOnly.membershipEvents[0],audit=winnerOnly.audit[0];
+            assert.equal(employee.active,false);assert.equal(employee.revision,1);assert.equal(manager.active,true);assert.equal(manager.revision,0);
+            assert.equal(winnerOnly.task.status,"Pendiente");assert.equal(winnerOnly.task.state_revision,1);assert.equal(winnerOnly.sessions.length,0);assert.equal(winnerOnly.timerReceipts.length,0);
+            assert.equal(winnerOnly.commandReceipts.length,1);assert.equal(receipt.actor_id,chief);assert.equal(receipt.operation_id,revokeOp);assert.equal(receipt.kind,"companyMembership.setActive");
+            assert.deepEqual(Object.keys(receipt).sort(),["actor_id","arguments","created_at","kind","operation_id","organization_id","result"]);
+            assert.deepEqual(receipt.arguments,{kind:revokeCommand.kind,payload:revokeCommand.payload,expectedRevisions:revokeCommand.expectedRevisions});assert.deepEqual(JSON.parse(winnerResponse),receipt.result);
+            assert.equal(winnerOnly.membershipEvents.length,1);assert.equal(event.actor_id,chief);assert.equal(event.organization_id,org);assert.equal(event.company_id,companyId);assert.equal(event.profile_id,owner);assert.equal(event.revision,1);assert.equal(event.active,false);assert.equal(event.reason,revokeCommand.payload.reason);
+            assert.equal(winnerOnly.audit.length,1);assert.equal(audit.action,"companyMembership.setActive");assert.equal(audit.actor_id,chief);assert.equal(audit.entity_id,companyId);assert.equal(audit.organization_id,org);assert.deepEqual(audit.details,{active:false,profileId:owner,membershipRevision:"1"});
+            assert.deepEqual(winnerOnly.fences,{membershipEmployee:1,membershipChief:0,month:0,graph:1,graphConfig:0,timerOperation:null,revokeOperation:1});
+          }
+        });
+        const retry = new Session(); auxiliarySessions.push(retry); await retry.ok("\\set VERBOSITY verbose\nset statement_timeout='15s';");
+        const retryActor = firstAction === "timer" ? chief : owner, retryAal = firstAction === "timer" ? "aal2" : "aal1";
+        await retry.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(retryActor)},false),set_config('request.jwt.claims',${lit(JSON.stringify({role:"authenticated",sub:retryActor,aal:retryAal}))},false);set role authenticated;begin isolation level ${iso};`);
+        const retryIdentity=JSON.parse((await retry.ok(`select jsonb_build_object('uid',auth.uid(),'sub',current_setting('request.jwt.claim.sub',true),'jwtSub',auth.jwt()->>'sub','aal',auth.jwt()->>'aal','isolation',current_setting('transaction_isolation'))::text;`)).at(-1));
+        try{assert.deepEqual(retryIdentity,{uid:retryActor,sub:retryActor,jwtSub:retryActor,aal:retryAal,isolation:iso},`${order}/${isolation} retry identity/AAL/isolation`);}catch(error){persistDiagnostic("retry effective claims",{winnerPid,loserPid,claims:{winner:winnerIdentity.effective,loser:loserIdentity.effective,retry:retryIdentity}},error);throw error;}
+        const retrySql = firstAction === "timer" ? `select api.command_v1('${JSON.stringify(revokeCommand).replaceAll("'", "''")}'::jsonb);` : `select public.start_task_timer(${lit(task)},0,${lit(timerOp)},false);`;
+        const retryResult = await retry.query(retrySql);
+        const expectedRetry = firstAction === "timer" ? "00000" : "P0001";
+        const primaryError = retryResult.errors.match(/ERROR:\s+P0001:\s+([^\r\n]+)/u)?.[1] ?? null;
+        if (retryResult.code !== expectedRetry || (firstAction === "revoke" && primaryError !== "Sin permiso")) {
+          await retry.ok(retryResult.code === "00000" ? "commit;" : "rollback;"); await retry.ok("reset role;"); await retry.close(); auxiliarySessions.splice(auxiliarySessions.indexOf(retry),1);
+          const data={order,isolation,actorCheck,actors:{employee:owner,chief},operationIds:{timer:timerOp,revoke:revokeOp},winnerPid,loserPid,blockerPids,blocked,winnerSQLSTATE:winnerResult.code,winnerResponse,winnerOnly,loserSQLSTATE:loserResult.code,loserErrors:loserResult.errors,afterConflict,retrySQLSTATE:retryResult.code,expectedRetry,primaryError,retryResponse:retryResult.lines.at(-1),retryErrors:retryResult.errors,claims:{winner:winnerIdentity.effective,loser:loserIdentity.effective,retry:retryIdentity},final:await snapshot(),baseline,postgresLog:join(out,"postgres.log")};
+          writeFileSync(diagnosticPath,JSON.stringify(data,null,2));
+          throw Error(`${order}/${isolation}: retry outcome differs; observed ${retryResult.code}/${primaryError}; diagnostic ${diagnosticPath}`);
+        }
+        if (expectedRetry === "00000") await retry.ok("commit;"); else await retry.ok("rollback;");
+        await retry.ok("reset role;"); await retry.close(); auxiliarySessions.splice(auxiliarySessions.indexOf(retry),1);
+        const final = await snapshot();
+        const fenceExpected = firstAction === "timer"
+          ? { membershipEmployee: 2, membershipChief: 0, month: 1, graph: 2, graphConfig: 0, timerOperation: null, revokeOperation: 1 }
+          : { membershipEmployee: 1, membershipChief: 0, month: 0, graph: 1, graphConfig: 0, timerOperation: null, revokeOperation: 1 };
+        const timerReceipt = final.timerReceipts[0], revokeReceipt = final.commandReceipts[0];
+        verifyPhase("final effects and exact receipts",{...raceState,retryResult,final,claims:{winner:winnerIdentity.effective,loser:loserIdentity.effective,retry:retryIdentity}},()=>{
+          assert.deepEqual(final.fences,fenceExpected,`${order}/${isolation} exact all-fence footprint`);
+          assert.deepEqual(final.assignment,baseline.assignment,"assignment remains identical to baseline");
+          assert.deepEqual(final.responsibility,baseline.responsibility,"responsibility head/set/member rows remain identical to baseline");
+          assert.deepEqual(final.profiles,baseline.profiles,"profile rows remain identical to baseline");
+          assert.deepEqual(final.otherEffects,baseline.otherEffects);
+          assert.equal(final.memberships.find(m=>m.profile_id===owner).active,false);assert.equal(final.memberships.find(m=>m.profile_id===owner).revision,1);
+          assert.equal(final.memberships.find(m=>m.profile_id===chief).active,true);assert.equal(final.memberships.find(m=>m.profile_id===chief).revision,0);
+          assert.equal(final.membershipEvents.length,1);const membershipEvent=final.membershipEvents[0];
+          assert.equal(membershipEvent.actor_id,chief);assert.equal(membershipEvent.organization_id,org);assert.equal(membershipEvent.company_id,companyId);assert.equal(membershipEvent.profile_id,owner);assert.equal(membershipEvent.revision,1);assert.equal(membershipEvent.active,false);assert.equal(membershipEvent.reason,revokeCommand.payload.reason);
+          const membershipAudit=final.audit.filter(e=>e.action==="companyMembership.setActive");assert.equal(membershipAudit.length,1);
+          assert.equal(membershipAudit[0].actor_id,chief);assert.equal(membershipAudit[0].organization_id,org);assert.equal(membershipAudit[0].entity_id,companyId);assert.deepEqual(membershipAudit[0].details,{active:false,profileId:owner,membershipRevision:"1"});
+          assert.equal(final.commandReceipts.length,1);assert.equal(revokeReceipt.actor_id,chief);assert.equal(revokeReceipt.organization_id,org);assert.equal(revokeReceipt.operation_id,revokeOp);assert.equal(revokeReceipt.kind,"companyMembership.setActive");
+          assert.deepEqual(Object.keys(revokeReceipt).sort(),["actor_id","arguments","created_at","kind","operation_id","organization_id","result"]);
+          assert.deepEqual(revokeReceipt.arguments,{kind:revokeCommand.kind,payload:revokeCommand.payload,expectedRevisions:revokeCommand.expectedRevisions});
+          assert.equal(final.task.state_revision,firstAction==="timer"?2:1);assert.equal(final.task.status,firstAction==="timer"?"En curso":"Pendiente");
+          if(firstAction==="timer"){
+            const session=final.sessions[0],winnerSessionRow=winnerOnly.sessions[0],sessionId=winnerResponse;
+            assert.equal(final.sessions.length,1);assert.equal(session.id,sessionId);assert.equal(session.actor_id,owner);assert.equal(session.instance_id,task);assert.equal(session.contribution_kind,"responsible");assert.equal(session.absence_id,null);assert.equal(session.coverage_binding_id,null);assert.ok(session.ended_at);assert.ok(Date.parse(session.ended_at)>=Date.parse(session.started_at));
+            for(const key of ["id","organization_id","instance_id","actor_id","created_at","started_at","absence_id","contribution_kind","coverage_binding_id"])assert.equal(session[key],winnerSessionRow[key],`timer session ${key} is immutable across revoke`);
+            assert.equal(final.task.started_at,winnerOnly.task.started_at);
+            const expectedTask={...winnerOnly.task,state_revision:2};assert.deepEqual(final.task,expectedTask,"revocation only advances the timer-started task revision");
+            assert.equal(final.timerReceipts.length,1);assert.equal(timerReceipt.actor_id,owner);assert.equal(timerReceipt.organization_id,org);assert.equal(timerReceipt.operation_id,timerOp);assert.equal(timerReceipt.operation_kind,"start_timer");assert.deepEqual(timerReceipt.arguments,timerArgs);assert.deepEqual(timerReceipt.result,{session_id:sessionId});
+            assert.deepEqual(timerReceipt,winnerOnly.timerReceipts[0],"timer receipt is preserved byte-for-byte after revocation");
+            const timerAudits=final.audit.filter(e=>e.action==="task.timer_started");assert.equal(timerAudits.length,1);assert.deepEqual(timerAudits[0],winnerOnly.audit[0]);
+            assert.equal(timerAudits[0].actor_id,owner);assert.equal(timerAudits[0].entity_id,sessionId);assert.equal(timerAudits[0].details.instance,task);assert.equal(timerAudits[0].details.contribution,"responsible");assert.equal(timerAudits[0].details.binding,null);
+            assert.deepEqual(JSON.parse(retryResult.lines.at(-1)),revokeReceipt.result,"full successful revoke response equals durable receipt result");
+          }else{
+            assert.deepEqual(final,winnerOnly,"P0001 retry after revocation is inert across the full snapshot");
+            assert.deepEqual(final.sessions,[]);assert.equal(final.task.status,"Pendiente");assert.equal(final.task.state_revision,1);assert.equal(primaryError,"Sin permiso");
+            assert.deepEqual(final.timerReceipts,[]);assert.equal(final.audit.filter(e=>e.action==="task.timer_started").length,0);
+            assert.deepEqual(JSON.parse(winnerResponse),revokeReceipt.result,"full revoke winner response equals durable receipt result");
+          }
+        });
+        record(`M2.2C timer start/membership revoke ${order} (${iso}/${iso})`,true,{order,isolation:iso,actors:{employee:owner,chief},actorCheck,claims:{winner:winnerIdentity.effective,loser:loserIdentity.effective,retry:retryIdentity},winnerPid,loserPid,blockerPids,blocked,winnerSQLSTATE:winnerResult.code,winnerResponse,loserSQLSTATE:loserResult.code,loserResponse:loserResult.lines.at(-1),loserErrors:loserResult.errors,retrySQLSTATE:retryResult.code,retryPrimaryError:primaryError,baseline,winnerOnly,afterConflict,final,fenceExpected});
+        await a.ok("reset role;"); await b.ok("reset role;");
+      }
+      await timerStartMembershipRace({order:"timer-first",isolation:"RC",base:23000});
+      await timerStartMembershipRace({order:"revoke-first",isolation:"RC",base:23010});
+      await timerStartMembershipRace({order:"timer-first",isolation:"RR",base:23020});
+      await timerStartMembershipRace({order:"revoke-first",isolation:"RR",base:23030});
+
       // Same-isolation transition/membership races. The winning command stays
       // open while the competing command starts; pg_blocking_pids proves the
       // second session actually waits before the winner commits.

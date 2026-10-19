@@ -1,5 +1,21 @@
 # Acción vigente de migración — actualización 19/10/2026
 
+## Último bloque aceptado localmente por Sol — timer/revocación
+
+GPT-6 Luna agregó cuatro carreras `public.start_task_timer` frente a
+`companyMembership.setActive(false)`, en ambos órdenes bajo RC/RC y RR/RR.
+PostgreSQL nativo 17.11: 325/325, cuatro blockers reales, resultados/reintentos
+del contrato exactos y cero deadlocks. El resultado incluye sesiones, recibos,
+auditoría y fences. La suite completa pasó **738/738 en 74 archivos**;
+TypeScript, builds cliente/Worker, sintaxis y diff-check terminaron con exit 0.
+Los hashes y resultados se registran en el manifiesto
+`architecture/review-evidence/m2-2c-timer-start-membership-revocation-races-luna-20261019.json`.
+Runner SHA256 `fa7bf8da251a9fce4b0a4cc31f5152fdd2cbb5bc30c1d1e5b2ca48b03b9a4b23`;
+manifiesto SHA256 `0409cfdb36c1e50626773c305e97fad4a81330226d64d1cc875b589ae5f9667b`.
+Aceptación y límites P3:
+`architecture/M2-2C-TIMER-START-MEMBERSHIP-REVOCATION-RACES-SOL-ACCEPTANCE-20261019.md`.
+Commit/push aún pendiente; SQL011/014 siguen intactas.
+
 ## Último bloque aceptado localmente por Sol — operation.record/revocación
 
 GPT-6 Luna implementó los cuatro escenarios RC/RC y RR/RR. PostgreSQL nativo
@@ -18,13 +34,9 @@ verificado. SQL011/014 siguen sin cambios; Gate L/§9 permanece abierto.
 
 ## Próximo paso
 
-Pedir a GPT-6 Luna que implemente
-`architecture/M2-2C-TIMER-START-MEMBERSHIP-REVOCATION-RACES-LUNA-20261019.md`
-(SHA256 `b3cf39726e8a3d4c1fb2d7ddeaa03c6604e9eb03ff834032dc87b4f0b4aff82f`):
-cuatro carreras RC/RC y RR/RR de `public.start_task_timer` frente a
-`companyMembership.setActive(false)`, ambos órdenes. Sol aprobó el contrato sin
-P2; conserva el retry `P0001 / Sin permiso` tras revocación. No tocar SQL ni
-Supabase alojado; pausar y volver a Sol si cualquier resultado difiere.
+Continuar auditoría de §9 con GPT-6.1 Sol para elegir la siguiente matriz
+incompleta; redactar y revisar su contrato antes de pedir otra implementación
+Luna. No tocar SQL ni Supabase alojado.
 
 ## Último bloque local aceptado por Sol — cobertura contra onboarding
 

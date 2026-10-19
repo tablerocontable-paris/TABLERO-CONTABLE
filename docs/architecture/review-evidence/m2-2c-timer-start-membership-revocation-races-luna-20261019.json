@@ -1,0 +1,2876 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-19",
+  "scope": "Local synthetic PostgreSQL only; no remote Supabase/API calls and no SQL edits.",
+  "baselineCommit": "e6e0292bbaa2c91d787e9d272e37042ce37a7546",
+  "engine": "postgres (PostgreSQL) 17.11",
+  "nativeRun": {
+    "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2c-timer-start-membership-revocation-races-luna-20261019-attempt4 --port 55738 --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes",
+    "exitCode": 0,
+    "passed": 325,
+    "failed": 0,
+    "deadlocks40P01": 0,
+    "report": "../../outputs/m2-2c-timer-start-membership-revocation-races-luna-20261019-attempt4/review.json",
+    "stdoutLog": "../../outputs/m2-2c-timer-start-membership-revocation-races-luna-20261019-attempt4/runner.stdout.log",
+    "postgresLog": "../../outputs/m2-2c-timer-start-membership-revocation-races-luna-20261019-attempt4/postgres.log",
+    "initdbLog": "../../outputs/m2-2c-timer-start-membership-revocation-races-luna-20261019-attempt4/initdb.log",
+    "focusedCases": [
+      {
+        "name": "M2.2C timer start/membership revoke timer-first (read committed/read committed)",
+        "order": "timer-first",
+        "isolation": "read committed",
+        "actors": {
+          "employee": "00000000-0000-0000-0000-000000023000",
+          "chief": "00000000-0000-0000-0000-000000023001"
+        },
+        "claims": {
+          "winner": {
+            "aal": "aal1",
+            "sub": "00000000-0000-0000-0000-000000023000",
+            "uid": "00000000-0000-0000-0000-000000023000",
+            "jwtSub": "00000000-0000-0000-0000-000000023000",
+            "isolation": "read committed"
+          },
+          "loser": {
+            "aal": "aal2",
+            "sub": "00000000-0000-0000-0000-000000023001",
+            "uid": "00000000-0000-0000-0000-000000023001",
+            "jwtSub": "00000000-0000-0000-0000-000000023001",
+            "isolation": "read committed"
+          },
+          "retry": {
+            "aal": "aal2",
+            "sub": "00000000-0000-0000-0000-000000023001",
+            "uid": "00000000-0000-0000-0000-000000023001",
+            "jwtSub": "00000000-0000-0000-0000-000000023001",
+            "isolation": "read committed"
+          }
+        },
+        "blocked": true,
+        "winnerPid": 19624,
+        "loserPid": 9156,
+        "blockerPids": "{19624}",
+        "winnerSQLSTATE": "00000",
+        "loserSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "retryPrimaryError": null,
+        "fenceExpected": {
+          "membershipEmployee": 2,
+          "membershipChief": 0,
+          "month": 1,
+          "graph": 2,
+          "graphConfig": 0,
+          "timerOperation": null,
+          "revokeOperation": 1
+        },
+        "winnerOnly": {
+          "task": {
+            "id": "00000000-0000-0000-0000-000000023005",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start timer-first RC",
+            "period": "2026-10-01",
+            "status": "En curso",
+            "target": null,
+            "weight": 1,
+            "team_id": "00000000-0000-0000-0000-000000023003",
+            "due_date": "2026-10-19",
+            "owner_id": "00000000-0000-0000-0000-000000023000",
+            "priority": "Media",
+            "checklist": [],
+            "blocked_by": null,
+            "company_id": "00000000-0000-0000-0000-000000023002",
+            "started_at": "2026-10-19T10:48:57.571957-03:00",
+            "completed_at": null,
+            "scheduled_on": "2026-10-19",
+            "assignment_id": "00000000-0000-0000-0000-000000023004",
+            "blocked_since": null,
+            "state_revision": 1,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "audit": [
+            {
+              "at": "2026-10-19T10:48:57.571957-03:00",
+              "id": 704,
+              "action": "task.timer_started",
+              "details": {
+                "binding": null,
+                "instance": "00000000-0000-0000-0000-000000023005",
+                "contribution": "responsible"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023000",
+              "entity_id": "7c33353a-e98b-4daf-bc3f-be4832ec146a",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "fences": {
+            "graph": 1,
+            "month": 1,
+            "graphConfig": 0,
+            "timerOperation": null,
+            "membershipChief": 0,
+            "revokeOperation": null,
+            "membershipEmployee": 1
+          },
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000023000",
+              "name": "M2.2C timer start timer-first RC employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000023001",
+              "name": "M2.2C timer start timer-first RC chief",
+              "role": "jefe",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [
+            {
+              "id": "7c33353a-e98b-4daf-bc3f-be4832ec146a",
+              "actor_id": "00000000-0000-0000-0000-000000023000",
+              "ended_at": null,
+              "absence_id": null,
+              "created_at": "2026-10-19T10:48:57.561547-03:00",
+              "started_at": "2026-10-19T10:48:57.571957-03:00",
+              "instance_id": "00000000-0000-0000-0000-000000023005",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "contribution_kind": "responsible",
+              "coverage_binding_id": null
+            }
+          ],
+          "assignment": {
+            "id": "00000000-0000-0000-0000-000000023004",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start timer-first RC",
+            "target": null,
+            "weight": 1,
+            "due_day": 19,
+            "team_id": "00000000-0000-0000-0000-000000023003",
+            "end_date": null,
+            "owner_id": "00000000-0000-0000-0000-000000023000",
+            "weekdays": [
+              1
+            ],
+            "checklist": [],
+            "frequency": "unica",
+            "month_day": 19,
+            "company_id": "00000000-0000-0000-0000-000000023002",
+            "start_date": "2026-10-19",
+            "start_month": "2026-10-01",
+            "template_id": null,
+            "has_deadline": true,
+            "interval_count": 1,
+            "due_offset_days": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "definition_revision": 0,
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "memberships": [
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000023002",
+              "profile_id": "00000000-0000-0000-0000-000000023000",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000023002",
+              "profile_id": "00000000-0000-0000-0000-000000023001",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "otherEffects": {
+            "activity": 0,
+            "closures": 0,
+            "coverage": 0,
+            "assessments": 0,
+            "assignmentCount": 1,
+            "responsibilityMembers": 1
+          },
+          "timerReceipts": [
+            {
+              "result": {
+                "session_id": "7c33353a-e98b-4daf-bc3f-be4832ec146a"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023000",
+              "arguments": {
+                "switch": false,
+                "instance": "00000000-0000-0000-0000-000000023005",
+                "revision": 0
+              },
+              "created_at": "2026-10-19T10:48:57.561547-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000023006",
+              "operation_kind": "start_timer",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "responsibility": {
+            "set": {
+              "id": "9110437f-ca27-4753-a942-d118301b0ff5",
+              "mode": "individual",
+              "origin": "baseline_legacy",
+              "reason": null,
+              "sealed": true,
+              "revision": 1,
+              "captured_at": "2026-10-19T10:48:57.536684-03:00",
+              "captured_by": null,
+              "instance_id": "00000000-0000-0000-0000-000000023005",
+              "sector_source": "unknown",
+              "anchor_owner_id": "00000000-0000-0000-0000-000000023000",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "period_snapshot": "2026-10-01",
+              "sector_snapshot": null,
+              "team_id_snapshot": "00000000-0000-0000-0000-000000023003",
+              "company_id_snapshot": "00000000-0000-0000-0000-000000023002"
+            },
+            "head": {
+              "set_id": "9110437f-ca27-4753-a942-d118301b0ff5",
+              "instance_id": "00000000-0000-0000-0000-000000023005",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            "members": [
+              {
+                "set_id": "9110437f-ca27-4753-a942-d118301b0ff5",
+                "share_bps": 10000,
+                "profile_id": "00000000-0000-0000-0000-000000023000",
+                "organization_id": "00000000-0000-0000-0000-000000000001"
+              }
+            ]
+          },
+          "commandReceipts": [],
+          "membershipEvents": []
+        },
+        "afterConflict": {
+          "task": {
+            "id": "00000000-0000-0000-0000-000000023005",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start timer-first RC",
+            "period": "2026-10-01",
+            "status": "En curso",
+            "target": null,
+            "weight": 1,
+            "team_id": "00000000-0000-0000-0000-000000023003",
+            "due_date": "2026-10-19",
+            "owner_id": "00000000-0000-0000-0000-000000023000",
+            "priority": "Media",
+            "checklist": [],
+            "blocked_by": null,
+            "company_id": "00000000-0000-0000-0000-000000023002",
+            "started_at": "2026-10-19T10:48:57.571957-03:00",
+            "completed_at": null,
+            "scheduled_on": "2026-10-19",
+            "assignment_id": "00000000-0000-0000-0000-000000023004",
+            "blocked_since": null,
+            "state_revision": 1,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "audit": [
+            {
+              "at": "2026-10-19T10:48:57.571957-03:00",
+              "id": 704,
+              "action": "task.timer_started",
+              "details": {
+                "binding": null,
+                "instance": "00000000-0000-0000-0000-000000023005",
+                "contribution": "responsible"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023000",
+              "entity_id": "7c33353a-e98b-4daf-bc3f-be4832ec146a",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "fences": {
+            "graph": 1,
+            "month": 1,
+            "graphConfig": 0,
+            "timerOperation": null,
+            "membershipChief": 0,
+            "revokeOperation": null,
+            "membershipEmployee": 1
+          },
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000023000",
+              "name": "M2.2C timer start timer-first RC employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000023001",
+              "name": "M2.2C timer start timer-first RC chief",
+              "role": "jefe",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [
+            {
+              "id": "7c33353a-e98b-4daf-bc3f-be4832ec146a",
+              "actor_id": "00000000-0000-0000-0000-000000023000",
+              "ended_at": null,
+              "absence_id": null,
+              "created_at": "2026-10-19T10:48:57.561547-03:00",
+              "started_at": "2026-10-19T10:48:57.571957-03:00",
+              "instance_id": "00000000-0000-0000-0000-000000023005",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "contribution_kind": "responsible",
+              "coverage_binding_id": null
+            }
+          ],
+          "assignment": {
+            "id": "00000000-0000-0000-0000-000000023004",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start timer-first RC",
+            "target": null,
+            "weight": 1,
+            "due_day": 19,
+            "team_id": "00000000-0000-0000-0000-000000023003",
+            "end_date": null,
+            "owner_id": "00000000-0000-0000-0000-000000023000",
+            "weekdays": [
+              1
+            ],
+            "checklist": [],
+            "frequency": "unica",
+            "month_day": 19,
+            "company_id": "00000000-0000-0000-0000-000000023002",
+            "start_date": "2026-10-19",
+            "start_month": "2026-10-01",
+            "template_id": null,
+            "has_deadline": true,
+            "interval_count": 1,
+            "due_offset_days": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "definition_revision": 0,
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "memberships": [
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000023002",
+              "profile_id": "00000000-0000-0000-0000-000000023000",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000023002",
+              "profile_id": "00000000-0000-0000-0000-000000023001",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "otherEffects": {
+            "activity": 0,
+            "closures": 0,
+            "coverage": 0,
+            "assessments": 0,
+            "assignmentCount": 1,
+            "responsibilityMembers": 1
+          },
+          "timerReceipts": [
+            {
+              "result": {
+                "session_id": "7c33353a-e98b-4daf-bc3f-be4832ec146a"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023000",
+              "arguments": {
+                "switch": false,
+                "instance": "00000000-0000-0000-0000-000000023005",
+                "revision": 0
+              },
+              "created_at": "2026-10-19T10:48:57.561547-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000023006",
+              "operation_kind": "start_timer",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "responsibility": {
+            "set": {
+              "id": "9110437f-ca27-4753-a942-d118301b0ff5",
+              "mode": "individual",
+              "origin": "baseline_legacy",
+              "reason": null,
+              "sealed": true,
+              "revision": 1,
+              "captured_at": "2026-10-19T10:48:57.536684-03:00",
+              "captured_by": null,
+              "instance_id": "00000000-0000-0000-0000-000000023005",
+              "sector_source": "unknown",
+              "anchor_owner_id": "00000000-0000-0000-0000-000000023000",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "period_snapshot": "2026-10-01",
+              "sector_snapshot": null,
+              "team_id_snapshot": "00000000-0000-0000-0000-000000023003",
+              "company_id_snapshot": "00000000-0000-0000-0000-000000023002"
+            },
+            "head": {
+              "set_id": "9110437f-ca27-4753-a942-d118301b0ff5",
+              "instance_id": "00000000-0000-0000-0000-000000023005",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            "members": [
+              {
+                "set_id": "9110437f-ca27-4753-a942-d118301b0ff5",
+                "share_bps": 10000,
+                "profile_id": "00000000-0000-0000-0000-000000023000",
+                "organization_id": "00000000-0000-0000-0000-000000000001"
+              }
+            ]
+          },
+          "commandReceipts": [],
+          "membershipEvents": []
+        },
+        "final": {
+          "task": {
+            "id": "00000000-0000-0000-0000-000000023005",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start timer-first RC",
+            "period": "2026-10-01",
+            "status": "En curso",
+            "target": null,
+            "weight": 1,
+            "team_id": "00000000-0000-0000-0000-000000023003",
+            "due_date": "2026-10-19",
+            "owner_id": "00000000-0000-0000-0000-000000023000",
+            "priority": "Media",
+            "checklist": [],
+            "blocked_by": null,
+            "company_id": "00000000-0000-0000-0000-000000023002",
+            "started_at": "2026-10-19T10:48:57.571957-03:00",
+            "completed_at": null,
+            "scheduled_on": "2026-10-19",
+            "assignment_id": "00000000-0000-0000-0000-000000023004",
+            "blocked_since": null,
+            "state_revision": 2,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "audit": [
+            {
+              "at": "2026-10-19T10:48:57.571957-03:00",
+              "id": 704,
+              "action": "task.timer_started",
+              "details": {
+                "binding": null,
+                "instance": "00000000-0000-0000-0000-000000023005",
+                "contribution": "responsible"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023000",
+              "entity_id": "7c33353a-e98b-4daf-bc3f-be4832ec146a",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "at": "2026-10-19T10:48:57.722316-03:00",
+              "id": 705,
+              "action": "companyMembership.setActive",
+              "details": {
+                "active": false,
+                "profileId": "00000000-0000-0000-0000-000000023000",
+                "membershipRevision": "1"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023001",
+              "entity_id": "00000000-0000-0000-0000-000000023002",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "fences": {
+            "graph": 2,
+            "month": 1,
+            "graphConfig": 0,
+            "timerOperation": null,
+            "membershipChief": 0,
+            "revokeOperation": 1,
+            "membershipEmployee": 2
+          },
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000023000",
+              "name": "M2.2C timer start timer-first RC employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000023001",
+              "name": "M2.2C timer start timer-first RC chief",
+              "role": "jefe",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [
+            {
+              "id": "7c33353a-e98b-4daf-bc3f-be4832ec146a",
+              "actor_id": "00000000-0000-0000-0000-000000023000",
+              "ended_at": "2026-10-19T10:48:57.839232-03:00",
+              "absence_id": null,
+              "created_at": "2026-10-19T10:48:57.561547-03:00",
+              "started_at": "2026-10-19T10:48:57.571957-03:00",
+              "instance_id": "00000000-0000-0000-0000-000000023005",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "contribution_kind": "responsible",
+              "coverage_binding_id": null
+            }
+          ],
+          "assignment": {
+            "id": "00000000-0000-0000-0000-000000023004",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start timer-first RC",
+            "target": null,
+            "weight": 1,
+            "due_day": 19,
+            "team_id": "00000000-0000-0000-0000-000000023003",
+            "end_date": null,
+            "owner_id": "00000000-0000-0000-0000-000000023000",
+            "weekdays": [
+              1
+            ],
+            "checklist": [],
+            "frequency": "unica",
+            "month_day": 19,
+            "company_id": "00000000-0000-0000-0000-000000023002",
+            "start_date": "2026-10-19",
+            "start_month": "2026-10-01",
+            "template_id": null,
+            "has_deadline": true,
+            "interval_count": 1,
+            "due_offset_days": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "definition_revision": 0,
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "memberships": [
+            {
+              "active": false,
+              "revision": 1,
+              "changed_at": "2026-10-19T10:48:57.838686-03:00",
+              "changed_by": "00000000-0000-0000-0000-000000023001",
+              "company_id": "00000000-0000-0000-0000-000000023002",
+              "profile_id": "00000000-0000-0000-0000-000000023000",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000023002",
+              "profile_id": "00000000-0000-0000-0000-000000023001",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "otherEffects": {
+            "activity": 0,
+            "closures": 0,
+            "coverage": 0,
+            "assessments": 0,
+            "assignmentCount": 1,
+            "responsibilityMembers": 1
+          },
+          "timerReceipts": [
+            {
+              "result": {
+                "session_id": "7c33353a-e98b-4daf-bc3f-be4832ec146a"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023000",
+              "arguments": {
+                "switch": false,
+                "instance": "00000000-0000-0000-0000-000000023005",
+                "revision": 0
+              },
+              "created_at": "2026-10-19T10:48:57.561547-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000023006",
+              "operation_kind": "start_timer",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "responsibility": {
+            "set": {
+              "id": "9110437f-ca27-4753-a942-d118301b0ff5",
+              "mode": "individual",
+              "origin": "baseline_legacy",
+              "reason": null,
+              "sealed": true,
+              "revision": 1,
+              "captured_at": "2026-10-19T10:48:57.536684-03:00",
+              "captured_by": null,
+              "instance_id": "00000000-0000-0000-0000-000000023005",
+              "sector_source": "unknown",
+              "anchor_owner_id": "00000000-0000-0000-0000-000000023000",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "period_snapshot": "2026-10-01",
+              "sector_snapshot": null,
+              "team_id_snapshot": "00000000-0000-0000-0000-000000023003",
+              "company_id_snapshot": "00000000-0000-0000-0000-000000023002"
+            },
+            "head": {
+              "set_id": "9110437f-ca27-4753-a942-d118301b0ff5",
+              "instance_id": "00000000-0000-0000-0000-000000023005",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            "members": [
+              {
+                "set_id": "9110437f-ca27-4753-a942-d118301b0ff5",
+                "share_bps": 10000,
+                "profile_id": "00000000-0000-0000-0000-000000023000",
+                "organization_id": "00000000-0000-0000-0000-000000000001"
+              }
+            ]
+          },
+          "commandReceipts": [
+            {
+              "kind": "companyMembership.setActive",
+              "result": {
+                "kind": "companyMembership.setActive",
+                "result": {
+                  "active": false,
+                  "companyId": "00000000-0000-0000-0000-000000023002",
+                  "profileId": "00000000-0000-0000-0000-000000023000",
+                  "membershipRevision": "1"
+                },
+                "operationId": "00000000-0000-0000-0000-000000023007",
+                "contractVersion": 1
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023001",
+              "arguments": {
+                "kind": "companyMembership.setActive",
+                "payload": {
+                  "active": false,
+                  "reason": "M2.2C timer start timer-first RC synthetic revocation",
+                  "companyId": "00000000-0000-0000-0000-000000023002",
+                  "profileId": "00000000-0000-0000-0000-000000023000"
+                },
+                "expectedRevisions": {
+                  "membership:00000000-0000-0000-0000-000000023002:00000000-0000-0000-0000-000000023000": "0"
+                }
+              },
+              "created_at": "2026-10-19T10:48:57.866514-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000023007",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "membershipEvents": [
+            {
+              "id": "a70a6693-0cd5-43e9-959f-30ba9677f5ad",
+              "active": false,
+              "reason": "M2.2C timer start timer-first RC synthetic revocation",
+              "actor_id": "00000000-0000-0000-0000-000000023001",
+              "revision": 1,
+              "company_id": "00000000-0000-0000-0000-000000023002",
+              "created_at": "2026-10-19T10:48:57.841122-03:00",
+              "profile_id": "00000000-0000-0000-0000-000000023000",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ]
+        }
+      },
+      {
+        "name": "M2.2C timer start/membership revoke revoke-first (read committed/read committed)",
+        "order": "revoke-first",
+        "isolation": "read committed",
+        "actors": {
+          "employee": "00000000-0000-0000-0000-000000023010",
+          "chief": "00000000-0000-0000-0000-000000023011"
+        },
+        "claims": {
+          "winner": {
+            "aal": "aal2",
+            "sub": "00000000-0000-0000-0000-000000023011",
+            "uid": "00000000-0000-0000-0000-000000023011",
+            "jwtSub": "00000000-0000-0000-0000-000000023011",
+            "isolation": "read committed"
+          },
+          "loser": {
+            "aal": "aal1",
+            "sub": "00000000-0000-0000-0000-000000023010",
+            "uid": "00000000-0000-0000-0000-000000023010",
+            "jwtSub": "00000000-0000-0000-0000-000000023010",
+            "isolation": "read committed"
+          },
+          "retry": {
+            "aal": "aal1",
+            "sub": "00000000-0000-0000-0000-000000023010",
+            "uid": "00000000-0000-0000-0000-000000023010",
+            "jwtSub": "00000000-0000-0000-0000-000000023010",
+            "isolation": "read committed"
+          }
+        },
+        "blocked": true,
+        "winnerPid": 19624,
+        "loserPid": 9156,
+        "blockerPids": "{19624}",
+        "winnerSQLSTATE": "00000",
+        "loserSQLSTATE": "40001",
+        "retrySQLSTATE": "P0001",
+        "retryPrimaryError": "Sin permiso",
+        "fenceExpected": {
+          "membershipEmployee": 1,
+          "membershipChief": 0,
+          "month": 0,
+          "graph": 1,
+          "graphConfig": 0,
+          "timerOperation": null,
+          "revokeOperation": 1
+        },
+        "winnerOnly": {
+          "task": {
+            "id": "00000000-0000-0000-0000-000000023015",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start revoke-first RC",
+            "period": "2026-10-01",
+            "status": "Pendiente",
+            "target": null,
+            "weight": 1,
+            "team_id": "00000000-0000-0000-0000-000000023013",
+            "due_date": "2026-10-19",
+            "owner_id": "00000000-0000-0000-0000-000000023010",
+            "priority": "Media",
+            "checklist": [],
+            "blocked_by": null,
+            "company_id": "00000000-0000-0000-0000-000000023012",
+            "started_at": null,
+            "completed_at": null,
+            "scheduled_on": "2026-10-19",
+            "assignment_id": "00000000-0000-0000-0000-000000023014",
+            "blocked_since": null,
+            "state_revision": 1,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "audit": [
+            {
+              "at": "2026-10-19T10:48:57.896882-03:00",
+              "id": 706,
+              "action": "companyMembership.setActive",
+              "details": {
+                "active": false,
+                "profileId": "00000000-0000-0000-0000-000000023010",
+                "membershipRevision": "1"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023011",
+              "entity_id": "00000000-0000-0000-0000-000000023012",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "fences": {
+            "graph": 1,
+            "month": 0,
+            "graphConfig": 0,
+            "timerOperation": null,
+            "membershipChief": 0,
+            "revokeOperation": 1,
+            "membershipEmployee": 1
+          },
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000023010",
+              "name": "M2.2C timer start revoke-first RC employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000023011",
+              "name": "M2.2C timer start revoke-first RC chief",
+              "role": "jefe",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [],
+          "assignment": {
+            "id": "00000000-0000-0000-0000-000000023014",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start revoke-first RC",
+            "target": null,
+            "weight": 1,
+            "due_day": 19,
+            "team_id": "00000000-0000-0000-0000-000000023013",
+            "end_date": null,
+            "owner_id": "00000000-0000-0000-0000-000000023010",
+            "weekdays": [
+              1
+            ],
+            "checklist": [],
+            "frequency": "unica",
+            "month_day": 19,
+            "company_id": "00000000-0000-0000-0000-000000023012",
+            "start_date": "2026-10-19",
+            "start_month": "2026-10-01",
+            "template_id": null,
+            "has_deadline": true,
+            "interval_count": 1,
+            "due_offset_days": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "definition_revision": 0,
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "memberships": [
+            {
+              "active": false,
+              "revision": 1,
+              "changed_at": "2026-10-19T10:48:57.912746-03:00",
+              "changed_by": "00000000-0000-0000-0000-000000023011",
+              "company_id": "00000000-0000-0000-0000-000000023012",
+              "profile_id": "00000000-0000-0000-0000-000000023010",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000023012",
+              "profile_id": "00000000-0000-0000-0000-000000023011",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "otherEffects": {
+            "activity": 0,
+            "closures": 0,
+            "coverage": 0,
+            "assessments": 0,
+            "assignmentCount": 1,
+            "responsibilityMembers": 1
+          },
+          "timerReceipts": [],
+          "responsibility": {
+            "set": {
+              "id": "0b647ed1-ef1f-437c-8ed0-6dd4b6e8f42b",
+              "mode": "individual",
+              "origin": "baseline_legacy",
+              "reason": null,
+              "sealed": true,
+              "revision": 1,
+              "captured_at": "2026-10-19T10:48:57.888619-03:00",
+              "captured_by": null,
+              "instance_id": "00000000-0000-0000-0000-000000023015",
+              "sector_source": "unknown",
+              "anchor_owner_id": "00000000-0000-0000-0000-000000023010",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "period_snapshot": "2026-10-01",
+              "sector_snapshot": null,
+              "team_id_snapshot": "00000000-0000-0000-0000-000000023013",
+              "company_id_snapshot": "00000000-0000-0000-0000-000000023012"
+            },
+            "head": {
+              "set_id": "0b647ed1-ef1f-437c-8ed0-6dd4b6e8f42b",
+              "instance_id": "00000000-0000-0000-0000-000000023015",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            "members": [
+              {
+                "set_id": "0b647ed1-ef1f-437c-8ed0-6dd4b6e8f42b",
+                "share_bps": 10000,
+                "profile_id": "00000000-0000-0000-0000-000000023010",
+                "organization_id": "00000000-0000-0000-0000-000000000001"
+              }
+            ]
+          },
+          "commandReceipts": [
+            {
+              "kind": "companyMembership.setActive",
+              "result": {
+                "kind": "companyMembership.setActive",
+                "result": {
+                  "active": false,
+                  "companyId": "00000000-0000-0000-0000-000000023012",
+                  "profileId": "00000000-0000-0000-0000-000000023010",
+                  "membershipRevision": "1"
+                },
+                "operationId": "00000000-0000-0000-0000-000000023017",
+                "contractVersion": 1
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023011",
+              "arguments": {
+                "kind": "companyMembership.setActive",
+                "payload": {
+                  "active": false,
+                  "reason": "M2.2C timer start revoke-first RC synthetic revocation",
+                  "companyId": "00000000-0000-0000-0000-000000023012",
+                  "profileId": "00000000-0000-0000-0000-000000023010"
+                },
+                "expectedRevisions": {
+                  "membership:00000000-0000-0000-0000-000000023012:00000000-0000-0000-0000-000000023010": "0"
+                }
+              },
+              "created_at": "2026-10-19T10:48:57.913309-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000023017",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "membershipEvents": [
+            {
+              "id": "67726c29-9dbc-43fe-b03f-79abeb443e6a",
+              "active": false,
+              "reason": "M2.2C timer start revoke-first RC synthetic revocation",
+              "actor_id": "00000000-0000-0000-0000-000000023011",
+              "revision": 1,
+              "company_id": "00000000-0000-0000-0000-000000023012",
+              "created_at": "2026-10-19T10:48:57.913096-03:00",
+              "profile_id": "00000000-0000-0000-0000-000000023010",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ]
+        },
+        "afterConflict": {
+          "task": {
+            "id": "00000000-0000-0000-0000-000000023015",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start revoke-first RC",
+            "period": "2026-10-01",
+            "status": "Pendiente",
+            "target": null,
+            "weight": 1,
+            "team_id": "00000000-0000-0000-0000-000000023013",
+            "due_date": "2026-10-19",
+            "owner_id": "00000000-0000-0000-0000-000000023010",
+            "priority": "Media",
+            "checklist": [],
+            "blocked_by": null,
+            "company_id": "00000000-0000-0000-0000-000000023012",
+            "started_at": null,
+            "completed_at": null,
+            "scheduled_on": "2026-10-19",
+            "assignment_id": "00000000-0000-0000-0000-000000023014",
+            "blocked_since": null,
+            "state_revision": 1,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "audit": [
+            {
+              "at": "2026-10-19T10:48:57.896882-03:00",
+              "id": 706,
+              "action": "companyMembership.setActive",
+              "details": {
+                "active": false,
+                "profileId": "00000000-0000-0000-0000-000000023010",
+                "membershipRevision": "1"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023011",
+              "entity_id": "00000000-0000-0000-0000-000000023012",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "fences": {
+            "graph": 1,
+            "month": 0,
+            "graphConfig": 0,
+            "timerOperation": null,
+            "membershipChief": 0,
+            "revokeOperation": 1,
+            "membershipEmployee": 1
+          },
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000023010",
+              "name": "M2.2C timer start revoke-first RC employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000023011",
+              "name": "M2.2C timer start revoke-first RC chief",
+              "role": "jefe",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [],
+          "assignment": {
+            "id": "00000000-0000-0000-0000-000000023014",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start revoke-first RC",
+            "target": null,
+            "weight": 1,
+            "due_day": 19,
+            "team_id": "00000000-0000-0000-0000-000000023013",
+            "end_date": null,
+            "owner_id": "00000000-0000-0000-0000-000000023010",
+            "weekdays": [
+              1
+            ],
+            "checklist": [],
+            "frequency": "unica",
+            "month_day": 19,
+            "company_id": "00000000-0000-0000-0000-000000023012",
+            "start_date": "2026-10-19",
+            "start_month": "2026-10-01",
+            "template_id": null,
+            "has_deadline": true,
+            "interval_count": 1,
+            "due_offset_days": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "definition_revision": 0,
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "memberships": [
+            {
+              "active": false,
+              "revision": 1,
+              "changed_at": "2026-10-19T10:48:57.912746-03:00",
+              "changed_by": "00000000-0000-0000-0000-000000023011",
+              "company_id": "00000000-0000-0000-0000-000000023012",
+              "profile_id": "00000000-0000-0000-0000-000000023010",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000023012",
+              "profile_id": "00000000-0000-0000-0000-000000023011",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "otherEffects": {
+            "activity": 0,
+            "closures": 0,
+            "coverage": 0,
+            "assessments": 0,
+            "assignmentCount": 1,
+            "responsibilityMembers": 1
+          },
+          "timerReceipts": [],
+          "responsibility": {
+            "set": {
+              "id": "0b647ed1-ef1f-437c-8ed0-6dd4b6e8f42b",
+              "mode": "individual",
+              "origin": "baseline_legacy",
+              "reason": null,
+              "sealed": true,
+              "revision": 1,
+              "captured_at": "2026-10-19T10:48:57.888619-03:00",
+              "captured_by": null,
+              "instance_id": "00000000-0000-0000-0000-000000023015",
+              "sector_source": "unknown",
+              "anchor_owner_id": "00000000-0000-0000-0000-000000023010",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "period_snapshot": "2026-10-01",
+              "sector_snapshot": null,
+              "team_id_snapshot": "00000000-0000-0000-0000-000000023013",
+              "company_id_snapshot": "00000000-0000-0000-0000-000000023012"
+            },
+            "head": {
+              "set_id": "0b647ed1-ef1f-437c-8ed0-6dd4b6e8f42b",
+              "instance_id": "00000000-0000-0000-0000-000000023015",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            "members": [
+              {
+                "set_id": "0b647ed1-ef1f-437c-8ed0-6dd4b6e8f42b",
+                "share_bps": 10000,
+                "profile_id": "00000000-0000-0000-0000-000000023010",
+                "organization_id": "00000000-0000-0000-0000-000000000001"
+              }
+            ]
+          },
+          "commandReceipts": [
+            {
+              "kind": "companyMembership.setActive",
+              "result": {
+                "kind": "companyMembership.setActive",
+                "result": {
+                  "active": false,
+                  "companyId": "00000000-0000-0000-0000-000000023012",
+                  "profileId": "00000000-0000-0000-0000-000000023010",
+                  "membershipRevision": "1"
+                },
+                "operationId": "00000000-0000-0000-0000-000000023017",
+                "contractVersion": 1
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023011",
+              "arguments": {
+                "kind": "companyMembership.setActive",
+                "payload": {
+                  "active": false,
+                  "reason": "M2.2C timer start revoke-first RC synthetic revocation",
+                  "companyId": "00000000-0000-0000-0000-000000023012",
+                  "profileId": "00000000-0000-0000-0000-000000023010"
+                },
+                "expectedRevisions": {
+                  "membership:00000000-0000-0000-0000-000000023012:00000000-0000-0000-0000-000000023010": "0"
+                }
+              },
+              "created_at": "2026-10-19T10:48:57.913309-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000023017",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "membershipEvents": [
+            {
+              "id": "67726c29-9dbc-43fe-b03f-79abeb443e6a",
+              "active": false,
+              "reason": "M2.2C timer start revoke-first RC synthetic revocation",
+              "actor_id": "00000000-0000-0000-0000-000000023011",
+              "revision": 1,
+              "company_id": "00000000-0000-0000-0000-000000023012",
+              "created_at": "2026-10-19T10:48:57.913096-03:00",
+              "profile_id": "00000000-0000-0000-0000-000000023010",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ]
+        },
+        "final": {
+          "task": {
+            "id": "00000000-0000-0000-0000-000000023015",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start revoke-first RC",
+            "period": "2026-10-01",
+            "status": "Pendiente",
+            "target": null,
+            "weight": 1,
+            "team_id": "00000000-0000-0000-0000-000000023013",
+            "due_date": "2026-10-19",
+            "owner_id": "00000000-0000-0000-0000-000000023010",
+            "priority": "Media",
+            "checklist": [],
+            "blocked_by": null,
+            "company_id": "00000000-0000-0000-0000-000000023012",
+            "started_at": null,
+            "completed_at": null,
+            "scheduled_on": "2026-10-19",
+            "assignment_id": "00000000-0000-0000-0000-000000023014",
+            "blocked_since": null,
+            "state_revision": 1,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "audit": [
+            {
+              "at": "2026-10-19T10:48:57.896882-03:00",
+              "id": 706,
+              "action": "companyMembership.setActive",
+              "details": {
+                "active": false,
+                "profileId": "00000000-0000-0000-0000-000000023010",
+                "membershipRevision": "1"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023011",
+              "entity_id": "00000000-0000-0000-0000-000000023012",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "fences": {
+            "graph": 1,
+            "month": 0,
+            "graphConfig": 0,
+            "timerOperation": null,
+            "membershipChief": 0,
+            "revokeOperation": 1,
+            "membershipEmployee": 1
+          },
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000023010",
+              "name": "M2.2C timer start revoke-first RC employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000023011",
+              "name": "M2.2C timer start revoke-first RC chief",
+              "role": "jefe",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [],
+          "assignment": {
+            "id": "00000000-0000-0000-0000-000000023014",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start revoke-first RC",
+            "target": null,
+            "weight": 1,
+            "due_day": 19,
+            "team_id": "00000000-0000-0000-0000-000000023013",
+            "end_date": null,
+            "owner_id": "00000000-0000-0000-0000-000000023010",
+            "weekdays": [
+              1
+            ],
+            "checklist": [],
+            "frequency": "unica",
+            "month_day": 19,
+            "company_id": "00000000-0000-0000-0000-000000023012",
+            "start_date": "2026-10-19",
+            "start_month": "2026-10-01",
+            "template_id": null,
+            "has_deadline": true,
+            "interval_count": 1,
+            "due_offset_days": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "definition_revision": 0,
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "memberships": [
+            {
+              "active": false,
+              "revision": 1,
+              "changed_at": "2026-10-19T10:48:57.912746-03:00",
+              "changed_by": "00000000-0000-0000-0000-000000023011",
+              "company_id": "00000000-0000-0000-0000-000000023012",
+              "profile_id": "00000000-0000-0000-0000-000000023010",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000023012",
+              "profile_id": "00000000-0000-0000-0000-000000023011",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "otherEffects": {
+            "activity": 0,
+            "closures": 0,
+            "coverage": 0,
+            "assessments": 0,
+            "assignmentCount": 1,
+            "responsibilityMembers": 1
+          },
+          "timerReceipts": [],
+          "responsibility": {
+            "set": {
+              "id": "0b647ed1-ef1f-437c-8ed0-6dd4b6e8f42b",
+              "mode": "individual",
+              "origin": "baseline_legacy",
+              "reason": null,
+              "sealed": true,
+              "revision": 1,
+              "captured_at": "2026-10-19T10:48:57.888619-03:00",
+              "captured_by": null,
+              "instance_id": "00000000-0000-0000-0000-000000023015",
+              "sector_source": "unknown",
+              "anchor_owner_id": "00000000-0000-0000-0000-000000023010",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "period_snapshot": "2026-10-01",
+              "sector_snapshot": null,
+              "team_id_snapshot": "00000000-0000-0000-0000-000000023013",
+              "company_id_snapshot": "00000000-0000-0000-0000-000000023012"
+            },
+            "head": {
+              "set_id": "0b647ed1-ef1f-437c-8ed0-6dd4b6e8f42b",
+              "instance_id": "00000000-0000-0000-0000-000000023015",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            "members": [
+              {
+                "set_id": "0b647ed1-ef1f-437c-8ed0-6dd4b6e8f42b",
+                "share_bps": 10000,
+                "profile_id": "00000000-0000-0000-0000-000000023010",
+                "organization_id": "00000000-0000-0000-0000-000000000001"
+              }
+            ]
+          },
+          "commandReceipts": [
+            {
+              "kind": "companyMembership.setActive",
+              "result": {
+                "kind": "companyMembership.setActive",
+                "result": {
+                  "active": false,
+                  "companyId": "00000000-0000-0000-0000-000000023012",
+                  "profileId": "00000000-0000-0000-0000-000000023010",
+                  "membershipRevision": "1"
+                },
+                "operationId": "00000000-0000-0000-0000-000000023017",
+                "contractVersion": 1
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023011",
+              "arguments": {
+                "kind": "companyMembership.setActive",
+                "payload": {
+                  "active": false,
+                  "reason": "M2.2C timer start revoke-first RC synthetic revocation",
+                  "companyId": "00000000-0000-0000-0000-000000023012",
+                  "profileId": "00000000-0000-0000-0000-000000023010"
+                },
+                "expectedRevisions": {
+                  "membership:00000000-0000-0000-0000-000000023012:00000000-0000-0000-0000-000000023010": "0"
+                }
+              },
+              "created_at": "2026-10-19T10:48:57.913309-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000023017",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "membershipEvents": [
+            {
+              "id": "67726c29-9dbc-43fe-b03f-79abeb443e6a",
+              "active": false,
+              "reason": "M2.2C timer start revoke-first RC synthetic revocation",
+              "actor_id": "00000000-0000-0000-0000-000000023011",
+              "revision": 1,
+              "company_id": "00000000-0000-0000-0000-000000023012",
+              "created_at": "2026-10-19T10:48:57.913096-03:00",
+              "profile_id": "00000000-0000-0000-0000-000000023010",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ]
+        }
+      },
+      {
+        "name": "M2.2C timer start/membership revoke timer-first (repeatable read/repeatable read)",
+        "order": "timer-first",
+        "isolation": "repeatable read",
+        "actors": {
+          "employee": "00000000-0000-0000-0000-000000023020",
+          "chief": "00000000-0000-0000-0000-000000023021"
+        },
+        "claims": {
+          "winner": {
+            "aal": "aal1",
+            "sub": "00000000-0000-0000-0000-000000023020",
+            "uid": "00000000-0000-0000-0000-000000023020",
+            "jwtSub": "00000000-0000-0000-0000-000000023020",
+            "isolation": "repeatable read"
+          },
+          "loser": {
+            "aal": "aal2",
+            "sub": "00000000-0000-0000-0000-000000023021",
+            "uid": "00000000-0000-0000-0000-000000023021",
+            "jwtSub": "00000000-0000-0000-0000-000000023021",
+            "isolation": "repeatable read"
+          },
+          "retry": {
+            "aal": "aal2",
+            "sub": "00000000-0000-0000-0000-000000023021",
+            "uid": "00000000-0000-0000-0000-000000023021",
+            "jwtSub": "00000000-0000-0000-0000-000000023021",
+            "isolation": "repeatable read"
+          }
+        },
+        "blocked": true,
+        "winnerPid": 19624,
+        "loserPid": 9156,
+        "blockerPids": "{19624}",
+        "winnerSQLSTATE": "00000",
+        "loserSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "retryPrimaryError": null,
+        "fenceExpected": {
+          "membershipEmployee": 2,
+          "membershipChief": 0,
+          "month": 1,
+          "graph": 2,
+          "graphConfig": 0,
+          "timerOperation": null,
+          "revokeOperation": 1
+        },
+        "winnerOnly": {
+          "task": {
+            "id": "00000000-0000-0000-0000-000000023025",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start timer-first RR",
+            "period": "2026-10-01",
+            "status": "En curso",
+            "target": null,
+            "weight": 1,
+            "team_id": "00000000-0000-0000-0000-000000023023",
+            "due_date": "2026-10-19",
+            "owner_id": "00000000-0000-0000-0000-000000023020",
+            "priority": "Media",
+            "checklist": [],
+            "blocked_by": null,
+            "company_id": "00000000-0000-0000-0000-000000023022",
+            "started_at": "2026-10-19T10:48:58.2005-03:00",
+            "completed_at": null,
+            "scheduled_on": "2026-10-19",
+            "assignment_id": "00000000-0000-0000-0000-000000023024",
+            "blocked_since": null,
+            "state_revision": 1,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "audit": [
+            {
+              "at": "2026-10-19T10:48:58.2005-03:00",
+              "id": 707,
+              "action": "task.timer_started",
+              "details": {
+                "binding": null,
+                "instance": "00000000-0000-0000-0000-000000023025",
+                "contribution": "responsible"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023020",
+              "entity_id": "a11c3ef7-df39-44a8-9450-8878fa90f4e7",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "fences": {
+            "graph": 1,
+            "month": 1,
+            "graphConfig": 0,
+            "timerOperation": null,
+            "membershipChief": 0,
+            "revokeOperation": null,
+            "membershipEmployee": 1
+          },
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000023020",
+              "name": "M2.2C timer start timer-first RR employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000023021",
+              "name": "M2.2C timer start timer-first RR chief",
+              "role": "jefe",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [
+            {
+              "id": "a11c3ef7-df39-44a8-9450-8878fa90f4e7",
+              "actor_id": "00000000-0000-0000-0000-000000023020",
+              "ended_at": null,
+              "absence_id": null,
+              "created_at": "2026-10-19T10:48:58.190146-03:00",
+              "started_at": "2026-10-19T10:48:58.2005-03:00",
+              "instance_id": "00000000-0000-0000-0000-000000023025",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "contribution_kind": "responsible",
+              "coverage_binding_id": null
+            }
+          ],
+          "assignment": {
+            "id": "00000000-0000-0000-0000-000000023024",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start timer-first RR",
+            "target": null,
+            "weight": 1,
+            "due_day": 19,
+            "team_id": "00000000-0000-0000-0000-000000023023",
+            "end_date": null,
+            "owner_id": "00000000-0000-0000-0000-000000023020",
+            "weekdays": [
+              1
+            ],
+            "checklist": [],
+            "frequency": "unica",
+            "month_day": 19,
+            "company_id": "00000000-0000-0000-0000-000000023022",
+            "start_date": "2026-10-19",
+            "start_month": "2026-10-01",
+            "template_id": null,
+            "has_deadline": true,
+            "interval_count": 1,
+            "due_offset_days": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "definition_revision": 0,
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "memberships": [
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000023022",
+              "profile_id": "00000000-0000-0000-0000-000000023020",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000023022",
+              "profile_id": "00000000-0000-0000-0000-000000023021",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "otherEffects": {
+            "activity": 0,
+            "closures": 0,
+            "coverage": 0,
+            "assessments": 0,
+            "assignmentCount": 1,
+            "responsibilityMembers": 1
+          },
+          "timerReceipts": [
+            {
+              "result": {
+                "session_id": "a11c3ef7-df39-44a8-9450-8878fa90f4e7"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023020",
+              "arguments": {
+                "switch": false,
+                "instance": "00000000-0000-0000-0000-000000023025",
+                "revision": 0
+              },
+              "created_at": "2026-10-19T10:48:58.190146-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000023026",
+              "operation_kind": "start_timer",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "responsibility": {
+            "set": {
+              "id": "00c67624-4b7b-48df-a6d6-2fd928fd66c2",
+              "mode": "individual",
+              "origin": "baseline_legacy",
+              "reason": null,
+              "sealed": true,
+              "revision": 1,
+              "captured_at": "2026-10-19T10:48:58.181811-03:00",
+              "captured_by": null,
+              "instance_id": "00000000-0000-0000-0000-000000023025",
+              "sector_source": "unknown",
+              "anchor_owner_id": "00000000-0000-0000-0000-000000023020",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "period_snapshot": "2026-10-01",
+              "sector_snapshot": null,
+              "team_id_snapshot": "00000000-0000-0000-0000-000000023023",
+              "company_id_snapshot": "00000000-0000-0000-0000-000000023022"
+            },
+            "head": {
+              "set_id": "00c67624-4b7b-48df-a6d6-2fd928fd66c2",
+              "instance_id": "00000000-0000-0000-0000-000000023025",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            "members": [
+              {
+                "set_id": "00c67624-4b7b-48df-a6d6-2fd928fd66c2",
+                "share_bps": 10000,
+                "profile_id": "00000000-0000-0000-0000-000000023020",
+                "organization_id": "00000000-0000-0000-0000-000000000001"
+              }
+            ]
+          },
+          "commandReceipts": [],
+          "membershipEvents": []
+        },
+        "afterConflict": {
+          "task": {
+            "id": "00000000-0000-0000-0000-000000023025",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start timer-first RR",
+            "period": "2026-10-01",
+            "status": "En curso",
+            "target": null,
+            "weight": 1,
+            "team_id": "00000000-0000-0000-0000-000000023023",
+            "due_date": "2026-10-19",
+            "owner_id": "00000000-0000-0000-0000-000000023020",
+            "priority": "Media",
+            "checklist": [],
+            "blocked_by": null,
+            "company_id": "00000000-0000-0000-0000-000000023022",
+            "started_at": "2026-10-19T10:48:58.2005-03:00",
+            "completed_at": null,
+            "scheduled_on": "2026-10-19",
+            "assignment_id": "00000000-0000-0000-0000-000000023024",
+            "blocked_since": null,
+            "state_revision": 1,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "audit": [
+            {
+              "at": "2026-10-19T10:48:58.2005-03:00",
+              "id": 707,
+              "action": "task.timer_started",
+              "details": {
+                "binding": null,
+                "instance": "00000000-0000-0000-0000-000000023025",
+                "contribution": "responsible"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023020",
+              "entity_id": "a11c3ef7-df39-44a8-9450-8878fa90f4e7",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "fences": {
+            "graph": 1,
+            "month": 1,
+            "graphConfig": 0,
+            "timerOperation": null,
+            "membershipChief": 0,
+            "revokeOperation": null,
+            "membershipEmployee": 1
+          },
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000023020",
+              "name": "M2.2C timer start timer-first RR employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000023021",
+              "name": "M2.2C timer start timer-first RR chief",
+              "role": "jefe",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [
+            {
+              "id": "a11c3ef7-df39-44a8-9450-8878fa90f4e7",
+              "actor_id": "00000000-0000-0000-0000-000000023020",
+              "ended_at": null,
+              "absence_id": null,
+              "created_at": "2026-10-19T10:48:58.190146-03:00",
+              "started_at": "2026-10-19T10:48:58.2005-03:00",
+              "instance_id": "00000000-0000-0000-0000-000000023025",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "contribution_kind": "responsible",
+              "coverage_binding_id": null
+            }
+          ],
+          "assignment": {
+            "id": "00000000-0000-0000-0000-000000023024",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start timer-first RR",
+            "target": null,
+            "weight": 1,
+            "due_day": 19,
+            "team_id": "00000000-0000-0000-0000-000000023023",
+            "end_date": null,
+            "owner_id": "00000000-0000-0000-0000-000000023020",
+            "weekdays": [
+              1
+            ],
+            "checklist": [],
+            "frequency": "unica",
+            "month_day": 19,
+            "company_id": "00000000-0000-0000-0000-000000023022",
+            "start_date": "2026-10-19",
+            "start_month": "2026-10-01",
+            "template_id": null,
+            "has_deadline": true,
+            "interval_count": 1,
+            "due_offset_days": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "definition_revision": 0,
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "memberships": [
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000023022",
+              "profile_id": "00000000-0000-0000-0000-000000023020",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000023022",
+              "profile_id": "00000000-0000-0000-0000-000000023021",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "otherEffects": {
+            "activity": 0,
+            "closures": 0,
+            "coverage": 0,
+            "assessments": 0,
+            "assignmentCount": 1,
+            "responsibilityMembers": 1
+          },
+          "timerReceipts": [
+            {
+              "result": {
+                "session_id": "a11c3ef7-df39-44a8-9450-8878fa90f4e7"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023020",
+              "arguments": {
+                "switch": false,
+                "instance": "00000000-0000-0000-0000-000000023025",
+                "revision": 0
+              },
+              "created_at": "2026-10-19T10:48:58.190146-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000023026",
+              "operation_kind": "start_timer",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "responsibility": {
+            "set": {
+              "id": "00c67624-4b7b-48df-a6d6-2fd928fd66c2",
+              "mode": "individual",
+              "origin": "baseline_legacy",
+              "reason": null,
+              "sealed": true,
+              "revision": 1,
+              "captured_at": "2026-10-19T10:48:58.181811-03:00",
+              "captured_by": null,
+              "instance_id": "00000000-0000-0000-0000-000000023025",
+              "sector_source": "unknown",
+              "anchor_owner_id": "00000000-0000-0000-0000-000000023020",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "period_snapshot": "2026-10-01",
+              "sector_snapshot": null,
+              "team_id_snapshot": "00000000-0000-0000-0000-000000023023",
+              "company_id_snapshot": "00000000-0000-0000-0000-000000023022"
+            },
+            "head": {
+              "set_id": "00c67624-4b7b-48df-a6d6-2fd928fd66c2",
+              "instance_id": "00000000-0000-0000-0000-000000023025",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            "members": [
+              {
+                "set_id": "00c67624-4b7b-48df-a6d6-2fd928fd66c2",
+                "share_bps": 10000,
+                "profile_id": "00000000-0000-0000-0000-000000023020",
+                "organization_id": "00000000-0000-0000-0000-000000000001"
+              }
+            ]
+          },
+          "commandReceipts": [],
+          "membershipEvents": []
+        },
+        "final": {
+          "task": {
+            "id": "00000000-0000-0000-0000-000000023025",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start timer-first RR",
+            "period": "2026-10-01",
+            "status": "En curso",
+            "target": null,
+            "weight": 1,
+            "team_id": "00000000-0000-0000-0000-000000023023",
+            "due_date": "2026-10-19",
+            "owner_id": "00000000-0000-0000-0000-000000023020",
+            "priority": "Media",
+            "checklist": [],
+            "blocked_by": null,
+            "company_id": "00000000-0000-0000-0000-000000023022",
+            "started_at": "2026-10-19T10:48:58.2005-03:00",
+            "completed_at": null,
+            "scheduled_on": "2026-10-19",
+            "assignment_id": "00000000-0000-0000-0000-000000023024",
+            "blocked_since": null,
+            "state_revision": 2,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "audit": [
+            {
+              "at": "2026-10-19T10:48:58.2005-03:00",
+              "id": 707,
+              "action": "task.timer_started",
+              "details": {
+                "binding": null,
+                "instance": "00000000-0000-0000-0000-000000023025",
+                "contribution": "responsible"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023020",
+              "entity_id": "a11c3ef7-df39-44a8-9450-8878fa90f4e7",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "at": "2026-10-19T10:48:58.347776-03:00",
+              "id": 708,
+              "action": "companyMembership.setActive",
+              "details": {
+                "active": false,
+                "profileId": "00000000-0000-0000-0000-000000023020",
+                "membershipRevision": "1"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023021",
+              "entity_id": "00000000-0000-0000-0000-000000023022",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "fences": {
+            "graph": 2,
+            "month": 1,
+            "graphConfig": 0,
+            "timerOperation": null,
+            "membershipChief": 0,
+            "revokeOperation": 1,
+            "membershipEmployee": 2
+          },
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000023020",
+              "name": "M2.2C timer start timer-first RR employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000023021",
+              "name": "M2.2C timer start timer-first RR chief",
+              "role": "jefe",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [
+            {
+              "id": "a11c3ef7-df39-44a8-9450-8878fa90f4e7",
+              "actor_id": "00000000-0000-0000-0000-000000023020",
+              "ended_at": "2026-10-19T10:48:58.453683-03:00",
+              "absence_id": null,
+              "created_at": "2026-10-19T10:48:58.190146-03:00",
+              "started_at": "2026-10-19T10:48:58.2005-03:00",
+              "instance_id": "00000000-0000-0000-0000-000000023025",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "contribution_kind": "responsible",
+              "coverage_binding_id": null
+            }
+          ],
+          "assignment": {
+            "id": "00000000-0000-0000-0000-000000023024",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start timer-first RR",
+            "target": null,
+            "weight": 1,
+            "due_day": 19,
+            "team_id": "00000000-0000-0000-0000-000000023023",
+            "end_date": null,
+            "owner_id": "00000000-0000-0000-0000-000000023020",
+            "weekdays": [
+              1
+            ],
+            "checklist": [],
+            "frequency": "unica",
+            "month_day": 19,
+            "company_id": "00000000-0000-0000-0000-000000023022",
+            "start_date": "2026-10-19",
+            "start_month": "2026-10-01",
+            "template_id": null,
+            "has_deadline": true,
+            "interval_count": 1,
+            "due_offset_days": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "definition_revision": 0,
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "memberships": [
+            {
+              "active": false,
+              "revision": 1,
+              "changed_at": "2026-10-19T10:48:58.453103-03:00",
+              "changed_by": "00000000-0000-0000-0000-000000023021",
+              "company_id": "00000000-0000-0000-0000-000000023022",
+              "profile_id": "00000000-0000-0000-0000-000000023020",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000023022",
+              "profile_id": "00000000-0000-0000-0000-000000023021",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "otherEffects": {
+            "activity": 0,
+            "closures": 0,
+            "coverage": 0,
+            "assessments": 0,
+            "assignmentCount": 1,
+            "responsibilityMembers": 1
+          },
+          "timerReceipts": [
+            {
+              "result": {
+                "session_id": "a11c3ef7-df39-44a8-9450-8878fa90f4e7"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023020",
+              "arguments": {
+                "switch": false,
+                "instance": "00000000-0000-0000-0000-000000023025",
+                "revision": 0
+              },
+              "created_at": "2026-10-19T10:48:58.190146-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000023026",
+              "operation_kind": "start_timer",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "responsibility": {
+            "set": {
+              "id": "00c67624-4b7b-48df-a6d6-2fd928fd66c2",
+              "mode": "individual",
+              "origin": "baseline_legacy",
+              "reason": null,
+              "sealed": true,
+              "revision": 1,
+              "captured_at": "2026-10-19T10:48:58.181811-03:00",
+              "captured_by": null,
+              "instance_id": "00000000-0000-0000-0000-000000023025",
+              "sector_source": "unknown",
+              "anchor_owner_id": "00000000-0000-0000-0000-000000023020",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "period_snapshot": "2026-10-01",
+              "sector_snapshot": null,
+              "team_id_snapshot": "00000000-0000-0000-0000-000000023023",
+              "company_id_snapshot": "00000000-0000-0000-0000-000000023022"
+            },
+            "head": {
+              "set_id": "00c67624-4b7b-48df-a6d6-2fd928fd66c2",
+              "instance_id": "00000000-0000-0000-0000-000000023025",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            "members": [
+              {
+                "set_id": "00c67624-4b7b-48df-a6d6-2fd928fd66c2",
+                "share_bps": 10000,
+                "profile_id": "00000000-0000-0000-0000-000000023020",
+                "organization_id": "00000000-0000-0000-0000-000000000001"
+              }
+            ]
+          },
+          "commandReceipts": [
+            {
+              "kind": "companyMembership.setActive",
+              "result": {
+                "kind": "companyMembership.setActive",
+                "result": {
+                  "active": false,
+                  "companyId": "00000000-0000-0000-0000-000000023022",
+                  "profileId": "00000000-0000-0000-0000-000000023020",
+                  "membershipRevision": "1"
+                },
+                "operationId": "00000000-0000-0000-0000-000000023027",
+                "contractVersion": 1
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023021",
+              "arguments": {
+                "kind": "companyMembership.setActive",
+                "payload": {
+                  "active": false,
+                  "reason": "M2.2C timer start timer-first RR synthetic revocation",
+                  "companyId": "00000000-0000-0000-0000-000000023022",
+                  "profileId": "00000000-0000-0000-0000-000000023020"
+                },
+                "expectedRevisions": {
+                  "membership:00000000-0000-0000-0000-000000023022:00000000-0000-0000-0000-000000023020": "0"
+                }
+              },
+              "created_at": "2026-10-19T10:48:58.462911-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000023027",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "membershipEvents": [
+            {
+              "id": "eaa76877-8b59-40c2-87fe-e3f8ac31c247",
+              "active": false,
+              "reason": "M2.2C timer start timer-first RR synthetic revocation",
+              "actor_id": "00000000-0000-0000-0000-000000023021",
+              "revision": 1,
+              "company_id": "00000000-0000-0000-0000-000000023022",
+              "created_at": "2026-10-19T10:48:58.455583-03:00",
+              "profile_id": "00000000-0000-0000-0000-000000023020",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ]
+        }
+      },
+      {
+        "name": "M2.2C timer start/membership revoke revoke-first (repeatable read/repeatable read)",
+        "order": "revoke-first",
+        "isolation": "repeatable read",
+        "actors": {
+          "employee": "00000000-0000-0000-0000-000000023030",
+          "chief": "00000000-0000-0000-0000-000000023031"
+        },
+        "claims": {
+          "winner": {
+            "aal": "aal2",
+            "sub": "00000000-0000-0000-0000-000000023031",
+            "uid": "00000000-0000-0000-0000-000000023031",
+            "jwtSub": "00000000-0000-0000-0000-000000023031",
+            "isolation": "repeatable read"
+          },
+          "loser": {
+            "aal": "aal1",
+            "sub": "00000000-0000-0000-0000-000000023030",
+            "uid": "00000000-0000-0000-0000-000000023030",
+            "jwtSub": "00000000-0000-0000-0000-000000023030",
+            "isolation": "repeatable read"
+          },
+          "retry": {
+            "aal": "aal1",
+            "sub": "00000000-0000-0000-0000-000000023030",
+            "uid": "00000000-0000-0000-0000-000000023030",
+            "jwtSub": "00000000-0000-0000-0000-000000023030",
+            "isolation": "repeatable read"
+          }
+        },
+        "blocked": true,
+        "winnerPid": 19624,
+        "loserPid": 9156,
+        "blockerPids": "{19624}",
+        "winnerSQLSTATE": "00000",
+        "loserSQLSTATE": "40001",
+        "retrySQLSTATE": "P0001",
+        "retryPrimaryError": "Sin permiso",
+        "fenceExpected": {
+          "membershipEmployee": 1,
+          "membershipChief": 0,
+          "month": 0,
+          "graph": 1,
+          "graphConfig": 0,
+          "timerOperation": null,
+          "revokeOperation": 1
+        },
+        "winnerOnly": {
+          "task": {
+            "id": "00000000-0000-0000-0000-000000023035",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start revoke-first RR",
+            "period": "2026-10-01",
+            "status": "Pendiente",
+            "target": null,
+            "weight": 1,
+            "team_id": "00000000-0000-0000-0000-000000023033",
+            "due_date": "2026-10-19",
+            "owner_id": "00000000-0000-0000-0000-000000023030",
+            "priority": "Media",
+            "checklist": [],
+            "blocked_by": null,
+            "company_id": "00000000-0000-0000-0000-000000023032",
+            "started_at": null,
+            "completed_at": null,
+            "scheduled_on": "2026-10-19",
+            "assignment_id": "00000000-0000-0000-0000-000000023034",
+            "blocked_since": null,
+            "state_revision": 1,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "audit": [
+            {
+              "at": "2026-10-19T10:48:58.492158-03:00",
+              "id": 709,
+              "action": "companyMembership.setActive",
+              "details": {
+                "active": false,
+                "profileId": "00000000-0000-0000-0000-000000023030",
+                "membershipRevision": "1"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023031",
+              "entity_id": "00000000-0000-0000-0000-000000023032",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "fences": {
+            "graph": 1,
+            "month": 0,
+            "graphConfig": 0,
+            "timerOperation": null,
+            "membershipChief": 0,
+            "revokeOperation": 1,
+            "membershipEmployee": 1
+          },
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000023030",
+              "name": "M2.2C timer start revoke-first RR employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000023031",
+              "name": "M2.2C timer start revoke-first RR chief",
+              "role": "jefe",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [],
+          "assignment": {
+            "id": "00000000-0000-0000-0000-000000023034",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start revoke-first RR",
+            "target": null,
+            "weight": 1,
+            "due_day": 19,
+            "team_id": "00000000-0000-0000-0000-000000023033",
+            "end_date": null,
+            "owner_id": "00000000-0000-0000-0000-000000023030",
+            "weekdays": [
+              1
+            ],
+            "checklist": [],
+            "frequency": "unica",
+            "month_day": 19,
+            "company_id": "00000000-0000-0000-0000-000000023032",
+            "start_date": "2026-10-19",
+            "start_month": "2026-10-01",
+            "template_id": null,
+            "has_deadline": true,
+            "interval_count": 1,
+            "due_offset_days": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "definition_revision": 0,
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "memberships": [
+            {
+              "active": false,
+              "revision": 1,
+              "changed_at": "2026-10-19T10:48:58.509369-03:00",
+              "changed_by": "00000000-0000-0000-0000-000000023031",
+              "company_id": "00000000-0000-0000-0000-000000023032",
+              "profile_id": "00000000-0000-0000-0000-000000023030",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000023032",
+              "profile_id": "00000000-0000-0000-0000-000000023031",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "otherEffects": {
+            "activity": 0,
+            "closures": 0,
+            "coverage": 0,
+            "assessments": 0,
+            "assignmentCount": 1,
+            "responsibilityMembers": 1
+          },
+          "timerReceipts": [],
+          "responsibility": {
+            "set": {
+              "id": "7a6d8d35-e0b5-4a20-8cb0-cd1bbee48113",
+              "mode": "individual",
+              "origin": "baseline_legacy",
+              "reason": null,
+              "sealed": true,
+              "revision": 1,
+              "captured_at": "2026-10-19T10:48:58.483077-03:00",
+              "captured_by": null,
+              "instance_id": "00000000-0000-0000-0000-000000023035",
+              "sector_source": "unknown",
+              "anchor_owner_id": "00000000-0000-0000-0000-000000023030",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "period_snapshot": "2026-10-01",
+              "sector_snapshot": null,
+              "team_id_snapshot": "00000000-0000-0000-0000-000000023033",
+              "company_id_snapshot": "00000000-0000-0000-0000-000000023032"
+            },
+            "head": {
+              "set_id": "7a6d8d35-e0b5-4a20-8cb0-cd1bbee48113",
+              "instance_id": "00000000-0000-0000-0000-000000023035",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            "members": [
+              {
+                "set_id": "7a6d8d35-e0b5-4a20-8cb0-cd1bbee48113",
+                "share_bps": 10000,
+                "profile_id": "00000000-0000-0000-0000-000000023030",
+                "organization_id": "00000000-0000-0000-0000-000000000001"
+              }
+            ]
+          },
+          "commandReceipts": [
+            {
+              "kind": "companyMembership.setActive",
+              "result": {
+                "kind": "companyMembership.setActive",
+                "result": {
+                  "active": false,
+                  "companyId": "00000000-0000-0000-0000-000000023032",
+                  "profileId": "00000000-0000-0000-0000-000000023030",
+                  "membershipRevision": "1"
+                },
+                "operationId": "00000000-0000-0000-0000-000000023037",
+                "contractVersion": 1
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023031",
+              "arguments": {
+                "kind": "companyMembership.setActive",
+                "payload": {
+                  "active": false,
+                  "reason": "M2.2C timer start revoke-first RR synthetic revocation",
+                  "companyId": "00000000-0000-0000-0000-000000023032",
+                  "profileId": "00000000-0000-0000-0000-000000023030"
+                },
+                "expectedRevisions": {
+                  "membership:00000000-0000-0000-0000-000000023032:00000000-0000-0000-0000-000000023030": "0"
+                }
+              },
+              "created_at": "2026-10-19T10:48:58.509937-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000023037",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "membershipEvents": [
+            {
+              "id": "d4eea3f2-e265-4b73-a866-b31aed57fcda",
+              "active": false,
+              "reason": "M2.2C timer start revoke-first RR synthetic revocation",
+              "actor_id": "00000000-0000-0000-0000-000000023031",
+              "revision": 1,
+              "company_id": "00000000-0000-0000-0000-000000023032",
+              "created_at": "2026-10-19T10:48:58.509723-03:00",
+              "profile_id": "00000000-0000-0000-0000-000000023030",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ]
+        },
+        "afterConflict": {
+          "task": {
+            "id": "00000000-0000-0000-0000-000000023035",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start revoke-first RR",
+            "period": "2026-10-01",
+            "status": "Pendiente",
+            "target": null,
+            "weight": 1,
+            "team_id": "00000000-0000-0000-0000-000000023033",
+            "due_date": "2026-10-19",
+            "owner_id": "00000000-0000-0000-0000-000000023030",
+            "priority": "Media",
+            "checklist": [],
+            "blocked_by": null,
+            "company_id": "00000000-0000-0000-0000-000000023032",
+            "started_at": null,
+            "completed_at": null,
+            "scheduled_on": "2026-10-19",
+            "assignment_id": "00000000-0000-0000-0000-000000023034",
+            "blocked_since": null,
+            "state_revision": 1,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "audit": [
+            {
+              "at": "2026-10-19T10:48:58.492158-03:00",
+              "id": 709,
+              "action": "companyMembership.setActive",
+              "details": {
+                "active": false,
+                "profileId": "00000000-0000-0000-0000-000000023030",
+                "membershipRevision": "1"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023031",
+              "entity_id": "00000000-0000-0000-0000-000000023032",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "fences": {
+            "graph": 1,
+            "month": 0,
+            "graphConfig": 0,
+            "timerOperation": null,
+            "membershipChief": 0,
+            "revokeOperation": 1,
+            "membershipEmployee": 1
+          },
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000023030",
+              "name": "M2.2C timer start revoke-first RR employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000023031",
+              "name": "M2.2C timer start revoke-first RR chief",
+              "role": "jefe",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [],
+          "assignment": {
+            "id": "00000000-0000-0000-0000-000000023034",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start revoke-first RR",
+            "target": null,
+            "weight": 1,
+            "due_day": 19,
+            "team_id": "00000000-0000-0000-0000-000000023033",
+            "end_date": null,
+            "owner_id": "00000000-0000-0000-0000-000000023030",
+            "weekdays": [
+              1
+            ],
+            "checklist": [],
+            "frequency": "unica",
+            "month_day": 19,
+            "company_id": "00000000-0000-0000-0000-000000023032",
+            "start_date": "2026-10-19",
+            "start_month": "2026-10-01",
+            "template_id": null,
+            "has_deadline": true,
+            "interval_count": 1,
+            "due_offset_days": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "definition_revision": 0,
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "memberships": [
+            {
+              "active": false,
+              "revision": 1,
+              "changed_at": "2026-10-19T10:48:58.509369-03:00",
+              "changed_by": "00000000-0000-0000-0000-000000023031",
+              "company_id": "00000000-0000-0000-0000-000000023032",
+              "profile_id": "00000000-0000-0000-0000-000000023030",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000023032",
+              "profile_id": "00000000-0000-0000-0000-000000023031",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "otherEffects": {
+            "activity": 0,
+            "closures": 0,
+            "coverage": 0,
+            "assessments": 0,
+            "assignmentCount": 1,
+            "responsibilityMembers": 1
+          },
+          "timerReceipts": [],
+          "responsibility": {
+            "set": {
+              "id": "7a6d8d35-e0b5-4a20-8cb0-cd1bbee48113",
+              "mode": "individual",
+              "origin": "baseline_legacy",
+              "reason": null,
+              "sealed": true,
+              "revision": 1,
+              "captured_at": "2026-10-19T10:48:58.483077-03:00",
+              "captured_by": null,
+              "instance_id": "00000000-0000-0000-0000-000000023035",
+              "sector_source": "unknown",
+              "anchor_owner_id": "00000000-0000-0000-0000-000000023030",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "period_snapshot": "2026-10-01",
+              "sector_snapshot": null,
+              "team_id_snapshot": "00000000-0000-0000-0000-000000023033",
+              "company_id_snapshot": "00000000-0000-0000-0000-000000023032"
+            },
+            "head": {
+              "set_id": "7a6d8d35-e0b5-4a20-8cb0-cd1bbee48113",
+              "instance_id": "00000000-0000-0000-0000-000000023035",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            "members": [
+              {
+                "set_id": "7a6d8d35-e0b5-4a20-8cb0-cd1bbee48113",
+                "share_bps": 10000,
+                "profile_id": "00000000-0000-0000-0000-000000023030",
+                "organization_id": "00000000-0000-0000-0000-000000000001"
+              }
+            ]
+          },
+          "commandReceipts": [
+            {
+              "kind": "companyMembership.setActive",
+              "result": {
+                "kind": "companyMembership.setActive",
+                "result": {
+                  "active": false,
+                  "companyId": "00000000-0000-0000-0000-000000023032",
+                  "profileId": "00000000-0000-0000-0000-000000023030",
+                  "membershipRevision": "1"
+                },
+                "operationId": "00000000-0000-0000-0000-000000023037",
+                "contractVersion": 1
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023031",
+              "arguments": {
+                "kind": "companyMembership.setActive",
+                "payload": {
+                  "active": false,
+                  "reason": "M2.2C timer start revoke-first RR synthetic revocation",
+                  "companyId": "00000000-0000-0000-0000-000000023032",
+                  "profileId": "00000000-0000-0000-0000-000000023030"
+                },
+                "expectedRevisions": {
+                  "membership:00000000-0000-0000-0000-000000023032:00000000-0000-0000-0000-000000023030": "0"
+                }
+              },
+              "created_at": "2026-10-19T10:48:58.509937-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000023037",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "membershipEvents": [
+            {
+              "id": "d4eea3f2-e265-4b73-a866-b31aed57fcda",
+              "active": false,
+              "reason": "M2.2C timer start revoke-first RR synthetic revocation",
+              "actor_id": "00000000-0000-0000-0000-000000023031",
+              "revision": 1,
+              "company_id": "00000000-0000-0000-0000-000000023032",
+              "created_at": "2026-10-19T10:48:58.509723-03:00",
+              "profile_id": "00000000-0000-0000-0000-000000023030",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ]
+        },
+        "final": {
+          "task": {
+            "id": "00000000-0000-0000-0000-000000023035",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start revoke-first RR",
+            "period": "2026-10-01",
+            "status": "Pendiente",
+            "target": null,
+            "weight": 1,
+            "team_id": "00000000-0000-0000-0000-000000023033",
+            "due_date": "2026-10-19",
+            "owner_id": "00000000-0000-0000-0000-000000023030",
+            "priority": "Media",
+            "checklist": [],
+            "blocked_by": null,
+            "company_id": "00000000-0000-0000-0000-000000023032",
+            "started_at": null,
+            "completed_at": null,
+            "scheduled_on": "2026-10-19",
+            "assignment_id": "00000000-0000-0000-0000-000000023034",
+            "blocked_since": null,
+            "state_revision": 1,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "audit": [
+            {
+              "at": "2026-10-19T10:48:58.492158-03:00",
+              "id": 709,
+              "action": "companyMembership.setActive",
+              "details": {
+                "active": false,
+                "profileId": "00000000-0000-0000-0000-000000023030",
+                "membershipRevision": "1"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023031",
+              "entity_id": "00000000-0000-0000-0000-000000023032",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "fences": {
+            "graph": 1,
+            "month": 0,
+            "graphConfig": 0,
+            "timerOperation": null,
+            "membershipChief": 0,
+            "revokeOperation": 1,
+            "membershipEmployee": 1
+          },
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000023030",
+              "name": "M2.2C timer start revoke-first RR employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000023031",
+              "name": "M2.2C timer start revoke-first RR chief",
+              "role": "jefe",
+              "active": true,
+              "branch": "Timer race",
+              "sector": "Timer race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [],
+          "assignment": {
+            "id": "00000000-0000-0000-0000-000000023034",
+            "kind": "resultado",
+            "unit": null,
+            "title": "M2.2C timer start revoke-first RR",
+            "target": null,
+            "weight": 1,
+            "due_day": 19,
+            "team_id": "00000000-0000-0000-0000-000000023033",
+            "end_date": null,
+            "owner_id": "00000000-0000-0000-0000-000000023030",
+            "weekdays": [
+              1
+            ],
+            "checklist": [],
+            "frequency": "unica",
+            "month_day": 19,
+            "company_id": "00000000-0000-0000-0000-000000023032",
+            "start_date": "2026-10-19",
+            "start_month": "2026-10-01",
+            "template_id": null,
+            "has_deadline": true,
+            "interval_count": 1,
+            "due_offset_days": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001",
+            "definition_revision": 0,
+            "measurement_version": 1,
+            "template_version_id": null
+          },
+          "memberships": [
+            {
+              "active": false,
+              "revision": 1,
+              "changed_at": "2026-10-19T10:48:58.509369-03:00",
+              "changed_by": "00000000-0000-0000-0000-000000023031",
+              "company_id": "00000000-0000-0000-0000-000000023032",
+              "profile_id": "00000000-0000-0000-0000-000000023030",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000023032",
+              "profile_id": "00000000-0000-0000-0000-000000023031",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "otherEffects": {
+            "activity": 0,
+            "closures": 0,
+            "coverage": 0,
+            "assessments": 0,
+            "assignmentCount": 1,
+            "responsibilityMembers": 1
+          },
+          "timerReceipts": [],
+          "responsibility": {
+            "set": {
+              "id": "7a6d8d35-e0b5-4a20-8cb0-cd1bbee48113",
+              "mode": "individual",
+              "origin": "baseline_legacy",
+              "reason": null,
+              "sealed": true,
+              "revision": 1,
+              "captured_at": "2026-10-19T10:48:58.483077-03:00",
+              "captured_by": null,
+              "instance_id": "00000000-0000-0000-0000-000000023035",
+              "sector_source": "unknown",
+              "anchor_owner_id": "00000000-0000-0000-0000-000000023030",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "period_snapshot": "2026-10-01",
+              "sector_snapshot": null,
+              "team_id_snapshot": "00000000-0000-0000-0000-000000023033",
+              "company_id_snapshot": "00000000-0000-0000-0000-000000023032"
+            },
+            "head": {
+              "set_id": "7a6d8d35-e0b5-4a20-8cb0-cd1bbee48113",
+              "instance_id": "00000000-0000-0000-0000-000000023035",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            "members": [
+              {
+                "set_id": "7a6d8d35-e0b5-4a20-8cb0-cd1bbee48113",
+                "share_bps": 10000,
+                "profile_id": "00000000-0000-0000-0000-000000023030",
+                "organization_id": "00000000-0000-0000-0000-000000000001"
+              }
+            ]
+          },
+          "commandReceipts": [
+            {
+              "kind": "companyMembership.setActive",
+              "result": {
+                "kind": "companyMembership.setActive",
+                "result": {
+                  "active": false,
+                  "companyId": "00000000-0000-0000-0000-000000023032",
+                  "profileId": "00000000-0000-0000-0000-000000023030",
+                  "membershipRevision": "1"
+                },
+                "operationId": "00000000-0000-0000-0000-000000023037",
+                "contractVersion": 1
+              },
+              "actor_id": "00000000-0000-0000-0000-000000023031",
+              "arguments": {
+                "kind": "companyMembership.setActive",
+                "payload": {
+                  "active": false,
+                  "reason": "M2.2C timer start revoke-first RR synthetic revocation",
+                  "companyId": "00000000-0000-0000-0000-000000023032",
+                  "profileId": "00000000-0000-0000-0000-000000023030"
+                },
+                "expectedRevisions": {
+                  "membership:00000000-0000-0000-0000-000000023032:00000000-0000-0000-0000-000000023030": "0"
+                }
+              },
+              "created_at": "2026-10-19T10:48:58.509937-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000023037",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "membershipEvents": [
+            {
+              "id": "d4eea3f2-e265-4b73-a866-b31aed57fcda",
+              "active": false,
+              "reason": "M2.2C timer start revoke-first RR synthetic revocation",
+              "actor_id": "00000000-0000-0000-0000-000000023031",
+              "revision": 1,
+              "company_id": "00000000-0000-0000-0000-000000023032",
+              "created_at": "2026-10-19T10:48:58.509723-03:00",
+              "profile_id": "00000000-0000-0000-0000-000000023030",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "validation": {
+    "vitest": {
+      "command": "node node_modules/vitest/vitest.mjs run --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "exitCode": 0,
+      "filesPassed": 74,
+      "testsPassed": 738,
+      "log": "../../outputs/m2-2c-timer-start-membership-revocation-races-luna-20261019-attempt3/vitest.log"
+    },
+    "typescript": {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "exitCode": 0,
+      "log": "../../outputs/m2-2c-timer-start-membership-revocation-races-luna-20261019-attempt3/typescript.log"
+    },
+    "clientBuild": {
+      "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+      "exitCode": 0,
+      "log": "../../outputs/m2-2c-timer-start-membership-revocation-races-luna-20261019-attempt3/vite.log"
+    },
+    "workerBuild": {
+      "command": "node scripts/build-worker.mjs",
+      "exitCode": 0,
+      "log": "../../outputs/m2-2c-timer-start-membership-revocation-races-luna-20261019-attempt3/worker.log"
+    },
+    "nodeSyntax": {
+      "command": "node --check tests/review/m2-1-native-review.mjs",
+      "exitCode": 0,
+      "log": "../../outputs/m2-2c-timer-start-membership-revocation-races-luna-20261019-attempt4/node-check.log"
+    },
+    "diffCheck": {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "log": "../../outputs/m2-2c-timer-start-membership-revocation-races-luna-20261019-attempt4/diff-check.log"
+    },
+    "note": "Full suite and builds passed in attempt3 before this Sol-requested assertion-only runner refinement; they were not rerun for this refinement. PostgreSQL matrix, syntax, diff-check and hashes are from attempt4."
+  },
+  "sha256": {
+    "tests/review/m2-1-native-review.mjs": "fa7bf8da251a9fce4b0a4cc31f5152fdd2cbb5bc30c1d1e5b2ca48b03b9a4b23",
+    "docs/architecture/M2-2C-TIMER-START-MEMBERSHIP-REVOCATION-RACES-LUNA-20261019.md": "b3cf39726e8a3d4c1fb2d7ddeaa03c6604e9eb03ff834032dc87b4f0b4aff82f",
+    "supabase/migrations/202610060011_coordination_activation.sql": "9729a6800e93dedc43ab5f0840309b7c0d222343898cc8d5b43eeb4a387f4210",
+    "supabase/migrations/202610150014_operational_api.sql": "ac8cca582cf366b0cf143fd63d99c490c664b00b368eb473757017eebef26315",
+    "../../outputs/m2-2c-timer-start-membership-revocation-races-luna-20261019-attempt4/review.json": "47d3e60e19cd338f7523f79345d6efce486eaa9f7bb0bbcdfdc832e4a7ffaaf8",
+    "../../outputs/m2-2c-timer-start-membership-revocation-races-luna-20261019-attempt4/runner.stdout.log": "f02d0824925a3d10b502536ca23b0c66a54f74ffa09dc825333896facd20a5a2",
+    "../../outputs/m2-2c-timer-start-membership-revocation-races-luna-20261019-attempt4/postgres.log": "41438b637bcc4dab72cb01d10fb2ab84f1b7cee489a129d8274ba462da0733b1",
+    "../../outputs/m2-2c-timer-start-membership-revocation-races-luna-20261019-attempt4/initdb.log": "f9db27b769afa635280c98763a547bca56684bf239a793439ad29852d95957a0",
+    "../../outputs/m2-2c-timer-start-membership-revocation-races-luna-20261019-attempt3/vitest.log": "9ed1f58943a9b925eb1342de64554f4e55821bed1c62f28fd726d40a86e6f135",
+    "../../outputs/m2-2c-timer-start-membership-revocation-races-luna-20261019-attempt3/typescript.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "../../outputs/m2-2c-timer-start-membership-revocation-races-luna-20261019-attempt3/vite.log": "2063bab613ced8a618cf7ebe42bac4ec6c234caca020230204d75c61ee6faf2b",
+    "../../outputs/m2-2c-timer-start-membership-revocation-races-luna-20261019-attempt3/worker.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "../../outputs/m2-2c-timer-start-membership-revocation-races-luna-20261019-attempt4/node-check.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "../../outputs/m2-2c-timer-start-membership-revocation-races-luna-20261019-attempt4/diff-check.log": "83a57946a79338bd6e7b9875b3d1be2331d11fdca8fc816a43e6e73bc38b068e"
+  },
+  "reviewBoundary": "GPT-6.1 Sol accepted attempt4 for exactly these four local timer/revocation race cases; all three P2 assertion gaps closed. No SQL changed; no remote calls. This does not close M2.2C/Gate L or authorize SQL application."
+}
