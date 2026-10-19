@@ -1,5 +1,25 @@
 # Acción vigente de migración — actualización 19/10/2026
 
+## Último bloque local aceptado — transición frente a revocación
+
+GPT-6 Luna agregó cuatro carreras locales `task.transition` vs
+`companyMembership.setActive`, RC/RC y RR/RR con ambos ganadores. El runner
+focal terminó 305/305 en PostgreSQL 17.11, `40P01=0`; las cuatro observan
+bloqueo, validan actores distintos autorizados, conflicto/retry y snapshots.
+Evidencia y hashes en
+`architecture/review-evidence/m2-2c-transition-membership-races-luna-20261019.json`.
+Sol aceptó este alcance tras revisar hashes, SQL014 y el reporte. Decisión y
+límites P3: `architecture/M2-2C-TRANSITION-MEMBERSHIP-RACES-SOL-ACCEPTANCE-20261019.md`.
+El candidato aún no tiene commit/push; suite, TypeScript, builds y hook son
+resultados informados por Luna y no parte de la aceptación Sol. Mantener Gate L
+y §9 abiertos; no aplicar SQL014.
+
+## Próximo paso
+
+Auditar §9 contra el runner y evidencias vigentes para identificar la siguiente
+familia de concurrencia aún incompleta. Luego preparar contrato Luna acotado;
+sin llamadas remotas.
+
 ## Último bloque local aceptado — cobertura recurrente RC/RC y RR/RR
 
 GPT-6.1 Sol aceptó únicamente las cuatro carreras agregadas para ambos
@@ -16,7 +36,9 @@ sigue sin aplicar; Gate L/§9 sigue abierto.
 1. Los bloques anteriores de onboarding y cuatro carreras mixtas están publicados y aceptados en sus alcances.
 2. Sol aceptó localmente cuatro carreras adicionales RC/RC y RR/RR. PostgreSQL 17.11 **301/301**, `40P01=0`; suite **738/738 en 74 archivos**; TypeScript y builds cliente/Worker aprobados. Ver manifiesto vigente arriba.
 3. Hook local **196/196**, commits directos a `main` y SHA remoto verificados; no se abrió PR. La API disponible aún no devuelve checks para esos pushes, así que la verificación CI queda pendiente.
-4. Próxima ejecución: **GPT-6 Luna, esfuerzo medio, Standard**, implementa `architecture/M2-2C-TRANSITION-MEMBERSHIP-RACES-LUNA-20261019.md`. Alcance: cuatro carreras de transición/revocación para RC/RC y RR/RR, ambos ganadores; sólo local. Luego **GPT-6.1 Sol, esfuerzo alto**, revisa los hashes exactos antes de publicar. Si hay ambigüedad o defecto de SQL, detener y regresar a Sol. No aplicar SQL014.
+4. **Siguiente vigente:** revisar contrato §9 y evidencias actuales para elegir
+   una familia incompleta; luego ejecutar GPT-6 Luna medio Standard con contrato
+   acotado. No aplicar SQL014.
 
 # Acción de migración histórica — 17/10/2026
 

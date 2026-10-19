@@ -1,5 +1,19 @@
 # Estado operativo y precedencia — actualización 19/10/2026
 
+**Último bloque Luna aceptado localmente por Sol, alcance acotado:** cuatro carreras
+`task.transition` vs `companyMembership.setActive`, RC/RC y RR/RR con ambos
+ganadores. PostgreSQL 17.11: 305/305 en el runner focal, `40P01=0`; cada caso
+observó bloqueo real con `pg_blocking_pids`, actores autorizados distintos,
+SQLSTATE de conflicto/retry y snapshots antes, tras el conflicto y tras retry.
+Evidencia y hashes: `docs/architecture/review-evidence/m2-2c-transition-membership-races-luna-20261019.json`;
+runner SHA256 `d00b0ddd7c1fb0820da7b5b341e897b8c74519416ce24e7129c32a60e88d7ce7`;
+SQL014 sin cambios. Decisión, hashes y límites P3: `docs/architecture/M2-2C-TRANSITION-MEMBERSHIP-RACES-SOL-ACCEPTANCE-20261019.md`.
+Suite/build/hook fueron informados por Luna, pero no forman parte de esa
+aceptación Sol. Este corte aún no tiene commit ni push; el CI de la rama vigente
+no está verificado. No aplicar SQL014.
+
+## Base previamente aceptada
+
 **Último bloque local aceptado por GPT-6.1 Sol (alcance acotado):** cuatro
 carreras adicionales entre aprobación de cobertura recurrente y revocación de
 membresía, RC/RC y RR/RR con ambos ganadores. PostgreSQL 17.11: 301/301;
@@ -13,10 +27,9 @@ contrato y estado actual: `8646f10ee90371748054830ef4af81cf4904f577`. Ambos est�
 SHA; no hay CI verificado en esta sesión. El hook local pasó 196/196. SQL014 no
 se aplicó remotamente.
 
-**Siguiente:** GPT-6 Luna, esfuerzo medio, Standard, implementa únicamente
-`docs/architecture/M2-2C-TRANSITION-MEMBERSHIP-RACES-LUNA-20261019.md`. GPT-6.1
-Sol revisa los hashes y evidencia de esos cuatro casos antes de cualquier push.
-No tocar Supabase ni activar el espacio operativo.
+**Siguiente vigente:** elegir, mediante auditoría §9 sobre el runner actual, la
+siguiente familia de concurrencia aún incompleta; preparar un contrato acotado
+para GPT-6 Luna. No tocar Supabase ni activar el espacio operativo.
 
 **Bloques anteriores aceptados y publicados:** onboarding.requestChanges exact replay/commandReceipt y cuatro carreras mixtas de cobertura recurrente (RC/RR, RR/RC, ambos ganadores). Evidencias: `docs/architecture/review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json` y `m2-2c-gatel-recurrent-coverage-20261019.json`. El run 39184344731 corresponde al commit 873829271463b4f3bf4bbb5ad39dad978908a8d2. Gate L sigue abierto.
 

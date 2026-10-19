@@ -1,0 +1,563 @@
+{
+  "contract": "M2.2C task.transition versus companyMembership.setActive membership revocation races",
+  "scope": "four local synthetic PostgreSQL races: RC/RC and RR/RR, both winners; does not close Gate L or all of section 9",
+  "remoteCalls": false,
+  "sql014AppliedRemotely": false,
+  "candidateStatus": "uncommitted local runner/evidence candidate; no commit or push",
+  "sourceCommit": "b4d223d51141178f360d8b86594145a9d755a023",
+  "artifacts": {
+    "runner": {
+      "path": "tests/review/m2-1-native-review.mjs",
+      "sha256": "d00b0ddd7c1fb0820da7b5b341e897b8c74519416ce24e7129c32a60e88d7ce7"
+    },
+    "focusedTest": {
+      "path": "tests/review/m2-1-native-review.mjs#transitionMembershipRace",
+      "sha256": "d00b0ddd7c1fb0820da7b5b341e897b8c74519416ce24e7129c32a60e88d7ce7"
+    },
+    "sql014": {
+      "path": "supabase/migrations/202610150014_operational_api.sql",
+      "sha256": "ac8cca582cf366b0cf143fd63d99c490c664b00b368eb473757017eebef26315",
+      "unchangedFromSourceCommit": true
+    },
+    "nativeReport": {
+      "pathBase": "work/site",
+      "path": "../outputs/m2-2c-transition-membership-races-final/review.json",
+      "sha256": "b24b0d11a6489c82652b42e1ca40ca57a7a7786ec2dfecf9e9b2718f3e502b73",
+      "sourceCommit": "b4d223d51141178f360d8b86594145a9d755a023"
+    },
+    "runLog": {
+      "pathBase": "work/site",
+      "path": "../outputs/m2-2c-transition-membership-races-final-run.log",
+      "sha256": "4deec186ed9455fbed7773939cb8c72864d04264e75c17d48a1e44a0ec65c365"
+    }
+  },
+  "result": {
+    "engine": "postgres (PostgreSQL) 17.11",
+    "nativeTotal": "305/305",
+    "failures": 0,
+    "deadlocks40P01": 0,
+    "cases": [
+      {
+        "winner": "task.transition",
+        "isolationPair": "read committed/read committed",
+        "blockerObserved": true,
+        "transitionActor": "00000000-0000-0000-0000-000000015000",
+        "revocationActor": "00000000-0000-0000-0000-000000000020",
+        "bothActorsAuthorizedAndDistinct": true,
+        "winnerSQLSTATE": "00000",
+        "staleCommandSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "snapshots": {
+          "before": {
+            "task": [
+              "Pendiente",
+              0
+            ],
+            "audit": [],
+            "receipts": [],
+            "assignment": [
+              "00000000-0000-0000-0000-000000015001",
+              "00000000-0000-0000-0000-000000015000",
+              "00000000-0000-0000-0000-000000000021"
+            ],
+            "graphFence": 119,
+            "membership": [
+              true,
+              0
+            ],
+            "monthFence": 0,
+            "activeSessions": 0,
+            "trackingEvents": [],
+            "membershipFence": 0,
+            "completionEvents": [],
+            "membershipEvents": [],
+            "revokeOperationFence": 0,
+            "transitionOperationFence": 0
+          },
+          "afterConflict": {
+            "task": [
+              "En curso",
+              1
+            ],
+            "audit": [
+              [
+                "00000000-0000-0000-0000-000000015000",
+                "task.tracking.command",
+                "00000000-0000-0000-0000-000000015002"
+              ]
+            ],
+            "receipts": [
+              [
+                "00000000-0000-0000-0000-000000015000",
+                "00000000-0000-0000-0000-000000015003",
+                "task.transition"
+              ]
+            ],
+            "assignment": [
+              "00000000-0000-0000-0000-000000015001",
+              "00000000-0000-0000-0000-000000015000",
+              "00000000-0000-0000-0000-000000000021"
+            ],
+            "graphFence": 120,
+            "membership": [
+              true,
+              0
+            ],
+            "monthFence": 1,
+            "activeSessions": 1,
+            "trackingEvents": [],
+            "membershipFence": 1,
+            "completionEvents": [],
+            "membershipEvents": [],
+            "revokeOperationFence": 0,
+            "transitionOperationFence": 1
+          },
+          "afterRetry": {
+            "task": [
+              "En curso",
+              2
+            ],
+            "audit": [
+              [
+                "00000000-0000-0000-0000-000000015000",
+                "task.tracking.command",
+                "00000000-0000-0000-0000-000000015002"
+              ],
+              [
+                "00000000-0000-0000-0000-000000000020",
+                "companyMembership.setActive",
+                "00000000-0000-0000-0000-000000000021"
+              ]
+            ],
+            "receipts": [
+              [
+                "00000000-0000-0000-0000-000000015000",
+                "00000000-0000-0000-0000-000000015003",
+                "task.transition"
+              ],
+              [
+                "00000000-0000-0000-0000-000000000020",
+                "00000000-0000-0000-0000-000000015004",
+                "companyMembership.setActive"
+              ]
+            ],
+            "assignment": [
+              "00000000-0000-0000-0000-000000015001",
+              "00000000-0000-0000-0000-000000015000",
+              "00000000-0000-0000-0000-000000000021"
+            ],
+            "graphFence": 121,
+            "membership": [
+              false,
+              1
+            ],
+            "monthFence": 1,
+            "activeSessions": 0,
+            "trackingEvents": [],
+            "membershipFence": 2,
+            "completionEvents": [],
+            "membershipEvents": [
+              [
+                "00000000-0000-0000-0000-000000000020",
+                false,
+                1
+              ]
+            ],
+            "revokeOperationFence": 1,
+            "transitionOperationFence": 1
+          }
+        }
+      },
+      {
+        "winner": "companyMembership.setActive",
+        "isolationPair": "read committed/read committed",
+        "blockerObserved": true,
+        "transitionActor": "00000000-0000-0000-0000-000000015010",
+        "revocationActor": "00000000-0000-0000-0000-000000000020",
+        "bothActorsAuthorizedAndDistinct": true,
+        "winnerSQLSTATE": "00000",
+        "staleCommandSQLSTATE": "40001",
+        "retrySQLSTATE": "42501",
+        "snapshots": {
+          "before": {
+            "task": [
+              "Pendiente",
+              0
+            ],
+            "audit": [],
+            "receipts": [],
+            "assignment": [
+              "00000000-0000-0000-0000-000000015011",
+              "00000000-0000-0000-0000-000000015010",
+              "00000000-0000-0000-0000-000000000021"
+            ],
+            "graphFence": 121,
+            "membership": [
+              true,
+              0
+            ],
+            "monthFence": 0,
+            "activeSessions": 0,
+            "trackingEvents": [],
+            "membershipFence": 0,
+            "completionEvents": [],
+            "membershipEvents": [],
+            "revokeOperationFence": 0,
+            "transitionOperationFence": 0
+          },
+          "afterConflict": {
+            "task": [
+              "Pendiente",
+              1
+            ],
+            "audit": [
+              [
+                "00000000-0000-0000-0000-000000000020",
+                "companyMembership.setActive",
+                "00000000-0000-0000-0000-000000000021"
+              ]
+            ],
+            "receipts": [
+              [
+                "00000000-0000-0000-0000-000000000020",
+                "00000000-0000-0000-0000-000000015014",
+                "companyMembership.setActive"
+              ]
+            ],
+            "assignment": [
+              "00000000-0000-0000-0000-000000015011",
+              "00000000-0000-0000-0000-000000015010",
+              "00000000-0000-0000-0000-000000000021"
+            ],
+            "graphFence": 122,
+            "membership": [
+              false,
+              1
+            ],
+            "monthFence": 0,
+            "activeSessions": 0,
+            "trackingEvents": [],
+            "membershipFence": 1,
+            "completionEvents": [],
+            "membershipEvents": [
+              [
+                "00000000-0000-0000-0000-000000000020",
+                false,
+                1
+              ]
+            ],
+            "revokeOperationFence": 1,
+            "transitionOperationFence": 0
+          },
+          "afterRetry": {
+            "task": [
+              "Pendiente",
+              1
+            ],
+            "audit": [
+              [
+                "00000000-0000-0000-0000-000000000020",
+                "companyMembership.setActive",
+                "00000000-0000-0000-0000-000000000021"
+              ]
+            ],
+            "receipts": [
+              [
+                "00000000-0000-0000-0000-000000000020",
+                "00000000-0000-0000-0000-000000015014",
+                "companyMembership.setActive"
+              ]
+            ],
+            "assignment": [
+              "00000000-0000-0000-0000-000000015011",
+              "00000000-0000-0000-0000-000000015010",
+              "00000000-0000-0000-0000-000000000021"
+            ],
+            "graphFence": 122,
+            "membership": [
+              false,
+              1
+            ],
+            "monthFence": 0,
+            "activeSessions": 0,
+            "trackingEvents": [],
+            "membershipFence": 1,
+            "completionEvents": [],
+            "membershipEvents": [
+              [
+                "00000000-0000-0000-0000-000000000020",
+                false,
+                1
+              ]
+            ],
+            "revokeOperationFence": 1,
+            "transitionOperationFence": 0
+          }
+        }
+      },
+      {
+        "winner": "task.transition",
+        "isolationPair": "repeatable read/repeatable read",
+        "blockerObserved": true,
+        "transitionActor": "00000000-0000-0000-0000-000000015020",
+        "revocationActor": "00000000-0000-0000-0000-000000000020",
+        "bothActorsAuthorizedAndDistinct": true,
+        "winnerSQLSTATE": "00000",
+        "staleCommandSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "snapshots": {
+          "before": {
+            "task": [
+              "Pendiente",
+              0
+            ],
+            "audit": [],
+            "receipts": [],
+            "assignment": [
+              "00000000-0000-0000-0000-000000015021",
+              "00000000-0000-0000-0000-000000015020",
+              "00000000-0000-0000-0000-000000000021"
+            ],
+            "graphFence": 122,
+            "membership": [
+              true,
+              0
+            ],
+            "monthFence": 0,
+            "activeSessions": 0,
+            "trackingEvents": [],
+            "membershipFence": 0,
+            "completionEvents": [],
+            "membershipEvents": [],
+            "revokeOperationFence": 0,
+            "transitionOperationFence": 0
+          },
+          "afterConflict": {
+            "task": [
+              "En curso",
+              1
+            ],
+            "audit": [
+              [
+                "00000000-0000-0000-0000-000000015020",
+                "task.tracking.command",
+                "00000000-0000-0000-0000-000000015022"
+              ]
+            ],
+            "receipts": [
+              [
+                "00000000-0000-0000-0000-000000015020",
+                "00000000-0000-0000-0000-000000015023",
+                "task.transition"
+              ]
+            ],
+            "assignment": [
+              "00000000-0000-0000-0000-000000015021",
+              "00000000-0000-0000-0000-000000015020",
+              "00000000-0000-0000-0000-000000000021"
+            ],
+            "graphFence": 123,
+            "membership": [
+              true,
+              0
+            ],
+            "monthFence": 1,
+            "activeSessions": 1,
+            "trackingEvents": [],
+            "membershipFence": 1,
+            "completionEvents": [],
+            "membershipEvents": [],
+            "revokeOperationFence": 0,
+            "transitionOperationFence": 1
+          },
+          "afterRetry": {
+            "task": [
+              "En curso",
+              2
+            ],
+            "audit": [
+              [
+                "00000000-0000-0000-0000-000000015020",
+                "task.tracking.command",
+                "00000000-0000-0000-0000-000000015022"
+              ],
+              [
+                "00000000-0000-0000-0000-000000000020",
+                "companyMembership.setActive",
+                "00000000-0000-0000-0000-000000000021"
+              ]
+            ],
+            "receipts": [
+              [
+                "00000000-0000-0000-0000-000000015020",
+                "00000000-0000-0000-0000-000000015023",
+                "task.transition"
+              ],
+              [
+                "00000000-0000-0000-0000-000000000020",
+                "00000000-0000-0000-0000-000000015024",
+                "companyMembership.setActive"
+              ]
+            ],
+            "assignment": [
+              "00000000-0000-0000-0000-000000015021",
+              "00000000-0000-0000-0000-000000015020",
+              "00000000-0000-0000-0000-000000000021"
+            ],
+            "graphFence": 124,
+            "membership": [
+              false,
+              1
+            ],
+            "monthFence": 1,
+            "activeSessions": 0,
+            "trackingEvents": [],
+            "membershipFence": 2,
+            "completionEvents": [],
+            "membershipEvents": [
+              [
+                "00000000-0000-0000-0000-000000000020",
+                false,
+                1
+              ]
+            ],
+            "revokeOperationFence": 1,
+            "transitionOperationFence": 1
+          }
+        }
+      },
+      {
+        "winner": "companyMembership.setActive",
+        "isolationPair": "repeatable read/repeatable read",
+        "blockerObserved": true,
+        "transitionActor": "00000000-0000-0000-0000-000000015030",
+        "revocationActor": "00000000-0000-0000-0000-000000000020",
+        "bothActorsAuthorizedAndDistinct": true,
+        "winnerSQLSTATE": "00000",
+        "staleCommandSQLSTATE": "40001",
+        "retrySQLSTATE": "42501",
+        "snapshots": {
+          "before": {
+            "task": [
+              "Pendiente",
+              0
+            ],
+            "audit": [],
+            "receipts": [],
+            "assignment": [
+              "00000000-0000-0000-0000-000000015031",
+              "00000000-0000-0000-0000-000000015030",
+              "00000000-0000-0000-0000-000000000021"
+            ],
+            "graphFence": 124,
+            "membership": [
+              true,
+              0
+            ],
+            "monthFence": 0,
+            "activeSessions": 0,
+            "trackingEvents": [],
+            "membershipFence": 0,
+            "completionEvents": [],
+            "membershipEvents": [],
+            "revokeOperationFence": 0,
+            "transitionOperationFence": 0
+          },
+          "afterConflict": {
+            "task": [
+              "Pendiente",
+              1
+            ],
+            "audit": [
+              [
+                "00000000-0000-0000-0000-000000000020",
+                "companyMembership.setActive",
+                "00000000-0000-0000-0000-000000000021"
+              ]
+            ],
+            "receipts": [
+              [
+                "00000000-0000-0000-0000-000000000020",
+                "00000000-0000-0000-0000-000000015034",
+                "companyMembership.setActive"
+              ]
+            ],
+            "assignment": [
+              "00000000-0000-0000-0000-000000015031",
+              "00000000-0000-0000-0000-000000015030",
+              "00000000-0000-0000-0000-000000000021"
+            ],
+            "graphFence": 125,
+            "membership": [
+              false,
+              1
+            ],
+            "monthFence": 0,
+            "activeSessions": 0,
+            "trackingEvents": [],
+            "membershipFence": 1,
+            "completionEvents": [],
+            "membershipEvents": [
+              [
+                "00000000-0000-0000-0000-000000000020",
+                false,
+                1
+              ]
+            ],
+            "revokeOperationFence": 1,
+            "transitionOperationFence": 0
+          },
+          "afterRetry": {
+            "task": [
+              "Pendiente",
+              1
+            ],
+            "audit": [
+              [
+                "00000000-0000-0000-0000-000000000020",
+                "companyMembership.setActive",
+                "00000000-0000-0000-0000-000000000021"
+              ]
+            ],
+            "receipts": [
+              [
+                "00000000-0000-0000-0000-000000000020",
+                "00000000-0000-0000-0000-000000015034",
+                "companyMembership.setActive"
+              ]
+            ],
+            "assignment": [
+              "00000000-0000-0000-0000-000000015031",
+              "00000000-0000-0000-0000-000000015030",
+              "00000000-0000-0000-0000-000000000021"
+            ],
+            "graphFence": 125,
+            "membership": [
+              false,
+              1
+            ],
+            "monthFence": 0,
+            "activeSessions": 0,
+            "trackingEvents": [],
+            "membershipFence": 1,
+            "completionEvents": [],
+            "membershipEvents": [
+              [
+                "00000000-0000-0000-0000-000000000020",
+                false,
+                1
+              ]
+            ],
+            "revokeOperationFence": 1,
+            "transitionOperationFence": 0
+          }
+        }
+      }
+    ]
+  },
+  "limitations": [
+    "Synthetic claims and local PostgreSQL only; no hosted Supabase/Auth/HTTP evidence.",
+    "Runner report sourceCommit identifies the clean base commit; candidate runner hash identifies the uncommitted candidate.",
+    "Gate L and the full M2.2C section 9 matrix remain open."
+  ]
+}

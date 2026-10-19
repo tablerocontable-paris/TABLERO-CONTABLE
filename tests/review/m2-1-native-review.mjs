@@ -2786,6 +2786,123 @@ try {
       assert.equal(revokeFirstTransitionFinal, "false|1|Pendiente|1|1|1", revokeFirstTransitionFinal);
       record("M2.2C revoke-first stale RR task.transition aborts then API authorization denies with 42501 without partial status or receipt", true, { revokeSQLSTATE: revokeBeforeTransitionResult.code, staleTransitionSQLSTATE: staleTransition.code, retrySQLSTATE: retryTransition.code, finalState: revokeFirstTransitionFinal });
 
+      // Same-isolation transition/membership races. The winning command stays
+      // open while the competing command starts; pg_blocking_pids proves the
+      // second session actually waits before the winner commits.
+      async function transitionMembershipRace({ order, isolation, base }) {
+        const owner = uid(base), assignment = uid(base + 1), task = uid(base + 2);
+        const transitionOp = uid(base + 3), revokeOp = uid(base + 4);
+        await memberTask(owner, assignment, task, `M2.2C ${order} ${isolation} transition-membership race`);
+        const transition = { contractVersion: 1, operationId: transitionOp, kind: "task.transition", expectedRevisions: { [`task:${task}`]: "0" }, payload: { taskId: task, status: "En curso", reason: null, confirmCommercialCompletion: false } };
+        const revoke = { contractVersion: 1, operationId: revokeOp, kind: "companyMembership.setActive", expectedRevisions: { [`membership:${company}:${owner}`]: "0" }, payload: { companyId: company, profileId: owner, active: false, reason: `M2.2C ${order} ${isolation} transition race` } };
+        const iso = isolation === "RC" ? "read committed" : "repeatable read";
+        const isolationCheck = `select current_setting('transaction_isolation');`;
+        const beginAs = async (session, actor, aal) => {
+          await session.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(actor)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: actor, aal }))},false);set role authenticated;begin isolation level ${iso};`);
+          assert.equal((await session.ok(isolationCheck)).at(-1), iso, `${order}/${isolation}: effective isolation`);
+          return Number((await session.ok("select pg_backend_pid();")).at(-1));
+        };
+        const snapshot = async () => JSON.parse((await observer.ok(`select jsonb_build_object(
+          'membership',(select jsonb_build_array(active,revision) from public.company_memberships where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(owner)}),
+          'task',(select jsonb_build_array(status,state_revision) from public.task_instances where id=${lit(task)}),
+          'assignment',(select jsonb_build_array(id,owner_id,company_id) from public.task_assignments where id=${lit(assignment)}),
+          'activeSessions',(select count(*) from public.task_time_sessions where instance_id=${lit(task)} and ended_at is null),
+          'membershipFence',coalesce((select fence_epoch from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id=${lit(owner)}),0),
+          'monthFence',coalesce((select fence_epoch from app_private.api_month_fences where organization_id=${lit(org)} and owner_id=${lit(owner)} and period=${lit(monthPeriod)}::date),0),
+          'graphFence',coalesce((select fence_epoch from app_private.task_dependency_graphs where organization_id=${lit(org)} and company_id=${lit(company)} and period=${lit(monthPeriod)}::date),0),
+          'transitionOperationFence',coalesce((select fence_epoch from app_private.api_operation_fences where actor_id=${lit(owner)} and operation_id=${lit(transitionOp)}),0),
+          'revokeOperationFence',coalesce((select fence_epoch from app_private.api_operation_fences where actor_id=${lit(boss)} and operation_id=${lit(revokeOp)}),0),
+          'receipts',(select coalesce(jsonb_agg(jsonb_build_array(actor_id,operation_id,kind) order by operation_id),'[]'::jsonb) from app_private.api_command_receipts where operation_id in (${lit(transitionOp)},${lit(revokeOp)})),
+          'trackingEvents',(select coalesce(jsonb_agg(jsonb_build_array(actor_id,kind) order by at),'[]'::jsonb) from app_private.task_tracking_events where organization_id=${lit(org)} and instance_id=${lit(task)}),
+          'completionEvents',(select coalesce(jsonb_agg(jsonb_build_array(completed_by,task_revision) order by task_revision),'[]'::jsonb) from app_private.task_completion_events where organization_id=${lit(org)} and instance_id=${lit(task)}),
+          'membershipEvents',(select coalesce(jsonb_agg(jsonb_build_array(actor_id,active,revision) order by revision),'[]'::jsonb) from app_private.company_membership_events where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(owner)}),
+          'audit',(select coalesce(jsonb_agg(jsonb_build_array(actor_id,action,entity_id) order by at),'[]'::jsonb) from public.audit_events where organization_id=${lit(org)} and ((entity_id=${lit(task)} and actor_id=${lit(owner)} and action='task.tracking.command') or (entity_id=${lit(company)} and actor_id=${lit(boss)} and action='companyMembership.setActive' and details->>'profileId'=${lit(owner)})))
+        )::text;`)).at(-1));
+        const baseline = await snapshot();
+        assert.deepEqual(baseline.membership, [true, 0]);
+        assert.deepEqual(baseline.task, ["Pendiente", 0]);
+        assert.deepEqual(baseline.assignment, [assignment, owner, company]);
+        const actorChecks = (await observer.ok(`select (select role='jefe' and active from public.profiles where id=${lit(boss)})||'|'||(select role='empleado' and active from public.profiles where id=${lit(owner)})||'|'||(select active from public.company_memberships where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(owner)});`)).at(-1);
+        assert.equal(actorChecks, "true|true|true", `${order}/${isolation}: authorized distinct actors ${boss}/${owner}`);
+
+        let blockerPid, waiterPid, winnerResult, staleResult, retryResult, blocked = false;
+        if (order === "transition-first") {
+          await claims({ role: "authenticated", sub: owner, aal: "aal1" }, owner);
+          const winnerTx = await beginAs(a, owner, "aal1");
+          blockerPid = winnerTx;
+          winnerResult = await a.query(`select api.command_v1('${JSON.stringify(transition).replaceAll("'", "''")}'::jsonb);`);
+          assert.equal(winnerResult.code, "00000", JSON.stringify(winnerResult));
+          waiterPid = await beginAs(b, boss, "aal2");
+          await b.ok(`select active,revision from public.company_memberships where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(owner)};`);
+          const pending = b.query(`select api.command_v1('${JSON.stringify(revoke).replaceAll("'", "''")}'::jsonb);`);
+          const deadline = Date.now() + 10000;
+          while (Date.now() < deadline) {
+            if ((await observer.ok(`select ${blockerPid}=any(pg_catalog.pg_blocking_pids(${waiterPid}));`)).at(-1) === "t") { blocked = true; break; }
+            await new Promise((done) => setTimeout(done, 20));
+          }
+          assert.equal(blocked, true, `${order}/${isolation}: revoker must be blocked by transition`);
+          await a.ok("commit;");
+          staleResult = await pending;
+          await b.ok(staleResult.code === "00000" ? "commit;" : "rollback;");
+          assert.equal(staleResult.code, "40001", JSON.stringify(staleResult));
+          const afterConflict = await snapshot();
+          await b.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(boss)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: boss, aal: "aal2" }))},false);set role authenticated;begin isolation level ${iso};`);
+          retryResult = await b.query(`select api.command_v1('${JSON.stringify(revoke).replaceAll("'", "''")}'::jsonb);`);
+          assert.equal(retryResult.code, "00000", JSON.stringify(retryResult)); await b.ok("commit;");
+          const final = await snapshot();
+          assert.deepEqual(afterConflict.membership, [true, 0]);
+          assert.deepEqual(afterConflict.task, ["En curso", baseline.task[1] + 1]);
+          assert.deepEqual(final.membership, [false, 1]);
+          assert.deepEqual(final.task, ["En curso", baseline.task[1] + 2]);
+          assert.deepEqual(final.receipts.map(row => row[0]).sort(), [boss, owner].sort());
+          assert.deepEqual(final.trackingEvents, []);
+          assert.deepEqual(final.membershipEvents.map(row => row[0]), [boss]);
+          assert.equal(final.receipts.length, 2); assert.equal(final.trackingEvents.length, 0); assert.equal(final.membershipEvents.length, 1);
+          assert.equal(afterConflict.revokeOperationFence, baseline.revokeOperationFence);
+          assert.equal(final.revokeOperationFence, baseline.revokeOperationFence + 1);
+          assert.deepEqual(afterConflict.audit.map(row => row[0]), [owner]);
+          assert.deepEqual(final.audit.map(row => row[0]).sort(), [boss, owner].sort());
+          record(`M2.2C task.transition-first membership revoke ${isolation} blocks, stale-aborts and succeeds on fresh retry`, true, { order, isolation, observedIsolation: iso, actorChecks, actors: { transition: owner, revoker: boss }, blockerPid, waiterPid, blocked, winnerSQLSTATE: winnerResult.code, staleSQLSTATE: staleResult.code, retrySQLSTATE: retryResult.code, baseline, afterConflict, final });
+        } else {
+          await claims({ role: "authenticated", sub: boss, aal: "aal2" }, boss);
+          const winnerTx = await beginAs(a, boss, "aal2");
+          blockerPid = winnerTx;
+          winnerResult = await a.query(`select api.command_v1('${JSON.stringify(revoke).replaceAll("'", "''")}'::jsonb);`);
+          assert.equal(winnerResult.code, "00000", JSON.stringify(winnerResult));
+          waiterPid = await beginAs(b, owner, "aal1");
+          await b.ok(`select active,revision from public.company_memberships where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(owner)};`);
+          const pending = b.query(`select api.command_v1('${JSON.stringify(transition).replaceAll("'", "''")}'::jsonb);`);
+          const deadline = Date.now() + 10000;
+          while (Date.now() < deadline) {
+            if ((await observer.ok(`select ${blockerPid}=any(pg_catalog.pg_blocking_pids(${waiterPid}));`)).at(-1) === "t") { blocked = true; break; }
+            await new Promise((done) => setTimeout(done, 20));
+          }
+          assert.equal(blocked, true, `${order}/${isolation}: transition must be blocked by revocation`);
+          await a.ok("commit;");
+          staleResult = await pending;
+          await b.ok(staleResult.code === "00000" ? "commit;" : "rollback;");
+          assert.equal(staleResult.code, "40001", JSON.stringify(staleResult));
+          const afterConflict = await snapshot();
+          await b.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(owner)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: owner, aal: "aal1" }))},false);set role authenticated;begin isolation level ${iso};`);
+          retryResult = await b.query(`select api.command_v1('${JSON.stringify(transition).replaceAll("'", "''")}'::jsonb);`);
+          assert.equal(retryResult.code, "42501", JSON.stringify(retryResult)); await b.ok("rollback;");
+          const final = await snapshot();
+          assert.deepEqual(final, afterConflict, "denied transition retry must preserve every snapshotted field");
+          assert.deepEqual(final.membership, [false, 1]);
+          assert.deepEqual(final.task, ["Pendiente", baseline.task[1] + 1]);
+          assert.deepEqual(final.receipts.map(row => row[0]), [boss]);
+          assert.deepEqual(final.trackingEvents, []); assert.deepEqual(final.membershipEvents.map(row => row[0]), [boss]);
+          assert.equal(final.receipts.length, 1); assert.equal(final.membershipEvents.length, 1);
+          assert.deepEqual(final.audit.map(row => row[0]), [boss]);
+          record(`M2.2C membership revoke-first task.transition ${isolation} blocks, stale-aborts and denies on fresh retry`, true, { order, isolation, observedIsolation: iso, actorChecks, actors: { transition: owner, revoker: boss }, blockerPid, waiterPid, blocked, winnerSQLSTATE: winnerResult.code, staleSQLSTATE: staleResult.code, retrySQLSTATE: retryResult.code, baseline, afterConflict, final });
+        }
+        await a.ok("reset role;"); await b.ok("reset role;");
+      }
+      await transitionMembershipRace({ order: "transition-first", isolation: "RC", base: 15000 });
+      await transitionMembershipRace({ order: "revoke-first", isolation: "RC", base: 15010 });
+      await transitionMembershipRace({ order: "transition-first", isolation: "RR", base: 15020 });
+      await transitionMembershipRace({ order: "revoke-first", isolation: "RR", base: 15030 });
+
       const timerFirstOwner = uid(9660), timerFirstAssignment = uid(9661), timerFirstTask = uid(9662), timerFirstSession = uid(9663), revokeAfterTimerOp = uid(9664);
       await memberTask(timerFirstOwner, timerFirstAssignment, timerFirstTask, "M2.2C timer-first membership revoke");
       const revokeAfterTimer = { contractVersion: 1, operationId: revokeAfterTimerOp, kind: "companyMembership.setActive", expectedRevisions: { [`membership:${company}:${timerFirstOwner}`]: "0" }, payload: { companyId: company, profileId: timerFirstOwner, active: false, reason: "Timer-first membership revoke" } };
@@ -4352,6 +4469,10 @@ try {
       encoding: "utf8",
       windowsHide: true,
     }).trim(),
+    runnerSha256: createHash("sha256")
+      .update(readFileSync(join(root, "tests/review/m2-1-native-review.mjs")))
+      .digest("hex"),
+    focusedMatrix: "M2.2C task.transition versus companyMembership.setActive, RC/RC and RR/RR, both winners",
     engine: native("postgres", ["--version"]).trim(),
     migrationSha256: createHash("sha256")
       .update(readFileSync(sqlFile))

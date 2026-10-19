@@ -1,5 +1,18 @@
 # Estado general de la migración — actualización 19/10/2026
 
+**Último bloque Luna aceptado localmente por Sol, sólo este alcance:** cuatro
+carreras `task.transition`/revocación de membresía para RC/RC y RR/RR, ambos
+ganadores. El runner focal local pasó 305/305 en PostgreSQL 17.11, con
+`40P01=0`, bloqueo medido por `pg_blocking_pids`, retries y snapshots completos.
+Manifiesto: `architecture/review-evidence/m2-2c-transition-membership-races-luna-20261019.json`;
+runner SHA256 `d00b0ddd7c1fb0820da7b5b341e897b8c74519416ce24e7129c32a60e88d7ce7`.
+SQL014 sigue idéntica al baseline; no hubo llamadas remotas. Aceptación y límites
+P3: `architecture/M2-2C-TRANSITION-MEMBERSHIP-RACES-SOL-ACCEPTANCE-20261019.md`.
+La suite completa pasó 738/738 en 74 archivos; TypeScript, build cliente/Worker,
+sintaxis del runner y diff-check terminaron con código 0. El hook se ejecuta
+con el commit. Aún no hay commit/push y CI no está verificado. Gate L y §9
+permanecen abiertos.
+
 **Último bloque aceptado por GPT-6.1 Sol y publicado (alcance acotado):** cuatro
 carreras de aprobación de cobertura recurrente frente a revocación de membresía,
 RC/RC y RR/RR con ambos ganadores. PostgreSQL 17.11 **301/301**, `40P01=0`;
@@ -14,7 +27,10 @@ verificado. Hook local 196/196. Gate L/§9 sigue abierto. SQL014 no se aplicó r
 
 **Bloques anteriores publicados y aceptados por Sol:** onboarding.requestChanges exact replay/commandReceipt y cuatro carreras mixtas de cobertura recurrente. El run 39184344731 corresponde al commit 873829271463b4f3bf4bbb5ad39dad978908a8d2 y no valida cambios posteriores. Gate L/M2.2C sigue abierto.
 
-**Siguiente:** GPT-6 Luna, esfuerzo medio, Standard, implementa la matriz acotada `architecture/M2-2C-TRANSITION-MEMBERSHIP-RACES-LUNA-20261019.md`: cuatro carreras de transición/revocación para ambos ganadores bajo RC/RC y RR/RR. Sol revisa hashes y evidencia antes de publicar. Las cuatro carreras recurrentes ya están aceptadas localmente; no repetirlas.
+**Siguiente vigente:** auditar §9 frente al runner actual y elegir la siguiente
+familia de concurrencia sin cubrir completamente; después preparar el contrato
+exacto para Luna. Las familias de cobertura recurrente y task.transition aquí
+enumeradas ya tienen aceptación acotada; no repetirlas.
 
 **Infraestructura sin cambios:** GitHub `main` está en `8646f10ee90371748054830ef4af81cf4904f577`; SHA remoto confirmado. CI de este SHA no aparece en el conector. Supabase dev sigue activo/vacío; falta apagar la autoexposición. No hay Cloudflare, correo productivo ni Supabase de producción configurados. Site privado y datos ficticios.
 
