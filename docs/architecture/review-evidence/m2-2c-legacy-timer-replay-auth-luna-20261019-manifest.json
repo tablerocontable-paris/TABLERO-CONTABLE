@@ -1,0 +1,366 @@
+{
+  "title": "Sol recheck: legacy timer replay authorization",
+  "date": "2026-10-19",
+  "status": "Implementación local; pendiente revisión y aceptación Sol",
+  "baseline": {
+    "commit": "f23c42529a0c55dd0f3596d765a30d5b6c9c54c5",
+    "sql014Sha256": "BA972D3531F9CC5221FC090CDC7FB1FE5C990366B0F74773333C8582F087125C",
+    "extraction": "Blob SQL014 exacto del commit; reproducción roja y matriz baseline usan este archivo."
+  },
+  "contract": {
+    "path": "docs/architecture/M2-2C-LEGACY-TIMER-REPLAY-AUTHORIZATION-SOL-CONTRACT-20261019.md",
+    "sha256": "A006EC42F26C08992C8F0CA2BF149359D937D6B15CF639D4FF67E5FDEE489A5F"
+  },
+  "postgres": "17.11",
+  "migrations": [
+    {
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "sha256": "9729A6800E93DEDC43AB5F0840309B7C0D222343898CC8D5B43EEB4A387F4210"
+    },
+    {
+      "path": "supabase/migrations/202610140012_sql_receipt_and_onboarding_guards.sql",
+      "sha256": "CABFE95DBD04AE65EA82C787BC5E3EC8E638E4620456366B7EEB8A5D715DFBF4"
+    },
+    {
+      "path": "supabase/migrations/202610140013_api_identity_foundation.sql",
+      "sha256": "D013B82BFA1101ED11A35DAEAF7A64B2E6063DA9C09B55E7586CE67CC586BAC2"
+    },
+    {
+      "path": "supabase/migrations/202610150014_operational_api.sql",
+      "sha256": "C6A4ACDD92653DFFE9A0576EC3D8FBC906B2562E3BFAC056B8561981A4203EC8"
+    }
+  ],
+  "runners": [
+    {
+      "path": "tests/review/m2-2c-legacy-timer-replay.mjs",
+      "sha256": "27C6E8AF598C28DA4D45760C754199BA942A885E15AF14444D3A4A265065259C"
+    },
+    {
+      "path": "tests/review/m2-2c-legacy-timer-replay-red.mjs",
+      "sha256": "D6641D8C5CEF6454E563F96749E1AE4AC4EF40CF815469075800E161022E7841"
+    },
+    {
+      "path": "tests/review/m2-1-native-review.mjs",
+      "sha256": "F896565E1277FC6A77998A97AD6671B1B27CF8BC49863AD4F49A3BE7E1DE40F0"
+    }
+  ],
+  "commands": [
+    {
+      "name": "baseline-red",
+      "command": "node tests/review/m2-2c-legacy-timer-replay-red.mjs --pg-bin <repo>/work/pg-runtime/pgsql/bin --output-dir <repo>/outputs/m2-2c-sol-recheck-20261019-baseline-red-final --port 55875 --sql014-path <repo>/outputs/m2-2c-sol-recheck-20261019-baseline-red-final/SQL014-baseline-f23c425.sql",
+      "exit": 0,
+      "result": "RED_CONFIRMED: unauthorized exact replay after membership revoke and profile inactive returned 00000; authorized replay returned old UUID; changed arguments returned legacy P0001/message."
+    },
+    {
+      "name": "green-sequential-and-races",
+      "command": "node tests/review/m2-2c-legacy-timer-replay.mjs --pg-bin <repo>/work/pg-runtime/pgsql/bin --output-dir <repo>/outputs/m2-2c-sol-recheck-20261019-green-attempt33 --port 55883",
+      "exit": 0,
+      "result": "GREEN_MEMBERSHIP_DENIAL; 23 events; complete sequential snapshots and 8/8 blocked races."
+    },
+    {
+      "name": "native-complete-candidate",
+      "command": "node tests/review/m2-1-native-review.mjs --pg-bin <repo>/work/pg-runtime/pgsql/bin --output-dir <repo>/outputs/m2-2c-sol-recheck-20261019-native-complete-candidate --review-matrix full --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes",
+      "exit": 0,
+      "passed": "351/351",
+      "m2a": 17,
+      "m2c": 194,
+      "m2cSmoke": true
+    },
+    {
+      "name": "native-complete-baseline",
+      "command": "node tests/review/m2-1-native-review.mjs --pg-bin <repo>/work/pg-runtime/pgsql/bin --output-dir <repo>/outputs/m2-2c-sol-recheck-20261019-native-complete-baseline --review-matrix full --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes [SQL014 temporariamente reemplazada por blob baseline y restaurada]",
+      "exit": 0,
+      "passed": "351/351",
+      "m2a": 17,
+      "m2c": 194,
+      "m2cSmoke": true
+    },
+    {
+      "name": "final-validation",
+      "commands": [
+        "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+        "node node_modules/typescript/bin/tsc --noEmit",
+        "node node_modules/vite/bin/vite.js build --outDir dist/client",
+        "node scripts/build-worker.mjs",
+        "node --check green and red runners",
+        "git diff --check"
+      ],
+      "vitest": "738/738 across 74 files",
+      "allExitCodes": 0
+    }
+  ],
+  "nativeComparison": {
+    "candidate": "351/351",
+    "baseline": "351/351",
+    "resultNameOutcomeDifferences": 0,
+    "note": "The earlier 43/43 run omitted smoke operations (m2cSmoke=false), so it is superseded and not used for acceptance."
+  },
+  "limitations": [
+    "No commits or pushes",
+    "No hosted service calls or migration application",
+    "Only SQL014 product code changed; SQL011-013 hashes recorded",
+    "No UI/DTO/Worker changes",
+    "Evidence paths are relative to work/site and resolve to ../../outputs"
+  ],
+  "artifacts": [
+    {
+      "name": "m2-2c-sol-recheck-20261019-baseline-red-final",
+      "files": [
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-baseline-red-final/command.txt",
+          "sha256": "887F6F86A3D89DE51AB9D7F3B1BB0478D18125359EDA6F754CC0DE5AED6C7879"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-baseline-red-final/exit-code.txt",
+          "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-baseline-red-final/postgres.log",
+          "sha256": "F1B8E4E4FF48A7C2D84D92E488ED607A955A0AF8E78ED76F983F5E80E890813F"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-baseline-red-final/reproduction.json",
+          "sha256": "E2242C04A7C6076F9E539414A43257DEAD7AD83A03EAD36CEAC8D1662B9880DD"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-baseline-red-final/SQL014-baseline-f23c425.sql",
+          "sha256": "BA972D3531F9CC5221FC090CDC7FB1FE5C990366B0F74773333C8582F087125C"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-baseline-red-final/stderr.log",
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-baseline-red-final/stdout.log",
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-baseline-red-final/syntax.exit-code.txt",
+          "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-baseline-red-final/syntax.stderr.log",
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-baseline-red-final/syntax.stdout.log",
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        }
+      ]
+    },
+    {
+      "name": "m2-2c-sol-recheck-20261019-green-attempt33",
+      "files": [
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-green-attempt33/command.txt",
+          "sha256": "93221521C815B9C8DCAE0FF0BFDB5E33B14768DDCDD5AC30A3AFBC32500E11A9"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-green-attempt33/exit-code.txt",
+          "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-green-attempt33/postgres.log",
+          "sha256": "C80347471EE3D865348583DE9933E6C0153FCCD74C5A89897078A8ACB9B4B1E3"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-green-attempt33/reproduction.json",
+          "sha256": "F180E5DA6167DF0C98A5792131F74333FD5CAB91D47608A2F233261053C776E4"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-green-attempt33/stderr.log",
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-green-attempt33/stdout.log",
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        }
+      ]
+    },
+    {
+      "name": "m2-2c-sol-recheck-20261019-native-complete-candidate",
+      "files": [
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-native-complete-candidate/command.txt",
+          "sha256": "D5CDB8B3C363E9450E589365DDFEC24F61EE67063B9742519B4A4117B0BD97CF"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-native-complete-candidate/external-exit-code.txt",
+          "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-native-complete-candidate/initdb.log",
+          "sha256": "35355C7500B11A2D348B806372B7DC3A8D78FCB9123F7C03DC9275D60A68CBBF"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-native-complete-candidate/postgres.log",
+          "sha256": "6CFE8DE470C33C5D37F49CB777BE2763266049760D75986F40D3EAA229A6FAD8"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-native-complete-candidate/review.json",
+          "sha256": "97310F475EAC82A918AD835D021C00854ADF4C5C9EF8CFE40AAEA2FFB85A9874"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-native-complete-candidate/stderr.log",
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-native-complete-candidate/stdout.log",
+          "sha256": "5867E1CA4A6020CEB47EDE460D59CB97D8D71069E082E2DA3A425978D6DD5807"
+        }
+      ]
+    },
+    {
+      "name": "m2-2c-sol-recheck-20261019-native-complete-baseline",
+      "files": [
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-native-complete-baseline/command.txt",
+          "sha256": "D0E66338452C6EDF9D59EA137350E3327FDD7FF19A74F8087A251D9D40DBDD67"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-native-complete-baseline/external-exit-code.txt",
+          "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-native-complete-baseline/initdb.log",
+          "sha256": "D50E97E07036078D9C139D3D4E906C25FCD0C0FFD342AFFBF1B6EBF01E4DE5DB"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-native-complete-baseline/postgres.log",
+          "sha256": "A79C0632C2DB6449D18E42312F9EC39988F1BA03FDB4BF802481E79382C79C0B"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-native-complete-baseline/review.json",
+          "sha256": "8ABB8A0B9017D367D2AFD836F6B316096F3C52C855F8F6F241E2E6F471F74F91"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-native-complete-baseline/SQL014-candidate-restoration-copy.sql",
+          "sha256": "C6A4ACDD92653DFFE9A0576EC3D8FBC906B2562E3BFAC056B8561981A4203EC8"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-native-complete-baseline/stderr.log",
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-native-complete-baseline/stdout.log",
+          "sha256": "C73FA74938EBDA66E04C975448274E7BC4BBE548B05B9FC24BC371DF147ED9D7"
+        }
+      ]
+    },
+    {
+      "name": "m2-2c-sol-recheck-20261019-validation-final2",
+      "files": [
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/client-build.exit-code.txt",
+          "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/client-build.stderr.log",
+          "sha256": "364968084D5BAEB488E4EC3F05C1DA3A314B7F70261F9DAD0E279AC98A1F952B"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/client-build.stdout.log",
+          "sha256": "454471ECBFE3D65ADD0D70745C66F5FFA52F48AAD9811DD928D7F205F84337FD"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/diff-check.exit-code.txt",
+          "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/diff-check.stderr.log",
+          "sha256": "46352806412A975D115F75438D180A3F349BB9FB5BD027AF4CB8EBDB81F0E49C"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/diff-check.stdout.log",
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/green-syntax.exit-code.txt",
+          "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/green-syntax.stderr.log",
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/green-syntax.stdout.log",
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/red-syntax.exit-code.txt",
+          "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/red-syntax.stderr.log",
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/red-syntax.stdout.log",
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/suite.exit-code.txt",
+          "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/suite.stderr.log",
+          "sha256": "03574087F63CBD7924C3196B65366AD167E2BFEDC842A79617E898482D669A6D"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/suite.stdout.log",
+          "sha256": "D154B975575F5B615496DD9E9014CA04825C8F28F23CD6EDFA5CF85870214C9E"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/tsc.exit-code.txt",
+          "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/tsc.stderr.log",
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/tsc.stdout.log",
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/worker-build.exit-code.txt",
+          "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/worker-build.stderr.log",
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/worker-build.stdout.log",
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/final-diff-check.stdout.log",
+          "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/final-diff-check.stderr.log",
+          "sha256": "46352806412A975D115F75438D180A3F349BB9FB5BD027AF4CB8EBDB81F0E49C"
+        },
+        {
+          "path": "../../outputs/m2-2c-sol-recheck-20261019-validation-final2/final-diff-check.exit-code.txt",
+          "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9"
+        }
+      ]
+    }
+  ],
+  "versionedEvidence": [
+    {
+      "path": "docs/architecture/review-evidence/m2-2c-legacy-timer-replay-auth-luna-20261019-result.md",
+      "sha256": "387987A12B2B375ACABE4B222969B5C76C61194A12935BF35C542EFE517F8672"
+    },
+    {
+      "path": "docs/architecture/review-evidence/m2-2c-legacy-timer-replay-auth-luna-20261019-reproduction-green.json",
+      "sha256": "F180E5DA6167DF0C98A5792131F74333FD5CAB91D47608A2F233261053C776E4"
+    },
+    {
+      "path": "docs/architecture/review-evidence/m2-2c-legacy-timer-replay-auth-luna-20261019-reproduction-red-baseline.json",
+      "sha256": "E2242C04A7C6076F9E539414A43257DEAD7AD83A03EAD36CEAC8D1662B9880DD"
+    }
+  ]
+}

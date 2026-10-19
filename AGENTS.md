@@ -1,4 +1,30 @@
-# Continuidad vigente — OneOff local, 19/10/2026
+# Continuidad vigente — replay legacy de cronómetro aceptado, 19/10/2026
+
+Sol aceptó en alcance local limitado la reautorización del replay legacy de
+`public.start_task_timer`. Contrato `docs/architecture/M2-2C-LEGACY-TIMER-REPLAY-AUTHORIZATION-SOL-CONTRACT-20261019.md`
+(SHA-256 `A006EC42F26C08992C8F0CA2BF149359D937D6B15CF639D4FF67E5FDEE489A5F`);
+aceptación `docs/architecture/M2-2C-LEGACY-TIMER-REPLAY-AUTHORIZATION-SOL-ACCEPTANCE-20261019.md`.
+SQL014 candidato SHA `C6A4ACDD92653DFFE9A0576EC3D8FBC906B2562E3BFAC056B8561981A4203EC8`.
+Reproducción roja con SQL014 baseline exacta de `f23c42529a0c55dd0f3596d765a30d5b6c9c54c5`;
+23 eventos verdes y ocho carreras con blockers; matriz nativa con smoke flags
+351/351 en baseline y candidata; suite 738/738 en 74 archivos, TSC/builds/
+sintaxis/diff-check exit 0. Manifiesto `docs/architecture/review-evidence/m2-2c-legacy-timer-replay-auth-luna-20261019-manifest.json`
+(SHA-256 `BDD92D3416A9A27C1EBFE82E3645AD82318BCFB3A1A3CAD66F8321A943771859`).
+SQL011–013 no cambiaron. SQL014 sigue sin aplicar en Supabase.
+
+El proyecto Supabase `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`) fue consultado
+en modo lectura: activo, sin migraciones ni tablas en `public`, `api` o
+`app_private`. La configuración Data API no fue verificada en esta consulta.
+No aplicar SQL014 ni iniciar Gate H hasta cerrar Gate L y sus requisitos de
+exposición. Los replays legacy de `record_activity_once` y
+`assign_task_responsibility`, §9/Gate L, Auth/HTTP, Data API, Storage/restore,
+hosting, correo, CI y producción siguen pendientes.
+
+**Próximo paso:** GPT-6.1 Sol audita el inventario de §9 tras esta aceptación y
+elige la siguiente familia legacy pendiente sin repetir matrices aceptadas;
+luego GPT-6 Luna implementa ese contrato acotado.
+
+## Bloque anterior — OneOff local, 19/10/2026
 
 Runner/evidencia de la matriz OneOff aceptados por Sol en alcance limitado y ejecutados localmente contra
 `docs/architecture/M2-2C-ONEOFF-CREATE-MEMBERSHIP-REVOCATION-RACES-SOL-CONTRACT-20261019.md` (SHA-256 contrato `98C9B35ACA1D66C4931644B4E5E2CCF9EFD654D02426B0351E2E5AA7FFA033C4`).

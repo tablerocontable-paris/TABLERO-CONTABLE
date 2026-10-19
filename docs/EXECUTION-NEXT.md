@@ -1,4 +1,25 @@
-# Continuidad vigente — OneOff local, 19/10/2026
+# Continuidad vigente — replay legacy de cronómetro aceptado, 19/10/2026
+
+Sol aceptó en alcance local acotado la reautorización del replay legacy de
+`public.start_task_timer`. Contrato y aceptación: `architecture/M2-2C-LEGACY-TIMER-REPLAY-AUTHORIZATION-SOL-CONTRACT-20261019.md`
+y `architecture/M2-2C-LEGACY-TIMER-REPLAY-AUTHORIZATION-SOL-ACCEPTANCE-20261019.md`.
+SQL014 candidato SHA-256 `C6A4ACDD92653DFFE9A0576EC3D8FBC906B2562E3BFAC056B8561981A4203EC8`;
+manifiesto `architecture/review-evidence/m2-2c-legacy-timer-replay-auth-luna-20261019-manifest.json`
+(SHA-256 `BDD92D3416A9A27C1EBFE82E3645AD82318BCFB3A1A3CAD66F8321A943771859`).
+Reproducción roja contra SQL014 exacta del baseline; 23 eventos verdes, ocho
+carreras bloqueadas; matriz nativa operativa 351/351 baseline y candidata;
+suite 738/738 en 74 archivos y TypeScript/builds/sintaxis/diff-check exit 0.
+SQL011–013 intactos. SQL014 no se aplicó ni se hicieron llamadas alojadas.
+
+Supabase dev consultado en modo lectura: proyecto activo y vacío, lista de
+migraciones vacía; Data API no verificada. No aplicar migraciones hasta aceptar
+Gate L y cerrar la configuración Data API exigida por el contrato.
+
+**Próximo paso:** Sol cruza §9 con la evidencia acumulada y selecciona el
+siguiente replay legacy pendiente (`record_activity_once` o
+`assign_task_responsibility`); Luna implementa sólo el contrato Sol resultante.
+
+## Bloque anterior — OneOff local, 19/10/2026
 
 Runner/evidencia de la matriz OneOff aceptados por Sol en alcance limitado y ejecutados localmente contra
 `architecture/M2-2C-ONEOFF-CREATE-MEMBERSHIP-REVOCATION-RACES-SOL-CONTRACT-20261019.md` (SHA-256 contrato `98C9B35ACA1D66C4931644B4E5E2CCF9EFD654D02426B0351E2E5AA7FFA033C4`).

@@ -1,4 +1,25 @@
-# Continuidad vigente — OneOff local, 19/10/2026
+# Continuidad vigente — replay legacy de cronómetro aceptado, 19/10/2026
+
+Sol aceptó localmente y en alcance acotado la reautorización del replay legacy
+`public.start_task_timer`. Contrato y aceptación: `architecture/M2-2C-LEGACY-TIMER-REPLAY-AUTHORIZATION-SOL-CONTRACT-20261019.md`
+y `architecture/M2-2C-LEGACY-TIMER-REPLAY-AUTHORIZATION-SOL-ACCEPTANCE-20261019.md`.
+SQL014 candidato SHA-256 `C6A4ACDD92653DFFE9A0576EC3D8FBC906B2562E3BFAC056B8561981A4203EC8`;
+manifiesto SHA-256 `BDD92D3416A9A27C1EBFE82E3645AD82318BCFB3A1A3CAD66F8321A943771859`.
+Rojo baseline exacto confirmado; verde 23 eventos/8 carreras con blockers;
+matriz nativa con smoke flags 351/351 baseline y candidata; suite 738/738,
+TypeScript, builds, sintaxis y diff-check exit 0. SQL011–013 intactos. Sin commit
+de este bloque todavía; SQL014 no se aplicó remotamente.
+
+Lectura Supabase actual: organización `tablerocontable-paris DEV`, proyecto
+`grupo-paris-dev` (`kynqjfhqujnjojcmurwf`) activo; lista de migraciones vacía y
+sin tablas en `public`, `api`, `app_private`. La configuración Data API no se
+verificó. Gate L/§9, otros replays legacy, Auth/HTTP, Data API, Storage/restore,
+SQL014 remoto, CI, hosting, correo y producción siguen abiertos.
+
+**Siguiente:** revisión Sol del inventario residual de §9; elegir el siguiente
+contrato legacy sin reimplementar familias ya aceptadas.
+
+## Bloque anterior — OneOff local, 19/10/2026
 
 Runner/evidencia de la matriz OneOff aceptados por Sol en alcance limitado y ejecutados localmente contra
 `architecture/M2-2C-ONEOFF-CREATE-MEMBERSHIP-REVOCATION-RACES-SOL-CONTRACT-20261019.md` (SHA-256 contrato `98C9B35ACA1D66C4931644B4E5E2CCF9EFD654D02426B0351E2E5AA7FFA033C4`).

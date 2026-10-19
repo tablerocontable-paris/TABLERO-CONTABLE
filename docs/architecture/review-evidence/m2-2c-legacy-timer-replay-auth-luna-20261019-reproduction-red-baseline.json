@@ -1,0 +1,329 @@
+{
+  "contractSha256": "a006ec42f26c08992c8f0ca2bf149359d937d6b15cf639d4ff67e5fdee489a5f",
+  "runnerSha256": "d6641d8c5cef6454e563f96749e1ae4ac4ef40cf815469075800e161022e7841",
+  "baselineCommit": "f23c42529a0c55dd0f3596d765a30d5b6c9c54c5",
+  "baselineSql014Path": "C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\outputs\\m2-2c-sol-recheck-20261019-baseline-red-final\\SQL014-baseline-f23c425.sql",
+  "baselineSql014Sha256": "ba972d3531f9cc5221fc090cdc7fb1fe5c990366b0f74773333c8582f087125c",
+  "postgresVersion": "postgres (PostgreSQL) 17.11",
+  "events": [
+    {
+      "name": "baseline exact replay after membership revocation",
+      "initialSQLSTATE": "00000",
+      "initialSession": "c8b5e8b6-a9aa-4169-83b0-ce9611d010a8",
+      "initialTimerReceipt": {
+        "result": {
+          "session_id": "c8b5e8b6-a9aa-4169-83b0-ce9611d010a8"
+        },
+        "actor_id": "00000000-0000-0000-0000-000000080004",
+        "arguments": {
+          "switch": false,
+          "instance": "00000000-0000-0000-0000-000000080009",
+          "revision": 0
+        },
+        "created_at": "2026-10-19T16:38:28.834302-03:00",
+        "operation_id": "00000000-0000-0000-0000-000000080010",
+        "operation_kind": "start_timer",
+        "organization_id": "00000000-0000-0000-0000-000000080001"
+      },
+      "authorizedExactReplaySQLSTATE": "00000",
+      "authorizedExactReplaySession": "c8b5e8b6-a9aa-4169-83b0-ce9611d010a8",
+      "changedArgumentSQLSTATE": "P0001",
+      "changedArgumentPrimaryMessage": "Identificador de operación reutilizado con otros argumentos",
+      "revokeSQLSTATE": "00000",
+      "revokeResponse": {
+        "kind": "companyMembership.setActive",
+        "result": {
+          "active": false,
+          "companyId": "00000000-0000-0000-0000-000000080002",
+          "profileId": "00000000-0000-0000-0000-000000080004",
+          "membershipRevision": "1"
+        },
+        "operationId": "00000000-0000-0000-0000-000000080011",
+        "contractVersion": 1
+      },
+      "replaySQLSTATE": "00000",
+      "replaySession": "c8b5e8b6-a9aa-4169-83b0-ce9611d010a8",
+      "expectedAfterFix": "P0001 Sin permiso",
+      "baseline": {
+        "task": {
+          "id": "00000000-0000-0000-0000-000000080009",
+          "kind": "resultado",
+          "unit": null,
+          "title": "Timer result",
+          "period": "2026-10-01",
+          "status": "En curso",
+          "target": null,
+          "weight": 1,
+          "team_id": "00000000-0000-0000-0000-000000080003",
+          "due_date": "2026-10-31",
+          "owner_id": "00000000-0000-0000-0000-000000080004",
+          "priority": "Media",
+          "checklist": [],
+          "blocked_by": null,
+          "company_id": "00000000-0000-0000-0000-000000080002",
+          "started_at": "2026-10-19T16:38:28.880956-03:00",
+          "completed_at": null,
+          "scheduled_on": "2026-10-19",
+          "assignment_id": "00000000-0000-0000-0000-000000080008",
+          "blocked_since": null,
+          "state_revision": 1,
+          "organization_id": "00000000-0000-0000-0000-000000080001",
+          "measurement_version": 1,
+          "template_version_id": "00000000-0000-0000-0000-000000080007"
+        },
+        "audit": [
+          {
+            "at": "2026-10-19T16:38:28.880956-03:00",
+            "id": 1,
+            "action": "task.timer_started",
+            "details": {
+              "binding": null,
+              "instance": "00000000-0000-0000-0000-000000080009",
+              "contribution": "responsible"
+            },
+            "actor_id": "00000000-0000-0000-0000-000000080004",
+            "entity_id": "c8b5e8b6-a9aa-4169-83b0-ce9611d010a8",
+            "organization_id": "00000000-0000-0000-0000-000000080001"
+          }
+        ],
+        "graph": [
+          {
+            "period": "2026-10-01",
+            "company_id": "00000000-0000-0000-0000-000000080002",
+            "fence_epoch": 0,
+            "config_revision": 0,
+            "organization_id": "00000000-0000-0000-0000-000000080001"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "c8b5e8b6-a9aa-4169-83b0-ce9611d010a8",
+            "actor_id": "00000000-0000-0000-0000-000000080004",
+            "ended_at": null,
+            "absence_id": null,
+            "created_at": "2026-10-19T16:38:28.834302-03:00",
+            "started_at": "2026-10-19T16:38:28.880956-03:00",
+            "instance_id": "00000000-0000-0000-0000-000000080009",
+            "organization_id": "00000000-0000-0000-0000-000000080001",
+            "contribution_kind": "responsible",
+            "coverage_binding_id": null
+          }
+        ],
+        "membership": {
+          "active": true,
+          "revision": 0,
+          "changed_at": null,
+          "changed_by": null,
+          "company_id": "00000000-0000-0000-0000-000000080002",
+          "profile_id": "00000000-0000-0000-0000-000000080004",
+          "organization_id": "00000000-0000-0000-0000-000000080001",
+          "access_valid_from": null
+        },
+        "monthFences": [
+          {
+            "period": "2026-10-01",
+            "owner_id": "00000000-0000-0000-0000-000000080004",
+            "fence_epoch": 1,
+            "organization_id": "00000000-0000-0000-0000-000000080001"
+          }
+        ],
+        "timerReceipts": [
+          {
+            "result": {
+              "session_id": "c8b5e8b6-a9aa-4169-83b0-ce9611d010a8"
+            },
+            "actor_id": "00000000-0000-0000-0000-000000080004",
+            "arguments": {
+              "switch": false,
+              "instance": "00000000-0000-0000-0000-000000080009",
+              "revision": 0
+            },
+            "created_at": "2026-10-19T16:38:28.834302-03:00",
+            "operation_id": "00000000-0000-0000-0000-000000080010",
+            "operation_kind": "start_timer",
+            "organization_id": "00000000-0000-0000-0000-000000080001"
+          }
+        ],
+        "membershipFence": {
+          "profile_id": "00000000-0000-0000-0000-000000080004",
+          "fence_epoch": 1,
+          "organization_id": "00000000-0000-0000-0000-000000080001"
+        },
+        "operationFences": null
+      },
+      "afterRevokeAndReplay": {
+        "task": {
+          "id": "00000000-0000-0000-0000-000000080009",
+          "kind": "resultado",
+          "unit": null,
+          "title": "Timer result",
+          "period": "2026-10-01",
+          "status": "En curso",
+          "target": null,
+          "weight": 1,
+          "team_id": "00000000-0000-0000-0000-000000080003",
+          "due_date": "2026-10-31",
+          "owner_id": "00000000-0000-0000-0000-000000080004",
+          "priority": "Media",
+          "checklist": [],
+          "blocked_by": null,
+          "company_id": "00000000-0000-0000-0000-000000080002",
+          "started_at": "2026-10-19T16:38:28.880956-03:00",
+          "completed_at": null,
+          "scheduled_on": "2026-10-19",
+          "assignment_id": "00000000-0000-0000-0000-000000080008",
+          "blocked_since": null,
+          "state_revision": 2,
+          "organization_id": "00000000-0000-0000-0000-000000080001",
+          "measurement_version": 1,
+          "template_version_id": "00000000-0000-0000-0000-000000080007"
+        },
+        "audit": [
+          {
+            "at": "2026-10-19T16:38:28.880956-03:00",
+            "id": 1,
+            "action": "task.timer_started",
+            "details": {
+              "binding": null,
+              "instance": "00000000-0000-0000-0000-000000080009",
+              "contribution": "responsible"
+            },
+            "actor_id": "00000000-0000-0000-0000-000000080004",
+            "entity_id": "c8b5e8b6-a9aa-4169-83b0-ce9611d010a8",
+            "organization_id": "00000000-0000-0000-0000-000000080001"
+          },
+          {
+            "at": "2026-10-19T16:38:28.931603-03:00",
+            "id": 2,
+            "action": "companyMembership.setActive",
+            "details": {
+              "active": false,
+              "profileId": "00000000-0000-0000-0000-000000080004",
+              "membershipRevision": "1"
+            },
+            "actor_id": "00000000-0000-0000-0000-000000080005",
+            "entity_id": "00000000-0000-0000-0000-000000080002",
+            "organization_id": "00000000-0000-0000-0000-000000080001"
+          }
+        ],
+        "graph": [
+          {
+            "period": "2026-10-01",
+            "company_id": "00000000-0000-0000-0000-000000080002",
+            "fence_epoch": 1,
+            "config_revision": 0,
+            "organization_id": "00000000-0000-0000-0000-000000080001"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "c8b5e8b6-a9aa-4169-83b0-ce9611d010a8",
+            "actor_id": "00000000-0000-0000-0000-000000080004",
+            "ended_at": "2026-10-19T16:38:28.964709-03:00",
+            "absence_id": null,
+            "created_at": "2026-10-19T16:38:28.834302-03:00",
+            "started_at": "2026-10-19T16:38:28.880956-03:00",
+            "instance_id": "00000000-0000-0000-0000-000000080009",
+            "organization_id": "00000000-0000-0000-0000-000000080001",
+            "contribution_kind": "responsible",
+            "coverage_binding_id": null
+          }
+        ],
+        "membership": {
+          "active": false,
+          "revision": 1,
+          "changed_at": "2026-10-19T16:38:28.964326-03:00",
+          "changed_by": "00000000-0000-0000-0000-000000080005",
+          "company_id": "00000000-0000-0000-0000-000000080002",
+          "profile_id": "00000000-0000-0000-0000-000000080004",
+          "organization_id": "00000000-0000-0000-0000-000000080001",
+          "access_valid_from": null
+        },
+        "monthFences": [
+          {
+            "period": "2026-10-01",
+            "owner_id": "00000000-0000-0000-0000-000000080004",
+            "fence_epoch": 1,
+            "organization_id": "00000000-0000-0000-0000-000000080001"
+          }
+        ],
+        "timerReceipts": [
+          {
+            "result": {
+              "session_id": "c8b5e8b6-a9aa-4169-83b0-ce9611d010a8"
+            },
+            "actor_id": "00000000-0000-0000-0000-000000080004",
+            "arguments": {
+              "switch": false,
+              "instance": "00000000-0000-0000-0000-000000080009",
+              "revision": 0
+            },
+            "created_at": "2026-10-19T16:38:28.834302-03:00",
+            "operation_id": "00000000-0000-0000-0000-000000080010",
+            "operation_kind": "start_timer",
+            "organization_id": "00000000-0000-0000-0000-000000080001"
+          }
+        ],
+        "membershipFence": {
+          "profile_id": "00000000-0000-0000-0000-000000080004",
+          "fence_epoch": 2,
+          "organization_id": "00000000-0000-0000-0000-000000080001"
+        },
+        "operationFences": [
+          {
+            "actor_id": "00000000-0000-0000-0000-000000080005",
+            "fence_epoch": 1,
+            "operation_id": "00000000-0000-0000-0000-000000080011"
+          }
+        ]
+      }
+    },
+    {
+      "name": "exact replay after local employee profile inactivation",
+      "profileBefore": {
+        "id": "00000000-0000-0000-0000-000000080030",
+        "name": "Inactive employee",
+        "role": "empleado",
+        "active": true,
+        "branch": "Test",
+        "sector": "Test",
+        "position": "Empleado",
+        "manager_id": null,
+        "organization_id": "00000000-0000-0000-0000-000000080001"
+      },
+      "profileAfter": {
+        "id": "00000000-0000-0000-0000-000000080030",
+        "name": "Inactive employee",
+        "role": "empleado",
+        "active": false,
+        "branch": "Test",
+        "sector": "Test",
+        "position": "Empleado",
+        "manager_id": null,
+        "organization_id": "00000000-0000-0000-0000-000000080001"
+      },
+      "initialSQLSTATE": "00000",
+      "session": "5908ded1-8e4c-481d-a2c8-0988b62fcce4",
+      "exactTimerReceipt": {
+        "result": {
+          "session_id": "5908ded1-8e4c-481d-a2c8-0988b62fcce4"
+        },
+        "actor_id": "00000000-0000-0000-0000-000000080030",
+        "arguments": {
+          "switch": false,
+          "instance": "00000000-0000-0000-0000-000000080032",
+          "revision": 0
+        },
+        "created_at": "2026-10-19T16:38:29.025458-03:00",
+        "operation_id": "00000000-0000-0000-0000-000000080033",
+        "operation_kind": "start_timer",
+        "organization_id": "00000000-0000-0000-0000-000000080001"
+      },
+      "replaySQLSTATE": "00000",
+      "replaySession": "5908ded1-8e4c-481d-a2c8-0988b62fcce4",
+      "membershipRemainedActive": true,
+      "unrelatedFenceAndAuditCollectionsUnchanged": true
+    }
+  ],
+  "result": "RED_CONFIRMED"
+}

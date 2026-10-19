@@ -1190,7 +1190,7 @@ language plpgsql security definer set search_path='' as $$
 declare plan jsonb; actor uuid:=auth.uid(); planned public.task_instances%rowtype; t public.task_instances%rowtype;
  old_session public.task_time_sessions%rowtype; target_session public.task_time_sessions%rowtype;
  source_task public.task_instances%rowtype; new_session uuid; binding uuid; absence uuid; old_ended timestamptz;
- cached public.task_mutation_receipts%rowtype; args jsonb; result uuid; at_time timestamptz;
+ cached public.task_mutation_receipts%rowtype; cached_after public.task_mutation_receipts%rowtype; args jsonb; result uuid; at_time timestamptz;
  actors uuid[]; profiles_to_lock uuid[]; months jsonb; active_count integer; contribution text; readiness jsonb;
 begin
  if actor is null or p_instance is null or p_operation_id is null or p_expected_revision is null
@@ -1200,6 +1200,37 @@ begin
  select * into cached from public.task_mutation_receipts where actor_id=actor and operation_id=p_operation_id;
  if found then
    if cached.operation_kind<>'start_timer' or cached.arguments<>args then raise exception 'Identificador de operación reutilizado con otros argumentos'; end if;
+   if cached.organization_id is null then raise exception 'Sin permiso'; end if;
+   select * into planned from public.task_instances where id=p_instance and organization_id=cached.organization_id;
+   if not found then raise exception 'Sin permiso'; end if;
+   select coalesce(array_agg(distinct x order by x),array[]::uuid[]) into profiles_to_lock from (
+     select actor x union select planned.owner_id
+     union select m.profile_id from public.task_responsibility_heads h
+       join public.task_responsibility_members m on m.set_id=h.set_id
+       where h.instance_id=planned.id and h.organization_id=planned.organization_id
+   ) q;
+   select coalesce(jsonb_agg(jsonb_build_object('ownerId',x,'period',planned.period) order by x),'[]'::jsonb)
+     into months from unnest(profiles_to_lock) x;
+   plan:=public._coordination_prepare(array[planned.id],array[actor],profiles_to_lock,months,
+     case when planned.kind='resultado' then array['dependencies:'||planned.organization_id||':'||planned.company_id||':'||planned.period] else array[]::text[] end,'{}'::jsonb);
+   perform app_private._coordination_acquire_m22b(plan,false);
+   select * into t from public.task_instances where id=p_instance;
+   if not found or (t.id,t.organization_id,t.assignment_id,t.company_id,t.owner_id,t.team_id,t.period)
+     is distinct from (planned.id,planned.organization_id,planned.assignment_id,planned.company_id,planned.owner_id,planned.team_id,planned.period)
+     then raise exception using errcode='40001',message='La ocurrencia cambió; reintente en una transacción nueva'; end if;
+   select * into cached_after from public.task_mutation_receipts where actor_id=actor and operation_id=p_operation_id;
+   if not found or (cached_after.organization_id,cached_after.actor_id,cached_after.operation_id,cached_after.operation_kind,cached_after.arguments,cached_after.result)
+     is distinct from (cached.organization_id,cached.actor_id,cached.operation_id,cached.operation_kind,cached.arguments,cached.result)
+     then raise exception using errcode='40001',message='El recibo del cronómetro cambió; reintente en una transacción nueva'; end if;
+   at_time:=clock_timestamp();
+   if not exists(select 1 from public.profiles p where p.id=actor and p.organization_id=t.organization_id and p.active)
+     or not coalesce(public._can_access_instance_at(t.id,at_time),false)
+     or public.actor_role() is null or public.actor_role()='auditor'
+     then raise exception 'Sin permiso'; end if;
+   if (exists(select 1 from app_private.task_tracking tr where tr.instance_id=t.id and (tr.commercial_enabled or tr.available_from is not null))
+       or exists(select 1 from app_private.task_dependencies d where d.instance_id=t.id or d.prerequisite_id=t.id))
+     and not app_private.api_task_actor_can_execute(t.id,actor,(at_time at time zone 'America/Argentina/Buenos_Aires')::date)
+     then raise exception 'Sin permiso'; end if;
    return (cached.result->>'session_id')::uuid;
  end if;
  select * into planned from public.task_instances where id=p_instance;
