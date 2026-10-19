@@ -1,3 +1,5 @@
+**Último bloque local aceptado por Sol, alcance acotado:** cuatro carreras `assignment.create` vs `companyMembership.setActive(false)`, RC/RC y RR/RR en ambos órdenes. PostgreSQL nativo 17.11: 329/329, cuatro bloqueos reales, cero deadlocks; outcomes por contrato exactos. Suite completa: 738/738 en 74 archivos; TypeScript, builds cliente/Worker, `node --check` y `git diff --check` exit 0. El fallo anterior 737/738 no se reprodujo en el caso enfocado sobre baseline limpio, ni en la suite completa posterior. Sin cambios SQL ni llamadas remotas. Manifiesto versionado: `docs/architecture/review-evidence/m2-2c-assignment-create-membership-revocation-races-luna-20261019.json`; runner, reportes y logs en `../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/`. Aceptación registrada en `docs/architecture/M2-2C-ASSIGNMENT-CREATE-MEMBERSHIP-REVOCATION-RACES-SOL-ACCEPTANCE-20261019.md`. Sin aplicar SQL014; Gate L/§9 siguen abiertos.
+
 # Estado operativo y precedencia — actualización 19/10/2026
 
 **Último bloque local aceptado por Sol, alcance acotado:** cuatro carreras entre

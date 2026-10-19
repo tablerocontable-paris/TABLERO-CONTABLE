@@ -3293,6 +3293,195 @@ try {
       await operationRecordMembershipRace({ order: "record-first", isolation: "RR", base: 22020 });
       await operationRecordMembershipRace({ order: "revoke-first", isolation: "RR", base: 22030 });
 
+      // First-execution assignment.create versus membership revocation. Each
+      // case owns its company/team and two distinct AAL2 chiefs; all creation,
+      // month, graph and membership fences are explicitly materialized at 0.
+      async function assignmentCreateMembershipRace({ order, isolation, base }) {
+        const iso = isolation === "RC" ? "read committed" : "repeatable read";
+        const creator = uid(base), revoker = uid(base + 1), owner = uid(base + 2);
+        const companyId = uid(base + 3), teamId = uid(base + 4), createOp = uid(base + 5), revokeOp = uid(base + 6);
+        const label = `M2.2C assignment create ${order} ${isolation}`;
+        const period = monthPeriod, date = scheduledOn, weekday = 1;
+        assert.notEqual(creator, revoker);
+        await observer.ok(`insert into auth.users(id) values(${lit(creator)}),(${lit(revoker)}),(${lit(owner)});
+          insert into public.profiles(id,organization_id,name,role,sector,branch,position) values
+            (${lit(creator)},${lit(org)},${lit(label)}||' creator','jefe','Assignment race','Assignment race','Chief'),
+            (${lit(revoker)},${lit(org)},${lit(label)}||' revoker','jefe','Assignment race','Assignment race','Chief'),
+            (${lit(owner)},${lit(org)},${lit(label)}||' employee','empleado','Assignment race','Assignment race','Employee');
+          insert into public.companies(id,organization_id,name) values(${lit(companyId)},${lit(org)},${lit(label)}||' company');
+          insert into public.teams(id,organization_id,name,manager_id) values(${lit(teamId)},${lit(org)},${lit(label)}||' team',${lit(creator)});
+          insert into public.company_memberships(organization_id,company_id,profile_id) values
+            (${lit(org)},${lit(companyId)},${lit(owner)}),(${lit(org)},${lit(companyId)},${lit(creator)}),(${lit(org)},${lit(companyId)},${lit(revoker)});
+          insert into public.team_members(organization_id,team_id,profile_id) values
+            (${lit(org)},${lit(teamId)},${lit(owner)}),(${lit(org)},${lit(teamId)},${lit(creator)}),(${lit(org)},${lit(teamId)},${lit(revoker)});
+          insert into app_private.api_creation_heads(organization_id,owner_id,revision,fence_epoch) values(${lit(org)},${lit(owner)},0,0)
+            on conflict(organization_id,owner_id) do update set revision=0,fence_epoch=0;
+          insert into app_private.api_month_fences(organization_id,owner_id,period,fence_epoch) values(${lit(org)},${lit(owner)},${lit(period)}::date,0)
+            on conflict(owner_id,period) do update set fence_epoch=0;
+          insert into app_private.task_dependency_graphs(organization_id,company_id,period,config_revision,fence_epoch)
+            values(${lit(org)},${lit(companyId)},${lit(period)}::date,0,0)
+            on conflict(organization_id,company_id,period) do update set config_revision=0,fence_epoch=0;`);
+        const createCommand = { contractVersion: 1, operationId: createOp, kind: "assignment.create",
+          expectedRevisions: { [`creation:${owner}`]: "0" },
+          payload: { ownerId: owner, companyId, teamId,
+            source: { type: "custom", definition: { kind: "operativa", title: label, objective: `${label} synthetic objective`, sector: "Assignment race", unit: "documentos" } },
+            schedule: { frequency: "unica", startDate: date, endDate: date, interval: 1, weekdays: [], monthDay: Number(date.slice(-2)), hasDeadline: true, dueOffsetDays: 0 } } };
+        const revokeCommand = { contractVersion: 1, operationId: revokeOp, kind: "companyMembership.setActive",
+          expectedRevisions: { [`membership:${companyId}:${owner}`]: "0" },
+          payload: { companyId, profileId: owner, active: false, reason: `${label} synthetic revocation` } };
+        const snapshot = async () => JSON.parse((await observer.ok(`select jsonb_build_object(
+          'profiles',(select coalesce(jsonb_agg(to_jsonb(p) order by p.id),'[]'::jsonb) from public.profiles p where p.id in (${lit(owner)},${lit(creator)},${lit(revoker)})),
+          'memberships',(select coalesce(jsonb_agg(to_jsonb(m) order by m.profile_id),'[]'::jsonb) from public.company_memberships m where m.organization_id=${lit(org)} and m.company_id=${lit(companyId)}),
+          'teamMembers',(select coalesce(jsonb_agg(to_jsonb(tm) order by tm.profile_id),'[]'::jsonb) from public.team_members tm where tm.organization_id=${lit(org)} and tm.team_id=${lit(teamId)}),
+          'assignments',(select coalesce(jsonb_agg(to_jsonb(a) order by a.id),'[]'::jsonb) from public.task_assignments a where a.organization_id=${lit(org)} and a.owner_id=${lit(owner)} and a.company_id=${lit(companyId)}),
+          'chiefAssignments',(select count(*) from public.task_assignments a where a.organization_id=${lit(org)} and a.company_id=${lit(companyId)} and a.owner_id in (${lit(creator)},${lit(revoker)})),
+          'chiefInstances',(select count(*) from public.task_instances i where i.organization_id=${lit(org)} and i.company_id=${lit(companyId)} and i.owner_id in (${lit(creator)},${lit(revoker)})),
+          'instances',(select coalesce(jsonb_agg(to_jsonb(i) order by i.id),'[]'::jsonb) from public.task_instances i where i.organization_id=${lit(org)} and i.owner_id=${lit(owner)} and i.company_id=${lit(companyId)}),
+          'sessions',(select coalesce(jsonb_agg(to_jsonb(s) order by s.id),'[]'::jsonb) from public.task_time_sessions s where s.organization_id=${lit(org)} and (s.actor_id in (${lit(owner)},${lit(creator)},${lit(revoker)}) or s.instance_id in (select id from public.task_instances where owner_id=${lit(owner)} and company_id=${lit(companyId)}))),
+          'head',(select to_jsonb(h) from app_private.api_creation_heads h where h.organization_id=${lit(org)} and h.owner_id=${lit(owner)}),
+          'month',(select to_jsonb(f) from app_private.api_month_fences f where f.organization_id=${lit(org)} and f.owner_id=${lit(owner)} and f.period=${lit(period)}::date),
+          'graph',(select to_jsonb(g) from app_private.task_dependency_graphs g where g.organization_id=${lit(org)} and g.company_id=${lit(companyId)} and g.period=${lit(period)}::date),
+          'fences',jsonb_build_object(
+            'membershipOwner',(select fence_epoch from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id=${lit(owner)}),
+            'membershipCreator',(select fence_epoch from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id=${lit(creator)}),
+            'membershipRevoker',(select fence_epoch from app_private.api_membership_fences where organization_id=${lit(org)} and profile_id=${lit(revoker)}),
+            'month',(select fence_epoch from app_private.api_month_fences where organization_id=${lit(org)} and owner_id=${lit(owner)} and period=${lit(period)}::date),
+            'graph',(select fence_epoch from app_private.task_dependency_graphs where organization_id=${lit(org)} and company_id=${lit(companyId)} and period=${lit(period)}::date),
+            'graphConfig',(select config_revision from app_private.task_dependency_graphs where organization_id=${lit(org)} and company_id=${lit(companyId)} and period=${lit(period)}::date),
+            'creationRevision',(select revision from app_private.api_creation_heads where organization_id=${lit(org)} and owner_id=${lit(owner)}),
+            'creation',(select fence_epoch from app_private.api_creation_heads where organization_id=${lit(org)} and owner_id=${lit(owner)}),
+            'createOperation',coalesce((select fence_epoch from app_private.api_operation_fences where actor_id=${lit(creator)} and operation_id=${lit(createOp)}),0),
+            'revokeOperation',coalesce((select fence_epoch from app_private.api_operation_fences where actor_id=${lit(revoker)} and operation_id=${lit(revokeOp)}),0)),
+          'receipts',(select coalesce(jsonb_agg(to_jsonb(r) order by r.operation_id),'[]'::jsonb) from app_private.api_command_receipts r where r.operation_id in (${lit(createOp)},${lit(revokeOp)})),
+          'operationFences',(select coalesce(jsonb_agg(to_jsonb(f) order by f.actor_id,f.operation_id),'[]'::jsonb) from app_private.api_operation_fences f where f.operation_id in (${lit(createOp)},${lit(revokeOp)})),
+          'assignmentAudit',(select coalesce(jsonb_agg(to_jsonb(a) order by a.id),'[]'::jsonb) from public.audit_events a where a.organization_id=${lit(org)} and a.action='assignment.create' and (a.entity_id in (select id from public.task_assignments where owner_id=${lit(owner)} and company_id=${lit(companyId)}) or a.details->>'ownerId'=${lit(owner)})),
+          'membershipAudit',(select coalesce(jsonb_agg(to_jsonb(a) order by a.id),'[]'::jsonb) from public.audit_events a where a.organization_id=${lit(org)} and a.action='companyMembership.setActive' and (a.entity_id=${lit(companyId)} or a.details->>'profileId'=${lit(owner)})),
+          'membershipEvents',(select coalesce(jsonb_agg(to_jsonb(e) order by e.revision),'[]'::jsonb) from app_private.company_membership_events e where e.organization_id=${lit(org)} and e.company_id=${lit(companyId)} and e.profile_id=${lit(owner)}),
+          'activity',(select count(*) from public.activity_entries e where e.organization_id=${lit(org)} and e.actor_id in (${lit(owner)},${lit(creator)},${lit(revoker)})),
+          'closures',(select count(*) from public.monthly_closures c where c.organization_id=${lit(org)} and c.owner_id=${lit(owner)}),
+          'absences',(select count(*) from public.employee_absences x where x.organization_id=${lit(org)} and (x.owner_id=${lit(owner)} or x.replacement_id=${lit(owner)})),
+          'coverage',(select count(*) from public.task_coverage_bindings b where b.organization_id=${lit(org)} and b.company_id_snapshot=${lit(companyId)}),
+          'responsibilityHeads',(select count(*) from public.task_responsibility_heads h join public.task_instances i on i.id=h.instance_id where i.organization_id=${lit(org)} and i.company_id=${lit(companyId)} and i.owner_id=${lit(owner)}),
+          'dependencies',(select count(*) from app_private.task_dependencies d where d.organization_id=${lit(org)} and d.company_id=${lit(companyId)} and d.period=${lit(period)}::date),
+          'tracking',(select count(*) from app_private.task_tracking t join public.task_instances i on i.id=t.instance_id where i.organization_id=${lit(org)} and i.company_id=${lit(companyId)} and i.owner_id=${lit(owner)}),
+          'trackingEvents',(select count(*) from app_private.task_tracking_events e join public.task_instances i on i.id=e.instance_id where i.organization_id=${lit(org)} and i.company_id=${lit(companyId)} and i.owner_id=${lit(owner)}),
+          'completionEvents',(select count(*) from app_private.task_completion_events e join public.task_instances i on i.id=e.instance_id where i.organization_id=${lit(org)} and i.company_id=${lit(companyId)} and i.owner_id=${lit(owner)}),
+          'parameterization',(select count(*) from app_private.assignment_parameterization p where p.organization_id=${lit(org)} and p.assignment_id in (select id from public.task_assignments where owner_id=${lit(owner)} and company_id=${lit(companyId)}))
+        )::text;`)).at(-1));
+        const baseline = await snapshot();
+        assert.equal(baseline.profiles.length, 3); assert.equal(baseline.memberships.length, 3); assert.equal(baseline.teamMembers.length, 3);
+        assert.equal(baseline.assignments.length, 0); assert.equal(baseline.chiefAssignments, 0); assert.equal(baseline.chiefInstances, 0); assert.deepEqual(baseline.instances, []); assert.deepEqual(baseline.sessions, []);
+        assert.equal(baseline.head.revision, 0); assert.equal(baseline.head.fence_epoch, 0);
+        assert.equal(baseline.month.fence_epoch, 0); assert.equal(baseline.graph.fence_epoch, 0); assert.equal(baseline.graph.config_revision, 0);
+        assert.deepEqual(baseline.receipts, []); assert.deepEqual(baseline.operationFences, []); assert.deepEqual(baseline.assignmentAudit, []); assert.deepEqual(baseline.membershipAudit, []); assert.deepEqual(baseline.membershipEvents, []);
+        assert.equal(baseline.activity, 0); assert.equal(baseline.closures, 0); assert.equal(baseline.absences, 0); assert.equal(baseline.coverage, 0);
+        assert.equal(baseline.responsibilityHeads, 0); assert.equal(baseline.dependencies, 0); assert.equal(baseline.tracking, 0); assert.equal(baseline.trackingEvents, 0); assert.equal(baseline.completionEvents, 0); assert.equal(baseline.parameterization, 0);
+        assert.deepEqual(baseline.fences, { membershipOwner: 0, membershipCreator: 0, membershipRevoker: 0, month: 0, graph: 0, graphConfig: 0, creationRevision: 0, creation: 0, createOperation: 0, revokeOperation: 0 });
+        const claimsFor = async (session, actor, aal) => {
+          const row = (await session.ok(`select coalesce(auth.uid()::text,'')||'|'||coalesce(current_setting('request.jwt.claim.sub',true),'')||'|'||coalesce((current_setting('request.jwt.claims',true)::jsonb->>'sub'),'')||'|'||coalesce((current_setting('request.jwt.claims',true)::jsonb->>'aal'),'')||'|'||current_setting('transaction_isolation')||'|'||current_user||'|'||coalesce((current_setting('request.jwt.claims',true)::jsonb->>'role'),'');`)).at(-1).split("|");
+          const observed = { uid: row[0], jwtSub: row[1], claimsSub: row[2], aal: row[3], isolation: row[4], currentUser: row[5], claimsRole: row[6] };
+          assert.deepEqual(observed, { uid: actor, jwtSub: actor, claimsSub: actor, aal, isolation: iso, currentUser: "authenticated", claimsRole: "authenticated" }, `${order}/${isolation}: effective claims`);
+          return observed;
+        };
+        const runAs = async (session, actor, aal) => {
+          await session.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(actor)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: actor, aal }))},false);set role authenticated;begin isolation level ${iso};`);
+          return { pid: Number((await session.ok("select pg_backend_pid();")).at(-1)), claims: await claimsFor(session, actor, aal) };
+        };
+        const winnerAction = order === "assignment-first" ? "assignment" : "revoke";
+        const winnerActor = winnerAction === "assignment" ? creator : revoker, loserActor = winnerAction === "assignment" ? revoker : creator;
+        const winnerCommand = winnerAction === "assignment" ? createCommand : revokeCommand, loserCommand = winnerAction === "assignment" ? revokeCommand : createCommand;
+        const winnerAal = "aal2", loserAal = "aal2", expectedRetry = winnerAction === "assignment" ? "00000" : "42501";
+        const winnerContext = await runAs(a, winnerActor, winnerAal);
+        const winnerResult = await a.query(`select api.command_v1('${JSON.stringify(winnerCommand).replaceAll("'", "''")}'::jsonb);`);
+        if (winnerResult.code !== "00000") throw Error(`${label}: winner expected 00000, observed ${winnerResult.code}: ${winnerResult.errors}`);
+        await b.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(loserActor)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: loserActor, aal: loserAal }))},false);set role authenticated;begin isolation level ${iso};select active,revision from public.company_memberships where organization_id=${lit(org)} and company_id=${lit(companyId)} and profile_id=${lit(owner)};`);
+        const loserPid = Number((await b.ok("select pg_backend_pid();")).at(-1)), loserClaims = await claimsFor(b, loserActor, loserAal);
+        const pendingLoser = b.query(`select api.command_v1('${JSON.stringify(loserCommand).replaceAll("'", "''")}'::jsonb);`);
+        let blocked = false; const deadline = Date.now() + 10000;
+        while (Date.now() < deadline) { if ((await observer.ok(`select ${winnerContext.pid}=any(pg_catalog.pg_blocking_pids(${loserPid}));`)).at(-1) === "t") { blocked = true; break; } await new Promise(done => setTimeout(done, 20)); }
+        const blockerPids = (await observer.ok(`select pg_catalog.pg_blocking_pids(${loserPid})::text;`)).at(-1);
+        if (!blocked) { await a.ok("commit;"); const r = await pendingLoser; await b.ok(r.code === "00000" ? "commit;" : "rollback;"); throw Error(`${label}: expected real blocker; observed ${JSON.stringify({winnerPid:winnerContext.pid,loserPid,blockerPids,winner:r.code,loser:r.errors})}`); }
+        await a.ok("commit;"); const winnerOnly = await snapshot();
+        const loserResult = await pendingLoser; await b.ok(loserResult.code === "00000" ? "commit;" : "rollback;");
+        const afterRollback = await snapshot();
+        if (loserResult.code !== "40001") throw Error(`${label}: first loser expected 40001, observed ${loserResult.code}: ${loserResult.errors}; snapshot=${JSON.stringify(afterRollback)}`);
+        assert.deepEqual(afterRollback, winnerOnly, `${label}: serialization loser must leave winner-only state`);
+        const retry = new Session(); auxiliarySessions.push(retry); await retry.ok("\\set VERBOSITY verbose\nset statement_timeout='15s';");
+        const retryContext = await runAs(retry, loserActor, loserAal);
+        const retryResult = await retry.query(`select api.command_v1('${JSON.stringify(loserCommand).replaceAll("'", "''")}'::jsonb);`);
+        if (retryResult.code !== expectedRetry) { await retry.ok(retryResult.code === "00000" ? "commit;" : "rollback;"); throw Error(`${label}: retry expected ${expectedRetry}, observed ${retryResult.code}: ${retryResult.errors}; snapshot=${JSON.stringify(await snapshot())}`); }
+        if (expectedRetry === "00000") await retry.ok("commit;"); else await retry.ok("rollback;");
+        const retryResponse = retryResult.lines.at(-1); await retry.ok("reset role;"); await retry.close(); auxiliarySessions.splice(auxiliarySessions.indexOf(retry), 1);
+        const final = await snapshot();
+        const fenceExpected = winnerAction === "assignment"
+          ? { membershipOwner: 2, membershipCreator: 1, membershipRevoker: 0, month: 1, graph: 0, graphConfig: 0, creationRevision: 1, creation: 1, createOperation: 1, revokeOperation: 1 }
+          : { membershipOwner: 1, membershipCreator: 0, membershipRevoker: 0, month: 0, graph: 0, graphConfig: 0, creationRevision: 0, creation: 0, createOperation: 0, revokeOperation: 1 };
+        const winnerFenceExpected = winnerAction === "assignment"
+          ? { membershipOwner: 1, membershipCreator: 1, membershipRevoker: 0, month: 1, graph: 0, graphConfig: 0, creationRevision: 1, creation: 1, createOperation: 1, revokeOperation: 0 }
+          : { membershipOwner: 1, membershipCreator: 0, membershipRevoker: 0, month: 0, graph: 0, graphConfig: 0, creationRevision: 0, creation: 0, createOperation: 0, revokeOperation: 1 };
+        try {
+          assert.deepEqual(final.fences, fenceExpected);
+          assert.equal(final.assignments.length, winnerAction === "assignment" ? 1 : 0);
+          assert.equal(final.chiefAssignments, 0); assert.equal(final.chiefInstances, 0);
+          assert.equal(final.operationFences.length, winnerAction === "assignment" ? 2 : 1);
+          assert.equal(final.instances.length, 0); assert.equal(final.sessions.length, 0);
+          assert.equal(final.activity, 0); assert.equal(final.closures, 0); assert.equal(final.absences, 0); assert.equal(final.coverage, 0);
+          assert.equal(final.responsibilityHeads, 0); assert.equal(final.dependencies, 0); assert.equal(final.tracking, 0); assert.equal(final.trackingEvents, 0); assert.equal(final.completionEvents, 0); assert.equal(final.parameterization, 0);
+          assert.equal(final.memberships.find(m => m.profile_id === owner).active, false);
+          assert.equal(final.memberships.find(m => m.profile_id === owner).revision, 1);
+          assert.deepEqual(final.graph, baseline.graph);
+          assert.deepEqual(winnerOnly.fences, winnerFenceExpected, `${label}: exact winner-only fence vector`);
+          if (winnerAction === "assignment") {
+            assert.equal(winnerOnly.assignments.length, 1); assert.equal(winnerOnly.memberships.find(m => m.profile_id === owner).active, true);
+            assert.equal(winnerOnly.head.revision, 1); assert.equal(winnerOnly.head.fence_epoch, 1); assert.equal(winnerOnly.month.fence_epoch, 1);
+            assert.deepEqual(final.assignments, winnerOnly.assignments, `${label}: retry revoke must preserve assignment row exactly`);
+            assert.equal(final.assignments.length, 1);
+            const assignment = final.assignments[0];
+            assert.equal(assignment.owner_id, owner); assert.equal(assignment.company_id, companyId); assert.equal(assignment.team_id, teamId);
+            assert.equal(assignment.title, label); assert.equal(assignment.kind, "operativa");
+            assert.equal(assignment.template_id, null); assert.equal(assignment.template_version_id, null);
+            assert.equal(assignment.measurement_version, 2); assert.equal(assignment.weight, null); assert.equal(assignment.target, null);
+            assert.equal(assignment.unit, "documentos"); assert.equal(assignment.frequency, "unica");
+            assert.equal(assignment.start_month, period); assert.equal(assignment.start_date, date); assert.equal(assignment.end_date, date);
+            assert.equal(assignment.interval_count, 1); assert.deepEqual(assignment.weekdays, [weekday]);
+            assert.equal(assignment.month_day, Number(date.slice(-2))); assert.equal(assignment.has_deadline, true); assert.equal(assignment.due_offset_days, 0);
+            assert.equal(assignment.due_day, Number(date.slice(-2))); assert.deepEqual(assignment.checklist, []);
+            assert.equal(assignment.definition_revision, 1);
+            assert.equal(final.receipts.length, 2); assert.equal(final.assignmentAudit.length, 1); assert.equal(final.membershipAudit.length, 1); assert.equal(final.membershipEvents.length, 1);
+            assert.equal(final.operationFences.find(f => f.operation_id === createOp).fence_epoch, 1); assert.equal(final.operationFences.find(f => f.operation_id === revokeOp).fence_epoch, 1);
+          } else {
+            assert.deepEqual(final, winnerOnly); assert.deepEqual(final.assignments, []);
+            assert.equal(final.head.revision, 0); assert.equal(final.head.fence_epoch, 0); assert.equal(final.month.fence_epoch, 0);
+            assert.equal(final.receipts.length, 1); assert.deepEqual(final.assignmentAudit, []); assert.deepEqual(final.membershipAudit.length, 1); assert.equal(final.membershipEvents.length, 1);
+            assert.equal(final.operationFences[0].operation_id, revokeOp); assert.equal(final.operationFences[0].fence_epoch, 1);
+          }
+        } catch (error) { throw Error(`${label}: final invariant failed: ${error.message}; expected=${JSON.stringify(fenceExpected)} observed=${JSON.stringify(final)}`); }
+        const receiptCreate = final.receipts.find(r => r.operation_id === createOp), receiptRevoke = final.receipts.find(r => r.operation_id === revokeOp);
+        if (receiptCreate) {
+          const envelope = JSON.parse(winnerAction === "assignment" ? winnerResult.lines.at(-1) : retryResponse);
+          assert.deepEqual(envelope, receiptCreate.result); assert.equal(receiptCreate.actor_id, creator); assert.equal(receiptCreate.kind, "assignment.create");
+          assert.deepEqual(receiptCreate.arguments, { kind: "assignment.create", payload: createCommand.payload, expectedRevisions: createCommand.expectedRevisions });
+          assert.equal(receiptCreate.result.result.assignmentId, final.assignments[0].id); assert.equal(receiptCreate.result.result.assignmentRevision, "1");
+          assert.equal(final.assignmentAudit[0].actor_id, creator); assert.equal(final.assignmentAudit[0].entity_id, final.assignments[0].id);
+          assert.equal(final.assignmentAudit[0].details.ownerId, owner);
+        }
+        assert.equal(receiptRevoke.actor_id, revoker); assert.equal(receiptRevoke.kind, "companyMembership.setActive");
+        assert.deepEqual(receiptRevoke.arguments, { kind: "companyMembership.setActive", payload: revokeCommand.payload, expectedRevisions: revokeCommand.expectedRevisions });
+        const revokeEnvelope = JSON.parse(winnerAction === "revoke" ? winnerResult.lines.at(-1) : retryResponse);
+        assert.deepEqual(revokeEnvelope, receiptRevoke.result);
+        assert.equal(final.membershipAudit[0].actor_id, revoker); assert.equal(final.membershipAudit[0].entity_id, companyId);
+        assert.equal(final.membershipAudit[0].details.profileId, owner); assert.equal(final.membershipAudit[0].details.active, false);
+        assert.equal(final.membershipEvents[0].actor_id, revoker); assert.equal(final.membershipEvents[0].company_id, companyId);
+        assert.equal(final.membershipEvents[0].profile_id, owner); assert.equal(final.membershipEvents[0].revision, 1); assert.equal(final.membershipEvents[0].active, false);
+        record(`M2.2C assignment.create versus membership revoke ${order} ${isolation} blocks, stale-aborts, exact retry`, true,
+          { order, isolation: iso, actors: { owner, creator, revoker, distinctChiefs: creator !== revoker }, claims: { winner: winnerContext.claims, loser: loserClaims, retry: retryContext.claims }, pids: { winner: winnerContext.pid, loser: loserPid, blockerPids }, blocked, winnerSQLSTATE: winnerResult.code, winnerResponse: winnerResult.lines.at(-1), winnerErrors: winnerResult.errors, loserSQLSTATE: loserResult.code, loserResponse: loserResult.lines.at(-1), loserErrors: loserResult.errors, retrySQLSTATE: retryResult.code, retryResponse, retryErrors: retryResult.errors, baseline, winnerOnly, afterFirstAttemptAndRollback: afterRollback, final, expectedWinnerFences: winnerFenceExpected, expectedFences: fenceExpected, weekdayInput: [], weekdayPersisted: weekday, createdAssignment: final.assignments[0] ?? null });
+        await a.ok("reset role;"); await b.ok("reset role;");
+      }
+      await assignmentCreateMembershipRace({ order: "assignment-first", isolation: "RC", base: 24000 });
+      await assignmentCreateMembershipRace({ order: "revoke-first", isolation: "RC", base: 24020 });
+      await assignmentCreateMembershipRace({ order: "assignment-first", isolation: "RR", base: 24040 });
+      await assignmentCreateMembershipRace({ order: "revoke-first", isolation: "RR", base: 24060 });
+
       // Native timer-start/membership-revocation matrix. Each case owns its
       // company, team, employee, chief, task, responsibility, graph and month
       // fence rows so the asserted epochs are exact deltas from a zero base.

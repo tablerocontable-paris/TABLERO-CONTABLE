@@ -1,0 +1,3713 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-19",
+  "scope": "PostgreSQL nativo local; fixtures sintéticos; sin cambios SQL, llamadas remotas, commits o push.",
+  "baselineCommit": "26f8e6b711c04e467fd9608f9e031bfb93ab83ad",
+  "engine": "postgres (PostgreSQL) 17.11",
+  "nativeRun": {
+    "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9 --port 55747 --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes",
+    "exitCode": 0,
+    "passed": 329,
+    "failed": 0,
+    "deadlocks40P01": 0,
+    "report": "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/review.json",
+    "stdoutLog": "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/runner.stdout.log",
+    "postgresLog": "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/postgres.log",
+    "initdbLog": "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/initdb.log",
+    "focusedCases": [
+      {
+        "name": "M2.2C assignment.create versus membership revoke assignment-first RC blocks, stale-aborts, exact retry",
+        "passed": true,
+        "blocked": true,
+        "winnerSQLSTATE": "00000",
+        "loserSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "actors": {
+          "owner": "00000000-0000-0000-0000-000000024002",
+          "creator": "00000000-0000-0000-0000-000000024000",
+          "revoker": "00000000-0000-0000-0000-000000024001",
+          "distinctChiefs": true
+        },
+        "claims": {
+          "winner": {
+            "uid": "00000000-0000-0000-0000-000000024000",
+            "jwtSub": "00000000-0000-0000-0000-000000024000",
+            "claimsSub": "00000000-0000-0000-0000-000000024000",
+            "aal": "aal2",
+            "isolation": "read committed",
+            "currentUser": "authenticated",
+            "claimsRole": "authenticated"
+          },
+          "loser": {
+            "uid": "00000000-0000-0000-0000-000000024001",
+            "jwtSub": "00000000-0000-0000-0000-000000024001",
+            "claimsSub": "00000000-0000-0000-0000-000000024001",
+            "aal": "aal2",
+            "isolation": "read committed",
+            "currentUser": "authenticated",
+            "claimsRole": "authenticated"
+          },
+          "retry": {
+            "uid": "00000000-0000-0000-0000-000000024001",
+            "jwtSub": "00000000-0000-0000-0000-000000024001",
+            "claimsSub": "00000000-0000-0000-0000-000000024001",
+            "aal": "aal2",
+            "isolation": "read committed",
+            "currentUser": "authenticated",
+            "claimsRole": "authenticated"
+          }
+        },
+        "pids": {
+          "winner": 20448,
+          "loser": 11428,
+          "blockerPids": "{20448}"
+        },
+        "expectedWinnerFences": {
+          "membershipOwner": 1,
+          "membershipCreator": 1,
+          "membershipRevoker": 0,
+          "month": 1,
+          "graph": 0,
+          "graphConfig": 0,
+          "creationRevision": 1,
+          "creation": 1,
+          "createOperation": 1,
+          "revokeOperation": 0
+        },
+        "expectedFences": {
+          "membershipOwner": 2,
+          "membershipCreator": 1,
+          "membershipRevoker": 0,
+          "month": 1,
+          "graph": 0,
+          "graphConfig": 0,
+          "creationRevision": 1,
+          "creation": 1,
+          "createOperation": 1,
+          "revokeOperation": 1
+        },
+        "weekdayInput": [],
+        "weekdayPersisted": 1,
+        "createdAssignment": {
+          "id": "bf6babcf-2a62-4bab-98ca-cad953579709",
+          "kind": "operativa",
+          "unit": "documentos",
+          "title": "M2.2C assignment create assignment-first RC",
+          "target": null,
+          "weight": null,
+          "due_day": 19,
+          "team_id": "00000000-0000-0000-0000-000000024004",
+          "end_date": "2026-10-19",
+          "owner_id": "00000000-0000-0000-0000-000000024002",
+          "weekdays": [
+            1
+          ],
+          "checklist": [],
+          "frequency": "unica",
+          "month_day": 19,
+          "company_id": "00000000-0000-0000-0000-000000024003",
+          "start_date": "2026-10-19",
+          "start_month": "2026-10-01",
+          "template_id": null,
+          "has_deadline": true,
+          "interval_count": 1,
+          "due_offset_days": 0,
+          "organization_id": "00000000-0000-0000-0000-000000000001",
+          "definition_revision": 1,
+          "measurement_version": 2,
+          "template_version_id": null
+        },
+        "baseline": {
+          "head": {
+            "owner_id": "00000000-0000-0000-0000-000000024002",
+            "revision": 0,
+            "fence_epoch": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "graph": {
+            "period": "2026-10-01",
+            "company_id": "00000000-0000-0000-0000-000000024003",
+            "fence_epoch": 0,
+            "config_revision": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "month": {
+            "period": "2026-10-01",
+            "owner_id": "00000000-0000-0000-0000-000000024002",
+            "fence_epoch": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "fences": {
+            "graph": 0,
+            "month": 0,
+            "creation": 0,
+            "graphConfig": 0,
+            "createOperation": 0,
+            "membershipOwner": 0,
+            "revokeOperation": 0,
+            "creationRevision": 0,
+            "membershipCreator": 0,
+            "membershipRevoker": 0
+          },
+          "absences": 0,
+          "activity": 0,
+          "closures": 0,
+          "coverage": 0,
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000024000",
+              "name": "M2.2C assignment create assignment-first RC creator",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024001",
+              "name": "M2.2C assignment create assignment-first RC revoker",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024002",
+              "name": "M2.2C assignment create assignment-first RC employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "receipts": [],
+          "sessions": [],
+          "tracking": 0,
+          "instances": [],
+          "assignments": [],
+          "memberships": [
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024003",
+              "profile_id": "00000000-0000-0000-0000-000000024000",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024003",
+              "profile_id": "00000000-0000-0000-0000-000000024001",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024003",
+              "profile_id": "00000000-0000-0000-0000-000000024002",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "teamMembers": [
+            {
+              "team_id": "00000000-0000-0000-0000-000000024004",
+              "profile_id": "00000000-0000-0000-0000-000000024000",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024004",
+              "profile_id": "00000000-0000-0000-0000-000000024001",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024004",
+              "profile_id": "00000000-0000-0000-0000-000000024002",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "dependencies": 0,
+          "chiefInstances": 0,
+          "trackingEvents": 0,
+          "assignmentAudit": [],
+          "membershipAudit": [],
+          "operationFences": [],
+          "chiefAssignments": 0,
+          "completionEvents": 0,
+          "membershipEvents": [],
+          "parameterization": 0,
+          "responsibilityHeads": 0
+        },
+        "winnerOnly": {
+          "head": {
+            "owner_id": "00000000-0000-0000-0000-000000024002",
+            "revision": 1,
+            "fence_epoch": 1,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "graph": {
+            "period": "2026-10-01",
+            "company_id": "00000000-0000-0000-0000-000000024003",
+            "fence_epoch": 0,
+            "config_revision": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "month": {
+            "period": "2026-10-01",
+            "owner_id": "00000000-0000-0000-0000-000000024002",
+            "fence_epoch": 1,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "fences": {
+            "graph": 0,
+            "month": 1,
+            "creation": 1,
+            "graphConfig": 0,
+            "createOperation": 1,
+            "membershipOwner": 1,
+            "revokeOperation": 0,
+            "creationRevision": 1,
+            "membershipCreator": 1,
+            "membershipRevoker": 0
+          },
+          "absences": 0,
+          "activity": 0,
+          "closures": 0,
+          "coverage": 0,
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000024000",
+              "name": "M2.2C assignment create assignment-first RC creator",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024001",
+              "name": "M2.2C assignment create assignment-first RC revoker",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024002",
+              "name": "M2.2C assignment create assignment-first RC employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "receipts": [
+            {
+              "kind": "assignment.create",
+              "result": {
+                "kind": "assignment.create",
+                "result": {
+                  "assignmentId": "bf6babcf-2a62-4bab-98ca-cad953579709",
+                  "assignmentRevision": "1"
+                },
+                "operationId": "00000000-0000-0000-0000-000000024005",
+                "contractVersion": 1
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024000",
+              "arguments": {
+                "kind": "assignment.create",
+                "payload": {
+                  "source": {
+                    "type": "custom",
+                    "definition": {
+                      "kind": "operativa",
+                      "unit": "documentos",
+                      "title": "M2.2C assignment create assignment-first RC",
+                      "sector": "Assignment race",
+                      "objective": "M2.2C assignment create assignment-first RC synthetic objective"
+                    }
+                  },
+                  "teamId": "00000000-0000-0000-0000-000000024004",
+                  "ownerId": "00000000-0000-0000-0000-000000024002",
+                  "schedule": {
+                    "endDate": "2026-10-19",
+                    "interval": 1,
+                    "monthDay": 19,
+                    "weekdays": [],
+                    "frequency": "unica",
+                    "startDate": "2026-10-19",
+                    "hasDeadline": true,
+                    "dueOffsetDays": 0
+                  },
+                  "companyId": "00000000-0000-0000-0000-000000024003"
+                },
+                "expectedRevisions": {
+                  "creation:00000000-0000-0000-0000-000000024002": "0"
+                }
+              },
+              "created_at": "2026-10-19T11:33:54.179832-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000024005",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [],
+          "tracking": 0,
+          "instances": [],
+          "assignments": [
+            {
+              "id": "bf6babcf-2a62-4bab-98ca-cad953579709",
+              "kind": "operativa",
+              "unit": "documentos",
+              "title": "M2.2C assignment create assignment-first RC",
+              "target": null,
+              "weight": null,
+              "due_day": 19,
+              "team_id": "00000000-0000-0000-0000-000000024004",
+              "end_date": "2026-10-19",
+              "owner_id": "00000000-0000-0000-0000-000000024002",
+              "weekdays": [
+                1
+              ],
+              "checklist": [],
+              "frequency": "unica",
+              "month_day": 19,
+              "company_id": "00000000-0000-0000-0000-000000024003",
+              "start_date": "2026-10-19",
+              "start_month": "2026-10-01",
+              "template_id": null,
+              "has_deadline": true,
+              "interval_count": 1,
+              "due_offset_days": 0,
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "definition_revision": 1,
+              "measurement_version": 2,
+              "template_version_id": null
+            }
+          ],
+          "memberships": [
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024003",
+              "profile_id": "00000000-0000-0000-0000-000000024000",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024003",
+              "profile_id": "00000000-0000-0000-0000-000000024001",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024003",
+              "profile_id": "00000000-0000-0000-0000-000000024002",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "teamMembers": [
+            {
+              "team_id": "00000000-0000-0000-0000-000000024004",
+              "profile_id": "00000000-0000-0000-0000-000000024000",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024004",
+              "profile_id": "00000000-0000-0000-0000-000000024001",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024004",
+              "profile_id": "00000000-0000-0000-0000-000000024002",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "dependencies": 0,
+          "chiefInstances": 0,
+          "trackingEvents": 0,
+          "assignmentAudit": [
+            {
+              "at": "2026-10-19T11:33:54.167451-03:00",
+              "id": 704,
+              "action": "assignment.create",
+              "details": {
+                "period": "2026-10-01",
+                "ownerId": "00000000-0000-0000-0000-000000024002"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024000",
+              "entity_id": "bf6babcf-2a62-4bab-98ca-cad953579709",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "membershipAudit": [],
+          "operationFences": [
+            {
+              "actor_id": "00000000-0000-0000-0000-000000024000",
+              "fence_epoch": 1,
+              "operation_id": "00000000-0000-0000-0000-000000024005"
+            }
+          ],
+          "chiefAssignments": 0,
+          "completionEvents": 0,
+          "membershipEvents": [],
+          "parameterization": 0,
+          "responsibilityHeads": 0
+        },
+        "afterFirstAttemptAndRollback": {
+          "head": {
+            "owner_id": "00000000-0000-0000-0000-000000024002",
+            "revision": 1,
+            "fence_epoch": 1,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "graph": {
+            "period": "2026-10-01",
+            "company_id": "00000000-0000-0000-0000-000000024003",
+            "fence_epoch": 0,
+            "config_revision": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "month": {
+            "period": "2026-10-01",
+            "owner_id": "00000000-0000-0000-0000-000000024002",
+            "fence_epoch": 1,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "fences": {
+            "graph": 0,
+            "month": 1,
+            "creation": 1,
+            "graphConfig": 0,
+            "createOperation": 1,
+            "membershipOwner": 1,
+            "revokeOperation": 0,
+            "creationRevision": 1,
+            "membershipCreator": 1,
+            "membershipRevoker": 0
+          },
+          "absences": 0,
+          "activity": 0,
+          "closures": 0,
+          "coverage": 0,
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000024000",
+              "name": "M2.2C assignment create assignment-first RC creator",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024001",
+              "name": "M2.2C assignment create assignment-first RC revoker",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024002",
+              "name": "M2.2C assignment create assignment-first RC employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "receipts": [
+            {
+              "kind": "assignment.create",
+              "result": {
+                "kind": "assignment.create",
+                "result": {
+                  "assignmentId": "bf6babcf-2a62-4bab-98ca-cad953579709",
+                  "assignmentRevision": "1"
+                },
+                "operationId": "00000000-0000-0000-0000-000000024005",
+                "contractVersion": 1
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024000",
+              "arguments": {
+                "kind": "assignment.create",
+                "payload": {
+                  "source": {
+                    "type": "custom",
+                    "definition": {
+                      "kind": "operativa",
+                      "unit": "documentos",
+                      "title": "M2.2C assignment create assignment-first RC",
+                      "sector": "Assignment race",
+                      "objective": "M2.2C assignment create assignment-first RC synthetic objective"
+                    }
+                  },
+                  "teamId": "00000000-0000-0000-0000-000000024004",
+                  "ownerId": "00000000-0000-0000-0000-000000024002",
+                  "schedule": {
+                    "endDate": "2026-10-19",
+                    "interval": 1,
+                    "monthDay": 19,
+                    "weekdays": [],
+                    "frequency": "unica",
+                    "startDate": "2026-10-19",
+                    "hasDeadline": true,
+                    "dueOffsetDays": 0
+                  },
+                  "companyId": "00000000-0000-0000-0000-000000024003"
+                },
+                "expectedRevisions": {
+                  "creation:00000000-0000-0000-0000-000000024002": "0"
+                }
+              },
+              "created_at": "2026-10-19T11:33:54.179832-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000024005",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [],
+          "tracking": 0,
+          "instances": [],
+          "assignments": [
+            {
+              "id": "bf6babcf-2a62-4bab-98ca-cad953579709",
+              "kind": "operativa",
+              "unit": "documentos",
+              "title": "M2.2C assignment create assignment-first RC",
+              "target": null,
+              "weight": null,
+              "due_day": 19,
+              "team_id": "00000000-0000-0000-0000-000000024004",
+              "end_date": "2026-10-19",
+              "owner_id": "00000000-0000-0000-0000-000000024002",
+              "weekdays": [
+                1
+              ],
+              "checklist": [],
+              "frequency": "unica",
+              "month_day": 19,
+              "company_id": "00000000-0000-0000-0000-000000024003",
+              "start_date": "2026-10-19",
+              "start_month": "2026-10-01",
+              "template_id": null,
+              "has_deadline": true,
+              "interval_count": 1,
+              "due_offset_days": 0,
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "definition_revision": 1,
+              "measurement_version": 2,
+              "template_version_id": null
+            }
+          ],
+          "memberships": [
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024003",
+              "profile_id": "00000000-0000-0000-0000-000000024000",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024003",
+              "profile_id": "00000000-0000-0000-0000-000000024001",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024003",
+              "profile_id": "00000000-0000-0000-0000-000000024002",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "teamMembers": [
+            {
+              "team_id": "00000000-0000-0000-0000-000000024004",
+              "profile_id": "00000000-0000-0000-0000-000000024000",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024004",
+              "profile_id": "00000000-0000-0000-0000-000000024001",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024004",
+              "profile_id": "00000000-0000-0000-0000-000000024002",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "dependencies": 0,
+          "chiefInstances": 0,
+          "trackingEvents": 0,
+          "assignmentAudit": [
+            {
+              "at": "2026-10-19T11:33:54.167451-03:00",
+              "id": 704,
+              "action": "assignment.create",
+              "details": {
+                "period": "2026-10-01",
+                "ownerId": "00000000-0000-0000-0000-000000024002"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024000",
+              "entity_id": "bf6babcf-2a62-4bab-98ca-cad953579709",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "membershipAudit": [],
+          "operationFences": [
+            {
+              "actor_id": "00000000-0000-0000-0000-000000024000",
+              "fence_epoch": 1,
+              "operation_id": "00000000-0000-0000-0000-000000024005"
+            }
+          ],
+          "chiefAssignments": 0,
+          "completionEvents": 0,
+          "membershipEvents": [],
+          "parameterization": 0,
+          "responsibilityHeads": 0
+        },
+        "final": {
+          "head": {
+            "owner_id": "00000000-0000-0000-0000-000000024002",
+            "revision": 1,
+            "fence_epoch": 1,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "graph": {
+            "period": "2026-10-01",
+            "company_id": "00000000-0000-0000-0000-000000024003",
+            "fence_epoch": 0,
+            "config_revision": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "month": {
+            "period": "2026-10-01",
+            "owner_id": "00000000-0000-0000-0000-000000024002",
+            "fence_epoch": 1,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "fences": {
+            "graph": 0,
+            "month": 1,
+            "creation": 1,
+            "graphConfig": 0,
+            "createOperation": 1,
+            "membershipOwner": 2,
+            "revokeOperation": 1,
+            "creationRevision": 1,
+            "membershipCreator": 1,
+            "membershipRevoker": 0
+          },
+          "absences": 0,
+          "activity": 0,
+          "closures": 0,
+          "coverage": 0,
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000024000",
+              "name": "M2.2C assignment create assignment-first RC creator",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024001",
+              "name": "M2.2C assignment create assignment-first RC revoker",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024002",
+              "name": "M2.2C assignment create assignment-first RC employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "receipts": [
+            {
+              "kind": "assignment.create",
+              "result": {
+                "kind": "assignment.create",
+                "result": {
+                  "assignmentId": "bf6babcf-2a62-4bab-98ca-cad953579709",
+                  "assignmentRevision": "1"
+                },
+                "operationId": "00000000-0000-0000-0000-000000024005",
+                "contractVersion": 1
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024000",
+              "arguments": {
+                "kind": "assignment.create",
+                "payload": {
+                  "source": {
+                    "type": "custom",
+                    "definition": {
+                      "kind": "operativa",
+                      "unit": "documentos",
+                      "title": "M2.2C assignment create assignment-first RC",
+                      "sector": "Assignment race",
+                      "objective": "M2.2C assignment create assignment-first RC synthetic objective"
+                    }
+                  },
+                  "teamId": "00000000-0000-0000-0000-000000024004",
+                  "ownerId": "00000000-0000-0000-0000-000000024002",
+                  "schedule": {
+                    "endDate": "2026-10-19",
+                    "interval": 1,
+                    "monthDay": 19,
+                    "weekdays": [],
+                    "frequency": "unica",
+                    "startDate": "2026-10-19",
+                    "hasDeadline": true,
+                    "dueOffsetDays": 0
+                  },
+                  "companyId": "00000000-0000-0000-0000-000000024003"
+                },
+                "expectedRevisions": {
+                  "creation:00000000-0000-0000-0000-000000024002": "0"
+                }
+              },
+              "created_at": "2026-10-19T11:33:54.179832-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000024005",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "kind": "companyMembership.setActive",
+              "result": {
+                "kind": "companyMembership.setActive",
+                "result": {
+                  "active": false,
+                  "companyId": "00000000-0000-0000-0000-000000024003",
+                  "profileId": "00000000-0000-0000-0000-000000024002",
+                  "membershipRevision": "1"
+                },
+                "operationId": "00000000-0000-0000-0000-000000024006",
+                "contractVersion": 1
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024001",
+              "arguments": {
+                "kind": "companyMembership.setActive",
+                "payload": {
+                  "active": false,
+                  "reason": "M2.2C assignment create assignment-first RC synthetic revocation",
+                  "companyId": "00000000-0000-0000-0000-000000024003",
+                  "profileId": "00000000-0000-0000-0000-000000024002"
+                },
+                "expectedRevisions": {
+                  "membership:00000000-0000-0000-0000-000000024003:00000000-0000-0000-0000-000000024002": "0"
+                }
+              },
+              "created_at": "2026-10-19T11:33:54.467802-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000024006",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [],
+          "tracking": 0,
+          "instances": [],
+          "assignments": [
+            {
+              "id": "bf6babcf-2a62-4bab-98ca-cad953579709",
+              "kind": "operativa",
+              "unit": "documentos",
+              "title": "M2.2C assignment create assignment-first RC",
+              "target": null,
+              "weight": null,
+              "due_day": 19,
+              "team_id": "00000000-0000-0000-0000-000000024004",
+              "end_date": "2026-10-19",
+              "owner_id": "00000000-0000-0000-0000-000000024002",
+              "weekdays": [
+                1
+              ],
+              "checklist": [],
+              "frequency": "unica",
+              "month_day": 19,
+              "company_id": "00000000-0000-0000-0000-000000024003",
+              "start_date": "2026-10-19",
+              "start_month": "2026-10-01",
+              "template_id": null,
+              "has_deadline": true,
+              "interval_count": 1,
+              "due_offset_days": 0,
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "definition_revision": 1,
+              "measurement_version": 2,
+              "template_version_id": null
+            }
+          ],
+          "memberships": [
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024003",
+              "profile_id": "00000000-0000-0000-0000-000000024000",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024003",
+              "profile_id": "00000000-0000-0000-0000-000000024001",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": false,
+              "revision": 1,
+              "changed_at": "2026-10-19T11:33:54.44392-03:00",
+              "changed_by": "00000000-0000-0000-0000-000000024001",
+              "company_id": "00000000-0000-0000-0000-000000024003",
+              "profile_id": "00000000-0000-0000-0000-000000024002",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "teamMembers": [
+            {
+              "team_id": "00000000-0000-0000-0000-000000024004",
+              "profile_id": "00000000-0000-0000-0000-000000024000",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024004",
+              "profile_id": "00000000-0000-0000-0000-000000024001",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024004",
+              "profile_id": "00000000-0000-0000-0000-000000024002",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "dependencies": 0,
+          "chiefInstances": 0,
+          "trackingEvents": 0,
+          "assignmentAudit": [
+            {
+              "at": "2026-10-19T11:33:54.167451-03:00",
+              "id": 704,
+              "action": "assignment.create",
+              "details": {
+                "period": "2026-10-01",
+                "ownerId": "00000000-0000-0000-0000-000000024002"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024000",
+              "entity_id": "bf6babcf-2a62-4bab-98ca-cad953579709",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "membershipAudit": [
+            {
+              "at": "2026-10-19T11:33:54.331764-03:00",
+              "id": 705,
+              "action": "companyMembership.setActive",
+              "details": {
+                "active": false,
+                "profileId": "00000000-0000-0000-0000-000000024002",
+                "membershipRevision": "1"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024001",
+              "entity_id": "00000000-0000-0000-0000-000000024003",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "operationFences": [
+            {
+              "actor_id": "00000000-0000-0000-0000-000000024000",
+              "fence_epoch": 1,
+              "operation_id": "00000000-0000-0000-0000-000000024005"
+            },
+            {
+              "actor_id": "00000000-0000-0000-0000-000000024001",
+              "fence_epoch": 1,
+              "operation_id": "00000000-0000-0000-0000-000000024006"
+            }
+          ],
+          "chiefAssignments": 0,
+          "completionEvents": 0,
+          "membershipEvents": [
+            {
+              "id": "31e95b8e-c992-4cb7-b9ab-a2766441fdb7",
+              "active": false,
+              "reason": "M2.2C assignment create assignment-first RC synthetic revocation",
+              "actor_id": "00000000-0000-0000-0000-000000024001",
+              "revision": 1,
+              "company_id": "00000000-0000-0000-0000-000000024003",
+              "created_at": "2026-10-19T11:33:54.445009-03:00",
+              "profile_id": "00000000-0000-0000-0000-000000024002",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "parameterization": 0,
+          "responsibilityHeads": 0
+        }
+      },
+      {
+        "name": "M2.2C assignment.create versus membership revoke revoke-first RC blocks, stale-aborts, exact retry",
+        "passed": true,
+        "blocked": true,
+        "winnerSQLSTATE": "00000",
+        "loserSQLSTATE": "40001",
+        "retrySQLSTATE": "42501",
+        "actors": {
+          "owner": "00000000-0000-0000-0000-000000024022",
+          "creator": "00000000-0000-0000-0000-000000024020",
+          "revoker": "00000000-0000-0000-0000-000000024021",
+          "distinctChiefs": true
+        },
+        "claims": {
+          "winner": {
+            "uid": "00000000-0000-0000-0000-000000024021",
+            "jwtSub": "00000000-0000-0000-0000-000000024021",
+            "claimsSub": "00000000-0000-0000-0000-000000024021",
+            "aal": "aal2",
+            "isolation": "read committed",
+            "currentUser": "authenticated",
+            "claimsRole": "authenticated"
+          },
+          "loser": {
+            "uid": "00000000-0000-0000-0000-000000024020",
+            "jwtSub": "00000000-0000-0000-0000-000000024020",
+            "claimsSub": "00000000-0000-0000-0000-000000024020",
+            "aal": "aal2",
+            "isolation": "read committed",
+            "currentUser": "authenticated",
+            "claimsRole": "authenticated"
+          },
+          "retry": {
+            "uid": "00000000-0000-0000-0000-000000024020",
+            "jwtSub": "00000000-0000-0000-0000-000000024020",
+            "claimsSub": "00000000-0000-0000-0000-000000024020",
+            "aal": "aal2",
+            "isolation": "read committed",
+            "currentUser": "authenticated",
+            "claimsRole": "authenticated"
+          }
+        },
+        "pids": {
+          "winner": 20448,
+          "loser": 11428,
+          "blockerPids": "{20448}"
+        },
+        "expectedWinnerFences": {
+          "membershipOwner": 1,
+          "membershipCreator": 0,
+          "membershipRevoker": 0,
+          "month": 0,
+          "graph": 0,
+          "graphConfig": 0,
+          "creationRevision": 0,
+          "creation": 0,
+          "createOperation": 0,
+          "revokeOperation": 1
+        },
+        "expectedFences": {
+          "membershipOwner": 1,
+          "membershipCreator": 0,
+          "membershipRevoker": 0,
+          "month": 0,
+          "graph": 0,
+          "graphConfig": 0,
+          "creationRevision": 0,
+          "creation": 0,
+          "createOperation": 0,
+          "revokeOperation": 1
+        },
+        "weekdayInput": [],
+        "weekdayPersisted": 1,
+        "createdAssignment": null,
+        "baseline": {
+          "head": {
+            "owner_id": "00000000-0000-0000-0000-000000024022",
+            "revision": 0,
+            "fence_epoch": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "graph": {
+            "period": "2026-10-01",
+            "company_id": "00000000-0000-0000-0000-000000024023",
+            "fence_epoch": 0,
+            "config_revision": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "month": {
+            "period": "2026-10-01",
+            "owner_id": "00000000-0000-0000-0000-000000024022",
+            "fence_epoch": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "fences": {
+            "graph": 0,
+            "month": 0,
+            "creation": 0,
+            "graphConfig": 0,
+            "createOperation": 0,
+            "membershipOwner": 0,
+            "revokeOperation": 0,
+            "creationRevision": 0,
+            "membershipCreator": 0,
+            "membershipRevoker": 0
+          },
+          "absences": 0,
+          "activity": 0,
+          "closures": 0,
+          "coverage": 0,
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000024020",
+              "name": "M2.2C assignment create revoke-first RC creator",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024021",
+              "name": "M2.2C assignment create revoke-first RC revoker",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024022",
+              "name": "M2.2C assignment create revoke-first RC employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "receipts": [],
+          "sessions": [],
+          "tracking": 0,
+          "instances": [],
+          "assignments": [],
+          "memberships": [
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024023",
+              "profile_id": "00000000-0000-0000-0000-000000024020",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024023",
+              "profile_id": "00000000-0000-0000-0000-000000024021",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024023",
+              "profile_id": "00000000-0000-0000-0000-000000024022",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "teamMembers": [
+            {
+              "team_id": "00000000-0000-0000-0000-000000024024",
+              "profile_id": "00000000-0000-0000-0000-000000024020",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024024",
+              "profile_id": "00000000-0000-0000-0000-000000024021",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024024",
+              "profile_id": "00000000-0000-0000-0000-000000024022",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "dependencies": 0,
+          "chiefInstances": 0,
+          "trackingEvents": 0,
+          "assignmentAudit": [],
+          "membershipAudit": [],
+          "operationFences": [],
+          "chiefAssignments": 0,
+          "completionEvents": 0,
+          "membershipEvents": [],
+          "parameterization": 0,
+          "responsibilityHeads": 0
+        },
+        "winnerOnly": {
+          "head": {
+            "owner_id": "00000000-0000-0000-0000-000000024022",
+            "revision": 0,
+            "fence_epoch": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "graph": {
+            "period": "2026-10-01",
+            "company_id": "00000000-0000-0000-0000-000000024023",
+            "fence_epoch": 0,
+            "config_revision": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "month": {
+            "period": "2026-10-01",
+            "owner_id": "00000000-0000-0000-0000-000000024022",
+            "fence_epoch": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "fences": {
+            "graph": 0,
+            "month": 0,
+            "creation": 0,
+            "graphConfig": 0,
+            "createOperation": 0,
+            "membershipOwner": 1,
+            "revokeOperation": 1,
+            "creationRevision": 0,
+            "membershipCreator": 0,
+            "membershipRevoker": 0
+          },
+          "absences": 0,
+          "activity": 0,
+          "closures": 0,
+          "coverage": 0,
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000024020",
+              "name": "M2.2C assignment create revoke-first RC creator",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024021",
+              "name": "M2.2C assignment create revoke-first RC revoker",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024022",
+              "name": "M2.2C assignment create revoke-first RC employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "receipts": [
+            {
+              "kind": "companyMembership.setActive",
+              "result": {
+                "kind": "companyMembership.setActive",
+                "result": {
+                  "active": false,
+                  "companyId": "00000000-0000-0000-0000-000000024023",
+                  "profileId": "00000000-0000-0000-0000-000000024022",
+                  "membershipRevision": "1"
+                },
+                "operationId": "00000000-0000-0000-0000-000000024026",
+                "contractVersion": 1
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024021",
+              "arguments": {
+                "kind": "companyMembership.setActive",
+                "payload": {
+                  "active": false,
+                  "reason": "M2.2C assignment create revoke-first RC synthetic revocation",
+                  "companyId": "00000000-0000-0000-0000-000000024023",
+                  "profileId": "00000000-0000-0000-0000-000000024022"
+                },
+                "expectedRevisions": {
+                  "membership:00000000-0000-0000-0000-000000024023:00000000-0000-0000-0000-000000024022": "0"
+                }
+              },
+              "created_at": "2026-10-19T11:33:54.513732-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000024026",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [],
+          "tracking": 0,
+          "instances": [],
+          "assignments": [],
+          "memberships": [
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024023",
+              "profile_id": "00000000-0000-0000-0000-000000024020",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024023",
+              "profile_id": "00000000-0000-0000-0000-000000024021",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": false,
+              "revision": 1,
+              "changed_at": "2026-10-19T11:33:54.512858-03:00",
+              "changed_by": "00000000-0000-0000-0000-000000024021",
+              "company_id": "00000000-0000-0000-0000-000000024023",
+              "profile_id": "00000000-0000-0000-0000-000000024022",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "teamMembers": [
+            {
+              "team_id": "00000000-0000-0000-0000-000000024024",
+              "profile_id": "00000000-0000-0000-0000-000000024020",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024024",
+              "profile_id": "00000000-0000-0000-0000-000000024021",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024024",
+              "profile_id": "00000000-0000-0000-0000-000000024022",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "dependencies": 0,
+          "chiefInstances": 0,
+          "trackingEvents": 0,
+          "assignmentAudit": [],
+          "membershipAudit": [
+            {
+              "at": "2026-10-19T11:33:54.497091-03:00",
+              "id": 706,
+              "action": "companyMembership.setActive",
+              "details": {
+                "active": false,
+                "profileId": "00000000-0000-0000-0000-000000024022",
+                "membershipRevision": "1"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024021",
+              "entity_id": "00000000-0000-0000-0000-000000024023",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "operationFences": [
+            {
+              "actor_id": "00000000-0000-0000-0000-000000024021",
+              "fence_epoch": 1,
+              "operation_id": "00000000-0000-0000-0000-000000024026"
+            }
+          ],
+          "chiefAssignments": 0,
+          "completionEvents": 0,
+          "membershipEvents": [
+            {
+              "id": "d9b1b2c4-028f-48b1-928b-eed0021141ea",
+              "active": false,
+              "reason": "M2.2C assignment create revoke-first RC synthetic revocation",
+              "actor_id": "00000000-0000-0000-0000-000000024021",
+              "revision": 1,
+              "company_id": "00000000-0000-0000-0000-000000024023",
+              "created_at": "2026-10-19T11:33:54.513274-03:00",
+              "profile_id": "00000000-0000-0000-0000-000000024022",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "parameterization": 0,
+          "responsibilityHeads": 0
+        },
+        "afterFirstAttemptAndRollback": {
+          "head": {
+            "owner_id": "00000000-0000-0000-0000-000000024022",
+            "revision": 0,
+            "fence_epoch": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "graph": {
+            "period": "2026-10-01",
+            "company_id": "00000000-0000-0000-0000-000000024023",
+            "fence_epoch": 0,
+            "config_revision": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "month": {
+            "period": "2026-10-01",
+            "owner_id": "00000000-0000-0000-0000-000000024022",
+            "fence_epoch": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "fences": {
+            "graph": 0,
+            "month": 0,
+            "creation": 0,
+            "graphConfig": 0,
+            "createOperation": 0,
+            "membershipOwner": 1,
+            "revokeOperation": 1,
+            "creationRevision": 0,
+            "membershipCreator": 0,
+            "membershipRevoker": 0
+          },
+          "absences": 0,
+          "activity": 0,
+          "closures": 0,
+          "coverage": 0,
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000024020",
+              "name": "M2.2C assignment create revoke-first RC creator",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024021",
+              "name": "M2.2C assignment create revoke-first RC revoker",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024022",
+              "name": "M2.2C assignment create revoke-first RC employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "receipts": [
+            {
+              "kind": "companyMembership.setActive",
+              "result": {
+                "kind": "companyMembership.setActive",
+                "result": {
+                  "active": false,
+                  "companyId": "00000000-0000-0000-0000-000000024023",
+                  "profileId": "00000000-0000-0000-0000-000000024022",
+                  "membershipRevision": "1"
+                },
+                "operationId": "00000000-0000-0000-0000-000000024026",
+                "contractVersion": 1
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024021",
+              "arguments": {
+                "kind": "companyMembership.setActive",
+                "payload": {
+                  "active": false,
+                  "reason": "M2.2C assignment create revoke-first RC synthetic revocation",
+                  "companyId": "00000000-0000-0000-0000-000000024023",
+                  "profileId": "00000000-0000-0000-0000-000000024022"
+                },
+                "expectedRevisions": {
+                  "membership:00000000-0000-0000-0000-000000024023:00000000-0000-0000-0000-000000024022": "0"
+                }
+              },
+              "created_at": "2026-10-19T11:33:54.513732-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000024026",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [],
+          "tracking": 0,
+          "instances": [],
+          "assignments": [],
+          "memberships": [
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024023",
+              "profile_id": "00000000-0000-0000-0000-000000024020",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024023",
+              "profile_id": "00000000-0000-0000-0000-000000024021",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": false,
+              "revision": 1,
+              "changed_at": "2026-10-19T11:33:54.512858-03:00",
+              "changed_by": "00000000-0000-0000-0000-000000024021",
+              "company_id": "00000000-0000-0000-0000-000000024023",
+              "profile_id": "00000000-0000-0000-0000-000000024022",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "teamMembers": [
+            {
+              "team_id": "00000000-0000-0000-0000-000000024024",
+              "profile_id": "00000000-0000-0000-0000-000000024020",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024024",
+              "profile_id": "00000000-0000-0000-0000-000000024021",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024024",
+              "profile_id": "00000000-0000-0000-0000-000000024022",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "dependencies": 0,
+          "chiefInstances": 0,
+          "trackingEvents": 0,
+          "assignmentAudit": [],
+          "membershipAudit": [
+            {
+              "at": "2026-10-19T11:33:54.497091-03:00",
+              "id": 706,
+              "action": "companyMembership.setActive",
+              "details": {
+                "active": false,
+                "profileId": "00000000-0000-0000-0000-000000024022",
+                "membershipRevision": "1"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024021",
+              "entity_id": "00000000-0000-0000-0000-000000024023",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "operationFences": [
+            {
+              "actor_id": "00000000-0000-0000-0000-000000024021",
+              "fence_epoch": 1,
+              "operation_id": "00000000-0000-0000-0000-000000024026"
+            }
+          ],
+          "chiefAssignments": 0,
+          "completionEvents": 0,
+          "membershipEvents": [
+            {
+              "id": "d9b1b2c4-028f-48b1-928b-eed0021141ea",
+              "active": false,
+              "reason": "M2.2C assignment create revoke-first RC synthetic revocation",
+              "actor_id": "00000000-0000-0000-0000-000000024021",
+              "revision": 1,
+              "company_id": "00000000-0000-0000-0000-000000024023",
+              "created_at": "2026-10-19T11:33:54.513274-03:00",
+              "profile_id": "00000000-0000-0000-0000-000000024022",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "parameterization": 0,
+          "responsibilityHeads": 0
+        },
+        "final": {
+          "head": {
+            "owner_id": "00000000-0000-0000-0000-000000024022",
+            "revision": 0,
+            "fence_epoch": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "graph": {
+            "period": "2026-10-01",
+            "company_id": "00000000-0000-0000-0000-000000024023",
+            "fence_epoch": 0,
+            "config_revision": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "month": {
+            "period": "2026-10-01",
+            "owner_id": "00000000-0000-0000-0000-000000024022",
+            "fence_epoch": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "fences": {
+            "graph": 0,
+            "month": 0,
+            "creation": 0,
+            "graphConfig": 0,
+            "createOperation": 0,
+            "membershipOwner": 1,
+            "revokeOperation": 1,
+            "creationRevision": 0,
+            "membershipCreator": 0,
+            "membershipRevoker": 0
+          },
+          "absences": 0,
+          "activity": 0,
+          "closures": 0,
+          "coverage": 0,
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000024020",
+              "name": "M2.2C assignment create revoke-first RC creator",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024021",
+              "name": "M2.2C assignment create revoke-first RC revoker",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024022",
+              "name": "M2.2C assignment create revoke-first RC employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "receipts": [
+            {
+              "kind": "companyMembership.setActive",
+              "result": {
+                "kind": "companyMembership.setActive",
+                "result": {
+                  "active": false,
+                  "companyId": "00000000-0000-0000-0000-000000024023",
+                  "profileId": "00000000-0000-0000-0000-000000024022",
+                  "membershipRevision": "1"
+                },
+                "operationId": "00000000-0000-0000-0000-000000024026",
+                "contractVersion": 1
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024021",
+              "arguments": {
+                "kind": "companyMembership.setActive",
+                "payload": {
+                  "active": false,
+                  "reason": "M2.2C assignment create revoke-first RC synthetic revocation",
+                  "companyId": "00000000-0000-0000-0000-000000024023",
+                  "profileId": "00000000-0000-0000-0000-000000024022"
+                },
+                "expectedRevisions": {
+                  "membership:00000000-0000-0000-0000-000000024023:00000000-0000-0000-0000-000000024022": "0"
+                }
+              },
+              "created_at": "2026-10-19T11:33:54.513732-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000024026",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [],
+          "tracking": 0,
+          "instances": [],
+          "assignments": [],
+          "memberships": [
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024023",
+              "profile_id": "00000000-0000-0000-0000-000000024020",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024023",
+              "profile_id": "00000000-0000-0000-0000-000000024021",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": false,
+              "revision": 1,
+              "changed_at": "2026-10-19T11:33:54.512858-03:00",
+              "changed_by": "00000000-0000-0000-0000-000000024021",
+              "company_id": "00000000-0000-0000-0000-000000024023",
+              "profile_id": "00000000-0000-0000-0000-000000024022",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "teamMembers": [
+            {
+              "team_id": "00000000-0000-0000-0000-000000024024",
+              "profile_id": "00000000-0000-0000-0000-000000024020",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024024",
+              "profile_id": "00000000-0000-0000-0000-000000024021",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024024",
+              "profile_id": "00000000-0000-0000-0000-000000024022",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "dependencies": 0,
+          "chiefInstances": 0,
+          "trackingEvents": 0,
+          "assignmentAudit": [],
+          "membershipAudit": [
+            {
+              "at": "2026-10-19T11:33:54.497091-03:00",
+              "id": 706,
+              "action": "companyMembership.setActive",
+              "details": {
+                "active": false,
+                "profileId": "00000000-0000-0000-0000-000000024022",
+                "membershipRevision": "1"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024021",
+              "entity_id": "00000000-0000-0000-0000-000000024023",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "operationFences": [
+            {
+              "actor_id": "00000000-0000-0000-0000-000000024021",
+              "fence_epoch": 1,
+              "operation_id": "00000000-0000-0000-0000-000000024026"
+            }
+          ],
+          "chiefAssignments": 0,
+          "completionEvents": 0,
+          "membershipEvents": [
+            {
+              "id": "d9b1b2c4-028f-48b1-928b-eed0021141ea",
+              "active": false,
+              "reason": "M2.2C assignment create revoke-first RC synthetic revocation",
+              "actor_id": "00000000-0000-0000-0000-000000024021",
+              "revision": 1,
+              "company_id": "00000000-0000-0000-0000-000000024023",
+              "created_at": "2026-10-19T11:33:54.513274-03:00",
+              "profile_id": "00000000-0000-0000-0000-000000024022",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "parameterization": 0,
+          "responsibilityHeads": 0
+        }
+      },
+      {
+        "name": "M2.2C assignment.create versus membership revoke assignment-first RR blocks, stale-aborts, exact retry",
+        "passed": true,
+        "blocked": true,
+        "winnerSQLSTATE": "00000",
+        "loserSQLSTATE": "40001",
+        "retrySQLSTATE": "00000",
+        "actors": {
+          "owner": "00000000-0000-0000-0000-000000024042",
+          "creator": "00000000-0000-0000-0000-000000024040",
+          "revoker": "00000000-0000-0000-0000-000000024041",
+          "distinctChiefs": true
+        },
+        "claims": {
+          "winner": {
+            "uid": "00000000-0000-0000-0000-000000024040",
+            "jwtSub": "00000000-0000-0000-0000-000000024040",
+            "claimsSub": "00000000-0000-0000-0000-000000024040",
+            "aal": "aal2",
+            "isolation": "repeatable read",
+            "currentUser": "authenticated",
+            "claimsRole": "authenticated"
+          },
+          "loser": {
+            "uid": "00000000-0000-0000-0000-000000024041",
+            "jwtSub": "00000000-0000-0000-0000-000000024041",
+            "claimsSub": "00000000-0000-0000-0000-000000024041",
+            "aal": "aal2",
+            "isolation": "repeatable read",
+            "currentUser": "authenticated",
+            "claimsRole": "authenticated"
+          },
+          "retry": {
+            "uid": "00000000-0000-0000-0000-000000024041",
+            "jwtSub": "00000000-0000-0000-0000-000000024041",
+            "claimsSub": "00000000-0000-0000-0000-000000024041",
+            "aal": "aal2",
+            "isolation": "repeatable read",
+            "currentUser": "authenticated",
+            "claimsRole": "authenticated"
+          }
+        },
+        "pids": {
+          "winner": 20448,
+          "loser": 11428,
+          "blockerPids": "{20448}"
+        },
+        "expectedWinnerFences": {
+          "membershipOwner": 1,
+          "membershipCreator": 1,
+          "membershipRevoker": 0,
+          "month": 1,
+          "graph": 0,
+          "graphConfig": 0,
+          "creationRevision": 1,
+          "creation": 1,
+          "createOperation": 1,
+          "revokeOperation": 0
+        },
+        "expectedFences": {
+          "membershipOwner": 2,
+          "membershipCreator": 1,
+          "membershipRevoker": 0,
+          "month": 1,
+          "graph": 0,
+          "graphConfig": 0,
+          "creationRevision": 1,
+          "creation": 1,
+          "createOperation": 1,
+          "revokeOperation": 1
+        },
+        "weekdayInput": [],
+        "weekdayPersisted": 1,
+        "createdAssignment": {
+          "id": "0d6ff8d2-29a6-48c4-92d8-d13685a39916",
+          "kind": "operativa",
+          "unit": "documentos",
+          "title": "M2.2C assignment create assignment-first RR",
+          "target": null,
+          "weight": null,
+          "due_day": 19,
+          "team_id": "00000000-0000-0000-0000-000000024044",
+          "end_date": "2026-10-19",
+          "owner_id": "00000000-0000-0000-0000-000000024042",
+          "weekdays": [
+            1
+          ],
+          "checklist": [],
+          "frequency": "unica",
+          "month_day": 19,
+          "company_id": "00000000-0000-0000-0000-000000024043",
+          "start_date": "2026-10-19",
+          "start_month": "2026-10-01",
+          "template_id": null,
+          "has_deadline": true,
+          "interval_count": 1,
+          "due_offset_days": 0,
+          "organization_id": "00000000-0000-0000-0000-000000000001",
+          "definition_revision": 1,
+          "measurement_version": 2,
+          "template_version_id": null
+        },
+        "baseline": {
+          "head": {
+            "owner_id": "00000000-0000-0000-0000-000000024042",
+            "revision": 0,
+            "fence_epoch": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "graph": {
+            "period": "2026-10-01",
+            "company_id": "00000000-0000-0000-0000-000000024043",
+            "fence_epoch": 0,
+            "config_revision": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "month": {
+            "period": "2026-10-01",
+            "owner_id": "00000000-0000-0000-0000-000000024042",
+            "fence_epoch": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "fences": {
+            "graph": 0,
+            "month": 0,
+            "creation": 0,
+            "graphConfig": 0,
+            "createOperation": 0,
+            "membershipOwner": 0,
+            "revokeOperation": 0,
+            "creationRevision": 0,
+            "membershipCreator": 0,
+            "membershipRevoker": 0
+          },
+          "absences": 0,
+          "activity": 0,
+          "closures": 0,
+          "coverage": 0,
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000024040",
+              "name": "M2.2C assignment create assignment-first RR creator",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024041",
+              "name": "M2.2C assignment create assignment-first RR revoker",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024042",
+              "name": "M2.2C assignment create assignment-first RR employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "receipts": [],
+          "sessions": [],
+          "tracking": 0,
+          "instances": [],
+          "assignments": [],
+          "memberships": [
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024043",
+              "profile_id": "00000000-0000-0000-0000-000000024040",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024043",
+              "profile_id": "00000000-0000-0000-0000-000000024041",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024043",
+              "profile_id": "00000000-0000-0000-0000-000000024042",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "teamMembers": [
+            {
+              "team_id": "00000000-0000-0000-0000-000000024044",
+              "profile_id": "00000000-0000-0000-0000-000000024040",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024044",
+              "profile_id": "00000000-0000-0000-0000-000000024041",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024044",
+              "profile_id": "00000000-0000-0000-0000-000000024042",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "dependencies": 0,
+          "chiefInstances": 0,
+          "trackingEvents": 0,
+          "assignmentAudit": [],
+          "membershipAudit": [],
+          "operationFences": [],
+          "chiefAssignments": 0,
+          "completionEvents": 0,
+          "membershipEvents": [],
+          "parameterization": 0,
+          "responsibilityHeads": 0
+        },
+        "winnerOnly": {
+          "head": {
+            "owner_id": "00000000-0000-0000-0000-000000024042",
+            "revision": 1,
+            "fence_epoch": 1,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "graph": {
+            "period": "2026-10-01",
+            "company_id": "00000000-0000-0000-0000-000000024043",
+            "fence_epoch": 0,
+            "config_revision": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "month": {
+            "period": "2026-10-01",
+            "owner_id": "00000000-0000-0000-0000-000000024042",
+            "fence_epoch": 1,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "fences": {
+            "graph": 0,
+            "month": 1,
+            "creation": 1,
+            "graphConfig": 0,
+            "createOperation": 1,
+            "membershipOwner": 1,
+            "revokeOperation": 0,
+            "creationRevision": 1,
+            "membershipCreator": 1,
+            "membershipRevoker": 0
+          },
+          "absences": 0,
+          "activity": 0,
+          "closures": 0,
+          "coverage": 0,
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000024040",
+              "name": "M2.2C assignment create assignment-first RR creator",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024041",
+              "name": "M2.2C assignment create assignment-first RR revoker",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024042",
+              "name": "M2.2C assignment create assignment-first RR employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "receipts": [
+            {
+              "kind": "assignment.create",
+              "result": {
+                "kind": "assignment.create",
+                "result": {
+                  "assignmentId": "0d6ff8d2-29a6-48c4-92d8-d13685a39916",
+                  "assignmentRevision": "1"
+                },
+                "operationId": "00000000-0000-0000-0000-000000024045",
+                "contractVersion": 1
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024040",
+              "arguments": {
+                "kind": "assignment.create",
+                "payload": {
+                  "source": {
+                    "type": "custom",
+                    "definition": {
+                      "kind": "operativa",
+                      "unit": "documentos",
+                      "title": "M2.2C assignment create assignment-first RR",
+                      "sector": "Assignment race",
+                      "objective": "M2.2C assignment create assignment-first RR synthetic objective"
+                    }
+                  },
+                  "teamId": "00000000-0000-0000-0000-000000024044",
+                  "ownerId": "00000000-0000-0000-0000-000000024042",
+                  "schedule": {
+                    "endDate": "2026-10-19",
+                    "interval": 1,
+                    "monthDay": 19,
+                    "weekdays": [],
+                    "frequency": "unica",
+                    "startDate": "2026-10-19",
+                    "hasDeadline": true,
+                    "dueOffsetDays": 0
+                  },
+                  "companyId": "00000000-0000-0000-0000-000000024043"
+                },
+                "expectedRevisions": {
+                  "creation:00000000-0000-0000-0000-000000024042": "0"
+                }
+              },
+              "created_at": "2026-10-19T11:33:54.844019-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000024045",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [],
+          "tracking": 0,
+          "instances": [],
+          "assignments": [
+            {
+              "id": "0d6ff8d2-29a6-48c4-92d8-d13685a39916",
+              "kind": "operativa",
+              "unit": "documentos",
+              "title": "M2.2C assignment create assignment-first RR",
+              "target": null,
+              "weight": null,
+              "due_day": 19,
+              "team_id": "00000000-0000-0000-0000-000000024044",
+              "end_date": "2026-10-19",
+              "owner_id": "00000000-0000-0000-0000-000000024042",
+              "weekdays": [
+                1
+              ],
+              "checklist": [],
+              "frequency": "unica",
+              "month_day": 19,
+              "company_id": "00000000-0000-0000-0000-000000024043",
+              "start_date": "2026-10-19",
+              "start_month": "2026-10-01",
+              "template_id": null,
+              "has_deadline": true,
+              "interval_count": 1,
+              "due_offset_days": 0,
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "definition_revision": 1,
+              "measurement_version": 2,
+              "template_version_id": null
+            }
+          ],
+          "memberships": [
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024043",
+              "profile_id": "00000000-0000-0000-0000-000000024040",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024043",
+              "profile_id": "00000000-0000-0000-0000-000000024041",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024043",
+              "profile_id": "00000000-0000-0000-0000-000000024042",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "teamMembers": [
+            {
+              "team_id": "00000000-0000-0000-0000-000000024044",
+              "profile_id": "00000000-0000-0000-0000-000000024040",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024044",
+              "profile_id": "00000000-0000-0000-0000-000000024041",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024044",
+              "profile_id": "00000000-0000-0000-0000-000000024042",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "dependencies": 0,
+          "chiefInstances": 0,
+          "trackingEvents": 0,
+          "assignmentAudit": [
+            {
+              "at": "2026-10-19T11:33:54.83323-03:00",
+              "id": 707,
+              "action": "assignment.create",
+              "details": {
+                "period": "2026-10-01",
+                "ownerId": "00000000-0000-0000-0000-000000024042"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024040",
+              "entity_id": "0d6ff8d2-29a6-48c4-92d8-d13685a39916",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "membershipAudit": [],
+          "operationFences": [
+            {
+              "actor_id": "00000000-0000-0000-0000-000000024040",
+              "fence_epoch": 1,
+              "operation_id": "00000000-0000-0000-0000-000000024045"
+            }
+          ],
+          "chiefAssignments": 0,
+          "completionEvents": 0,
+          "membershipEvents": [],
+          "parameterization": 0,
+          "responsibilityHeads": 0
+        },
+        "afterFirstAttemptAndRollback": {
+          "head": {
+            "owner_id": "00000000-0000-0000-0000-000000024042",
+            "revision": 1,
+            "fence_epoch": 1,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "graph": {
+            "period": "2026-10-01",
+            "company_id": "00000000-0000-0000-0000-000000024043",
+            "fence_epoch": 0,
+            "config_revision": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "month": {
+            "period": "2026-10-01",
+            "owner_id": "00000000-0000-0000-0000-000000024042",
+            "fence_epoch": 1,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "fences": {
+            "graph": 0,
+            "month": 1,
+            "creation": 1,
+            "graphConfig": 0,
+            "createOperation": 1,
+            "membershipOwner": 1,
+            "revokeOperation": 0,
+            "creationRevision": 1,
+            "membershipCreator": 1,
+            "membershipRevoker": 0
+          },
+          "absences": 0,
+          "activity": 0,
+          "closures": 0,
+          "coverage": 0,
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000024040",
+              "name": "M2.2C assignment create assignment-first RR creator",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024041",
+              "name": "M2.2C assignment create assignment-first RR revoker",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024042",
+              "name": "M2.2C assignment create assignment-first RR employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "receipts": [
+            {
+              "kind": "assignment.create",
+              "result": {
+                "kind": "assignment.create",
+                "result": {
+                  "assignmentId": "0d6ff8d2-29a6-48c4-92d8-d13685a39916",
+                  "assignmentRevision": "1"
+                },
+                "operationId": "00000000-0000-0000-0000-000000024045",
+                "contractVersion": 1
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024040",
+              "arguments": {
+                "kind": "assignment.create",
+                "payload": {
+                  "source": {
+                    "type": "custom",
+                    "definition": {
+                      "kind": "operativa",
+                      "unit": "documentos",
+                      "title": "M2.2C assignment create assignment-first RR",
+                      "sector": "Assignment race",
+                      "objective": "M2.2C assignment create assignment-first RR synthetic objective"
+                    }
+                  },
+                  "teamId": "00000000-0000-0000-0000-000000024044",
+                  "ownerId": "00000000-0000-0000-0000-000000024042",
+                  "schedule": {
+                    "endDate": "2026-10-19",
+                    "interval": 1,
+                    "monthDay": 19,
+                    "weekdays": [],
+                    "frequency": "unica",
+                    "startDate": "2026-10-19",
+                    "hasDeadline": true,
+                    "dueOffsetDays": 0
+                  },
+                  "companyId": "00000000-0000-0000-0000-000000024043"
+                },
+                "expectedRevisions": {
+                  "creation:00000000-0000-0000-0000-000000024042": "0"
+                }
+              },
+              "created_at": "2026-10-19T11:33:54.844019-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000024045",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [],
+          "tracking": 0,
+          "instances": [],
+          "assignments": [
+            {
+              "id": "0d6ff8d2-29a6-48c4-92d8-d13685a39916",
+              "kind": "operativa",
+              "unit": "documentos",
+              "title": "M2.2C assignment create assignment-first RR",
+              "target": null,
+              "weight": null,
+              "due_day": 19,
+              "team_id": "00000000-0000-0000-0000-000000024044",
+              "end_date": "2026-10-19",
+              "owner_id": "00000000-0000-0000-0000-000000024042",
+              "weekdays": [
+                1
+              ],
+              "checklist": [],
+              "frequency": "unica",
+              "month_day": 19,
+              "company_id": "00000000-0000-0000-0000-000000024043",
+              "start_date": "2026-10-19",
+              "start_month": "2026-10-01",
+              "template_id": null,
+              "has_deadline": true,
+              "interval_count": 1,
+              "due_offset_days": 0,
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "definition_revision": 1,
+              "measurement_version": 2,
+              "template_version_id": null
+            }
+          ],
+          "memberships": [
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024043",
+              "profile_id": "00000000-0000-0000-0000-000000024040",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024043",
+              "profile_id": "00000000-0000-0000-0000-000000024041",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024043",
+              "profile_id": "00000000-0000-0000-0000-000000024042",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "teamMembers": [
+            {
+              "team_id": "00000000-0000-0000-0000-000000024044",
+              "profile_id": "00000000-0000-0000-0000-000000024040",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024044",
+              "profile_id": "00000000-0000-0000-0000-000000024041",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024044",
+              "profile_id": "00000000-0000-0000-0000-000000024042",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "dependencies": 0,
+          "chiefInstances": 0,
+          "trackingEvents": 0,
+          "assignmentAudit": [
+            {
+              "at": "2026-10-19T11:33:54.83323-03:00",
+              "id": 707,
+              "action": "assignment.create",
+              "details": {
+                "period": "2026-10-01",
+                "ownerId": "00000000-0000-0000-0000-000000024042"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024040",
+              "entity_id": "0d6ff8d2-29a6-48c4-92d8-d13685a39916",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "membershipAudit": [],
+          "operationFences": [
+            {
+              "actor_id": "00000000-0000-0000-0000-000000024040",
+              "fence_epoch": 1,
+              "operation_id": "00000000-0000-0000-0000-000000024045"
+            }
+          ],
+          "chiefAssignments": 0,
+          "completionEvents": 0,
+          "membershipEvents": [],
+          "parameterization": 0,
+          "responsibilityHeads": 0
+        },
+        "final": {
+          "head": {
+            "owner_id": "00000000-0000-0000-0000-000000024042",
+            "revision": 1,
+            "fence_epoch": 1,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "graph": {
+            "period": "2026-10-01",
+            "company_id": "00000000-0000-0000-0000-000000024043",
+            "fence_epoch": 0,
+            "config_revision": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "month": {
+            "period": "2026-10-01",
+            "owner_id": "00000000-0000-0000-0000-000000024042",
+            "fence_epoch": 1,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "fences": {
+            "graph": 0,
+            "month": 1,
+            "creation": 1,
+            "graphConfig": 0,
+            "createOperation": 1,
+            "membershipOwner": 2,
+            "revokeOperation": 1,
+            "creationRevision": 1,
+            "membershipCreator": 1,
+            "membershipRevoker": 0
+          },
+          "absences": 0,
+          "activity": 0,
+          "closures": 0,
+          "coverage": 0,
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000024040",
+              "name": "M2.2C assignment create assignment-first RR creator",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024041",
+              "name": "M2.2C assignment create assignment-first RR revoker",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024042",
+              "name": "M2.2C assignment create assignment-first RR employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "receipts": [
+            {
+              "kind": "assignment.create",
+              "result": {
+                "kind": "assignment.create",
+                "result": {
+                  "assignmentId": "0d6ff8d2-29a6-48c4-92d8-d13685a39916",
+                  "assignmentRevision": "1"
+                },
+                "operationId": "00000000-0000-0000-0000-000000024045",
+                "contractVersion": 1
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024040",
+              "arguments": {
+                "kind": "assignment.create",
+                "payload": {
+                  "source": {
+                    "type": "custom",
+                    "definition": {
+                      "kind": "operativa",
+                      "unit": "documentos",
+                      "title": "M2.2C assignment create assignment-first RR",
+                      "sector": "Assignment race",
+                      "objective": "M2.2C assignment create assignment-first RR synthetic objective"
+                    }
+                  },
+                  "teamId": "00000000-0000-0000-0000-000000024044",
+                  "ownerId": "00000000-0000-0000-0000-000000024042",
+                  "schedule": {
+                    "endDate": "2026-10-19",
+                    "interval": 1,
+                    "monthDay": 19,
+                    "weekdays": [],
+                    "frequency": "unica",
+                    "startDate": "2026-10-19",
+                    "hasDeadline": true,
+                    "dueOffsetDays": 0
+                  },
+                  "companyId": "00000000-0000-0000-0000-000000024043"
+                },
+                "expectedRevisions": {
+                  "creation:00000000-0000-0000-0000-000000024042": "0"
+                }
+              },
+              "created_at": "2026-10-19T11:33:54.844019-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000024045",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "kind": "companyMembership.setActive",
+              "result": {
+                "kind": "companyMembership.setActive",
+                "result": {
+                  "active": false,
+                  "companyId": "00000000-0000-0000-0000-000000024043",
+                  "profileId": "00000000-0000-0000-0000-000000024042",
+                  "membershipRevision": "1"
+                },
+                "operationId": "00000000-0000-0000-0000-000000024046",
+                "contractVersion": 1
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024041",
+              "arguments": {
+                "kind": "companyMembership.setActive",
+                "payload": {
+                  "active": false,
+                  "reason": "M2.2C assignment create assignment-first RR synthetic revocation",
+                  "companyId": "00000000-0000-0000-0000-000000024043",
+                  "profileId": "00000000-0000-0000-0000-000000024042"
+                },
+                "expectedRevisions": {
+                  "membership:00000000-0000-0000-0000-000000024043:00000000-0000-0000-0000-000000024042": "0"
+                }
+              },
+              "created_at": "2026-10-19T11:33:55.156559-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000024046",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [],
+          "tracking": 0,
+          "instances": [],
+          "assignments": [
+            {
+              "id": "0d6ff8d2-29a6-48c4-92d8-d13685a39916",
+              "kind": "operativa",
+              "unit": "documentos",
+              "title": "M2.2C assignment create assignment-first RR",
+              "target": null,
+              "weight": null,
+              "due_day": 19,
+              "team_id": "00000000-0000-0000-0000-000000024044",
+              "end_date": "2026-10-19",
+              "owner_id": "00000000-0000-0000-0000-000000024042",
+              "weekdays": [
+                1
+              ],
+              "checklist": [],
+              "frequency": "unica",
+              "month_day": 19,
+              "company_id": "00000000-0000-0000-0000-000000024043",
+              "start_date": "2026-10-19",
+              "start_month": "2026-10-01",
+              "template_id": null,
+              "has_deadline": true,
+              "interval_count": 1,
+              "due_offset_days": 0,
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "definition_revision": 1,
+              "measurement_version": 2,
+              "template_version_id": null
+            }
+          ],
+          "memberships": [
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024043",
+              "profile_id": "00000000-0000-0000-0000-000000024040",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024043",
+              "profile_id": "00000000-0000-0000-0000-000000024041",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": false,
+              "revision": 1,
+              "changed_at": "2026-10-19T11:33:55.132306-03:00",
+              "changed_by": "00000000-0000-0000-0000-000000024041",
+              "company_id": "00000000-0000-0000-0000-000000024043",
+              "profile_id": "00000000-0000-0000-0000-000000024042",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "teamMembers": [
+            {
+              "team_id": "00000000-0000-0000-0000-000000024044",
+              "profile_id": "00000000-0000-0000-0000-000000024040",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024044",
+              "profile_id": "00000000-0000-0000-0000-000000024041",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024044",
+              "profile_id": "00000000-0000-0000-0000-000000024042",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "dependencies": 0,
+          "chiefInstances": 0,
+          "trackingEvents": 0,
+          "assignmentAudit": [
+            {
+              "at": "2026-10-19T11:33:54.83323-03:00",
+              "id": 707,
+              "action": "assignment.create",
+              "details": {
+                "period": "2026-10-01",
+                "ownerId": "00000000-0000-0000-0000-000000024042"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024040",
+              "entity_id": "0d6ff8d2-29a6-48c4-92d8-d13685a39916",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "membershipAudit": [
+            {
+              "at": "2026-10-19T11:33:54.983666-03:00",
+              "id": 708,
+              "action": "companyMembership.setActive",
+              "details": {
+                "active": false,
+                "profileId": "00000000-0000-0000-0000-000000024042",
+                "membershipRevision": "1"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024041",
+              "entity_id": "00000000-0000-0000-0000-000000024043",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "operationFences": [
+            {
+              "actor_id": "00000000-0000-0000-0000-000000024040",
+              "fence_epoch": 1,
+              "operation_id": "00000000-0000-0000-0000-000000024045"
+            },
+            {
+              "actor_id": "00000000-0000-0000-0000-000000024041",
+              "fence_epoch": 1,
+              "operation_id": "00000000-0000-0000-0000-000000024046"
+            }
+          ],
+          "chiefAssignments": 0,
+          "completionEvents": 0,
+          "membershipEvents": [
+            {
+              "id": "0fd10ba0-4a9f-43f7-9741-bde51ad862ba",
+              "active": false,
+              "reason": "M2.2C assignment create assignment-first RR synthetic revocation",
+              "actor_id": "00000000-0000-0000-0000-000000024041",
+              "revision": 1,
+              "company_id": "00000000-0000-0000-0000-000000024043",
+              "created_at": "2026-10-19T11:33:55.147207-03:00",
+              "profile_id": "00000000-0000-0000-0000-000000024042",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "parameterization": 0,
+          "responsibilityHeads": 0
+        }
+      },
+      {
+        "name": "M2.2C assignment.create versus membership revoke revoke-first RR blocks, stale-aborts, exact retry",
+        "passed": true,
+        "blocked": true,
+        "winnerSQLSTATE": "00000",
+        "loserSQLSTATE": "40001",
+        "retrySQLSTATE": "42501",
+        "actors": {
+          "owner": "00000000-0000-0000-0000-000000024062",
+          "creator": "00000000-0000-0000-0000-000000024060",
+          "revoker": "00000000-0000-0000-0000-000000024061",
+          "distinctChiefs": true
+        },
+        "claims": {
+          "winner": {
+            "uid": "00000000-0000-0000-0000-000000024061",
+            "jwtSub": "00000000-0000-0000-0000-000000024061",
+            "claimsSub": "00000000-0000-0000-0000-000000024061",
+            "aal": "aal2",
+            "isolation": "repeatable read",
+            "currentUser": "authenticated",
+            "claimsRole": "authenticated"
+          },
+          "loser": {
+            "uid": "00000000-0000-0000-0000-000000024060",
+            "jwtSub": "00000000-0000-0000-0000-000000024060",
+            "claimsSub": "00000000-0000-0000-0000-000000024060",
+            "aal": "aal2",
+            "isolation": "repeatable read",
+            "currentUser": "authenticated",
+            "claimsRole": "authenticated"
+          },
+          "retry": {
+            "uid": "00000000-0000-0000-0000-000000024060",
+            "jwtSub": "00000000-0000-0000-0000-000000024060",
+            "claimsSub": "00000000-0000-0000-0000-000000024060",
+            "aal": "aal2",
+            "isolation": "repeatable read",
+            "currentUser": "authenticated",
+            "claimsRole": "authenticated"
+          }
+        },
+        "pids": {
+          "winner": 20448,
+          "loser": 11428,
+          "blockerPids": "{20448}"
+        },
+        "expectedWinnerFences": {
+          "membershipOwner": 1,
+          "membershipCreator": 0,
+          "membershipRevoker": 0,
+          "month": 0,
+          "graph": 0,
+          "graphConfig": 0,
+          "creationRevision": 0,
+          "creation": 0,
+          "createOperation": 0,
+          "revokeOperation": 1
+        },
+        "expectedFences": {
+          "membershipOwner": 1,
+          "membershipCreator": 0,
+          "membershipRevoker": 0,
+          "month": 0,
+          "graph": 0,
+          "graphConfig": 0,
+          "creationRevision": 0,
+          "creation": 0,
+          "createOperation": 0,
+          "revokeOperation": 1
+        },
+        "weekdayInput": [],
+        "weekdayPersisted": 1,
+        "createdAssignment": null,
+        "baseline": {
+          "head": {
+            "owner_id": "00000000-0000-0000-0000-000000024062",
+            "revision": 0,
+            "fence_epoch": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "graph": {
+            "period": "2026-10-01",
+            "company_id": "00000000-0000-0000-0000-000000024063",
+            "fence_epoch": 0,
+            "config_revision": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "month": {
+            "period": "2026-10-01",
+            "owner_id": "00000000-0000-0000-0000-000000024062",
+            "fence_epoch": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "fences": {
+            "graph": 0,
+            "month": 0,
+            "creation": 0,
+            "graphConfig": 0,
+            "createOperation": 0,
+            "membershipOwner": 0,
+            "revokeOperation": 0,
+            "creationRevision": 0,
+            "membershipCreator": 0,
+            "membershipRevoker": 0
+          },
+          "absences": 0,
+          "activity": 0,
+          "closures": 0,
+          "coverage": 0,
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000024060",
+              "name": "M2.2C assignment create revoke-first RR creator",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024061",
+              "name": "M2.2C assignment create revoke-first RR revoker",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024062",
+              "name": "M2.2C assignment create revoke-first RR employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "receipts": [],
+          "sessions": [],
+          "tracking": 0,
+          "instances": [],
+          "assignments": [],
+          "memberships": [
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024063",
+              "profile_id": "00000000-0000-0000-0000-000000024060",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024063",
+              "profile_id": "00000000-0000-0000-0000-000000024061",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024063",
+              "profile_id": "00000000-0000-0000-0000-000000024062",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "teamMembers": [
+            {
+              "team_id": "00000000-0000-0000-0000-000000024064",
+              "profile_id": "00000000-0000-0000-0000-000000024060",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024064",
+              "profile_id": "00000000-0000-0000-0000-000000024061",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024064",
+              "profile_id": "00000000-0000-0000-0000-000000024062",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "dependencies": 0,
+          "chiefInstances": 0,
+          "trackingEvents": 0,
+          "assignmentAudit": [],
+          "membershipAudit": [],
+          "operationFences": [],
+          "chiefAssignments": 0,
+          "completionEvents": 0,
+          "membershipEvents": [],
+          "parameterization": 0,
+          "responsibilityHeads": 0
+        },
+        "winnerOnly": {
+          "head": {
+            "owner_id": "00000000-0000-0000-0000-000000024062",
+            "revision": 0,
+            "fence_epoch": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "graph": {
+            "period": "2026-10-01",
+            "company_id": "00000000-0000-0000-0000-000000024063",
+            "fence_epoch": 0,
+            "config_revision": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "month": {
+            "period": "2026-10-01",
+            "owner_id": "00000000-0000-0000-0000-000000024062",
+            "fence_epoch": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "fences": {
+            "graph": 0,
+            "month": 0,
+            "creation": 0,
+            "graphConfig": 0,
+            "createOperation": 0,
+            "membershipOwner": 1,
+            "revokeOperation": 1,
+            "creationRevision": 0,
+            "membershipCreator": 0,
+            "membershipRevoker": 0
+          },
+          "absences": 0,
+          "activity": 0,
+          "closures": 0,
+          "coverage": 0,
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000024060",
+              "name": "M2.2C assignment create revoke-first RR creator",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024061",
+              "name": "M2.2C assignment create revoke-first RR revoker",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024062",
+              "name": "M2.2C assignment create revoke-first RR employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "receipts": [
+            {
+              "kind": "companyMembership.setActive",
+              "result": {
+                "kind": "companyMembership.setActive",
+                "result": {
+                  "active": false,
+                  "companyId": "00000000-0000-0000-0000-000000024063",
+                  "profileId": "00000000-0000-0000-0000-000000024062",
+                  "membershipRevision": "1"
+                },
+                "operationId": "00000000-0000-0000-0000-000000024066",
+                "contractVersion": 1
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024061",
+              "arguments": {
+                "kind": "companyMembership.setActive",
+                "payload": {
+                  "active": false,
+                  "reason": "M2.2C assignment create revoke-first RR synthetic revocation",
+                  "companyId": "00000000-0000-0000-0000-000000024063",
+                  "profileId": "00000000-0000-0000-0000-000000024062"
+                },
+                "expectedRevisions": {
+                  "membership:00000000-0000-0000-0000-000000024063:00000000-0000-0000-0000-000000024062": "0"
+                }
+              },
+              "created_at": "2026-10-19T11:33:55.200912-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000024066",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [],
+          "tracking": 0,
+          "instances": [],
+          "assignments": [],
+          "memberships": [
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024063",
+              "profile_id": "00000000-0000-0000-0000-000000024060",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024063",
+              "profile_id": "00000000-0000-0000-0000-000000024061",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": false,
+              "revision": 1,
+              "changed_at": "2026-10-19T11:33:55.200201-03:00",
+              "changed_by": "00000000-0000-0000-0000-000000024061",
+              "company_id": "00000000-0000-0000-0000-000000024063",
+              "profile_id": "00000000-0000-0000-0000-000000024062",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "teamMembers": [
+            {
+              "team_id": "00000000-0000-0000-0000-000000024064",
+              "profile_id": "00000000-0000-0000-0000-000000024060",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024064",
+              "profile_id": "00000000-0000-0000-0000-000000024061",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024064",
+              "profile_id": "00000000-0000-0000-0000-000000024062",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "dependencies": 0,
+          "chiefInstances": 0,
+          "trackingEvents": 0,
+          "assignmentAudit": [],
+          "membershipAudit": [
+            {
+              "at": "2026-10-19T11:33:55.185651-03:00",
+              "id": 709,
+              "action": "companyMembership.setActive",
+              "details": {
+                "active": false,
+                "profileId": "00000000-0000-0000-0000-000000024062",
+                "membershipRevision": "1"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024061",
+              "entity_id": "00000000-0000-0000-0000-000000024063",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "operationFences": [
+            {
+              "actor_id": "00000000-0000-0000-0000-000000024061",
+              "fence_epoch": 1,
+              "operation_id": "00000000-0000-0000-0000-000000024066"
+            }
+          ],
+          "chiefAssignments": 0,
+          "completionEvents": 0,
+          "membershipEvents": [
+            {
+              "id": "a2cd6187-85ac-4115-afc6-67695f9372ef",
+              "active": false,
+              "reason": "M2.2C assignment create revoke-first RR synthetic revocation",
+              "actor_id": "00000000-0000-0000-0000-000000024061",
+              "revision": 1,
+              "company_id": "00000000-0000-0000-0000-000000024063",
+              "created_at": "2026-10-19T11:33:55.200595-03:00",
+              "profile_id": "00000000-0000-0000-0000-000000024062",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "parameterization": 0,
+          "responsibilityHeads": 0
+        },
+        "afterFirstAttemptAndRollback": {
+          "head": {
+            "owner_id": "00000000-0000-0000-0000-000000024062",
+            "revision": 0,
+            "fence_epoch": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "graph": {
+            "period": "2026-10-01",
+            "company_id": "00000000-0000-0000-0000-000000024063",
+            "fence_epoch": 0,
+            "config_revision": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "month": {
+            "period": "2026-10-01",
+            "owner_id": "00000000-0000-0000-0000-000000024062",
+            "fence_epoch": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "fences": {
+            "graph": 0,
+            "month": 0,
+            "creation": 0,
+            "graphConfig": 0,
+            "createOperation": 0,
+            "membershipOwner": 1,
+            "revokeOperation": 1,
+            "creationRevision": 0,
+            "membershipCreator": 0,
+            "membershipRevoker": 0
+          },
+          "absences": 0,
+          "activity": 0,
+          "closures": 0,
+          "coverage": 0,
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000024060",
+              "name": "M2.2C assignment create revoke-first RR creator",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024061",
+              "name": "M2.2C assignment create revoke-first RR revoker",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024062",
+              "name": "M2.2C assignment create revoke-first RR employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "receipts": [
+            {
+              "kind": "companyMembership.setActive",
+              "result": {
+                "kind": "companyMembership.setActive",
+                "result": {
+                  "active": false,
+                  "companyId": "00000000-0000-0000-0000-000000024063",
+                  "profileId": "00000000-0000-0000-0000-000000024062",
+                  "membershipRevision": "1"
+                },
+                "operationId": "00000000-0000-0000-0000-000000024066",
+                "contractVersion": 1
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024061",
+              "arguments": {
+                "kind": "companyMembership.setActive",
+                "payload": {
+                  "active": false,
+                  "reason": "M2.2C assignment create revoke-first RR synthetic revocation",
+                  "companyId": "00000000-0000-0000-0000-000000024063",
+                  "profileId": "00000000-0000-0000-0000-000000024062"
+                },
+                "expectedRevisions": {
+                  "membership:00000000-0000-0000-0000-000000024063:00000000-0000-0000-0000-000000024062": "0"
+                }
+              },
+              "created_at": "2026-10-19T11:33:55.200912-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000024066",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [],
+          "tracking": 0,
+          "instances": [],
+          "assignments": [],
+          "memberships": [
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024063",
+              "profile_id": "00000000-0000-0000-0000-000000024060",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024063",
+              "profile_id": "00000000-0000-0000-0000-000000024061",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": false,
+              "revision": 1,
+              "changed_at": "2026-10-19T11:33:55.200201-03:00",
+              "changed_by": "00000000-0000-0000-0000-000000024061",
+              "company_id": "00000000-0000-0000-0000-000000024063",
+              "profile_id": "00000000-0000-0000-0000-000000024062",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "teamMembers": [
+            {
+              "team_id": "00000000-0000-0000-0000-000000024064",
+              "profile_id": "00000000-0000-0000-0000-000000024060",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024064",
+              "profile_id": "00000000-0000-0000-0000-000000024061",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024064",
+              "profile_id": "00000000-0000-0000-0000-000000024062",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "dependencies": 0,
+          "chiefInstances": 0,
+          "trackingEvents": 0,
+          "assignmentAudit": [],
+          "membershipAudit": [
+            {
+              "at": "2026-10-19T11:33:55.185651-03:00",
+              "id": 709,
+              "action": "companyMembership.setActive",
+              "details": {
+                "active": false,
+                "profileId": "00000000-0000-0000-0000-000000024062",
+                "membershipRevision": "1"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024061",
+              "entity_id": "00000000-0000-0000-0000-000000024063",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "operationFences": [
+            {
+              "actor_id": "00000000-0000-0000-0000-000000024061",
+              "fence_epoch": 1,
+              "operation_id": "00000000-0000-0000-0000-000000024066"
+            }
+          ],
+          "chiefAssignments": 0,
+          "completionEvents": 0,
+          "membershipEvents": [
+            {
+              "id": "a2cd6187-85ac-4115-afc6-67695f9372ef",
+              "active": false,
+              "reason": "M2.2C assignment create revoke-first RR synthetic revocation",
+              "actor_id": "00000000-0000-0000-0000-000000024061",
+              "revision": 1,
+              "company_id": "00000000-0000-0000-0000-000000024063",
+              "created_at": "2026-10-19T11:33:55.200595-03:00",
+              "profile_id": "00000000-0000-0000-0000-000000024062",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "parameterization": 0,
+          "responsibilityHeads": 0
+        },
+        "final": {
+          "head": {
+            "owner_id": "00000000-0000-0000-0000-000000024062",
+            "revision": 0,
+            "fence_epoch": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "graph": {
+            "period": "2026-10-01",
+            "company_id": "00000000-0000-0000-0000-000000024063",
+            "fence_epoch": 0,
+            "config_revision": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "month": {
+            "period": "2026-10-01",
+            "owner_id": "00000000-0000-0000-0000-000000024062",
+            "fence_epoch": 0,
+            "organization_id": "00000000-0000-0000-0000-000000000001"
+          },
+          "fences": {
+            "graph": 0,
+            "month": 0,
+            "creation": 0,
+            "graphConfig": 0,
+            "createOperation": 0,
+            "membershipOwner": 1,
+            "revokeOperation": 1,
+            "creationRevision": 0,
+            "membershipCreator": 0,
+            "membershipRevoker": 0
+          },
+          "absences": 0,
+          "activity": 0,
+          "closures": 0,
+          "coverage": 0,
+          "profiles": [
+            {
+              "id": "00000000-0000-0000-0000-000000024060",
+              "name": "M2.2C assignment create revoke-first RR creator",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024061",
+              "name": "M2.2C assignment create revoke-first RR revoker",
+              "role": "jefe",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Chief",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000024062",
+              "name": "M2.2C assignment create revoke-first RR employee",
+              "role": "empleado",
+              "active": true,
+              "branch": "Assignment race",
+              "sector": "Assignment race",
+              "position": "Employee",
+              "manager_id": null,
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "receipts": [
+            {
+              "kind": "companyMembership.setActive",
+              "result": {
+                "kind": "companyMembership.setActive",
+                "result": {
+                  "active": false,
+                  "companyId": "00000000-0000-0000-0000-000000024063",
+                  "profileId": "00000000-0000-0000-0000-000000024062",
+                  "membershipRevision": "1"
+                },
+                "operationId": "00000000-0000-0000-0000-000000024066",
+                "contractVersion": 1
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024061",
+              "arguments": {
+                "kind": "companyMembership.setActive",
+                "payload": {
+                  "active": false,
+                  "reason": "M2.2C assignment create revoke-first RR synthetic revocation",
+                  "companyId": "00000000-0000-0000-0000-000000024063",
+                  "profileId": "00000000-0000-0000-0000-000000024062"
+                },
+                "expectedRevisions": {
+                  "membership:00000000-0000-0000-0000-000000024063:00000000-0000-0000-0000-000000024062": "0"
+                }
+              },
+              "created_at": "2026-10-19T11:33:55.200912-03:00",
+              "operation_id": "00000000-0000-0000-0000-000000024066",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "sessions": [],
+          "tracking": 0,
+          "instances": [],
+          "assignments": [],
+          "memberships": [
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024063",
+              "profile_id": "00000000-0000-0000-0000-000000024060",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": true,
+              "revision": 0,
+              "changed_at": null,
+              "changed_by": null,
+              "company_id": "00000000-0000-0000-0000-000000024063",
+              "profile_id": "00000000-0000-0000-0000-000000024061",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            },
+            {
+              "active": false,
+              "revision": 1,
+              "changed_at": "2026-10-19T11:33:55.200201-03:00",
+              "changed_by": "00000000-0000-0000-0000-000000024061",
+              "company_id": "00000000-0000-0000-0000-000000024063",
+              "profile_id": "00000000-0000-0000-0000-000000024062",
+              "organization_id": "00000000-0000-0000-0000-000000000001",
+              "access_valid_from": null
+            }
+          ],
+          "teamMembers": [
+            {
+              "team_id": "00000000-0000-0000-0000-000000024064",
+              "profile_id": "00000000-0000-0000-0000-000000024060",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024064",
+              "profile_id": "00000000-0000-0000-0000-000000024061",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            },
+            {
+              "team_id": "00000000-0000-0000-0000-000000024064",
+              "profile_id": "00000000-0000-0000-0000-000000024062",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "dependencies": 0,
+          "chiefInstances": 0,
+          "trackingEvents": 0,
+          "assignmentAudit": [],
+          "membershipAudit": [
+            {
+              "at": "2026-10-19T11:33:55.185651-03:00",
+              "id": 709,
+              "action": "companyMembership.setActive",
+              "details": {
+                "active": false,
+                "profileId": "00000000-0000-0000-0000-000000024062",
+                "membershipRevision": "1"
+              },
+              "actor_id": "00000000-0000-0000-0000-000000024061",
+              "entity_id": "00000000-0000-0000-0000-000000024063",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "operationFences": [
+            {
+              "actor_id": "00000000-0000-0000-0000-000000024061",
+              "fence_epoch": 1,
+              "operation_id": "00000000-0000-0000-0000-000000024066"
+            }
+          ],
+          "chiefAssignments": 0,
+          "completionEvents": 0,
+          "membershipEvents": [
+            {
+              "id": "a2cd6187-85ac-4115-afc6-67695f9372ef",
+              "active": false,
+              "reason": "M2.2C assignment create revoke-first RR synthetic revocation",
+              "actor_id": "00000000-0000-0000-0000-000000024061",
+              "revision": 1,
+              "company_id": "00000000-0000-0000-0000-000000024063",
+              "created_at": "2026-10-19T11:33:55.200595-03:00",
+              "profile_id": "00000000-0000-0000-0000-000000024062",
+              "organization_id": "00000000-0000-0000-0000-000000000001"
+            }
+          ],
+          "parameterization": 0,
+          "responsibilityHeads": 0
+        }
+      }
+    ]
+  },
+  "validation": {
+    "vitest": {
+      "command": "node node_modules/vitest/vitest.mjs run --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "exitCode": 0,
+      "filesPassed": 74,
+      "testsPassed": 738,
+      "log": "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/vitest.log"
+    },
+    "typescript": {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "exitCode": 0,
+      "log": "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/typescript.log"
+    },
+    "clientBuild": {
+      "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+      "exitCode": 0,
+      "log": "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/vite.log"
+    },
+    "workerBuild": {
+      "command": "node scripts/build-worker.mjs",
+      "exitCode": 0,
+      "log": "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/worker.log"
+    },
+    "nodeSyntax": {
+      "command": "node --check tests/review/m2-1-native-review.mjs",
+      "exitCode": 0,
+      "log": "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/node-check.log"
+    },
+    "diffCheck": {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "log": "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/diff-check.log"
+    }
+  },
+  "baselineReproduction": {
+    "commit": "26f8e6b711c04e467fd9608f9e031bfb93ab83ad",
+    "test": "tests/annotations-tour-app.test.tsx -t revalida empresa y conserva el pedido al revocar su ámbito durante la conversión",
+    "exitCode": 0,
+    "passed": 1,
+    "skipped": 46,
+    "log": "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt8/baseline-focused.log",
+    "worktreeLog": "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt8/baseline-worktree.log",
+    "note": "El fallo previo de suite 737/738 no se reprodujo en el baseline ni en suite completa attempt9: 738/738."
+  },
+  "sha256": {
+    "tests/review/m2-1-native-review.mjs": "405c214816e1e257d359ea23b625e905eada5d0c1e8077d6c329395532050f3b",
+    "docs/architecture/M2-2C-ASSIGNMENT-CREATE-MEMBERSHIP-REVOCATION-RACES-LUNA-20261019.md": "9de273684735d6c075bb0800b24d933238afbd6d24fcf55aec59f3e74a25b8df",
+    "supabase/migrations/202610060011_coordination_activation.sql": "9729a6800e93dedc43ab5f0840309b7c0d222343898cc8d5b43eeb4a387f4210",
+    "supabase/migrations/202610150014_operational_api.sql": "ac8cca582cf366b0cf143fd63d99c490c664b00b368eb473757017eebef26315",
+    "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/review.json": "5c20d256d103a1fb99694a243322e4332360448f953ec93af1d568e1ba207957",
+    "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/runner.stdout.log": "041a4f2fe8172f83e32674c94def3409e21bf2999025c214a5a49a217cd519bc",
+    "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/postgres.log": "3098f51c8cb936297eb08bb072febaa46fe5b4f622a3b3cfac4efd37cca2bd69",
+    "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/initdb.log": "fd53df6e3ba881d731fa384b19e52bbd28b4db753c3bbc19bf93f3c22ed4bed6",
+    "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/vitest.log": "651769c91a94ce305179ca324c73502f6d8a72312d43160b6e22d482be80435b",
+    "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/typescript.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/vite.log": "cba34088006ff0e6abf3b35db9df8c242ea751c2649a6b7cf3eb1643e947857d",
+    "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/worker.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/node-check.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/diff-check.log": "83a57946a79338bd6e7b9875b3d1be2331d11fdca8fc816a43e6e73bc38b068e",
+    "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt8/baseline-focused.log": "ec914060fec29a3a82dcf361952db8634f57a1d1528897bcac708315631a2aac",
+    "../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt8/baseline-worktree.log": "e318c52fe1fc6e21d8a86d1be53e189e2f60cea89d22a99e0957cb8a20b55bcc"
+  },
+  "reviewBoundary": "Pendiente revisión/aceptación GPT-6.1 Sol de runner, reporte y hashes. Sin SQL, servicios remotos, Supabase hosted, commit ni push. La matriz no cierra M2.2C/Gate L ni autoriza aplicar SQL014."
+}
