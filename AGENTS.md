@@ -55,9 +55,11 @@ siguen abiertos. Commit directo a `origin/main`, sin PR:
 `cf37b7fe220befa5317e4ae3295514288e96ff6e`; `git ls-remote` confirmó el SHA.
 CI del push no está verificado.
 
-**Siguiente vigente:** auditar con Sol la matriz `public.start_task_timer` frente
-a `companyMembership.setActive(false)` y redactar contrato antes de encargar la
-implementación a Luna. No tocar SQL011/014 ni Supabase alojado.
+**Siguiente vigente:** implementar el contrato Sol-aprobado
+`docs/architecture/M2-2C-TIMER-START-MEMBERSHIP-REVOCATION-RACES-LUNA-20261019.md`
+(SHA256 `b3cf39726e8a3d4c1fb2d7ddeaa03c6604e9eb03ff834032dc87b4f0b4aff82f`).
+Cuatro carreras de `public.start_task_timer` frente a revocación, RC/RC y RR/RR,
+ambos órdenes; no tocar SQL011/014 ni Supabase alojado.
 
 **Bloques anteriores aceptados y publicados:** onboarding.requestChanges exact replay/commandReceipt y cuatro carreras mixtas de cobertura recurrente (RC/RR, RR/RC, ambos ganadores). Evidencias: `docs/architecture/review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json` y `m2-2c-gatel-recurrent-coverage-20261019.json`. El run 39184344731 corresponde al commit 873829271463b4f3bf4bbb5ad39dad978908a8d2. Gate L sigue abierto.
 

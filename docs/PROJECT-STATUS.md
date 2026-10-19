@@ -91,10 +91,11 @@ Commit publicado directamente a `origin/main`, sin PR:
 El hook local ejecutó 196/196, aunque `git commit` devolvió código 1 después de
 crear el commit; el árbol quedó limpio. CI del push no está verificado.
 
-**Siguiente vigente:** cuatro carreras RC/RC y RR/RR de `operation.record` frente
-a `companyMembership.setActive(false)`, ambos órdenes. Contrato:
-`architecture/M2-2C-OPERATION-RECORD-MEMBERSHIP-REVOCATION-RACES-LUNA-20261019.md`.
-Registrar y auditar el resultado por SQLSTATE esperado antes de cambiar SQL.
+**Siguiente vigente:** implementación Luna del contrato aprobado por Sol
+`architecture/M2-2C-TIMER-START-MEMBERSHIP-REVOCATION-RACES-LUNA-20261019.md`
+(SHA256 `b3cf39726e8a3d4c1fb2d7ddeaa03c6604e9eb03ff834032dc87b4f0b4aff82f`):
+cuatro carreras de `public.start_task_timer` frente a revocación bajo RC/RC y
+RR/RR, ambos órdenes. No tocar SQL ni Supabase alojado.
 
 El bloque cobertura recurrente/materialización quedó publicado directamente en
 `main` (sin PR) como `63bc5c78dd3274a5d6c0d1e1ef089f06f24baa75`; el SHA remoto

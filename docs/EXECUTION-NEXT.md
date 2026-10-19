@@ -18,9 +18,13 @@ verificado. SQL011/014 siguen sin cambios; Gate L/§9 permanece abierto.
 
 ## Próximo paso
 
-Auditar la matriz incompleta `public.start_task_timer` frente a
-`companyMembership.setActive(false)` con Sol y redactar un contrato acotado
-antes de pedir la implementación Luna. No tocar SQL ni Supabase alojado.
+Pedir a GPT-6 Luna que implemente
+`architecture/M2-2C-TIMER-START-MEMBERSHIP-REVOCATION-RACES-LUNA-20261019.md`
+(SHA256 `b3cf39726e8a3d4c1fb2d7ddeaa03c6604e9eb03ff834032dc87b4f0b4aff82f`):
+cuatro carreras RC/RC y RR/RR de `public.start_task_timer` frente a
+`companyMembership.setActive(false)`, ambos órdenes. Sol aprobó el contrato sin
+P2; conserva el retry `P0001 / Sin permiso` tras revocación. No tocar SQL ni
+Supabase alojado; pausar y volver a Sol si cualquier resultado difiere.
 
 ## Último bloque local aceptado por Sol — cobertura contra onboarding
 
