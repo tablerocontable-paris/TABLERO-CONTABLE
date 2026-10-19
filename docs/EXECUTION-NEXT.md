@@ -1,5 +1,19 @@
 # Acción vigente de migración — actualización 19/10/2026
 
+## Último bloque local aceptado por Sol — cobertura contra onboarding
+
+Luna implementó el contrato
+`architecture/M2-2C-COVERAGE-CANCEL-ONBOARDING-APPROVAL-RACES-LUNA-20261019.md`.
+Las cuatro carreras focales pasaron con resultados específicos por orden y
+aislamiento; runner 317/317, Vitest 738/738, TypeScript y builds cliente/Worker,
+sintaxis y diff-check aprobados. Ver informe con snapshots, SQLSTATE, receipts
+y hashes en
+`architecture/review-evidence/m2-2c-coverage-cancel-onboarding-approval-races-luna-20261019.json`.
+Aceptación acotada y límites P3:
+`architecture/M2-2C-COVERAGE-CANCEL-ONBOARDING-APPROVAL-RACES-SOL-ACCEPTANCE-20261019.md`.
+Los logs crudos están fuera del Git root. No se cambió SQL ni hubo llamadas
+remotas. Esto no cierra §9/Gate L.
+
 ## Último bloque local aceptado — transición frente a revocación
 
 GPT-6 Luna agregó cuatro carreras locales `task.transition` vs
@@ -18,12 +32,10 @@ no aplicar SQL014.
 
 ## Próximo paso
 
-Implementar el contrato
-`architecture/M2-2C-COVERAGE-CANCEL-ONBOARDING-APPROVAL-RACES-LUNA-20261019.md`:
-cuatro carreras de `cancel_task_coverage_binding` frente a
-`onboarding.approve`, RC/RC y RR/RR en ambos órdenes. Mantener las expectativas
-específicas por caso y detenerse ante cualquier outcome inesperado. No tocar
-SQL014 ni Supabase alojado.
+Auditar §9 del contrato M2.2B/C contra el runner y las aceptaciones Sol para
+seleccionar la siguiente familia incompleta; dejar registro y contrato acotado
+antes de encargar la implementación a Luna. No tocar Supabase alojado ni el
+espacio operativo.
 
 El último bloque `assign_task_responsibility`/`onboarding.approve` quedó aceptado
 localmente por Sol; ver

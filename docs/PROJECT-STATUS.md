@@ -1,5 +1,23 @@
 # Estado general de la migración — actualización 19/10/2026
 
+**Último bloque local aceptado por Sol, alcance acotado:** se agregaron cuatro carreras
+`cancel_task_coverage_binding`/`onboarding.approve` con binding de instancia
+única y dos jefes AAL2 distintos. PostgreSQL 17.11: **317/317**, cero fallos y
+deadlocks; cada caso bloqueó realmente. En RC/RC el cancel-first tuvo `40001`
+y retry `00000`; approve-first canceló con `00000` y el replay void fue inerte.
+Ambos órdenes RR/RR tuvieron el `40001` esperado y retry `00000`. Respuestas y
+recibos completos coinciden; cierre final sin duplicados. Suite **738/738 en 74
+archivos**; TypeScript, builds cliente/Worker, sintaxis y diff-check con exit 0.
+Aceptación y límites P3:
+`architecture/M2-2C-COVERAGE-CANCEL-ONBOARDING-APPROVAL-RACES-SOL-ACCEPTANCE-20261019.md`.
+Manifiesto:
+`architecture/review-evidence/m2-2c-coverage-cancel-onboarding-approval-races-luna-20261019.json`.
+Runner SHA256 `320498dc9601ce7d72feb64c34ec88b38e9dce41f324651c3e45be208d829c74`;
+SQL011/014 no cambiaron. Evidencia local adicional está bajo
+`../../outputs/m2-2c-coverage-cancel-onboarding-approval-races-luna-20261019-attempt3/`,
+fuera del Git root. No se modificó SQL ni hubo llamadas remotas. Gate L y §9
+siguen abiertos; esta aceptación no autoriza migración.
+
 **Último bloque Luna aceptado localmente por Sol, sólo este alcance:** cuatro
 carreras `task.transition`/revocación de membresía para RC/RC y RR/RR, ambos
 ganadores. El runner focal local pasó 305/305 en PostgreSQL 17.11, con
@@ -53,13 +71,9 @@ Commit publicado directamente a `origin/main`, sin PR:
 El hook local ejecutó 196/196, aunque `git commit` devolvió código 1 después de
 crear el commit; el árbol quedó limpio. CI del push no está verificado.
 
-**Siguiente vigente:** cuatro carreras faltantes RC/RC y RR/RR para
-`cancel_task_coverage_binding` frente a `onboarding.approve`, ambos órdenes.
-Contrato Sol:
-`architecture/M2-2C-COVERAGE-CANCEL-ONBOARDING-APPROVAL-RACES-LUNA-20261019.md`.
-Esperar `40001` o éxito sólo según el caso definido; sin cambiar SQL. Los logs
-crudos del bloque anterior permanecen fuera del Git root; su manifiesto conserva
-hashes y resultados resumidos.
+**Siguiente vigente:** auditar §9 frente al runner y aceptaciones Sol para
+seleccionar la próxima familia local incompleta; registrar análisis y contrato
+antes de pedir la implementación Luna.
 
 El bloque cobertura recurrente/materialización quedó publicado directamente en
 `main` (sin PR) como `63bc5c78dd3274a5d6c0d1e1ef089f06f24baa75`; el SHA remoto

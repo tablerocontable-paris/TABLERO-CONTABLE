@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-19",
+  "scope": "Local synthetic PostgreSQL race review only; no hosted Supabase, migration application, or remote API calls.",
+  "baselineCommit": "4bcae22747e62348caabd89a64e086f1b91bd6de",
+  "engine": "PostgreSQL 17.11",
+  "nativeRun": {
+    "command": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../../outputs/m2-2c-coverage-cancel-onboarding-approval-races-luna-20261019-attempt3 --port 55728 --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes",
+    "exitCode": 0,
+    "passed": 317,
+    "failed": 0,
+    "deadlocks40P01": 0,
+    "report": "../../outputs/m2-2c-coverage-cancel-onboarding-approval-races-luna-20261019-attempt3/review.json",
+    "postgresLog": "../../outputs/m2-2c-coverage-cancel-onboarding-approval-races-luna-20261019-attempt3/postgres.log",
+    "reportContains": "Full before, winner-only, first-attempt, retry/replay, and final snapshots; SQLSTATEs, blocker PIDs, full responses, receipts, audits, fences, assignments, tasks, plans, bindings, sessions, and duplicate-count assertions."
+  },
+  "focusedCases": [
+    {
+      "order": "cancel-first",
+      "isolation": "read committed/read committed",
+      "distinctAuthorizedAal2Chiefs": true,
+      "blockedByPid": true,
+      "winnerSQLSTATE": "00000",
+      "loserSQLSTATE": "40001",
+      "newSessionApprovalRetrySQLSTATE": "00000",
+      "approvalResponseEqualsReceipt": true,
+      "cancelReceipt": "cancel_task_coverage; args {binding, reason}; result {}",
+      "final": { "activationPerLine": 1, "assignment": 1, "occurrence": 1, "cancelledOriginalBinding": 1, "approvalReceipts": 1, "cancelReceipts": 1, "auditPerAction": 1 }
+    },
+    {
+      "order": "approve-first",
+      "isolation": "read committed/read committed",
+      "distinctAuthorizedAal2Chiefs": true,
+      "blockedByPid": true,
+      "winnerSQLSTATE": "00000",
+      "loserSQLSTATE": "00000",
+      "winnerOnlySnapshotProvesOriginalTaskAssignmentBindingPlanAndSessionsUnchanged": true,
+      "newSessionExactCancelReplaySQLSTATE": "00000",
+      "voidResponseAndReceiptReplayEqual": true,
+      "replayLeavesSnapshotUnchanged": true,
+      "approvalResponseEqualsReceipt": true,
+      "cancelReceipt": "cancel_task_coverage; args {binding, reason}; result {}",
+      "final": { "activationPerLine": 1, "assignment": 1, "occurrence": 1, "cancelledOriginalBinding": 1, "approvalReceipts": 1, "cancelReceipts": 1, "auditPerAction": 1 }
+    },
+    {
+      "order": "cancel-first",
+      "isolation": "repeatable read/repeatable read",
+      "distinctAuthorizedAal2Chiefs": true,
+      "blockedByPid": true,
+      "winnerSQLSTATE": "00000",
+      "loserSQLSTATE": "40001",
+      "newSessionApprovalRetrySQLSTATE": "00000",
+      "approvalResponseEqualsReceipt": true,
+      "cancelReceipt": "cancel_task_coverage; args {binding, reason}; result {}",
+      "final": { "activationPerLine": 1, "assignment": 1, "occurrence": 1, "cancelledOriginalBinding": 1, "approvalReceipts": 1, "cancelReceipts": 1, "auditPerAction": 1 }
+    },
+    {
+      "order": "approve-first",
+      "isolation": "repeatable read/repeatable read",
+      "distinctAuthorizedAal2Chiefs": true,
+      "blockedByPid": true,
+      "winnerSQLSTATE": "00000",
+      "loserSQLSTATE": "40001",
+      "newSessionCancelRetrySQLSTATE": "00000",
+      "winnerOnlySnapshotProvesOriginalTaskAssignmentBindingPlanAndSessionsUnchanged": true,
+      "approvalResponseEqualsReceipt": true,
+      "cancelReceipt": "cancel_task_coverage; args {binding, reason}; result {}",
+      "final": { "activationPerLine": 1, "assignment": 1, "occurrence": 1, "cancelledOriginalBinding": 1, "approvalReceipts": 1, "cancelReceipts": 1, "auditPerAction": 1 }
+    }
+  ],
+  "validation": {
+    "vitest": { "command": "node node_modules/vitest/vitest.mjs run --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000", "exitCode": 0, "filesPassed": 74, "testsPassed": 738, "log": "../../outputs/m2-2c-coverage-cancel-onboarding-approval-races-luna-20261019-attempt3/vitest.log" },
+    "typescript": { "command": "node node_modules/typescript/bin/tsc --noEmit", "exitCode": 0, "log": "../../outputs/m2-2c-coverage-cancel-onboarding-approval-races-luna-20261019-attempt3/tsc-build.log" },
+    "clientBuild": { "command": "node node_modules/vite/bin/vite.js build --outDir dist/client", "exitCode": 0, "log": "../../outputs/m2-2c-coverage-cancel-onboarding-approval-races-luna-20261019-attempt3/vite-build.log" },
+    "workerBuild": { "command": "node scripts/build-worker.mjs", "exitCode": 0, "log": "../../outputs/m2-2c-coverage-cancel-onboarding-approval-races-luna-20261019-attempt3/worker-build.log" },
+    "nodeSyntax": { "command": "node --check tests/review/m2-1-native-review.mjs", "exitCode": 0 },
+    "diffCheck": { "command": "git diff --check", "exitCode": 0 },
+    "runtimeNote": "npm is unavailable in this workstation; local scripts ran directly with the bundled Node runtime. No dependencies were installed."
+  },
+  "sha256": {
+    "tests/review/m2-1-native-review.mjs": "320498dc9601ce7d72feb64c34ec88b38e9dce41f324651c3e45be208d829c74",
+    "docs/architecture/M2-2C-COVERAGE-CANCEL-ONBOARDING-APPROVAL-RACES-LUNA-20261019.md": "0c2b373b7947223ff89b3d1683fff407aa686142693d70d6a2415f4a718ee6f6",
+    "supabase/migrations/202610060011_coordination_activation.sql": "9729a6800e93dedc43ab5f0840309b7c0d222343898cc8d5b43eeb4a387f4210",
+    "supabase/migrations/202610150014_operational_api.sql": "ac8cca582cf366b0cf143fd63d99c490c664b00b368eb473757017eebef26315",
+    "../../outputs/m2-2c-coverage-cancel-onboarding-approval-races-luna-20261019-attempt3/review.json": "a83766a9b9e890d64bf0c05db8e54be3d7bb41eaba55f4631d506d6fa885f27c",
+    "../../outputs/m2-2c-coverage-cancel-onboarding-approval-races-luna-20261019-attempt3/postgres.log": "4a7f84ebe7cc5c6af5e6cb56c5d9562cf6f81b5f425676996bab108d62fa914c",
+    "../../outputs/m2-2c-coverage-cancel-onboarding-approval-races-luna-20261019-attempt3/vitest.log": "3731869fad88c5f53b957709f7594b82eee0fd3dedaea8d0f0ea106c3a1c3c7a",
+    "../../outputs/m2-2c-coverage-cancel-onboarding-approval-races-luna-20261019-attempt3/tsc-build.log": "2414e97fb5e03d8039e115ff617ebb022aa374e6279841f1e8b0982118c80cc5",
+    "../../outputs/m2-2c-coverage-cancel-onboarding-approval-races-luna-20261019-attempt3/vite-build.log": "c68df7c4fd2ae30de46045a51f7efe3ec58a38caa0342284443ce15f2a03e274",
+    "../../outputs/m2-2c-coverage-cancel-onboarding-approval-races-luna-20261019-attempt3/worker-build.log": "2414e97fb5e03d8039e115ff617ebb022aa374e6279841f1e8b0982118c80cc5",
+    "../../outputs/m2-2c-coverage-cancel-onboarding-approval-races-luna-20261019-attempt3/initdb.log": "c8f499dabac7862450507dba3b9d5f74afd3280a7d42efd92df8f6d62cf8e2a5"
+  },
+  "reviewBoundary": "GPT-6.1 Sol accepted only these four local synthetic cases. Raw outputs are outside the Git root under ../../outputs and are not transported by cloning. No SQL changed or remote calls were made; this does not close M2.2C/Gate L or authorize remote migration."
+}

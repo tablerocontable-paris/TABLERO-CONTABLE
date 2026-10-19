@@ -2893,6 +2893,162 @@ try {
         const bindingId = (await observer.ok(`select id from public.task_coverage_bindings where instance_id=${lit(taskId)} and status='active';`)).at(-1); assert.match(bindingId,/^[0-9a-f-]{36}$/i,bindingId);
         return { ownerId, replacementId, taskId, bindingId };
       }
+      // Same-isolation cancellation/onboarding approval matrix. These fixtures
+      // deliberately use a one-off assignment and an instance-only binding;
+      // they must not inherit the monthly assignment from memberTask().
+      const coverageApprovalCancellationCases = [
+        { order: "cancel-first", isolation: "read committed", expectedLoser: "40001", retry: "approval" },
+        { order: "approve-first", isolation: "read committed", expectedLoser: "00000", retry: "cancel-replay" },
+        { order: "cancel-first", isolation: "repeatable read", expectedLoser: "40001", retry: "approval" },
+        { order: "approve-first", isolation: "repeatable read", expectedLoser: "40001", retry: "cancel" },
+      ];
+      for (let index = 0; index < coverageApprovalCancellationCases.length; index++) {
+        const spec = coverageApprovalCancellationCases[index], base = 53000 + index * 20;
+        const ownerId = uid(base), replacementId = uid(base + 1), assignmentId = uid(base + 2), taskId = uid(base + 3);
+        const planId = uid(base + 4), lineId = uid(base + 5), saveOp = uid(base + 6), submitOp = uid(base + 7);
+        const approvalOp = uid(base + 8), coverageApproveOp = uid(base + 9), cancelOp = uid(base + 10);
+        const cancelChief = uid(base + 11), approvalChief = uid(base + 12), reason = `M2.2C ${spec.order} ${spec.isolation} cancellation`;
+        const firstAction = spec.order === "cancel-first" ? "cancel" : "approve";
+        const winnerActor = firstAction === "cancel" ? cancelChief : approvalChief;
+        const loserActor = firstAction === "cancel" ? approvalChief : cancelChief;
+        await observer.ok(`insert into auth.users(id) values(${lit(ownerId)}),(${lit(replacementId)}),(${lit(cancelChief)}),(${lit(approvalChief)});
+          insert into public.profiles(id,organization_id,name,role,sector,branch,position) values
+            (${lit(ownerId)},${lit(org)},'M2.2C coverage approval owner ${index}','empleado','Test','Test','Test'),
+            (${lit(replacementId)},${lit(org)},'M2.2C coverage replacement ${index}','empleado','Test','Test','Test'),
+            (${lit(cancelChief)},${lit(org)},'M2.2C coverage cancel chief ${index}','jefe','Test','Test','Jefe'),
+            (${lit(approvalChief)},${lit(org)},'M2.2C coverage approval chief ${index}','jefe','Test','Test','Jefe');
+          insert into public.company_memberships(organization_id,company_id,profile_id) values
+            (${lit(org)},${lit(company)},${lit(ownerId)}),(${lit(org)},${lit(company)},${lit(replacementId)}),
+            (${lit(org)},${lit(company)},${lit(cancelChief)}),(${lit(org)},${lit(company)},${lit(approvalChief)});
+          insert into public.team_members(organization_id,team_id,profile_id) values
+            (${lit(org)},${lit(team)},${lit(ownerId)}),(${lit(org)},${lit(team)},${lit(replacementId)}),
+            (${lit(org)},${lit(team)},${lit(cancelChief)}),(${lit(org)},${lit(team)},${lit(approvalChief)});
+          insert into public.task_assignments(id,organization_id,company_id,owner_id,team_id,title,kind,weight,unit,target,frequency,start_month,due_day,checklist,start_date,end_date,interval_count,weekdays,month_day,has_deadline,due_offset_days)
+            values(${lit(assignmentId)},${lit(org)},${lit(company)},${lit(ownerId)},${lit(team)},'M2.2C covered one-off ${index}','resultado',1,null,null,'unica',date_trunc('month',${lit(scheduledOn)}::date)::date,extract(day from ${lit(scheduledOn)}::date)::integer,'[]',${lit(scheduledOn)}::date,${lit(scheduledOn)}::date,1,array[1]::smallint[],extract(day from ${lit(scheduledOn)}::date)::smallint,true,0);
+          insert into public.task_instances(id,organization_id,assignment_id,company_id,owner_id,team_id,period,scheduled_on,title,kind,weight,due_date,unit,target,checklist,status)
+            values(${lit(taskId)},${lit(org)},${lit(assignmentId)},${lit(company)},${lit(ownerId)},${lit(team)},${lit(monthPeriod)}::date,${lit(scheduledOn)}::date,'M2.2C covered one-off ${index}','resultado',1,${lit(scheduledOn)}::date,null,null,'[]','Pendiente');
+          insert into public.task_coverage_plans(id,organization_id,responsible_id,replacement_id,starts_on,ends_on,kind,created_by,sealed)
+            values(${lit(planId)},${lit(org)},${lit(ownerId)},${lit(replacementId)},${lit(scheduledOn)}::date,${lit(scheduledOn)}::date,'otra',${lit(cancelChief)},false);
+          insert into public.task_coverage_plan_instances(plan_id,organization_id,instance_id,company_id_snapshot,period_snapshot,responsibility_set_id)
+            select ${lit(planId)},${lit(org)},${lit(taskId)},${lit(company)},${lit(monthPeriod)}::date,h.set_id from public.task_responsibility_heads h where h.instance_id=${lit(taskId)};
+          update public.task_coverage_plans set sealed=true,sealed_by=${lit(cancelChief)},sealed_at=clock_timestamp() where id=${lit(planId)};`);
+        const coverageSetupActorCount = (await observer.ok(`select count(*) from public.profiles p join public.company_memberships m on m.profile_id=p.id and m.organization_id=p.organization_id and m.company_id=${lit(company)} and m.active where p.id in (${lit(cancelChief)},${lit(approvalChief)}) and p.organization_id=${lit(org)} and p.role='jefe' and p.active;`)).at(-1);
+        assert.equal(coverageSetupActorCount, "2", `two active, company-authorized chiefs required: ${coverageSetupActorCount}`);
+        await claims({ role: "authenticated", sub: cancelChief, aal: "aal2" }, cancelChief);
+        const coverageSetup = await a.query(`select public.approve_task_coverage_plan(${lit(planId)},${lit(coverageApproveOp)});`);
+        assert.equal(coverageSetup.code, "00000", JSON.stringify(coverageSetup)); await a.ok("reset role;");
+        const bindingId = (await observer.ok(`select id from public.task_coverage_bindings where plan_id=${lit(planId)} and instance_id=${lit(taskId)} and status='active';`)).at(-1);
+        assert.match(bindingId, /^[0-9a-f-]{36}$/iu, bindingId);
+        const bindingShape = (await observer.ok(`select (b.instance_id=${lit(taskId)})::text||'|'||(b.source_rule_id is null)::text||'|'||(t.assignment_id=${lit(assignmentId)})::text||'|'||a.frequency from public.task_coverage_bindings b join public.task_instances t on t.id=b.instance_id join public.task_assignments a on a.id=t.assignment_id where b.id=${lit(bindingId)};`)).at(-1);
+        assert.equal(bindingShape, "true|true|true|unica", bindingShape);
+        const draft = { ...requestDraft, lines: [{ lineId, companyId: company, teamId: team,
+          source: { type: "custom", definition: { kind: "operativa", title: `M2.2C onboarding one-off ${index}`, objective: "", sector: "Test", unit: "documentos" } },
+          schedule: { ...requestDraft.lines[0].schedule, frequency: "unica", startDate: scheduledOn, endDate: scheduledOn } }] };
+        await claims({ role: "authenticated", sub: ownerId, aal: "aal1" }, ownerId);
+        const saved = await a.query(`select api.command_v1('${JSON.stringify({ contractVersion: 1, operationId: saveOp, kind: "onboarding.saveDraft", expectedRevisions: { [`onboardingOwner:${ownerId}`]: "0" }, payload: { requestId: null, draft } }).replaceAll("'", "''")}'::jsonb);`);
+        assert.equal(saved.code, "00000", JSON.stringify(saved)); const requestId = JSON.parse(saved.lines.at(-1)).result.requestId;
+        const submitted = await a.query(`select api.command_v1('${JSON.stringify({ contractVersion: 1, operationId: submitOp, kind: "onboarding.submit", expectedRevisions: { [`onboarding:${requestId}`]: "0", [`onboardingDraft:${requestId}`]: "1" }, payload: { requestId } }).replaceAll("'", "''")}'::jsonb);`);
+        assert.equal(submitted.code, "00000", JSON.stringify(submitted)); await a.ok("reset role;");
+        const approve = { contractVersion: 1, operationId: approvalOp, kind: "onboarding.approve", expectedRevisions: { [`onboarding:${requestId}`]: "1" }, payload: { requestId, weightOverrides: [], period: monthPeriod } };
+        const approvalSql = `select api.command_v1('${JSON.stringify(approve).replaceAll("'", "''")}'::jsonb);`;
+        const cancellationSql = `select public.cancel_task_coverage_binding(${lit(bindingId)},${lit(reason)},${lit(cancelOp)});`;
+        const snapshot = async () => JSON.parse((await reviewer.ok(`select jsonb_build_object(
+          'request',(select to_jsonb(r) from public.onboarding_requests r where r.id=${lit(requestId)}),
+          'requestVersion',(select to_jsonb(v) from public.onboarding_request_versions v where v.request_id=${lit(requestId)} and v.revision=1),
+          'sourceAssignment',(select to_jsonb(a) from public.task_assignments a where a.id=${lit(assignmentId)}),
+          'sourceTask',(select to_jsonb(t) from public.task_instances t where t.id=${lit(taskId)}),
+          'coveragePlan',(select to_jsonb(p) from public.task_coverage_plans p where p.id=${lit(planId)}),
+          'coveragePlanInstance',(select to_jsonb(pi) from public.task_coverage_plan_instances pi where pi.plan_id=${lit(planId)} and pi.instance_id=${lit(taskId)}),
+          'binding',(select to_jsonb(b) from public.task_coverage_bindings b where b.id=${lit(bindingId)}),
+          'sessions',(select coalesce(jsonb_agg(to_jsonb(s) order by s.id),'[]'::jsonb) from public.task_time_sessions s where s.instance_id=${lit(taskId)} or s.coverage_binding_id=${lit(bindingId)}),
+          'activations',(select coalesce(jsonb_agg(to_jsonb(x) order by x.line_id),'[]'::jsonb) from public.onboarding_activations x where x.request_id=${lit(requestId)}),
+          'onboardingAssignments',(select coalesce(jsonb_agg(to_jsonb(a) order by a.id),'[]'::jsonb) from public.onboarding_activations x join public.task_assignments a on a.id=x.assignment_id where x.request_id=${lit(requestId)}),
+          'onboardingTasks',(select coalesce(jsonb_agg(to_jsonb(t) order by t.id),'[]'::jsonb) from public.onboarding_activations x join public.task_assignments a on a.id=x.assignment_id join public.task_instances t on t.assignment_id=a.id and t.period=${lit(monthPeriod)}::date where x.request_id=${lit(requestId)}),
+          'approvalReceipts',(select coalesce(jsonb_agg(to_jsonb(r) order by r.operation_id),'[]'::jsonb) from app_private.api_command_receipts r where r.actor_id=${lit(approvalChief)} and r.operation_id=${lit(approvalOp)}),
+          'cancellationReceipts',(select coalesce(jsonb_agg(to_jsonb(r) order by r.operation_id),'[]'::jsonb) from public.task_mutation_receipts r where r.actor_id=${lit(cancelChief)} and r.operation_id=${lit(cancelOp)}),
+          'monthFence',(select coalesce(jsonb_agg(to_jsonb(f) order by f.period),'[]'::jsonb) from app_private.api_month_fences f where f.organization_id=${lit(org)} and f.owner_id=${lit(ownerId)} and f.period=${lit(monthPeriod)}::date),
+          'dependencyFence',(select to_jsonb(g) from app_private.task_dependency_graphs g where g.organization_id=${lit(org)} and g.company_id=${lit(company)} and g.period=${lit(monthPeriod)}::date),
+          'audit',(select coalesce(jsonb_agg(to_jsonb(e) order by e.at,e.id),'[]'::jsonb) from public.audit_events e where e.entity_id in (${lit(requestId)},${lit(taskId)},${lit(bindingId)}) and e.actor_id in (${lit(cancelChief)},${lit(approvalChief)}) and e.action in ('onboarding.approved','task.coverage_cancelled'))
+        )::text;`)).at(-1));
+        const before = await snapshot(); assert.equal(before.request.status, "submitted"); assert.equal(before.binding.status, "active");
+        assert.equal(before.binding.source_rule_id, null); assert.equal(before.activations.length, 0); assert.equal(before.sessions.length, 0);
+        assert.equal(before.sourceAssignment.frequency, "unica"); assert.equal(before.coveragePlan.sealed, true);
+        const winner = firstAction === "cancel" ? a : a, loser = b;
+        const winnerSql = firstAction === "cancel" ? cancellationSql : approvalSql, loserSql = firstAction === "cancel" ? approvalSql : cancellationSql;
+        const setAal2Actor = async (session, actorId) => session.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(actorId)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: actorId, aal: "aal2" }))},false);set role authenticated;`);
+        await setAal2Actor(winner, winnerActor); await winner.ok(`begin isolation level ${spec.isolation};`);
+        const winnerIsolation = (await winner.ok("show transaction_isolation;")).at(-1); assert.equal(winnerIsolation, spec.isolation);
+        const winnerPid = Number((await winner.ok("select pg_backend_pid();")).at(-1));
+        const winnerPending = winner.query(winnerSql); const winnerResult = await winnerPending;
+        if (winnerResult.code !== "00000") throw Error(`M2.2C coverage cancellation race winner diverged before blocker: ${spec.order}/${spec.isolation}, ${winnerResult.code}: ${winnerResult.errors}`);
+        await setAal2Actor(loser, loserActor); await loser.ok(`begin isolation level ${spec.isolation};select status from public.onboarding_requests where id=${lit(requestId)};select state_revision from public.task_instances where id=${lit(taskId)};`);
+        const loserIsolation = (await loser.ok("show transaction_isolation;")).at(-1); assert.equal(loserIsolation, spec.isolation);
+        const loserPid = Number((await loser.ok("select pg_backend_pid();")).at(-1)); const loserPending = loser.query(loserSql);
+        let blocked = false; const deadline = Date.now() + 10000;
+        while (Date.now() < deadline) { if ((await reviewer.ok(`select ${winnerPid}=any(pg_catalog.pg_blocking_pids(${loserPid}));`)).at(-1) === "t") { blocked = true; break; } await new Promise(done => setTimeout(done, 20)); }
+        const blockerPids = (await reviewer.ok(`select pg_catalog.pg_blocking_pids(${loserPid})::text;`)).at(-1);
+        if (!blocked) { await winner.ok("commit;"); const loserResult = await loserPending; await loser.ok("rollback;"); const diag = { spec, before, winner: { sqlstate: winnerResult.code, response: winnerResult.lines.at(-1) }, loser: { sqlstate: loserResult.code, errors: loserResult.errors }, blocked, blockerPids, after: await snapshot() }; writeFileSync(join(out, `m2-2c-coverage-cancel-approval-race-${index}-diagnostic.json`), JSON.stringify(diag, null, 2)); record(`M2.2C coverage cancellation race missing real blocker ${spec.order}/${spec.isolation}`, false, diag); throw Error(`M2.2C coverage race did not block for ${spec.order}/${spec.isolation}`); }
+        await winner.ok("commit;"); const loserResult = await loserPending; const afterWinnerCommit = await snapshot();
+        if (loserResult.code !== spec.expectedLoser) {
+          await loser.ok("rollback;"); const diag = { spec, actors: { cancelChief, approvalChief, winnerActor, loserActor }, isolation: { winner: winnerIsolation, loser: loserIsolation }, pids: { winnerPid, loserPid, blockerPids }, before, winner: { sqlstate: winnerResult.code, response: winnerResult.lines.at(-1) }, loser: { sqlstate: loserResult.code, errors: loserResult.errors, response: loserResult.lines.at(-1) }, afterWinnerCommit, afterRollback: await snapshot(), postgresLog: join(out, "postgres.log") };
+          writeFileSync(join(out, `m2-2c-coverage-cancel-approval-race-${index}-diagnostic.json`), JSON.stringify(diag, null, 2)); record(`M2.2C coverage cancellation race unexpected loser outcome ${spec.order}/${spec.isolation}`, false, diag); throw Error(`M2.2C fixed SQLSTATE mismatch ${spec.order}/${spec.isolation}: expected ${spec.expectedLoser}, observed ${loserResult.code}`);
+        }
+        let retryResult = null, retryConnection = null, replayResult = null, afterFirstAttempt = afterWinnerCommit;
+        if (spec.expectedLoser === "40001") await loser.ok("rollback;"); else await loser.ok("commit;");
+        afterFirstAttempt = await snapshot();
+        if (firstAction === "cancel") {
+          assert.equal(afterFirstAttempt.request.status, "submitted"); assert.equal(afterFirstAttempt.binding.status, "cancelled");
+          assert.equal(afterFirstAttempt.activations.length, 0); assert.equal(afterFirstAttempt.approvalReceipts.length, 0);
+        } else {
+          assert.equal(afterWinnerCommit.request.status, "approved"); assert.equal(afterWinnerCommit.binding.status, "active");
+          assert.equal(afterWinnerCommit.activations.length, 1); assert.equal(afterWinnerCommit.approvalReceipts.length, 1);
+          assert.deepEqual(afterWinnerCommit.sourceTask, before.sourceTask); assert.deepEqual(afterWinnerCommit.sourceAssignment, before.sourceAssignment);
+          assert.deepEqual(afterWinnerCommit.binding, before.binding); assert.deepEqual(afterWinnerCommit.coveragePlan, before.coveragePlan);
+          assert.deepEqual(afterWinnerCommit.coveragePlanInstance, before.coveragePlanInstance); assert.deepEqual(afterWinnerCommit.sessions, before.sessions);
+        }
+        const retrySession = new Session(); auxiliarySessions.push(retrySession);
+        await retrySession.ok("\\set VERBOSITY verbose\nset statement_timeout='15s';");
+        const retryActor = spec.retry === "approval" ? approvalChief : cancelChief;
+        await setAal2Actor(retrySession, retryActor);
+        await retrySession.ok(`begin isolation level ${spec.isolation};`);
+        if (spec.retry === "approval") {
+          retryResult = await retrySession.query(approvalSql); assert.equal(retryResult.code, "00000", JSON.stringify(retryResult)); await retrySession.ok("commit;");
+        } else if (spec.retry === "cancel") {
+          retryResult = await retrySession.query(cancellationSql); assert.equal(retryResult.code, "00000", JSON.stringify(retryResult)); await retrySession.ok("commit;");
+        } else {
+          replayResult = await retrySession.query(cancellationSql); assert.equal(replayResult.code, "00000", JSON.stringify(replayResult));
+          assert.deepEqual(replayResult.lines, loserResult.lines, "void cancellation exact replay must return the same empty response");
+          await retrySession.ok("commit;");
+        }
+        await retrySession.ok("reset role;"); await retrySession.close(); auxiliarySessions.splice(auxiliarySessions.indexOf(retrySession), 1);
+        const afterRetry = await snapshot();
+        if (spec.retry === "cancel-replay") assert.deepEqual(afterRetry, afterFirstAttempt, "void cancellation replay must be inert");
+        const approvalEnvelope = JSON.parse((firstAction === "approve" ? winnerResult : retryResult).lines.at(-1));
+        const approvalReceipt = afterRetry.approvalReceipts[0]; assert.equal(afterRetry.approvalReceipts.length, 1);
+        assert.deepEqual(approvalEnvelope, approvalReceipt.result, "full onboarding.approve response must equal its durable receipt result");
+        const cancelReceipt = afterRetry.cancellationReceipts[0]; assert.equal(afterRetry.cancellationReceipts.length, 1);
+        assert.equal(cancelReceipt.operation_kind, "cancel_task_coverage"); assert.equal(cancelReceipt.actor_id, cancelChief); assert.equal(cancelReceipt.operation_id, cancelOp);
+        assert.deepEqual(cancelReceipt.arguments, { binding: bindingId, reason: reason }); assert.deepEqual(cancelReceipt.result, {});
+        assert.equal(afterRetry.request.status, "approved"); assert.equal(afterRetry.activations.length, 1); assert.equal(afterRetry.activations[0].line_id, lineId);
+        assert.equal(afterRetry.onboardingAssignments.length, 1); assert.equal(afterRetry.onboardingTasks.length, 1);
+        assert.equal(afterRetry.binding.status, "cancelled"); assert.equal(afterRetry.binding.cancelled_by, cancelChief);
+        assert.equal(afterRetry.sessions.length, 0); assert.equal(afterRetry.audit.filter(e => e.action === "task.coverage_cancelled" && e.entity_id === bindingId).length, 1);
+        assert.equal(afterRetry.audit.filter(e => e.action === "onboarding.approved" && e.entity_id === requestId).length, 1);
+        const final = { activationCount: afterRetry.activations.length, assignments: afterRetry.onboardingAssignments.length, occurrences: afterRetry.onboardingTasks.length,
+          cancelledBindings: afterRetry.binding.status === "cancelled" ? 1 : 0, approvalReceipts: afterRetry.approvalReceipts.length, cancellationReceipts: afterRetry.cancellationReceipts.length,
+          cancellationAuditEvents: afterRetry.audit.filter(e => e.action === "task.coverage_cancelled" && e.entity_id === bindingId).length,
+          approvalAuditEvents: afterRetry.audit.filter(e => e.action === "onboarding.approved" && e.entity_id === requestId).length };
+        assert.deepEqual(final, { activationCount: 1, assignments: 1, occurrences: 1, cancelledBindings: 1, approvalReceipts: 1, cancellationReceipts: 1, cancellationAuditEvents: 1, approvalAuditEvents: 1 });
+        record(`M2.2C coverage cancellation vs onboarding approval ${spec.order} (${spec.isolation}/${spec.isolation})`, true, {
+          spec, actors: { cancelChief, approvalChief, distinctAal2Chiefs: cancelChief !== approvalChief }, actualIsolation: { winner: winnerIsolation, loser: loserIsolation },
+          backendPids: { winner: winnerPid, loser: loserPid }, blockerPids, blocked, before, winner: { sqlstate: winnerResult.code, response: winnerResult.lines.at(-1) },
+          loser: { sqlstate: loserResult.code, response: loserResult.lines.at(-1), errors: loserResult.errors }, afterWinnerCommit, afterFirstAttempt,
+          retry: retryResult ? { connection: "new PostgreSQL session", sqlstate: retryResult.code, response: retryResult.lines.at(-1) } : null,
+          exactVoidReplay: replayResult ? { connection: "new PostgreSQL session", sqlstate: replayResult.code, response: replayResult.lines, inert: true } : null,
+          approvalEnvelope, approvalReceipt, cancellationVoid: { sqlstate: firstAction === "cancel" ? winnerResult.code : (loserResult.code === "00000" ? loserResult.code : retryResult.code), receipt: cancelReceipt }, after: afterRetry, final,
+        });
+        await a.ok("reset role;"); await b.ok("reset role;");
+      }
       async function transitionReceiptFor(taskId, opId, executorId) {
         const command = { contractVersion: 1, operationId: opId, kind: "task.transition", expectedRevisions: { [`task:${taskId}`]: "0" }, payload: { taskId, status: "En curso", reason: null, confirmCommercialCompletion: false } };
         await claims({ role: "authenticated", sub: executorId, aal: "aal1" }, executorId);
