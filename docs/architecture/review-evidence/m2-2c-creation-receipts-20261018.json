@@ -1,0 +1,86 @@
+{
+  "scope": "M2.2C creation receipt authorization; local repository only",
+  "recordedAt": "2026-10-18",
+  "sourceCommit": "b520b52a2bb8ae53c931cf22493bf6d17dea8c13",
+  "hostedSupabaseModified": false,
+  "migrationApplied": false,
+  "changes": [
+    {
+      "file": "supabase/migrations/202610150014_operational_api.sql",
+      "sha256": "7041600cb4283c7159e53c5d92265ce4981f4e4c7276eb3e4d87663530a7214c"
+    },
+    {
+      "file": "tests/m2-2c-contract.test.ts",
+      "sha256": "ca030c81246eb27d74f2281216cfa40e8e0e32e38004f235a3f418f94092300c"
+    },
+    {
+      "file": "tests/review/m2-1-native-review.mjs",
+      "sha256": "efb3808657ed7d5d388cd294217956d969cf8b6d20ae39ef2eb431b23effcf38"
+    }
+  ],
+  "nativePostgres": {
+    "report": "../outputs/m2-2c-creation-receipts-20261018-r10/review.json",
+    "reportSha256": "48c1f310d32c9047cdebcdf524737bd4af965440cd0f888307ba61075877997e",
+    "engine": "PostgreSQL 17.11",
+    "runnerCommand": "node tests/review/m2-1-native-review.mjs --pg-bin ../pg-runtime/pgsql/bin --output-dir ../outputs/m2-2c-creation-receipts-20261018-r10 --port 55643 --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes",
+    "result": {
+      "total": 168,
+      "passed": 168,
+      "failed": 0,
+      "sqlstate40P01": 0,
+      "migration014Sha256": "7041600cb4283c7159e53c5d92265ce4981f4e4c7276eb3e4d87663530a7214c"
+    },
+    "newCoverage": {
+      "assignmentCommandReceiptMembershipRace": 8,
+      "monthMaterializeReplayAndCommandReceiptOwnerLivenessRace": 16,
+      "isolationPairs": [
+        "read committed/read committed",
+        "repeatable read/repeatable read",
+        "read committed/repeatable read",
+        "repeatable read/read committed"
+      ],
+      "raceDirections": [
+        "reader first",
+        "writer first"
+      ],
+      "assertions": [
+        "synthetic second active chief reads receipts without company/team membership",
+        "assignment receipt rechecks active owner membership and team_members",
+        "month exact replay and commandReceipt require active jefe AAL2 plus active employee owner but no company/team membership",
+        "reader-first coordination holds distinct-chief writes until read completes",
+        "writer-first stale repeatable-read reads return 40001 and fresh retry returns 42501",
+        "read-only snapshots stay unchanged"
+      ]
+    }
+  },
+  "focusedContractTest": {
+    "command": "node node_modules/vitest/vitest.mjs run tests/m2-2c-contract.test.ts --maxWorkers=1 --testTimeout=30000 --hookTimeout=30000",
+    "result": {
+      "exitCode": 0,
+      "filesPassed": 1,
+      "testsPassed": 20,
+      "testsFailed": 0,
+      "durationSeconds": 54.81
+    }
+  },
+  "staticChecks": {
+    "typescript": {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "exitCode": 0
+    },
+    "runnerSyntax": {
+      "command": "node --check tests/review/m2-1-native-review.mjs",
+      "exitCode": 0
+    },
+    "diffCheck": {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "note": "Only Git LF-to-CRLF working-copy warnings."
+    }
+  },
+  "limits": [
+    "This is local synthetic database evidence only; no hosted Supabase Auth, HTTP, or project integration was exercised.",
+    "Migration 014 remains unapplied; migrations 001-013 and the operational Worker were not changed.",
+    "This closes only the specified creation-receipt family for independent review; it does not claim M2.2C or Gate L complete."
+  ]
+}

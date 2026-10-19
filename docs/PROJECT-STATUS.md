@@ -1,5 +1,13 @@
 # Estado general de la migración — actualización 18/10/2026
 
+**Corte local aceptado por Sol (acotado):** `assignment.create commandReceipt`, `month.materialize commandReceipt` y replay exacto `month.materialize`. Sin P0–P2; Gate L/M2.2C continúa abierto. Evidencia `docs/architecture/review-evidence/m2-2c-creation-receipts-20261018.json`: PostgreSQL 17.11 **168/168**, 40P01=0; focal **20/20**; sonda independiente Sol **39/39**; la sonda no quedó guardada como runner reproducible. Suite completa **736/736 en 74 archivos** terminó código 0 sobre el hash final; TypeScript y builds cliente/Worker código 0; `git diff --check` código 0. SQL014 SHA256 `7041600cb4283c7159e53c5d92265ce4981f4e4c7276eb3e4d87663530a7214c`. Aún no comprometido ni publicado.
+
+**Siguiente:** commit y push directo a `main` sin PR. Después implementar con Luna el bloque definido por Sol: replay exacto y `commandReceipt` de `onboarding.approve`, con revisión de la versión enviada original, propietario activo, membresías/ equipos vigentes, locks de sólo lectura y snapshots sin escrituras. Mantener `onboarding.requestChanges` para su bloque separado. No aplicar SQL014; Supabase dev permanece vacío hasta completar el ajuste de Data API y Gate L.
+
+**Infraestructura sin cambios:** GitHub remoto `main` sigue en el checkpoint previo `b520b52a2bb8ae53c931cf22493bf6d17dea8c13`; push Actions no verificable con el conector actual. Supabase dev `grupo-paris-dev` sigue activo/vacío; autoexposición debe apagarse. No hay hosting Cloudflare ni correo productivo conectados, y no existe Supabase de producción. Site privado, datos ficticios.
+
+# Estado general de la migración — actualización 18/10/2026
+
 **Checkpoint remoto:** el repo privado `tablerocontable-paris/TABLERO-CONTABLE` tiene publicado en `main` el corte funcional `5803b1e4434cfc46a4ab64a26da3f76ab9d12d3d`, autoría Tablero Contable y push directo sin PR; después se publicaron sincronizaciones documentales. El push está confirmado. No se pudo verificar Actions para el evento push: el conector sólo devuelve runs de pull request. El run 18 exitoso es de un SHA anterior.
 
 **Último corte publicado:** Sol aceptó el arreglo de `assignment.create` exact replay tras revocación. Evidencia `docs/architecture/review-evidence/m2-2c-assignment-replay-20261018.json`; PostgreSQL 17.11 144/144, `40P01=0`; Vitest focal 19/19 y suite 735/735; TypeScript, build de cliente y Worker, `node --check` y `git diff --check` aprobados. Revalida jefe AAL2, empleado activo, membresía de empresa y equipo antes de devolver el recibo; argumentos distintos conservan `40001`. Sol lo aceptó en alcance local acotado; dejó P3 no bloqueante: la carrera usa el mismo jefe en ambas sesiones y no aísla lock de actor vs lock de membresía.

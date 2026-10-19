@@ -2225,6 +2225,12 @@ begin
    if existing.kind<>kind_v or existing.arguments is distinct from args then raise exception using errcode='40001',message='Identificador de operación ya utilizado'; end if;
    if existing.organization_id<>org then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
   end if;
+ elsif kind_v='month.materialize' then
+  select * into existing from app_private.api_command_receipts where actor_id=actor and operation_id=op;
+  if existing.actor_id is not null then
+   if existing.kind<>kind_v or existing.arguments is distinct from args then raise exception using errcode='40001',message='Identificador de operación ya utilizado'; end if;
+   if existing.organization_id<>org then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
+  end if;
  end if;
  c:=app_private.api_require_business(false);
  if (c->'principal'->>'organizationId')::uuid<>org then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
@@ -2283,6 +2289,25 @@ begin
    perform 1 from public.team_members tm
     where tm.organization_id=org and tm.profile_id=owner_v and tm.team_id=team_v for share;
    if not found then raise exception using errcode='42501',message='La empresa o el equipo no está asignado'; end if;
+  elsif kind_v='month.materialize' then
+   period_v:=app_private.api_date(payload,'period');
+   if extract(day from period_v)<>1 then raise exception using errcode='22023',message='Período inválido'; end if;
+   -- Historical replay is an authorized read: lock actor/owner profiles and
+   -- owner-period only. Do not request a materialize scope or write fences.
+   months:=jsonb_build_array(jsonb_build_object('ownerId',owner_v,'period',period_v));
+   plan:=public._coordination_prepare('{}'::uuid[],array[actor],array[actor,owner_v],months,array[]::text[],'{}'::jsonb);
+   perform app_private._coordination_acquire_m22b(plan,false);
+   c:=app_private.api_require_business(false);
+   if (c->'principal'->>'organizationId')::uuid<>org
+      or c->'principal'->>'role'<>'jefe' or c->'authentication'->>'aal'<>'aal2'
+      or not exists(select 1 from public.profiles p where p.id=actor and p.organization_id=org and p.active and p.role='jefe') then
+    raise exception using errcode='42501',message='Contexto no autorizado';
+   end if;
+   select p.active,p.role into owner_active,owner_role from public.profiles p
+    where p.id=owner_v and p.organization_id=org for share;
+   if not found or not owner_active or owner_role<>'empleado' then
+    raise exception using errcode='42501',message='El responsable no está activo';
+   end if;
   else
    perform 1 from public.profiles p where p.id=actor and p.organization_id=org and p.active for share;
    if not found then raise exception using errcode='42501',message='Contexto no autorizado'; end if;
@@ -2531,6 +2556,45 @@ begin
    perform 1 from public.team_members tm where tm.organization_id=org
     and tm.profile_id=receipt_owner and tm.team_id=receipt_team for share;
    if not found then raise exception using errcode='42501',message='Consulta no disponible'; end if;
+   return jsonb_build_object('contractVersion',1,'kind',k,'data',jsonb_build_object('found',true,'command',receipt.result));
+  end if;
+  if receipt.kind in ('assignment.create','month.materialize') then
+   receipt_owner:=app_private.api_uuid(receipt.arguments->'payload','ownerId');
+   if receipt.organization_id<>org then return jsonb_build_object('contractVersion',1,'kind',k,'data',jsonb_build_object('found',false)); end if;
+   if receipt.kind='assignment.create' then
+    receipt_company:=app_private.api_uuid(receipt.arguments->'payload','companyId');
+    receipt_team:=app_private.api_uuid(receipt.arguments->'payload','teamId');
+    receipt_period:=date_trunc('month',app_private.api_date(receipt.arguments->'payload'->'schedule','startDate'))::date;
+    receipt_scopes:=array['membership:'||receipt_company::text||':'||receipt_owner::text];
+   else
+    receipt_period:=app_private.api_date(receipt.arguments->'payload','period');
+    if extract(day from receipt_period)<>1 then raise exception using errcode='42501',message='Consulta no disponible'; end if;
+    receipt_scopes:=array[]::text[];
+   end if;
+   receipt_plan:=public._coordination_prepare('{}'::uuid[],array[actor],array[actor,receipt_owner],
+    jsonb_build_array(jsonb_build_object('ownerId',receipt_owner,'period',receipt_period)),receipt_scopes,
+    case when receipt.kind='assignment.create' then jsonb_build_object('membership',receipt_owner,'company',receipt_company) else '{}'::jsonb end);
+   perform app_private._coordination_acquire_m22b(receipt_plan,false);
+   perform app_private.api_revalidate_actor(actor,c);
+   role_v:=c->'principal'->>'role';
+   select * into receipt from app_private.api_command_receipts where actor_id=actor and operation_id=op;
+   if not found or receipt.organization_id<>org or receipt.kind not in ('assignment.create','month.materialize') then
+    return jsonb_build_object('contractVersion',1,'kind',k,'data',jsonb_build_object('found',false));
+   end if;
+   if role_v<>'jefe' or c->'authentication'->>'aal'<>'aal2' then raise exception using errcode='42501',message='Consulta no disponible'; end if;
+   perform 1 from public.profiles p where p.id=actor and p.organization_id=org and p.active and p.role='jefe' for share;
+   if not found then raise exception using errcode='42501',message='Consulta no disponible'; end if;
+   select p.active,p.role into owner_active,owner_role from public.profiles p
+    where p.id=receipt_owner and p.organization_id=org for share;
+   if not found or not owner_active or owner_role<>'empleado' then raise exception using errcode='42501',message='Consulta no disponible'; end if;
+   if receipt.kind='assignment.create' then
+    perform 1 from public.company_memberships cm where cm.organization_id=org
+     and cm.profile_id=receipt_owner and cm.company_id=receipt_company and cm.active for share;
+    if not found then raise exception using errcode='42501',message='Consulta no disponible'; end if;
+    perform 1 from public.team_members tm where tm.organization_id=org
+     and tm.profile_id=receipt_owner and tm.team_id=receipt_team for share;
+    if not found then raise exception using errcode='42501',message='Consulta no disponible'; end if;
+   end if;
    return jsonb_build_object('contractVersion',1,'kind',k,'data',jsonb_build_object('found',true,'command',receipt.result));
   end if;
   if receipt.organization_id<>org or receipt.kind not in ('onboarding.saveDraft','onboarding.submit','onboarding.requestChanges','onboarding.approve','assignment.create','task.createOneOff','month.materialize') then return null; end if;

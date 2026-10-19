@@ -1,5 +1,13 @@
 # Estado operativo y precedencia — actualización 18/10/2026
 
+**Último corte local aceptado por GPT-6.1 Sol:** autorización de `assignment.create commandReceipt`, `month.materialize commandReceipt` y replay exacto `month.materialize`; aceptación acotada, sin P0–P2 y sin cerrar M2.2C/Gate L. Evidencia `docs/architecture/review-evidence/m2-2c-creation-receipts-20261018.json` (PostgreSQL 17.11 168/168, 40P01=0; focal Vitest 20/20; sonda Sol independiente 39/39). SQL014 SHA256 `7041600cb4283c7159e53c5d92265ce4981f4e4c7276eb3e4d87663530a7214c`. Suite completa 736/736, TypeScript y builds cliente/Worker pasaron sobre el mismo corte funcional; el argumento de scope corregido fue revalidado en focal y PostgreSQL. Aún sin commit/push.
+
+**Validación final:** suite completa sobre el hash final 736/736 en 74 archivos; TypeScript y builds cliente/Worker código 0; PostgreSQL 17.11 168/168 sin deadlocks; focal 20/20; `git diff --check` código 0. El código y su evidencia ya están aceptados localmente. Acción inmediata: commit y push directo a `main`, sin PR. Después Luna implementa el contrato Sol de `onboarding.approve` replay exacto + `commandReceipt`. No aplicar SQL014: Supabase dev sigue vacío y su configuración de exposición debe corregirse/prevalidarse primero. No tocar datos reales, cuentas de producción ni el Site público.
+
+El conector GitHub no confirma los runs de Actions de eventos push; no presentar un run de otro SHA como comprobación. Mantener separado SQL014 del Worker/D1. El resto del historial de este archivo conserva su valor histórico.
+
+# Estado operativo y precedencia — actualización 18/10/2026
+
 Este bloque tiene precedencia sobre el historial más abajo. GitHub privado
 `tablerocontable-paris/TABLERO-CONTABLE` tiene publicado en `main` el corte
 funcional `5803b1e4434cfc46a4ab64a26da3f76ab9d12d3d`, seguido de sincronización

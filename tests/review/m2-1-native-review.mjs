@@ -1104,6 +1104,150 @@ try {
         assert.equal((await observer.ok(snapshotSql)).at(-1), afterRevocation, "denied/mismatched replay must preserve post-revocation read-only state");
         record("M2.2C exact assignment replay is read-only, serializes before membership revoke, and denies replay after revoke", true, { createSQLSTATE: assignmentCreated.code, replaySQLSTATE: replaySuccess.code, replayReadOnlyBeforeRevoke: beforeReplay, revokerBlockedByReplay: replayBlockedRevocation, revokeSQLSTATE: revoked.code, revokedState: afterRevocation, exactReplayAfterRevokeSQLSTATE: deniedReplay.code, argumentMismatchSQLSTATE: mismatchResult.code, stateUnchangedByDeniedReplays: true });
       }
+      {
+        const makeReceiptFixture = async (seed) => {
+          const chief = uid(seed), ownerId = uid(seed + 1), opId = uid(seed + 2), revokeId = uid(seed + 3);
+          await observer.ok(`insert into auth.users(id) values(${lit(chief)}),(${lit(ownerId)});insert into public.profiles(id,organization_id,name,role,sector,branch,position) values(${lit(chief)},${lit(org)},'M2.2C receipt chief','jefe','Test','Test','Test'),(${lit(ownerId)},${lit(org)},'M2.2C receipt owner','empleado','Test','Test','Test');insert into public.company_memberships(organization_id,company_id,profile_id) values(${lit(org)},${lit(company)},${lit(ownerId)});insert into public.team_members(organization_id,team_id,profile_id) values(${lit(org)},${lit(team)},${lit(ownerId)});`);
+          const command = { contractVersion: 1, operationId: opId, kind: "assignment.create", expectedRevisions: { [`creation:${ownerId}`]: "0", [`catalogue:${JSON.parse(standardCall.lines.at(-1)).result.templateId}`]: "1" }, payload: { ownerId, companyId: company, teamId: team, source: { type: "catalogue", templateVersionId: standardVersionId }, schedule: { frequency: "mensual", startDate: scheduledOn, endDate: null, interval: 1, weekdays: [], monthDay: dayOfMonth, hasDeadline: true, dueOffsetDays: 0 } } };
+          await claims({ role: "authenticated", sub: chief, aal: "aal2" }, chief);
+          const created = await a.query(`select api.command_v1('${JSON.stringify(command).replaceAll("'", "''")}'::jsonb);`);
+          assert.equal(created.code, "00000", JSON.stringify(created));
+          const receipt = { contractVersion: 1, kind: "commandReceipt", filters: { operationId: opId }, cursor: null, limit: 1 };
+          const revoke = { contractVersion: 1, operationId: revokeId, kind: "companyMembership.setActive", expectedRevisions: { [`membership:${company}:${ownerId}`]: "0" }, payload: { companyId: company, profileId: ownerId, active: false, reason: "Creation receipt race" } };
+          const snapshotSql = `select jsonb_build_object(
+            'profiles',(select coalesce(jsonb_agg(to_jsonb(p) order by p.id),'[]'::jsonb) from public.profiles p where p.id in (${lit(chief)},${lit(ownerId)})),
+            'memberships',(select coalesce(jsonb_agg(to_jsonb(m) order by m.company_id,m.profile_id),'[]'::jsonb) from public.company_memberships m where m.organization_id=${lit(org)} and m.profile_id=${lit(ownerId)}),
+            'teamMembers',(select coalesce(jsonb_agg(to_jsonb(t) order by t.team_id,t.profile_id),'[]'::jsonb) from public.team_members t where t.organization_id=${lit(org)} and t.profile_id=${lit(ownerId)}),
+            'assignments',(select coalesce(jsonb_agg(to_jsonb(x) order by x.id),'[]'::jsonb) from public.task_assignments x where x.organization_id=${lit(org)} and x.owner_id=${lit(ownerId)}),
+            'instances',(select coalesce(jsonb_agg(to_jsonb(x) order by x.id),'[]'::jsonb) from public.task_instances x where x.organization_id=${lit(org)} and x.owner_id=${lit(ownerId)}),
+            'head',(select to_jsonb(h) from app_private.api_creation_heads h where h.organization_id=${lit(org)} and h.owner_id=${lit(ownerId)}),
+            'monthFences',(select coalesce(jsonb_agg(to_jsonb(f) order by f.period),'[]'::jsonb) from app_private.api_month_fences f where f.organization_id=${lit(org)} and f.owner_id=${lit(ownerId)}),
+            'membershipFences',(select coalesce(jsonb_agg(to_jsonb(f) order by f.profile_id),'[]'::jsonb) from app_private.api_membership_fences f where f.organization_id=${lit(org)} and f.profile_id=${lit(ownerId)}),
+            'operationFences',(select coalesce(jsonb_agg(to_jsonb(f) order by f.actor_id,f.operation_id),'[]'::jsonb) from app_private.api_operation_fences f where f.actor_id=${lit(chief)}),
+            'receipt',(select to_jsonb(r) from app_private.api_command_receipts r where r.actor_id=${lit(chief)} and r.operation_id=${lit(opId)}),
+            'audit',(select coalesce(jsonb_agg(to_jsonb(x) order by x.id),'[]'::jsonb) from public.audit_events x where x.actor_id=${lit(chief)} and x.action='assignment.create'),
+            'membershipEvents',(select coalesce(jsonb_agg(to_jsonb(x) order by x.id),'[]'::jsonb) from app_private.company_membership_events x where x.company_id=${lit(company)} and x.profile_id=${lit(ownerId)})
+          );`;
+          return { chief, ownerId, command, receipt, revoke, snapshotSql };
+        };
+        const readIsolation = ["read committed", "repeatable read"];
+        const matrixPairs = [["read committed", "read committed"], ["repeatable read", "repeatable read"], ["read committed", "repeatable read"], ["repeatable read", "read committed"]];
+        const waitBlocked = async (blockedPid, blockerPid) => {
+          const until = Date.now() + 10000;
+          while (Date.now() < until) {
+            if ((await reviewer.ok(`select ${blockerPid}=any(pg_catalog.pg_blocking_pids(${blockedPid}));`)).at(-1) === "t") return true;
+            await new Promise(done => setTimeout(done, 20));
+          }
+          return false;
+        };
+        let raceNo = 0;
+        for (const [readerIsolation, revokerIsolation] of matrixPairs) {
+          const f = await makeReceiptFixture(15100 + raceNo++ * 10);
+          const before = (await observer.ok(f.snapshotSql)).at(-1);
+          await claims({ role: "authenticated", sub: f.chief, aal: "aal2" }, f.chief);
+          await a.ok(`begin isolation level ${readerIsolation};`);
+          const readerPid = Number((await a.ok("select pg_backend_pid();")).at(-1));
+          const read = await a.query(`select api.query_v1('${JSON.stringify(f.receipt).replaceAll("'", "''")}'::jsonb);`);
+          assert.equal(read.code, "00000", JSON.stringify(read));
+          assert.equal(JSON.parse(read.lines.at(-1)).data.found, true, JSON.stringify(read));
+          assert.equal((await observer.ok(f.snapshotSql)).at(-1), before, "read-first receipt query changed state");
+          await b.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(boss)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: boss, aal: "aal2" }))},false);set role authenticated;begin isolation level ${revokerIsolation};`);
+          const revokerPid = Number((await b.ok("select pg_backend_pid();")).at(-1));
+          const revocationPending = b.query(`select api.command_v1('${JSON.stringify(f.revoke).replaceAll("'", "''")}'::jsonb);`);
+          const blocked = await waitBlocked(revokerPid, readerPid);
+          await a.ok("commit;"); const revocation = await revocationPending; await b.ok(revocation.code === "00000" ? "commit;" : "rollback;");
+          assert.equal(blocked, true, `${readerIsolation}/${revokerIsolation} read-first must serialize on membership scope`);
+          assert.equal(revocation.code, "00000", JSON.stringify(revocation));
+          await a.ok("reset role;"); await b.ok("reset role;");
+          record(`M2.2C assignment commandReceipt membership race read-first (${readerIsolation}/${revokerIsolation})`, true, { readerSQLSTATE: read.code, revocationSQLSTATE: revocation.code, revokerBlockedByDistinctChiefReceiptReader: blocked, readOnlySnapshot: before });
+        }
+        for (const [readerIsolation, revokerIsolation] of matrixPairs) {
+          const f = await makeReceiptFixture(15200 + raceNo++ * 10);
+          await claims({ role: "authenticated", sub: f.chief, aal: "aal2" }, f.chief);
+          await a.ok(`begin isolation level ${readerIsolation};`);
+          await a.ok(`select active from public.company_memberships where organization_id=${lit(org)} and company_id=${lit(company)} and profile_id=${lit(f.ownerId)};`);
+          await b.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(boss)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: boss, aal: "aal2" }))},false);set role authenticated;begin isolation level ${revokerIsolation};`);
+          const revoke = await b.query(`select api.command_v1('${JSON.stringify(f.revoke).replaceAll("'", "''")}'::jsonb);`);
+          assert.equal(revoke.code, "00000", JSON.stringify(revoke)); await b.ok("commit;");
+          const beforeDeniedRetry = (await observer.ok(f.snapshotSql)).at(-1);
+          const staleRead = await a.query(`select api.query_v1('${JSON.stringify(f.receipt).replaceAll("'", "''")}'::jsonb);`);
+          if (readerIsolation === "repeatable read") assert.equal(staleRead.code, "40001", JSON.stringify(staleRead));
+          else assert.equal(staleRead.code, "42501", JSON.stringify(staleRead));
+          await a.ok("rollback;");
+          const retry = await a.query(`select api.query_v1('${JSON.stringify(f.receipt).replaceAll("'", "''")}'::jsonb);`);
+          assert.equal(retry.code, "42501", JSON.stringify(retry));
+          assert.equal((await observer.ok(f.snapshotSql)).at(-1), beforeDeniedRetry, "stale denial/retry changed post-revocation state");
+          await a.ok("reset role;"); await b.ok("reset role;");
+          record(`M2.2C assignment commandReceipt membership race revoke-first (${readerIsolation}/${revokerIsolation})`, true, { revocationSQLSTATE: revoke.code, staleReaderSQLSTATE: staleRead.code, freshRetrySQLSTATE: retry.code, postRevocationSnapshotUnchanged: true });
+        }
+        const makeMonthFixture = async (seed) => {
+          const chief = uid(seed), ownerId = uid(seed + 1), opId = uid(seed + 2);
+          await observer.ok(`insert into auth.users(id) values(${lit(chief)}),(${lit(ownerId)});insert into public.profiles(id,organization_id,name,role,sector,branch,position) values(${lit(chief)},${lit(org)},'M2.2C month receipt chief','jefe','Test','Test','Test'),(${lit(ownerId)},${lit(org)},'M2.2C month receipt owner','empleado','Test','Test','Test');`);
+          const command = { contractVersion: 1, operationId: opId, kind: "month.materialize", expectedRevisions: { [`creation:${ownerId}`]: "0" }, payload: { ownerId, period: monthPeriod } };
+          await claims({ role: "authenticated", sub: chief, aal: "aal2" }, chief);
+          const created = await a.query(`select api.command_v1('${JSON.stringify(command).replaceAll("'", "''")}'::jsonb);`);
+          assert.equal(created.code, "00000", JSON.stringify(created));
+          const receipt = { contractVersion: 1, kind: "commandReceipt", filters: { operationId: opId }, cursor: null, limit: 1 };
+          const snapshotSql = `select jsonb_build_object(
+            'profiles',(select coalesce(jsonb_agg(to_jsonb(p) order by p.id),'[]'::jsonb) from public.profiles p where p.id in (${lit(chief)},${lit(ownerId)})),
+            'memberships',(select coalesce(jsonb_agg(to_jsonb(m) order by m.company_id,m.profile_id),'[]'::jsonb) from public.company_memberships m where m.organization_id=${lit(org)} and m.profile_id=${lit(ownerId)}),
+            'teamMembers',(select coalesce(jsonb_agg(to_jsonb(t) order by t.team_id,t.profile_id),'[]'::jsonb) from public.team_members t where t.organization_id=${lit(org)} and t.profile_id=${lit(ownerId)}),
+            'assignments',(select coalesce(jsonb_agg(to_jsonb(x) order by x.id),'[]'::jsonb) from public.task_assignments x where x.organization_id=${lit(org)} and x.owner_id=${lit(ownerId)}),
+            'instances',(select coalesce(jsonb_agg(to_jsonb(x) order by x.id),'[]'::jsonb) from public.task_instances x where x.organization_id=${lit(org)} and x.owner_id=${lit(ownerId)}),
+            'head',(select to_jsonb(h) from app_private.api_creation_heads h where h.organization_id=${lit(org)} and h.owner_id=${lit(ownerId)}),
+            'monthFences',(select coalesce(jsonb_agg(to_jsonb(f) order by f.period),'[]'::jsonb) from app_private.api_month_fences f where f.organization_id=${lit(org)} and f.owner_id=${lit(ownerId)}),
+            'membershipFences',(select coalesce(jsonb_agg(to_jsonb(f) order by f.profile_id),'[]'::jsonb) from app_private.api_membership_fences f where f.organization_id=${lit(org)} and f.profile_id=${lit(ownerId)}),
+            'operationFences',(select coalesce(jsonb_agg(to_jsonb(f) order by f.actor_id,f.operation_id),'[]'::jsonb) from app_private.api_operation_fences f where f.actor_id=${lit(chief)}),
+            'receipt',(select to_jsonb(r) from app_private.api_command_receipts r where r.actor_id=${lit(chief)} and r.operation_id=${lit(opId)}),
+            'audit',(select coalesce(jsonb_agg(to_jsonb(x) order by x.id),'[]'::jsonb) from public.audit_events x where x.actor_id=${lit(chief)} and x.action='month.materialized')
+          );`;
+          return { chief, ownerId, command, receipt, created, snapshotSql };
+        };
+        const monthActions = [
+          { name: "exact replay", run: async (f) => a.query(`select api.command_v1('${JSON.stringify(f.command).replaceAll("'", "''")}'::jsonb);`), expect: (r, f) => { assert.equal(r.code, "00000", JSON.stringify(r)); assert.deepEqual(JSON.parse(r.lines.at(-1)).result, JSON.parse(f.created.lines.at(-1)).result); } },
+          { name: "commandReceipt", run: async (f) => a.query(`select api.query_v1('${JSON.stringify(f.receipt).replaceAll("'", "''")}'::jsonb);`), expect: (r) => { assert.equal(r.code, "00000", JSON.stringify(r)); assert.equal(JSON.parse(r.lines.at(-1)).data.found, true, JSON.stringify(r)); } },
+        ];
+        let monthRaceNo = 0;
+        for (const action of monthActions) for (const [readerIsolation, writerIsolation] of matrixPairs) {
+          const f = await makeMonthFixture(15300 + monthRaceNo++ * 10);
+          const before = (await observer.ok(f.snapshotSql)).at(-1);
+          await claims({ role: "authenticated", sub: f.chief, aal: "aal2" }, f.chief);
+          await a.ok(`begin isolation level ${readerIsolation};`);
+          const readerPid = Number((await a.ok("select pg_backend_pid();")).at(-1));
+          action.created = f.created;
+          const read = await action.run(f); action.expect(read, f);
+          assert.equal((await observer.ok(f.snapshotSql)).at(-1), before, `${action.name} read-first changed snapshot`);
+          await observer.ok(`begin isolation level ${writerIsolation};`);
+          const deactivationPid = Number((await observer.ok("select pg_backend_pid();")).at(-1));
+          const deactivationPending = observer.query(`update public.profiles set active=false where id=${lit(f.ownerId)};`);
+          const blocked = await waitBlocked(deactivationPid, readerPid);
+          await a.ok("commit;"); const deactivation = await deactivationPending;
+          await observer.ok("commit;");
+          assert.equal(blocked, true, `${action.name} read-first (${readerIsolation}/${writerIsolation}) must lock the owner profile`);
+          assert.equal(deactivation.code, "00000", JSON.stringify(deactivation));
+          await a.ok("reset role;");
+          record(`M2.2C month ${action.name} owner-deactivation race read-first (${readerIsolation}/${writerIsolation})`, true, { readerSQLSTATE: read.code, ownerDeactivationSQLSTATE: deactivation.code, deactivationBlockedByRead: blocked, readOnlySnapshot: before });
+        }
+        for (const action of monthActions) for (const [readerIsolation, writerIsolation] of matrixPairs) {
+          const f = await makeMonthFixture(15400 + monthRaceNo++ * 10);
+          await claims({ role: "authenticated", sub: f.chief, aal: "aal2" }, f.chief);
+          await a.ok(`begin isolation level ${readerIsolation};select active from public.profiles where id=${lit(f.ownerId)};`);
+          await observer.ok(`begin isolation level ${writerIsolation};`);
+          const deactivation = await observer.query(`update public.profiles set active=false where id=${lit(f.ownerId)};`);
+          assert.equal(deactivation.code, "00000", JSON.stringify(deactivation)); await observer.ok("commit;");
+          const beforeRetry = (await observer.ok(f.snapshotSql)).at(-1);
+          action.created = f.created;
+          const staleRead = await action.run(f);
+          if (readerIsolation === "repeatable read") assert.equal(staleRead.code, "40001", `${action.name}: ${JSON.stringify(staleRead)}`);
+          else assert.equal(staleRead.code, "42501", `${action.name}: ${JSON.stringify(staleRead)}`);
+          await a.ok("rollback;");
+          await claims({ role: "authenticated", sub: f.chief, aal: "aal2" }, f.chief);
+          const retry = await action.run(f); assert.equal(retry.code, "42501", `${action.name} fresh retry: ${JSON.stringify(retry)}`);
+          assert.equal((await observer.ok(f.snapshotSql)).at(-1), beforeRetry, "owner denial/retry changed post-deactivation state");
+          await a.ok("reset role;");
+          record(`M2.2C month ${action.name} owner-deactivation race writer-first (${readerIsolation}/${writerIsolation})`, true, { ownerDeactivationSQLSTATE: deactivation.code, staleReaderSQLSTATE: staleRead.code, freshRetrySQLSTATE: retry.code, postDeactivationSnapshotUnchanged: true });
+        }
+      }
       const saveRequest = { contractVersion: 1, operationId: uid(350), kind: "onboarding.saveDraft", expectedRevisions: { [`onboardingOwner:${actor}`]: onboardingRevision }, payload: { requestId: null, draft: requestDraft } };
       await claims({ role: "authenticated", sub: actor, aal: "aal1" });
       const savedRequestCall = await a.query(`select api.command_v1('${JSON.stringify(saveRequest).replaceAll("'", "''")}'::jsonb);`);
