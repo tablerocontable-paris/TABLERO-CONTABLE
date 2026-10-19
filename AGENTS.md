@@ -1,3 +1,21 @@
+# Continuidad vigente — OneOff local, 19/10/2026
+
+Runner/evidencia de la matriz OneOff aceptados por Sol en alcance limitado y ejecutados localmente contra
+`docs/architecture/M2-2C-ONEOFF-CREATE-MEMBERSHIP-REVOCATION-RACES-SOL-CONTRACT-20261019.md` (SHA-256 contrato `98C9B35ACA1D66C4931644B4E5E2CCF9EFD654D02426B0351E2E5AA7FFA033C4`).
+PostgreSQL 17.11: 333/333, cuatro carreras create-first/revoke-first RC/RC y RR/RR; cero deadlocks. En baseline, winner-only, after-rollback y final se capturan/assertan sesiones y efectos laterales cero; reportes, entregas y outbox se limitan por org y owners E/R; month fences cubren todos los períodos de E/R, y las filas de operación se comparan exactamente por comando. Suite 738/738 en 74 archivos; TypeScript, build cliente, Worker, sintaxis y diff-check exit 0.
+Runner SHA-256: `fbf8e3a86caaecb825561e654795c01b8f065b3774bee6594d0a5e24290547b7`; reporte SHA-256: `21398735b5470bf3957c3a82d8ad7b22511e8603609b1e0199724c9e33747401`. Manifiesto: `docs/architecture/review-evidence/m2-2c-oneoff-create-membership-revocation-races-luna-20261019.json`; logs nativos en `../outputs/m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11/`. Aceptación: `docs/architecture/M2-2C-ONEOFF-CREATE-MEMBERSHIP-REVOCATION-RACES-SOL-ACCEPTANCE-20261019.md`. Esto no cierra Gate L/§9. SQL011/014 y producto sin cambios. No aplicar SQL014 ni iniciar preflight alojado.
+
+Esta cabecera tiene precedencia. Los registros cronológicos siguientes
+conservan evidencia histórica; sus instrucciones anteriores de próximo paso
+quedan supersedidas. Las reglas permanentes de seguridad, datos y flujo siguen
+vigentes.
+Las matrices de assignment.create, timer y operation.record ya aceptadas no
+se deben volver a implementar por una instrucción histórica. El contrato
+OneOff sólo autoriza su matriz local sintética.
+No aplicar SQL014 ni iniciar preflight alojado por este documento.
+
+## Antecedentes y evidencia histórica
+
 **Último bloque local aceptado por Sol, alcance acotado:** cuatro carreras `assignment.create` vs `companyMembership.setActive(false)`, RC/RC y RR/RR en ambos órdenes. PostgreSQL nativo 17.11: 329/329, cuatro bloqueos reales, cero deadlocks; outcomes por contrato exactos. Suite completa: 738/738 en 74 archivos; TypeScript, builds cliente/Worker, `node --check` y `git diff --check` exit 0. El fallo anterior 737/738 no se reprodujo en el caso enfocado sobre baseline limpio, ni en la suite completa posterior. Sin cambios SQL ni llamadas remotas. Manifiesto versionado: `docs/architecture/review-evidence/m2-2c-assignment-create-membership-revocation-races-luna-20261019.json`; runner, reportes y logs en `../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/`. Aceptación registrada en `docs/architecture/M2-2C-ASSIGNMENT-CREATE-MEMBERSHIP-REVOCATION-RACES-SOL-ACCEPTANCE-20261019.md`. Sin aplicar SQL014; Gate L/§9 siguen abiertos.
 
 # Estado operativo y precedencia — actualización 19/10/2026
@@ -67,11 +85,8 @@ siguen abiertos. Commit directo a `origin/main`, sin PR:
 `cf37b7fe220befa5317e4ae3295514288e96ff6e`; `git ls-remote` confirmó el SHA.
 CI del push no está verificado.
 
-**Siguiente vigente:** implementar el contrato Sol-aprobado
-`docs/architecture/M2-2C-ASSIGNMENT-CREATE-MEMBERSHIP-REVOCATION-RACES-LUNA-20261019.md`
-(SHA256 `9de273684735d6c075bb0800b24d933238afbd6d24fcf55aec59f3e74a25b8df`).
-Cuatro carreras RC/RC y RR/RR, ambos órdenes; respetar creation-head/fence
-preexistentes y P3 de schedule/definición v2. No tocar SQL ni Supabase alojado.
+**Bloque completado:** assignment.create/revocación quedó aceptado en alcance
+acotado y registrado en la cabecera; ya no es una instrucción de implementación.
 
 **Bloques anteriores aceptados y publicados:** onboarding.requestChanges exact replay/commandReceipt y cuatro carreras mixtas de cobertura recurrente (RC/RR, RR/RC, ambos ganadores). Evidencias: `docs/architecture/review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json` y `m2-2c-gatel-recurrent-coverage-20261019.json`. El run 39184344731 corresponde al commit 873829271463b4f3bf4bbb5ad39dad978908a8d2. Gate L sigue abierto.
 
@@ -79,9 +94,9 @@ preexistentes y P3 de schedule/definición v2. No tocar SQL ni Supabase alojado.
 
 El corte `onboarding.approve` publicado como `ad64854091505a2770cb93478fc34467e2aeae05` tiene Actions `39181886848` en success; esto no acredita el siguiente commit. Mantener separado SQL014 del Worker/D1. El resto del historial de este archivo conserva su valor histórico.
 
-# Estado operativo y precedencia — actualización 19/10/2026
+# Checkpoint histórico supersedido — 19/10/2026
 
-Este bloque tiene precedencia sobre el historial más abajo. GitHub privado
+Este bloque conserva evidencia anterior; no define la acción vigente. GitHub privado
 `tablerocontable-paris/TABLERO-CONTABLE` tiene publicado en `main` el corte
 funcional `5803b1e4434cfc46a4ab64a26da3f76ab9d12d3d`, seguido de sincronización
 documental directa. El push está confirmado, pero el conector disponible no

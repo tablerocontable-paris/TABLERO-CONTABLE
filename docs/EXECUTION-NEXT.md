@@ -1,3 +1,21 @@
+# Continuidad vigente — OneOff local, 19/10/2026
+
+Runner/evidencia de la matriz OneOff aceptados por Sol en alcance limitado y ejecutados localmente contra
+`architecture/M2-2C-ONEOFF-CREATE-MEMBERSHIP-REVOCATION-RACES-SOL-CONTRACT-20261019.md` (SHA-256 contrato `98C9B35ACA1D66C4931644B4E5E2CCF9EFD654D02426B0351E2E5AA7FFA033C4`).
+PostgreSQL 17.11: 333/333, cuatro carreras create-first/revoke-first RC/RC y RR/RR; cero deadlocks. En baseline, winner-only, after-rollback y final se capturan/assertan sesiones y efectos laterales cero; reportes, entregas y outbox se limitan por org y owners E/R; month fences cubren todos los períodos de E/R, y las filas de operación se comparan exactamente por comando. Suite 738/738 en 74 archivos; TypeScript, build cliente, Worker, sintaxis y diff-check exit 0.
+Runner SHA-256: `fbf8e3a86caaecb825561e654795c01b8f065b3774bee6594d0a5e24290547b7`; reporte SHA-256: `21398735b5470bf3957c3a82d8ad7b22511e8603609b1e0199724c9e33747401`. Manifiesto: `architecture/review-evidence/m2-2c-oneoff-create-membership-revocation-races-luna-20261019.json`; logs nativos en `../outputs/m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11/`. Aceptación: `architecture/M2-2C-ONEOFF-CREATE-MEMBERSHIP-REVOCATION-RACES-SOL-ACCEPTANCE-20261019.md`. Esto no cierra Gate L/§9. SQL011/014 y producto sin cambios. No aplicar SQL014 ni iniciar preflight alojado.
+
+Esta cabecera tiene precedencia. Los registros cronológicos siguientes
+conservan evidencia histórica; sus instrucciones anteriores de próximo paso
+quedan supersedidas. Las reglas permanentes de seguridad, datos y flujo siguen
+vigentes.
+Las matrices de assignment.create, timer y operation.record ya aceptadas no
+se deben volver a implementar por una instrucción histórica. El contrato
+OneOff sólo autoriza su matriz local sintética.
+No aplicar SQL014 ni iniciar preflight alojado por este documento.
+
+## Antecedentes y evidencia histórica
+
 **Último bloque local aceptado por Sol, alcance acotado:** cuatro carreras `assignment.create` vs `companyMembership.setActive(false)`, RC/RC y RR/RR en ambos órdenes. PostgreSQL nativo 17.11: 329/329, cuatro bloqueos reales, cero deadlocks; outcomes por contrato exactos. Suite completa: 738/738 en 74 archivos; TypeScript, builds cliente/Worker, `node --check` y `git diff --check` exit 0. El fallo anterior 737/738 no se reprodujo en el caso enfocado sobre baseline limpio, ni en la suite completa posterior. Sin cambios SQL ni llamadas remotas. Manifiesto versionado: `docs/architecture/review-evidence/m2-2c-assignment-create-membership-revocation-races-luna-20261019.json`; runner, reportes y logs en `../../outputs/m2-2c-assignment-create-membership-revocation-races-luna-20261019-attempt9/`. Aceptación registrada en `docs/architecture/M2-2C-ASSIGNMENT-CREATE-MEMBERSHIP-REVOCATION-RACES-SOL-ACCEPTANCE-20261019.md`. Sin aplicar SQL014; Gate L/§9 siguen abiertos.
 
 # Acción vigente de migración — actualización 19/10/2026
@@ -36,14 +54,10 @@ Publicado directamente a `origin/main`, sin PR, en
 `cf37b7fe220befa5317e4ae3295514288e96ff6e`; SHA remoto confirmado. CI no está
 verificado. SQL011/014 siguen sin cambios; Gate L/§9 permanece abierto.
 
-## Próximo paso
+## Bloque completado — assignment.create/revocación
 
-Pedir a GPT-6 Luna que implemente el contrato Sol-aprobado
-`architecture/M2-2C-ASSIGNMENT-CREATE-MEMBERSHIP-REVOCATION-RACES-LUNA-20261019.md`
-(SHA256 `9de273684735d6c075bb0800b24d933238afbd6d24fcf55aec59f3e74a25b8df`):
-cuatro carreras RC/RC y RR/RR frente a revocación, ambos órdenes. Respetar
-creation head y fences precreados en cero; incluir las precisiones P3 de schedule
-y persistencia v2. No tocar SQL ni Supabase alojado.
+Esta matriz está aceptada localmente en alcance acotado, según la cabecera y
+su aceptación registrada. La instrucción anterior de implementarla queda retirada.
 
 ## Último bloque local aceptado por Sol — cobertura contra onboarding
 
@@ -77,13 +91,10 @@ TypeScript, builds, sintaxis, diff-check y hook 196/196 pasaron. GitHub devolvi�
 checks vacíos, por lo que CI no está verificado. Mantener Gate L y §9 abiertos;
 no aplicar SQL014.
 
-## Próximo paso
+## Bloque completado — operation.record/revocación
 
-Implementar el contrato
-`architecture/M2-2C-OPERATION-RECORD-MEMBERSHIP-REVOCATION-RACES-LUNA-20261019.md`:
-cuatro carreras de `operation.record` frente a revocación de membresía bajo
-RC/RC y RR/RR, ambos órdenes. Los retries deben conservar actor/args/operationId;
-respetar SQLSTATE exactos del contrato. No tocar SQL ni Supabase alojado.
+Esta matriz está aceptada localmente en alcance acotado, según la aceptación
+y el manifiesto conservados arriba. La instrucción anterior de ejecutarla queda retirada.
 
 El último bloque `assign_task_responsibility`/`onboarding.approve` quedó aceptado
 localmente por Sol; ver
@@ -109,9 +120,9 @@ sigue sin aplicar; Gate L/§9 sigue abierto.
 1. Los bloques anteriores de onboarding y cuatro carreras mixtas están publicados y aceptados en sus alcances.
 2. Sol aceptó localmente cuatro carreras adicionales RC/RC y RR/RR. PostgreSQL 17.11 **301/301**, `40P01=0`; suite **738/738 en 74 archivos**; TypeScript y builds cliente/Worker aprobados. Ver manifiesto vigente arriba.
 3. Hook local **196/196**, commits directos a `main` y SHA remoto verificados; no se abrió PR. La API disponible aún no devuelve checks para esos pushes, así que la verificación CI queda pendiente.
-4. **Siguiente vigente:** revisar contrato §9 y evidencias actuales para elegir
-   una familia incompleta; luego ejecutar GPT-6 Luna medio Standard con contrato
-   acotado. No aplicar SQL014.
+4. **Selección completada:** se eligió primera alta task.createOneOff frente a
+   revocación de membresía. La cabecera fija como único próximo paso revisar
+   su contrato Sol; aún no se autoriza implementar ni ejecutar la matriz.
 
 # Acción de migración histórica — 17/10/2026
 
@@ -121,7 +132,7 @@ sigue sin aplicar; Gate L/§9 sigue abierto.
 4. El repositorio fuente está en GitHub privado `tablerocontable-paris/TABLERO-CONTABLE`, rama única `main`. La guía de PC personal es `outputs/LEEME-PC-PERSONAL.md`; IndexedDB/localStorage no se sincroniza con GitHub.
 5. Proyecto Supabase `grupo-paris-dev` existe en la organización visible `tablerocontable-paris DEV`, región `sa-east-1`, activo y vacío. La Data API aún muestra `public,extensions` expuestos y autoexposición activada según la última observación. No aplicar migraciones hasta comprobar exposición segura y completar el preflight en el proyecto vacío.
 6. Cloudflare/hosting propio, correo productivo, Supabase de producción y flujo de release permanecen pendientes. El Site privado existente sigue separado; no abrir audiencia ni activar la app operativa.
-# Acción vigente — completar M2.2C localmente, 16/10/2026
+# Acción histórica — completar M2.2C localmente, 16/10/2026
 
 **Registro histórico supersedido — R51 (no usar como estado actual).** R51
 reportó 96/96 sobre un candidato anterior que todavía no tenía el writer soft

@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-19",
+  "scope": "First execution task.createOneOff versus companyMembership.setActive(false), synthetic local PostgreSQL only",
+  "contractApprovalSha256": "98C9B35ACA1D66C4931644B4E5E2CCF9EFD654D02426B0351E2E5AA7FFA033C4",
+  "sourceCommit": "0a7b81bf727ec8ae19fca2f2bd40b1f420776d1e",
+  "engine": "postgres (PostgreSQL) 17.11",
+  "runnerSha256": "fbf8e3a86caaecb825561e654795c01b8f065b3774bee6594d0a5e24290547b7",
+  "result": {
+    "total": 333,
+    "passed": 333,
+    "failed": 0,
+    "deadlocks": 0,
+    "focusedCases": [
+      "M2.2C task.createOneOff versus membership revoke create-first RC blocker/stale/retry",
+      "M2.2C task.createOneOff versus membership revoke revoke-first RC blocker/stale/retry",
+      "M2.2C task.createOneOff versus membership revoke create-first RR blocker/stale/retry",
+      "M2.2C task.createOneOff versus membership revoke revoke-first RR blocker/stale/retry"
+    ],
+    "focusedCasesPassed": 4
+  },
+  "commands": [
+    {
+      "name": "native PostgreSQL review",
+      "command": "node tests/review/m2-1-native-review.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11 --port 55711 --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes",
+      "exitCode": 0,
+      "result": "PostgreSQL 17.11, 333/333 passed, 0 failed, 0 deadlocks; four OneOff scenarios passed.",
+      "stdout": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\runner.stdout.log",
+      "stderr": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\runner.stderr.log",
+      "exitCodeFile": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\runner.exit-code.txt"
+    },
+    {
+      "name": "full Vitest suite",
+      "command": "node node_modules/vitest/vitest.mjs run --exclude 'tmp/**' --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "exitCode": 0,
+      "result": "738 passed in 74 files; duration 210.68s.",
+      "stdout": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\vitest.stdout.log",
+      "stderr": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\vitest.stderr.log",
+      "exitCodeFile": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\vitest.exit-code.txt"
+    },
+    {
+      "name": "TypeScript check",
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "exitCode": 0,
+      "stdout": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\tsc.stdout.log",
+      "stderr": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\tsc.stderr.log",
+      "exitCodeFile": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\tsc.exit-code.txt"
+    },
+    {
+      "name": "Vite client build",
+      "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+      "exitCode": 0,
+      "stdout": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\vite.stdout.log",
+      "stderr": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\vite.stderr.log",
+      "exitCodeFile": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\vite.exit-code.txt"
+    },
+    {
+      "name": "Worker build",
+      "command": "node scripts/build-worker.mjs",
+      "exitCode": 0,
+      "stdout": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\worker.stdout.log",
+      "stderr": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\worker.stderr.log",
+      "exitCodeFile": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\worker.exit-code.txt"
+    },
+    {
+      "name": "runner syntax",
+      "command": "node --check tests/review/m2-1-native-review.mjs",
+      "exitCode": 0,
+      "stdout": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\syntax.stdout.log",
+      "stderr": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\syntax.stderr.log",
+      "exitCodeFile": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\syntax.exit-code.txt"
+    },
+    {
+      "name": "diff check",
+      "command": "git diff --check",
+      "exitCode": 0,
+      "stdout": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\diffcheck.stdout.log",
+      "stderr": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\diffcheck.stderr.log",
+      "exitCodeFile": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\diffcheck.exit-code.txt"
+    }
+  ],
+  "artifacts": {
+    "contract": "docs/architecture/M2-2C-ONEOFF-CREATE-MEMBERSHIP-REVOCATION-RACES-SOL-CONTRACT-20261019.md",
+    "runner": "tests/review/m2-1-native-review.mjs",
+    "sql011": "supabase/migrations/202610060011_coordination_activation.sql",
+    "sql014": "supabase/migrations/202610150014_operational_api.sql",
+    "report": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\review.json",
+    "runnerStdout": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\runner.stdout.log",
+    "runnerStderr": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\runner.stderr.log",
+    "runnerExitCode": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\runner.exit-code.txt",
+    "postgresLog": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\postgres.log",
+    "initdbLog": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\initdb.log",
+    "vitestStdout": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\vitest.stdout.log",
+    "vitestStderr": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\vitest.stderr.log",
+    "vitestExitCode": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\vitest.exit-code.txt",
+    "tscStdout": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\tsc.stdout.log",
+    "tscStderr": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\tsc.stderr.log",
+    "tscExitCode": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\tsc.exit-code.txt",
+    "viteStdout": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\vite.stdout.log",
+    "viteStderr": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\vite.stderr.log",
+    "viteExitCode": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\vite.exit-code.txt",
+    "workerStdout": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\worker.stdout.log",
+    "workerStderr": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\worker.stderr.log",
+    "workerExitCode": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\worker.exit-code.txt",
+    "syntaxStdout": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\syntax.stdout.log",
+    "syntaxStderr": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\syntax.stderr.log",
+    "syntaxExitCode": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\syntax.exit-code.txt",
+    "diffcheckStdout": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\diffcheck.stdout.log",
+    "diffcheckStderr": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\diffcheck.stderr.log",
+    "diffcheckExitCode": "..\\outputs\\m2-2c-oneoff-create-membership-revocation-races-luna-20261019-attempt11\\diffcheck.exit-code.txt",
+    "agentsDoc": "AGENTS.md",
+    "executionNextDoc": "docs/EXECUTION-NEXT.md",
+    "projectStatusDoc": "docs/PROJECT-STATUS.md"
+  },
+  "hashes": {
+    "contract": "98c9b35aca1d66c4931644b4e5e2ccf9efd654d02426b0351e2e5aa7ffa033c4",
+    "runner": "fbf8e3a86caaecb825561e654795c01b8f065b3774bee6594d0a5e24290547b7",
+    "sql011": "9729a6800e93dedc43ab5f0840309b7c0d222343898cc8d5b43eeb4a387f4210",
+    "sql014": "ac8cca582cf366b0cf143fd63d99c490c664b00b368eb473757017eebef26315",
+    "report": "21398735b5470bf3957c3a82d8ad7b22511e8603609b1e0199724c9e33747401",
+    "runnerStdout": "d18d3314a6c75a68b6d5082f33ba0633bd601eb599aa343010381d2a996dd7e1",
+    "runnerStderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "runnerExitCode": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "postgresLog": "e8da9bb5ea552cd2dce46bdf8e59531483042d90f3518932bfe3acbf3ec9aaa7",
+    "initdbLog": "34059719ee78015db1df858f6a50f3e89cecee1ccd731b336461e589e7983232",
+    "vitestStdout": "20ecadac96e91d09dbcd6c818c4b61b27dd5868bfaa71c0a12ef954460dee861",
+    "vitestStderr": "03574087f63cbd7924c3196b65366ad167e2bfedc842a79617e898482d669a6d",
+    "vitestExitCode": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "tscStdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tscStderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tscExitCode": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "viteStdout": "44c0516cb3bef664437c85e04d34e18669e6fd70a5713b178fdf1aeee9d6b167",
+    "viteStderr": "233fcd81a1bd111af4afa23e7585784528d149f851002d837b9a77277229df83",
+    "viteExitCode": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "workerStdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "workerStderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "workerExitCode": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "syntaxStdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "syntaxStderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "syntaxExitCode": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "diffcheckStdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "diffcheckStderr": "55516954e9f227d8c87a009d66389d7badfbbde5159be17d0c568fc8261d749b",
+    "diffcheckExitCode": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "agentsDoc": "50ea05dfa232c20c20cab1a70fd61e9968e11ded96fa1795186aba807e0e2f09",
+    "executionNextDoc": "a91732024fc4c203117e7789ce3891aead5fd77654fc3bdaf6d504e51434ec40",
+    "projectStatusDoc": "5997a73e02186be21222ca5f829d1747f8f8b6f4bae177e0d69840acdf0dccd5"
+  },
+  "assertions": [
+    "All api_month_fences rows for fixture E/R across all periods in the organization are captured and exact arrays asserted at baseline, winner-only, after-rollback and final.",
+    "api_operation_fences are compared as exact actor/operation rows at baseline, winner-only, after-rollback and final.",
+    "Sessions, scoped monthly closures, period reports, report deliveries joined to scoped period reports, and report outbox events joined through delivery and report are zero at all four snapshots.",
+    "Scoped side-effect counts use organization, fixture company and fixture owners E/R; they are compared to the zero baseline at all four stages and do not include organization-global preexisting outbox records.",
+    "Four create-first/revoke-first RC/RC and RR/RR outcomes, exact rows, receipts, audits, responses and blockers remain asserted."
+  ],
+  "limitations": [
+    "synthetic local harness only; no remote API or production data",
+    "SQL011 and SQL014 not modified",
+    "product/DTO/UI/Worker source not modified",
+    "no commit or push"
+  ],
+  "runnerSha256VerifiedAgainstReport": true
+}
