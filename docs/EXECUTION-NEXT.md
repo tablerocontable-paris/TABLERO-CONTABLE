@@ -7,12 +7,15 @@ ganadores bajo RC/RC y RR/RR. PostgreSQL 17.11 **301/301**, `40P01=0`; suite
 **738/738** en 74 archivos; TypeScript, build cliente/Worker, sintaxis del runner
 y diff-check aprobados. Evidencia y límites:
 `architecture/review-evidence/m2-2c-recurrent-same-isolation-luna-20261019.json`.
-La revisión usa hashes del contenido sobre baseline `2b60c21…`; no acredita
-commit, push ni CI. SQL014 sigue sin aplicar; Gate L/§9 sigue abierto.
+La revisión usó hashes del contenido sobre baseline `2b60c21…`. El código y su
+evidencia están publicados como `660f75dcc9a9d4a5ab698e84d3ff0ae23a0f2068`; este
+estado/contrato quedó en `8646f10ee90371748054830ef4af81cf4904f577`. SHA remoto
+confirmado; GitHub devolvió checks vacíos, por lo que CI no se acredita. SQL014
+sigue sin aplicar; Gate L/§9 sigue abierto.
 
 1. Los bloques anteriores de onboarding y cuatro carreras mixtas están publicados y aceptados en sus alcances.
 2. Sol aceptó localmente cuatro carreras adicionales RC/RC y RR/RR. PostgreSQL 17.11 **301/301**, `40P01=0`; suite **738/738 en 74 archivos**; TypeScript y builds cliente/Worker aprobados. Ver manifiesto vigente arriba.
-3. Este bloque aún requiere hook, commit directo a `main`, push y verificación de SHA/CI. No abrir PR ni aplicar SQL014.
+3. Hook local **196/196**, commits directos a `main` y SHA remoto verificados; no se abrió PR. La API disponible aún no devuelve checks para esos pushes, así que la verificación CI queda pendiente.
 4. Próxima ejecución: **GPT-6 Luna, esfuerzo medio, Standard**, implementa `architecture/M2-2C-TRANSITION-MEMBERSHIP-RACES-LUNA-20261019.md`. Alcance: cuatro carreras de transición/revocación para RC/RC y RR/RR, ambos ganadores; sólo local. Luego **GPT-6.1 Sol, esfuerzo alto**, revisa los hashes exactos antes de publicar. Si hay ambigüedad o defecto de SQL, detener y regresar a Sol. No aplicar SQL014.
 
 # Acción de migración histórica — 17/10/2026

@@ -7,15 +7,18 @@ membresía, RC/RC y RR/RR con ambos ganadores. PostgreSQL 17.11: 301/301;
 sintaxis del runner y diff-check aprobados. Evidencia:
 `docs/architecture/review-evidence/m2-2c-recurrent-same-isolation-luna-20261019.json`.
 Sol acepta sólo esos cuatro casos. Sus límites P3 están en el manifiesto; Gate L
-y §9 siguen abiertos. El cambio aún no está publicado ni tiene CI verificado.
-SQL014 no se aplicó remotamente.
+y §9 siguen abiertos. Código/evidencia: `660f75dcc9a9d4a5ab698e84d3ff0ae23a0f2068`;
+contrato y estado actual: `8646f10ee90371748054830ef4af81cf4904f577`. Ambos están en
+`origin/main`, sin PR. GitHub devolvió una lista de checks vacía para el último
+SHA; no hay CI verificado en esta sesión. El hook local pasó 196/196. SQL014 no
+se aplicó remotamente.
 
 **Siguiente:** GPT-6 Luna, esfuerzo medio, Standard, implementa únicamente
 `docs/architecture/M2-2C-TRANSITION-MEMBERSHIP-RACES-LUNA-20261019.md`. GPT-6.1
 Sol revisa los hashes y evidencia de esos cuatro casos antes de cualquier push.
 No tocar Supabase ni activar el espacio operativo.
 
-**Bloques anteriores aceptados y publicados:** onboarding.requestChanges exact replay/commandReceipt y cuatro carreras mixtas de cobertura recurrente (RC/RR, RR/RC, ambos ganadores). Evidencias: `docs/architecture/review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json` y `m2-2c-gatel-recurrent-coverage-20261019.json`. El run 39184344731 corresponde al commit 873829271463b4f3bf4bbb5ad39dad978908a8d2. El nuevo bloque local está descrito arriba y aún no se publica. Gate L sigue abierto.
+**Bloques anteriores aceptados y publicados:** onboarding.requestChanges exact replay/commandReceipt y cuatro carreras mixtas de cobertura recurrente (RC/RR, RR/RC, ambos ganadores). Evidencias: `docs/architecture/review-evidence/m2-2c-onboarding-requestchanges-replay-20261018.json` y `m2-2c-gatel-recurrent-coverage-20261019.json`. El run 39184344731 corresponde al commit 873829271463b4f3bf4bbb5ad39dad978908a8d2. Gate L sigue abierto.
 
 **Validación previa:** requestChanges y las carreras mixtas pasaron en los alcances documentados. Esto no cierra Gate L. No aplicar SQL014; Supabase dev sigue vacío y queda su configuración Data API/preflight.
 

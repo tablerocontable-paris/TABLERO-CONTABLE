@@ -1,19 +1,22 @@
 # Estado general de la migración — actualización 19/10/2026
 
-**Último bloque local aceptado por GPT-6.1 Sol (alcance acotado):** cuatro
+**Último bloque aceptado por GPT-6.1 Sol y publicado (alcance acotado):** cuatro
 carreras de aprobación de cobertura recurrente frente a revocación de membresía,
 RC/RC y RR/RR con ambos ganadores. PostgreSQL 17.11 **301/301**, `40P01=0`;
 suite Vitest **738/738 en 74 archivos**; TypeScript, build cliente/Worker,
 sintaxis del runner y `git diff --check` aprobados. Manifiesto y hashes:
 `architecture/review-evidence/m2-2c-recurrent-same-isolation-luna-20261019.json`.
 Sol acepta sólo estos casos; límites P3 y snapshot acotado constan en el
-manifiesto. Gate L/§9 sigue abierto. SQL014 no se aplicó remotamente.
+manifiesto. Código/evidencia en `660f75dcc9a9d4a5ab698e84d3ff0ae23a0f2068`; contrato
+y estado actual en `8646f10ee90371748054830ef4af81cf4904f577`, ambos confirmados en
+`origin/main` sin PR. El último status query devolvió lista vacía; CI no está
+verificado. Hook local 196/196. Gate L/§9 sigue abierto. SQL014 no se aplicó remotamente.
 
-**Bloques anteriores publicados y aceptados por Sol:** onboarding.requestChanges exact replay/commandReceipt y cuatro carreras mixtas de cobertura recurrente. Se suma el bloque local descrito arriba; sus resultados no deben atribuirse al commit remoto anterior. Gate L/M2.2C sigue abierto. SQL014 SHA256 ac8cca582cf366b0cf143fd3d99c490c664b00b368eb473757017eebef26315. El run 39184344731 corresponde al commit 873829271463b4f3bf4bbb5ad39dad978908a8d2 y no valida cambios posteriores.
+**Bloques anteriores publicados y aceptados por Sol:** onboarding.requestChanges exact replay/commandReceipt y cuatro carreras mixtas de cobertura recurrente. El run 39184344731 corresponde al commit 873829271463b4f3bf4bbb5ad39dad978908a8d2 y no valida cambios posteriores. Gate L/M2.2C sigue abierto.
 
 **Siguiente:** GPT-6 Luna, esfuerzo medio, Standard, implementa la matriz acotada `architecture/M2-2C-TRANSITION-MEMBERSHIP-RACES-LUNA-20261019.md`: cuatro carreras de transición/revocación para ambos ganadores bajo RC/RC y RR/RR. Sol revisa hashes y evidencia antes de publicar. Las cuatro carreras recurrentes ya están aceptadas localmente; no repetirlas.
 
-**Infraestructura sin cambios:** mientras se registra este bloque local, GitHub main sigue en 873829271463b4f3bf4bbb5ad39dad978908a8d2; falta publicar el cambio y verificar su CI. Supabase dev sigue activo/vacío; falta apagar la autoexposición. No hay Cloudflare, correo productivo ni Supabase de producción configurados. Site privado y datos ficticios.
+**Infraestructura sin cambios:** GitHub `main` está en `8646f10ee90371748054830ef4af81cf4904f577`; SHA remoto confirmado. CI de este SHA no aparece en el conector. Supabase dev sigue activo/vacío; falta apagar la autoexposición. No hay Cloudflare, correo productivo ni Supabase de producción configurados. Site privado y datos ficticios.
 
 # Estado general de la migración — actualización 19/10/2026
 
