@@ -1,18 +1,22 @@
-# Continuidad vigente — replay legacy de movimientos aceptado, 19/10/2026
+# Continuidad vigente — replay de responsabilidad aceptado localmente, 20/10/2026
 
-Sol aceptó localmente el replay de `public.record_activity_once`. Contrato y
-aceptación: `architecture/M2-2C-LEGACY-ACTIVITY-REPLAY-AUTHORIZATION-SOL-CONTRACT-20261019.md`
-y `architecture/M2-2C-LEGACY-ACTIVITY-REPLAY-SOL-ACCEPTANCE-20261019.md`.
-SQL014 candidata SHA `7BF6F10E8703A2044708C9E37AD72021F07B6CD3C7E803C3D9313A0E170A5C7E`;
-manifiesto SHA `6EF709F05E8D44CF0520257E45EA9E0B6EC326E8EC724E9F45C200BA2D50CFD4`.
-Baseline rojo Actual/Upgrade; candidata verde con 8/8 carreras por ruta,
-siete secuencias con snapshots y 67/67 referencias. SQL001–013 intactos.
-Este bloque aceptado está pendiente de commit y push; SQL014 no se aplicó.
+Sol aceptó localmente `public.assign_task_responsibility` en alcance acotado.
+Contrato y aceptación están en `architecture/M2-2C-LEGACY-RESPONSIBILITY-REPLAY-AUTHORIZATION-SOL-CONTRACT-20261019.md`
+y `architecture/M2-2C-LEGACY-RESPONSIBILITY-REPLAY-SOL-ACCEPTANCE-20261019.md`
+(SHA aceptación `233ADBE22F7DFB2BE135D6AAE08E232530688D291D07BB05EAE8B7964AFB018E`).
+SQL014 candidata SHA `CDD909C1A280DF8E891D6062838B146AEECADCF5CBC0F52291C6D44A0C89ECA2`;
+baseline Git exacta `092B14200AD17D5FF5F96C5D6D748826366B395E3308082C5FEDAE40444EB4EA`.
+Rojo confirmado; 28 casos secuenciales, 8/8 carreras, matriz nativa 351/351,
+suite 738/738, TSC, builds cliente/Worker, sintaxis y diff-check exit 0.
+Manifiesto SHA `478157350FC4ED3561EE5DF6BD940E0B79E20D339E8D6861F16B3B1182E71C1F`;
+33/33 hashes y rutas verificados. SQL001–013 intactas. Límite P3 AAL1 consta en
+la aceptación.
 
-Supabase dev continúa separado y sin migraciones aplicadas. Gate L/§9, otros
-replays, Auth/HTTP, Data API, Storage/restore, CI, hosting, correo y producción
-siguen abiertos. El siguiente paso es publicar este corte directo a `origin/main`
-y luego revisar con Sol el inventario residual §9.
+El bloque queda aceptado localmente y pendiente de publicación directa a
+`origin/main`, sin PR. SQL014 no se aplicó a Supabase. El proyecto dev continúa
+separado y sin migraciones aplicadas. Después del push, GPT-6.1 Sol audita el
+inventario residual §9. Gate L, Auth/HTTP, Data API, Storage/restore, CI, hosting,
+correo y producción siguen abiertos.
 
 Esta actualización supersede el encabezado anterior; los registros siguientes
 son historial.

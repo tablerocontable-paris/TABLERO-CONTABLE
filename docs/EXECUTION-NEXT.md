@@ -1,18 +1,20 @@
-# Continuidad vigente — replay legacy de movimientos aceptado, 19/10/2026
+# Continuidad vigente — replay de responsabilidad aceptado localmente, 20/10/2026
 
-Sol aceptó el corte local `public.record_activity_once`. Contrato:
-`architecture/M2-2C-LEGACY-ACTIVITY-REPLAY-AUTHORIZATION-SOL-CONTRACT-20261019.md`;
-aceptación: `architecture/M2-2C-LEGACY-ACTIVITY-REPLAY-SOL-ACCEPTANCE-20261019.md`.
-SQL014 SHA `7BF6F10E8703A2044708C9E37AD72021F07B6CD3C7E803C3D9313A0E170A5C7E`;
-manifiesto versionado SHA `6EF709F05E8D44CF0520257E45EA9E0B6EC326E8EC724E9F45C200BA2D50CFD4`.
-Baseline rojo Actual/Upgrade; verde Actual/Upgrade con 8/8 carreras cada una;
-snapshots completos y 67/67 referencias. Sin llamadas alojadas; SQL014 no se
-aplicó. El bloque revisado queda listo para publicación directa en `origin/main`.
+Sol aceptó `public.assign_task_responsibility` en alcance local acotado.
+Contrato y aceptación: `architecture/M2-2C-LEGACY-RESPONSIBILITY-REPLAY-AUTHORIZATION-SOL-CONTRACT-20261019.md`
+y `architecture/M2-2C-LEGACY-RESPONSIBILITY-REPLAY-SOL-ACCEPTANCE-20261019.md`.
+SQL014 candidata SHA `CDD909C1A280DF8E891D6062838B146AEECADCF5CBC0F52291C6D44A0C89ECA2`;
+aceptación SHA `233ADBE22F7DFB2BE135D6AAE08E232530688D291D07BB05EAE8B7964AFB018E`.
+Rojo confirmado; 28 casos secuenciales y 8/8 carreras; matriz nativa 351/351,
+suite 738/738, TSC, builds cliente/Worker, sintaxis y diff-check aprobados.
+Manifiesto versionado SHA `478157350FC4ED3561EE5DF6BD940E0B79E20D339E8D6861F16B3B1182E71C1F`,
+33/33 rutas y hashes correctos. SQL001–013 intactas. La aceptación registra el
+límite P3 del contexto AAL1.
 
-Después del commit/push, GPT-6.1 Sol cruza §9 con la evidencia acumulada y
-selecciona la próxima familia legacy pendiente (`assign_task_responsibility`).
-Luna implementa sólo el contrato Sol resultante. Gate L/§9, Auth/HTTP, Data API,
-Storage/restore, CI, hosting, correo y producción siguen abiertos.
+**Publicar este corte directamente en `origin/main`, sin PR.** No aplicar SQL014
+ni activar el espacio operativo. Luego GPT-6.1 Sol debe auditar §9 y seleccionar
+la siguiente unidad de migración. Gate L, Auth/HTTP, Data API, Storage/restore,
+CI, hosting, correo y producción siguen abiertos.
 
 Esta actualización supersede el encabezado anterior; los registros siguientes
 son historial.

@@ -1,0 +1,986 @@
+{
+  "schemaVersion": 1,
+  "pathBase": "work/site; artifact paths are relative to this directory",
+  "project": "Grupo París · M2.2C legacy responsibility replay authorization",
+  "generatedAt": "2026-10-20T03:10:21.011Z",
+  "baseline": {
+    "commit": "c12c43aaa8db002596bc04b5836d0de0af0d4f43",
+    "contract": {
+      "path": "docs/architecture/M2-2C-LEGACY-RESPONSIBILITY-REPLAY-AUTHORIZATION-SOL-CONTRACT-20261019.md",
+      "sha256": "DC7FA9BEEE6491C48F5A39E33CD30E7C1360AFD560BBD144B0927F7A27685C6F"
+    },
+    "sql014GitBlobSha256": "092B14200AD17D5FF5F96C5D6D748826366B395E3308082C5FEDAE40444EB4EA",
+    "sql014BaselineArtifact": {
+      "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/baseline-SQL014.sql",
+      "sha256": "092B14200AD17D5FF5F96C5D6D748826366B395E3308082C5FEDAE40444EB4EA"
+    }
+  },
+  "candidate": {
+    "sql014CheckoutSha256": "CDD909C1A280DF8E891D6062838B146AEECADCF5CBC0F52291C6D44A0C89ECA2",
+    "candidateGitBlobStatus": "not available: candidate is an uncommitted checkout; checkout SHA-256 identifies exact bytes",
+    "scope": "cached branch only; SQL001-013 unchanged"
+  },
+  "migrations": [
+    {
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "gitBlobSha256": "4AE00143F3740D21A828165139FA929DEA0DCB8775849939A505CA5CB8BDF161",
+      "checkoutSha256": "2B1115E1E043883D3284613D2367B7228A5C443925829FF09EE5D32322189DD9",
+      "checkoutEol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202609300001_foundation.sql"
+    },
+    {
+      "path": "supabase/migrations/202609300002_workflows.sql",
+      "gitBlobSha256": "EC5AA503834DC8A10E0A7CF858C0C6C4F09A3B0C5BB0A53DF9E34FD834697832",
+      "checkoutSha256": "7472D4AE996C827412E5F7DAAEFDA498206349BBF49D02A8C90E3542F8EECCBE",
+      "checkoutEol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202609300002_workflows.sql"
+    },
+    {
+      "path": "supabase/migrations/202610010001_occurrence_contract.sql",
+      "gitBlobSha256": "009E453942D2609F6F84913D2684015326FE5874EB39351A9E75A0525C4C17B0",
+      "checkoutSha256": "3A9C3B92A241FC4A6569FEA2549FA179CA96E7FAAC50832C5841EFC90DB5CA2F",
+      "checkoutEol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010001_occurrence_contract.sql"
+    },
+    {
+      "path": "supabase/migrations/202610010002_onboarding_approval.sql",
+      "gitBlobSha256": "F531CEC7664A4E58B2575F8F8FB154EC933D53973F63A7A1036387E2B27C02F3",
+      "checkoutSha256": "9560644D1304DD5123D6B295BC9E4E5EC07D91BB07024174AED979B3A425D897",
+      "checkoutEol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010002_onboarding_approval.sql"
+    },
+    {
+      "path": "supabase/migrations/202610010003_report_delivery.sql",
+      "gitBlobSha256": "2CA30367916FE708464BAE2A857C34B014089F1D7618D21C1A822DC16E5C7FF4",
+      "checkoutSha256": "39C8B92F41D00FB96174978BE8903120424CBABE4D0378761746148E57B38731",
+      "checkoutEol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010003_report_delivery.sql"
+    },
+    {
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "gitBlobSha256": "C4868ECC2A0AC7B440D459D80C06EDB65B15AD2929517CFB178570412392A7E3",
+      "checkoutSha256": "FA49AA77BB8A7FC9B153C8AF9B27225ED6500D0489D7C396D9C7128B393E7630",
+      "checkoutEol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010004_time_coverage.sql"
+    },
+    {
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "gitBlobSha256": "50A073AAC2913D7EF3F5FE3D32D2879226DDA19A4A15239CF02D65BD9D0179AC",
+      "checkoutSha256": "400C671934E0FA050907AEA78C3DA28248255068F0E8AD16F0007081421D8A33",
+      "checkoutEol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010005_time_coverage_hardening.sql"
+    },
+    {
+      "path": "supabase/migrations/202610010006_time_coverage_acceptance.sql",
+      "gitBlobSha256": "394E3354FAB91CA3BABD850F3E5B08E32513E08CCC172064F74CDE16594D906B",
+      "checkoutSha256": "A47942D0281ADB517AA7BC5E1123769DD77F415B58CF97748B97FCE376314FBF",
+      "checkoutEol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010006_time_coverage_acceptance.sql"
+    },
+    {
+      "path": "supabase/migrations/202610010007_time_coverage_completion.sql",
+      "gitBlobSha256": "5FEE47AB9A401A6D05A205431365BB3E5840CBA98147E9950AB84FF18C1E454F",
+      "checkoutSha256": "34886FF8E7CCB947D8E68754F68AC9155F4E012DC4200B395C95967D2710160B",
+      "checkoutEol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010007_time_coverage_completion.sql"
+    },
+    {
+      "path": "supabase/migrations/202610010008_time_coverage_finalization.sql",
+      "gitBlobSha256": "AD0DA14254585C341C3F0846EA21E9FD7F8F71020F44A4079D4D5E1424E45A3E",
+      "checkoutSha256": "3CDE522CBF9DF98A05BEE0F1C6FD510377324A9551FF2AD396756A397BC70A46",
+      "checkoutEol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010008_time_coverage_finalization.sql"
+    },
+    {
+      "path": "supabase/migrations/202610020009_private_block_notes.sql",
+      "gitBlobSha256": "7E4B0E179C8B0D058FD08DCC4127EB16EA4577F432F358A0D133C334E6820A80",
+      "checkoutSha256": "CF2B2BABF4A0FF8B144A643ABA5D71796D9062559CDD201C989BA754640D6269",
+      "checkoutEol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610020009_private_block_notes.sql"
+    },
+    {
+      "path": "supabase/migrations/202610040010_coordination_foundation.sql",
+      "gitBlobSha256": "93A161ED5949C02E3067C080E80AAF3E8AE917A8DF66FCC4E788B58FBFAB16F8",
+      "checkoutSha256": "84BA65311535E85F5B1AB3A991308193CE634C79F031978DC020B15B683AD7B1",
+      "checkoutEol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610040010_coordination_foundation.sql"
+    },
+    {
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "gitBlobSha256": "9729A6800E93DEDC43AB5F0840309B7C0D222343898CC8D5B43EEB4A387F4210",
+      "checkoutSha256": "9729A6800E93DEDC43AB5F0840309B7C0D222343898CC8D5B43EEB4A387F4210",
+      "checkoutEol": "i/lf    w/lf    attr/                 \tsupabase/migrations/202610060011_coordination_activation.sql"
+    },
+    {
+      "path": "supabase/migrations/202610140012_sql_receipt_and_onboarding_guards.sql",
+      "gitBlobSha256": "CABFE95DBD04AE65EA82C787BC5E3EC8E638E4620456366B7EEB8A5D715DFBF4",
+      "checkoutSha256": "CABFE95DBD04AE65EA82C787BC5E3EC8E638E4620456366B7EEB8A5D715DFBF4",
+      "checkoutEol": "i/lf    w/lf    attr/                 \tsupabase/migrations/202610140012_sql_receipt_and_onboarding_guards.sql"
+    },
+    {
+      "path": "supabase/migrations/202610140013_api_identity_foundation.sql",
+      "gitBlobSha256": "D013B82BFA1101ED11A35DAEAF7A64B2E6063DA9C09B55E7586CE67CC586BAC2",
+      "checkoutSha256": "D013B82BFA1101ED11A35DAEAF7A64B2E6063DA9C09B55E7586CE67CC586BAC2",
+      "checkoutEol": "i/lf    w/lf    attr/                 \tsupabase/migrations/202610140013_api_identity_foundation.sql"
+    },
+    {
+      "path": "supabase/migrations/202610150014_operational_api.sql",
+      "gitBlobSha256": "092B14200AD17D5FF5F96C5D6D748826366B395E3308082C5FEDAE40444EB4EA",
+      "checkoutSha256": "CDD909C1A280DF8E891D6062838B146AEECADCF5CBC0F52291C6D44A0C89ECA2",
+      "checkoutEol": "i/lf    w/mixed attr/                 \tsupabase/migrations/202610150014_operational_api.sql"
+    }
+  ],
+  "runners": [
+    {
+      "path": "tests/review/m2-2c-legacy-responsibility-replay-red.mjs",
+      "sha256": "007C2090CF8A926A4271E9A0A467A7E3CC0E9C1749194F55F2AF75FFA44C9CDD"
+    },
+    {
+      "path": "tests/review/m2-2c-legacy-responsibility-replay.mjs",
+      "sha256": "06CB251C6A139D2A67566842B3FAF0921A2542F063E47157879BEA7DA227E105"
+    },
+    {
+      "path": "tests/review/m2-2c-legacy-responsibility-evidence-manifest.mjs",
+      "sha256": "10D105A33C56594A229135A97200B24FD1B766A90661CB345A60D9501F8F4EBB"
+    }
+  ],
+  "commands": [
+    {
+      "id": "red-baseline-exact",
+      "cwd": "work/site",
+      "command": "node tests/review/m2-2c-legacy-responsibility-replay-red.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-responsibility-replay-luna-20261019\\red-sol-p2-final3 --port 56248 --sql014-path ..\\..\\outputs\\m2-2c-legacy-responsibility-replay-luna-20261019\\baseline-SQL014.sql",
+      "result": "RED_CONFIRMED",
+      "report": {
+        "id": "red-report",
+        "kind": "json",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/red-sol-p2-final3/reproduction.json",
+        "sha256": "72BD55572E36E2ABAF83AADD009F646A2728C09CA9A3B200093709B2E5600726",
+        "bytes": 884573
+      },
+      "stdout": {
+        "id": "red-stdout",
+        "kind": "stdout",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/red-sol-p2-final3/stdout.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "bytes": 0
+      },
+      "stderr": {
+        "id": "red-stderr",
+        "kind": "stderr",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/red-sol-p2-final3/stderr.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "bytes": 0
+      },
+      "postgres": {
+        "id": "red-postgres",
+        "kind": "postgres-log",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/red-sol-p2-final3/postgres.log",
+        "sha256": "6CB52EBFB30C67980ACA386BD4A459CF1350D2D9469A6A799FED68C8D9C1E5C8",
+        "bytes": 8818
+      },
+      "exitCode": "0"
+    },
+    {
+      "id": "green-candidate-sequential-eight-races",
+      "cwd": "work/site",
+      "command": "node tests/review/m2-2c-legacy-responsibility-replay.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-responsibility-replay-luna-20261019\\green-sol-p2-final6 --port 56247",
+      "result": "GREEN_AUTHORIZATION_AND_EIGHT_RACES",
+      "report": {
+        "id": "green-report",
+        "kind": "json",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/green-sol-p2-final6/reproduction.json",
+        "sha256": "8797A49DDB50A7BB0287BD429A642E4A71F2F4958D47157CE1920D123AFCDAD0",
+        "bytes": 6453280,
+        "raceCount": 8,
+        "sequentialCount": 28
+      },
+      "stdout": {
+        "id": "green-stdout",
+        "kind": "stdout",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/green-sol-p2-final6/stdout.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "bytes": 0
+      },
+      "stderr": {
+        "id": "green-stderr",
+        "kind": "stderr",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/green-sol-p2-final6/stderr.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "bytes": 0
+      },
+      "postgres": {
+        "id": "green-postgres",
+        "kind": "postgres-log",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/green-sol-p2-final6/postgres.log",
+        "sha256": "E0FBC5202C698D87D6BB3F4EFE175FAF0C5F332D9B9E3CEE21532AE05BB84D60",
+        "bytes": 20110
+      },
+      "exitCode": "0"
+    },
+    {
+      "id": "native-full-matrix",
+      "cwd": "work/site",
+      "command": "node tests/review/m2-1-native-review.mjs --pg-bin ..\\pg-runtime\\pgsql\\bin --output-dir ..\\..\\outputs\\m2-2c-legacy-responsibility-replay-luna-20261019\\native-captured-final --port 56226 --review-matrix full --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes",
+      "result": "351/351",
+      "report": {
+        "id": "native-report",
+        "kind": "json",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/native-captured-final/review.json",
+        "sha256": "E917BC53754EE9A72B0C8C3C25AE9A2B89EACBF7A5B2865703900A99209207C1",
+        "bytes": 2720796
+      },
+      "stdout": {
+        "id": "native-stdout",
+        "kind": "stdout",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/native-captured-final/stdout.log",
+        "sha256": "316914048D5FAB56595E1F5643607EEAEB4F9AF460730B66C7AD1E798B7329C3",
+        "bytes": 1898807
+      },
+      "stderr": {
+        "id": "native-stderr",
+        "kind": "stderr",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/native-captured-final/stderr.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "bytes": 0
+      },
+      "postgres": {
+        "id": "native-postgres",
+        "kind": "postgres-log",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/native-captured-final/postgres.log",
+        "sha256": "68C5592E7A342D5DE1F0FC398A1B27E73487BF7F8708FF083945CD0EF5CC892F",
+        "bytes": 345157
+      },
+      "exitCode": "0"
+    },
+    {
+      "id": "vitest-full",
+      "cwd": "work/site",
+      "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "result": "738/738 passed",
+      "stdout": {
+        "id": "vitest-stdout",
+        "kind": "stdout",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/vitest-full-final/stdout.log",
+        "sha256": "B76E0316AF9AFDC2D25E479F0E641BC36EF45AB685A5878F18A8D5E423D231BC",
+        "bytes": 21351
+      },
+      "stderr": {
+        "id": "vitest-stderr",
+        "kind": "stderr",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/vitest-full-final/stderr.log",
+        "sha256": "03574087F63CBD7924C3196B65366AD167E2BFEDC842A79617E898482D669A6D",
+        "bytes": 897
+      },
+      "exitCode": "0"
+    },
+    {
+      "id": "tsc",
+      "cwd": "work/site",
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "result": "passed",
+      "stdout": {
+        "id": "tsc-stdout",
+        "kind": "stdout",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/validation-final2/tsc/stdout.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "bytes": 0
+      },
+      "stderr": {
+        "id": "tsc-stderr",
+        "kind": "stderr",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/validation-final2/tsc/stderr.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "bytes": 0
+      },
+      "exitCode": "0"
+    },
+    {
+      "id": "client-build",
+      "cwd": "work/site",
+      "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+      "result": "passed",
+      "stdout": {
+        "id": "client-build-stdout",
+        "kind": "stdout",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/validation-final2/client-build/stdout.log",
+        "sha256": "495012F80903001D1E0878B159EC805341D3B67AFA5DD0AF80D960DBD671EE1A",
+        "bytes": 2403
+      },
+      "stderr": {
+        "id": "client-build-stderr",
+        "kind": "stderr",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/validation-final2/client-build/stderr.log",
+        "sha256": "233FCD81A1BD111AF4AFA23E7585784528D149F851002D837B9A77277229DF83",
+        "bytes": 1049
+      },
+      "exitCode": "0"
+    },
+    {
+      "id": "worker-build",
+      "cwd": "work/site",
+      "command": "node scripts/build-worker.mjs",
+      "result": "passed",
+      "stdout": {
+        "id": "worker-build-stdout",
+        "kind": "stdout",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/validation-final2/worker-build/stdout.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "bytes": 0
+      },
+      "stderr": {
+        "id": "worker-build-stderr",
+        "kind": "stderr",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/validation-final2/worker-build/stderr.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "bytes": 0
+      },
+      "exitCode": "0"
+    },
+    {
+      "id": "node-check-red",
+      "cwd": "work/site",
+      "command": "node --check tests/review/m2-2c-legacy-responsibility-replay-red.mjs",
+      "result": "passed",
+      "stdout": {
+        "id": "node-check-red-stdout",
+        "kind": "stdout",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/validation-final2/node-check-red/stdout.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "bytes": 0
+      },
+      "stderr": {
+        "id": "node-check-red-stderr",
+        "kind": "stderr",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/validation-final2/node-check-red/stderr.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "bytes": 0
+      },
+      "exitCode": "0"
+    },
+    {
+      "id": "node-check-green",
+      "cwd": "work/site",
+      "command": "node --check tests/review/m2-2c-legacy-responsibility-replay.mjs",
+      "result": "passed",
+      "stdout": {
+        "id": "node-check-green-stdout",
+        "kind": "stdout",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/validation-final2/node-check-green/stdout.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "bytes": 0
+      },
+      "stderr": {
+        "id": "node-check-green-stderr",
+        "kind": "stderr",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/validation-final2/node-check-green/stderr.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "bytes": 0
+      },
+      "exitCode": "0"
+    },
+    {
+      "id": "node-check-manifest",
+      "cwd": "work/site",
+      "command": "node --check tests/review/m2-2c-legacy-responsibility-evidence-manifest.mjs",
+      "result": "passed",
+      "stdout": {
+        "id": "node-check-manifest-stdout",
+        "kind": "stdout",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/validation-final2/node-check-manifest/stdout.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "bytes": 0
+      },
+      "stderr": {
+        "id": "node-check-manifest-stderr",
+        "kind": "stderr",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/validation-final2/node-check-manifest/stderr.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "bytes": 0
+      },
+      "exitCode": "0"
+    },
+    {
+      "id": "git-diff-check",
+      "cwd": "work/site",
+      "command": "git diff --check",
+      "result": "passed",
+      "stdout": {
+        "id": "git-diff-check-stdout",
+        "kind": "stdout",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/validation-final2/git-diff-check/stdout.log",
+        "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "bytes": 0
+      },
+      "stderr": {
+        "id": "git-diff-check-stderr",
+        "kind": "stderr",
+        "path": "../../outputs/m2-2c-legacy-responsibility-replay-luna-20261019/validation-final2/git-diff-check/stderr.log",
+        "sha256": "46352806412A975D115F75438D180A3F349BB9FB5BD027AF4CB8EBDB81F0E49C",
+        "bytes": 146
+      },
+      "exitCode": "0"
+    }
+  ],
+  "verified": {
+    "red": {
+      "result": "RED_CONFIRMED",
+      "freshSessionRevokedReplay": "00000",
+      "argumentConflicts": [
+        "active M cached argument conflict: instance",
+        "active M cached argument conflict: members",
+        "active M cached argument conflict: reason raw whitespace",
+        "active M cached argument conflict: revision",
+        "revoked M cached argument conflict: instance",
+        "revoked M cached argument conflict: members",
+        "revoked M cached argument conflict: reason raw whitespace",
+        "revoked M cached argument conflict: revision",
+        "inactive M cached argument conflict: instance",
+        "inactive M cached argument conflict: members",
+        "inactive M cached argument conflict: reason raw whitespace",
+        "inactive M cached argument conflict: revision"
+      ],
+      "kindConflict": "P0001",
+      "contexts": [
+        {
+          "label": "00000000-0000-0000-0000-000000092004:aal2",
+          "pid": 18668,
+          "uid": "00000000-0000-0000-0000-000000092004",
+          "claims": "{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000092004\",\"aal\":\"aal2\"}",
+          "snapshot": "1444:1444:",
+          "isolation": "read committed"
+        },
+        {
+          "label": "00000000-0000-0000-0000-000000092004:aal2",
+          "pid": 18668,
+          "uid": "00000000-0000-0000-0000-000000092004",
+          "claims": "{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000092004\",\"aal\":\"aal2\"}",
+          "snapshot": "1445:1445:",
+          "isolation": "read committed"
+        },
+        {
+          "label": "00000000-0000-0000-0000-000000092004:aal2",
+          "pid": 18668,
+          "uid": "00000000-0000-0000-0000-000000092004",
+          "claims": "{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000092004\",\"aal\":\"aal2\"}",
+          "snapshot": "1445:1445:",
+          "isolation": "read committed"
+        },
+        {
+          "label": "00000000-0000-0000-0000-000000092004:aal2",
+          "pid": 18668,
+          "uid": "00000000-0000-0000-0000-000000092004",
+          "claims": "{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000092004\",\"aal\":\"aal2\"}",
+          "snapshot": "1445:1445:",
+          "isolation": "read committed"
+        },
+        {
+          "label": "00000000-0000-0000-0000-000000092004:aal2",
+          "pid": 18668,
+          "uid": "00000000-0000-0000-0000-000000092004",
+          "claims": "{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000092004\",\"aal\":\"aal2\"}",
+          "snapshot": "1445:1445:",
+          "isolation": "read committed"
+        },
+        {
+          "label": "00000000-0000-0000-0000-000000092004:aal2",
+          "pid": 18668,
+          "uid": "00000000-0000-0000-0000-000000092004",
+          "claims": "{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000092004\",\"aal\":\"aal2\"}",
+          "snapshot": "1445:1445:",
+          "isolation": "read committed"
+        },
+        {
+          "label": "00000000-0000-0000-0000-000000092004:aal2",
+          "pid": 18668,
+          "uid": "00000000-0000-0000-0000-000000092004",
+          "claims": "{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000092004\",\"aal\":\"aal2\"}",
+          "snapshot": "1446:1446:",
+          "isolation": "repeatable read"
+        },
+        {
+          "label": "00000000-0000-0000-0000-000000092005:aal2",
+          "pid": 12668,
+          "uid": "00000000-0000-0000-0000-000000092005",
+          "claims": "{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000092005\",\"aal\":\"aal2\"}",
+          "snapshot": "1446:1446:",
+          "isolation": "read committed"
+        },
+        {
+          "label": "00000000-0000-0000-0000-000000092004:aal2",
+          "pid": 18668,
+          "uid": "00000000-0000-0000-0000-000000092004",
+          "claims": "{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000092004\",\"aal\":\"aal2\"}",
+          "snapshot": "1446:1446:",
+          "isolation": "repeatable read"
+        },
+        {
+          "label": "00000000-0000-0000-0000-000000092004:aal2",
+          "pid": 18668,
+          "uid": "00000000-0000-0000-0000-000000092004",
+          "claims": "{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000092004\",\"aal\":\"aal2\"}",
+          "snapshot": "1446:1446:",
+          "isolation": "repeatable read"
+        },
+        {
+          "label": "00000000-0000-0000-0000-000000092004:aal2",
+          "pid": 18668,
+          "uid": "00000000-0000-0000-0000-000000092004",
+          "claims": "{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000092004\",\"aal\":\"aal2\"}",
+          "snapshot": "1446:1446:",
+          "isolation": "repeatable read"
+        },
+        {
+          "label": "00000000-0000-0000-0000-000000092004:aal2",
+          "pid": 18668,
+          "uid": "00000000-0000-0000-0000-000000092004",
+          "claims": "{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000092004\",\"aal\":\"aal2\"}",
+          "snapshot": "1446:1446:",
+          "isolation": "repeatable read"
+        },
+        {
+          "label": "manager RR replay after committed revocation",
+          "pid": 18668,
+          "uid": "00000000-0000-0000-0000-000000092004",
+          "claims": "{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000092004\",\"aal\":\"aal2\"}",
+          "snapshot": "1446:1446:",
+          "isolation": "repeatable read"
+        },
+        {
+          "label": "00000000-0000-0000-0000-000000092004:aal2",
+          "pid": 5472,
+          "uid": "00000000-0000-0000-0000-000000092004",
+          "claims": "{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000092004\",\"aal\":\"aal2\"}",
+          "snapshot": "1447:1447:",
+          "isolation": "read committed"
+        },
+        {
+          "label": "00000000-0000-0000-0000-000000092005:aal2",
+          "pid": 12668,
+          "uid": "00000000-0000-0000-0000-000000092005",
+          "claims": "{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000092005\",\"aal\":\"aal2\"}",
+          "snapshot": "1447:1447:",
+          "isolation": "read committed"
+        },
+        {
+          "label": "00000000-0000-0000-0000-000000092004:aal2",
+          "pid": 18668,
+          "uid": "00000000-0000-0000-0000-000000092004",
+          "claims": "{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000092004\",\"aal\":\"aal2\"}",
+          "snapshot": "1449:1449:",
+          "isolation": "read committed"
+        },
+        {
+          "label": "00000000-0000-0000-0000-000000092004:aal2",
+          "pid": 18668,
+          "uid": "00000000-0000-0000-0000-000000092004",
+          "claims": "{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000092004\",\"aal\":\"aal2\"}",
+          "snapshot": "1449:1449:",
+          "isolation": "read committed"
+        },
+        {
+          "label": "00000000-0000-0000-0000-000000092004:aal2",
+          "pid": 18668,
+          "uid": "00000000-0000-0000-0000-000000092004",
+          "claims": "{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000092004\",\"aal\":\"aal2\"}",
+          "snapshot": "1449:1449:",
+          "isolation": "read committed"
+        },
+        {
+          "label": "00000000-0000-0000-0000-000000092004:aal2",
+          "pid": 18668,
+          "uid": "00000000-0000-0000-0000-000000092004",
+          "claims": "{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000092004\",\"aal\":\"aal2\"}",
+          "snapshot": "1449:1449:",
+          "isolation": "read committed"
+        },
+        {
+          "label": "00000000-0000-0000-0000-000000092004:aal2",
+          "pid": 7804,
+          "uid": "00000000-0000-0000-0000-000000092004",
+          "claims": "{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000092004\",\"aal\":\"aal2\"}",
+          "snapshot": "1449:1449:",
+          "isolation": "read committed"
+        },
+        {
+          "label": "00000000-0000-0000-0000-000000092004:aal2",
+          "pid": 9240,
+          "uid": "00000000-0000-0000-0000-000000092004",
+          "claims": "{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000092004\",\"aal\":\"aal2\"}",
+          "snapshot": "1450:1450:",
+          "isolation": "read committed"
+        },
+        {
+          "label": "00000000-0000-0000-0000-000000092004:aal1",
+          "pid": 14572,
+          "uid": "00000000-0000-0000-0000-000000092004",
+          "claims": "{\"role\":\"authenticated\",\"sub\":\"00000000-0000-0000-0000-000000092004\",\"aal\":\"aal1\"}",
+          "snapshot": "1451:1451:",
+          "isolation": "read committed"
+        }
+      ]
+    },
+    "green": {
+      "result": "GREEN_AUTHORIZATION_AND_EIGHT_RACES",
+      "sequentialCases": [
+        {
+          "name": "authentic initial assignment as active encargado M AAL2",
+          "sqlstate": "00000"
+        },
+        {
+          "name": "authorized immediate replay",
+          "sqlstate": "00000"
+        },
+        {
+          "name": "active M cached argument conflict: instance",
+          "sqlstate": "P0001"
+        },
+        {
+          "name": "active M cached argument conflict: members",
+          "sqlstate": "P0001"
+        },
+        {
+          "name": "active M cached argument conflict: reason raw whitespace",
+          "sqlstate": "P0001"
+        },
+        {
+          "name": "active M cached argument conflict: revision",
+          "sqlstate": "P0001"
+        },
+        {
+          "name": "E advances task through legacy-compatible task.transition; M original responsibility replay remains authorized",
+          "sqlstate": "00000"
+        },
+        {
+          "name": "J creates and replays own responsibility while retaining chief authority",
+          "sqlstate": "00000"
+        },
+        {
+          "name": "E pauses the authentic timer before month-close precondition",
+          "sqlstate": "00000"
+        },
+        {
+          "name": "valid legacy period close endpoint followed by authorized M replay",
+          "sqlstate": "00000"
+        },
+        {
+          "name": "authentic record_activity receipt conflicts with responsibility kind",
+          "sqlstate": "P0001"
+        },
+        {
+          "name": "membership revoked by distinct chief J using API after RR authorization snapshot",
+          "sqlstate": "00000"
+        },
+        {
+          "name": "revoked M cached argument conflict: instance",
+          "sqlstate": "P0001"
+        },
+        {
+          "name": "revoked M cached argument conflict: members",
+          "sqlstate": "P0001"
+        },
+        {
+          "name": "revoked M cached argument conflict: reason raw whitespace",
+          "sqlstate": "P0001"
+        },
+        {
+          "name": "revoked M cached argument conflict: revision",
+          "sqlstate": "P0001"
+        },
+        {
+          "name": "stale RR replay aborts after membership revocation",
+          "sqlstate": "40001"
+        },
+        {
+          "name": "fresh-session replay after membership revoke",
+          "sqlstate": "P0001"
+        },
+        {
+          "name": "J restores manager membership, then M replays original responsibility successfully",
+          "sqlstate": "00000"
+        },
+        {
+          "name": "inactive M cached argument conflict: instance",
+          "sqlstate": "P0001"
+        },
+        {
+          "name": "inactive M cached argument conflict: members",
+          "sqlstate": "P0001"
+        },
+        {
+          "name": "inactive M cached argument conflict: reason raw whitespace",
+          "sqlstate": "P0001"
+        },
+        {
+          "name": "inactive M cached argument conflict: revision",
+          "sqlstate": "P0001"
+        },
+        {
+          "name": "inactive manager replay denied",
+          "sqlstate": "P0001"
+        },
+        {
+          "name": "local profile and role restored, then M replays original responsibility successfully",
+          "sqlstate": "00000"
+        },
+        {
+          "name": "demoted manager replay denied",
+          "sqlstate": "P0001"
+        },
+        {
+          "name": "AAL2 replay after final profile and role restoration",
+          "sqlstate": "00000"
+        },
+        {
+          "name": "AAL1 manager replay denied",
+          "sqlstate": "P0001"
+        }
+      ],
+      "races": [
+        {
+          "index": 1,
+          "replayIsolation": "read committed",
+          "revokeIsolation": "read committed",
+          "winner": "replay",
+          "loserReplaySqlstate": "00000",
+          "blockerPids": [
+            19636
+          ],
+          "scopeAssertions": {
+            "companyId": "00000000-0000-0000-0000-000000092002",
+            "managerId": "00000000-0000-0000-0000-000000092004",
+            "companyDistinctFromKindFixture": true,
+            "ownerTasks": [],
+            "assignmentOwners": [],
+            "teamMemberships": [],
+            "responsibilityMemberships": [],
+            "coverage": [],
+            "sessions": [],
+            "activity": []
+          },
+          "rollbackCaptured": false,
+          "retryRevokeSqlstate": "00000",
+          "retryReplaySqlstate": "P0001",
+          "taskArraysUnchanged": true
+        },
+        {
+          "index": 2,
+          "replayIsolation": "read committed",
+          "revokeIsolation": "read committed",
+          "winner": "revocation",
+          "loserReplaySqlstate": "40001",
+          "blockerPids": [
+            16480
+          ],
+          "scopeAssertions": {
+            "companyId": "00000000-0000-0000-0000-000000092002",
+            "managerId": "00000000-0000-0000-0000-000000092004",
+            "companyDistinctFromKindFixture": true,
+            "ownerTasks": [],
+            "assignmentOwners": [],
+            "teamMemberships": [],
+            "responsibilityMemberships": [],
+            "coverage": [],
+            "sessions": [],
+            "activity": []
+          },
+          "rollbackCaptured": true,
+          "retryRevokeSqlstate": "00000",
+          "retryReplaySqlstate": "P0001",
+          "taskArraysUnchanged": true
+        },
+        {
+          "index": 3,
+          "replayIsolation": "read committed",
+          "revokeIsolation": "repeatable read",
+          "winner": "replay",
+          "loserReplaySqlstate": "00000",
+          "blockerPids": [
+            6700
+          ],
+          "scopeAssertions": {
+            "companyId": "00000000-0000-0000-0000-000000092002",
+            "managerId": "00000000-0000-0000-0000-000000092004",
+            "companyDistinctFromKindFixture": true,
+            "ownerTasks": [],
+            "assignmentOwners": [],
+            "teamMemberships": [],
+            "responsibilityMemberships": [],
+            "coverage": [],
+            "sessions": [],
+            "activity": []
+          },
+          "rollbackCaptured": false,
+          "retryRevokeSqlstate": "00000",
+          "retryReplaySqlstate": "P0001",
+          "taskArraysUnchanged": true
+        },
+        {
+          "index": 4,
+          "replayIsolation": "read committed",
+          "revokeIsolation": "repeatable read",
+          "winner": "revocation",
+          "loserReplaySqlstate": "40001",
+          "blockerPids": [
+            12516
+          ],
+          "scopeAssertions": {
+            "companyId": "00000000-0000-0000-0000-000000092002",
+            "managerId": "00000000-0000-0000-0000-000000092004",
+            "companyDistinctFromKindFixture": true,
+            "ownerTasks": [],
+            "assignmentOwners": [],
+            "teamMemberships": [],
+            "responsibilityMemberships": [],
+            "coverage": [],
+            "sessions": [],
+            "activity": []
+          },
+          "rollbackCaptured": true,
+          "retryRevokeSqlstate": "00000",
+          "retryReplaySqlstate": "P0001",
+          "taskArraysUnchanged": true
+        },
+        {
+          "index": 5,
+          "replayIsolation": "repeatable read",
+          "revokeIsolation": "read committed",
+          "winner": "replay",
+          "loserReplaySqlstate": "00000",
+          "blockerPids": [
+            3200
+          ],
+          "scopeAssertions": {
+            "companyId": "00000000-0000-0000-0000-000000092002",
+            "managerId": "00000000-0000-0000-0000-000000092004",
+            "companyDistinctFromKindFixture": true,
+            "ownerTasks": [],
+            "assignmentOwners": [],
+            "teamMemberships": [],
+            "responsibilityMemberships": [],
+            "coverage": [],
+            "sessions": [],
+            "activity": []
+          },
+          "rollbackCaptured": false,
+          "retryRevokeSqlstate": "00000",
+          "retryReplaySqlstate": "P0001",
+          "taskArraysUnchanged": true
+        },
+        {
+          "index": 6,
+          "replayIsolation": "repeatable read",
+          "revokeIsolation": "read committed",
+          "winner": "revocation",
+          "loserReplaySqlstate": "40001",
+          "blockerPids": [
+            18380
+          ],
+          "scopeAssertions": {
+            "companyId": "00000000-0000-0000-0000-000000092002",
+            "managerId": "00000000-0000-0000-0000-000000092004",
+            "companyDistinctFromKindFixture": true,
+            "ownerTasks": [],
+            "assignmentOwners": [],
+            "teamMemberships": [],
+            "responsibilityMemberships": [],
+            "coverage": [],
+            "sessions": [],
+            "activity": []
+          },
+          "rollbackCaptured": true,
+          "retryRevokeSqlstate": "00000",
+          "retryReplaySqlstate": "P0001",
+          "taskArraysUnchanged": true
+        },
+        {
+          "index": 7,
+          "replayIsolation": "repeatable read",
+          "revokeIsolation": "repeatable read",
+          "winner": "replay",
+          "loserReplaySqlstate": "00000",
+          "blockerPids": [
+            4336
+          ],
+          "scopeAssertions": {
+            "companyId": "00000000-0000-0000-0000-000000092002",
+            "managerId": "00000000-0000-0000-0000-000000092004",
+            "companyDistinctFromKindFixture": true,
+            "ownerTasks": [],
+            "assignmentOwners": [],
+            "teamMemberships": [],
+            "responsibilityMemberships": [],
+            "coverage": [],
+            "sessions": [],
+            "activity": []
+          },
+          "rollbackCaptured": false,
+          "retryRevokeSqlstate": "00000",
+          "retryReplaySqlstate": "P0001",
+          "taskArraysUnchanged": true
+        },
+        {
+          "index": 8,
+          "replayIsolation": "repeatable read",
+          "revokeIsolation": "repeatable read",
+          "winner": "revocation",
+          "loserReplaySqlstate": "40001",
+          "blockerPids": [
+            20576
+          ],
+          "scopeAssertions": {
+            "companyId": "00000000-0000-0000-0000-000000092002",
+            "managerId": "00000000-0000-0000-0000-000000092004",
+            "companyDistinctFromKindFixture": true,
+            "ownerTasks": [],
+            "assignmentOwners": [],
+            "teamMemberships": [],
+            "responsibilityMemberships": [],
+            "coverage": [],
+            "sessions": [],
+            "activity": []
+          },
+          "rollbackCaptured": true,
+          "retryRevokeSqlstate": "00000",
+          "retryReplaySqlstate": "P0001",
+          "taskArraysUnchanged": true
+        }
+      ]
+    },
+    "native": {
+      "passed": 351,
+      "total": 351,
+      "failed": 0,
+      "m2cSmoke": true
+    }
+  },
+  "contractSection5Coverage": {
+    "requiredScenarios": [
+      "authorized immediate replay",
+      "E advances task through legacy-compatible task.transition; M original responsibility replay remains authorized",
+      "J creates and replays own responsibility while retaining chief authority",
+      "valid legacy period close endpoint followed by authorized M replay",
+      "J restores manager membership, then M replays original responsibility successfully",
+      "local profile and role restored, then M replays original responsibility successfully",
+      "authentic record_activity receipt conflicts with responsibility kind"
+    ],
+    "conflictScenarios": [
+      "active M cached argument conflict: instance",
+      "active M cached argument conflict: members",
+      "active M cached argument conflict: reason raw whitespace",
+      "active M cached argument conflict: revision",
+      "revoked M cached argument conflict: instance",
+      "revoked M cached argument conflict: members",
+      "revoked M cached argument conflict: reason raw whitespace",
+      "revoked M cached argument conflict: revision",
+      "inactive M cached argument conflict: instance",
+      "inactive M cached argument conflict: members",
+      "inactive M cached argument conflict: reason raw whitespace",
+      "inactive M cached argument conflict: revision"
+    ],
+    "missing": [],
+    "acceptance": "complete for §5; pending Sol review"
+  },
+  "failedAttemptsPreserved": [
+    "red-actual-attempt1: wrong schema qualification for task_dependency_graphs in harness",
+    "green-races-attempt1: pg_blocking_pids text parsed as JSON",
+    "green-races-attempt2: snapshot array canonical ordering assertion",
+    "green-captured-final: winner-only/final snapshot canonical ordering assertion",
+    "green-rr-attempt3: psql verbosity omitted SQLSTATE on fresh-session harness connection",
+    "green-sequential-completion-attempt1: genuine close endpoint blocked on active clock; fixture precondition diagnosed",
+    "green-sequential-completion-attempt3: UTC work date exceeded ART business date; fixture clock corrected",
+    "green-sequential-completion-attempt4: assertion included nullable closure collection length",
+    "green-sol-p2-final1: scope snapshot nullable collection not normalized",
+    "green-sol-p2-final4: strict membership changed_at expectation updated to assert timestamp progression"
+  ],
+  "limitations": [
+    "No hosted database, deployment, remote SQL, or commit/push was performed."
+  ]
+}

@@ -19,6 +19,8 @@ describe("baja y reasignación auditada en el laboratorio", () => {
     state.activeId = "m1";
     const manager = state.profiles.find((profile) => profile.id === "m1")!;
     const task = state.tasks.find((row) => row.ownerId === "e0" && row.companyId === "c1" && row.status !== "Completada")!;
+    const companyName = state.companies.find((company) => company.id === task.companyId)!.name;
+    const taskLabel = new RegExp(`${task.title}.*${companyName}`);
     state.tasks = state.tasks.map((row) => row.id === task.id ? { ...row, scheduledOn: dateART(), due: dateART() } : row);
     const commit = vi.fn(() => true);
     const notify = vi.fn();
@@ -28,12 +30,12 @@ describe("baja y reasignación auditada en el laboratorio", () => {
     fireEvent.change(screen.getByLabelText("Desde"), { target: { value: dateART() } });
     fireEvent.change(screen.getByLabelText("Hasta"), { target: { value: dateART() } });
     fireEvent.change(screen.getByLabelText("Quién cubre"), { target: { value: "e1" } });
-    fireEvent.click(screen.getByLabelText(new RegExp(task.title)));
+    fireEvent.click(screen.getByLabelText(taskLabel));
 
     const revokedManager = { ...manager, companyIds: manager.companyIds.filter((companyId) => companyId !== "c1") };
     const revoked = { ...state, profiles: state.profiles.map((profile) => profile.id === manager.id ? revokedManager : profile) };
     view.rerender(<Absences state={revoked} commit={commit} notify={notify} />);
-    expect(screen.queryByLabelText(new RegExp(task.title))).toBeNull();
+    expect(screen.queryByLabelText(taskLabel)).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Guardar ausencia" }));
     expect(commit).not.toHaveBeenCalled();
     expect(notify).toHaveBeenCalledWith(expect.stringContaining("Cambió el alcance"));

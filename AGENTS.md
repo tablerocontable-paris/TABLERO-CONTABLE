@@ -1,25 +1,28 @@
-# Continuidad vigente — replay legacy de movimientos aceptado, 19/10/2026
+# Continuidad vigente — replay de responsabilidad aceptado localmente, 20/10/2026
 
-GPT-6.1 Sol aceptó el replay legacy de `public.record_activity_once` en alcance
-local. Contrato y aceptación están en `docs/architecture/M2-2C-LEGACY-ACTIVITY-REPLAY-AUTHORIZATION-SOL-CONTRACT-20261019.md`
-(SHA `F4113A701BF4E8C075CAF12F95535BAC7B5A0BFC8D307E17EC17CF40010D665A`) y
-`docs/architecture/M2-2C-LEGACY-ACTIVITY-REPLAY-SOL-ACCEPTANCE-20261019.md`.
-SQL014 candidata SHA `7BF6F10E8703A2044708C9E37AD72021F07B6CD3C7E803C3D9313A0E170A5C7E`.
-Baseline rojo Actual/Upgrade; candidata verde Actual/Upgrade, ocho carreras cada
-una; siete secuencias con snapshots; 67/67 referencias. `node --check` y
-diff-check exit 0. Manifiesto versionado SHA
-`6EF709F05E8D44CF0520257E45EA9E0B6EC326E8EC724E9F45C200BA2D50CFD4`.
+GPT-6.1 Sol aceptó en alcance local acotado el replay de
+`public.assign_task_responsibility`. Contrato:
+`docs/architecture/M2-2C-LEGACY-RESPONSIBILITY-REPLAY-AUTHORIZATION-SOL-CONTRACT-20261019.md`;
+aceptación: `docs/architecture/M2-2C-LEGACY-RESPONSIBILITY-REPLAY-SOL-ACCEPTANCE-20261019.md`
+(SHA-256 `233ADBE22F7DFB2BE135D6AAE08E232530688D291D07BB05EAE8B7964AFB018E`).
+SQL014 candidata checkout SHA-256 `CDD909C1A280DF8E891D6062838B146AEECADCF5CBC0F52291C6D44A0C89ECA2`;
+baseline Git exacta `092B14200AD17D5FF5F96C5D6D748826366B395E3308082C5FEDAE40444EB4EA`.
+Rojo confirmado; verde 28 casos secuenciales y 8/8 carreras con M fuera del
+ámbito de tareas; matriz nativa 351/351 y suite 738/738. TSC, builds cliente y
+Worker, sintaxis y diff-check terminaron con exit 0. Manifiesto versionado SHA
+`478157350FC4ED3561EE5DF6BD940E0B79E20D339E8D6861F16B3B1182E71C1F`; 33/33
+referencias verificadas. SQL001–013 intactas. Límite P3 de metadatos AAL1 está
+descripto en la aceptación.
 
-El bloque local aceptado se publicará directo a `origin/main`, sin PR. No aplicar
-SQL014 ni iniciar Gate H: Gate L/§9 y sus requisitos de exposición siguen
-pendientes. Auth/HTTP, Data API, Storage/restore, CI, hosting, correo y
-producción también permanecen abiertos. El replay de
-`assign_task_responsibility` sigue siendo la próxima familia; Sol define su
-contrato antes de Luna.
+Este bloque está aceptado localmente y pendiente de commit/push directo a
+`origin/main`, sin PR. SQL014 no se aplicó a Supabase. Después de publicar,
+GPT-6.1 Sol audita el inventario residual §9 y define la próxima unidad acotada.
+Gate L, Auth/HTTP, Data API, Storage/restore, CI, hosting, correo y producción
+siguen abiertos. No activar el espacio operativo ni usar datos reales.
 
-Esta cabecera supersede el estado anterior de cronómetro. El historial siguiente
-se conserva como evidencia; sus instrucciones previas de próximo paso quedan
-supersedidas.
+Esta cabecera supersede el estado anterior de movimientos. El historial
+siguiente se conserva como evidencia; sus instrucciones previas de próximo paso
+quedan supersedidas.
 # Continuidad vigente — replay legacy de cronómetro aceptado, 19/10/2026
 
 Sol aceptó en alcance local limitado la reautorización del replay legacy de

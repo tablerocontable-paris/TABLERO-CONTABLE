@@ -1138,6 +1138,37 @@ begin
  select * into cached from public.task_mutation_receipts where actor_id=actor and operation_id=p_idempotency_key;
  if found then
    if cached.operation_kind<>'assign_responsibility' or cached.arguments<>args then raise exception 'Identificador de operación reutilizado con otros argumentos'; end if;
+   -- Cached replay is read-only, but current authorization must still be
+   -- serialized against membership/profile changes. Keep the shared M2.2B
+   -- lock order and do not publish writer fences on this path.
+   select * into planned from public.task_instances where id=p_instance;
+   if not found then raise exception using errcode='40001',message='La ocurrencia cambió; reintente desde una transacción nueva'; end if;
+   select coalesce(array_agg(distinct x order by x),array[]::uuid[]) into profiles from (
+     select actor x union select planned.owner_id
+     union select m.profile_id from public.task_responsibility_heads h
+       join public.task_responsibility_members m on m.set_id=h.set_id and m.organization_id=h.organization_id
+       where h.instance_id=planned.id and h.organization_id=planned.organization_id
+   ) q where x is not null;
+   select coalesce(jsonb_agg(jsonb_build_object('ownerId',x,'period',planned.period) order by x),'[]'::jsonb)
+     into month_keys from unnest(profiles) q(x);
+   plan:=public._coordination_prepare(array[planned.id],array[actor],profiles,month_keys,
+     case when planned.kind='resultado' then array['dependencies:'||planned.organization_id||':'||planned.company_id||':'||planned.period] else array[]::text[] end,'{}'::jsonb);
+   perform app_private._coordination_acquire_m22b(plan,false);
+   select * into t from public.task_instances where id=p_instance for share;
+   select * into cached from public.task_mutation_receipts where actor_id=actor and operation_id=p_idempotency_key for share;
+   if not found or cached.operation_kind<>'assign_responsibility' or cached.arguments<>args
+      or cached.organization_id is distinct from t.organization_id
+      or jsonb_typeof(cached.result)<>'object' or cached.result->>'revision' is null
+      or (cached.result->>'revision') !~ '^[1-9][0-9]*$' then
+     raise exception using errcode='40001',message='El recibo cambió; reintente desde una transacción nueva';
+   end if;
+   if not exists(select 1 from public.profiles p where p.id=actor and p.organization_id=t.organization_id
+       and p.active and p.role in ('jefe','encargado'))
+      or (public.actor_role()='encargado' and not public.can_access_owner(t.owner_id))
+      or not public._can_access_instance_at(t.id,clock_timestamp()) then
+     raise exception 'Sin permiso';
+   end if;
+   perform public.require_privileged_session();
    return (cached.result->>'revision')::bigint;
  end if;
  select * into planned from public.task_instances where id=p_instance;
