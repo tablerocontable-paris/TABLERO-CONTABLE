@@ -1,0 +1,209 @@
+{
+  "manifestVersion": 4,
+  "contract": "docs/architecture/M2-2C-LEGACY-COVERAGE-REPLAY-AUTHORIZATION-SOL-CONTRACT-20261020.md",
+  "contractSha256": "9F44C0DAE1C2C3B339CAD7271EE3AD2C80B1E1700711E46692EA15F0929D53C8",
+  "baselineCommit": "4f2900e5edae9fea1ee1a8bf141e22c2ab777c2a",
+  "baselineSql014GitBlob": "d3e45df0b8385772a3ace935b557fc0379f4e95a",
+  "baselineSql014Sha256Lf": "544E574725CB58B039B05BA940B4EF7C884DCD6527C396FC5C67A4E8FE097A99",
+  "candidateSql014": "supabase\\migrations\\202610150014_operational_api.sql",
+  "candidateSql014Sha256": "CE85FFB750443CB54CC25DD55AE25831CCFE71D8A10EA143D54C34855009447D",
+  "runner": "tests\\review\\m2-2c-legacy-coverage-replay-red.mjs",
+  "runnerSha256": "2D5A5F443D499005501D02AA56CA84A33E8E3858D74787E9F3E2A451D22B5524",
+  "postgresVersion": "PostgreSQL 17.11",
+  "canonicalOutputRoot": "../../outputs/m2-2c-legacy-coverage-replay-luna-20261020/",
+  "status": "CANDIDATE_CONCURRENCY_PASS_PENDING_SOL_RECHECK",
+  "evidence": {
+    "red": {
+      "path": "../../outputs/m2-2c-legacy-coverage-replay-luna-20261020/red-complete/red-report.json",
+      "sha256": "78AAB30AC62B3FEA56D20894BFB6FA32433125DD68E4DE9B7E7A19A6A54529C1",
+      "runnerSha256": "2D5A5F443D499005501D02AA56CA84A33E8E3858D74787E9F3E2A451D22B5524",
+      "result": "RED_CONFIRMED_BOTH_ENDPOINTS_AND_STALE_RR",
+      "cases": 10,
+      "completeSnapshots": 20,
+      "staleRRByEndpoint": 2,
+      "stdoutSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "stderrSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "exitCode": 0
+    },
+    "green": {
+      "path": "../../outputs/m2-2c-legacy-coverage-replay-luna-20261020/green-races/green-report.json",
+      "sha256": "917582FECC5F38DB980441A674E9E7A7F38093DE9F38B363975EB7EC6394EC2A",
+      "runnerSha256": "2D5A5F443D499005501D02AA56CA84A33E8E3858D74787E9F3E2A451D22B5524",
+      "result": "GREEN_CANDIDATE_SEQUENTIAL_STALE_RR_AND_RACES",
+      "cases": 28,
+      "completeSnapshots": 56,
+      "staleRRByEndpoint": 2,
+      "races": 8,
+      "revocationWinnerSnapshotsEqual": true,
+      "revocationWinnerSnapshotOrder": "writer api.command_v1 mutates under held transaction; stale replay starts concurrently and waits on writer lock; capture full 57-table writer-session snapshot after writer statement and before commit; commit writer; replay returns; rollback replay transaction; full post-replay snapshot deepEqual to precommit writer snapshot",
+      "writerDeltasIncluded": "membership revision, membership fence, receipt and audit changes from authentic api.command_v1 revoke are already in both snapshots",
+      "blockersClaimed": "All eight races use overlapping transactions. Replay-winner cases prove writer PID waits on replay PID; writer-winner cases prove replay PID waits on writer PID. Each blocker is observed with pg_stat_activity wait_event_type=Lock and pg_blocking_pids before the winning transaction commits.",
+      "stdoutSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "stderrSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "exitCode": 0,
+      "writerWinnerCases": 4,
+      "writerWinnerRealBlockers": 4,
+      "writerWinnerCompleteSnapshotEqual": 4,
+      "freshRetryCases": 8,
+      "writerWinnerResults": [
+        {
+          "readerIsolation": "read committed",
+          "writerIsolation": "read committed",
+          "replaySqlstate": "40001",
+          "writerWait": {
+            "pid": 17160,
+            "state": "active",
+            "waitEventType": "Lock",
+            "waitEvent": "advisory",
+            "blockers": [
+              16504
+            ]
+          },
+          "freshRetrySqlstate": "P0001"
+        },
+        {
+          "readerIsolation": "read committed",
+          "writerIsolation": "repeatable read",
+          "replaySqlstate": "40001",
+          "writerWait": {
+            "pid": 17160,
+            "state": "active",
+            "waitEventType": "Lock",
+            "waitEvent": "advisory",
+            "blockers": [
+              16504
+            ]
+          },
+          "freshRetrySqlstate": "P0001"
+        },
+        {
+          "readerIsolation": "repeatable read",
+          "writerIsolation": "read committed",
+          "replaySqlstate": "40001",
+          "writerWait": {
+            "pid": 17160,
+            "state": "active",
+            "waitEventType": "Lock",
+            "waitEvent": "advisory",
+            "blockers": [
+              16504
+            ]
+          },
+          "freshRetrySqlstate": "P0001"
+        },
+        {
+          "readerIsolation": "repeatable read",
+          "writerIsolation": "repeatable read",
+          "replaySqlstate": "40001",
+          "writerWait": {
+            "pid": 17160,
+            "state": "active",
+            "waitEventType": "Lock",
+            "waitEvent": "advisory",
+            "blockers": [
+              16504
+            ]
+          },
+          "freshRetrySqlstate": "P0001"
+        }
+      ],
+      "blockerProtocol": "Authentic api.command_v1 writer holds its transaction and row/fence locks; the concurrent stale replay PID is observed waiting on Lock with pg_blocking_pids identifying the writer PID; writer commits; replay SQLSTATE is checked; complete writer-session state after its command is deepEqual to complete state after replay/rollback; fresh retry is denied with zero full-snapshot delta.",
+      "raceRunExitCode": 0
+    },
+    "nativeMatrix": {
+      "path": "../../outputs/m2-2c-legacy-coverage-replay-luna-20261020/native-full/review.json",
+      "sha256": "8307AA5018AE53EDF0D9EF6EB0CDB232D01D3A6ED06F1B3FBF61B8C2E192D696",
+      "total": 351,
+      "passed": 351,
+      "failed": 0,
+      "deadlock40P01": 0,
+      "exitCode": 0
+    },
+    "vitest": {
+      "testFiles": 74,
+      "passed": 738,
+      "failed": 0,
+      "durationSeconds": 363.3,
+      "logStdout": "../../outputs/m2-2c-legacy-coverage-replay-luna-20261020/validation/vitest.stdout.txt",
+      "logStderr": "../../outputs/m2-2c-legacy-coverage-replay-luna-20261020/validation/vitest.stderr.txt",
+      "exitCode": 0
+    },
+    "validations": [
+      {
+        "name": "Vitest",
+        "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+        "exitCode": 0,
+        "stdoutPath": "../../outputs/m2-2c-legacy-coverage-replay-luna-20261020/validation/vitest.stdout.txt",
+        "stdoutSha256": "E6497005A26D7DD2AC28FEFBBB37FA040C1301BD20D3FEAC4E492C4BA2F93362",
+        "stderrPath": "../../outputs/m2-2c-legacy-coverage-replay-luna-20261020/validation/vitest.stderr.txt",
+        "stderrSha256": "03574087F63CBD7924C3196B65366AD167E2BFEDC842A79617E898482D669A6D"
+      },
+      {
+        "name": "TypeScript",
+        "command": "node node_modules/typescript/bin/tsc --noEmit",
+        "exitCode": 0,
+        "stdoutPath": "../../outputs/m2-2c-legacy-coverage-replay-luna-20261020/validation/tsc.stdout.txt",
+        "stdoutSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "stderrPath": "../../outputs/m2-2c-legacy-coverage-replay-luna-20261020/validation/tsc.stderr.txt",
+        "stderrSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      {
+        "name": "Client build",
+        "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+        "exitCode": 0,
+        "stdoutPath": "../../outputs/m2-2c-legacy-coverage-replay-luna-20261020/validation/client-build.stdout.txt",
+        "stdoutSha256": "BE94FA10D19549382E027EC28B6047341B48B615F97C7F9B5A76631979FFA8A8",
+        "stderrPath": "../../outputs/m2-2c-legacy-coverage-replay-luna-20261020/validation/client-build.stderr.txt",
+        "stderrSha256": "364968084D5BAEB488E4EC3F05C1DA3A314B7F70261F9DAD0E279AC98A1F952B"
+      },
+      {
+        "name": "Worker build",
+        "command": "node scripts/build-worker.mjs",
+        "exitCode": 0,
+        "stdoutPath": "../../outputs/m2-2c-legacy-coverage-replay-luna-20261020/validation/worker-build.stdout.txt",
+        "stdoutSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "stderrPath": "../../outputs/m2-2c-legacy-coverage-replay-luna-20261020/validation/worker-build.stderr.txt",
+        "stderrSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      {
+        "name": "Runner syntax",
+        "command": "node --check tests/review/m2-2c-legacy-coverage-replay-red.mjs",
+        "exitCode": 0,
+        "stdoutPath": "../../outputs/m2-2c-legacy-coverage-replay-luna-20261020/validation/runner-syntax.stdout.txt",
+        "stdoutSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "stderrPath": "../../outputs/m2-2c-legacy-coverage-replay-luna-20261020/validation/runner-syntax.stderr.txt",
+        "stderrSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      {
+        "name": "Diff check",
+        "command": "git diff --check",
+        "exitCode": 0,
+        "stdoutPath": "../../outputs/m2-2c-legacy-coverage-replay-luna-20261020/validation/diff-check.stdout.txt",
+        "stdoutSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "stderrPath": "../../outputs/m2-2c-legacy-coverage-replay-luna-20261020/validation/diff-check.stderr.txt",
+        "stderrSha256": "46352806412A975D115F75438D180A3F349BB9FB5BD027AF4CB8EBDB81F0E49C"
+      }
+    ]
+  },
+  "completed": [
+    "Red reproduction on both public endpoints and stale-RR probes passed against exact baseline.",
+    "Candidate sequential replay/authorization cases pass with complete snapshots.",
+    "All eight RC/RC, RC/RR, RR/RC and RR/RR combinations ran with both winners. Each writer-winner has overlapping transactions, authentic api.command_v1 writer, actual replay wait verified via pg_stat_activity and pg_blocking_pids, writer commit, checked replay SQLSTATE, full snapshot equality, and fresh denied retry with full zero-delta snapshots.",
+    "SQL014 hash is unchanged. Existing full suite/build/native evidence remains valid; runner syntax and diff-check were refreshed."
+  ],
+  "excludedAttempts": [
+    {
+      "reason": "initdb refused non-empty cluster before assertions; excluded",
+      "attempt": "red-final reused output directory"
+    },
+    {
+      "reason": "runner construction error before assertions; excluded",
+      "attempt": "initial harness capture"
+    }
+  ],
+  "limits": [
+    "Disposable local PostgreSQL; no hosted Supabase connection.",
+    "Sol must re-check canonical report paths/hashes and the corrected full-snapshot comparison before acceptance."
+  ],
+  "next": "Sol re-check canonical report/runner hashes and the confirmed real-blocker writer-winner evidence; acceptance remains required."
+}

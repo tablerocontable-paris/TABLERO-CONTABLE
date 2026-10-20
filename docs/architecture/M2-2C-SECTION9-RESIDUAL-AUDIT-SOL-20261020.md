@@ -1,3 +1,18 @@
+# Continuidad vigente §9 — T y C aceptadas; sigue A (20/10/2026)
+
+La etapa T quedó aceptada y publicada en `4f2900e5edae9fea1ee1a8bf141e22c2ab777c2a`.
+La familia C quedó aceptada localmente por Sol; aún debe publicarse junto a su
+evidencia. Aceptación C:
+`M2-2C-LEGACY-COVERAGE-REPLAY-SOL-ACCEPTANCE-20261020.md` (SHA-256
+`64A2B9D3F9024E307FC21DCBEB38B810208B551C8DA2BE8DFEB6CE094FD8F8A1`). No
+reimplementar T/C ni repetir sus matrices para esta edición de SQL014.
+
+La siguiente unidad es A: `approve_employee_absence` y
+`cancel_employee_absence`, con contrato Sol separado. Después queda P (dictamen
+de política), el cruce consolidado §9 y la aceptación Gate L. No aplicar SQL014
+en Supabase hasta completar esos gates. Este checkpoint supersede la selección
+T histórica que sigue.
+
 # Inventario residual §9 — auditoría Sol
 
 Fecha: 20/10/2026. Baseline inspeccionado:
@@ -44,8 +59,8 @@ grupos, diez endpoints, más helper interno compartido de ausencias:
 
 | Grupo | Endpoints | Evidencia actual y tratamiento |
 |---|---|---|
-| T: controles de tarea | transition_task_reviewed, set_checklist_item_reviewed, set_task_wait, set_task_wait_reviewed | Retornos cached anteriores a `_coordination_apply_task_control`. Sospecha estática concreta; seleccionado ahora como una familia de cuatro wrappers. |
-| C: supervisión de cobertura | approve_task_coverage_plan, cancel_task_coverage_binding | Retorno cached antes de MFA/ámbito; sus carreras aceptadas de primera ejecución no prueban esos retornos. Inspección y reproducción posterior agrupadas, sin repetir materialización/revocación ya aceptadas. |
+| T: controles de tarea | transition_task_reviewed, set_checklist_item_reviewed, set_task_wait, set_task_wait_reviewed | Aceptada localmente y publicada; aceptación `M2-2C-LEGACY-TASK-CONTROL-REPLAY-SOL-ACCEPTANCE-20261020.md`. No reabrir sin evidencia contradictoria. |
+| C: supervisión de cobertura | approve_task_coverage_plan, cancel_task_coverage_binding | Aceptada localmente; `M2-2C-LEGACY-COVERAGE-REPLAY-SOL-ACCEPTANCE-20261020.md`. Reportes y artefactos exactos están en esa aceptación. No reabrir sin evidencia contradictoria. |
 | A: supervisión de ausencias | approve_employee_absence, cancel_employee_absence | `_get_mutation_receipt` de SQL011:1379 retorna antes de MFA/ámbito. Helper sólo tiene estos dos consumidores efectivos. No cambiarlo globalmente sin contrato de esta familia. |
 | P: política de cleanup/privacidad | pause_task_timer, save_private_block_note | No clasificar automáticamente como defecto. Pause admite cerrar sesión propia después de perder acceso; el mapa R90 documenta explícitamente pausa con perfil inactivo. Notas son privadas del autor y ya verifican rol/org activos antes de cached; falta resolver qué acceso histórico propio conserva el autor. Revisar política y evidencia existente antes de autorizar cambios. |
 
@@ -60,7 +75,7 @@ Los otros endpoints legacy de asignación/materialización sin receipt cached
 no entran automáticamente en este inventario. Su cobertura de primera
 ejecución pertenece al cruce de §9, no a nuevas correcciones de replay.
 
-## Próxima unidad elegida y condición de avance
+## Selección histórica T y condición de avance (supersedida)
 
 Contrato ejecutable:
 `M2-2C-LEGACY-TASK-CONTROL-REPLAY-AUTHORIZATION-SOL-CONTRACT-20261020.md`.
@@ -68,8 +83,8 @@ Cuatro wrappers, una autorización readonly privada y una matriz compartida;
 reproducción por wrapper antes de tocar SQL014. Si la sospecha no se reproduce,
 no-go y evidencia a Sol; no fabricar un fallo para justificar un cambio.
 
-Después de aceptar T: actualizar esta tabla una sola vez y seguir C/A/P.
-Después, cruce consolidado de §9 con nombres/resultados ya existentes y
+La continuación vigente tras T y C es A; después resolver P y hacer el cruce
+consolidado de §9 con nombres/resultados ya existentes y
 acotamiento de huecos reales de concurrencia/inyección de fallos: no una nueva
 reimplementación genérica de todos los writers. Una familia ya aceptada sólo
 se reabre por cambio de producto o evidencia concreta contradictoria.

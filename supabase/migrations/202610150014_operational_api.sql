@@ -2935,6 +2935,236 @@ begin
  if s->'privateNote'<>'null'::jsonb then perform 1 from public.task_private_block_notes where id=(s->'privateNote'->>'id')::uuid for update; end if;
  perform public._coordination_revalidate(p_plan);
 end $$;
+
+-- C: reauthorize cached coverage supervision receipts. Replays take the
+-- shared M2.2B protocol read-only, then validate current scope and the full
+-- immutable receipt before returning its historical result.
+create function app_private.replay_legacy_coverage_receipt(
+ p_plan_id uuid,p_binding_id uuid,p_actor uuid,p_operation_id uuid,p_kind text,p_arguments jsonb
+) returns jsonb language plpgsql security definer set search_path='' as $$
+declare cached public.task_mutation_receipts%rowtype; cached_after public.task_mutation_receipts%rowtype;
+ planned_plan public.task_coverage_plans%rowtype; current_plan public.task_coverage_plans%rowtype;
+ planned_binding public.task_coverage_bindings%rowtype; current_binding public.task_coverage_bindings%rowtype;
+ plan jsonb; people uuid[]; months jsonb; catalog_keys text[]; at_time timestamptz;
+begin
+ select * into cached from public.task_mutation_receipts r
+  where r.actor_id=p_actor and r.operation_id=p_operation_id;
+ if not found or cached.operation_kind<>p_kind or cached.arguments<>p_arguments
+   then raise exception using errcode='40001',message='El recibo cambió; reintente desde una transacción nueva'; end if;
+ if cached.organization_id is null then raise exception 'Sin permiso'; end if;
+
+ if p_kind='approve_task_coverage' then
+  select * into planned_plan from public.task_coverage_plans p
+   where p.id=p_plan_id and p.organization_id=cached.organization_id;
+  if not found then raise exception using errcode='40001',message='El plan cambió; reintente'; end if;
+  select coalesce(array_agg(distinct z),array[]::uuid[]) into people from (
+   select planned_plan.responsible_id z union select planned_plan.replacement_id
+   union select ti.owner_id from public.task_coverage_plan_instances i join public.task_instances ti on ti.id=i.instance_id where i.plan_id=planned_plan.id
+   union select m.profile_id from public.task_coverage_plan_instances i join public.task_responsibility_heads h on h.instance_id=i.instance_id
+     join public.task_responsibility_members m on m.set_id=h.set_id where i.plan_id=planned_plan.id
+   union select planned_plan.responsible_id from public.task_coverage_plan_assignment_rules r where r.plan_id=planned_plan.id
+   union select planned_plan.replacement_id from public.task_coverage_plan_assignment_rules r where r.plan_id=planned_plan.id
+  ) q;
+  select coalesce(jsonb_agg(jsonb_build_object('ownerId',z.profile_id,'period',z.period) order by z.profile_id,z.period),'[]'::jsonb) into months from (
+   select distinct person.profile_id,ti.period from public.task_coverage_plan_instances i
+    join public.task_instances ti on ti.id=i.instance_id
+    cross join lateral (select ti.owner_id profile_id union
+      select m.profile_id from public.task_responsibility_heads h join public.task_responsibility_members m on m.set_id=h.set_id where h.instance_id=ti.id
+      union select planned_plan.responsible_id union select planned_plan.replacement_id) person
+    where i.plan_id=planned_plan.id
+   union
+   select planned_plan.responsible_id,g::date from generate_series(date_trunc('month',planned_plan.starts_on)::date::timestamp,date_trunc('month',planned_plan.ends_on)::date::timestamp,interval '1 month') g
+    where exists(select 1 from public.task_coverage_plan_assignment_rules r where r.plan_id=planned_plan.id)
+   union
+   select planned_plan.replacement_id,g::date from generate_series(date_trunc('month',planned_plan.starts_on)::date::timestamp,date_trunc('month',planned_plan.ends_on)::date::timestamp,interval '1 month') g
+    where exists(select 1 from public.task_coverage_plan_assignment_rules r where r.plan_id=planned_plan.id)
+  ) z;
+  select coalesce(array_agg(distinct 'template:'||ta.template_id::text),'{}') into catalog_keys
+   from public.task_coverage_plan_assignment_rules r join public.task_assignments ta on ta.id=r.assignment_id where r.plan_id=planned_plan.id;
+  plan:=public._coordination_prepare('{}'::uuid[],array[p_actor],people,months,catalog_keys,jsonb_build_object('plan',planned_plan.id));
+  perform app_private._coordination_acquire_m22b(plan,false);
+  select * into current_plan from public.task_coverage_plans p where p.id=p_plan_id for share;
+  if not found or to_jsonb(current_plan) is distinct from to_jsonb(planned_plan) then
+   raise exception using errcode='40001',message='El plan cambió; reintente';
+  end if;
+  select * into cached_after from public.task_mutation_receipts r where r.actor_id=p_actor and r.operation_id=p_operation_id for share;
+  if not found or to_jsonb(cached_after) is distinct from to_jsonb(cached) then
+   raise exception using errcode='40001',message='El recibo cambió; reintente';
+  end if;
+  perform public.require_privileged_session();
+  if not exists(select 1 from public.profiles p where p.id=p_actor and p.organization_id=planned_plan.organization_id and p.active and p.role in ('jefe','encargado'))
+    or public.actor_org() is distinct from planned_plan.organization_id or public.actor_role() not in ('jefe','encargado') then
+   raise exception 'Sin permiso';
+  end if;
+  if public.actor_role()='encargado' and (
+    not public.can_access_owner(planned_plan.responsible_id) or not public.can_access_owner(planned_plan.replacement_id)
+    or exists(select 1 from public.task_coverage_plan_instances i join public.task_instances ti on ti.id=i.instance_id
+      where i.plan_id=planned_plan.id and not public.can_access_owner(ti.owner_id))
+    or exists(select 1 from public.task_coverage_plan_assignment_rules r join public.task_assignments a on a.id=r.assignment_id
+      where r.plan_id=planned_plan.id and not public.can_access_owner(a.owner_id))
+    or exists(select 1 from public.task_coverage_plan_instances i join public.task_instances ti on ti.id=i.instance_id
+      where i.plan_id=planned_plan.id and not exists(select 1 from public.company_memberships cm where cm.organization_id=planned_plan.organization_id and cm.company_id=ti.company_id and cm.profile_id=p_actor and cm.active))
+    or exists(select 1 from public.task_coverage_plan_assignment_rules r join public.task_assignments a on a.id=r.assignment_id
+      where r.plan_id=planned_plan.id and not exists(select 1 from public.company_memberships cm where cm.organization_id=planned_plan.organization_id and cm.company_id=a.company_id and cm.profile_id=p_actor and cm.active))
+  ) then raise exception 'Fuera del ámbito del encargado'; end if;
+  if jsonb_typeof(cached_after.result)<>'object' or coalesce(cached_after.result->>'count','') !~ '^[1-9][0-9]*$'
+    then raise exception using errcode='40001',message='El recibo de aprobación es inconsistente; reintente'; end if;
+  return cached_after.result;
+ elsif p_kind='cancel_task_coverage' then
+  select * into planned_binding from public.task_coverage_bindings b where b.id=p_binding_id and b.organization_id=cached.organization_id;
+  if not found then raise exception using errcode='40001',message='La cobertura cambió; reintente'; end if;
+  plan:=public._coordination_prepare('{}'::uuid[],array[p_actor],array[planned_binding.responsible_id,planned_binding.replacement_id],
+    '[]'::jsonb,'{}'::text[],jsonb_build_object('binding',planned_binding.id,'stopSessions',true));
+  perform app_private._coordination_acquire_m22b(plan,false);
+  select * into current_binding from public.task_coverage_bindings b where b.id=p_binding_id for share;
+  if not found or to_jsonb(current_binding) is distinct from to_jsonb(planned_binding) then
+   raise exception using errcode='40001',message='La cobertura cambió; reintente';
+  end if;
+  select * into cached_after from public.task_mutation_receipts r where r.actor_id=p_actor and r.operation_id=p_operation_id for share;
+  if not found or to_jsonb(cached_after) is distinct from to_jsonb(cached) then
+   raise exception using errcode='40001',message='El recibo cambió; reintente';
+  end if;
+  perform public.require_privileged_session();
+  if not exists(select 1 from public.profiles p where p.id=p_actor and p.organization_id=planned_binding.organization_id and p.active and p.role in ('jefe','encargado'))
+    or public.actor_org() is distinct from planned_binding.organization_id or public.actor_role() not in ('jefe','encargado') then
+   raise exception 'Fuera del ámbito';
+  end if;
+  if public.actor_role()='encargado' and (
+    not public.can_access_owner(planned_binding.responsible_id) or not public.can_access_owner(planned_binding.replacement_id)
+    or exists(select 1 from public.task_coverage_bindings c where (c.id=planned_binding.id or c.source_rule_id=planned_binding.id)
+      and not exists(select 1 from public.company_memberships m where m.profile_id=p_actor and m.company_id=c.company_id_snapshot and m.organization_id=planned_binding.organization_id and m.active))
+  ) then raise exception 'Fuera del ámbito'; end if;
+  if cached_after.result is distinct from '{}'::jsonb then
+   raise exception using errcode='40001',message='El recibo de cancelación es inconsistente; reintente';
+  end if;
+  return cached_after.result;
+ else
+  raise exception using errcode='22023',message='Tipo de recibo de cobertura inválido';
+ end if;
+end $$;
+revoke all on function app_private.replay_legacy_coverage_receipt(uuid,uuid,uuid,uuid,text,jsonb) from public,anon,authenticated,service_role;
+
+create or replace function public.approve_task_coverage_plan(p_plan uuid,p_operation_id uuid) returns integer
+language plpgsql security definer set search_path='' as $$
+declare plan jsonb; actor uuid:=auth.uid(); p public.task_coverage_plans%rowtype; cached public.task_mutation_receipts%rowtype;
+ args jsonb; n integer:=0; rule_binding uuid; x record; t public.task_instances%rowtype; a public.task_assignments%rowtype; org uuid; months jsonb; people uuid[]; catalog_keys text[];
+ planned public.task_coverage_plans%rowtype; cached_result jsonb;
+begin
+ if actor is null or p_operation_id is null then raise exception 'Identidad y operación requeridas'; end if;
+ perform public._coordination_receipt_lock(actor,p_operation_id);
+ args:=jsonb_build_object('plan',p_plan);
+ select * into cached from public.task_mutation_receipts where actor_id=actor and operation_id=p_operation_id;
+ if found then
+  if cached.operation_kind<>'approve_task_coverage' or cached.arguments<>args then raise exception 'Identificador de operación reutilizado con otros argumentos'; end if;
+  cached_result:=app_private.replay_legacy_coverage_receipt(p_plan,null,actor,p_operation_id,'approve_task_coverage',args);
+  return (cached_result->>'count')::integer;
+ end if;
+ perform public.require_privileged_session();
+ select * into p from public.task_coverage_plans where id=p_plan;
+ if not found or not p.sealed then raise exception 'Plan de cobertura sellado requerido'; end if;
+ planned:=p;
+ if public.actor_org() is distinct from p.organization_id or public.actor_role() not in ('jefe','encargado') then raise exception 'Sin permiso'; end if;
+ if public.actor_role()='encargado' and (not public.can_access_owner(p.responsible_id) or not public.can_access_owner(p.replacement_id)) then raise exception 'Fuera del ámbito del encargado'; end if;
+ select coalesce(array_agg(distinct z),array[]::uuid[]) into people from (
+  select p.responsible_id z union select p.replacement_id
+  union select task_row.owner_id from public.task_coverage_plan_instances i join public.task_instances task_row on task_row.id=i.instance_id where i.plan_id=p.id
+  union select m.profile_id from public.task_coverage_plan_instances i join public.task_responsibility_heads h on h.instance_id=i.instance_id join public.task_responsibility_members m on m.set_id=h.set_id where i.plan_id=p.id
+  union select p.responsible_id from public.task_coverage_plan_assignment_rules r where r.plan_id=p.id
+  union select p.replacement_id from public.task_coverage_plan_assignment_rules r where r.plan_id=p.id
+ ) q;
+ select coalesce(jsonb_agg(jsonb_build_object('ownerId',z.profile_id,'period',z.period)),'[]') into months from (
+  select distinct person.profile_id,task.period from public.task_coverage_plan_instances i join public.task_instances task on task.id=i.instance_id
+  cross join lateral (select task.owner_id profile_id union select m.profile_id from public.task_responsibility_heads h
+    join public.task_responsibility_members m on m.set_id=h.set_id where h.instance_id=task.id union select p.responsible_id union select p.replacement_id) person
+  where i.plan_id=p.id
+  union select p.responsible_id,month_start::date from generate_series(date_trunc('month',p.starts_on)::date::timestamp,date_trunc('month',p.ends_on)::date::timestamp,interval '1 month') month_start where exists(select 1 from public.task_coverage_plan_assignment_rules r where r.plan_id=p.id)
+  union select p.replacement_id,month_start::date from generate_series(date_trunc('month',p.starts_on)::date::timestamp,date_trunc('month',p.ends_on)::date::timestamp,interval '1 month') month_start where exists(select 1 from public.task_coverage_plan_assignment_rules r where r.plan_id=p.id)
+ ) z;
+ select coalesce(array_agg(distinct 'template:'||ta.template_id::text),'{}') into catalog_keys from public.task_coverage_plan_assignment_rules r join public.task_assignments ta on ta.id=r.assignment_id where r.plan_id=p.id;
+ plan:=public._coordination_prepare(array[]::uuid[],array[actor],people,months,catalog_keys,jsonb_build_object('plan',p.id));
+ perform public._coordination_acquire(plan);
+ perform public.require_privileged_session();
+ for x in select (m->>'ownerId')::uuid owner_id,(m->>'period')::date period from jsonb_array_elements(plan->'months') m loop perform public._coordination_assert_month(x.owner_id,x.period); end loop;
+ perform 1 from public.task_templates tt join public.task_assignments ta on ta.template_id=tt.id join public.task_coverage_plan_assignment_rules r on r.assignment_id=ta.id where r.plan_id=p.id order by tt.id for update of tt;
+ perform 1 from public.task_assignments ta join public.task_coverage_plan_assignment_rules r on r.assignment_id=ta.id where r.plan_id=p.id order by ta.id for update of ta;
+ select * into p from public.task_coverage_plans where id=p_plan for update;
+ if not found or to_jsonb(p) is distinct from to_jsonb(planned) then raise exception using errcode='40001',message='El plan cambió; reintente'; end if;
+ if not exists(select 1 from public.profiles replacement_profile join public.profiles owner_profile on owner_profile.id=p.responsible_id and owner_profile.organization_id=p.organization_id
+    where replacement_profile.id=p.replacement_id and replacement_profile.organization_id=p.organization_id and replacement_profile.active and replacement_profile.role in ('empleado','encargado') and owner_profile.active) then raise exception 'Titular o reemplazo inactivo'; end if;
+ for x in select i.instance_id,i.company_id_snapshot,i.period_snapshot,i.responsibility_set_id from public.task_coverage_plan_instances i where i.plan_id=p.id order by i.instance_id loop
+  select * into t from public.task_instances where id=x.instance_id for update;
+  if not found or t.owner_id<>p.responsible_id or t.organization_id<>p.organization_id or t.company_id<>x.company_id_snapshot or t.period<>x.period_snapshot then raise exception 'Selección de ocurrencia cambió'; end if;
+  if (x.responsibility_set_id is not null and not exists(select 1 from public.task_responsibility_heads h where h.instance_id=t.id and h.set_id=x.responsibility_set_id))
+    or (x.responsibility_set_id is null and exists(select 1 from public.task_responsibility_heads h join public.task_responsibility_sets rs on rs.id=h.set_id where h.instance_id=t.id and (rs.mode<>'individual' or not exists(select 1 from public.task_responsibility_members rm where rm.set_id=rs.id and rm.profile_id=t.owner_id)))) then raise exception 'La responsabilidad de la selección cambió'; end if;
+  if not exists(select 1 from public.company_memberships m where m.profile_id=p.replacement_id and m.company_id=t.company_id and m.organization_id=t.organization_id) then raise exception 'El reemplazo no pertenece a la empresa de la tarea'; end if;
+  if not public.can_access_owner(t.owner_id) and public.actor_role()<>'jefe' then raise exception 'Fuera del equipo asignado'; end if;
+  perform public._coordination_assert_month(t.owner_id,t.period);
+  if exists(select 1 from public.task_responsibility_heads h join public.task_responsibility_members m on m.set_id=h.set_id where h.instance_id=t.id and m.profile_id=p.replacement_id) then raise exception 'Un miembro responsable no se duplica como cobertura'; end if;
+  insert into public.task_coverage_bindings(organization_id,plan_id,instance_id,responsible_id,replacement_id,starts_on,ends_on,company_id_snapshot,period_snapshot,scheduled_on_snapshot,approved_by)
+   values(p.organization_id,p.id,t.id,p.responsible_id,p.replacement_id,p.starts_on,p.ends_on,t.company_id,t.period,t.scheduled_on,actor); n:=n+1;
+ end loop;
+ for x in select r.assignment_id,r.company_id_snapshot,r.assignment_snapshot from public.task_coverage_plan_assignment_rules r where r.plan_id=p.id order by r.assignment_id loop
+  select * into a from public.task_assignments where id=x.assignment_id for update;
+  if not found or a.organization_id<>p.organization_id or a.owner_id<>p.responsible_id or a.company_id<>x.company_id_snapshot or to_jsonb(a) is distinct from x.assignment_snapshot then raise exception 'La regla o su snapshot cambió'; end if;
+  if not exists(select 1 from public.company_memberships m where m.profile_id=p.replacement_id and m.company_id=a.company_id and m.organization_id=a.organization_id) then raise exception 'El reemplazo no pertenece a la empresa de la regla'; end if;
+  if not public.can_access_owner(a.owner_id) and public.actor_role()<>'jefe' then raise exception 'Fuera del equipo asignado'; end if;
+  if exists(select 1 from public.task_coverage_bindings b where b.assignment_id=a.id and b.replacement_id=p.replacement_id and b.status='active' and b.starts_on<=p.ends_on and b.ends_on>=p.starts_on) then raise exception 'Ya existe cobertura activa solapada para esta regla'; end if;
+  perform public._coordination_assert_month(a.owner_id,date_trunc('month',p.starts_on)::date);
+  insert into public.task_coverage_bindings(organization_id,plan_id,assignment_id,responsible_id,replacement_id,starts_on,ends_on,company_id_snapshot,assignment_snapshot,approved_by)
+   values(p.organization_id,p.id,a.id,p.responsible_id,p.replacement_id,p.starts_on,p.ends_on,a.company_id,to_jsonb(a),actor) returning id into rule_binding; n:=n+1;
+  for t in select * from public.task_instances ti where ti.assignment_id=a.id and ti.organization_id=a.organization_id and ti.scheduled_on between p.starts_on and p.ends_on order by ti.id for update loop
+   if not exists(select 1 from public.company_memberships m where m.profile_id=p.replacement_id and m.company_id=t.company_id and m.organization_id=t.organization_id) then raise exception 'El reemplazo no pertenece a la empresa de una ocurrencia'; end if;
+   if exists(select 1 from public.task_responsibility_heads h join public.task_responsibility_members m on m.set_id=h.set_id where h.instance_id=t.id and m.profile_id=p.replacement_id) then raise exception 'Un miembro responsable no se duplica como cobertura'; end if;
+   perform public._coordination_assert_month(t.owner_id,t.period);
+   insert into public.task_coverage_bindings(organization_id,plan_id,instance_id,responsible_id,replacement_id,starts_on,ends_on,company_id_snapshot,period_snapshot,scheduled_on_snapshot,approved_by,source_rule_id)
+    values(p.organization_id,p.id,t.id,p.responsible_id,p.replacement_id,p.starts_on,p.ends_on,t.company_id,t.period,t.scheduled_on,actor,rule_binding); n:=n+1;
+  end loop;
+ end loop;
+ if n=0 then raise exception 'El plan no contiene ocurrencias seleccionadas'; end if;
+ insert into public.audit_events(organization_id,actor_id,action,entity_id,at,details) values(p.organization_id,actor,'task.coverage_approved',p.id,clock_timestamp(),jsonb_build_object('bindings',n));
+ insert into public.task_mutation_receipts(organization_id,actor_id,operation_id,operation_kind,arguments,result) values(p.organization_id,actor,p_operation_id,'approve_task_coverage',args,jsonb_build_object('count',n));
+ return n;
+end $$;
+revoke all on function public.approve_task_coverage_plan(uuid,uuid) from public,anon,service_role;
+grant execute on function public.approve_task_coverage_plan(uuid,uuid) to authenticated;
+
+create or replace function public.cancel_task_coverage_binding(p_binding uuid,p_reason text,p_operation_id uuid) returns void
+language plpgsql security definer set search_path='' as $$
+declare actor uuid:=auth.uid(); b public.task_coverage_bindings%rowtype; cached public.task_mutation_receipts%rowtype;
+ args jsonb; plan jsonb; at_time timestamptz; s record; cutoff timestamptz; family uuid[]; cached_result jsonb;
+begin
+ if actor is null or p_operation_id is null or public._coordination_text_present(p_reason) is not true then raise exception 'Identidad, operación y motivo requeridos'; end if;
+ perform public._coordination_receipt_lock(actor,p_operation_id);
+ args:=jsonb_build_object('binding',p_binding,'reason',trim(p_reason));
+ select * into cached from public.task_mutation_receipts where actor_id=actor and operation_id=p_operation_id;
+ if found then
+  if cached.operation_kind<>'cancel_task_coverage' or cached.arguments<>args then raise exception 'Identificador de operación reutilizado con otros argumentos'; end if;
+  perform app_private.replay_legacy_coverage_receipt(null,p_binding,actor,p_operation_id,'cancel_task_coverage',args);
+  return;
+ end if;
+ select * into b from public.task_coverage_bindings where id=p_binding;
+ if not found then raise exception 'Cobertura inexistente'; end if;
+ plan:=public._coordination_prepare('{}',array[actor],array[b.responsible_id,b.replacement_id],'[]','{}',jsonb_build_object('binding',b.id,'stopSessions',true));
+ perform public._coordination_acquire(plan);
+ perform public.require_privileged_session();
+ if public.actor_org() is distinct from b.organization_id or public.actor_role() not in ('jefe','encargado')
+   or (public.actor_role()='encargado' and (not public.can_access_owner(b.responsible_id) or not public.can_access_owner(b.replacement_id)
+     or exists(select 1 from public.task_coverage_bindings c where (c.id=b.id or c.source_rule_id=b.id) and not exists(select 1 from public.company_memberships m where m.profile_id=actor and m.company_id=c.company_id_snapshot and m.organization_id=b.organization_id)))) then raise exception 'Fuera del ámbito'; end if;
+ select array_agg(id order by id) into family from public.task_coverage_bindings where id=b.id or source_rule_id=b.id;
+ at_time:=clock_timestamp();
+ for s in select ts.*,t.owner_id,t.period from public.task_time_sessions ts join public.task_instances t on t.id=ts.instance_id where ts.coverage_binding_id=any(family) and ts.ended_at is null order by ts.instance_id,ts.actor_id,ts.id loop
+  perform public._coordination_assert_month(s.actor_id,s.period); perform public._coordination_assert_month(s.owner_id,s.period);
+  cutoff:=greatest(s.started_at,public._effective_session_end(s.id,at_time));
+  update public.task_time_sessions set ended_at=cutoff where id=s.id;
+  update public.task_instances set state_revision=state_revision+1 where id=s.instance_id;
+  insert into public.audit_events(organization_id,actor_id,action,entity_id,at,details) values(b.organization_id,actor,'coverage.session_stopped',s.instance_id,at_time,jsonb_build_object('session',s.id,'binding',s.coverage_binding_id,'reason',trim(p_reason),'ended_at',cutoff));
+ end loop;
+ update public.task_coverage_bindings set status='cancelled',cancelled_by=actor,cancelled_at=at_time,cancel_reason=trim(p_reason) where id=any(family) and status='active';
+ insert into public.audit_events(organization_id,actor_id,action,entity_id,at,details) values(b.organization_id,actor,'task.coverage_cancelled',b.id,at_time,jsonb_build_object('reason',trim(p_reason),'bindings',to_jsonb(family)));
+ insert into public.task_mutation_receipts(organization_id,actor_id,operation_id,operation_kind,arguments,result) values(b.organization_id,actor,p_operation_id,'cancel_task_coverage',args,'{}');
+end $$;
+revoke all on function public.cancel_task_coverage_binding(uuid,text,uuid) from public,anon,service_role;
+grant execute on function public.cancel_task_coverage_binding(uuid,text,uuid) to authenticated;
 create trigger company_membership_events_immutable before update or delete on app_private.company_membership_events
  for each row execute function app_private.reject_immutable_operational_history();
 

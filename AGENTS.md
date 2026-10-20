@@ -1,3 +1,25 @@
+# Continuidad vigente — C aceptada localmente, 20/10/2026
+
+GPT-6.1 Sol aceptó localmente, en alcance acotado, los replays legacy de
+`approve_task_coverage_plan` y `cancel_task_coverage_binding`. Aceptación:
+`docs/architecture/M2-2C-LEGACY-COVERAGE-REPLAY-SOL-ACCEPTANCE-20261020.md`
+(SHA-256 `64A2B9D3F9024E307FC21DCBEB38B810208B551C8DA2BE8DFEB6CE094FD8F8A1`).
+Contrato SHA `9F44C0DAE1C2C3B339CAD7271EE3AD2C80B1E1700711E46692EA15F0929D53C8`;
+SQL014 candidata SHA `CE85FFB750443CB54CC25DD55AE25831CCFE71D8A10EA143D54C34855009447D`.
+Manifiesto repo/canónico SHA `2B00185B57E55D1B9E74C806363A83DFE03309B4C560519BB2F3A868E855FD18`.
+Evidencia: 10 rojos, 28 verdes, ocho carreras con ambos ganadores y blockers
+reales, 56 snapshots completos, 351/351 matriz nativa y 738/738 en 74 archivos;
+TypeScript/builds cliente y Worker con exit 0. SQL014 no se aplicó remotamente.
+
+El corte C está aceptado, pendiente de documentar/publicar junto con T en el
+commit directo a `origin/main`, sin PR. Próximo paso: GPT-6.1 Sol define el
+contrato A (replays de aprobación/cancelación de ausencias); luego GPT-6 Luna
+implementa y Sol acepta. Después queda P, el cruce §9/Gate L y la migración
+alojada. Mantener Site privado, datos ficticios y espacio operativo apagado.
+No iniciar escrituras remotas todavía.
+
+Esta cabecera supersede los próximos pasos históricos que siguen.
+
 # Continuidad vigente — controles legacy de tarea aceptados localmente, 20/10/2026
 
 GPT-6.1 Sol aceptó en alcance local acotado la familia T de replays de controles

@@ -1,3 +1,20 @@
+# Continuidad vigente — C aceptada localmente, 20/10/2026
+
+La familia C de replays legacy de supervisión de cobertura quedó aceptada por
+GPT-6.1 Sol en alcance local acotado. Aceptación SHA-256
+`64A2B9D3F9024E307FC21DCBEB38B810208B551C8DA2BE8DFEB6CE094FD8F8A1`; SQL014
+`CE85FFB750443CB54CC25DD55AE25831CCFE71D8A10EA143D54C34855009447D`.
+Evidencia canónica con manifiesto sincronizado: rojo 10/10, verde 28/28, 8/8
+carreras, 56 snapshots completos, matriz 351/351, suite 738/738; TypeScript y
+builds de cliente/Worker aprobados. Cubre sólo el SQL local; no se aplicó en
+Supabase. Corte pendiente de commit/push directo junto con T.
+
+Siguiente: contrato Sol para A (dos replays de ausencias), implementación Luna,
+aceptación Sol; luego resolver P y consolidar §9/Gate L. Supabase alojado,
+Auth/HTTP, Data API, Storage/restauración, frontend integrado, CI, hosting,
+correo y producción siguen pendientes. Sin activar el espacio operativo ni
+usar datos reales.
+
 # Continuidad vigente — controles legacy de tarea aceptados localmente, 20/10/2026
 
 Etapa T aprobada por GPT-6.1 Sol, en alcance local acotado. Aceptación SHA-256

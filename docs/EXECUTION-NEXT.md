@@ -1,3 +1,26 @@
+# Próximo paso — familia A y publicación del corte C
+
+Familia C aceptada por Sol localmente: `approve_task_coverage_plan` y
+`cancel_task_coverage_binding`. Aceptación SHA-256
+`64A2B9D3F9024E307FC21DCBEB38B810208B551C8DA2BE8DFEB6CE094FD8F8A1`;
+SQL014 candidata SHA `CE85FFB750443CB54CC25DD55AE25831CCFE71D8A10EA143D54C34855009447D`.
+El manifiesto y los reportes locales/canónicos están identificados en la
+aceptación.
+
+1. Actualizar inventario §9 y continuidad; publicar juntos T+C directamente en
+   `origin/main`, sin PR.
+2. GPT-6.1 Sol define contrato aislado A para `approve_employee_absence` y
+   `cancel_employee_absence`; no ampliar `_get_mutation_receipt` globalmente.
+3. GPT-6 Luna implementa con rojo primero, verdes, concurrencia necesaria y
+   evidencia; Sol revisa hashes y alcance.
+4. Resolver P con dictamen de política, después cruce consolidado §9/Gate L.
+5. Sólo con Gate L aceptado y settings Data API revisados, preparar preflight y
+   migración Supabase dev. Luego Auth/API/Storage/front-end, CI, Cloudflare,
+   correo y validación desde la PC personal.
+
+No hubo migración alojada en los cortes T/C. Mantener Site privado, datos
+ficticios y espacio operativo apagado.
+
 # Próximo paso — etapa C/A/P de §9
 
 Etapa T (replays de controles legacy de tarea) aceptada por GPT-6.1 Sol en
