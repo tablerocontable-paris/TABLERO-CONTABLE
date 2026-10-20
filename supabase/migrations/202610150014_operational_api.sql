@@ -3345,3 +3345,158 @@ begin
 end
 $$;
 commit;
+
+-- Reauthorize cached legacy task-control replays without repeating the writer.
+-- Keep this private helper limited to the four legacy wrapper receipt kinds.
+create function app_private.replay_legacy_task_control(
+ p_instance uuid,p_operation_id uuid,p_kind text,p_arguments jsonb,p_observed_receipt jsonb
+) returns bigint
+language plpgsql security definer set search_path='' as $$
+declare
+ actor uuid:=auth.uid(); r public.task_mutation_receipts%rowtype; r_after public.task_mutation_receipts%rowtype;
+ planned public.task_instances%rowtype; current_task public.task_instances%rowtype;
+ actor_profile public.profiles%rowtype; people uuid[]; months jsonb; catalog text[]; plan jsonb;
+ result_value jsonb; protected_task boolean; result_revision bigint;
+begin
+ if p_kind not in ('transition_reviewed','checklist_reviewed','task_wait','task_wait_reviewed')
+   or actor is null or p_operation_id is null or p_instance is null then
+   raise exception using errcode='P0001',message='Sin permiso';
+ end if;
+ select * into r from public.task_mutation_receipts
+  where actor_id=actor and operation_id=p_operation_id;
+ if not found or to_jsonb(r) is distinct from p_observed_receipt
+   or r.operation_kind is distinct from p_kind or r.arguments is distinct from p_arguments then
+   raise exception using errcode='40001',message='El recibo de tarea cambió; recargue y reintente';
+ end if;
+ if jsonb_typeof(r.result) is distinct from 'object'
+   or not app_private.api_exact_keys(r.result,array['revision'])
+   or jsonb_typeof(r.result->'revision') is distinct from 'number'
+   or (r.result->>'revision') !~ '^(0|[1-9][0-9]*)$' then
+   raise exception using errcode='40001',message='El recibo de tarea es inconsistente';
+ end if;
+ result_revision:=(r.result->>'revision')::bigint;
+ select * into planned from public.task_instances where id=p_instance;
+ if not found or planned.organization_id is distinct from r.organization_id then
+   raise exception using errcode='P0001',message='Sin permiso';
+ end if;
+ select * into actor_profile from public.profiles where id=actor;
+ if not found or not actor_profile.active or actor_profile.organization_id is distinct from planned.organization_id
+   or actor_profile.role not in ('jefe','encargado','empleado')
+   or not public._can_access_instance_at(planned.id,clock_timestamp()) then
+   raise exception using errcode='P0001',message='Sin permiso';
+ end if;
+ select coalesce(array_agg(distinct q.id order by q.id),'{}'::uuid[])
+   into people from (
+    select actor id union select planned.owner_id
+    union select m.profile_id from public.task_responsibility_heads h
+      join public.task_responsibility_members m on m.set_id=h.set_id and m.organization_id=h.organization_id
+      where h.instance_id=planned.id
+    union select s.actor_id from public.task_time_sessions s
+      where s.instance_id=planned.id and s.ended_at is null
+   ) q;
+ select coalesce(jsonb_agg(jsonb_build_object('ownerId',q.id,'period',planned.period) order by q.id),'[]'::jsonb)
+   into months from (select distinct unnest(people) id) q;
+ catalog:=case when planned.kind='resultado'
+   then array['dependencies:'||planned.organization_id||':'||planned.company_id||':'||planned.period]
+   else array[]::text[] end;
+ plan:=public._coordination_prepare(array[planned.id],array[actor],people,months,catalog,
+   jsonb_build_object('stopSessions',false));
+ perform app_private._coordination_acquire_m22b(plan,false);
+ perform 1 from public.task_instances t where t.id=planned.id for share;
+ select * into current_task from public.task_instances where id=planned.id;
+ select * into r_after from public.task_mutation_receipts
+   where actor_id=actor and operation_id=p_operation_id;
+ if not found or to_jsonb(r_after) is distinct from p_observed_receipt
+   or to_jsonb(current_task) is distinct from to_jsonb(planned) then
+   raise exception using errcode='40001',message='La tarea o el recibo cambió; recargue y reintente';
+ end if;
+ select * into actor_profile from public.profiles where id=actor;
+ if not found or not actor_profile.active or actor_profile.organization_id is distinct from planned.organization_id
+   or actor_profile.role not in ('jefe','encargado','empleado')
+   or not public._can_access_instance_at(planned.id,clock_timestamp()) then
+   raise exception using errcode='P0001',message='Sin permiso';
+ end if;
+ select exists(select 1 from app_private.task_tracking tr where tr.instance_id=planned.id
+      and (tr.commercial_enabled or tr.available_from is not null))
+   or exists(select 1 from app_private.task_dependencies d where d.instance_id=planned.id or d.prerequisite_id=planned.id)
+   into protected_task;
+ if protected_task and not app_private.api_task_actor_can_execute(planned.id,actor,
+     (clock_timestamp() at time zone 'America/Argentina/Buenos_Aires')::date) then
+   raise exception using errcode='P0001',message='Sin permiso';
+ end if;
+ return result_revision;
+end
+$$;
+revoke all on function app_private.replay_legacy_task_control(uuid,uuid,text,jsonb,jsonb) from public,anon,authenticated,service_role;
+
+create or replace function public.transition_task_reviewed(
+ p_instance uuid,p_next text,p_reason text,p_expected_revision bigint,p_operation_id uuid
+) returns bigint language plpgsql security definer set search_path='' as $$
+declare actor uuid:=auth.uid(); args jsonb; r public.task_mutation_receipts%rowtype; result bigint;
+begin
+ args:=jsonb_build_object('instance',p_instance,'next',p_next,'reason',p_reason,'revision',p_expected_revision);
+ perform public._coordination_receipt_lock(actor,p_operation_id);
+ select * into r from public.task_mutation_receipts where actor_id=actor and operation_id=p_operation_id;
+ if found then
+  if r.operation_kind<>'transition_reviewed' or r.arguments<>args then raise exception 'Identificador de operación reutilizado con otros argumentos'; end if;
+  return app_private.replay_legacy_task_control(p_instance,p_operation_id,'transition_reviewed',args,to_jsonb(r));
+ end if;
+ result:=public._coordination_apply_task_control(p_instance,'transition',p_next,null,null,null,p_reason,p_expected_revision);
+ insert into public.task_mutation_receipts(organization_id,actor_id,operation_id,operation_kind,arguments,result)
+ values(public.actor_org(),actor,p_operation_id,'transition_reviewed',args,jsonb_build_object('revision',result));
+ return result;
+end $$;
+create or replace function public.set_checklist_item_reviewed(
+ p_instance uuid,p_check text,p_done boolean,p_reason text,p_expected_revision bigint,p_operation_id uuid
+) returns bigint language plpgsql security definer set search_path='' as $$
+declare actor uuid:=auth.uid(); args jsonb; r public.task_mutation_receipts%rowtype; result bigint;
+begin
+ args:=jsonb_build_object('instance',p_instance,'check',p_check,'done',p_done,'reason',p_reason,'revision',p_expected_revision);
+ perform public._coordination_receipt_lock(actor,p_operation_id);
+ select * into r from public.task_mutation_receipts where actor_id=actor and operation_id=p_operation_id;
+ if found then
+  if r.operation_kind<>'checklist_reviewed' or r.arguments<>args then raise exception 'Identificador de operación reutilizado con otros argumentos'; end if;
+  return app_private.replay_legacy_task_control(p_instance,p_operation_id,'checklist_reviewed',args,to_jsonb(r));
+ end if;
+ result:=public._coordination_apply_task_control(p_instance,'checklist',null,p_check,p_done,null,p_reason,p_expected_revision);
+ insert into public.task_mutation_receipts(organization_id,actor_id,operation_id,operation_kind,arguments,result)
+ values(public.actor_org(),actor,p_operation_id,'checklist_reviewed',args,jsonb_build_object('revision',result));
+ return result;
+end $$;
+create or replace function public.set_task_wait(
+ p_instance uuid,p_note text,p_expected_revision bigint,p_operation_id uuid
+) returns bigint language plpgsql security definer set search_path='' as $$
+declare actor uuid:=auth.uid(); args jsonb; r public.task_mutation_receipts%rowtype; result bigint;
+begin
+ args:=jsonb_build_object('instance',p_instance,'note',p_note,'revision',p_expected_revision);
+ perform public._coordination_receipt_lock(actor,p_operation_id);
+ select * into r from public.task_mutation_receipts where actor_id=actor and operation_id=p_operation_id;
+ if found then
+  if r.operation_kind<>'task_wait' or r.arguments<>args then raise exception 'Identificador de operación reutilizado con otros argumentos'; end if;
+  return app_private.replay_legacy_task_control(p_instance,p_operation_id,'task_wait',args,to_jsonb(r));
+ end if;
+ result:=public._coordination_apply_task_control(p_instance,'wait',null,null,null,p_note,null,p_expected_revision);
+ insert into public.task_mutation_receipts(organization_id,actor_id,operation_id,operation_kind,arguments,result)
+ values(public.actor_org(),actor,p_operation_id,'task_wait',args,jsonb_build_object('revision',result));
+ return result;
+end $$;
+create or replace function public.set_task_wait_reviewed(
+ p_instance uuid,p_note text,p_reason text,p_expected_revision bigint,p_operation_id uuid
+) returns bigint language plpgsql security definer set search_path='' as $$
+declare actor uuid:=auth.uid(); args jsonb; r public.task_mutation_receipts%rowtype; result bigint;
+begin
+ if actor is null or p_operation_id is null then raise exception 'Identidad y operación requeridas'; end if;
+ args:=jsonb_build_object('instance',p_instance,'note',p_note,'reason',p_reason,'revision',p_expected_revision);
+ perform public._coordination_receipt_lock(actor,p_operation_id);
+ select * into r from public.task_mutation_receipts where actor_id=actor and operation_id=p_operation_id;
+ if found then
+  if r.operation_kind<>'task_wait_reviewed' or r.arguments<>args then raise exception 'Identificador de operación reutilizado con otros argumentos'; end if;
+  return app_private.replay_legacy_task_control(p_instance,p_operation_id,'task_wait_reviewed',args,to_jsonb(r));
+ end if;
+ result:=public._coordination_apply_task_control(p_instance,'wait',null,null,null,p_note,p_reason,p_expected_revision);
+ insert into public.task_mutation_receipts(organization_id,actor_id,operation_id,operation_kind,arguments,result)
+ values(public.actor_org(),actor,p_operation_id,'task_wait_reviewed',args,jsonb_build_object('revision',result));
+ return result;
+end $$;
+revoke all on function public.transition_task_reviewed(uuid,text,text,bigint,uuid),public.set_checklist_item_reviewed(uuid,text,boolean,text,bigint,uuid),public.set_task_wait(uuid,text,bigint,uuid),public.set_task_wait_reviewed(uuid,text,text,bigint,uuid) from public,anon;
+grant execute on function public.transition_task_reviewed(uuid,text,text,bigint,uuid),public.set_checklist_item_reviewed(uuid,text,boolean,text,bigint,uuid),public.set_task_wait(uuid,text,bigint,uuid),public.set_task_wait_reviewed(uuid,text,text,bigint,uuid) to authenticated;

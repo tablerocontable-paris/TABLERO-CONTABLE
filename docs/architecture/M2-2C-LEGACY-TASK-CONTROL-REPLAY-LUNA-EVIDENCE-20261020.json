@@ -1,0 +1,826 @@
+{
+  "schemaVersion": 1,
+  "project": "Grupo Paris",
+  "contract": "M2-2C legacy task-control replay authorization",
+  "date": "2026-10-20",
+  "baselineCommit": "f3a20cfe9ffba0efea5f8e09be047ebd25eb4e7d",
+  "baselineSql014GitBlobSha256": "B5EAED293474A5A666E396AB42CBDAF998D9EA7EC63B93F111FA90B954230C92",
+  "baselineSql014CheckoutSha256": "CDD909C1A280DF8E891D6062838B146AEECADCF5CBC0F52291C6D44A0C89ECA2",
+  "candidateSql014CheckoutSha256": "19EC849B0397602B7DC03939539D37F0999FE808FD21A91B227E7767F4BF9FC3",
+  "contractSha256": "86BDD0730BF33EB6184E108B20C6FE111C0EEE4B092C3940A3887CBBE3464FD2",
+  "executionBase": "work/site",
+  "outputDirectory": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020",
+  "migrations": [
+    {
+      "path": "supabase/migrations/202609300001_foundation.sql",
+      "gitBlobAtHEAD": "57bf365d10e78c273690fdfde5edf41e4a23d7ff",
+      "checkoutSha256": "2B1115E1E043883D3284613D2367B7228A5C443925829FF09EE5D32322189DD9",
+      "eol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202609300001_foundation.sql",
+      "workingTreeModified": false
+    },
+    {
+      "path": "supabase/migrations/202609300002_workflows.sql",
+      "gitBlobAtHEAD": "3e59b14be8f4c0482dd9b6b0b76d4d12cd2e4403",
+      "checkoutSha256": "7472D4AE996C827412E5F7DAAEFDA498206349BBF49D02A8C90E3542F8EECCBE",
+      "eol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202609300002_workflows.sql",
+      "workingTreeModified": false
+    },
+    {
+      "path": "supabase/migrations/202610010001_occurrence_contract.sql",
+      "gitBlobAtHEAD": "7478e667c32a9b72bc061909ca48a62ac7aa97a0",
+      "checkoutSha256": "3A9C3B92A241FC4A6569FEA2549FA179CA96E7FAAC50832C5841EFC90DB5CA2F",
+      "eol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010001_occurrence_contract.sql",
+      "workingTreeModified": false
+    },
+    {
+      "path": "supabase/migrations/202610010002_onboarding_approval.sql",
+      "gitBlobAtHEAD": "8341a0360af6fd78168dcc52121c64a5ed6726f6",
+      "checkoutSha256": "9560644D1304DD5123D6B295BC9E4E5EC07D91BB07024174AED979B3A425D897",
+      "eol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010002_onboarding_approval.sql",
+      "workingTreeModified": false
+    },
+    {
+      "path": "supabase/migrations/202610010003_report_delivery.sql",
+      "gitBlobAtHEAD": "fca9120d38a9b878e18765ecce325d8991c2b617",
+      "checkoutSha256": "39C8B92F41D00FB96174978BE8903120424CBABE4D0378761746148E57B38731",
+      "eol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010003_report_delivery.sql",
+      "workingTreeModified": false
+    },
+    {
+      "path": "supabase/migrations/202610010004_time_coverage.sql",
+      "gitBlobAtHEAD": "8e41378168bdf137e0c72c0f7cc238e7b8ed60e0",
+      "checkoutSha256": "FA49AA77BB8A7FC9B153C8AF9B27225ED6500D0489D7C396D9C7128B393E7630",
+      "eol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010004_time_coverage.sql",
+      "workingTreeModified": false
+    },
+    {
+      "path": "supabase/migrations/202610010005_time_coverage_hardening.sql",
+      "gitBlobAtHEAD": "63e53838bc85a1f4166742507f2ab2dde610505a",
+      "checkoutSha256": "400C671934E0FA050907AEA78C3DA28248255068F0E8AD16F0007081421D8A33",
+      "eol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010005_time_coverage_hardening.sql",
+      "workingTreeModified": false
+    },
+    {
+      "path": "supabase/migrations/202610010006_time_coverage_acceptance.sql",
+      "gitBlobAtHEAD": "df6de8f9a3f4e429b04307e2b78c726c9db66ce2",
+      "checkoutSha256": "A47942D0281ADB517AA7BC5E1123769DD77F415B58CF97748B97FCE376314FBF",
+      "eol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010006_time_coverage_acceptance.sql",
+      "workingTreeModified": false
+    },
+    {
+      "path": "supabase/migrations/202610010007_time_coverage_completion.sql",
+      "gitBlobAtHEAD": "d2ba1c1cb610225c4a239c67d96df41446b5db41",
+      "checkoutSha256": "34886FF8E7CCB947D8E68754F68AC9155F4E012DC4200B395C95967D2710160B",
+      "eol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010007_time_coverage_completion.sql",
+      "workingTreeModified": false
+    },
+    {
+      "path": "supabase/migrations/202610010008_time_coverage_finalization.sql",
+      "gitBlobAtHEAD": "90d5038b963056b96ce895aadf584c0153054dda",
+      "checkoutSha256": "3CDE522CBF9DF98A05BEE0F1C6FD510377324A9551FF2AD396756A397BC70A46",
+      "eol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610010008_time_coverage_finalization.sql",
+      "workingTreeModified": false
+    },
+    {
+      "path": "supabase/migrations/202610020009_private_block_notes.sql",
+      "gitBlobAtHEAD": "3c1d13e6ddb27eeb8c497de48f4e8be124e05736",
+      "checkoutSha256": "CF2B2BABF4A0FF8B144A643ABA5D71796D9062559CDD201C989BA754640D6269",
+      "eol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610020009_private_block_notes.sql",
+      "workingTreeModified": false
+    },
+    {
+      "path": "supabase/migrations/202610040010_coordination_foundation.sql",
+      "gitBlobAtHEAD": "c0ea297dd153cec205d364d1382d27dd8ab9e2b4",
+      "checkoutSha256": "84BA65311535E85F5B1AB3A991308193CE634C79F031978DC020B15B683AD7B1",
+      "eol": "i/lf    w/crlf  attr/                 \tsupabase/migrations/202610040010_coordination_foundation.sql",
+      "workingTreeModified": false
+    },
+    {
+      "path": "supabase/migrations/202610060011_coordination_activation.sql",
+      "gitBlobAtHEAD": "3c8202175c8f99d1fd96848cd74f0982c08e5a34",
+      "checkoutSha256": "9729A6800E93DEDC43AB5F0840309B7C0D222343898CC8D5B43EEB4A387F4210",
+      "eol": "i/lf    w/lf    attr/                 \tsupabase/migrations/202610060011_coordination_activation.sql",
+      "workingTreeModified": false
+    },
+    {
+      "path": "supabase/migrations/202610140012_sql_receipt_and_onboarding_guards.sql",
+      "gitBlobAtHEAD": "311f89a6139c8863a959696934402c8f5d48cf93",
+      "checkoutSha256": "CABFE95DBD04AE65EA82C787BC5E3EC8E638E4620456366B7EEB8A5D715DFBF4",
+      "eol": "i/lf    w/lf    attr/                 \tsupabase/migrations/202610140012_sql_receipt_and_onboarding_guards.sql",
+      "workingTreeModified": false
+    },
+    {
+      "path": "supabase/migrations/202610140013_api_identity_foundation.sql",
+      "gitBlobAtHEAD": "c5c701049c3c3b414bdef59c1db6a32fcb0c8841",
+      "checkoutSha256": "D013B82BFA1101ED11A35DAEAF7A64B2E6063DA9C09B55E7586CE67CC586BAC2",
+      "eol": "i/lf    w/lf    attr/                 \tsupabase/migrations/202610140013_api_identity_foundation.sql",
+      "workingTreeModified": false
+    },
+    {
+      "path": "supabase/migrations/202610150014_operational_api.sql",
+      "gitBlobAtHEAD": "e20f88b1e522ae0aa7c1cd4ab2eff3da1c90c01f",
+      "checkoutSha256": "19EC849B0397602B7DC03939539D37F0999FE808FD21A91B227E7767F4BF9FC3",
+      "eol": "i/lf    w/mixed attr/                 \tsupabase/migrations/202610150014_operational_api.sql",
+      "workingTreeModified": true
+    }
+  ],
+  "runIndex": [
+    {
+      "paths": [
+        "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-seq-final3-case0/red-report.json",
+        "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-seq-final3-case1/red-report.json",
+        "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-seq-final4-case2/red-report.json",
+        "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-seq-final4-case3/red-report.json"
+      ],
+      "outcome": "RED confirmed for four wrappers",
+      "phase": "red sequential"
+    },
+    {
+      "paths": [
+        "green-section4-final-case0/green-report.json",
+        "green-section4-final-case1/green-report.json",
+        "green-section4-final-case2/green-report.json",
+        "green-section4-final-case3/green-report.json"
+      ],
+      "outcome": "four wrapper green reports; exit success",
+      "phase": "green sequential"
+    },
+    {
+      "paths": [
+        "races-attempt18/green-report.json",
+        "races-final2-case0/green-report.json",
+        "races-final2-case1/green-report.json",
+        "races-final2-case3/green-report.json"
+      ],
+      "outcome": "each report has 8 races; stale RR 40001; fresh revoked replay P0001",
+      "phase": "race green"
+    },
+    {
+      "path": "races-attempt16/green-report.json",
+      "outcome": "prior 8-race pass retained",
+      "phase": "attempt16"
+    },
+    {
+      "path": "races-attempt17/postgres.log",
+      "outcome": "failed/incomplete harness attempt retained; excluded from acceptance",
+      "phase": "attempt17"
+    },
+    {
+      "outcome": "351/351; exit 0",
+      "command": "node tests/review/m2-1-native-review.mjs --pg-bin ..\\..\\work\\pg-runtime\\pgsql\\bin --output-dir ../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/native-final --port 56350 --review-matrix full --through-014 yes --m2-2a-smoke yes --m2-2c-smoke yes",
+      "phase": "native"
+    },
+    {
+      "outcome": "74 files, 738/738 tests, exit 0; npm unavailable, direct installed Vitest",
+      "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "phase": "vitest"
+    },
+    {
+      "outcome": "exit 0",
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "phase": "tsc"
+    },
+    {
+      "outcome": "exit 0; two Rollup dependency annotation warnings",
+      "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+      "phase": "client build"
+    },
+    {
+      "outcome": "exit 0, no stdout",
+      "command": "node scripts/build-worker.mjs",
+      "phase": "worker build"
+    },
+    {
+      "outcome": "all exit 0",
+      "commands": [
+        "node --check red runner",
+        "node --check green runner",
+        "node --check races runner",
+        "git diff --check"
+      ],
+      "phase": "syntax/diff"
+    },
+    {
+      "phase": "race invocation exact arguments",
+      "attempt": "races-attempt16",
+      "command": "node tests/review/m2-2c-legacy-task-control-replay-races.mjs --pg-bin \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\pg-runtime\\pgsql\\bin\" --sql014-path \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\site\\supabase\\migrations\\202610150014_operational_api.sql\" --output-dir \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\outputs\\m2-2c-legacy-task-control-replay-luna-20261020\\races-attempt16\" --port 56319 --case-index 2",
+      "caseIndex": 2,
+      "port": 56319,
+      "note": "passing earlier green; 8 races"
+    },
+    {
+      "phase": "race invocation exact arguments",
+      "attempt": "races-attempt17",
+      "command": "node tests/review/m2-2c-legacy-task-control-replay-races.mjs --pg-bin \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\pg-runtime\\pgsql\\bin\" --sql014-path \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\site\\supabase\\migrations\\202610150014_operational_api.sql\" --output-dir \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\outputs\\m2-2c-legacy-task-control-replay-luna-20261020\\races-attempt17\" --port 56325 --case-index 2",
+      "caseIndex": 2,
+      "port": 56325,
+      "note": "incomplete harness; retained, no report"
+    },
+    {
+      "phase": "race invocation exact arguments",
+      "attempt": "races-attempt18",
+      "command": "node tests/review/m2-2c-legacy-task-control-replay-races.mjs --pg-bin \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\pg-runtime\\pgsql\\bin\" --sql014-path \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\site\\supabase\\migrations\\202610150014_operational_api.sql\" --output-dir \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\outputs\\m2-2c-legacy-task-control-replay-luna-20261020\\races-attempt18\" --port 56326 --case-index 2",
+      "caseIndex": 2,
+      "port": 56326,
+      "note": "final set_task_wait green"
+    },
+    {
+      "phase": "race invocation exact arguments",
+      "attempt": "races-final2-case0",
+      "command": "node tests/review/m2-2c-legacy-task-control-replay-races.mjs --pg-bin \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\pg-runtime\\pgsql\\bin\" --sql014-path \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\site\\supabase\\migrations\\202610150014_operational_api.sql\" --output-dir \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\outputs\\m2-2c-legacy-task-control-replay-luna-20261020\\races-final2-case0\" --port 56340 --case-index 0",
+      "caseIndex": 0,
+      "port": 56340,
+      "note": "final transition_task_reviewed green"
+    },
+    {
+      "phase": "race invocation exact arguments",
+      "attempt": "races-final2-case1",
+      "command": "node tests/review/m2-2c-legacy-task-control-replay-races.mjs --pg-bin \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\pg-runtime\\pgsql\\bin\" --sql014-path \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\site\\supabase\\migrations\\202610150014_operational_api.sql\" --output-dir \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\outputs\\m2-2c-legacy-task-control-replay-luna-20261020\\races-final2-case1\" --port 56341 --case-index 1",
+      "caseIndex": 1,
+      "port": 56341,
+      "note": "final set_checklist_item_reviewed green"
+    },
+    {
+      "phase": "race invocation exact arguments",
+      "attempt": "races-final2-case3",
+      "command": "node tests/review/m2-2c-legacy-task-control-replay-races.mjs --pg-bin \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\pg-runtime\\pgsql\\bin\" --sql014-path \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\site\\supabase\\migrations\\202610150014_operational_api.sql\" --output-dir \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\outputs\\m2-2c-legacy-task-control-replay-luna-20261020\\races-final2-case3\" --port 56343 --case-index 3",
+      "caseIndex": 3,
+      "port": 56343,
+      "note": "final set_task_wait_reviewed green"
+    },
+    {
+      "phase": "red rerun expanded snapshots",
+      "caseIndex": 0,
+      "port": 56400,
+      "command": "node tests/review/m2-2c-legacy-task-control-replay-red.mjs --pg-bin \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\pg-runtime\\pgsql\\bin\" --sql014-path \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\outputs\\m2-2c-legacy-task-control-replay-luna-20261020\\baseline-SQL014.sql\" --output-dir \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\outputs\\m2-2c-legacy-task-control-replay-luna-20261020\\red-review2-case0\" --port 56400 --case-index 0",
+      "artifact": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case0/red-report.json",
+      "outcome": "RED_CONFIRMED_SELECTED_WRAPPERS; exit 0"
+    },
+    {
+      "phase": "green rerun expanded snapshots",
+      "caseIndex": 0,
+      "port": 56410,
+      "command": "node tests/review/m2-2c-legacy-task-control-replay-green.mjs --pg-bin \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\pg-runtime\\pgsql\\bin\" --sql014-path \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\site\\supabase\\migrations\\202610150014_operational_api.sql\" --output-dir \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\outputs\\m2-2c-legacy-task-control-replay-luna-20261020\\green-review2-case0\" --port 56410 --case-index 0",
+      "artifact": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case0/green-report.json",
+      "outcome": "GREEN_SELECTED_WRAPPERS; exit 0"
+    },
+    {
+      "phase": "red rerun expanded snapshots",
+      "caseIndex": 1,
+      "port": 56401,
+      "command": "node tests/review/m2-2c-legacy-task-control-replay-red.mjs --pg-bin \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\pg-runtime\\pgsql\\bin\" --sql014-path \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\outputs\\m2-2c-legacy-task-control-replay-luna-20261020\\baseline-SQL014.sql\" --output-dir \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\outputs\\m2-2c-legacy-task-control-replay-luna-20261020\\red-review2-case1\" --port 56401 --case-index 1",
+      "artifact": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case1/red-report.json",
+      "outcome": "RED_CONFIRMED_SELECTED_WRAPPERS; exit 0"
+    },
+    {
+      "phase": "green rerun expanded snapshots",
+      "caseIndex": 1,
+      "port": 56411,
+      "command": "node tests/review/m2-2c-legacy-task-control-replay-green.mjs --pg-bin \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\pg-runtime\\pgsql\\bin\" --sql014-path \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\site\\supabase\\migrations\\202610150014_operational_api.sql\" --output-dir \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\outputs\\m2-2c-legacy-task-control-replay-luna-20261020\\green-review2-case1\" --port 56411 --case-index 1",
+      "artifact": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case1/green-report.json",
+      "outcome": "GREEN_SELECTED_WRAPPERS; exit 0"
+    },
+    {
+      "phase": "red rerun expanded snapshots",
+      "caseIndex": 2,
+      "port": 56402,
+      "command": "node tests/review/m2-2c-legacy-task-control-replay-red.mjs --pg-bin \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\pg-runtime\\pgsql\\bin\" --sql014-path \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\outputs\\m2-2c-legacy-task-control-replay-luna-20261020\\baseline-SQL014.sql\" --output-dir \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\outputs\\m2-2c-legacy-task-control-replay-luna-20261020\\red-review2-case2\" --port 56402 --case-index 2",
+      "artifact": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case2/red-report.json",
+      "outcome": "RED_CONFIRMED_SELECTED_WRAPPERS; exit 0"
+    },
+    {
+      "phase": "green rerun expanded snapshots",
+      "caseIndex": 2,
+      "port": 56412,
+      "command": "node tests/review/m2-2c-legacy-task-control-replay-green.mjs --pg-bin \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\pg-runtime\\pgsql\\bin\" --sql014-path \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\site\\supabase\\migrations\\202610150014_operational_api.sql\" --output-dir \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\outputs\\m2-2c-legacy-task-control-replay-luna-20261020\\green-review2-case2\" --port 56412 --case-index 2",
+      "artifact": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case2/green-report.json",
+      "outcome": "GREEN_SELECTED_WRAPPERS; exit 0"
+    },
+    {
+      "phase": "red rerun expanded snapshots",
+      "caseIndex": 3,
+      "port": 56403,
+      "command": "node tests/review/m2-2c-legacy-task-control-replay-red.mjs --pg-bin \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\pg-runtime\\pgsql\\bin\" --sql014-path \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\outputs\\m2-2c-legacy-task-control-replay-luna-20261020\\baseline-SQL014.sql\" --output-dir \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\outputs\\m2-2c-legacy-task-control-replay-luna-20261020\\red-review2-case3\" --port 56403 --case-index 3",
+      "artifact": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case3/red-report.json",
+      "outcome": "RED_CONFIRMED_SELECTED_WRAPPERS; exit 0"
+    },
+    {
+      "phase": "green rerun expanded snapshots",
+      "caseIndex": 3,
+      "port": 56413,
+      "command": "node tests/review/m2-2c-legacy-task-control-replay-green.mjs --pg-bin \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\pg-runtime\\pgsql\\bin\" --sql014-path \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\site\\supabase\\migrations\\202610150014_operational_api.sql\" --output-dir \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\outputs\\m2-2c-legacy-task-control-replay-luna-20261020\\green-review2-case3\" --port 56413 --case-index 3",
+      "artifact": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case3/green-report.json",
+      "outcome": "GREEN_SELECTED_WRAPPERS; exit 0"
+    },
+    {
+      "phase": "race rerun expanded snapshots",
+      "caseIndex": 2,
+      "port": 56422,
+      "command": "node tests/review/m2-2c-legacy-task-control-replay-races.mjs --pg-bin \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\pg-runtime\\pgsql\\bin\" --sql014-path \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\work\\site\\supabase\\migrations\\202610150014_operational_api.sql\" --output-dir \"C:\\Users\\Vmagni\\Documents\\Codex\\2026-10-06\\sites-plugin-sites-openai-curated-remote-2\\outputs\\m2-2c-legacy-task-control-replay-luna-20261020\\races-review2-case2\" --port 56422 --case-index 2",
+      "artifact": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/races-review2-case2/green-report.json",
+      "outcome": "8/8 races; stale RR 40001, fresh revoked replay P0001; exit 0"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "supabase/migrations/202610150014_operational_api.sql",
+      "kind": "SQL014 candidate",
+      "sha256": "19EC849B0397602B7DC03939539D37F0999FE808FD21A91B227E7767F4BF9FC3",
+      "bytes": 362784
+    },
+    {
+      "path": "tests/review/m2-2c-legacy-task-control-replay-races.mjs",
+      "kind": "race runner",
+      "sha256": "0982C71FC64BC8E00FD7B9F1D40E7B93D0C180A18E4494C545288BA5BA500541",
+      "bytes": 46764
+    },
+    {
+      "path": "tests/review/m2-2c-legacy-task-control-replay-red.mjs",
+      "kind": "red runner",
+      "sha256": "1992B281C67E953548943E852253CF136D88D5D6E0A1FB7A0A33945E40C650C3",
+      "bytes": 32895
+    },
+    {
+      "path": "tests/review/m2-2c-legacy-task-control-replay-green.mjs",
+      "kind": "green runner",
+      "sha256": "B8F322D131B95BAA4EAF35403B768DB75591BBC88239AC8851743744902F019E",
+      "bytes": 29892
+    },
+    {
+      "path": "docs/architecture/M2-2C-LEGACY-TASK-CONTROL-REPLAY-AUTHORIZATION-SOL-CONTRACT-20261020.md",
+      "kind": "Sol contract",
+      "sha256": "86BDD0730BF33EB6184E108B20C6FE111C0EEE4B092C3940A3887CBBE3464FD2",
+      "bytes": 13224
+    },
+    {
+      "path": "docs/architecture/M2-2C-SECTION9-RESIDUAL-AUDIT-SOL-20261020.md",
+      "kind": "residual audit",
+      "sha256": "72D115845A30822809AF2FA7E88F278EAF806716BC1BBE61D06B904251E8D87B",
+      "bytes": 7140
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-seq-final3-case0/red-report.json",
+      "kind": "execution report/log/exit",
+      "sha256": "A8E428A57594CFABCDF5BF6E2817BDDA544438AC27FC792C5C57C5DB76461D13",
+      "bytes": 1305197
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-seq-final3-case1/red-report.json",
+      "kind": "execution report/log/exit",
+      "sha256": "837F8CA8F642B545D405064D49F5BC10219E0447C29F4F92CD0DEE2D616C1D35",
+      "bytes": 1459609
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-seq-final4-case2/red-report.json",
+      "kind": "execution report/log/exit",
+      "sha256": "993C619A93269C27841631440ABA6371BA4A05D040887AACB53891222DFCDE89",
+      "bytes": 1153655
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-seq-final4-case3/red-report.json",
+      "kind": "execution report/log/exit",
+      "sha256": "1DA23E7C9AC0DF5C913167CB470E9EF78D8974A8859423CE1514BC65F341312F",
+      "bytes": 1178447
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-section4-final-case0/green-report.json",
+      "kind": "execution report/log/exit",
+      "sha256": "54DF2ED23CAF6FB25CE0C9CD5E7386A8AEAB98619E42DBAAB2B08FC382747798",
+      "bytes": 1811375
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-section4-final-case1/green-report.json",
+      "kind": "execution report/log/exit",
+      "sha256": "A230C109319E3D34EF2A186740B149FC8AE3EA16DB72BAF03B213AB3EF43D4FA",
+      "bytes": 2031754
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-section4-final-case2/green-report.json",
+      "kind": "execution report/log/exit",
+      "sha256": "93FA0D61DF866B255E496043A9AF089D8346DD5D0839036F6DF66C4EEAA9575C",
+      "bytes": 1604695
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-section4-final-case3/green-report.json",
+      "kind": "execution report/log/exit",
+      "sha256": "BA45E3F8FE21624021F64386A4FACD942C023C1B47B84015D02CC9B5CCF6A48A",
+      "bytes": 1673448
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/races-attempt18/green-report.json",
+      "kind": "execution report/log/exit",
+      "sha256": "5A27EEB27F1C554804DD08AC61B78BAB11415AF6930E23578224DD4EC7221656",
+      "bytes": 9944200
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/races-final2-case0/green-report.json",
+      "kind": "execution report/log/exit",
+      "sha256": "D7F8A001CB6F39D4A2597C7B596DE313C92DA691F6E14366DF1B189EB18CA871",
+      "bytes": 7798898
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/races-final2-case1/green-report.json",
+      "kind": "execution report/log/exit",
+      "sha256": "A44650398C0F94E1447DA834FADD7FC886AC3EF9801D2DE5EE5F0C1985574749",
+      "bytes": 7991030
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/races-final2-case3/green-report.json",
+      "kind": "execution report/log/exit",
+      "sha256": "0E246B8CF8E705645CECA667C82DA2BF486CF218EB8C5BD6413A0971345760BB",
+      "bytes": 7487747
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/races-attempt16/green-report.json",
+      "kind": "execution report/log/exit",
+      "sha256": "A30CFDF1E7851B1EDC6E395062E761B8B3F9A3379BB1B6E622E726EEB6DCF284",
+      "bytes": 9189236
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/races-attempt17/postgres.log",
+      "kind": "execution report/log/exit",
+      "sha256": "415720C06CD9E83BEFE9290B9C77C8E9B06825F5990928FB9F2B2CC6FD0368A8",
+      "bytes": 14811
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/native-final/review.json",
+      "kind": "execution report/log/exit",
+      "sha256": "9B6922CABF3B0C28A10ADEE106F1509C686A69BD56DAEBC329717D6C59EBE698",
+      "bytes": 2720813
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/native-final/stdout.log",
+      "kind": "execution report/log/exit",
+      "sha256": "88E6EB9777A665CBA99A3C50017697345DAA44DFE54BFE5D7493B71F6B52E05D",
+      "bytes": 1898824
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/native-final/stderr.log",
+      "kind": "execution report/log/exit",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/native-final/exit-code.txt",
+      "kind": "execution report/log/exit",
+      "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9",
+      "bytes": 1
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/suite-final/stdout.log",
+      "kind": "execution report/log/exit",
+      "sha256": "299214590327EA28019F4BCD7925CCF97DD65AFD2A4FE2642CFEB3629CB16E2E",
+      "bytes": 21811
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/suite-final/stderr.log",
+      "kind": "execution report/log/exit",
+      "sha256": "03574087F63CBD7924C3196B65366AD167E2BFEDC842A79617E898482D669A6D",
+      "bytes": 897
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/suite-final/exit-code.txt",
+      "kind": "execution report/log/exit",
+      "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9",
+      "bytes": 1
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/build-final/tsc.stdout.log",
+      "kind": "execution report/log/exit",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/build-final/tsc.stderr.log",
+      "kind": "execution report/log/exit",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/build-final/tsc.exit-code.txt",
+      "kind": "execution report/log/exit",
+      "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9",
+      "bytes": 1
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/build-final/client-build.log",
+      "kind": "execution report/log/exit",
+      "sha256": "063DC6ED10FA2712EDFE598EF4B586588E49F245B11DFFC284B04E7EE4EBD57A",
+      "bytes": 3484
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/build-final/client-build.exit",
+      "kind": "execution report/log/exit",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "bytes": 3
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/build-final/worker-build.log",
+      "kind": "execution report/log/exit",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/build-final/worker-build.exit",
+      "kind": "execution report/log/exit",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "bytes": 3
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case0/red-report.json",
+      "kind": "review2 execution evidence",
+      "sha256": "AA18C94612510798144D6704E37CBB6E2630F9DC630A3774746699C21285E967",
+      "bytes": 1820756
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case0/postgres.log",
+      "kind": "review2 execution evidence",
+      "sha256": "0DE023986EFD2BE4FCF06BD47B7BF027F702ACC00D4F4429933AA9457006DB4A",
+      "bytes": 6781
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case0.stdout.log",
+      "kind": "review2 execution evidence",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case0.stderr.log",
+      "kind": "review2 execution evidence",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case0.exit-code.txt",
+      "kind": "review2 execution evidence",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "bytes": 3
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case0/green-report.json",
+      "kind": "review2 execution evidence",
+      "sha256": "3E983A4A0F9C6DCC0C227ABA30566DCD3912058576B7C6B2A3C032F95E6EA35F",
+      "bytes": 1821589
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case0/postgres.log",
+      "kind": "review2 execution evidence",
+      "sha256": "B7DD7CC568F0463E517B4F72E5497A1AB1B25074606C62E1925827F184A4630F",
+      "bytes": 7745
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case0.stdout.log",
+      "kind": "review2 execution evidence",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case0.stderr.log",
+      "kind": "review2 execution evidence",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case0.exit-code.txt",
+      "kind": "review2 execution evidence",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "bytes": 3
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case1/red-report.json",
+      "kind": "review2 execution evidence",
+      "sha256": "0EA50609A2CCDE572F8ECE4ABC8E5D30D7C7AD3BE7163A2C314A672EAB826F84",
+      "bytes": 2042472
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case1/postgres.log",
+      "kind": "review2 execution evidence",
+      "sha256": "8D38962496FCB7CBC36EB4FF77408C7B38BB3A962AE8B2FC2626094F008E54CB",
+      "bytes": 8323
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case1.stdout.log",
+      "kind": "review2 execution evidence",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case1.stderr.log",
+      "kind": "review2 execution evidence",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case1.exit-code.txt",
+      "kind": "review2 execution evidence",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "bytes": 3
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case1/green-report.json",
+      "kind": "review2 execution evidence",
+      "sha256": "E37B328B197566B4B63B0336ED0DA86CCAAEAA4EDEB3DD8ED3EFC11CC7B55C74",
+      "bytes": 2043088
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case1/postgres.log",
+      "kind": "review2 execution evidence",
+      "sha256": "B91269D80B67848CBA7E571005B01C1EA8FD76032B080762D85662FFCB91A66B",
+      "bytes": 9284
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case1.stdout.log",
+      "kind": "review2 execution evidence",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case1.stderr.log",
+      "kind": "review2 execution evidence",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case1.exit-code.txt",
+      "kind": "review2 execution evidence",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "bytes": 3
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case2/red-report.json",
+      "kind": "review2 execution evidence",
+      "sha256": "8EEEF4B0BEB79BE030D2740B77FE723424AB8C3616B8A4799BDC8867231D2FCB",
+      "bytes": 1763631
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case2/postgres.log",
+      "kind": "review2 execution evidence",
+      "sha256": "D0B95E4358AA00C74299E2893BBA7CCFCBBEE858B99E2F10D3EC71488160D24B",
+      "bytes": 5294
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case2.stdout.log",
+      "kind": "review2 execution evidence",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case2.stderr.log",
+      "kind": "review2 execution evidence",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case2.exit-code.txt",
+      "kind": "review2 execution evidence",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "bytes": 3
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case2/green-report.json",
+      "kind": "review2 execution evidence",
+      "sha256": "8FACB8C0EECD98BCF9E3A0FD8C5F0DFD9A5AD3B0047B2F6167B93261A50FD9EB",
+      "bytes": 1613608
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case2/postgres.log",
+      "kind": "review2 execution evidence",
+      "sha256": "A1F6D193CBDEDFA32C2682BF41EE7B3FC4390DB76380B6060DB8A6597BC25C2C",
+      "bytes": 6226
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case2.stdout.log",
+      "kind": "review2 execution evidence",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case2.stderr.log",
+      "kind": "review2 execution evidence",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case2.exit-code.txt",
+      "kind": "review2 execution evidence",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "bytes": 3
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case3/red-report.json",
+      "kind": "review2 execution evidence",
+      "sha256": "7C7BC2884E093D146A79E80C026F35F2079D2BA93A8CF55E62E5A6D8E8306B72",
+      "bytes": 1682867
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case3/postgres.log",
+      "kind": "review2 execution evidence",
+      "sha256": "07DAECD47D4E65441F528F051678A61BF29680D4C11E6BDCDCA2BB840CB31E9E",
+      "bytes": 6865
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case3.stdout.log",
+      "kind": "review2 execution evidence",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case3.stderr.log",
+      "kind": "review2 execution evidence",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case3.exit-code.txt",
+      "kind": "review2 execution evidence",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "bytes": 3
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case3/green-report.json",
+      "kind": "review2 execution evidence",
+      "sha256": "4ACDCEE34A2C4D2BFE499FB3D7CB324664F5C80CC726C7EB96985DE62989CCD5",
+      "bytes": 1683367
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case3/postgres.log",
+      "kind": "review2 execution evidence",
+      "sha256": "EA19E62B0CEAB716F8900618A40F08E458419E9D3A6A939D5F552BDB85410180",
+      "bytes": 7837
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case3.stdout.log",
+      "kind": "review2 execution evidence",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case3.stderr.log",
+      "kind": "review2 execution evidence",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/green-review2-case3.exit-code.txt",
+      "kind": "review2 execution evidence",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "bytes": 3
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/races-review2-case2/green-report.json",
+      "kind": "review2 execution evidence",
+      "sha256": "7A5304E25D7CAD08FCC92DD3C9D123B475DCA2777FACCC900E0C32A221C53E04",
+      "bytes": 9968908
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/races-review2-case2/postgres.log",
+      "kind": "review2 execution evidence",
+      "sha256": "A472548BEDE4E562C3B20F10A2B0C2698C1A142A89BF60BBA605C0F69561C5D7",
+      "bytes": 14540
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/races-review2-case2.stdout.log",
+      "kind": "review2 execution evidence",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/races-review2-case2.stderr.log",
+      "kind": "review2 execution evidence",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/races-review2-case2.exit-code.txt",
+      "kind": "review2 execution evidence",
+      "sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+      "bytes": 3
+    }
+  ],
+  "commitPush": "none",
+  "hostedServices": "not used",
+  "snapshotCollectionsIncluded": [
+    "app_private.task_tracking_events",
+    "app_private.task_completion_events",
+    "app_private.operational_assessment_versions",
+    "public.employee_absence_companies",
+    "public.task_coverage_plan_instances",
+    "public.task_coverage_plan_assignment_rules"
+  ],
+  "redStaleRrProbe": {
+    "wrapper": "set_task_wait",
+    "caseIndex": 2,
+    "outcome": "baseline reproduces unauthorized replay: SQLSTATE 00000, revision 1",
+    "isolation": "repeatable read",
+    "employeeSnapshotMembershipActiveBeforeRevoke": true,
+    "employeeSameSnapshotMembershipActiveAfterChiefRevocation": true,
+    "observerMembershipActiveAfterRevoke": false,
+    "fullSnapshots": [
+      "fullSnapshotBeforeRevoke",
+      "fullSnapshotAfterConfirmedRevoke",
+      "fullSnapshotBeforeReplay",
+      "fullSnapshotAfterReplay"
+    ],
+    "artifact": "../../outputs/m2-2c-legacy-task-control-replay-luna-20261020/red-review2-case2/red-report.json"
+  }
+}

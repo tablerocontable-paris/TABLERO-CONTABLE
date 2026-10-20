@@ -1,3 +1,19 @@
+# Continuidad vigente — controles legacy de tarea aceptados localmente, 20/10/2026
+
+Etapa T aprobada por GPT-6.1 Sol, en alcance local acotado. Aceptación SHA-256
+`638EA12EF904AC9F72873854F15AAFAABFD17DEF7B2E0D892B7F11F3636C4B7B`;
+SQL014 candidata `19EC849B0397602B7DC03939539D37F0999FE808FD21A91B227E7767F4BF9FC3`.
+Cuatro rojos y cuatro verdes, ocho carreras con blockers, 162 comparaciones de
+inercia y 352 snapshots; manifiesto 79/79; matriz 351/351, suite 738/738,
+TypeScript y builds cliente/Worker aprobados. Los intentos históricos y scratch
+`.block` están excluidos. Sin SQL remoto, cambios de servicio, commit o push.
+
+Próximo paso: GPT-6.1 Sol selecciona/acota siguiente familia C/A/P y GPT-6 Luna
+la implementa con contrato cerrado. §9/Gate L siguen abiertos; SQL014 no se
+aplicó. Después quedan preflight, Auth/HTTP, Data API, Storage/restauración,
+frontend integrado, GitHub CI, hosting, correo y aceptación final. Mantener Site
+privado, datos ficticios y espacio operativo apagado.
+
 # Continuidad vigente — replay de responsabilidad aceptado localmente, 20/10/2026
 
 Sol aceptó localmente `public.assign_task_responsibility` en alcance acotado.

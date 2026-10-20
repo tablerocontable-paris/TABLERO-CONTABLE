@@ -1,3 +1,25 @@
+# Próximo paso — etapa C/A/P de §9
+
+Etapa T (replays de controles legacy de tarea) aceptada por GPT-6.1 Sol en
+alcance local acotado. Aceptación:
+`docs/architecture/M2-2C-LEGACY-TASK-CONTROL-REPLAY-SOL-ACCEPTANCE-20261020.md`
+(SHA-256 `638EA12EF904AC9F72873854F15AAFAABFD17DEF7B2E0D892B7F11F3636C4B7B`).
+SQL014 candidata SHA-256
+`19EC849B0397602B7DC03939539D37F0999FE808FD21A91B227E7767F4BF9FC3`.
+
+1. Registrar/pulir este corte, commit y push directo a `origin/main`, sin PR.
+2. GPT-6.1 Sol revisa el residual §9 y fija contrato de siguiente unidad entre
+   C (supervisión de cobertura), A (supervisión de ausencias) y P (política de
+   cleanup/privacidad); no repetir matrices ya aceptadas.
+3. GPT-6 Luna implementa sólo el contrato aprobado; Sol reaudita hashes y
+   alcance antes de publicar.
+4. Repetir el esquema para cerrar §9 y Gate L. Recién entonces revisar
+   configuración Data API, preflight H y despliegues de Supabase/Auth/HTTP/
+   Storage, frontend, CI, hosting y correo.
+
+Sin migraciones ni escrituras remotas en esta etapa. Mantener Site privado,
+datos ficticios y espacio operativo apagado. No afirmar migración completa.
+
 # Continuidad vigente — replay de responsabilidad aceptado localmente, 20/10/2026
 
 Sol aceptó `public.assign_task_responsibility` en alcance local acotado.

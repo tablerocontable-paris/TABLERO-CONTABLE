@@ -1,3 +1,25 @@
+# Continuidad vigente — controles legacy de tarea aceptados localmente, 20/10/2026
+
+GPT-6.1 Sol aceptó en alcance local acotado la familia T de replays de controles
+legacy de tarea. Aceptación `docs/architecture/M2-2C-LEGACY-TASK-CONTROL-REPLAY-SOL-ACCEPTANCE-20261020.md`
+(SHA-256 `638EA12EF904AC9F72873854F15AAFAABFD17DEF7B2E0D892B7F11F3636C4B7B`);
+contrato en `docs/architecture/M2-2C-LEGACY-TASK-CONTROL-REPLAY-AUTHORIZATION-SOL-CONTRACT-20261020.md`.
+SQL014 candidata SHA-256 `19EC849B0397602B7DC03939539D37F0999FE808FD21A91B227E7767F4BF9FC3`.
+Evidencia: 4 rojos, 4 verdes, 8 carreras con blockers, 162 comparaciones de
+inercia, 352 snapshots; matriz 351/351, suite 738/738, TSC y builds cliente/
+Worker exit 0. Manifiesto de 79 artefactos con hashes verificados. SQL001–013
+intactas. Sol excluyó intentos históricos y scratch `.block` de la aceptación.
+
+Este bloque está aceptado localmente y pendiente de commit/push directo a
+`origin/main`, sin PR. SQL014 no se aplicó a Supabase. El próximo paso es que
+GPT-6.1 Sol acote la unidad C/A/P siguiente desde el inventario residual en
+`docs/architecture/M2-2C-SECTION9-RESIDUAL-AUDIT-SOL-20261020.md`; después
+GPT-6 Luna implementa el contrato aprobado. Gate L, Data API, Auth/HTTP,
+Storage/restauración, CI, hosting, correo y producción siguen abiertos. No
+activar el espacio operativo ni usar datos reales.
+
+Esta cabecera supersede los próximos pasos históricos que siguen.
+
 # Continuidad vigente — replay de responsabilidad aceptado localmente, 20/10/2026
 
 GPT-6.1 Sol aceptó en alcance local acotado el replay de
