@@ -12,11 +12,12 @@ Manifiesto SHA `478157350FC4ED3561EE5DF6BD940E0B79E20D339E8D6861F16B3B1182E71C1F
 33/33 hashes y rutas verificados. SQL001–013 intactas. Límite P3 AAL1 consta en
 la aceptación.
 
-El bloque queda aceptado localmente y pendiente de publicación directa a
-`origin/main`, sin PR. SQL014 no se aplicó a Supabase. El proyecto dev continúa
-separado y sin migraciones aplicadas. Después del push, GPT-6.1 Sol audita el
-inventario residual §9. Gate L, Auth/HTTP, Data API, Storage/restore, CI, hosting,
-correo y producción siguen abiertos.
+El bloque está publicado directamente a `origin/main`, sin PR, en
+`53f37f09d04e871bbc15ae88c8b8362472753a95`; el SHA remoto fue confirmado.
+SQL014 no se aplicó a Supabase. El proyecto dev continúa separado y sin
+migraciones aplicadas. GPT-6.1 Sol audita ahora el inventario residual §9.
+Gate L, Auth/HTTP, Data API, Storage/restore, CI, hosting, correo y producción
+siguen abiertos.
 
 Esta actualización supersede el encabezado anterior; los registros siguientes
 son historial.

@@ -14,9 +14,10 @@ Worker, sintaxis y diff-check terminaron con exit 0. Manifiesto versionado SHA
 referencias verificadas. SQL001–013 intactas. Límite P3 de metadatos AAL1 está
 descripto en la aceptación.
 
-Este bloque está aceptado localmente y pendiente de commit/push directo a
-`origin/main`, sin PR. SQL014 no se aplicó a Supabase. Después de publicar,
-GPT-6.1 Sol audita el inventario residual §9 y define la próxima unidad acotada.
+Este bloque quedó aceptado y publicado directamente a `origin/main`, sin PR,
+en `53f37f09d04e871bbc15ae88c8b8362472753a95`; el SHA remoto fue confirmado.
+SQL014 no se aplicó a Supabase. GPT-6.1 Sol audita ahora el inventario residual
+§9 y define la próxima unidad acotada.
 Gate L, Auth/HTTP, Data API, Storage/restore, CI, hosting, correo y producción
 siguen abiertos. No activar el espacio operativo ni usar datos reales.
 

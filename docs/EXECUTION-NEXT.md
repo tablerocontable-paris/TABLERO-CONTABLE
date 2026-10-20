@@ -11,10 +11,11 @@ Manifiesto versionado SHA `478157350FC4ED3561EE5DF6BD940E0B79E20D339E8D6861F16B3
 33/33 rutas y hashes correctos. SQL001–013 intactas. La aceptación registra el
 límite P3 del contexto AAL1.
 
-**Publicar este corte directamente en `origin/main`, sin PR.** No aplicar SQL014
-ni activar el espacio operativo. Luego GPT-6.1 Sol debe auditar §9 y seleccionar
-la siguiente unidad de migración. Gate L, Auth/HTTP, Data API, Storage/restore,
-CI, hosting, correo y producción siguen abiertos.
+El corte está publicado directamente en `origin/main`, sin PR, en
+`53f37f09d04e871bbc15ae88c8b8362472753a95`; el SHA remoto fue confirmado. No
+aplicar SQL014 ni activar el espacio operativo. GPT-6.1 Sol debe auditar §9 y
+seleccionar la siguiente unidad de migración. Gate L, Auth/HTTP, Data API,
+Storage/restore, CI, hosting, correo y producción siguen abiertos.
 
 Esta actualización supersede el encabezado anterior; los registros siguientes
 son historial.
