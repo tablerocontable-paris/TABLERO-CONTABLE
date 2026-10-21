@@ -1,3 +1,25 @@
+# Continuidad vigente — A aceptada localmente, 21/10/2026
+
+Sol aceptó A (replays legacy de aprobación y cancelación de ausencias) en alcance
+local acotado. Aceptación `docs/architecture/M2-2C-LEGACY-ABSENCE-REPLAY-SOL-ACCEPTANCE-20261021.md`;
+manifiesto SHA-256 `97A69B5539E69A5125F3DBD9A857171C6DACB4F7BBE595E39A20DAA99BD1E191`;
+SQL014 SHA-256 `EF9BD767AA9A7FE83CD93B117E643F4B29DDC62345E8DD0687E2E2F598D04B95`.
+Evidencia: rojo 50/50; verde 52 secuenciales, 2 stale-RR y 8 carreras con blockers
+reales; snapshots completos; matriz nativa 376/376 en baseline y candidata;
+suite 738/738, TypeScript, builds cliente/Worker, syntax y diff-check aprobados.
+95 artefactos canónicos resueltos y hash-verificados. SQL001–013 intactas.
+
+**Estado:** A aceptada por Sol, pendiente de registro y publicación directa a
+`origin/main` sin PR. T y C ya están publicados en `dbf65fadde1693f29d52a85c9f17f9dc000bbcc9`.
+No hubo llamadas remotas ni aplicación de SQL014 en Supabase.
+
+**Siguiente:** publicar A; GPT-6.1 Sol dicta P y cruza el residual §9/Gate L; tras
+la aceptación de Gate L, revisar ajustes Data API y ejecutar preflight/migración
+en Supabase dev. Luego integrar Auth/API/Storage y frontend, automatizar CI y
+despliegue, preparar Cloudflare/correo, y validar clon/ejecución desde la PC
+personal. Mantener Site privado, datos ficticios y espacio operativo apagado.
+
+Esta cabecera supersede el estado y siguiente paso históricos más abajo.
 # Continuidad vigente — C aceptada localmente, 20/10/2026
 
 La familia C de replays legacy de supervisión de cobertura quedó aceptada por

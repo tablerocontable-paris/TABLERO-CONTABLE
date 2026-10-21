@@ -3730,3 +3730,162 @@ begin
 end $$;
 revoke all on function public.transition_task_reviewed(uuid,text,text,bigint,uuid),public.set_checklist_item_reviewed(uuid,text,boolean,text,bigint,uuid),public.set_task_wait(uuid,text,bigint,uuid),public.set_task_wait_reviewed(uuid,text,text,bigint,uuid) from public,anon;
 grant execute on function public.transition_task_reviewed(uuid,text,text,bigint,uuid),public.set_checklist_item_reviewed(uuid,text,boolean,text,bigint,uuid),public.set_task_wait(uuid,text,bigint,uuid),public.set_task_wait_reviewed(uuid,text,text,bigint,uuid) to authenticated;
+
+-- A-only legacy absence replay authorization. This helper is deliberately
+-- private and acquires the shared advisory/profile/membership protocol without
+-- creating or advancing any API fence.
+create function app_private._authorize_absence_receipt(p_receipt jsonb,p_mode text) returns void
+language plpgsql security definer set search_path='' as $$
+declare
+ actor uuid:=auth.uid(); org uuid; receipt_org uuid; a public.employee_absences%rowtype;
+ args jsonb:=p_receipt->'arguments'; absence_id uuid; owner_id uuid; replacement_id uuid;
+ company_ids uuid[]; months jsonb; catalog_keys text[]; plan jsonb; r jsonb; profile_id uuid;
+ c uuid; planned_profile jsonb; actual_profile jsonb; planned_absence jsonb;
+ linked_ids uuid[]; receipt_companies uuid[];
+begin
+ if actor is null or p_mode not in ('approve_absence','cancel_absence') then raise exception 'Sin permiso'; end if;
+ perform public.require_privileged_session();
+ org:=public.actor_org(); receipt_org:=(p_receipt->>'organization_id')::uuid;
+ if org is null or receipt_org is distinct from org or public.actor_role() not in ('jefe','encargado') then
+  if p_mode='approve_absence' then raise exception 'Responsable fuera de ámbito'; else raise exception 'Ausencia fuera del ámbito'; end if;
+ end if;
+ if p_mode='approve_absence' then
+  absence_id:=(p_receipt->'result'->>'id')::uuid; owner_id:=(args->>'owner')::uuid;
+  replacement_id:=nullif(args->>'replacement','')::uuid;
+  select coalesce(array_agg((value #>> '{}')::uuid order by ordinality),array[]::uuid[]) into receipt_companies
+   from jsonb_array_elements(coalesce(nullif(args->'companies','null'::jsonb),'[]'::jsonb)) with ordinality;
+ else
+  absence_id:=(args->>'absence')::uuid;
+ end if;
+ select * into a from public.employee_absences x where x.id=absence_id and x.organization_id=receipt_org;
+ if not found then
+  if p_mode='approve_absence' then raise exception 'Responsable fuera de ámbito'; else raise exception 'Ausencia fuera del ámbito'; end if;
+ end if;
+ if p_mode='approve_absence' then
+  if not a.authorization_sealed or a.owner_id is distinct from owner_id or a.replacement_id is distinct from replacement_id
+   or a.kind is distinct from args->>'kind' or a.starts_on is distinct from (args->>'starts')::date
+   or a.ends_on is distinct from (args->>'ends')::date or a.note is distinct from trim(args->>'note') then
+   raise exception 'Responsable fuera de ámbito';
+  end if;
+  select coalesce(array_agg(company_id order by company_id),array[]::uuid[]) into linked_ids
+   from public.employee_absence_companies x where x.absence_id=a.id and x.organization_id=receipt_org;
+  if linked_ids is distinct from (select coalesce(array_agg(x order by x),array[]::uuid[]) from unnest(receipt_companies) x) then raise exception 'Responsable fuera de ámbito'; end if;
+  owner_id:=a.owner_id; replacement_id:=a.replacement_id; company_ids:=receipt_companies;
+ else
+  owner_id:=a.owner_id; replacement_id:=a.replacement_id;
+  select coalesce(array_agg(company_id order by company_id),array[]::uuid[]) into company_ids
+   from public.employee_absence_companies x where x.absence_id=a.id and x.organization_id=receipt_org;
+ end if;
+ select coalesce(jsonb_agg(jsonb_build_object('ownerId',person,'period',g::date) order by person,g),'[]'::jsonb)
+  into months from unnest(array[owner_id,replacement_id]) person
+   cross join generate_series(date_trunc('month',a.starts_on)::date,date_trunc('month',a.ends_on)::date,interval '1 month') g
+   where person is not null;
+ select coalesce(array_agg('membership:'||x::text||':'||actor::text order by 'membership:'||x::text||':'||actor::text),'{}'::text[])
+  into catalog_keys from unnest(company_ids) x;
+ plan:=public._coordination_prepare('{}'::uuid[],array[actor],array[owner_id,replacement_id],months,catalog_keys,
+   jsonb_build_object('absence',absence_id));
+ -- Match the writer's lock namespace order 1102..1105 after the receipt lock.
+ perform public._coordination_lock_keys(1102,array(select x::text from jsonb_array_elements_text(plan->'actors') x));
+ perform public._coordination_lock_keys(1103,array(select x::text from jsonb_array_elements_text(plan->'profiles') x));
+ perform public._coordination_lock_keys(1104,array(select distinct (x->>'ownerId')||':'||(x->>'period') from jsonb_array_elements(plan->'months') x));
+ perform public._coordination_lock_keys(1105,array(select x from jsonb_array_elements_text(plan->'catalog') x));
+ for r in select value from jsonb_array_elements(plan->'snapshot'->'profiles') order by value->>'id' loop
+  profile_id:=(r->>'id')::uuid;
+  select to_jsonb(p) into actual_profile from public.profiles p where p.id=profile_id for share;
+  if actual_profile is distinct from r then raise exception using errcode='40001',message='Cambió el ámbito de la operación; reintente en una transacción nueva'; end if;
+ end loop;
+ for c in select x from unnest(company_ids) x order by x loop
+  perform 1 from public.companies co where co.id=c and co.organization_id=receipt_org for share;
+  if not found then raise exception 'Empresa fuera del ámbito'; end if;
+  if public.actor_role()='encargado' then
+   perform 1 from public.company_memberships cm where cm.organization_id=receipt_org and cm.company_id=c and cm.profile_id=actor and cm.active for share;
+   if not found then raise exception 'Empresa fuera del ámbito'; end if;
+  end if;
+ end loop;
+ select to_jsonb(x) into planned_absence from jsonb_array_elements(plan->'snapshot'->'absences') x where (x->>'id')::uuid=absence_id;
+ select to_jsonb(x) into r from public.employee_absences x where x.id=absence_id and x.organization_id=receipt_org for share;
+ if r is null or r is distinct from planned_absence then raise exception using errcode='40001',message='Cambió el ámbito de la operación; reintente en una transacción nueva'; end if;
+ perform public._coordination_revalidate(plan);
+ perform public.require_privileged_session();
+ if public.actor_org() is distinct from receipt_org or public.actor_role() not in ('jefe','encargado') then
+  if p_mode='approve_absence' then raise exception 'Responsable fuera de ámbito'; else raise exception 'Ausencia fuera del ámbito'; end if;
+ end if;
+ if public.actor_role()='encargado' and
+  (not public.can_access_owner(owner_id) or (replacement_id is not null and not public.can_access_owner(replacement_id))) then
+  if p_mode='approve_absence' then raise exception 'Fuera del ámbito permanente'; else raise exception 'Ausencia fuera del ámbito'; end if;
+ end if;
+ if p_mode='approve_absence' and
+  (not exists(select 1 from public.profiles p where p.id=owner_id and p.organization_id=receipt_org)
+   or (replacement_id is not null and not exists(select 1 from public.profiles p where p.id=replacement_id and p.organization_id=receipt_org))) then
+  raise exception 'Responsable fuera de ámbito';
+ end if;
+end $$;
+revoke all on function app_private._authorize_absence_receipt(jsonb,text) from public,anon,authenticated,service_role;
+
+create or replace function public.approve_employee_absence(p_owner uuid,p_replacement uuid,p_kind text,p_starts date,p_ends date,p_company_ids uuid[],p_note text,p_operation_id uuid) returns uuid
+language plpgsql security definer set search_path='' as $$
+declare plan jsonb; months jsonb; org uuid; new_id uuid; cached jsonb; c uuid; args jsonb; at_time timestamptz; receipt_row public.task_mutation_receipts%rowtype;
+begin
+ if auth.uid() is null or p_owner is null or p_kind is null or p_starts is null or p_ends is null or p_ends<p_starts or nullif(trim(coalesce(p_note,'')),'') is null then raise exception 'Datos de ausencia inválidos'; end if;
+ args:=jsonb_build_object('owner',p_owner,'replacement',p_replacement,'kind',p_kind,'starts',p_starts,'ends',p_ends,'companies',p_company_ids,'note',p_note);
+ cached:=public._get_mutation_receipt('approve_absence',args,p_operation_id);
+ if cached is not null then
+  select * into receipt_row from public.task_mutation_receipts where actor_id=auth.uid() and operation_id=p_operation_id;
+  if not found then raise exception using errcode='40001',message='El recibo cambió; reintente desde otra transacción'; end if;
+  perform app_private._authorize_absence_receipt(to_jsonb(receipt_row),'approve_absence');
+  return (cached->>'id')::uuid;
+ end if;
+ perform public.require_privileged_session();
+ if public.actor_role() not in ('jefe','encargado') then raise exception 'Sólo jefatura o encargado puede aprobar ausencias'; end if;
+ org:=public.actor_org();
+ select coalesce(jsonb_agg(jsonb_build_object('ownerId',x,'period',g::date)),'[]') into months from unnest(array[p_owner,p_replacement]) x cross join generate_series(date_trunc('month',p_starts)::date,date_trunc('month',p_ends)::date,interval '1 month') g where x is not null;
+ plan:=public._coordination_prepare('{}',array[auth.uid()],array[p_owner,p_replacement],months,'{}'); perform public._coordination_acquire(plan);
+ perform public.require_privileged_session();
+ if public.actor_role() not in ('jefe','encargado') or public.actor_org() is distinct from org then raise exception 'Responsable fuera de ámbito'; end if;
+ if p_kind not in ('vacaciones','licencia') or not exists(select 1 from public.profiles where id=p_owner and organization_id=org and active) then raise exception 'Titular o tipo inválido'; end if;
+ if public.actor_role()<>'jefe' then
+  if not public.can_access_owner(p_owner) or (p_replacement is not null and not public.can_access_owner(p_replacement)) then raise exception 'Fuera del ámbito permanente'; end if;
+  if exists(select 1 from unnest(coalesce(p_company_ids,'{}'::uuid[])) cid where not exists(select 1 from public.company_memberships m where m.profile_id=auth.uid() and m.company_id=cid and m.organization_id=org and m.active)) then raise exception 'Empresa fuera del ámbito'; end if;
+ end if;
+ if p_replacement is not null and (p_replacement=p_owner or not exists(select 1 from public.profiles where id=p_replacement and organization_id=org and active and role in ('empleado','encargado'))) then raise exception 'Reemplazante inválido'; end if;
+ if p_replacement is not null and (coalesce(cardinality(p_company_ids),0)=0 or array_position(p_company_ids,null) is not null or cardinality(p_company_ids)<>(select count(distinct x) from unnest(p_company_ids) x)) then raise exception 'Seleccione empresas válidas y sin repetir'; end if;
+ if p_replacement is null and coalesce(cardinality(p_company_ids),0)>0 then raise exception 'Sin reemplazante no se habilitan empresas'; end if;
+ if p_replacement is not null and exists(select 1 from unnest(p_company_ids) cid where not exists(select 1 from public.company_memberships m where m.profile_id=p_owner and m.company_id=cid and m.organization_id=org) or not exists(select 1 from public.company_memberships m where m.profile_id=p_replacement and m.company_id=cid and m.organization_id=org)) then raise exception 'Ambos deben pertenecer a las empresas seleccionadas'; end if;
+ if exists(select 1 from public.employee_absences where owner_id=p_owner and cancelled_at is null and daterange(starts_on,ends_on,'[]') && daterange(p_starts,p_ends,'[]')) then raise exception 'La ausencia se superpone con otra'; end if;
+ if exists(select 1 from jsonb_array_elements(months) m join public.monthly_closures c on c.owner_id=(m->>'ownerId')::uuid and c.period=(m->>'period')::date) then raise exception 'El mes está cerrado'; end if;
+ at_time:=clock_timestamp(); insert into public.employee_absences(organization_id,owner_id,replacement_id,kind,starts_on,ends_on,note,approved_by,approved_at,authorization_sealed) values(org,p_owner,p_replacement,p_kind,p_starts,p_ends,trim(p_note),auth.uid(),at_time,false) returning id into new_id;
+ foreach c in array coalesce(p_company_ids,'{}'::uuid[]) loop insert into public.employee_absence_companies(absence_id,organization_id,company_id) values(new_id,org,c); end loop;
+ update public.employee_absences set authorization_sealed=true where id=new_id;
+ insert into public.audit_events(organization_id,actor_id,action,entity_id,at,details) values(org,auth.uid(),'absence.approved',new_id,at_time,jsonb_build_object('owner',p_owner,'replacement',p_replacement,'companies',coalesce(to_jsonb(p_company_ids),'[]'::jsonb)));
+ perform public._save_mutation_receipt('approve_absence',args,p_operation_id,jsonb_build_object('id',new_id)); return new_id;
+end $$;
+
+create or replace function public.cancel_employee_absence(p_absence uuid,p_reason text,p_operation_id uuid) returns void
+language plpgsql security definer set search_path='' as $$
+declare plan jsonb; a public.employee_absences; cached jsonb; args jsonb; cutoff timestamptz; row_session record; inst uuid; canonical_reason text; at_time timestamptz; receipt_row public.task_mutation_receipts%rowtype;
+begin
+ if auth.uid() is null or nullif(trim(coalesce(p_reason,'')),'') is null then raise exception 'Identidad y motivo requeridos'; end if;
+ args:=jsonb_build_object('absence',p_absence,'reason',trim(p_reason)); cached:=public._get_mutation_receipt('cancel_absence',args,p_operation_id);
+ if cached is not null then
+  select * into receipt_row from public.task_mutation_receipts where actor_id=auth.uid() and operation_id=p_operation_id;
+  if not found then raise exception using errcode='40001',message='El recibo cambió; reintente desde otra transacción'; end if;
+  perform app_private._authorize_absence_receipt(to_jsonb(receipt_row),'cancel_absence'); return;
+ end if;
+ perform public.require_privileged_session();
+ select * into a from public.employee_absences where id=p_absence and organization_id=public.actor_org();
+ if not found or public.actor_role() not in ('jefe','encargado') or not public.can_access_owner(a.owner_id) then raise exception 'Ausencia fuera del ámbito'; end if;
+ plan:=public._coordination_prepare('{}',array[auth.uid()],array[a.owner_id,a.replacement_id],'[]','{}',jsonb_build_object('absence',a.id,'stopSessions',true)); perform public._coordination_acquire(plan);
+ perform public.require_privileged_session();
+ if public.actor_role() not in ('jefe','encargado') or not public.can_access_owner(a.owner_id) or public.actor_org() is distinct from a.organization_id then raise exception 'Ausencia fuera del ámbito'; end if;
+ if public.actor_role()='encargado' and a.replacement_id is not null and (not public.can_access_owner(a.replacement_id) or exists(select 1 from public.employee_absence_companies c where c.absence_id=a.id and not exists(select 1 from public.company_memberships m where m.profile_id=auth.uid() and m.organization_id=a.organization_id and m.company_id=c.company_id and m.active))) then raise exception 'El reemplazante o una empresa está fuera del ámbito permanente'; end if;
+ for row_session in select s.actor_id,t.owner_id,t.period from public.task_time_sessions s join public.task_instances t on t.id=s.instance_id where s.absence_id=a.id and s.ended_at is null loop perform public._coordination_assert_month(row_session.owner_id,row_session.period); perform public._coordination_assert_month(row_session.actor_id,row_session.period); end loop;
+ if a.cancelled_at is null then at_time:=clock_timestamp(); cutoff:=at_time; update public.employee_absences set cancelled_at=cutoff where id=a.id; else cutoff:=a.cancelled_at; select e.details->>'reason' into canonical_reason from public.audit_events e where e.action='absence.cancelled' and e.entity_id=a.id order by e.at limit 1; end if;
+ for row_session in select s.id,s.instance_id,s.actor_id,s.started_at,t.organization_id from public.task_time_sessions s join public.task_instances t on t.id=s.instance_id where s.absence_id=a.id and s.ended_at is null order by s.id loop
+  update public.task_time_sessions set ended_at=public._effective_session_end(row_session.id,cutoff) where id=row_session.id; update public.task_instances set state_revision=state_revision+1 where id=row_session.instance_id;
+  insert into public.audit_events(organization_id,actor_id,action,entity_id,at,details) values(row_session.organization_id,auth.uid(),'absence.session_stopped',row_session.instance_id,at_time,jsonb_build_object('absence',a.id,'session',row_session.id,'executor',row_session.actor_id,'started_at',row_session.started_at,'ended_at',public._effective_session_end(row_session.id,cutoff),'reason',coalesce(canonical_reason,trim(p_reason))));
+ end loop;
+ if a.cancelled_at is null then insert into public.audit_events(organization_id,actor_id,action,entity_id,at,details) values(a.organization_id,auth.uid(),'absence.cancelled',a.id,at_time,jsonb_build_object('reason',trim(p_reason),'cancelled_at',cutoff)); end if;
+ perform public._save_mutation_receipt('cancel_absence',args,p_operation_id,jsonb_build_object('cancelled_at',cutoff));
+end $$;
+revoke all on function public.approve_employee_absence(uuid,uuid,text,date,date,uuid[],text,uuid),public.cancel_employee_absence(uuid,text,uuid) from public,anon;
+grant execute on function public.approve_employee_absence(uuid,uuid,text,date,date,uuid[],text,uuid),public.cancel_employee_absence(uuid,text,uuid) to authenticated;

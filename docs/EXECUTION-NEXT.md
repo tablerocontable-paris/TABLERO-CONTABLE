@@ -1,3 +1,25 @@
+# Próximo paso vigente — publicar A y cerrar §9/Gate L
+
+**A aceptada por Sol en alcance local.** Aprobación registrada en
+`docs/architecture/M2-2C-LEGACY-ABSENCE-REPLAY-SOL-ACCEPTANCE-20261021.md`.
+SQL014 SHA-256 `EF9BD767AA9A7FE83CD93B117E643F4B29DDC62345E8DD0687E2E2F598D04B95`;
+manifiesto SHA-256 `97A69B5539E69A5125F3DBD9A857171C6DACB4F7BBE595E39A20DAA99BD1E191`.
+T+C están en `origin/main` (`dbf65fadde1693f29d52a85c9f17f9dc000bbcc9`).
+
+1. Commit y push directo a `origin/main`, sin PR, actualizando continuidad y
+   aceptación A; verificar SHA remoto y GitHub Actions.
+2. GPT-6.1 Sol evalúa P (`pause_task_timer`, `save_private_block_note`) y
+   completa el cruce §9/Gate L, con dictamen y condiciones explícitas.
+3. Sólo si Gate L queda aceptado, revisar Data API/exposición y ejecutar
+   preflight y migración revisada en Supabase dev. No migrar producción.
+4. Completar Auth/API/Storage y respaldo, frontend, CI, hosting Cloudflare,
+   correo y validación desde la PC personal; cada corte con evidencias y
+   revisión independiente.
+
+Mantener Site privado, datos sintéticos, sin activación operativa. SQL014 aún no
+se aplicó en Supabase; no hacer escrituras remotas hasta cerrar Gate L.
+
+Esta cabecera supersede próximos pasos históricos debajo.
 # Próximo paso — familia A y publicación del corte C
 
 Familia C aceptada por Sol localmente: `approve_task_coverage_plan` y

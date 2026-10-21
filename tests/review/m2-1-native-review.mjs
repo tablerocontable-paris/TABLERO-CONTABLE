@@ -9,7 +9,7 @@ import { decodeContextV1 } from "../../src/data/supabase/context-contract.ts";
 import { decodeCommandResponseV1, decodeQueryResponseV1 } from "../../src/data/supabase/operational-contract.ts";
 
 const allowedFlags = new Set([
-  "--pg-bin", "--output-dir", "--port", "--candidate", "--review-matrix",
+  "--pg-bin", "--output-dir", "--port", "--candidate", "--review-matrix", "--sql014-path",
   "--through-014", "--m2-2a-smoke", "--m2-2a-independent", "--m2-2b-smoke", "--m2-2c-smoke",
   "--m2-2a-isolation", "--m2-2a-first-isolation", "--m2-2a-second-isolation",
 ]);
@@ -208,6 +208,7 @@ class Session {
 }
 
 const results = [];
+let appliedSql014Sha256 = null;
 const auxiliarySessions = [];
 const record = (name, passed, details) => {
   const row = { name, passed, ...details };
@@ -266,6 +267,10 @@ try {
       join(root, "supabase/migrations", file),
       "utf8",
     );
+    if (file === "202610150014_operational_api.sql" && flags["--sql014-path"])
+      migration = readFileSync(resolve(flags["--sql014-path"]), "utf8");
+    if (file === "202610150014_operational_api.sql")
+      appliedSql014Sha256 = createHash("sha256").update(migration).digest("hex");
     if (file.startsWith("202610140013") && flags["--candidate"]) {
       assert.equal(flags["--candidate"], "guard-fence-v2");
       migration = candidate013(migration);
@@ -4655,8 +4660,8 @@ try {
         values(${lit(bAssignmentC)},${lit(org)},${lit(company)},${lit(actor)},${lit(team)},'M2.2B race C','resultado',1,null,null,'mensual','2026-10-01',15,'[]'),
               (${lit(bAssignmentD)},${lit(org)},${lit(company)},${lit(actor)},${lit(team)},'M2.2B race D','resultado',1,null,null,'mensual','2026-10-01',15,'[]');
         insert into public.task_instances(id,organization_id,assignment_id,company_id,owner_id,team_id,period,scheduled_on,title,kind,weight,due_date,unit,target,checklist,status)
-        values(${lit(bTaskC)},${lit(org)},${lit(bAssignmentC)},${lit(company)},${lit(actor)},${lit(team)},'2026-10-01','2026-10-01','M2.2B race C','resultado',1,null,null,null,'[]','Pendiente'),
-              (${lit(bTaskD)},${lit(org)},${lit(bAssignmentD)},${lit(company)},${lit(actor)},${lit(team)},'2026-10-01','2026-10-01','M2.2B race D','resultado',1,null,null,null,'[]','Pendiente');`);
+        values(${lit(bTaskC)},${lit(org)},${lit(bAssignmentC)},${lit(company)},${lit(actor)},${lit(team)},'2026-10-01',current_date,'M2.2B race C','resultado',1,null,null,null,'[]','Pendiente'),
+              (${lit(bTaskD)},${lit(org)},${lit(bAssignmentD)},${lit(company)},${lit(actor)},${lit(team)},'2026-10-01',current_date,'M2.2B race D','resultado',1,null,null,null,'[]','Pendiente');`);
       const firstIsolation = m2aFirstIsolation, secondIsolation = m2aSecondIsolation;
       await claims({ role: "authenticated", sub: boss, aal: "aal2" }, boss);
       await a.ok(`begin isolation level ${firstIsolation};`);
@@ -4665,7 +4670,7 @@ try {
       const graphEditResult = await a.query(`select api.command_v1('${JSON.stringify(graphEdit).replaceAll("'", "''")}'::jsonb);`);
       assert.equal(graphEditResult.code, "00000", JSON.stringify(graphEditResult));
       await claims({ role: "authenticated", sub: actor, aal: "aal1" });
-      await b.ok(`begin isolation level ${secondIsolation};`);
+      await b.ok(`reset role;select set_config('request.jwt.claim.sub',${lit(actor)},false),set_config('request.jwt.claims',${lit(JSON.stringify({ role: "authenticated", sub: actor, aal: "aal1" }))},false);set role authenticated;begin isolation level ${secondIsolation};`);
       const timerPid = Number((await b.ok("select pg_backend_pid();")).at(-1));
       const waitingTimer = b.query(`select public.start_task_timer(${lit(bTaskD)},1,${lit(uid(215))},false);`);
       let graphTimerBlocked = false;
@@ -4695,7 +4700,7 @@ try {
        await observer.ok(`insert into public.task_assignments(id,organization_id,company_id,owner_id,team_id,title,kind,weight,unit,target,frequency,start_month,due_day,checklist)
          values(${lit(bAssignmentH)},${lit(org)},${lit(company)},${lit(actor)},${lit(team)},'M2.2B timer-first H','resultado',1,null,null,'mensual','2026-10-01',15,'[]');
          insert into public.task_instances(id,organization_id,assignment_id,company_id,owner_id,team_id,period,scheduled_on,title,kind,weight,due_date,unit,target,checklist,status)
-         values(${lit(bTaskH)},${lit(org)},${lit(bAssignmentH)},${lit(company)},${lit(actor)},${lit(team)},'2026-10-01','2026-10-01','M2.2B timer-first H','resultado',1,null,null,null,'[]','Pendiente');`);
+         values(${lit(bTaskH)},${lit(org)},${lit(bAssignmentH)},${lit(company)},${lit(actor)},${lit(team)},'2026-10-01',current_date,'M2.2B timer-first H','resultado',1,null,null,null,'[]','Pendiente');`);
        await claims({ role: "authenticated", sub: actor, aal: "aal1" });
        await a.ok(`begin isolation level ${firstIsolation};`);
        const timerFirstPid = Number((await a.ok("select pg_backend_pid();")).at(-1));
@@ -5713,6 +5718,9 @@ try {
       .update(readFileSync(sqlFile))
       .digest("hex"),
     migration014Sha256: flags["--through-014"]
+      ? appliedSql014Sha256
+      : null,
+    migration014SourceFileSha256: flags["--through-014"]
       ? createHash("sha256").update(readFileSync(sql014File)).digest("hex")
       : null,
     candidate: flags["--candidate"] ?? null,

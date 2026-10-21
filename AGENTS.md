@@ -1,3 +1,24 @@
+# Continuidad vigente — A aceptada localmente, 21/10/2026
+
+Sol aceptó la familia A de replays de ausencias en SQL014, limitada a
+`approve_employee_absence` y `cancel_employee_absence`. Aceptación:
+`docs/architecture/M2-2C-LEGACY-ABSENCE-REPLAY-SOL-ACCEPTANCE-20261021.md`.
+Manifiesto SHA-256 `97A69B5539E69A5125F3DBD9A857171C6DACB4F7BBE595E39A20DAA99BD1E191`;
+SQL014 SHA-256 `EF9BD767AA9A7FE83CD93B117E643F4B29DDC62345E8DD0687E2E2F598D04B95`.
+Rojo 50; verde 52, 2 stale-RR y 8 carreras reales; matriz PostgreSQL 376/376
+baseline y candidata; suite 738/738; TypeScript/builds/checks aprobados. SQL001–013
+intactas. No se aplicó SQL remoto.
+
+T, C y A quedan aceptadas localmente; A aún debe publicarse en el commit directo
+a `origin/main`, sin PR, con continuidad actualizada. Después GPT-6.1 Sol debe
+resolver P y completar el cruce residual §9/Gate L. Sólo con Gate L aceptado se
+retoma la migración Supabase dev y luego Auth/API/Storage, frontend, hosting,
+correo y validación desde la PC personal. Sitio privado, datos ficticios,
+espacio operativo apagado. No aplicar SQL014 ni activar servicios alojados antes
+de Gate L.
+
+Esta cabecera supersede estados y próximos pasos históricos debajo. Conservar
+el proyecto, la historia Git y el scratch `.block`.
 # Continuidad vigente — C aceptada localmente, 20/10/2026
 
 GPT-6.1 Sol aceptó localmente, en alcance acotado, los replays legacy de
