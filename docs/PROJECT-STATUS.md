@@ -1,5 +1,22 @@
 # Continuidad vigente — preflight CLI local listo; remoto pendiente, 21/10/2026
 
+## Último corte local publicado — 21/10/2026
+
+Commit `e8b8eb2` agrega el creador de cliente Supabase para navegador y sus
+validaciones: sólo acepta URL HTTPS (HTTP local sólo para localhost), clave
+publishable o JWT `anon`, rechaza claves privilegiadas y configura persistencia
+de sesión/renovación. `.env.example` mantiene vacíos los valores. Prueba enfocada
+9/9; suite completa 752/752 en 76 archivos; TypeScript, build cliente, build
+Worker y hook de commit 196/196 aprobaron. Push directo a `origin/main`
+confirmado en `e8b8eb2c70bfbf7eac6a99222b122d7f26fd0f1d`.
+
+Esto no monta el cliente en `src/main.tsx` ni activa Auth: la app sigue siendo
+el laboratorio local. Supabase DEV permanece en 0 migraciones y 0 tablas. Para
+seguir, falta que el usuario agregue `SUPABASE_DEV_DB_URL` como secreto de
+Actions y ejecute el workflow manual primero en modo preflight; no enviar el
+secreto por chat. Después corresponde revisar el destino/dry-run, aplicar sólo
+en DEV y auditar antes de integrar pantallas.
+
 **Gate L aceptado por Sol** para el corte local sintético original, con alcance
 en `architecture/M2-2C-GATEL-INTEGRAL-SOL-ACCEPTANCE-20261021.md`; esa aceptación
 corresponde al SQL014 SHA-256 `218DEA9E9E3097743BD09238E73D5840A664F6718AEBE7670B88AF064278A837`.

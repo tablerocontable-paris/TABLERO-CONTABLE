@@ -1,5 +1,14 @@
 # Próximo paso vigente — preflight remoto de Supabase dev, 21/10/2026
 
+## Estado agregado del cliente — 21/10/2026
+
+Commit `e8b8eb2` en `main` contiene `src/data/supabase/client.ts`, plantilla
+`.env.example` y pruebas. El cliente acepta sólo clave publishable/anon, URL
+HTTPS (HTTP localhost para desarrollo) y habilita persistencia/renovación de
+sesión. Prueba enfocada 9/9; suite completa 752/752, TypeScript y builds cliente
+y Worker aprobados; hook 196/196. La aplicación sigue montando el laboratorio;
+la nueva fábrica aún no está conectada al inicio ni a pantallas operativas.
+
 **Corte Sol original:** Gate L fue aceptado para el hash SQL014
 `218DEA9E9E3097743BD09238E73D5840A664F6718AEBE7670B88AF064278A837` en alcance
 sintético. Luego se eliminaron los delimitadores `BEGIN`/`COMMIT` para preservar
