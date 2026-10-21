@@ -1,5 +1,14 @@
 # Estado de conexión de la aplicación para migración remota — 21/10/2026
 
+## Avance local adicional — configuración del cliente, 21/10/2026
+
+Se agregó `src/data/supabase/client.ts` para validar URL y clave pública/anon,
+rechazar claves privilegiadas y construir un cliente de navegador con sesión
+persistente y renovación automática. `.env.example` documenta los dos nombres
+de variables sin valores. La prueba enfocada pasó 9/9 y TypeScript no reportó
+errores. Esto todavía no crea una sesión, no instancia el cliente en el arranque,
+no habilita el acceso a DEV ni reemplaza el laboratorio local.
+
 ## Avance local de integración — 21/10/2026
 
 Se agregó `src/data/supabase/operational-transport.ts`: valida los envelopes
