@@ -1,6 +1,26 @@
 # Estado de conexión de la aplicación para migración remota — 21/10/2026
 
-Auditoría local del repositorio después de publicar `ad47ff9` en
+## Avance local de integración — 21/10/2026
+
+Se agregó `src/data/supabase/operational-transport.ts`: valida los envelopes
+v1 existentes, exige una sesión Supabase antes de llamar a
+`get_context_v1`, `query_v1` o `command_v1`, valida las respuestas y expone
+errores categorizados sin filtrar detalles de Postgres. La identidad y los
+permisos siguen determinados por el JWT y las funciones SQL; el transporte no
+acepta un actor o perfil de la interfaz.
+
+Este adaptador todavía no instancia el cliente, no está conectado a
+`src/main.tsx`, no reemplaza el laboratorio y no se ha llamado contra el
+proyecto alojado. La prueba unitaria enfocada pasó 6/6; la suite completa pasó
+744/744 en 75 archivos, TypeScript pasó y también los builds Vite y Worker. Vite
+emitió avisos no fatales de anotaciones dentro de la dependencia Zod. No hay
+autenticación ni lectura/escritura remota disponibles para usuarios todavía.
+Una revisión técnica independiente aceptó este alcance local y solicitó probar
+rechazos de respuesta malformada y de un `actorId` inyectado; esas comprobaciones
+quedaron añadidas. Los RPC se invocan explícitamente con `client.schema("api")`,
+que coincide con el esquema de SQL014.
+
+Auditoría inicial local del repositorio después de publicar `ad47ff9` en
 `tablerocontable-paris/TABLERO-CONTABLE`. No se conectó una sesión ni se cambió
 ningún servicio remoto.
 
@@ -16,10 +36,10 @@ ningún servicio remoto.
   a `/api/workspace`. Esa ruta pertenece a `src/server/site-worker.ts`, que usa
   el binding D1, las cabeceras de identidad del entorno Sites y el almacén
   `site-store`; no implementa Supabase Auth ni el contrato de RPC.
-- Hay contratos y adaptadores inyectables bajo `src/data/remote` y
-  `src/data/supabase`, pero el código de `src` no instancia un cliente Supabase
-  ni implementa un transporte real para esos RPC. `@supabase/supabase-js` está
-  declarado como dependencia; `src/server/supabase-report-store.ts` sólo recibe
+- Hay contratos inyectables bajo `src/data/remote` y `src/data/supabase`.
+  `operational-transport.ts` ahora invoca RPC v1 con un cliente inyectado, pero
+  `src` aún no instancia ese cliente ni tiene configuración de Auth; no está
+  conectado a la aplicación. `src/server/supabase-report-store.ts` sólo recibe
   un cliente ya creado y no crea ni conecta uno.
 - Por eso, el repositorio contiene preparación y contratos para Supabase, pero
   hoy no hay un recorrido de usuario autenticado que lea y guarde trabajo en el
@@ -53,9 +73,11 @@ y no tocar producción dentro de esta etapa.
 
 ## Verificación reproducible
 
-En el estado local auditado, `rg` no encontró `createClient`, `@supabase/ssr`,
-`import.meta.env`, `VITE_SUPABASE` ni `SUPABASE_URL` bajo `src`. El único import
-de `@supabase/supabase-js` es de tipo en `src/server/supabase-report-store.ts`.
+En el estado local auditado, `rg` no encontró una instancia `createClient`,
+`@supabase/ssr`, `import.meta.env`, `VITE_SUPABASE` ni `SUPABASE_URL` bajo
+`src`. Los dos imports de `@supabase/supabase-js` son exclusivamente de tipo,
+en `src/data/supabase/operational-transport.ts` y
+`src/server/supabase-report-store.ts`.
 Referencias: `src/main.tsx:3,28-34`,
 `src/components/LaboratoryWorkspace.tsx:16-18`,
 `src/components/RemoteWorkspace.tsx:1-10,29`,

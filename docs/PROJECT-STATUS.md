@@ -29,6 +29,13 @@ exactamente esos 16 archivos. No creó tablas ni historial. Evidencia:
 `api` y `app_private`. No se ejecutó SQL remoto. Autoexposición de tablas nuevas
 apagada en DEV; producción intacta.
 
+**Preparación local:** ya existe el transporte `get_context_v1`/`query_v1`/
+`command_v1`, con sesión requerida y decodificación estricta. Sus 6 pruebas
+enfocadas, la suite completa 744/744, TypeScript y los builds cliente/Worker
+pasaron. Aún no se instancia en el arranque ni se conecta al proyecto, por lo
+que no habilita el uso remoto. Detalle:
+`docs/architecture/REMOTE-MIGRATION-READINESS-20261021.md`.
+
 **Workflow publicado:** commit `83249f0` agregó en `main` el flujo manual
 `.github/workflows/supabase-dev-migrations.yml`, primero con `Apply migrations`
 desmarcado. Requiere el secreto de repositorio `SUPABASE_DEV_DB_URL`, tomado de
