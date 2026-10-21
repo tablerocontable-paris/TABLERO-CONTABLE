@@ -42,6 +42,12 @@ exponer sólo `api`. Luego siguen Auth/API sintética, Storage/restore, frontend
 CI, Cloudflare, correo y validación desde la PC personal. Mantener Site privado,
 datos ficticios y espacio operativo apagado.
 
+**Conexión de la app aún no implementada:** `src/main.tsx` monta el laboratorio
+local. `RemoteWorkspace` usa el API del Worker con D1 y tampoco está montado; no
+hay instancia de Supabase Auth/RPC en `src`. Aplicar el esquema no completa la
+migración de la aplicación. Auditoría y secuencia concreta:
+`docs/architecture/REMOTE-MIGRATION-READINESS-20261021.md`.
+
 Esta cabecera supersede el estado y siguiente paso históricos más abajo.
 # Continuidad vigente — C aceptada localmente, 20/10/2026
 
