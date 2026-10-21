@@ -28,7 +28,8 @@ de tablas nuevas continúa apagado.
 
 ## Siguiente puerta
 
-Publicar y ejecutar el workflow manual
+El workflow manual ya está publicado en `main` desde el commit `83249f0`.
+Ejecutar
 `.github/workflows/supabase-dev-migrations.yml` en `main`, primero con
 `Apply migrations` desmarcado. Usa la URL Session pooler de DEV; guardar su valor
 como secreto `SUPABASE_DEV_DB_URL` en Settings → Secrets and variables → Actions,

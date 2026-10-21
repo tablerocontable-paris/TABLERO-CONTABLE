@@ -29,13 +29,13 @@ exactamente esos 16 archivos. No creó tablas ni historial. Evidencia:
 `api` y `app_private`. No se ejecutó SQL remoto. Autoexposición de tablas nuevas
 apagada en DEV; producción intacta.
 
-**Siguiente:** publicar y ejecutar en GitHub Actions el workflow manual
+**Workflow publicado:** commit `83249f0` agregó en `main` el flujo manual
 `.github/workflows/supabase-dev-migrations.yml`, primero con `Apply migrations`
 desmarcado. Requiere el secreto de repositorio `SUPABASE_DEV_DB_URL`, tomado de
 Connect → Session pooler de DEV; no compartir su valor en el chat. Revisar el
 resultado de destino, historial y dry-run; sólo luego volver a ejecutarlo con
-`Apply migrations` seleccionado para aplicar. El workflow aún no se publicó ni
-ejecutó; no hubo `db push` remoto.
+`Apply migrations` seleccionado para aplicar. El workflow todavía no se ejecutó;
+no hubo `db push` remoto.
 
 Después del preflight remoto aceptado: aplicar las 16 migraciones sólo en DEV y auditar
 ledger, esquema, RLS, grants, funciones y advisors; configurar Data API para
