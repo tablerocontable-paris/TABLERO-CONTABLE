@@ -1,23 +1,46 @@
-# Continuidad vigente — A aceptada localmente, 21/10/2026
+# Continuidad vigente — preflight CLI local listo; remoto pendiente, 21/10/2026
 
-Sol aceptó A (replays legacy de aprobación y cancelación de ausencias) en alcance
-local acotado. Aceptación `docs/architecture/M2-2C-LEGACY-ABSENCE-REPLAY-SOL-ACCEPTANCE-20261021.md`;
-manifiesto SHA-256 `97A69B5539E69A5125F3DBD9A857171C6DACB4F7BBE595E39A20DAA99BD1E191`;
-SQL014 SHA-256 `EF9BD767AA9A7FE83CD93B117E643F4B29DDC62345E8DD0687E2E2F598D04B95`.
-Evidencia: rojo 50/50; verde 52 secuenciales, 2 stale-RR y 8 carreras con blockers
-reales; snapshots completos; matriz nativa 376/376 en baseline y candidata;
-suite 738/738, TypeScript, builds cliente/Worker, syntax y diff-check aprobados.
-95 artefactos canónicos resueltos y hash-verificados. SQL001–013 intactas.
+**Gate L aceptado por Sol** para el corte local sintético original, con alcance
+en `architecture/M2-2C-GATEL-INTEGRAL-SOL-ACCEPTANCE-20261021.md`; esa aceptación
+corresponde al SQL014 SHA-256 `218DEA9E9E3097743BD09238E73D5840A664F6718AEBE7670B88AF064278A837`.
+Luego se quitaron sólo los delimitadores SQL `BEGIN`/`COMMIT` para que la CLI
+ejecute el archivo como una transacción única. El candidato actual es
+`BC09CF9631A2F3E4BD19541C2A050AB1C663AE0E704D47D7E5A4752B114E0345`; su
+revalidación de atomicidad local está documentada. Sol aceptó BC09 para aplicar
+exclusivamente en `grupo-paris-dev` mediante CLI 2.121.0; no amplía el alcance a
+producción, usuarios reales ni activación operativa. Gate L original sigue
+referido al hash 218DEA.
 
-**Estado:** A aceptada por Sol, pendiente de registro y publicación directa a
-`origin/main` sin PR. T y C ya están publicados en `dbf65fadde1693f29d52a85c9f17f9dc000bbcc9`.
-No hubo llamadas remotas ni aplicación de SQL014 en Supabase.
+La CLI 2.121.0 se probó ahora contra un PostgreSQL 17.11 descartable: la falla
+inyectada al final de SQL014 dejó 15 versiones y cero objetos de 014; el retry
+con BC09 exacta pasó y registró la versión 16. Evidencia:
+`architecture/SUPABASE-DEV-CLI-TRANSACTION-LOCAL-PREFLIGHT-20261021.md`.
+Sol aceptó BC09 para aplicación únicamente en `grupo-paris-dev`; resta el
+preflight remoto y la verificación de que el destino coincide exactamente.
 
-**Siguiente:** publicar A; GPT-6.1 Sol dicta P y cruza el residual §9/Gate L; tras
-la aceptación de Gate L, revisar ajustes Data API y ejecutar preflight/migración
-en Supabase dev. Luego integrar Auth/API/Storage y frontend, automatizar CI y
-despliegue, preparar Cloudflare/correo, y validar clon/ejecución desde la PC
-personal. Mantener Site privado, datos ficticios y espacio operativo apagado.
+**CLI Supabase:** se descargó temporalmente la versión oficial 2.121.0 y se
+verificó el SHA-256 del release. En PostgreSQL 17.11 descartable, `migration list`
+reconoció las 16 versiones locales de 12 dígitos y `db push --dry-run` enumeró
+exactamente esos 16 archivos. No creó tablas ni historial. Evidencia:
+`architecture/SUPABASE-DEV-CLI-LOCAL-PREFLIGHT-20261021.md`.
+
+**Estado remoto confirmado ahora:** `grupo-paris-dev`, ref
+`kynqjfhqujnjojcmurwf`: Supabase MCP informa 0 migraciones y 0 tablas en `public`,
+`api` y `app_private`. No se ejecutó SQL remoto. Autoexposición de tablas nuevas
+apagada en DEV; producción intacta.
+
+**Siguiente:** ejecutar el workflow manual
+`.github/workflows/supabase-dev-preflight.yml` en `main`. Requiere un único
+secreto de repositorio:
+`SUPABASE_DEV_DB_URL`, tomado de Connect → Session pooler del proyecto DEV. No
+compartir su valor en el chat. Todavía no se ejecutó el workflow remoto ni
+`db push` real.
+
+Después del preflight remoto aceptado: aplicar las 16 migraciones sólo en DEV y auditar
+ledger, esquema, RLS, grants, funciones y advisors; configurar Data API para
+exponer sólo `api`. Luego siguen Auth/API sintética, Storage/restore, frontend,
+CI, Cloudflare, correo y validación desde la PC personal. Mantener Site privado,
+datos ficticios y espacio operativo apagado.
 
 Esta cabecera supersede el estado y siguiente paso históricos más abajo.
 # Continuidad vigente — C aceptada localmente, 20/10/2026

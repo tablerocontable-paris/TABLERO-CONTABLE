@@ -1,23 +1,50 @@
-# Próximo paso vigente — publicar A y cerrar §9/Gate L
+# Próximo paso vigente — preflight remoto de Supabase dev, 21/10/2026
 
-**A aceptada por Sol en alcance local.** Aprobación registrada en
-`docs/architecture/M2-2C-LEGACY-ABSENCE-REPLAY-SOL-ACCEPTANCE-20261021.md`.
-SQL014 SHA-256 `EF9BD767AA9A7FE83CD93B117E643F4B29DDC62345E8DD0687E2E2F598D04B95`;
-manifiesto SHA-256 `97A69B5539E69A5125F3DBD9A857171C6DACB4F7BBE595E39A20DAA99BD1E191`.
-T+C están en `origin/main` (`dbf65fadde1693f29d52a85c9f17f9dc000bbcc9`).
+**Corte Sol original:** Gate L fue aceptado para el hash SQL014
+`218DEA9E9E3097743BD09238E73D5840A664F6718AEBE7670B88AF064278A837` en alcance
+sintético. Luego se eliminaron los delimitadores `BEGIN`/`COMMIT` para preservar
+la transacción por archivo de Supabase CLI. El hash candidato actual es
+`BC09CF9631A2F3E4BD19541C2A050AB1C663AE0E704D47D7E5A4752B114E0345`.
+La atomicidad de BC09 se probó con Supabase CLI 2.121.0 en PostgreSQL 17.11:
+fallo tardío por CLI dejó intactas 15 versiones y revirtió objetos 014; el retry
+con el archivo exacto pasó. Evidencia en
+`architecture/SUPABASE-DEV-CLI-TRANSACTION-LOCAL-PREFLIGHT-20261021.md`.
+**Aceptación suplementaria Sol:** BC09 queda aprobado para aplicar únicamente
+en `grupo-paris-dev` mediante CLI 2.121.0, `db push --skip-vault --yes`. No cubre
+producción, datos/usuarios reales ni activar el espacio operativo. Dictamen en
+`architecture/SUPABASE-DEV-INITIAL-MIGRATION-SOL-REVIEW-20261021.md`.
 
-1. Commit y push directo a `origin/main`, sin PR, actualizando continuidad y
-   aceptación A; verificar SHA remoto y GitHub Actions.
-2. GPT-6.1 Sol evalúa P (`pause_task_timer`, `save_private_block_note`) y
-   completa el cruce §9/Gate L, con dictamen y condiciones explícitas.
-3. Sólo si Gate L queda aceptado, revisar Data API/exposición y ejecutar
-   preflight y migración revisada en Supabase dev. No migrar producción.
-4. Completar Auth/API/Storage y respaldo, frontend, CI, hosting Cloudflare,
-   correo y validación desde la PC personal; cada corte con evidencias y
-   revisión independiente.
+**CLI comprobada sin instalación en la PC del usuario:** Supabase CLI 2.121.0,
+descargada temporalmente y verificada contra el SHA-256 oficial del release,
+reconoció exactamente las 16 versiones locales de 12 dígitos. `migration list`
+las emparejó con el PostgreSQL 17.11 descartable; `db push --dry-run` enumeró
+las mismas 16 y no creó tablas ni historial. La evidencia reproducible está en
+`architecture/SUPABASE-DEV-CLI-LOCAL-PREFLIGHT-20261021.md`.
 
-Mantener Site privado, datos sintéticos, sin activación operativa. SQL014 aún no
-se aplicó en Supabase; no hacer escrituras remotas hasta cerrar Gate L.
+**Destino remoto sigue vacío:** `grupo-paris-dev`, ref `kynqjfhqujnjojcmurwf`;
+lectura Supabase de hoy: 0 migraciones y 0 tablas en `public`, `api` y
+`app_private`. No se ejecutó `db push` remoto. El interruptor de autoexposición
+de tablas nuevas continúa apagado.
+
+## Siguiente puerta
+
+Ejecutar el preflight manual
+`.github/workflows/supabase-dev-preflight.yml` sobre
+`main`. Usa la URL Session pooler de DEV para permitir conexión desde GitHub
+Actions (IPv4), fija el CLI y sólo corre `migration list` y
+`db push --dry-run`. El usuario debe copiar la cadena de Connect → Session pooler
+como secreto `SUPABASE_DEV_DB_URL` en Settings → Secrets and variables → Actions;
+no compartirla en el chat. El workflow valida usuario, host regional, puerto,
+base y TLS; aborta si las 16 versiones no coinciden y no contiene comandos de
+aplicación ni reparación. Después volver a consultar remoto y comprobar que sigue
+vacío.
+
+Sólo tras confirmar el resultado remoto corresponde aplicar las 16 migraciones en
+`grupo-paris-dev`, verificar versiones, esquema, RLS, grants, funciones y
+advisors, y configurar Data API para exponer únicamente `api`. Producción sigue
+fuera de alcance. Luego continúan Auth/API sintética, Storage/restore, frontend,
+CI, Cloudflare, correo y prueba desde la PC personal. Mantener Site privado,
+datos ficticios y espacio operativo apagado.
 
 Esta cabecera supersede próximos pasos históricos debajo.
 # Próximo paso — familia A y publicación del corte C

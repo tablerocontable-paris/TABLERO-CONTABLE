@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 1,
+  "status": "RED_CONFIRMED_PRIVATE_NOTE_REPLAY_POLICY_GAP",
+  "reviewBoundary": "Evidence only; SQL014 unchanged; Sol must define/accept the minimum policy correction before any SQL edit.",
+  "baseline": {
+    "head": "eb960410a14d70abbc4c3a43528f6da1aa567a1c",
+    "originMain": "eb960410a14d70abbc4c3a43528f6da1aa567a1c",
+    "sql014Sha256": "EF9BD767AA9A7FE83CD93B117E643F4B29DDC62345E8DD0687E2E2F598D04B95"
+  },
+  "postgres": "postgres (PostgreSQL) 17.11",
+  "command": "node tests/review/m2-2c-private-block-note-replay-policy.mjs --pg-bin %TEMP%\\tablero-postgres-17.11-portable\\pgsql\\bin --output-dir ../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021-final --port 56555",
+  "runnerSha256": "DC8CED4B5FD55FB9A74A33B6B9F3AEEC9569297BE0832E6AD69DE6C7D6038454",
+  "expectedPolicy": "A cached ACK is returned only to the same actor while active and in the same organization and role; a different actor never receives the author receipt.",
+  "results": {
+    "cases": 17,
+    "realBarrierCases": 4,
+    "allBarrierWaitsConfirmed": true,
+    "policyViolations": [
+      "inactive/repeatable read",
+      "role/read committed",
+      "role/repeatable read"
+    ],
+    "races": [
+      {
+        "mutation": "inactive",
+        "isolation": "read committed",
+        "sqlstate": "P0001",
+        "policyViolation": false,
+        "writerVisibleState": {
+          "active": false,
+          "role": "empleado",
+          "organization": "00000000-0000-0000-0000-000000700001"
+        },
+        "blocker": {
+          "pid": 3992,
+          "waitEventType": "Lock",
+          "waitEvent": "advisory",
+          "blockers": [
+            2628
+          ]
+        },
+        "writerCommit": "00000",
+        "fullSnapshotsPersisted": true
+      },
+      {
+        "mutation": "inactive",
+        "isolation": "repeatable read",
+        "sqlstate": "00000",
+        "policyViolation": true,
+        "writerVisibleState": {
+          "active": false,
+          "role": "empleado",
+          "organization": "00000000-0000-0000-0000-000000700001"
+        },
+        "blocker": {
+          "pid": 3992,
+          "waitEventType": "Lock",
+          "waitEvent": "advisory",
+          "blockers": [
+            2628
+          ]
+        },
+        "writerCommit": "00000",
+        "fullSnapshotsPersisted": true
+      },
+      {
+        "mutation": "role",
+        "isolation": "read committed",
+        "sqlstate": "00000",
+        "policyViolation": true,
+        "writerVisibleState": {
+          "active": true,
+          "role": "encargado",
+          "organization": "00000000-0000-0000-0000-000000700001"
+        },
+        "blocker": {
+          "pid": 3992,
+          "waitEventType": "Lock",
+          "waitEvent": "advisory",
+          "blockers": [
+            2628
+          ]
+        },
+        "writerCommit": "00000",
+        "fullSnapshotsPersisted": true
+      },
+      {
+        "mutation": "role",
+        "isolation": "repeatable read",
+        "sqlstate": "00000",
+        "policyViolation": true,
+        "writerVisibleState": {
+          "active": true,
+          "role": "encargado",
+          "organization": "00000000-0000-0000-0000-000000700001"
+        },
+        "blocker": {
+          "pid": 3992,
+          "waitEventType": "Lock",
+          "waitEvent": "advisory",
+          "blockers": [
+            2628
+          ]
+        },
+        "writerCommit": "00000",
+        "fullSnapshotsPersisted": true
+      }
+    ],
+    "authorizedOwnAck": {
+      "sqlstate": "00000",
+      "ackShape": "note_id, revision, cleared; no body",
+      "fullSnapshotUnchanged": true
+    },
+    "changedArguments": {
+      "sqlstate": "P0001",
+      "fullSnapshotUnchanged": true
+    },
+    "authorOrganizationChange": {
+      "sqlstate": "23503",
+      "fullSnapshotUnchanged": true,
+      "limitation": "The profile move is blocked by composite foreign keys linking profile, task, note and receipt to the original organization; constraints were not dropped or bypassed."
+    },
+    "crossOrganizationActor": {
+      "sqlstate": "P0001",
+      "fullSnapshotUnchanged": true
+    },
+    "sameOrganizationOtherActor": {
+      "sqlstate": "P0001",
+      "fullSnapshotUnchanged": true
+    }
+  },
+  "fullSnapshots": "report.json contains complete ordered JSONB snapshots for first write, authorized replay, each profile mutation while uncommitted, after mutation commit and after replay.",
+  "interpretation": "Current SQL rejects replay after inactivation at READ COMMITTED, but stale REPEATABLE READ returns the receipt. Changing employee to another valid role (encargado) returns the receipt at both isolation levels. The replay reads cached result without requiring a profile row lock or matching the original role snapshot.",
+  "artifacts": [
+    {
+      "path": "../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021-final/report.json",
+      "bytes": 1307004,
+      "sha256": "710D8F8E50ED5916409436F5E963079C04E34AEF0121FA90F03F9660271AB39C"
+    },
+    {
+      "path": "../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021-final/stdout-stderr.log",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021-final/captured-exit-code.txt",
+      "bytes": 1,
+      "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9"
+    },
+    {
+      "path": "../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021-final/postgres.log",
+      "bytes": 5012,
+      "sha256": "0592F1194E89AE4FEFFC1CEAF00D0C2B709A8C2EA99368B4A960BBBCE0FBA263"
+    },
+    {
+      "path": "tests/review/m2-2c-private-block-note-replay-policy.mjs",
+      "bytes": 19212,
+      "sha256": "DC8CED4B5FD55FB9A74A33B6B9F3AEEC9569297BE0832E6AD69DE6C7D6038454"
+    },
+    {
+      "path": "../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021-attempt2/report.json",
+      "bytes": 1059369,
+      "sha256": "F3994ECAEDBE2CB911A507AE0095C85BC7DB8211671F9F60EE6B3C228B90670B"
+    },
+    {
+      "path": "../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021-attempt2/captured-exit-code.txt",
+      "bytes": 1,
+      "sha256": "5FECEB66FFC86F38D952786C6D696C79C2DBC239DD4E91B46729D73A27FB57E9"
+    },
+    {
+      "path": "../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021-attempt2/stdout-stderr.log",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021/initdb.log",
+      "bytes": 1228,
+      "sha256": "7A03268E837C142C5C7DBEB741B33D550D9DA12C5886CAC0DE98FACEC7299F59"
+    },
+    {
+      "path": "../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021/postgres.log",
+      "bytes": 1004,
+      "sha256": "C263B11D1DC3D942E94B69619798A87C1713EC8D8D9262D04A23348163C845E6"
+    },
+    {
+      "path": "../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021/stdout-stderr.log",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    }
+  ],
+  "failedDevelopmentAttempt": {
+    "path": "../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021",
+    "note": "Initial runner iteration correctly reached expected P0001, but psql did not emit the per-query marker inside the aborted transaction and the harness hung; rerun enabled ON_ERROR_ROLLBACK. No source SQL changed.",
+    "exitCode": "interrupted during harness development; initial SQL P0001 triggered marker hang in explicit transaction"
+  },
+  "priorRunnerAttempt": {
+    "path": "../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021-attempt2/report.json",
+    "result": "RED_CONFIRMED_PRIVATE_NOTE_REPLAY_POLICY_GAP",
+    "note": "Same four barrier results before adding changed-arguments assertions; retained."
+  },
+  "remoteCalls": 0,
+  "hostedMigrationApplied": false,
+  "commit": false,
+  "push": false,
+  "syntaxCheck": {
+    "command": "node --check tests/review/m2-2c-private-block-note-replay-policy.mjs",
+    "exitCode": 0
+  }
+}

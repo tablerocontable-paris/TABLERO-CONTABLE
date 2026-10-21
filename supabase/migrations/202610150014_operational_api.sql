@@ -1,6 +1,4 @@
-begin;
-
--- M2.2A/B candidate. This migration remains local until B/C are accepted.
+-- M2.2A/B migration. Remote application is restricted to the reviewed DEV project.
 create table app_private.operational_rate_heads (
   id uuid primary key default gen_random_uuid(), organization_id uuid not null,
   company_id uuid not null, template_id uuid, instance_id uuid,
@@ -3574,7 +3572,6 @@ begin
   return entry;
 end
 $$;
-commit;
 
 -- Reauthorize cached legacy task-control replays without repeating the writer.
 -- Keep this private helper limited to the four legacy wrapper receipt kinds.
@@ -3889,3 +3886,86 @@ begin
 end $$;
 revoke all on function public.approve_employee_absence(uuid,uuid,text,date,date,uuid[],text,uuid),public.cancel_employee_absence(uuid,text,uuid) from public,anon;
 grant execute on function public.approve_employee_absence(uuid,uuid,text,date,date,uuid[],text,uuid),public.cancel_employee_absence(uuid,text,uuid) to authenticated;
+
+
+-- Private-note receipt replay rechecks the active author under the M2.2B profile lock.
+create or replace function public.save_private_block_note(
+ p_instance uuid,p_body text,p_expected_revision bigint,p_operation_id uuid
+) returns jsonb
+language plpgsql security definer set search_path='' as $$
+declare plan jsonb; actor uuid:=auth.uid(); org uuid; actor_role_value text; normalized text; args jsonb;
+ cached public.private_block_note_receipts%rowtype; cached_after public.private_block_note_receipts%rowtype;
+ current_profile record; planned public.task_instances%rowtype;
+ t public.task_instances%rowtype; n public.task_private_block_notes%rowtype; people uuid[]; months jsonb;
+ at_time timestamptz; result jsonb; action_name text;
+ profile_item uuid;
+begin
+ org:=public.actor_org(); actor_role_value:=public.actor_role();
+ if actor is null or org is null or actor_role_value not in ('empleado','encargado','jefe') then raise exception 'Sin permiso'; end if;
+ if p_instance is null or p_operation_id is null or p_expected_revision is null or p_expected_revision<0 then raise exception 'Identidad, operación y revisión requeridas'; end if;
+ normalized:=public._normalize_private_block_note_body(p_body);
+ if p_body is not null and (length(normalized)=0 or length(normalized)>2000) then raise exception 'El comentario debe tener entre 1 y 2000 caracteres'; end if;
+ args:=jsonb_build_object('instance',p_instance,'body',p_body,'revision',p_expected_revision);
+ perform public._coordination_receipt_lock(actor,p_operation_id);
+ if public.actor_org() is distinct from org or public.actor_role() not in ('empleado','encargado','jefe') then raise exception 'Sin permiso'; end if;
+ select * into cached from public.private_block_note_receipts where actor_id=actor and operation_id=p_operation_id;
+ if found then
+   if cached.organization_id is distinct from org or cached.arguments<>args then raise exception 'La operación ya fue usada con otros argumentos'; end if;
+   plan:=public._coordination_prepare(array[]::uuid[],array[actor],array[actor],'[]'::jsonb,array[]::text[],'{}'::jsonb);
+   perform app_private._coordination_acquire_m22b(plan,false);
+   select p.organization_id,p.active,p.role into current_profile from public.profiles p where p.id=actor for share;
+   if not found or not current_profile.active or current_profile.organization_id is distinct from cached.organization_id
+      or current_profile.role not in ('empleado','encargado','jefe') then raise exception 'Sin permiso'; end if;
+   select * into cached_after from public.private_block_note_receipts where actor_id=actor and operation_id=p_operation_id;
+   if not found or (cached_after.organization_id,cached_after.actor_id,cached_after.operation_id,cached_after.arguments,cached_after.result)
+      is distinct from (cached.organization_id,cached.actor_id,cached.operation_id,cached.arguments,cached.result)
+      then raise exception using errcode='40001',message='El recibo del comentario cambió; reintente desde otra transacción'; end if;
+   return cached_after.result;
+ end if;
+ select * into planned from public.task_instances where id=p_instance and organization_id=org;
+ if not found then raise exception 'Sin permiso'; end if;
+ people:=array[planned.owner_id];
+ select coalesce(jsonb_agg(jsonb_build_object('ownerId',person,'period',planned.period)),'[]')
+  into months from unnest(people) person;
+ plan:=public._coordination_prepare(array[planned.id],array[]::uuid[],people,months,array[]::text[],jsonb_build_object('kind','private'));
+ perform public._coordination_acquire(plan);
+ perform 1 from public.task_instances i where i.id=planned.id for update;
+ select * into t from public.task_instances where id=p_instance and organization_id=org;
+ if not found or (t.id,t.organization_id,t.assignment_id,t.company_id,t.owner_id,t.period,t.state_revision)
+  is distinct from (planned.id,planned.organization_id,planned.assignment_id,planned.company_id,planned.owner_id,planned.period,planned.state_revision)
+  then raise exception using errcode='40001',message='La tarea cambió; reintente en otra transacción'; end if;
+ at_time:=clock_timestamp();
+ if public.actor_org() is distinct from org or not public._can_access_instance_at(t.id,at_time)
+   or public.actor_role() not in ('empleado','encargado','jefe') then raise exception 'Sin permiso'; end if;
+ foreach profile_item in array people loop perform public._coordination_assert_month(profile_item,t.period); end loop;
+ select * into n from public.task_private_block_notes where instance_id=t.id and author_id=actor for update;
+ if not found then
+  if p_expected_revision<>0 or p_body is null then raise exception 'La revisión del comentario cambió'; end if;
+  insert into public.task_private_block_notes(organization_id,instance_id,author_id,body,revision,created_at,updated_at)
+   values(t.organization_id,t.id,actor,normalized,1,at_time,at_time) returning * into n;
+  action_name:='private_block_note.created';
+  insert into public.task_private_block_note_versions(note_id,organization_id,revision,body,cleared_at,at,actor_id)
+   values(n.id,n.organization_id,n.revision,n.body,null,at_time,actor);
+ else
+  if n.revision<>p_expected_revision then raise exception 'La revisión del comentario cambió'; end if;
+  normalized:=coalesce(normalized,'');
+  if n.body=normalized and ((p_body is null)=(n.cleared_at is not null)) then
+   result:=jsonb_build_object('note_id',n.id,'revision',n.revision,'cleared',n.cleared_at is not null);
+   insert into public.private_block_note_receipts(organization_id,actor_id,operation_id,arguments,result)
+    values(org,actor,p_operation_id,args,result);
+   return result;
+  end if;
+  if n.revision>=9007199254740991 then raise exception 'Se alcanzó el límite de revisiones'; end if;
+  update public.task_private_block_notes set body=normalized,revision=n.revision+1,updated_at=at_time,
+   cleared_at=case when p_body is null then at_time else null end where id=n.id returning * into n;
+  action_name:=case when p_body is null then 'private_block_note.cleared' else 'private_block_note.updated' end;
+  insert into public.task_private_block_note_versions(note_id,organization_id,revision,body,cleared_at,at,actor_id)
+   values(n.id,n.organization_id,n.revision,n.body,n.cleared_at,at_time,actor);
+ end if;
+ result:=jsonb_build_object('note_id',n.id,'revision',n.revision,'cleared',n.cleared_at is not null);
+ insert into public.audit_events(organization_id,actor_id,action,entity_id,at,details)
+  values(org,actor,action_name,n.id,at_time,'{}'::jsonb);
+ insert into public.private_block_note_receipts(organization_id,actor_id,operation_id,arguments,result)
+  values(org,actor,p_operation_id,args,result);
+ return result;
+end $$;

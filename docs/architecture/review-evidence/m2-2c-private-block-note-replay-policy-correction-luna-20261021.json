@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 1,
+  "status": "GREEN_PRIVATE_NOTE_REPLAY_POLICY",
+  "scope": "SQL014 cached receipt replay only; SQL001-013, receipt-lock helper, coordination helpers, RLS, pause_task_timer unchanged.",
+  "baseline": {
+    "head": "eb960410a14d70abbc4c3a43528f6da1aa567a1c",
+    "originMain": "eb960410a14d70abbc4c3a43528f6da1aa567a1c",
+    "gitBlobSql014Sha256": "B0E2A651E379D06B1DADD8216B9F6F2A9D9D3AFA7A1115305E11889366D90D0C",
+    "previousWindowsCheckoutSha256": "EF9BD767AA9A7FE83CD93B117E643F4B29DDC62345E8DD0687E2E2F598D04B95"
+  },
+  "candidate": {
+    "sql014Sha256": "218DEA9E9E3097743BD09238E73D5840A664F6718AEBE7670B88AF064278A837",
+    "runnerSha256": "B6D2E46C46735DEB8CAEB1175674AEDCBFD63E9A69BBE32513FA5BF934196F84"
+  },
+  "policy": "Exact own cached ACK is allowed only to the same active actor in the receipt organization whose current role is empleado, encargado or jefe. A transition among allowed roles does not invalidate the author ACK. Inactive or auditor author receives no ACK. Replay remains inert.",
+  "native": {
+    "postgres": "postgres (PostgreSQL) 17.11",
+    "baseline": {
+      "result": "RED_CONFIRMED_PRIVATE_NOTE_REPLAY_POLICY_GAP",
+      "cases": 27,
+      "realBarriers": true,
+      "policyViolations": [
+        "inactive/repeatable read",
+        "unauthorized-role/repeatable read"
+      ],
+      "races": [
+        {
+          "mutation": "inactive",
+          "isolation": "read committed",
+          "sqlstate": "P0001",
+          "retrySqlstate": "P0001",
+          "violation": false
+        },
+        {
+          "mutation": "inactive",
+          "isolation": "repeatable read",
+          "sqlstate": "00000",
+          "retrySqlstate": "P0001",
+          "violation": true
+        },
+        {
+          "mutation": "allowed-role",
+          "isolation": "read committed",
+          "sqlstate": "00000",
+          "retrySqlstate": "00000",
+          "violation": false
+        },
+        {
+          "mutation": "allowed-role",
+          "isolation": "repeatable read",
+          "sqlstate": "00000",
+          "retrySqlstate": "00000",
+          "violation": false
+        },
+        {
+          "mutation": "unauthorized-role",
+          "isolation": "read committed",
+          "sqlstate": "P0001",
+          "retrySqlstate": "P0001",
+          "violation": false
+        },
+        {
+          "mutation": "unauthorized-role",
+          "isolation": "repeatable read",
+          "sqlstate": "00000",
+          "retrySqlstate": "P0001",
+          "violation": true
+        }
+      ]
+    },
+    "candidate": {
+      "result": "GREEN_PRIVATE_NOTE_REPLAY_POLICY",
+      "cases": 27,
+      "raceCases": 6,
+      "realBarriers": true,
+      "policyViolations": [],
+      "races": [
+        {
+          "mutation": "inactive",
+          "isolation": "read committed",
+          "sqlstate": "P0001",
+          "retrySqlstate": "P0001",
+          "violation": false,
+          "snapshotStable": true
+        },
+        {
+          "mutation": "inactive",
+          "isolation": "repeatable read",
+          "sqlstate": "40001",
+          "retrySqlstate": "P0001",
+          "violation": false,
+          "snapshotStable": true
+        },
+        {
+          "mutation": "allowed-role",
+          "isolation": "read committed",
+          "sqlstate": "00000",
+          "retrySqlstate": "00000",
+          "violation": false,
+          "snapshotStable": true
+        },
+        {
+          "mutation": "allowed-role",
+          "isolation": "repeatable read",
+          "sqlstate": "40001",
+          "retrySqlstate": "00000",
+          "violation": false,
+          "snapshotStable": true
+        },
+        {
+          "mutation": "unauthorized-role",
+          "isolation": "read committed",
+          "sqlstate": "P0001",
+          "retrySqlstate": "P0001",
+          "violation": false,
+          "snapshotStable": true
+        },
+        {
+          "mutation": "unauthorized-role",
+          "isolation": "repeatable read",
+          "sqlstate": "40001",
+          "retrySqlstate": "P0001",
+          "violation": false,
+          "snapshotStable": true
+        }
+      ],
+      "closureReplay": true,
+      "coverageCancellationReplay": true,
+      "orgMoveSqlstate": "23503"
+    }
+  },
+  "checks": {
+    "runnerBaselineCommand": "node tests/review/m2-2c-private-block-note-replay-policy.mjs --pg-bin %TEMP%\\tablero-postgres-17.11-portable\\pgsql\\bin --output-dir ../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021-baseline-corrected-runner --port 56559 --baseline-mode true",
+    "runnerCandidateCommand": "node tests/review/m2-2c-private-block-note-replay-policy.mjs --pg-bin %TEMP%\\tablero-postgres-17.11-portable\\pgsql\\bin --output-dir ../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021-candidate-final --port 56560",
+    "nativeBaselineExitCode": 0,
+    "nativeCandidateExitCode": 0,
+    "vitest": {
+      "command": "node node_modules/vitest/vitest.mjs run tests/private-block-notes-009-review.test.ts --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "exitCode": 0,
+      "testFiles": 2,
+      "testsPassed": 24,
+      "detail": "Vitest also picked up an existing tmp/transfer-validation-bbff614-main copy."
+    },
+    "typescript": {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "exitCode": 0
+    },
+    "clientBuild": {
+      "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+      "exitCode": 0,
+      "warnings": "Two dependency PURE annotation placement warnings from zod; Rollup removed the annotations."
+    },
+    "workerBuild": {
+      "command": "node scripts/build-worker.mjs",
+      "exitCode": 0
+    },
+    "gitDiffCheck": {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "detail": "Only CRLF normalization warnings on existing shared docs and SQL014."
+    }
+  },
+  "limitations": [
+    "Organization move for the same author cannot be represented: composite foreign keys tie profile, task, note and receipt organization; attempted mutation returns 23503 with unchanged full snapshot; constraints were not bypassed.",
+    "Coverage case cancels a valid approved absence after first write and verifies own replay after coverage is no longer active; it does not simulate clock-driven end-date passage.",
+    "Repeatable Read races return 40001 after a concurrent profile tuple update; the runner verifies the fresh-transaction retry response and full snapshots."
+  ],
+  "remoteCalls": 0,
+  "hostedMigrationApplied": false,
+  "commit": false,
+  "push": false,
+  "artifacts": [
+    {
+      "path": "../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021-candidate-final/report.json",
+      "bytes": 3518746,
+      "sha256": "427B70B9D8A6E07B9413DC4419D092FF2EE5A456A88D0F4893C777B762AC982E"
+    },
+    {
+      "path": "../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021-baseline-corrected-runner/report.json",
+      "bytes": 3517663,
+      "sha256": "4BA24309EBF42D65AD5C8F47AFC0F4205F7008F3330B623BDA09315A0E766F66"
+    },
+    {
+      "path": "../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021-final/report.json",
+      "bytes": 1307004,
+      "sha256": "710D8F8E50ED5916409436F5E963079C04E34AEF0121FA90F03F9660271AB39C"
+    },
+    {
+      "path": "../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021-attempt2/report.json",
+      "bytes": 1059369,
+      "sha256": "F3994ECAEDBE2CB911A507AE0095C85BC7DB8211671F9F60EE6B3C228B90670B"
+    },
+    {
+      "path": "docs/architecture/review-evidence/m2-2c-private-block-note-replay-policy-luna-20261021.json",
+      "bytes": 8173,
+      "sha256": "A5FBB36D47D5685FE8131A2F04692D14CDBBA86B6E93ED16A7DA04AD482AE45B"
+    },
+    {
+      "path": "../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021-candidate-final/initdb.log",
+      "bytes": 1262,
+      "sha256": "D1F32F2A3C2CC5DCE663DC15F092058F9F29557C577DD064390821DC448420CF"
+    },
+    {
+      "path": "../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021-candidate-final/postgres.log",
+      "bytes": 10728,
+      "sha256": "1EE1FB809C4F672AFA91C12B6F8E1090D00DAF07380ED86C20EFF0F9A5E52194"
+    },
+    {
+      "path": "../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021-baseline-corrected-runner/initdb.log",
+      "bytes": 1283,
+      "sha256": "000E55F253535659569E93518C99A0E555D44538D4B7E4A7089CA45845712555"
+    },
+    {
+      "path": "../../outputs/m2-2c-private-block-note-replay-policy-luna-20261021-baseline-corrected-runner/postgres.log",
+      "bytes": 8708,
+      "sha256": "41CE2F354AEBFDABC5EABC6C2AC9EE8348ED79092AA91B8DAA8F2D09244B0AED"
+    },
+    {
+      "path": "tests/review/m2-2c-private-block-note-replay-policy.mjs",
+      "bytes": 26766,
+      "sha256": "B6D2E46C46735DEB8CAEB1175674AEDCBFD63E9A69BBE32513FA5BF934196F84"
+    },
+    {
+      "path": "supabase/migrations/202610150014_operational_api.sql",
+      "bytes": 410853,
+      "sha256": "218DEA9E9E3097743BD09238E73D5840A664F6718AEBE7670B88AF064278A837"
+    }
+  ]
+}

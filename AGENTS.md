@@ -1,3 +1,27 @@
+# Continuidad del proyecto — estado vigente, 21/10/2026
+
+Repo activo: `work/site`; conservar este repositorio, historia Git y Site privado.
+Sol aceptó Gate L para SQL014 SHA `218DEA9E...`. Luego se quitaron únicamente
+los delimitadores `BEGIN`/`COMMIT` para preservar una sola transacción por archivo
+al ejecutarlo con Supabase CLI. El candidato actual SHA-256
+`BC09CF9631A2F3E4BD19541C2A050AB1C663AE0E704D47D7E5A4752B114E0345`.
+La atomicidad del candidato se verificó con Supabase CLI 2.121.0 en PostgreSQL
+17.11 descartable: el fallo tardío revirtió SQL014/historial y el retry exacto
+pasó; evidencia en `docs/architecture/SUPABASE-DEV-CLI-TRANSACTION-LOCAL-PREFLIGHT-20261021.md`.
+Sol aceptó el hash exacto BC09 para aplicarlo sólo en `grupo-paris-dev`, mediante
+CLI 2.121.0 y `db push --skip-vault --yes`; esta aceptación no cubre producción,
+usuarios reales ni activar el espacio operativo. La misma CLI reconoció las 16
+migraciones de 12 dígitos y `db push --dry-run` no alteró una base local limpia.
+
+Supabase `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`) sigue vacío: 0 migraciones,
+0 tablas en `public`/`api`/`app_private`; autoexposición de tablas nuevas apagada.
+No aplicar migraciones alojadas hasta que el workflow de preflight confirme la
+lista exacta y el dry-run contra el proyecto exacto; volver a verificar el estado
+y destino antes de aplicar sólo en DEV.
+Credenciales deben vivir en secretos de GitHub Actions, nunca en el repo/chat.
+Luego aplicar sólo las 16 migraciones a DEV, auditar esquema/permisos/advisors y
+seguir con Auth/API/Storage, frontend, CI, Cloudflare, correo y prueba en PC
+personal. Producción intacta; datos ficticios; espacio operativo apagado.
 # Continuidad vigente — A aceptada localmente, 21/10/2026
 
 Sol aceptó la familia A de replays de ausencias en SQL014, limitada a
