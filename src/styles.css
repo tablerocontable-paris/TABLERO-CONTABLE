@@ -3105,3 +3105,15 @@ header .notification-trigger span { position: absolute; top: -6px; right: -6px; 
   .sidebar-bottom { padding-top: 6px; }
   .sidebar-bottom .user { margin-top: 6px; padding-top: 6px; }
 }
+
+/* Supabase authentication gate (kept separate from the local laboratory UI). */
+.supabase-auth-shell { display: grid; min-height: 100vh; place-items: center; padding: 24px; background: var(--page, #f3f4f6); color: var(--ink, #24262b); }
+.supabase-auth-card { display: grid; gap: 16px; width: min(100%, 440px); padding: 28px; border: 1px solid var(--line, #dfe2e8); border-radius: 14px; background: var(--surface, #fff); box-shadow: 0 12px 36px #18202b12; }
+.supabase-auth-card h1, .supabase-auth-card p { margin: 0; }
+.supabase-auth-card label { display: grid; gap: 6px; color: var(--muted, #69717e); font-size: 12px; }
+.supabase-auth-card input { width: 100%; min-height: 42px; padding: 9px 11px; border: 1px solid var(--line, #dfe2e8); border-radius: 8px; background: var(--surface, #fff); color: var(--ink, #24262b); }
+.supabase-auth-card button { justify-self: start; }
+.supabase-auth-error { color: #a33030; }
+.supabase-mfa-qr { width: 190px; max-width: 100%; justify-self: center; }
+.supabase-mfa-secret { justify-self: center; overflow-wrap: anywhere; }
+.supabase-session { position: fixed; right: 12px; bottom: 12px; display: flex; align-items: center; gap: 10px; padding: 7px 10px; border: 1px solid var(--line, #dfe2e8); border-radius: 9px; background: var(--surface, #fff); color: var(--muted, #69717e); font-size: 11px; box-shadow: 0 4px 20px #18202b18; }
