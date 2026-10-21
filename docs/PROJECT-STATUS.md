@@ -6,7 +6,7 @@ Commit `e8b8eb2` agrega el creador de cliente Supabase para navegador y sus
 validaciones: sólo acepta URL HTTPS (HTTP local sólo para localhost), clave
 publishable o JWT `anon`, rechaza claves privilegiadas y configura persistencia
 de sesión/renovación. `.env.example` mantiene vacíos los valores. Prueba enfocada
-9/9; suite completa 752/752 en 76 archivos; TypeScript, build cliente, build
+9/9; suite completa 753/753 en 76 archivos; TypeScript, build cliente, build
 Worker y hook de commit 196/196 aprobaron. Push directo a `origin/main`
 confirmado en `e8b8eb2c70bfbf7eac6a99222b122d7f26fd0f1d`.
 

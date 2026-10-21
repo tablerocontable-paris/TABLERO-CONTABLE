@@ -5,7 +5,7 @@
 Commit `e8b8eb2` en `main` contiene `src/data/supabase/client.ts`, plantilla
 `.env.example` y pruebas. El cliente acepta sólo clave publishable/anon, URL
 HTTPS (HTTP localhost para desarrollo) y habilita persistencia/renovación de
-sesión. Prueba enfocada 9/9; suite completa 752/752, TypeScript y builds cliente
+sesión. Prueba enfocada 9/9; suite completa 753/753, TypeScript y builds cliente
 y Worker aprobados; hook 196/196. La aplicación sigue montando el laboratorio;
 la nueva fábrica aún no está conectada al inicio ni a pantallas operativas.
 
