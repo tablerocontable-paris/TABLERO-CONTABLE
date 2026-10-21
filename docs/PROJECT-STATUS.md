@@ -29,12 +29,13 @@ exactamente esos 16 archivos. No creó tablas ni historial. Evidencia:
 `api` y `app_private`. No se ejecutó SQL remoto. Autoexposición de tablas nuevas
 apagada en DEV; producción intacta.
 
-**Siguiente:** ejecutar el workflow manual
-`.github/workflows/supabase-dev-preflight.yml` en `main`. Requiere un único
-secreto de repositorio:
-`SUPABASE_DEV_DB_URL`, tomado de Connect → Session pooler del proyecto DEV. No
-compartir su valor en el chat. Todavía no se ejecutó el workflow remoto ni
-`db push` real.
+**Siguiente:** publicar y ejecutar en GitHub Actions el workflow manual
+`.github/workflows/supabase-dev-migrations.yml`, primero con `Apply migrations`
+desmarcado. Requiere el secreto de repositorio `SUPABASE_DEV_DB_URL`, tomado de
+Connect → Session pooler de DEV; no compartir su valor en el chat. Revisar el
+resultado de destino, historial y dry-run; sólo luego volver a ejecutarlo con
+`Apply migrations` seleccionado para aplicar. El workflow aún no se publicó ni
+ejecutó; no hubo `db push` remoto.
 
 Después del preflight remoto aceptado: aplicar las 16 migraciones sólo en DEV y auditar
 ledger, esquema, RLS, grants, funciones y advisors; configurar Data API para
@@ -49,6 +50,7 @@ migración de la aplicación. Auditoría y secuencia concreta:
 `docs/architecture/REMOTE-MIGRATION-READINESS-20261021.md`.
 
 Esta cabecera supersede el estado y siguiente paso históricos más abajo.
+
 # Continuidad vigente — C aceptada localmente, 20/10/2026
 
 La familia C de replays legacy de supervisión de cobertura quedó aceptada por
@@ -105,6 +107,7 @@ siguen abiertos.
 
 Esta actualización supersede el encabezado anterior; los registros siguientes
 son historial.
+
 # Continuidad vigente — replay legacy de cronómetro aceptado, 19/10/2026
 
 Sol aceptó localmente y en alcance acotado la reautorización del replay legacy
@@ -304,8 +307,7 @@ cuentas. Supabase alojado, hosting y aceptación final siguen pendientes; avance
 
 ## Candidato anterior — implementación R6 pendiente de revisión
 
-Se corrigió la validación NULL-safe de claves y revisiones en la migración local
-014. Los envelopes, payloads, revisiones, filtros y cursores malformados devuelven
+Se corrigió la validación NULL-safe de claves y revisiones en la migración local 014. Los envelopes, payloads, revisiones, filtros y cursores malformados devuelven
 errores de protocolo antes de producir efectos. Las revisiones vacías, ausentes,
 nulas, parciales o con claves/tipos incorrectos ya no habilitan escrituras. Una
 revisión explícita obsoleta conserva `40001`; una entrada vigente sigue funcionando.
@@ -374,9 +376,6 @@ de este corte. El avance global permanece ~45% histórico, sin recalcular ni aum
 Evidencia de aquel corte: `architecture/review-evidence/m2-2a-implementation-20261015.json`.
 La revalidación posterior y la acción vigente constan al inicio de este archivo.
 
-
-
-
 > **Corte vigente 15/10/2026: M2.1 aceptado localmente.** Los cuatro defectos anteriores quedaron resueltos. Revisión independiente: PostgreSQL42/42, focales27/27 y TypeScript; fuentes de producto iguales al corte690/690/builds del14/10. Informe architecture/M2-1-SOL-ACCEPTANCE-20261015.md. Próximo: Luna medio Standard implementa architecture/M2-2A-OPERATIVE-API-LUNA-20261015.md. M2.2 completo requiere A/B/C; sólo A tiene contrato ejecutable. Sin aceptación de servicios alojados ni despliegue. ~45% histórico, sin recalcular por revisión/documentación.
 
 > **Diseño M2 — 14/10/2026.** Inventario estático de 90 fuentes/38 campos State y matriz completa de consultas/comandos, con siete bloques de migración a Supabase. Se definieron fronteras de API, identidad técnica separada, privacidad de anotaciones, operativas versionadas, cierres por empresa, evidencia y recuperación. Contrato inmediato cerrado para M2.1; los demás requieren desglose/revisión antes de Luna. Ver architecture/SUPABASE-M2-CONTRACT-20261014.md y architecture/M2-1-IDENTITY-LUNA-20261014.md. Reproducibilidad M1 verificada ahora sobre clonación limpia con npm ci: Node24.19/npm portable12.2, 223 paquetes, 668/668, TypeScript/builds/paquete Sites aprobados; Git limpio. Se corrigió la guía portable. Evidencia: architecture/review-evidence/m2-architecture-contract-20261014.json. SQL013 y la app Supabase aún no están implementados. ~45% histórico sin recalcular.
@@ -387,9 +386,9 @@ La revalidación posterior y la acción vigente constan al inicio de este archiv
 > 65 hallazgos/95 casos y la siguiente acción era implementar la etapa 1. El
 > estado vigente está en la actualización de aceptación de etapa 3 más abajo.
 
-
 > **Reauditoría del recorrido S39 — 14/10/2026.** La lectura módulo por módulo encontró brechas después de la validación anterior: algunos pasos aún apuntaban a controles generales, y una vista sin laboratorio no resolvía su destino de calendario. Se ajustaron los anclajes internos, los estados vacíos, el despliegue temporal de Catálogo y el recálculo de posición al cambiar el viewport. El recorrido no abre formularios ni ejecuta acciones de negocio; empleado, encargado y jefe conservan sus permisos.
 > Suite completa: **663/663 en 67 archivos**. TypeScript, build cliente y Worker pasan. Edge: **31/31**, tours completos para los tres roles (11/13/15 pasos), desktop 1440×900 y coach móvil 390×844; cero errores JS y cero llamadas a la API operativa. Revisión independiente Sol y aceptación humana con lector de pantalla siguen pendientes. Evidencia: `docs/architecture/review-evidence/s39-tour-refresh-20261014.json` y `outputs/s39-tour-refresh-20261014/browser-validation.json`. No se hizo commit ni publicación; avance global ~45%.
+
 # Estado del proyecto Grupo París
 
 > **Aceptación M2.1 — 15/10/2026.** Se revisaron migración013, decoder, permisos,
@@ -414,7 +413,7 @@ La revalidación posterior y la acción vigente constan al inicio de este archiv
 > incorporarse aún a013. Se identificaron brechas de upgrade poblado y fixtures.
 > Informe architecture/M2-1-SOL-REVIEW-20261014.md; siguiente Luna medio Standard
 > ejecuta architecture/M2-1-CORRECTIONS-LUNA-20261014.md, luego Sol alto revisa.
->014/M2.2 pendiente; sin cuentas conectadas, avance ~45% histórico sin aumentar.
+> 014/M2.2 pendiente; sin cuentas conectadas, avance ~45% histórico sin aumentar.
 
 > **M2.1 implementado localmente — 14/10/2026.** Se añadió SQL013 con los
 > esquemas `api`/`app_private`, cuenta técnica separada, bloqueo de identidad
@@ -649,7 +648,7 @@ La revalidación posterior y la acción vigente constan al inicio de este archiv
 > `docs/architecture/review-evidence/stage-7-implementation-local-20261014.json`.
 
 > Revalidación y nuevos bordes de foco: `docs/architecture/review-evidence/
-> stage-5-partial-laboratory-20261014.json`; benchmark actual:
+stage-5-partial-laboratory-20261014.json`; benchmark actual:
 > `outputs/performance-lab-2026-10-14-post-tour-2026-10-14/`.
 
 > **Corte anterior a la actualización de etapa 7 — etapas 5 y 6 implementadas localmente; aceptación
@@ -661,8 +660,8 @@ La revalidación posterior y la acción vigente constan al inicio de este archiv
 > de etapas 5/6, lector de pantalla y revisión S52 de etapa 4. Avance global
 > ~45%, sin cambio. Sin commit, PR, actualización del Site, cuentas, API
 > operativa ni despliegue. Evidencia: `docs/architecture/review-evidence/
-> stage-5-partial-laboratory-20261014.json`, `stage-6-verifier-implementation-
-> lab-20261014.json` y sus reportes bajo `outputs/`.
+stage-5-partial-laboratory-20261014.json`, `stage-6-verifier-implementation-
+lab-20261014.json` y sus reportes bajo `outputs/`.
 
 > Actualización 14/10/2026 — **etapa 3 aceptada por revisión independiente de
 > Sol** para S04/S12/S19/S22/S26/S35/S61. Suite final 595/595 en 65 archivos;
@@ -705,7 +704,7 @@ La revalidación posterior y la acción vigente constan al inicio de este archiv
 > Etapa 1 sigue aceptada; etapas 3–7 y aceptación global abiertas. Avance
 > orientativo ~45%, sin cambio. Sin commit, PR, actualización del Site, cuentas,
 > API ni despliegue. Evidencia completa: `docs/architecture/review-evidence/
-> stage-2-final-acceptance-20261014.json`.
+stage-2-final-acceptance-20261014.json`.
 
 > Próximo bloque en ese corte: revisar y terminar etapa 3 (S04/S12/S19/S22/S26/S35/S61)
 > contra el código actual y sus casos adversos. El archivo fechado 12/10 es
@@ -724,7 +723,7 @@ La revalidación posterior y la acción vigente constan al inicio de este archiv
 > implementada y sin aceptación; etapas 3–7 y aceptación global siguen abiertas.
 > Avance global orientativo ~45%, sin recalcular. Sin commit, PR, actualización
 > de Site, cuentas ni API; laboratorio privado. Evidencia: `docs/architecture/
-> review-evidence/stage-1-final-acceptance-20261013.json`.
+review-evidence/stage-1-final-acceptance-20261013.json`.
 
 > Actualización 13/10/2026 — bloque 2A de etapa 2 aceptado por Sol, alcance
 > S09/S16/S65 y estado durable de evidencia. La revisión pidió que la prueba
@@ -744,7 +743,7 @@ La revalidación posterior y la acción vigente constan al inicio de este archiv
 > lector de pantalla y benchmark. Sin commit, PR, actualización del Site,
 > cuentas ni API operativa. Avance global orientativo ~45%, sin recalcular.
 > Evidencia: `docs/architecture/review-evidence/
-> stage-2-evidence-durable-20261013.json`.
+stage-2-evidence-durable-20261013.json`.
 
 > Actualización de continuación — 13/10/2026: etapa 1 revalidada localmente;
 > sus 14 hallazgos siguen pendientes de revisión independiente de Sol. Tras
@@ -789,7 +788,6 @@ de obligación que permanece oculto tras abrirlo desde calendario y fecha
 anterior conservada en avisos al cruzar medianoche argentina y cronómetro de
 cobertura que sigue abierto después de la baja del reemplazo.
 No se modificó el producto con estos hallazgos ni se cerró la auditoría completa.
-
 
 Bloque posterior: referencias de empresas al editar perfiles (S27), ausencia sin cobertura rechazada al encargado (S28), pérdida de borradores de Consultas al fallar guardado (S29) y RPC SQL histórica de espera sin argumento de motivo (S30). Contraste lector/gateway contra 011: 13/14 aprobadas, discrepancia aislada en S30. Comentarios operativos privados contra 011: 12/12 aprobadas. Inventario de permisos efectivo: 84 funciones/37 tablas, sin DML directo authenticated; límites y dos triggers con ACL por defecto documentados. No se volvió a ejecutar suite completa ni build en este bloque; no hubo implementación de producto, commit o despliegue.
 
@@ -988,17 +986,21 @@ Sol6.1 alto para razonar/planear/revisar próximos contratos; Luna6 medio para
 implementarlos. No simular cambio de modelo ni delegación.
 
 ## Definición final de avance
+
 Avance global aproximado: 45%. El 100% incluye GitHub propio, Supabase dev/producción y hosting funcionando, con entrega automática verificada y todas las correcciones conocidas cerradas. Ver ops/FINAL-ACCEPTANCE.md. Primero aceptación funcional del laboratorio; después configuración e integración de infraestructura. No enviar invitaciones reales ahora.
 
 ## Correcciones de marca y notificaciones
+
 Logo alineado y centrado sin leyenda, cabecera compacta, campana para todos los perfiles y comentarios de tareas en laboratorio. Avisos de asignación, cambios, finalización, comentarios y activación conjunta; lectura persistente por destinatario. La entrega transaccional y los avisos entre computadoras siguen pendientes de servidor. Ver product/CORRECTIONS-20261006-NOTIFICATIONS.md.
 
 Verificación de este bloque: 339/339 pruebas en 33 archivos, build aprobado y Chromium escritorio/móvil aprobado con cero errores JS y cero llamadas a /api. Fuente y publicación privada del mismo Site; sin cambiar audiencia.
 
 ## Contrato conjunto — estado histórico actualizado
+
 El contrato de architecture/JOINT-LABORATORY-CONTRACT-20261006.md ya está implementado en el laboratorio local, con límites y validaciones vigentes descritos en la sección posterior «Tareas conjuntas del laboratorio». No modifica SQL011 ni el backend.
 
 ## Tablero movible — 06/10/2026
+
 Entregables arrastrables entre estados, orden antes/después y persistencia de orden manual. Cambio respeta transition(): iniciar abre sólo cronómetro del actor, completar requiere pasos y espera liberada, reapertura aumenta contador. Teclado Alt+flecha izquierda/derecha. Evidencia suite 341/341, build y Chromium con cero llamadas API operativa/errores JS.
 
 ## Tareas conjuntas del laboratorio — 06/10/2026
@@ -1568,6 +1570,7 @@ incorporan copias que no forman parte del commit.
 La validación aún está preparada, no ejecutada: no existe el repositorio GitHub
 propio. No conecta cuentas ni cambia la audiencia del Site. El avance global
 permanece aproximadamente en **45%**.
+
 ## Cierre de revisión anterior — 08/10/2026 (histórico; reemplazado por «Estado actual»)
 
 **Respuesta: no, todavía no están implementados ni aceptados todos los cambios del plan.** Este bloque sí corrigió la privacidad entre empresas en Mi día/calendario/historial, la atribución individual de tareas conjuntas, la validación de snapshots de cierres y la selección de vínculos del formulario de fechas. Sol revisó esas cuatro correcciones con probes independientes y no encontró regresiones en esos casos.
@@ -1581,6 +1584,7 @@ Queda trabajo funcional y aceptación global: consistencia de paneles/ayudas, ex
 **Siguiente paso:** GPT-6 Luna, esfuerzo medio, Standard, para implementar el próximo bloque acotado de paneles/ayudas y aceptación visual sin abrir servicios. Luego GPT-6.1 Sol, esfuerzo alto, Standard, para revisión independiente. La selección del modelo no se cambia automáticamente desde este entorno.
 
 Evidencia de este cierre: `docs/architecture/review-evidence/privacy-backup-calendar-recheck-lab-20261008.json`; recorrido Edge: `outputs/plan-validation-20261008/edge-final-privacy-validation/`.
+
 ## Registro de implementación inicial — 08/10/2026 (455 pruebas; histórico y reemplazado por «Estado actual»)
 
 Se corrigieron en el árbol local rutas del contrato 07/10: consulta por empresa, guardas de ejecución/readiness, bloqueos y materialización por unidad, cierre atómico de componentes conjuntos, confirmación comercial por botón/arrastre, gestión de pesos, cobertura y unidad cerrada, validación del respaldo y métricas de operativas sin cuotas antiguas. Se eliminó la ficha duplicada del actor simulado en la barra lateral. El recorrido guiado ahora oscurece el exterior, resalta el destino, ubica la explicación cerca del objetivo y contiene el foco con salida por Escape; pausar retira el resaltado.

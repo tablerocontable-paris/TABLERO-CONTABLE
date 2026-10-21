@@ -28,25 +28,23 @@ de tablas nuevas continúa apagado.
 
 ## Siguiente puerta
 
-Ejecutar el preflight manual
-`.github/workflows/supabase-dev-preflight.yml` sobre
-`main`. Usa la URL Session pooler de DEV para permitir conexión desde GitHub
-Actions (IPv4), fija el CLI y sólo corre `migration list` y
-`db push --dry-run`. El usuario debe copiar la cadena de Connect → Session pooler
-como secreto `SUPABASE_DEV_DB_URL` en Settings → Secrets and variables → Actions;
-no compartirla en el chat. El workflow valida usuario, host regional, puerto,
-base y TLS; aborta si las 16 versiones no coinciden y no contiene comandos de
-aplicación ni reparación. Después volver a consultar remoto y comprobar que sigue
-vacío.
+Publicar y ejecutar el workflow manual
+`.github/workflows/supabase-dev-migrations.yml` en `main`, primero con
+`Apply migrations` desmarcado. Usa la URL Session pooler de DEV; guardar su valor
+como secreto `SUPABASE_DEV_DB_URL` en Settings → Secrets and variables → Actions,
+nunca en el chat. Valida proyecto/host/puerto/TLS, hash aceptado de SQL014 y las
+16 versiones locales frente a 0 remotas; el dry-run lista el orden exacto. Revisar
+ese resultado antes de volver a ejecutar con `Apply migrations` seleccionado.
+Ese segundo paso aplica sólo en DEV y verifica el historial final.
 
-Sólo tras confirmar el resultado remoto corresponde aplicar las 16 migraciones en
-`grupo-paris-dev`, verificar versiones, esquema, RLS, grants, funciones y
-advisors, y configurar Data API para exponer únicamente `api`. Producción sigue
-fuera de alcance. Luego continúan Auth/API sintética, Storage/restore, frontend,
-CI, Cloudflare, correo y prueba desde la PC personal. Mantener Site privado,
-datos ficticios y espacio operativo apagado.
+Después auditar versiones, esquema, RLS, grants, funciones y advisors; configurar
+Data API para exponer únicamente `api`. Producción sigue fuera de alcance. Luego
+continúan Auth/API sintética, Storage/restore, frontend, CI, Cloudflare, correo y
+prueba desde la PC personal. Mantener Site privado, datos ficticios y espacio
+operativo apagado.
 
 Esta cabecera supersede próximos pasos históricos debajo.
+
 # Próximo paso — familia A y publicación del corte C
 
 Familia C aceptada por Sol localmente: `approve_task_coverage_plan` y
@@ -113,6 +111,7 @@ Storage/restore, CI, hosting, correo y producción siguen abiertos.
 
 Esta actualización supersede el encabezado anterior; los registros siguientes
 son historial.
+
 # Continuidad vigente — replay legacy de cronómetro aceptado, 19/10/2026
 
 Sol aceptó en alcance local acotado la reautorización del replay legacy de
@@ -268,6 +267,7 @@ sigue sin aplicar; Gate L/§9 sigue abierto.
 4. El repositorio fuente está en GitHub privado `tablerocontable-paris/TABLERO-CONTABLE`, rama única `main`. La guía de PC personal es `outputs/LEEME-PC-PERSONAL.md`; IndexedDB/localStorage no se sincroniza con GitHub.
 5. Proyecto Supabase `grupo-paris-dev` existe en la organización visible `tablerocontable-paris DEV`, región `sa-east-1`, activo y vacío. La Data API aún muestra `public,extensions` expuestos y autoexposición activada según la última observación. No aplicar migraciones hasta comprobar exposición segura y completar el preflight en el proyecto vacío.
 6. Cloudflare/hosting propio, correo productivo, Supabase de producción y flujo de release permanecen pendientes. El Site privado existente sigue separado; no abrir audiencia ni activar la app operativa.
+
 # Acción histórica — completar M2.2C localmente, 16/10/2026
 
 **Registro histórico supersedido — R51 (no usar como estado actual).** R51
@@ -700,8 +700,7 @@ contrato. Los informes incluyen hash del árbol efectivo y salidas únicas.
 
 En ese corte, la acción pendiente era la revisión independiente GPT-6.1 Sol,
 esfuerzo alto, Standard, sobre S57/S58 y su evidencia. Luego correspondía
-resolver los pendientes de aceptación de etapas 5 y 4 antes de iniciar la etapa
-7. El estado vigente y sus gates están en la sección superior. Este corte no es
+resolver los pendientes de aceptación de etapas 5 y 4 antes de iniciar la etapa 7. El estado vigente y sus gates están en la sección superior. Este corte no es
 aceptación global ni modifica el avance orientativo ~45%. No hubo commit, PR,
 publicación, cuentas, API operativa o despliegue.
 Evidencia: `docs/architecture/review-evidence/stage-6-verifier-implementation-

@@ -1,4 +1,4 @@
--- M2.2A/B migration. Remote application is restricted to the reviewed DEV project.
+-- M2.2A/B candidate. This migration remains local until B/C are accepted.
 create table app_private.operational_rate_heads (
   id uuid primary key default gen_random_uuid(), organization_id uuid not null,
   company_id uuid not null, template_id uuid, instance_id uuid,
