@@ -1,8 +1,10 @@
 # Corte de implementación local — 21/10/2026
 
-La puerta `SupabaseAuthGate` ya tiene inicio/cierre de sesión, identidad derivada de `get_context_v1`, MFA TOTP requerido para jefe/encargado, guardas para respuestas asíncronas obsoletas y formulario de acceso. Validación actual: 6 pruebas enfocadas; suite 759/759 en 77 archivos; TypeScript, build cliente y build Worker aprobados. Esto sigue sin conectar `src/main.tsx` ni activar el área operativa remota.
+La puerta `SupabaseAuthGate` ya tiene inicio/cierre de sesión, identidad derivada de `get_context_v1`, MFA TOTP requerido para jefe/encargado, guardas para respuestas asíncronas obsoletas y formulario de acceso. Validación actual (21/10/2026): 7 pruebas enfocadas; suite 760/760 en 77 archivos; TypeScript, build cliente y build Worker aprobados. La prueba nueva confirma enrolamiento TOTP obligatorio para encargado. Esto sigue sin conectar `src/main.tsx` ni activar el área operativa remota.
 
-Siguiente acción externa: agregar `SUPABASE_DEV_DB_URL` como secreto en GitHub y ejecutar el workflow de migración en modo preflight. Supabase DEV sigue sin migraciones/tablas. Tras el preflight, aplicar únicamente a DEV y auditarlo; luego conectar la app y validar integración. Cloudflare, correo y prueba desde la PC personal siguen pendientes.
+Lectura remota repetida el 21/10/2026: `grupo-paris-dev` continúa con 0 migraciones y 0 tablas en `public`, `api` y `app_private`; no se aplicó ningún cambio remoto.
+
+Siguiente acción: guardar `SUPABASE_DEV_DB_URL` como secreto de Actions y ejecutar `.github/workflows/supabase-dev-migrations.yml` con `Apply migrations` desmarcado. Tras aprobar destino, historial vacío y lista exacta, ejecutar la segunda corrida para aplicar únicamente a DEV. Luego auditar el esquema y conectar la app. Cloudflare, correo y prueba desde la PC personal siguen pendientes.
 
 ---
 # Estado de conexión de la aplicación para migración remota — 21/10/2026

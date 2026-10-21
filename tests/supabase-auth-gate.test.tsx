@@ -24,6 +24,10 @@ const elevatedContext = {
   principal: { ...context.principal, role: "jefe" },
   authentication: { aal: "aal1", requiresMfa: true },
 };
+const managerContext = {
+  ...elevatedContext,
+  principal: { ...context.principal, role: "encargado" },
+};
 const elevatedContextAfterMfa = {
   ...elevatedContext,
   authentication: { aal: "aal2", requiresMfa: false },
@@ -217,6 +221,39 @@ describe("SupabaseAuthGate", () => {
       factorId: "verified-totp",
     });
     expect(client.auth.mfa.enroll).not.toHaveBeenCalled();
+  });
+
+  it("requires TOTP enrollment before an encargado can enter", async () => {
+    const user = userEvent.setup();
+    const managerContextAfterMfa = {
+      ...managerContext,
+      authentication: { aal: "aal2", requiresMfa: false },
+    };
+    const { client } = makeClient(managerContext, managerContextAfterMfa);
+    render(
+      <SupabaseAuthGate client={client}>
+        {(value) => <p>Espacio: {value.principal.displayName}</p>}
+      </SupabaseAuthGate>,
+    );
+    await screen.findByRole("heading", { name: "Ingresar a Grupo París" });
+    await user.type(
+      screen.getByLabelText("Correo electrónico"),
+      "encargado@example.test",
+    );
+    await user.type(screen.getByLabelText("Contraseña"), "not-a-real-password");
+    await user.click(screen.getByRole("button", { name: "Ingresar" }));
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "Activá la verificación en dos pasos",
+      }),
+    ).toBeTruthy();
+    expect(screen.queryByText("Espacio: Valentino Magni")).toBeNull();
+    await user.type(screen.getByLabelText("Código de verificación"), "123456");
+    await user.click(
+      screen.getByRole("button", { name: "Verificar e ingresar" }),
+    );
+    expect(await screen.findByText("Espacio: Valentino Magni")).toBeTruthy();
   });
 
   it("ignores a context response after the session changes to signed out", async () => {
