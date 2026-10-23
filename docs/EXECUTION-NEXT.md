@@ -30,9 +30,9 @@ dependiendo de Supabase DEV y aún no hay conexiones reales.
 
 Este corte supersede los estados inferiores que indiquen CI pendiente, Site sin publicar o último SHA anterior.
 
-- El repositorio local aislado `src/data/supabase/workspace-repository.ts` consulta únicamente `workspacePageV2` y `taskChecklistPage`; todavía no está conectado a la UI ni publicado. Sol lo aceptó; las observaciones P3 de pruebas quedaron cubiertas. Suite 795/795, TypeScript, builds cliente y Worker aprobados.
-- El remoto `grupo-paris-dev` había sido confirmado vacío. Falta el secreto `SUPABASE_DEV_DB_URL` en Actions para iniciar el preflight sin escrituras de 001–014. No enviar su valor en el chat.
-- Después del preflight: aplicar/auditar 001–014 en DEV; revisar y aplicar SQL015 por separado; integrar Auth/permisos y vistas remotas por módulo; luego evidencia/Storage, hosting/correo y aceptación desde PC personal.
+- El código ya conecta el modo opt-in de Supabase Auth con `MyWork` de sólo lectura. El laboratorio sigue por defecto; todavía no se probó el modo contra Supabase alojado ni hay escrituras RPC desde la UI.
+- No hubo un nuevo preflight después del rechazo de URL. El secreto `SUPABASE_DEV_DB_URL` existe en Actions; actualizarlo con el URI Session pooler de DEV y repetir el preflight read-only. No compartir su valor en el chat.
+- Después del preflight: aplicar/auditar 001–014 en DEV; revisar y aplicar SQL015 por separado; probar Auth/MFA y `MyWork` con identidades ficticias. Luego ampliar módulos y comandos RPC de forma incremental, incorporar Storage/evidencia, Cloudflare y correo, y aceptar desde la PC personal.
 
 - Último commit publicado antes de este corte local: `158b2a0d4ab0251f1a775b332ccd3497e59ec92f`; GitHub Actions `39978569509` pasó suite, build y paquete Sites. El repositorio aislado de lectura queda pendiente de publicar y validar en CI.
 - El hook aprobó 196/196 pruebas. El bootstrap optativo pasó revisión Sol y la suite completa 787/787 en 80 archivos, TypeScript y builds cliente/Worker. Código y evidencia ya están publicados.

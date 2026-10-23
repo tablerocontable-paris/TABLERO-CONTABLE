@@ -2,13 +2,17 @@
 
 ## Comprobación más reciente
 
-La rama `main` del repositorio privado contiene el commit `6dea64af0c0344ba2175fc5a4a61b1ea56d80fce`. GitHub Actions `40001331220` terminó correctamente con suite, build y paquete Sites. Se mejoraron los mensajes de validación del URI de Supabase: ahora revelan sólo indicadores booleanos por campo y nunca imprimen el secreto.
+El commit de diagnóstico `6dea64af0c0344ba2175fc5a4a61b1ea56d80fce` pasó
+GitHub Actions `40001331220` con suite, build y paquete Sites. Los commits
+posteriores `17c5b2e` y `7a428fe` actualizan documentación y la guía de la PC
+personal; su validación CI está en curso. Los workflows ahora revelan sólo
+indicadores booleanos por campo del URI y nunca imprimen el secreto.
 
 El preflight Supabase `40000787076` falló antes de conectar porque el URI configurado no pasó el control de formato/destino. No consultó historial ni hizo dry-run/escrituras. No se ha observado una nueva ejecución del preflight desde entonces. Requiere actualizar `SUPABASE_DEV_DB_URL` con el Session pooler del proyecto DEV y repetirlo.
 
 ## Cloudflare
 
-El producto publicado sigue siendo el Site privado de OpenAI. No hay configuración Wrangler, despliegue de Cloudflare ni secretos de esa plataforma versionados. El Worker existente depende de D1 y de cabeceras de identidad que provee Sites; no se puede desplegar tal cual como backend operativo de Cloudflare. La ruta prevista debe esperar a integrar Supabase Auth/RPC y separar los datos del laboratorio.
+El producto publicado sigue siendo el Site privado de OpenAI. No hay configuración Wrangler, despliegue de Cloudflare ni secretos de esa plataforma versionados. El Worker existente depende de D1 y de cabeceras de identidad que provee Sites; no se puede desplegar tal cual como backend operativo de Cloudflare. El código actual ya tiene un arranque Supabase Auth opt-in y `MyWork` read-only, pero ese camino aún no se conectó ni verificó contra Supabase DEV. Cloudflare debe esperar a validar Auth/RPC alojados y separar los datos del laboratorio.
 
 Preparación requerida antes de publicar: definir frontend en Cloudflare Pages o Workers Static Assets, resolver el destino del Worker D1 existente, separar entornos DEV/producción, bindings y secretos, y configurar acceso privado. No se ha conectado ni desplegado Cloudflare.
 
@@ -20,7 +24,7 @@ Hay un contrato servidor de entregas con claim/retry y un proveedor ficticio par
 
 1. Corregir el secreto Supabase y completar preflight sin escrituras.
 2. Aplicar/auditar 001–014 en DEV; luego revisar SQL015 en su etapa separada.
-3. Integrar Auth, permisos y operaciones de la aplicación, manteniendo el laboratorio aislado.
+3. Probar Auth/MFA y `MyWork` de sólo lectura con identidades ficticias; después ampliar consultas autorizadas y comandos RPC por módulo, manteniendo el laboratorio aislado.
 4. Preparar y validar Cloudflare con entorno privado de DEV.
 5. Implementar y probar el proveedor de correo elegido en entorno de prueba.
 6. Probar desde la PC personal antes de aceptar la migración.
@@ -73,7 +77,13 @@ Auditoría inicial local del repositorio después de publicar `ad47ff9` en
 `tablerocontable-paris/TABLERO-CONTABLE`. No se conectó una sesión ni se cambió
 ningún servicio remoto.
 
-## Hallazgos comprobados
+## Hallazgos comprobados al 21/10/2026 — snapshot histórico
+
+Los hallazgos siguientes describen el checkout revisado el 21/10. El cableado
+posterior del 23/10 se registra arriba y en
+`REMOTE-WORKSPACE-AUTH-BOOTSTRAP-IMPLEMENTATION-LUNA-20261023.md`: `MyWork` sí
+quedó conectado al bootstrap opt-in, como lectura solamente. La ruta legacy
+`RemoteWorkspace`/D1 sigue fuera del arranque.
 
 - `src/main.tsx` monta `LaboratoryWorkspace`.
 - `src/components/LaboratoryWorkspace.tsx` carga y persiste datos mediante el

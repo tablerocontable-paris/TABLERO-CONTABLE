@@ -13,8 +13,9 @@ El valor de ejemplo es `false` y el arranque normal continúa en
 Con la bandera activa, URL o clave faltante/inválida muestra un error cerrado,
 sin abrir el laboratorio como alternativa. Con configuración válida, el
 cliente se crea una vez antes de React/StrictMode y se monta `SupabaseAuthGate`.
-Después de autenticarse sólo aparece una pantalla diagnóstica mínima; no monta
-`RemoteWorkspace`, no inicia comandos ni habilita el área operativa.
+En el cableado posterior, después de autenticarse se monta `MyWork` de sólo
+lectura (`workspacePageV2` y `taskChecklistPage`). No monta `RemoteWorkspace`, no
+inicia comandos ni habilita el área operativa completa.
 
 ## Archivos
 
@@ -38,22 +39,23 @@ Después de autenticarse sólo aparece una pantalla diagnóstica mínima; no mon
 - El build muestra avisos de Zod/Rollup y del bundle principal superior a
   500 kB; no son fallos de esta corrección.
 
-## Límites y continuidad
+## Límites y continuidad — corte de implementación inicial
 
 El bootstrap y el reporte ya están publicados en `main`; no se activó la bandera,
 no se autenticó contra Supabase ni se hicieron escrituras. El repositorio activo
 continúa siendo `work/site`.
 
-El 23/10 se agregó aparte un repositorio aislado de lectura para `workspacePageV2`
-y `taskChecklistPage`. No está conectado al bootstrap, no monta el tablero, no
-convierte DTOs a `State`, y no ofrece comandos ni persistencia. Sol lo aceptó
+El 23/10 se agregó un repositorio aislado de lectura para `workspacePageV2` y
+`taskChecklistPage`, y se conectó a `MyWork` dentro del modo autenticado opcional.
+No convierte DTOs a `State`, no ofrece comandos ni persistencia. Sol lo aceptó
 localmente sin hallazgos bloqueantes. La revisión señaló dos mejoras P3 de
-cobertura, incorporadas en la prueba enfocada; su aceptación se refiere al
-código local y no demuestra integración con Supabase alojado.
+cobertura, incorporadas en la prueba enfocada; la aceptación se refiere al código
+local y no demuestra integración con Supabase alojado.
 
-La suite completa más reciente comunicada antes de ese repositorio fue 795/795;
-el repositorio nuevo pasó su prueba enfocada 8/8 y TypeScript. La integración
-alojada sigue pendiente: DEV no tiene migraciones/tablas y el preflight necesita
-el secreto `SUPABASE_DEV_DB_URL` en GitHub Actions. Después siguen aplicación y
-auditoría de migraciones, UI remota y permisos, almacenamiento/evidencia,
-hosting/correo y aceptación funcional desde la PC personal.
+La suite completa más reciente comunicada antes del cableado fue 795/795; el
+repositorio nuevo pasó su prueba enfocada 8/8 y TypeScript. GitHub Actions
+`40001331220` aprobó luego suite, build y paquete Sites para el código de
+diagnóstico. La integración alojada sigue pendiente: el preflight `40000787076`
+falló antes de conectar. Luego corresponden aplicación/auditoría de migraciones,
+prueba end-to-end de Auth y lecturas, permisos/escrituras, almacenamiento,
+hosting/correo y aceptación desde la PC personal.

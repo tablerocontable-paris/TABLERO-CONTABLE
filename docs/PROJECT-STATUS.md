@@ -47,48 +47,27 @@ Auditoría read-only y secuencia detalladas en
 Este bloque reemplaza los estados anteriores de “lector sin UI”, `158b2a0` y
 “sólo diagnóstico”. El resto del registro queda como historial.
 
-## Corte local en curso — repositorio Supabase de lectura
+## Cableado local Supabase/Auth — estado vigente
 
-El bootstrap Auth permanece publicado y apagado por defecto. Se implementó un
-repositorio aislado para consultar páginas `workspacePageV2` y segmentos de
-`taskChecklistPage`, sin conectar la interfaz, convertir datos a `State`, ni
-habilitar comandos. Sol lo aceptó sin hallazgos funcionales; se incorporaron sus
-dos observaciones P3 de cobertura. Verificación local actual: suite **795/795**
-en 81 archivos, TypeScript, build cliente y build Worker aprobados. La suite y
-los builds son locales; aún no representan conexión alojada. Código pendiente de
-publicación directa en `main`.
+El modo remoto opcional ya está conectado desde `main.tsx`/`mount.tsx` al
+bootstrap, al `SupabaseAuthGate` y a `MyWork`. Sigue apagado por defecto: sin
+`VITE_SUPABASE_AUTH_BOOTSTRAP=true` la app abre el laboratorio. Con el modo
+activado, el cliente usa clave publishable/anon, resuelve identidad y permisos
+con `get_context_v1`, exige TOTP cuando corresponde y `MyWork` consulta páginas
+`workspacePageV2` y `taskChecklistPage`.
 
-La migración externa sigue bloqueada por el secreto `SUPABASE_DEV_DB_URL` en
-GitHub Actions. Supabase DEV se había consultado vacío (0 migraciones y 0 tablas);
-el preflight 001–014 aún no se ejecutó. Después siguen migración/auditoría DEV,
-SQL015 separado, autenticación y permisos alojados, UI remota por módulos,
-evidencia/almacenamiento, hosting/correo y aceptación desde la PC personal.
+Este primer recorrido es de sólo lectura: no contiene comandos RPC, escritura,
+gestión de equipo ni el tablero operativo completo. Su montaje no prueba un
+servicio alojado. El preflight `40000787076` falló antes de conectar, por lo que
+Auth, migraciones, RLS, grants y respuestas aún no están validados en Supabase
+DEV. La ruta antigua `RemoteWorkspace`/`site-worker.ts` usa D1 y autenticación de
+Sites y permanece fuera del arranque.
 
-`main` está publicado directamente en GitHub; último SHA confirmado antes de
-este corte local: `158b2a0d4ab0251f1a775b332ccd3497e59ec92f`. Actions
-`39978569509` aprobó suite, build y paquete Sites para ese SHA. El repositorio de
-lectura y este corte documental están pendientes de commit/CI.
-
-Sol aceptó el código SQL015 para DEV con hash LF
-`CC49480D1317F1B44CD29F245508F9C8FB0B0894FE4E66C1B22F8E00D36B33F2`, tras aceptar
-el contrato bootstrap (`42849A54…018E96D`) y el contrato de checklist extenso
-(`34C7A45A02100E28617E5E180753472F148E6E1D96152003A9757DF61128E36D`).
-`workspacePageV2` y `taskChecklistPage` preservan SQL014 y la lectura de controles
-extensos sin truncarlos. Evidencia en el informe Luna y aceptación Sol del código.
-
-Supabase DEV se reconsultó el 23/10: está activo, con 0 migraciones y 0 tablas en
-`public`, `api` y `app_private`. No se hicieron escrituras remotas. Falta correr el
-preflight remoto de 001–014; GitHub requiere el secreto `SUPABASE_DEV_DB_URL`,
-que el usuario debe guardar en Settings → Secrets and variables → Actions, sin
-pegarlo en el chat. Luego aplicar/auditar 001–014 y, por separado, 015.
-
-El bootstrap de Supabase Auth para diagnóstico ya está publicado y aceptado por
-Sol. Su suite completa anterior fue 787/787 en 80 archivos; el corte actual pasó
-795/795 en 81 archivos, TypeScript y builds cliente/Worker. El modo remoto se activa sólo con una
-bandera explícita; por defecto sigue cargando `LaboratoryWorkspace`. Aun activado,
-muestra sólo diagnóstico, sin tablero operativo. Evidencia:
-`docs/architecture/REMOTE-WORKSPACE-AUTH-BOOTSTRAP-IMPLEMENTATION-LUNA-20261023.md`.
-Cloudflare, correo, producción y prueba desde la PC personal siguen pendientes.
+SQL015 está aceptada para DEV con hash LF
+`CC49480D1317F1B44CD29F245508F9C8FB0B0894FE4E66C1B22F8E00D36B33F2`, pero va
+después de aplicar y auditar 001–014. La secuencia remota y los límites de
+Cloudflare/correo están en
+`docs/architecture/REMOTE-MIGRATION-READINESS-20261021.md`.
 
 # Corte de implementación local — 21/10/2026
 
