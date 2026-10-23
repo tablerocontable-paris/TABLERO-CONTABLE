@@ -89,14 +89,20 @@ describe("base nueva desde cero y RLS", () => {
       `update task_instances set checklist='[{"id":"step","text":"Control","done":false}]',status='En curso',completed_at=null,state_revision=0 where id=$1`,
       [ids.t],
     );
+    const { rows: beforeWriterRows } = await db.query<{ state_revision: number }>("select state_revision from task_instances where id=$1", [ids.t]);
     await actor(ids.employee);
     await db.query("select set_checklist_item($1,$2,true)", [ids.t, "step"]);
+    const { rows: revisionRows } = await db.query<{ state_revision: number }>("select state_revision from task_instances where id=$1", [ids.t]);
+    const revision = revisionRows[0].state_revision;
+    expect(revision).toBe(beforeWriterRows[0].state_revision + 1);
     expect(
       (await db.query<{ status: string }>("select status from task_instances"))
         .rows[0].status,
     ).toBe("Completada");
     await expect(db.query("select set_checklist_item($1,$2,false)", [ids.t, "step"])).rejects.toThrow("motivo");
-    await db.query("select set_checklist_item_reviewed($1,$2,false,'Control omitido deliberadamente',1,$3)", [ids.t, "step", "90000000-0000-0000-0000-000000000001"]);
+    await db.query("select set_checklist_item_reviewed($1,$2,false,'Control omitido deliberadamente',$4,$3)", [ids.t, "step", "90000000-0000-0000-0000-000000000001", revision]);
+    const { rows: reviewedRevisionRows } = await db.query<{ state_revision: number }>("select state_revision from task_instances where id=$1", [ids.t]);
+    expect(reviewedRevisionRows[0].state_revision).toBe(revision + 1);
     expect(
       (await db.query<{ status: string }>("select status from task_instances"))
         .rows[0].status,

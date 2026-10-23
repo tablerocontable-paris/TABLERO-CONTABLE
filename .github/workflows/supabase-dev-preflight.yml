@@ -1,4 +1,4 @@
-name: Preflight remoto Supabase DEV
+name: Preflight Supabase DEV 001–014
 
 on:
   workflow_dispatch:
@@ -14,9 +14,9 @@ jobs:
   preflight:
     if: github.repository == 'tablerocontable-paris/TABLERO-CONTABLE' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
-      - name: Rechazar ejecución fuera del repositorio y branch autorizados
+      - name: Reject an unauthorized repository or branch
         env:
           REPOSITORY: ${{ github.repository }}
           REF: ${{ github.ref }}
@@ -25,12 +25,12 @@ jobs:
           [[ "$REPOSITORY" == 'tablerocontable-paris/TABLERO-CONTABLE' ]]
           [[ "$REF" == 'refs/heads/main' ]]
 
-      - name: Checkout del mismo commit validado por CI
+      - name: Checkout main without a write token
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
 
-      - name: Instalar Supabase CLI 2.121.0 y verificar SHA-256
+      - name: Install pinned Supabase CLI
         run: |
           set -euo pipefail
           archive="$RUNNER_TEMP/supabase_2.121.0_linux_amd64.tar.gz"
@@ -41,23 +41,26 @@ jobs:
           mkdir -p "$RUNNER_TEMP/supabase-cli"
           tar -xzf "$archive" -C "$RUNNER_TEMP/supabase-cli" supabase
           chmod 0755 "$RUNNER_TEMP/supabase-cli/supabase"
-          cli_version="$("$RUNNER_TEMP/supabase-cli/supabase" --version)"
-          [[ "$cli_version" == '2.121.0' ]]
-          printf 'Supabase CLI %s verificada.\n' "$cli_version"
+          [[ "$("$RUNNER_TEMP/supabase-cli/supabase" --version)" == '2.121.0' ]]
 
-      - name: Consultar destino y verificar migraciones pendientes sin aplicar
+      - name: Verify hash lock and stage only migrations 001–014
+        run: |
+          set -euo pipefail
+          node scripts/supabase-dev-migration-guard.mjs verify-files . baseline_001_014
+          stage_root="$RUNNER_TEMP/supabase-baseline-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          node scripts/supabase-dev-migration-guard.mjs stage . baseline_001_014 "$stage_root"
+          echo "SUPABASE_STAGE_ROOT=$stage_root" >> "$GITHUB_ENV"
+
+      - name: Validate DEV pooler target without printing its URL
         env:
           SUPABASE_DEV_DB_URL: ${{ secrets.SUPABASE_DEV_DB_URL }}
-        working-directory: .
         run: |
           set -euo pipefail
           if [[ -z "${SUPABASE_DEV_DB_URL:-}" ]]; then
-            echo 'Falta el secreto SUPABASE_DEV_DB_URL. Copiá la URL del Session pooler desde Connect y guardala en Settings → Secrets and variables → Actions; nunca la pegues en el repositorio ni en este workflow.' >&2
+            echo 'Falta SUPABASE_DEV_DB_URL en Settings → Secrets and variables → Actions. Guardá la URL Session pooler de grupo-paris-dev allí; no la pegues en el repositorio ni en el chat.' >&2
             exit 1
           fi
-
-          # Valida Session pooler IPv4 del proyecto DEV y devuelve la URL sin mostrarla.
-          export DB_URL="$(python3 - <<'PY'
+          python3 - <<'PY'
           import os, re, sys
           from urllib.parse import urlsplit, parse_qs
           raw = os.environ["SUPABASE_DEV_DB_URL"]
@@ -76,53 +79,19 @@ jobs:
           except ValueError:
               valid = False
           if not valid:
-              print("SUPABASE_DEV_DB_URL no cumple el formato del Session pooler DEV requerido.", file=sys.stderr)
+              print("La conexión no corresponde al Session pooler de grupo-paris-dev.", file=sys.stderr)
               raise SystemExit(1)
-          print(raw)
-          PY
-          )"
-          unset SUPABASE_DEV_DB_URL
-          cli="$RUNNER_TEMP/supabase-cli/supabase"
-          # Se captura y valida el reporte JSON fuera del repositorio.
-          "$cli" migration list --db-url "$DB_URL" --output-format json > "$RUNNER_TEMP/migration-list.json"
-          python3 - "$RUNNER_TEMP/migration-list.json" <<'PY'
-          import json, sys
-          expected = set("202609300001 202609300002 202610010001 202610010002 202610010003 202610010004 202610010005 202610010006 202610010007 202610010008 202610020009 202610040010 202610060011 202610140012 202610140013 202610150014".split())
-          with open(sys.argv[1], encoding="utf-8") as f:
-              payload = json.load(f)
-          if (not isinstance(payload, dict) or not {"migrations", "message"}.issuperset(payload)
-                  or "migrations" not in payload or not isinstance(payload["migrations"], list)
-                  or ("message" in payload and not isinstance(payload["message"], str))):
-              raise SystemExit("Formato JSON de migration list no reconocido; preflight detenido.")
-          local, remote = [], []
-          for row in payload["migrations"]:
-              if not isinstance(row, dict) or not isinstance(row.get("local"), str) or not isinstance(row.get("remote"), str):
-                  raise SystemExit("Fila JSON de migration list no reconocida; preflight detenido.")
-              if set(row) != {"local", "remote", "time"} or not isinstance(row.get("time"), str):
-                  raise SystemExit("Campos de fila JSON inesperados; preflight detenido.")
-              local_version = row["local"]
-              remote_version = row["remote"]
-              if local_version:
-                  local.append(local_version)
-              if remote_version:
-                  remote.append(remote_version)
-          if len(local) != 16 or set(local) != expected or len(set(local)) != 16:
-              raise SystemExit(f"Versiones locales inesperadas: {len(local)} filas; se esperaban las 16 versiones exactas.")
-          if remote:
-              raise SystemExit(f"Se detectaron {len(remote)} versiones remotas; se esperaban 0. No se aplica nada.")
-          if set(local) != expected or len(local) - len(remote) != 16:
-              raise SystemExit("El conjunto pendiente no coincide exactamente con las 16 versiones esperadas. No se aplica nada.")
-          print("Preflight de historial aprobado: 16 locales, 0 remotas, 16 pendientes.")
+          print("URL DEV validada; contenido oculto.")
           PY
 
-          "$cli" db push --skip-vault --dry-run --db-url "$DB_URL" 2>&1 | tee "$RUNNER_TEMP/db-push-dry-run.txt"
-          # El dry-run debe anunciar las 16 migraciones, sin errores; este workflow no tiene ruta de aplicación.
-          python3 - "$RUNNER_TEMP/db-push-dry-run.txt" <<'PY'
-          import re, sys
-          text = open(sys.argv[1], encoding="utf-8").read()
-          expected = "202609300001 202609300002 202610010001 202610010002 202610010003 202610010004 202610010005 202610010006 202610010007 202610010008 202610020009 202610040010 202610060011 202610140012 202610140013 202610150014".split()
-          versions = re.findall(r"\b\d{12}\b", text)
-          if versions != expected:
-              raise SystemExit(f"Dry-run no demuestra exactamente las 16 versiones esperadas una vez y en orden (detectadas: {len(versions)}). No se aplica nada.")
-          print("Dry-run confirmado: las 16 versiones esperadas están pendientes.")
-          PY
+      - name: Require an empty remote history and exact 001–014 dry-run
+        env:
+          SUPABASE_DEV_DB_URL: ${{ secrets.SUPABASE_DEV_DB_URL }}
+        run: |
+          set -euo pipefail
+          cli="$RUNNER_TEMP/supabase-cli/supabase"
+          "$cli" --workdir "$SUPABASE_STAGE_ROOT" migration list --db-url "$SUPABASE_DEV_DB_URL" --output-format json > "$RUNNER_TEMP/migration-list-before.json"
+          node scripts/supabase-dev-migration-guard.mjs history . baseline_001_014 "$RUNNER_TEMP/migration-list-before.json" before
+          "$cli" --workdir "$SUPABASE_STAGE_ROOT" db push --dry-run --db-url "$SUPABASE_DEV_DB_URL" 2>&1 | tee "$RUNNER_TEMP/db-push-dry-run.txt"
+          node scripts/supabase-dev-migration-guard.mjs dry-run . baseline_001_014 "$RUNNER_TEMP/db-push-dry-run.txt"
+          echo 'Preflight completado sin modificar la base: remoto vacío, 16 migraciones 001–014 exactas y SQL015 excluida.'

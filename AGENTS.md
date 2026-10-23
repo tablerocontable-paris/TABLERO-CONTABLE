@@ -1,3 +1,32 @@
+# Estado actual de migración — 23/10/2026
+
+El repositorio activo sigue siendo `work/site`; preservar su historia Git y el
+Site privado existente. El proyecto Supabase `grupo-paris-dev`
+(`kynqjfhqujnjojcmurwf`) está activo y, en la última lectura, tenía 0
+migraciones y 0 tablas en `public`, `api` y `app_private`.
+
+SQL014 conserva el hash aprobado para DEV
+`BC09CF9631A2F3E4BD19541C2A050AB1C663AE0E704D47D7E5A4752B114E0345`.
+SQL015 añade localmente `workspacePage`, `workspacePageV2` y
+`taskChecklistPage`; hash normalizado LF `CC49480D1317F1B44CD29F245508F9C8FB0B0894FE4E66C1B22F8E00D36B33F2`.
+El contrato Sol de detalle extenso está aceptado para implementación, no el
+código. Los historiales no se truncan: V2 clasifica checklist inline, paginado
+o para revisión y el RPC de detalle reconstruye controles por segmentos. El
+guard/workflow exige aceptación Sol del hash exacto antes de aplicar 015.
+
+El workflow de DEV separa la simulación/aplicación de 001–014 de la aplicación
+posterior de 015. El secreto `SUPABASE_DEV_DB_URL` no debe compartirse por chat;
+se configura directamente en GitHub Actions. No aplicar migraciones alojadas
+hasta que el preflight remoto valide destino, historial y dry-run exactos.
+
+La app todavía monta `LaboratoryWorkspace`; no se conectó al espacio
+Supabase Auth/RPC. Cloudflare, correo, datos/cuentas reales, producción y la
+prueba desde la PC personal siguen pendientes. Mantener Site privado y el área
+operativa apagada.
+
+El historial de continuidad anterior se conserva debajo como referencia. Si
+contradice este estado actual, prevalece este bloque.
+
 # Continuidad del proyecto — estado vigente, 21/10/2026
 
 Repo activo: `work/site`; conservar este repositorio, historia Git y Site privado.

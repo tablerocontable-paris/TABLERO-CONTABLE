@@ -146,6 +146,7 @@ const commandKinds = z.discriminatedUnion("kind", [
 export const commandV1Schema = boundedJson(32_768).pipe(commandKinds);
 
 const pagination = { cursor: z.string().max(2048).nullable(), limit: safeInteger(1, 100) };
+const canonicalCursor = z.string().max(2048).nullable().refine((v) => v === null || (/^[A-Za-z0-9_-]+$/.test(v) && v.length % 4 !== 1));
 const queryKinds = z.discriminatedUnion("kind", [
   exact({ contractVersion: z.literal(1), kind: z.literal("activityPage"), filters: exact({ taskId: uuid }), ...pagination }),
   exact({ contractVersion: z.literal(1), kind: z.literal("operationalSummary"), filters: exact({ taskId: uuid }), cursor: z.null(), limit: z.literal(1) }),
@@ -160,6 +161,8 @@ const queryKinds = z.discriminatedUnion("kind", [
   exact({ contractVersion: z.literal(1), kind: z.literal("parameterInbox"), filters: exact({ status: z.enum(["submitted", "changes_requested", "approved"]), ownerId: uuid.nullable() }), ...pagination }),
   exact({ contractVersion: z.literal(1), kind: z.literal("creationContext"), filters: exact({ ownerId: uuid }), cursor: z.null(), limit: z.literal(1) }),
   exact({ contractVersion: z.literal(1), kind: z.literal("workspacePage"), filters: exact({ subjectId: uuid.nullable(), period: day.refine((v) => v.endsWith("-01")), companyId: uuid.nullable(), teamId: uuid.nullable(), sector: clean(1, 200).nullable() }), ...pagination }),
+  exact({ contractVersion: z.literal(1), kind: z.literal("workspacePageV2"), filters: exact({ subjectId: uuid.nullable(), period: day.refine((v) => v.endsWith("-01")), companyId: uuid.nullable(), teamId: uuid.nullable(), sector: clean(1, 200).nullable() }), cursor: canonicalCursor, limit: safeInteger(1, 100) }),
+  exact({ contractVersion: z.literal(1), kind: z.literal("taskChecklistPage"), filters: exact({ taskId: uuid, subjectId: uuid.nullable(), taskRevision: rev }), cursor: canonicalCursor, limit: safeInteger(1, 16) }),
 ]);
 export const queryV1Schema = boundedJson(4_096).pipe(queryKinds);
 
@@ -235,6 +238,56 @@ const workspaceOperativeV1Item = exact({ ...workspaceCommon, kind: z.literal("op
 const workspaceOperativeV2Item = exact({ ...workspaceCommon, kind: z.literal("operativa"), measurementVersion: z.literal(2), weight: z.null(), target: z.null(), unit: z.string().min(1).max(80), checklist: z.array(z.never()).max(0), subjectWork: exact({ recordedSeconds: rev, movementCount: rev, quantity: rev, unit: z.string().min(1).max(80), ratedLoad: legacyDecimal, weightedLoad: legacyDecimal.nullable(), unratedQuantity: rev }) });
 const workspaceItem = z.union([workspaceResultItem, workspaceOperativeV1Item, workspaceOperativeV2Item]);
 const workspacePageData = exact({ evaluatedAt: isoTimestamp, items: z.array(workspaceItem).max(100), nextCursor: z.string().max(2048).nullable() });
+const checklistCursor = canonicalCursor;
+const workspaceChecklistV2 = z.array(exact({ id: uuid, text: z.string().refine((v) => Array.from(v).length >= 1 && Array.from(v).length <= 1000), done: z.boolean() })).max(100);
+const workspaceV2Base = { ...workspaceCommon, checklistState: z.enum(["inline", "paged", "requires_review"]), checklistControlCount: safeInteger(0, 2_147_483_647) };
+const workspaceResultV2Item = exact({ ...workspaceV2Base, kind: z.literal("resultado"), measurementVersion: z.literal(1), weight: legacyDecimal.refine((v) => Number(v) > 0 && Number(v) <= 100), target: z.null(), unit: z.null(), checklist: workspaceChecklistV2, subjectWork: exact({ recordedSeconds: rev }) }).superRefine((v, c) => {
+  if (v.checklistState === "inline" && v.checklist.length !== v.checklistControlCount) c.addIssue({ code: "custom", path: ["checklist"], message: "Invalid protocol" });
+  if (v.checklistState !== "inline" && v.checklist.length !== 0) c.addIssue({ code: "custom", path: ["checklist"], message: "Invalid protocol" });
+});
+const workspaceOperativeV1V2Item = exact({ ...workspaceV2Base, kind: z.literal("operativa"), measurementVersion: z.literal(1), weight: legacyDecimal.refine((v) => Number(v) > 0 && Number(v) <= 100), target: safeInteger(1, 2_147_483_647), unit: z.string().min(1).max(80), checklist: workspaceChecklistV2, subjectWork: exact({ recordedSeconds: rev, movementCount: rev, quantity: rev, unit: z.string().min(1).max(80), ratedLoad: legacyDecimal, weightedLoad: legacyDecimal.nullable(), unratedQuantity: rev }) }).superRefine((v, c) => {
+  if (v.checklistState === "inline" && v.checklist.length !== v.checklistControlCount) c.addIssue({ code: "custom", path: ["checklist"], message: "Invalid protocol" });
+  if (v.checklistState !== "inline" && v.checklist.length !== 0) c.addIssue({ code: "custom", path: ["checklist"], message: "Invalid protocol" });
+});
+const workspaceOperativeV2V2Item = exact({ ...workspaceV2Base, kind: z.literal("operativa"), measurementVersion: z.literal(2), weight: z.null(), target: z.null(), unit: z.string().min(1).max(80), checklist: z.array(z.never()).max(0), subjectWork: exact({ recordedSeconds: rev, movementCount: rev, quantity: rev, unit: z.string().min(1).max(80), ratedLoad: legacyDecimal, weightedLoad: legacyDecimal.nullable(), unratedQuantity: rev }) }).superRefine((v, c) => {
+  if (v.checklistState !== "inline" || v.checklistControlCount !== 0) c.addIssue({ code: "custom", path: ["checklistState"], message: "Invalid protocol" });
+});
+const workspaceV2Item = z.union([workspaceResultV2Item, workspaceOperativeV1V2Item, workspaceOperativeV2V2Item]);
+const workspacePageV2Data = exact({ evaluatedAt: isoTimestamp, items: z.array(workspaceV2Item).max(100), nextCursor: checklistCursor });
+const checklistIssueCode = z.enum(["invalid_type", "text_missing", "text_invalid", "text_empty", "done_invalid"]).nullable();
+const checklistPageItem = exact({ id: uuid, ordinal: safeInteger(1, 2_147_483_647), textPart: z.string().refine((v) => Array.from(v).length <= 512), textOffset: safeInteger(0, 2_147_483_647), textLength: safeInteger(0, 2_147_483_647), textComplete: z.boolean(), done: z.boolean().nullable(), issueCode: checklistIssueCode }).superRefine((v, c) => {
+  const partLength = Array.from(v.textPart).length;
+  const hasText = v.issueCode === null || v.issueCode === "done_invalid" || v.issueCode === "text_empty";
+  if (hasText && v.textLength > 0) {
+    if (v.textOffset % 512 !== 0 || v.textOffset >= v.textLength || partLength !== Math.min(512, v.textLength - v.textOffset) || v.textComplete !== (v.textOffset + partLength === v.textLength)) c.addIssue({ code: "custom", path: ["textPart"], message: "Invalid protocol" });
+  } else if (hasText && v.textLength === 0) {
+    if (v.textOffset !== 0 || v.textPart !== "" || !v.textComplete) c.addIssue({ code: "custom", path: ["textPart"], message: "Invalid protocol" });
+  } else if (v.textOffset !== 0 || v.textLength !== 0 || v.textPart !== "" || !v.textComplete || v.done !== null) {
+    c.addIssue({ code: "custom", path: ["textPart"], message: "Invalid protocol" });
+  }
+  if (v.issueCode === "done_invalid" && (v.done !== null || !hasText)) c.addIssue({ code: "custom", path: ["done"], message: "Invalid protocol" });
+  if (v.issueCode === "text_empty" && (v.textLength !== 0 || v.textPart !== "")) c.addIssue({ code: "custom", path: ["textLength"], message: "Invalid protocol" });
+  if (v.issueCode === "invalid_type" || v.issueCode === "text_missing" || v.issueCode === "text_invalid") if (v.done !== null) c.addIssue({ code: "custom", path: ["done"], message: "Invalid protocol" });
+  if (v.issueCode === null && (v.textLength === 0 || v.done === null)) c.addIssue({ code: "custom", path: ["issueCode"], message: "Invalid protocol" });
+  if (v.issueCode === "done_invalid" && v.textLength === 0) c.addIssue({ code: "custom", path: ["issueCode"], message: "Invalid protocol" });
+});
+const taskChecklistPageData = exact({ evaluatedAt: isoTimestamp, taskId: uuid, taskRevision: rev, totalControls: safeInteger(0, 2_147_483_647), items: z.array(checklistPageItem).max(16), nextCursor: checklistCursor }).superRefine((v, c) => {
+  if (v.totalControls === 0 && (v.items.length !== 0 || v.nextCursor !== null)) c.addIssue({ code: "custom", path: ["items"], message: "Invalid protocol" });
+  if (v.totalControls > 0 && v.items.length === 0) c.addIssue({ code: "custom", path: ["items"], message: "Invalid protocol" });
+  if (v.items.some((item) => item.ordinal > v.totalControls)) c.addIssue({ code: "custom", path: ["items"], message: "Invalid protocol" });
+  for (let i = 1; i < v.items.length; i++) {
+    const prev = v.items[i - 1]!; const next = v.items[i]!;
+    const expectedOrdinal = prev.textComplete ? prev.ordinal + 1 : prev.ordinal;
+    const expectedOffset = prev.textComplete ? 0 : prev.textOffset + 512;
+    if (next.ordinal !== expectedOrdinal || next.textOffset !== expectedOffset) c.addIssue({ code: "custom", path: ["items", i], message: "Invalid protocol" });
+    if (next.ordinal === prev.ordinal && (next.id !== prev.id || next.done !== prev.done || next.issueCode !== prev.issueCode || next.textLength !== prev.textLength)) c.addIssue({ code: "custom", path: ["items", i], message: "Invalid protocol" });
+  }
+  if (v.items.length > 0) {
+    const last = v.items.at(-1)!;
+    const hasMore = !last.textComplete || last.ordinal < v.totalControls;
+    if (hasMore !== (v.nextCursor !== null)) c.addIssue({ code: "custom", path: ["nextCursor"], message: "Invalid protocol" });
+  }
+});
 const queryDataKinds = z.discriminatedUnion("kind", [
   exact({ kind: z.literal("activityPage"), data: exact({ items: z.array(activity), nextCursor: z.string().max(2048).nullable() }) }),
   exact({ kind: z.literal("operationalSummary"), data: exact({ taskId: uuid, unit: legacyUnit, movementCount: rev, quantity: rev, ratedLoad: decimal, weightedLoad: nullableDecimal, unratedQuantity: rev, recordedSeconds: rev, fullyWeighted: z.boolean(), requiresJointReview: z.boolean() }) }),
@@ -249,6 +302,8 @@ const queryDataKinds = z.discriminatedUnion("kind", [
   exact({ kind: z.literal("parameterInbox"), data: parameterInboxData }),
   exact({ kind: z.literal("creationContext"), data: creationContextData }),
   exact({ kind: z.literal("workspacePage"), data: workspacePageData }),
+  exact({ kind: z.literal("workspacePageV2"), data: workspacePageV2Data }),
+  exact({ kind: z.literal("taskChecklistPage"), data: taskChecklistPageData }),
 ]);
 export const queryResponseV1Schema = z.discriminatedUnion("kind", [
   exact({ contractVersion: z.literal(1), kind: z.literal("activityPage"), data: z.object({ items: z.array(activity), nextCursor: z.string().max(2048).nullable() }).strict() }),
@@ -264,7 +319,17 @@ export const queryResponseV1Schema = z.discriminatedUnion("kind", [
   exact({ contractVersion: z.literal(1), kind: z.literal("parameterInbox"), data: parameterInboxData }),
   exact({ contractVersion: z.literal(1), kind: z.literal("creationContext"), data: creationContextData }),
   exact({ contractVersion: z.literal(1), kind: z.literal("workspacePage"), data: workspacePageData }),
-]);
+  exact({ contractVersion: z.literal(1), kind: z.literal("workspacePageV2"), data: workspacePageV2Data }),
+  exact({ contractVersion: z.literal(1), kind: z.literal("taskChecklistPage"), data: taskChecklistPageData }),
+]).superRefine((value, ctx) => {
+  if (value.kind !== "taskChecklistPage") return;
+  try {
+    const serialized = JSON.stringify(value);
+    if (serialized === undefined || new TextEncoder().encode(serialized).byteLength > 65_536) ctx.addIssue({ code: "custom", message: "Invalid protocol" });
+  } catch {
+    ctx.addIssue({ code: "custom", message: "Invalid protocol" });
+  }
+});
 
 export type CommandV1 = z.infer<typeof commandV1Schema>;
 export type QueryV1 = z.infer<typeof queryV1Schema>;

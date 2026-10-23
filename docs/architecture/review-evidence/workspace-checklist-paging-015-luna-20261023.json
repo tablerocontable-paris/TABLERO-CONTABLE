@@ -1,0 +1,76 @@
+{
+  "date": "2026-10-23",
+  "scope": "local implementation and validation only; no remote database writes, deployment, or UI connection",
+  "acceptedImplementationContract": {
+    "path": "docs/architecture/REMOTE-WORKSPACE-CHECKLIST-PAGING-SOL-PROPOSAL-20261023.md",
+    "sha256": "34C7A45A02100E28617E5E180753472F148E6E1D96152003A9757DF61128E36D",
+    "scope": "accepted for local implementation; not acceptance of code"
+  },
+  "migration": {
+    "path": "supabase/migrations/202610230015_workspace_page.sql",
+    "sha256Utf8Lf": "CC49480D1317F1B44CD29F245508F9C8FB0B0894FE4E66C1B22F8E00D36B33F2",
+    "sql014Changed": false,
+    "remoteApplied": false,
+    "codeAcceptance": "pending Sol review of this exact hash"
+  },
+  "files": {
+    "src/data/supabase/operational-contract.ts": "2499049A3098C1EF248DF9856655110DA672DB99D6836880E751F86E3E10AE2C",
+    "tests/supabase-workspace-page-015.test.ts": "29689AF602C9F60702C49A0892E2A90966D0E345C7FD5A9291A1B3D3C5E32F77",
+    "tests/database.test.ts": "5E70A471425A39E43BDB21568F19EDF5F1EE9DE1A47540D5EEEE7D22FFFCB996",
+    "scripts/supabase-dev-migration-guard.mjs": "61EC9E8BAACF01212DDEB880C6DB920731FD1C865A5E47AA5469935F11C41F00",
+    "scripts/supabase-dev-migration-guard.d.mts": "0853914CC478A2AE83970006F17A607561CBDA7AA057AE51CC5F653020291A5C",
+    "tests/supabase-dev-migration-guard.test.ts": "112DAC3CC034ABD6E41A45FEC3A7F39FA232C1365860BBDAD922D6AE903D90B5",
+    ".github/workflows/supabase-dev-migrations.yml": "9715FBA549C16A4EA6A3FE11C50D150A77DEE46D267784E6E0FFF54403F4946F",
+    ".github/workflows/supabase-dev-preflight.yml": "729984092CE4EF2E1FBE701FFE6FE6C0ADC41AFF65741996A93A88CD6A9D8F07",
+    "AGENTS.md": "22E37E0408A2AAF926F74055951E367D6647C4F1E8F3CB0369C614C24C00549F",
+    "docs/PROJECT-STATUS.md": "BD8BB6442E4A26167AC70FA35DF3CA9C6426995789154C27A2D4F98EB488CAD1",
+    "docs/EXECUTION-NEXT.md": "02AEAE4A1311778CA994DCE6FC75789A09087FE996571B225339DBF9E56DEAD9",
+    "docs/architecture/REMOTE-WORKSPACE-CHECKLIST-PAGING-IMPLEMENTATION-LUNA-20261023.md": "1046EF526434FE1E8332F7679E50D3BBB50512D31A19CCDD1C6FF2DC6FAD2012"
+  },
+  "validation": [
+    {
+      "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "result": "782 passed in 79 files; exit 0"
+    },
+    {
+      "command": "node node_modules/vitest/vitest.mjs run tests/supabase-workspace-page-015.test.ts",
+      "result": "18 passed; exit 0"
+    },
+    {
+      "command": "node node_modules/vitest/vitest.mjs run tests/supabase-dev-migration-guard.test.ts",
+      "result": "4 passed; exit 0"
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "result": "exit 0"
+    },
+    {
+      "command": "node node_modules/vite/bin/vite.js build --outDir dist/client",
+      "result": "exit 0; 2,323 modules transformed; dependency PURE-comment warnings only"
+    },
+    {
+      "command": "node scripts/build-worker.mjs",
+      "result": "exit 0"
+    },
+    {
+      "command": "git diff --check",
+      "result": "exit 0"
+    }
+  ],
+  "syntheticPerformance": {
+    "environment": "Windows x64, Node v24.19.0, PGlite; synthetic data, not Supabase",
+    "workload": "2,000 tasks; one task has 10,000 controls and one 1,000,000-codepoint text control",
+    "fullWorkspacePageV2Ms": 880,
+    "checklistDetailFirstAndNextPageMs": [26, 19],
+    "checklistResponseBytesFirstAndNext": [11274, 11292],
+    "maxEscapedContractEnvelopeBytes": 53935,
+    "envelopeLimitBytes": 65536,
+    "partialSelectorExplain": "Limit; 101 rows; 566.201 ms; 50,053 shared-hit blocks. Selector only, not full RPC plan."
+  },
+  "remoteActions": {
+    "supabaseWrites": false,
+    "deployment": false,
+    "credentialsUsed": false,
+    "operationalUiConnected": false
+  }
+}

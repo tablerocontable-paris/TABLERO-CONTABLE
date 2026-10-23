@@ -8,20 +8,25 @@
   "acceptance": "docs/architecture/REMOTE-WORKSPACE-BOOTSTRAP-SOL-ACCEPTANCE-20261023.md",
   "files": {
     "supabase/migrations/202610150014_operational_api.sql": "BC09CF9631A2F3E4BD19541C2A050AB1C663AE0E704D47D7E5A4752B114E0345",
-    "supabase/migrations/202610230015_workspace_page.sql": "5ED9080322FCE405855FF70210F542D9694A7EA57C5A888B9AEE187CE64C5FFE",
+    "supabase/migrations/202610230015_workspace_page.sql": "7B62E5A63C08239B49363A9D1A9F496CAAB3F366A4CA0B9226288C3862B0BDFD",
     "src/data/supabase/operational-contract.ts": "8D9AF39C150F920DC797F83CD1E16CD84B23BECC4B557492C070C9AD9BDC53B4",
-    "tests/supabase-workspace-page-015.test.ts": "327B7AE954BC829C877C5E0BC92DE01B8E566DFFC391F90B46293D24184BE061",
-    "tests/supabase-operational-contract.test.ts": "9BE08F294934FEAF7A9256BD5138EBA4511894315014176771C3E4F373FB16D4",
-    "tests/helpers/accounting-lab.ts": "D0C9D0DD6983B33D3BF077546A0E382EA4A846CE43E850FD35F8F5CBCCBA15BE"
+    "scripts/supabase-dev-migration-guard.mjs": "C3EB0714B2EDD7FF94B0BF2301FD3CE3D46C3C1961A622E7324B5DEED7C5FC70",
+    "tests/supabase-workspace-page-015.test.ts": "7A590473EF6EC1F2884B7489C81527A325B1A0AB58C4668576FED03CC099C157",
+    "tests/supabase-dev-migration-guard.test.ts": "112DAC3CC034ABD6E41A45FEC3A7F39FA232C1365860BBDAD922D6AE903D90B5",
+    "docs/architecture/REMOTE-WORKSPACE-015-LEGACY-CHECKLIST-SOL-DECISION-20261023.md": "696A17C6FBFD72163485FA405995997F33BC0953EB3EEB345353251D258489E0",
+    "docs/architecture/REMOTE-WORKSPACE-BOOTSTRAP-IMPLEMENTATION-LUNA-20261023.md": "FE335F69EDC38434C7963C1E909DC3E44EE79485F0195EE3BAD454BB484776B8",
+    "docs/EXECUTION-NEXT.md": "9CC37C79CE0EA4C6DD344E032C8AC618746BB5B26F1B7DB5613F46338CA45BA4",
+    "docs/PROJECT-STATUS.md": "3B3A7B7EB035DF16211BCDDA9819D777A4D77429DD5AD551EA79A3A52C3B1489",
+    "docs/architecture/REMOTE-WORKSPACE-BOOTSTRAP-CONTRACT-SOL-DRAFT-20261021.md": "42849A545D2B63DCFB0507592FB696F19AD070A4FD4C8B926ACB2E76B018E96D"
   },
   "validation": [
     {
       "command": "node node_modules/vitest/vitest.mjs run tests/supabase-workspace-page-015.test.ts tests/supabase-operational-contract.test.ts --maxWorkers=2 --testTimeout=60000 --hookTimeout=30000 --silent=false",
-      "result": "21 passed in 2 files"
+      "result": "33 passed in 3 files; exit 0"
     },
     {
       "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
-      "result": "765 passed in 78 files; exit 0"
+      "result": "777 passed in 79 files; exit 0"
     },
     {
       "command": "node node_modules/typescript/bin/tsc --noEmit; node node_modules/vite/bin/vite.js build --outDir dist/client; node scripts/build-worker.mjs",
@@ -37,15 +42,26 @@
     "workspacePageLimit": 100,
     "returnedItems": 100,
     "nextCursor": true,
-    "apiCallMs": 646,
-    "responseBytes": 60663,
+    "apiCallMs": 587,
+    "responseBytes": 60652,
     "explainAnalyzeBuffers": {
+      "scope": "partial selector-only; not the RPC plan; omits DTO aggregation and session/activity joins",
       "topNode": "Limit",
       "actualRows": 101,
       "executionTimeMs": 529.051,
       "sharedHitBlocks": 50052
     },
-    "limitation": "Synthetic local timing is not a Supabase latency estimate or a representative session/concurrency benchmark."
+    "dedicatedRerun": {
+      "apiCallMs": 536,
+      "responseBytes": 60667,
+      "selectorOnlyExplainExecutionTimeMs": 489.049
+    },
+    "fullSuiteConcurrentRerun": {
+      "apiCallMs": 1077,
+      "responseBytes": 60663,
+      "selectorOnlyExplainExecutionTimeMs": 607.625
+    },
+    "limitation": "Synthetic local timings vary by run; they are not a Supabase latency estimate or a representative session/concurrency benchmark. EXPLAIN is only the selector, not the RPC."
   },
   "remoteActions": {
     "databaseWrites": false,

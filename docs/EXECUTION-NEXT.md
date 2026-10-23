@@ -1,10 +1,19 @@
 # Corte de implementación local — 21/10/2026
 
+## Estado revalidado — 23/10/2026
+
+- GitHub Actions `39956016480` para `fd823fea52691d7db39a52222431844ef1016a28` terminó con éxito: instalación limpia, suite, build y validador de paquete Sites.
+- `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`) continúa sin migraciones ni tablas en `public`, `api` y `app_private`, según lecturas del conector Supabase de esta fecha.
+- La siguiente acción remota es el workflow `supabase-dev-preflight.yml`, que simula sólo 001–014 sin escrituras; el secreto `SUPABASE_DEV_DB_URL` aún no está confirmado. Tras revisar el preflight se puede ejecutar su workflow de aplicación para DEV. SQL015 requiere una etapa y autorización de código/hash separadas.
+- Sol aceptó el contrato bootstrap y el contrato de checklist extenso (`34C7A45A02100E28617E5E180753472F148E6E1D96152003A9757DF61128E36D`) para implementación local. SQL015 incorpora `workspacePageV2` y `taskChecklistPage` preservando SQL014 y los historiales íntegros. Hash normalizado LF actual: `CC49480D1317F1B44CD29F245508F9C8FB0B0894FE4E66C1B22F8E00D36B33F2`. Suite completa 782/782 en 79 archivos, SQL015 focal 18/18, guard 4/4, TypeScript, builds cliente/Worker y diff-check aprobados. Sol aceptó formalmente el código para DEV con ese hash; ver `architecture/REMOTE-WORKSPACE-015-CODE-SOL-ACCEPTANCE-20261023.md`.
+- SQL014 continúa intacta. SQL015 no se aplicó en Supabase ni se desplegó. La validación local de hashes de las 17 migraciones y el gate de aceptación exacta pasaron el 23/10. Falta publicar el candidato, verificar el workflow y su preflight remoto antes de cualquier aplicación.
+- La app todavía monta `LaboratoryWorkspace`. Supabase Auth, Cloudflare, Gmail y prueba desde la PC personal siguen pendientes; no declarar la migración completa.
+
 La puerta `SupabaseAuthGate` ya tiene inicio/cierre de sesión, identidad derivada de `get_context_v1`, MFA TOTP requerido para jefe/encargado, guardas para respuestas asíncronas obsoletas y formulario de acceso. Validación actual: 7 pruebas enfocadas; suite 760/760 en 77 archivos; TypeScript, build cliente y build Worker aprobados. La prueba nueva confirma el enrolamiento TOTP obligatorio para encargado. Esto sigue sin conectar `src/main.tsx` ni activar el área operativa remota.
 
 Supabase DEV fue reconsultado el 21/10/2026: 0 migraciones y 0 tablas en `public`, `api` y `app_private`; no hubo escrituras remotas.
 
-Siguiente acción: agregar `SUPABASE_DEV_DB_URL` como secreto de Actions en GitHub y ejecutar `.github/workflows/supabase-dev-migrations.yml` con `Apply migrations` desmarcado. Sólo después de un preflight exitoso ejecutar la segunda corrida para aplicar las 16 migraciones a DEV y auditar el esquema. Cloudflare, correo y prueba desde la PC personal siguen pendientes.
+Siguiente: Sol revisa la implementación local exacta de SQL015 y su evidencia; sólo tras aceptar el hash puede habilitarse su puerta de aplicación en DEV. En paralelo, ejecutar el preflight sin escrituras de 001–014; sólo si destino, historial y dry-run coinciden, aplicar ese segmento. Después conectar y validar la app. Cloudflare, correo y prueba desde la PC personal siguen pendientes.
 
 ---
 # Próximo paso vigente — preflight remoto de Supabase dev, 21/10/2026

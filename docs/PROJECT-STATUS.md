@@ -1,20 +1,20 @@
 # Estado vigente — workspacePage local, 23/10/2026
 
-Sol aceptó el contrato bootstrap cuyo SHA-256 es
-`42849A545D2B63DCFB0507592FB696F19AD070A4FD4C8B926ACB2E76B018E96D` para
-implementar localmente la migración aditiva 015. `workspacePage` se agregó
-encima del último `api.query_v1` mediante delegación: SQL014 permanece byte por
-byte sin cambios y conserva sus kinds anteriores. Se añadieron esquemas Zod/TS,
-pruebas PGlite de autorización propia/supervisora, delegación, DTO exacto y
-selección sobre 2.000 tareas. Suite 765/765 en 78 archivos, TypeScript, build
-de cliente/Worker y `git diff --check` aprobados. Evidencia y límites:
-`docs/architecture/REMOTE-WORKSPACE-BOOTSTRAP-IMPLEMENTATION-LUNA-20261023.md`.
+Sol aceptó el contrato bootstrap (`42849A54…018E96D`) y luego el contrato de
+checklist extenso (`34C7A45A02100E28617E5E180753472F148E6E1D96152003A9757DF61128E36D`),
+ambos para implementación local. SQL015 añade `workspacePageV2` y
+`taskChecklistPage`, preservando el delegate v1/SQL014. El SQL normalizado LF
+está fijado en `CC49480D1317F1B44CD29F245508F9C8FB0B0894FE4E66C1B22F8E00D36B33F2`.
+El contrato clasifica controles históricos sin truncarlos y permite leerlos por
+segmentos Unicode con autorización y revisión comprobadas en cada página. La
+aceptación Sol del código/hash sigue pendiente. La validación local actual está
+registrada en `docs/architecture/REMOTE-WORKSPACE-CHECKLIST-PAGING-IMPLEMENTATION-LUNA-20261023.md`;
+el corte bootstrap anterior se conserva en su informe original.
 
-SQL015 sólo está implementada y validada localmente. No se aplicó a Supabase,
-no se desplegó y no se conectó la interfaz; el Site sigue privado y el área
-operativa permanece apagada. Antes de cualquier aplicación remota, Sol debe
-revisar el código y su evidencia; el preflight aprobado para 001–014 sigue
-siendo una puerta independiente.
+SQL015 sólo está implementada localmente. No se aplicó a Supabase, no se
+desplegó y no se conectó la interfaz; el Site sigue privado y el área operativa
+permanece apagada. El preflight 001–014 es una puerta independiente; SQL015
+requiere su propio dictamen de código/hash antes de apply.
 
 # Corte de implementación local — 21/10/2026
 
@@ -22,7 +22,7 @@ La puerta `SupabaseAuthGate` ya tiene inicio/cierre de sesión, identidad deriva
 
 Estado remoto reconsultado el 21/10/2026: `grupo-paris-dev` sigue con 0 migraciones y 0 tablas en `public`, `api` y `app_private`; no se escribió en Supabase.
 
-Siguiente acción: agregar `SUPABASE_DEV_DB_URL` como secreto de Actions en GitHub y ejecutar `.github/workflows/supabase-dev-migrations.yml` con `Apply migrations` desmarcado. Sólo cuando el preflight remoto apruebe destino, historial y las 16 migraciones, ejecutar la segunda corrida autorizada para aplicar a DEV y auditar el esquema. Después conectar la app y validar integración. Cloudflare, correo y prueba desde la PC personal siguen pendientes.
+Próximo paso remoto vigente al 23/10: configurar `SUPABASE_DEV_DB_URL` como secreto y ejecutar primero el preflight 001–014 sin escrituras; revisar destino, historial y dry-run antes de aplicar DEV. SQL015 queda en etapa separada y requiere aceptación Sol específica del código/hash. Después conectar la app y validar integración. Cloudflare, correo y prueba desde la PC personal siguen pendientes.
 
 ---
 # Continuidad vigente — preflight CLI local listo; remoto pendiente, 21/10/2026

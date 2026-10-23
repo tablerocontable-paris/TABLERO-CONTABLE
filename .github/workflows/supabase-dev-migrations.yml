@@ -3,8 +3,16 @@ name: Supabase DEV migrations
 on:
   workflow_dispatch:
     inputs:
+      migration_stage:
+        description: Choose the reviewed segment. Stage 015 is available only after Sol accepts its exact SQL hash.
+        required: true
+        type: choice
+        options:
+          - baseline_001_014
+          - apply_015
+        default: baseline_001_014
       apply_migrations:
-        description: Apply the 16 reviewed migrations to grupo-paris-dev after the remote preflight passes
+        description: Apply only the selected and validated segment after the target history and dry-run match exactly
         required: true
         type: boolean
         default: false
@@ -22,7 +30,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
-      - name: Rechazar ejecución fuera del repositorio y branch autorizados
+      - name: Reject an unauthorized repository or branch
         env:
           REPOSITORY: ${{ github.repository }}
           REF: ${{ github.ref }}
@@ -31,12 +39,12 @@ jobs:
           [[ "$REPOSITORY" == 'tablerocontable-paris/TABLERO-CONTABLE' ]]
           [[ "$REF" == 'refs/heads/main' ]]
 
-      - name: Checkout del commit de main
+      - name: Checkout main without a write token
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
 
-      - name: Instalar Supabase CLI 2.121.0 y verificar SHA-256
+      - name: Install pinned Supabase CLI
         run: |
           set -euo pipefail
           archive="$RUNNER_TEMP/supabase_2.121.0_linux_amd64.tar.gz"
@@ -49,18 +57,27 @@ jobs:
           chmod 0755 "$RUNNER_TEMP/supabase-cli/supabase"
           [[ "$("$RUNNER_TEMP/supabase-cli/supabase" --version)" == '2.121.0' ]]
 
-      - name: Verificar destino, historial y plan; aplicar sólo si se seleccionó
+      - name: Verify the complete migration hash lock and create the isolated stage
         env:
-          SUPABASE_DEV_DB_URL: ${{ secrets.SUPABASE_DEV_DB_URL }}
-          APPLY_MIGRATIONS: ${{ inputs.apply_migrations }}
+          MIGRATION_STAGE: ${{ inputs.migration_stage }}
         run: |
           set -euo pipefail
-          [[ "$APPLY_MIGRATIONS" == 'true' || "$APPLY_MIGRATIONS" == 'false' ]]
+          [[ "$MIGRATION_STAGE" == 'baseline_001_014' || "$MIGRATION_STAGE" == 'apply_015' ]]
+          node scripts/supabase-dev-migration-guard.mjs verify-files . "$MIGRATION_STAGE"
+          stage_root="$RUNNER_TEMP/supabase-stage-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          node scripts/supabase-dev-migration-guard.mjs stage . "$MIGRATION_STAGE" "$stage_root"
+          echo "SUPABASE_STAGE_ROOT=$stage_root" >> "$GITHUB_ENV"
+
+      - name: Validate the DEV Session pooler URL without exposing it
+        env:
+          SUPABASE_DEV_DB_URL: ${{ secrets.SUPABASE_DEV_DB_URL }}
+        run: |
+          set -euo pipefail
           if [[ -z "${SUPABASE_DEV_DB_URL:-}" ]]; then
             echo 'Falta el secreto SUPABASE_DEV_DB_URL. Guardá la URL Session pooler de grupo-paris-dev en Settings → Secrets and variables → Actions; nunca la pegues en el repositorio ni en este workflow.' >&2
             exit 1
           fi
-          export DB_URL="$(python3 - <<'PY'
+          python3 - <<'PY'
           import os, re, sys
           from urllib.parse import urlsplit, parse_qs
           raw = os.environ["SUPABASE_DEV_DB_URL"]
@@ -79,69 +96,37 @@ jobs:
           except ValueError:
               valid = False
           if not valid:
-              print("SUPABASE_DEV_DB_URL no corresponde al Session pooler esperado de grupo-paris-dev.", file=sys.stderr)
+              print("La conexión no corresponde al Session pooler de grupo-paris-dev.", file=sys.stderr)
               raise SystemExit(1)
-          print(raw)
+          print("URL del Session pooler DEV validada; contenido oculto.")
           PY
-          )"
-          unset SUPABASE_DEV_DB_URL
 
-          # SHA-256 of the reviewed SQL014 after Git's checkout normalization.
-          sql014_sha='BC09CF9631A2F3E4BD19541C2A050AB1C663AE0E704D47D7E5A4752B114E0345'
-          actual_sha="$(sha256sum supabase/migrations/202610150014_operational_api.sql | cut -d ' ' -f 1 | tr '[:lower:]' '[:upper:]')"
-          [[ "$actual_sha" == "$sql014_sha" ]]
-
+      - name: Compare exact remote history and exact dry-run before any write
+        env:
+          SUPABASE_DEV_DB_URL: ${{ secrets.SUPABASE_DEV_DB_URL }}
+          MIGRATION_STAGE: ${{ inputs.migration_stage }}
+          APPLY_MIGRATIONS: ${{ inputs.apply_migrations }}
+        run: |
+          set -euo pipefail
           cli="$RUNNER_TEMP/supabase-cli/supabase"
-          "$cli" migration list --db-url "$DB_URL" --output-format json > "$RUNNER_TEMP/migration-list-before.json"
-          python3 - "$RUNNER_TEMP/migration-list-before.json" <<'PY'
-          import json, sys
-          expected = "202609300001 202609300002 202610010001 202610010002 202610010003 202610010004 202610010005 202610010006 202610010007 202610010008 202610020009 202610040010 202610060011 202610140012 202610140013 202610150014".split()
-          payload = json.load(open(sys.argv[1], encoding="utf-8"))
-          if not isinstance(payload, dict) or not isinstance(payload.get("migrations"), list):
-              raise SystemExit("Formato de historial remoto inesperado; no se aplicó nada.")
-          local, remote = [], []
-          for row in payload["migrations"]:
-              if not isinstance(row, dict) or set(row) != {"local", "remote", "time"}:
-                  raise SystemExit("Fila de historial remoto inesperada; no se aplicó nada.")
-              if not all(isinstance(row[k], str) for k in ("local", "remote", "time")):
-                  raise SystemExit("Campos de historial remoto inesperados; no se aplicó nada.")
-              if row["local"]: local.append(row["local"])
-              if row["remote"]: remote.append(row["remote"])
-          if local != expected or remote:
-              raise SystemExit(f"Historial no coincide: locales={len(local)}, remotas={len(remote)}; se esperaba 16 locales y 0 remotas. No se aplicó nada.")
-          print("Destino DEV confirmado: 16 migraciones locales esperadas y 0 remotas.")
-          PY
-
-          "$cli" db push --skip-vault --dry-run --db-url "$DB_URL" 2>&1 | tee "$RUNNER_TEMP/db-push-dry-run.txt"
-          python3 - "$RUNNER_TEMP/db-push-dry-run.txt" <<'PY'
-          import re, sys
-          text = open(sys.argv[1], encoding="utf-8").read()
-          expected = "202609300001 202609300002 202610010001 202610010002 202610010003 202610010004 202610010005 202610010006 202610010007 202610010008 202610020009 202610040010 202610060011 202610140012 202610140013 202610150014".split()
-          if re.findall(r"\b\d{12}\b", text) != expected:
-              raise SystemExit("El dry-run no enumera exactamente las 16 migraciones en orden; no se aplicó nada.")
-          print("Dry-run remoto aprobado: 16 migraciones exactas.")
-          PY
-
+          "$cli" --workdir "$SUPABASE_STAGE_ROOT" migration list --db-url "$SUPABASE_DEV_DB_URL" --output-format json > "$RUNNER_TEMP/migration-list-before.json"
+          node scripts/supabase-dev-migration-guard.mjs history . "$MIGRATION_STAGE" "$RUNNER_TEMP/migration-list-before.json" before
+          "$cli" --workdir "$SUPABASE_STAGE_ROOT" db push --dry-run --db-url "$SUPABASE_DEV_DB_URL" 2>&1 | tee "$RUNNER_TEMP/db-push-dry-run.txt"
+          node scripts/supabase-dev-migration-guard.mjs dry-run . "$MIGRATION_STAGE" "$RUNNER_TEMP/db-push-dry-run.txt"
           if [[ "$APPLY_MIGRATIONS" != 'true' ]]; then
-            echo 'Preflight terminado. No se aplicaron migraciones; repetí el workflow con Apply migrations seleccionado sólo cuando corresponda.'
+            echo 'Preflight aprobado y sin escrituras. La aplicación requiere una ejecución separada con Apply migrations seleccionado.'
             exit 0
           fi
-
-          "$cli" db push --skip-vault --yes --db-url "$DB_URL"
-          "$cli" migration list --db-url "$DB_URL" --output-format json > "$RUNNER_TEMP/migration-list-after.json"
-          python3 - "$RUNNER_TEMP/migration-list-after.json" <<'PY'
-          import json, sys
-          expected = "202609300001 202609300002 202610010001 202610010002 202610010003 202610010004 202610010005 202610010006 202610010007 202610010008 202610020009 202610040010 202610060011 202610140012 202610140013 202610150014".split()
-          payload = json.load(open(sys.argv[1], encoding="utf-8"))
-          if not isinstance(payload, dict) or not isinstance(payload.get("migrations"), list):
-              raise SystemExit("No se pudo verificar el historial después de aplicar.")
-          local, remote = [], []
-          for row in payload["migrations"]:
-              if not isinstance(row, dict) or set(row) != {"local", "remote", "time"}:
-                  raise SystemExit("Historial posterior con formato inesperado.")
-              if row["local"]: local.append(row["local"])
-              if row["remote"]: remote.append(row["remote"])
-          if local != expected or remote != expected:
-              raise SystemExit(f"Verificación posterior falló: locales={len(local)}, remotas={len(remote)}.")
-          print("Verificación posterior aprobada: las 16 migraciones coinciden en local y remoto.")
-          PY
+          if [[ "$MIGRATION_STAGE" == 'apply_015' ]]; then
+            node scripts/supabase-dev-migration-guard.mjs verify-acceptance . "$MIGRATION_STAGE"
+          fi
+          [[ "$APPLY_MIGRATIONS" == 'true' ]]
+          echo "Aplicando sólo el segmento exacto: $MIGRATION_STAGE"
+          "$cli" --workdir "$SUPABASE_STAGE_ROOT" db push --yes --db-url "$SUPABASE_DEV_DB_URL"
+          "$cli" --workdir "$SUPABASE_STAGE_ROOT" migration list --db-url "$SUPABASE_DEV_DB_URL" --output-format json > "$RUNNER_TEMP/migration-list-after.json"
+          node scripts/supabase-dev-migration-guard.mjs history . "$MIGRATION_STAGE" "$RUNNER_TEMP/migration-list-after.json" after
+          if [[ "$MIGRATION_STAGE" == 'baseline_001_014' ]]; then
+            echo 'Segmento 001–014 aplicado y verificado. SQL015 no estaba en el entorno de ejecución.'
+          else
+            echo 'Sólo SQL015 aplicada y verificada después de confirmar exactamente 16 migraciones previas.'
+          fi

@@ -12,39 +12,81 @@ resolver estos puntos:
    devolver tareas de tipo `resultado` y `operativa`, además de estado, empresa,
    equipo, persona, período, controles y fechas. `suggestedRoute` existente sólo
    contiene resultados no completados; no sustituye este listado.
-2. **Evitar fan-out por tarjeta.** La primera página debe incluir agregados
-   mínimos por tarea para pintar las tarjetas (tiempo propio del sujeto y, para
-   operativas, cantidad/unidad y carga ponderada disponible). No incluir
-   referencias, observaciones, autoría detallada ni filas de actividad. Esto
-   evita disparar `operationalSummary` y `activityPage` por cada tarea. El
-   detalle de actividad se carga bajo demanda para la tarea abierta.
+2. **Evitar fan-out por tarjeta sin atribuir trabajo ajeno.** La primera página
+   incluye por fila tiempo y movimientos atribuidos al sujeto consultado. Filtrar
+   `task_time_sessions.actor_id` y `activity_entries.actor_id` por ese sujeto;
+   las sumas generales por instancia no sirven para representar su aporte en una
+   tarea conjunta o cubierta. Conservar además el estado global de la tarea como
+   dato separado. El resumen actual `operationalSummary` agrega sesiones y
+   movimientos de toda la instancia; no debe usarse como contribución personal.
+   No incluir referencias, observaciones, autoría detallada ni filas de
+   actividad. El detalle se carga bajo demanda al abrir la tarea.
 3. **Bloqueos tipados, nunca texto libre.** Incluir `ready` y códigos de bloqueo
    permitidos por el contrato de `readiness`; omitir `blocked_by` y cualquier
-   observación. Las dependencias visibles deben seguir la política existente
-   de dependencias ocultas, sin revelar títulos que el actor no puede consultar.
+   observación. En `workspacePage` no incluir títulos ni estados de tareas
+   dependientes: SQL014 filtra las dependencias actuales con `can_access_instance`,
+   que no aplica el límite adicional de equipo del nuevo listado. Devolver sólo
+   códigos de bloqueo y un indicador de dependencia oculta. No modificar el
+   contrato publicado de `readiness`; cualquier detalle se carga por el RPC
+   existente, que revalida su propio permiso.
 4. **Autorización no equivale a actuar como el sujeto.** `subjectId = null`
-   representa al actor autenticado. Un sujeto distinto requiere rol de jefe o
-   encargado y autorización actual de `can_access_owner`; cada fila requiere
-   además `can_access_instance` para empresa vigente. Para cumplir “sólo su
-   equipo”, el encargado debe gestionar el `team_id` de la tarea, el sujeto debe
-   pertenecer actualmente a ese equipo y seguir bajo su relación supervisora.
-   El chequeo usa relaciones de base (`teams.manager_id`, `team_members` y
-   `profiles.manager_id`), nunca el filtro enviado por el cliente. Esta regla
-   debe incluir casos de baja o traslado entre equipos.
+   representa al actor autenticado. Resolver la pertenencia de tareas y la
+   autorización del actor como predicados separados:
+   - La consulta propia (sujeto efectivo = actor) incluye tareas donde es
+     `owner_id`, miembro del conjunto responsable, reemplazo con cobertura
+     autorizada vigente, o autor de movimientos/sesiones del período, pero sólo
+     si `can_access_instance` aún autoriza esa tarea y empresa. La autoría
+     histórica no conserva acceso tras revocar empresa/cobertura. No necesita
+     relación supervisora consigo mismo y nunca habilita ejecutar acciones.
+   - Consultar a otra persona requiere rol jefe/encargado y `can_access_owner`;
+     para encargado, además, la tarea debe pertenecer a un equipo que gestiona,
+     la persona debe ser miembro vigente de ese equipo y permanecer bajo la
+     relación supervisora. Incluir propietario, participantes responsables y
+     cobertura autorizada vigente que intersecte el período. Aportes históricos
+     sólo se incluyen si el actor conserva hoy autorización sobre esa tarea y
+     su empresa.
+   Revalidar por fila `can_access_instance` y, sólo cuando el sujeto efectivo es
+   distinto del actor, el ámbito de equipo reforzado. No inferir permisos desde
+   filtros del cliente. Usar relaciones de base (`teams.manager_id`,
+   `team_members`, `profiles.manager_id`, conjuntos y coberturas), con casos de
+   baja o traslado. Si un encargado consulta su propio trabajo, usar el primer
+   caso y no exigir que se supervise a sí mismo.
 5. **Capacidad de mutar es otra decisión.** El listado nunca devuelve credenciales
    ni sustituye las comprobaciones de `command_v1`; los comandos validan al actor
    autenticado, participante/reemplazo y vigencia. Una vista consultada no cambia
    al actor ni habilita cronómetro, checklist o finalización.
-6. **Paginación y consistencia.** Cursor opaco validado por SQL, limitado
-   al sujeto, mes, filtros y último orden estable; máximo 100 filas. Cada página
-   vuelve a validar permisos. Una revocación entre páginas debe impedir seguir
-   consultando; no se promete snapshot estable de membresías. Orden recomendado:
-   vencimiento, programación y UUID, con nulos en posiciones explícitas.
-7. **Forma del DTO y costo.** Congelar claves exactas comunes y agregados
-   opcionales explícitos por tipo; fechas como `YYYY-MM-DD`, revisiones y
-   decimales como strings donde corresponde; límites de texto y checklist
-   iguales en SQL y Zod. Probar plan de consulta con 2.000 tareas sin agregar
-   datos privados a la respuesta.
+6. **Paginación y consistencia.** Orden obligatorio: `dueDate ASC NULLS LAST`,
+   `scheduledOn ASC NULLS LAST`, `taskId ASC`. Cursor versión 1 opaco y validado
+   por SQL, ligado al sujeto efectivo, mes, filtros normalizados, versión de
+   orden y última clave; máximo 100 filas. Cada página revalida el sujeto y los
+   filtros explícitos: si el sujeto perdió acceso, o una empresa/equipo pedido
+   explícitamente dejó de estar autorizado, se rechaza. Con filtros amplios,
+   recomputar el ámbito actual y omitir cada fila que ya no esté autorizada; no
+   se rechaza toda la página por cambios parciales de membresía. No se promete
+   snapshot de datos: si una edición mueve filas entre páginas puede haber
+   repetidos u omitidos; el cliente
+   deduplica por `taskId`, reinicia al cambiar filtros/sujeto/mes y ofrece
+   recargar el listado para reconciliar cambios. Un cursor malformado, de otro
+   filtro o versión se rechaza sin filtrar silenciosamente.
+7. **Forma del DTO y costo.** Unión exacta por `kind` y `measurementVersion`;
+   conservar `checklist.id`. Para `resultado` v1, `weight` es decimal positivo
+   como string. Para `operativa` v1, peso y meta son valores legacy explícitos
+   (no coeficientes por movimiento); para `operativa` v2, `weight` y `target`
+   son `null`, sin checklist y con `unit` requerida. Incluir
+   `measurementVersion` siempre. `subjectWork.recordedSeconds` y, en operativas,
+   movimientos/cantidad/unidad/carga ponderada/cantidad sin coeficiente se
+   calculan sólo para el `actor_id` sujeto. Conservar el recorte efectivo de
+   cada sesión de SQL014, no restar simplemente inicio y fin. Si falta un
+   coeficiente, `weightedLoad` es `null`; el resultado global de la tarea sigue
+   separado del aporte personal. Fijar fechas `YYYY-MM-DD`, revisiones y
+   decimales como strings, valores nulos y límites idénticos en SQL/Zod.
+
+   La consulta elige primero hasta 101 tareas autorizadas en orden; calcula
+   agregados sólo para las 100 filas devueltas. No sumar la actividad global de
+   instancia y luego presentarla como personal. Medir `EXPLAIN (ANALYZE, BUFFERS)`
+   y bytes de respuesta con 2.000 tareas y volumen representativo de sesiones;
+   conservar el objetivo de navegación acordado en la matriz de aceptación y no
+   incluir filas privadas de actividad.
 
 La página debe tener un único RPC paginado que agregue los datos de sus filas;
 no puede resolverse con un `Promise.all` por tarjeta. Si los agregados aumentan
@@ -64,11 +106,13 @@ Evidencia en `src/data/supabase/operational-contract.ts` (unión `queryKinds` y 
 
 Agregar en una **nueva migración aditiva 015** un kind de consulta paginada, por ejemplo `workspacePage`, sin alterar ni reinterpretar tipos ya publicados:
 
-- Filtros exactos: `subjectId` nullable (NULL significa actor autenticado), `period` (primer día del mes), `companyId` nullable, `teamId` nullable y `sector` nullable. Sólo jefe/encargado pueden solicitar otro sujeto; la regla de encargado debe reutilizar y documentar la relación supervisora vigente, no inferir autorización por compartir equipo. El rechazo debe ocultar si el sujeto existe.
-- Respuesta por fila, shape exacto por congelar: `taskId`, `taskRevision`, `ownerId`, `ownerDisplayName`, `teamId`, `teamName`, `companyId`, `companyName`, `period`, `title`, `kind`, `status`, `weight`, `dueDate`, `scheduledOn`, `priority` y controles de checklist (`text`, `done`). La página incluye agregados de tiempo y, en operativas, cantidad/unidad y carga ponderada disponible para el sujeto consultado, evitando una llamada por cada tarjeta. Excluir referencias, observaciones, registros detallados de actividad, anotaciones, recordatorios, fórmulas y el texto libre `blocked_by`; readiness usa sólo códigos tipados y dependencias autorizadas. No devolver información de empresa/equipo/persona sin autorización sobre una tarea correspondiente.
-- Cursor opaco validado por SQL y ligado a los filtros exactos y última clave de orden; ordenar por vencimiento, programación y UUID de tarea, con límite máximo 100. No existe hoy una revisión única de membresías adecuada para congelar cursores. Cada página debe revalidar autorización actual; si membresías cambian, puede cambiar el conjunto entre páginas y no se promete snapshot estable.
-- Revalidación del ámbito contra relaciones actuales en cada página; nunca confiar en que `subjectId` o filtros elegidos por el cliente autoricen el acceso. Jefe consulta toda la organización. Encargado consulta sólo si `can_access_owner` confirma relación supervisora vigente, el encargado gestiona el equipo de la tarea, el sujeto pertenece actualmente a ese equipo y `can_access_instance` confirma empresa autorizada. La pertenencia común a un equipo, por sí sola, no concede acceso.
-- Empleado: sólo sus propias tareas. Encargado: sólo subordinados que pertenezcan a un equipo que gestiona y empresas autorizadas. Jefe: toda la organización. Consultar `subjectId` fuera del ámbito y sujeto desconocido deben producir el mismo rechazo.
+- Filtros exactos: `subjectId` nullable (`NULL` = actor autenticado), `period` (primer día del mes), `companyId`, `teamId` y `sector` nullable. Sólo jefe/encargado pueden solicitar otro sujeto; el rechazo de sujeto desconocido/fuera de ámbito es idéntico. Un encargado que consulta su propio trabajo usa permiso de actor, no permiso de supervisor.
+- Incluir tareas del sujeto según la regla de pertenencia del punto 4, siempre subordinada a `can_access_instance` actual. Reemplazo vencido o autoría histórica no conserva acceso cuando el permiso actual fue revocado. El permiso para consultar sujeto distinto es independiente y sólo entonces se aplica la relación supervisora y el equipo gestionado: jefe consulta organización; encargado consulta sujetos supervisados vigentes, tareas de equipos que gestiona, miembros vigentes de ese equipo y empresas autorizadas. Compartir equipo sin relación supervisora no concede acceso.
+- Respuesta: envelope exacto `{ contractVersion: 1, kind: "workspacePage", data: { evaluatedAt, items, nextCursor } }`. Claves comunes por item: `taskId` UUID, `taskRevision` string decimal, `ownerId` UUID, `ownerDisplayName` string (1–200), `teamId` UUID, `teamName` string (1–200), `companyId` UUID, `companyName` string (1–200), `period` y `scheduledOn` fechas ISO `YYYY-MM-DD` o null, `title` (1–200), `kind`, `measurementVersion` (1|2), `status` enum de `task_instances`, `dueDate` ISO o null, `priority` (`Alta|Media|Baja`), `weight` decimal string o null, `target` entero positivo o null, `unit` texto 1–80 o null, `checklist` arreglo de `{ id: UUID, text: 1–1000, done: boolean }` con máximo 100, `ready` boolean, `blockerCodes` arreglo de códigos tipados existentes, `hasHiddenDependencies` boolean y `subjectWork`. No incluir títulos ni estados de dependencias. Se conserva el envelope RPC `{ contractVersion, kind, data }`.
+- Unión de medición: `resultado` v1 requiere `weight` decimal positivo y permite `unit/target` null; `operativa` v1 conserva `weight/target` legacy identificados por `measurementVersion=1`; `operativa` v2 requiere `weight=null`, `target=null`, `unit` no nula y `checklist=[]`. Nunca interpretar peso legacy como coeficiente por movimiento.
+- `subjectWork` también es una unión: resultados llevan `{ recordedSeconds: nonnegative-integer-string }`; operativas llevan `{ recordedSeconds, movementCount, quantity, unit, ratedLoad, weightedLoad, unratedQuantity }`, conteos y números como strings salvo `unit`. `ratedLoad` suma sólo movimientos con snapshot `operational_unit_weight` guardado al registrar (cero si no hay); nunca recalcular con el coeficiente vigente. Los movimientos legacy v1 sin snapshot suman en `unratedQuantity`. `weightedLoad` es null si algún movimiento no tiene snapshot o falta cobertura completa de coeficientes. `data.evaluatedAt` es ISO con zona y define el corte de sesiones abiertas; los segundos usan el redondeo de SQL014. Filtrar por `actor_id` sujeto y conservar el recorte efectivo de SQL014. El agregado global `operationalSummary` no se reutiliza como contribución personal.
+- Excluir referencias, observaciones, detalle de actividad, anotaciones, recordatorios, fórmulas y texto libre `blocked_by`. Para dependencias sólo devolver códigos tipados y si existen dependencias ocultas; no incluir títulos/estados con permiso menos estricto que el de la fila.
+- Cursor JSON v1 con claves exactas `{ kind, cursorVersion, subjectId, period, companyId, teamId, sector, orderVersion, dueDate, scheduledOn, taskId }`; `subjectId` siempre es UUID efectivo; company/team son UUID canónicos o null; sector es texto trim o null; fechas nulas se codifican null. `cursorVersion=1` y `orderVersion=1`; toda clave/filtro/versión distinta rechaza cursor. Orden obligatorio `dueDate ASC NULLS LAST`, `scheduledOn ASC NULLS LAST`, `taskId ASC`; límite 100. En cada página se vuelve a validar sujeto y filtros explícitos: pérdida de acceso al sujeto o a companyId/teamId seleccionados rechaza. Con filtros amplios se recomputa ámbito y se omiten filas revocadas, sin rechazo total. Mutaciones de filas pueden repetir/omitir; deduplicar por `taskId`, reiniciar al cambiar filtros y ofrecer recarga. Elegir ≤101 filas autorizadas antes de agregar, y agregar sólo las ≤100 devueltas.
 - El selector de consulta no cambia el actor. Los comandos siguen ejecutándose como la persona autenticada; consultar un empleado no permite ejecutar sus tareas.
 - Denegación de notas personales en toda búsqueda/listado, independientemente del rol supervisor.
 - Invocar sólo vía `client.schema("api").rpc`; no exponer tablas `public` en Data API.
