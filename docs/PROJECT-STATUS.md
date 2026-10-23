@@ -1,31 +1,29 @@
 # Estado vigente — migración de workspace, 23/10/2026
 
-## Corte local actualizado — pantalla personal de solo lectura
+## Corte de publicación y migración externa
 
-`main` remoto está en `2b7e0d86e95e4bd33731af50fa5ccfae690e36e3`; Actions
-`39985971690` está ejecutándose. El commit anterior `ff90876` pasó suite, build
-y paquete Sites. La pantalla `Mi trabajo` ahora
-está implementada localmente, usa únicamente consultas del actor autenticado y
-permanece tras el opt-in Auth, apagado por defecto. Sol aceptó la revisión de
-seguridad tras corregir paginación Unicode, revocación/limpieza de datos y
-desbordes móviles. También se corrigieron las claves React usando ordinales y
-se añadió una prueba con IDs repetidos.
+El repositorio privado `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`,
+está en `c99aea8970cce6b92e5dfd2af45b70034a7927ed`. GitHub Actions
+`39986039308` terminó correctamente: suite, build y validación del paquete
+Sites.
 
-Validación final local: pruebas enfocadas 23/23, suite completa 813/813 en 82
-archivos, TypeScript, build cliente, build Worker, diff-check y paquete del Site
-privado. Commit directo sin PR: `2b7e0d86e95e4bd33731af50fa5ccfae690e36e3`.
-El archivo local mide 1.666.943 bytes; SHA-256
-`b19035606a58b4e34bcf0307405e0384d8f0202939db3d1f8cb45fea4849088b`. No hubo
-validación visual en navegador. El corte queda listo para publicar directo a
-`main`; el CI de ese commit está pendiente.
+El mismo Site privado `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85` se sincronizó
+con los 634 archivos versionados de `main` y se publicó como versión 95 desde
+`872f014a73ef1a7447d5ba58f3e6012518dca20c`. La publicación terminó con éxito en
+`https://grupo-paris-contabilidad.valentino-magni.chatgpt.site`. Su audiencia
+sigue limitada a la cuenta propietaria; no se agregaron visitantes ni se activó
+el área operativa.
 
-Supabase DEV sigue activo y vacío: 0 migraciones y 0 tablas. La migración remota
-espera que se configure el secreto Actions `SUPABASE_DEV_DB_URL`; luego se corre
-el preflight 001–014 sin escrituras, se revisa y sólo después se aplica DEV.
-SQL015 va separado. Faltan integración Auth/RPC real, permisos, escrituras
-operativas, evidencia/Storage, hosting/correo y aceptación desde PC personal.
-El repositorio/Site permanecen privados, con datos ficticios y sin activar el
-espacio operativo.
+Supabase `grupo-paris-dev` continúa activo y vacío: 0 migraciones. GitHub muestra
+que el repositorio no tiene secretos de Actions. La próxima puerta es guardar
+`SUPABASE_DEV_DB_URL` como secreto; después se ejecuta el preflight de 001–014,
+se revisa su resultado y recién entonces se aplican esas migraciones en DEV.
+SQL015 queda como ejecución independiente. No se hicieron escrituras remotas.
+
+Siguen pendientes la migración/autenticación alojada y sus permisos, escrituras
+operativas, evidencia y Storage, hosting Cloudflare independiente, correo,
+producción y aceptación desde la PC personal. La aplicación sigue en laboratorio
+con datos ficticios.
 
 Este bloque reemplaza los estados anteriores de “lector sin UI”, `158b2a0` y
 “sólo diagnóstico”. El resto del registro queda como historial.

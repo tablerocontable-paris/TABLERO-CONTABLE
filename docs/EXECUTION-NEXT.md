@@ -1,15 +1,15 @@
 # Estado vigente de ejecución — 23/10/2026
 
-## Corte actualizado
+## Publicación confirmada y próxima puerta
 
-- `main` publicado directamente, sin PR: `2b7e0d86e95e4bd33731af50fa5ccfae690e36e3`. Actions `39985971690` está corriendo; el commit anterior `ff90876` pasó.
-- `Mi trabajo` de solo lectura está implementada localmente bajo el bootstrap optativo Auth, apagado por defecto. Sol aceptó la revisión; se corrigieron las claves React por ordinal y se probó con IDs repetidos.
-- Validación final local: 23/23 enfocadas, 813/813 suite completa en 82 archivos, TypeScript, build cliente/Worker, diff-check y paquete Sites pasaron. Paquete: 1.666.943 bytes, SHA-256 `b19035606a58b4e34bcf0307405e0384d8f0202939db3d1f8cb45fea4849088b`. Falta revisión visual en navegador.
-- Próximo paso: comprobar CI `39985971690` y registrar su resultado; después preparar el preflight remoto cuando exista el secreto.
-- Migración externa pendiente: guardar `SUPABASE_DEV_DB_URL` como secreto de Actions; correr preflight 001–014 sin escrituras; revisar destino/historial/dry-run; aplicar y auditar DEV; ejecutar SQL015 por separado.
-- Luego: validar Auth/RPC con cuenta de prueba, implementar escrituras permitidas, Storage/evidencia, hosting/correo y aceptación desde PC personal. Site privado, datos ficticios, área operativa apagada.
+- GitHub privado `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`: `c99aea8970cce6b92e5dfd2af45b70034a7927ed`. Actions `39986039308` terminó en verde con pruebas, build y paquete Sites.
+- El Site existente se sincronizó con los 634 archivos versionados y publicó la versión 95 desde el commit de su fuente `872f014a73ef1a7447d5ba58f3e6012518dca20c`. URL privada: `https://grupo-paris-contabilidad.valentino-magni.chatgpt.site`; audiencia limitada a la cuenta propietaria.
+- Supabase `grupo-paris-dev` está activo y vacío, con 0 migraciones. GitHub confirmó que aún no hay secretos de Actions.
+- Próximo paso: el propietario guarda `SUPABASE_DEV_DB_URL` en Settings → Secrets and variables → Actions. No pegar el valor en el chat. Luego ejecutar el preflight remoto de 001–014 sin escrituras y revisar destino, historial y dry-run antes de aplicar. SQL015 se aplica aparte.
+- Después siguen la autenticación y permisos alojados, escrituras operativas, evidencia/Storage, hosting Cloudflare independiente, correo, producción y aceptación desde la PC personal.
+- La app continúa como laboratorio con perfiles ficticios; no se activó el espacio operativo ni se agregaron usuarios al Site.
 
-Este corte supersede los puntos inferiores que indican lector no conectado, último SHA `158b2a0`, o pantalla sólo diagnóstica.
+Este corte supersede los estados inferiores que indiquen CI pendiente, Site sin publicar o último SHA anterior.
 
 - El repositorio local aislado `src/data/supabase/workspace-repository.ts` consulta únicamente `workspacePageV2` y `taskChecklistPage`; todavía no está conectado a la UI ni publicado. Sol lo aceptó; las observaciones P3 de pruebas quedaron cubiertas. Suite 795/795, TypeScript, builds cliente y Worker aprobados.
 - El remoto `grupo-paris-dev` había sido confirmado vacío. Falta el secreto `SUPABASE_DEV_DB_URL` en Actions para iniciar el preflight sin escrituras de 001–014. No enviar su valor en el chat.
