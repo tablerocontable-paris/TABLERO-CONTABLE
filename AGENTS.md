@@ -1,8 +1,8 @@
 # Estado actual de migración — 23/10/2026, corte posterior a publicación
 
 Repositorio activo `work/site`, remoto `tablerocontable-paris/TABLERO-CONTABLE`,
-`main` en `cee3b402a6e3e3641e00582dc258098b54341899`. Se preserva el Site privado.
-GitHub Actions para este SHA terminó con éxito: suite, build y paquete Sites.
+`main` en `22ac0ad404d6e12e69828edde7026e5f9f114de4`. Se preserva el Site privado.
+GitHub Actions `39976297299` valida este SHA; el commit anterior pasó suite, build y paquete Sites.
 
 Supabase `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`) está activo y reconsultado
 ahora: 0 migraciones y 0 tablas en `public`, `api` y `app_private`. SQL014
@@ -17,12 +17,11 @@ Actions en GitHub; nunca compartir su valor por chat. Después se ejecutará el
 preflight de destino/historial/dry-run, se aplicará y auditará 001–014; SQL015
 se hará en una etapa separada.
 
-El bootstrap optativo de Auth quedó implementado localmente y aceptado por Sol;
-la suite completa pasó con 787 pruebas en 80 archivos, además de TypeScript y
-builds cliente/Worker. Está sin publicar y el modo remoto sigue desactivado por
-defecto. Sólo muestra diagnóstico después de autenticar; no conecta el tablero
-operativo. Cloudflare, correo, producción y aceptación desde la PC personal
-siguen pendientes. Evidencia en
+El bootstrap optativo de Auth quedó publicado y aceptado por Sol; suite completa
+787 pruebas en 80 archivos, TypeScript y builds cliente/Worker aprobaron. La
+bandera remota permanece apagada y el bootstrap sólo muestra diagnóstico; no
+conecta el tablero operativo. Cloudflare, correo, producción y aceptación desde
+la PC personal siguen pendientes. Evidencia en
 `docs/architecture/REMOTE-WORKSPACE-AUTH-BOOTSTRAP-IMPLEMENTATION-LUNA-20261023.md`.
 Mantener datos ficticios, Site privado y el área operativa apagada.
 

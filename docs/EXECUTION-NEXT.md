@@ -1,7 +1,7 @@
 # Estado vigente de ejecución — 23/10/2026
 
-- Commit `cee3b402a6e3e3641e00582dc258098b54341899` está en `main` del repo privado nuevo. GitHub Actions `39973797396` terminó con éxito: suite, build y paquete Sites.
-- El hook local aprobó 196/196 pruebas. El bootstrap optativo pasó revisión Sol y la suite completa 787/787 en 80 archivos, TypeScript y builds cliente/Worker. El cambio y su evidencia local esperan commit/publicación.
+- Commit `22ac0ad404d6e12e69828edde7026e5f9f114de4` está publicado en `main` del repo privado nuevo. GitHub Actions `39976297299` valida el último cambio; el commit anterior terminó con suite, build y paquete Sites exitosos.
+- El hook aprobó 196/196 pruebas. El bootstrap optativo pasó revisión Sol y la suite completa 787/787 en 80 archivos, TypeScript y builds cliente/Worker. Código y evidencia ya están publicados.
 - Lectura Supabase de hoy: `grupo-paris-dev` activo, 0 migraciones y 0 tablas en `public`, `api` y `app_private`.
 - SQL015 está aceptada por Sol para DEV en el hash exacto `CC49480D1317F1B44CD29F245508F9C8FB0B0894FE4E66C1B22F8E00D36B33F2`, pero no aplicada.
 - Próximo bloqueo operativo: agregar `SUPABASE_DEV_DB_URL` como secreto de Actions desde GitHub; no compartir el valor por chat. Luego correr preflight sin escrituras para 001–014, revisar destino/historial/dry-run, aplicar y auditar. SQL015 va en ejecución separada.

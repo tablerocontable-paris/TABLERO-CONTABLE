@@ -1,8 +1,9 @@
 # Estado vigente — migración de workspace, 23/10/2026
 
-`main` se publicó directamente en GitHub en `cee3b402a6e3e3641e00582dc258098b54341899`;
-Actions terminó con éxito en suite completa, build y paquete Sites. El hook local
-aprobó 196/196 pruebas.
+`main` se publicó directamente en GitHub en `22ac0ad404d6e12e69828edde7026e5f9f114de4`;
+Actions `39976297299` valida este SHA. El commit anterior terminó con suite
+completa, build y paquete Sites exitosos. El nuevo commit aprobó el hook local
+196/196; el corte local completo quedó en 787/787 y builds cliente/Worker.
 
 Sol aceptó el código SQL015 para DEV con hash LF
 `CC49480D1317F1B44CD29F245508F9C8FB0B0894FE4E66C1B22F8E00D36B33F2`, tras aceptar
@@ -17,9 +18,9 @@ preflight remoto de 001–014; GitHub requiere el secreto `SUPABASE_DEV_DB_URL`,
 que el usuario debe guardar en Settings → Secrets and variables → Actions, sin
 pegarlo en el chat. Luego aplicar/auditar 001–014 y, por separado, 015.
 
-El bootstrap de Supabase Auth para diagnóstico ya está implementado localmente y
-aceptado por Sol. Suite completa 787/787 en 80 archivos, TypeScript y builds de
-cliente/Worker aprobados. Falta publicarlo. El modo remoto se activa sólo con una
+El bootstrap de Supabase Auth para diagnóstico ya está publicado y aceptado por
+Sol. Suite completa 787/787 en 80 archivos, TypeScript y builds de cliente/Worker
+aprobados. El modo remoto se activa sólo con una
 bandera explícita; por defecto sigue cargando `LaboratoryWorkspace`. Aun activado,
 muestra sólo diagnóstico, sin tablero operativo. Evidencia:
 `docs/architecture/REMOTE-WORKSPACE-AUTH-BOOTSTRAP-IMPLEMENTATION-LUNA-20261023.md`.
