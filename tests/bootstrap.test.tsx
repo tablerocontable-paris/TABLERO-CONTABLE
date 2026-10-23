@@ -54,7 +54,7 @@ describe("opt-in app bootstrap", () => {
     expect(createClient).not.toHaveBeenCalled();
   });
 
-  it("creates one client before mounting the real StrictMode tree when explicitly enabled", () => {
+  it("creates one client before mounting the real StrictMode tree when explicitly enabled", async () => {
     createClient.mockReturnValue({ auth: {} });
     mount({ ...config, VITE_SUPABASE_AUTH_BOOTSTRAP: "true" });
     expect(createClient).toHaveBeenCalledOnce();
@@ -64,10 +64,9 @@ describe("opt-in app bootstrap", () => {
       expect.any(Object),
     );
     expect(screen.getByTestId("auth-gate")).toBeTruthy();
-    expect(screen.getByText("Acceso verificado")).toBeTruthy();
-    expect(
-      screen.getByText("El espacio operativo todavía no está habilitado."),
-    ).toBeTruthy();
+    expect(screen.getByText("Mi trabajo")).toBeTruthy();
+    expect(screen.getByText("Vista de solo lectura de las tareas asignadas a tu sesión.")).toBeTruthy();
+    await screen.findByRole("alert");
     expect(screen.queryByText("No mostrar")).toBeNull();
     expect(screen.queryByText("Laboratorio local")).toBeNull();
   });

@@ -1,11 +1,13 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { useMemo } from "react";
 import LaboratoryWorkspace from "./components/LaboratoryWorkspace";
 import SupabaseAuthGate from "./components/SupabaseAuthGate";
 import {
   createSupabaseBrowserClient,
   type SupabaseBrowserClientResult,
 } from "./data/supabase/client";
-import type { ContextV1 } from "./data/supabase/context-contract";
+import { createOperationalTransport } from "./data/supabase/operational-transport";
+import MyWork from "./components/MyWork";
 
 export type BootstrapEnvironment = Record<string, unknown> & {
   VITE_SUPABASE_AUTH_BOOTSTRAP?: unknown;
@@ -33,21 +35,15 @@ export function resolveApplicationBootstrap(
     : { mode: "configuration-error", reason: result.reason };
 }
 
-function DiagnosticWorkspace({ context }: { context: ContextV1 }) {
+function DiagnosticWorkspace({ client }: { client: SupabaseClient }) {
+  const queryTransport = useMemo(() => {
+    const operational = createOperationalTransport(client);
+    return { query: operational.query };
+  }, [client]);
   return (
-    <main className="supabase-auth-shell" aria-labelledby="diagnostic-title">
-      <section className="supabase-auth-card">
-        <h1 id="diagnostic-title">Acceso verificado</h1>
-        <p>La autenticación está activa en modo diagnóstico.</p>
-        <dl>
-          <dt>Perfil</dt>
-          <dd>{context.principal.role}</dd>
-          <dt>Permisos disponibles</dt>
-          <dd>{context.capabilities.length}</dd>
-        </dl>
-        <p>El espacio operativo todavía no está habilitado.</p>
-      </section>
-    </main>
+    <div>
+      <MyWork transport={queryTransport} />
+    </div>
   );
 }
 
@@ -74,7 +70,7 @@ export function ApplicationBootstrap({
 
   return (
     <SupabaseAuthGate client={bootstrap.client}>
-      {(context) => <DiagnosticWorkspace context={context} />}
+      {() => <DiagnosticWorkspace client={bootstrap.client} />}
     </SupabaseAuthGate>
   );
 }

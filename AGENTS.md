@@ -1,4 +1,32 @@
-# Estado actual de migración — 23/10/2026, corte posterior a publicación
+# Estado actual de migración — actualizado 23/10/2026
+
+Repositorio activo `work/site`, remoto `tablerocontable-paris/TABLERO-CONTABLE`.
+Último commit remoto confirmado: `ff90876d3f7d29e10be000aa3e60421e4ba20b6d`;
+Actions `39981745913` aprobó suite, build y paquete Sites. La pantalla optativa
+`Mi trabajo` de solo lectura existe localmente; Sol aceptó la revisión y la
+observación P3 de claves React se corrigió con ordinales y prueba de IDs
+repetidos. Validación local: enfocadas 23/23, suite 813/813 en 82 archivos,
+TypeScript, build cliente, build Worker, diff-check y paquete Sites aprobados.
+Paquete 1.666.943 bytes, SHA-256
+`b19035606a58b4e34bcf0307405e0384d8f0202939db3d1f8cb45fea4849088b`.
+Revisión visual en navegador y CI del nuevo commit pendientes. Mantener mismo
+repo y Site privado.
+
+Supabase `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`) está activo y vacío (0
+migraciones/tablas, última consulta 23/10). No hubo escritura remota. El siguiente
+paso remoto requiere secreto Actions `SUPABASE_DEV_DB_URL`, luego preflight sin
+escrituras 001–014, revisión de destino/historial/dry-run y aplicación/auditoría
+separada de SQL015. Después Auth/RPC reales, permisos y operaciones, evidencia/
+Storage, hosting/correo y aceptación desde PC personal. Datos ficticios; no
+activar área operativa ni usar producción.
+
+Este bloque supersede los estados inferiores que indiquen `158b2a0`, lector sin
+UI o pantalla sólo diagnóstica. Conservar los registros históricos y el scratch
+`.block` intacto.
+
+<!-- Historial de continuidad -->
+
+# Estado anterior — 23/10/2026, corte posterior a publicación
 
 Repositorio activo `work/site`, remoto `tablerocontable-paris/TABLERO-CONTABLE`,
 `main` en `22ac0ad404d6e12e69828edde7026e5f9f114de4`. Se preserva el Site privado.

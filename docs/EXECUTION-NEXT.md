@@ -1,5 +1,16 @@
 # Estado vigente de ejecución — 23/10/2026
 
+## Corte actualizado
+
+- `main` publicado: `ff90876d3f7d29e10be000aa3e60421e4ba20b6d`; Actions `39981745913` pasó suite, build y paquete Sites.
+- `Mi trabajo` de solo lectura está implementada localmente bajo el bootstrap optativo Auth, apagado por defecto. Sol aceptó la revisión; se corrigieron las claves React por ordinal y se probó con IDs repetidos.
+- Validación final local: 23/23 enfocadas, 813/813 suite completa en 82 archivos, TypeScript, build cliente/Worker, diff-check y paquete Sites pasaron. Paquete: 1.666.943 bytes, SHA-256 `b19035606a58b4e34bcf0307405e0384d8f0202939db3d1f8cb45fea4849088b`. Falta revisión visual en navegador.
+- Próximo paso: hook/commit y publicación directa en `main`, comprobar CI y adjuntar evidencia actualizada.
+- Migración externa pendiente: guardar `SUPABASE_DEV_DB_URL` como secreto de Actions; correr preflight 001–014 sin escrituras; revisar destino/historial/dry-run; aplicar y auditar DEV; ejecutar SQL015 por separado.
+- Luego: validar Auth/RPC con cuenta de prueba, implementar escrituras permitidas, Storage/evidencia, hosting/correo y aceptación desde PC personal. Site privado, datos ficticios, área operativa apagada.
+
+Este corte supersede los puntos inferiores que indican lector no conectado, último SHA `158b2a0`, o pantalla sólo diagnóstica.
+
 - El repositorio local aislado `src/data/supabase/workspace-repository.ts` consulta únicamente `workspacePageV2` y `taskChecklistPage`; todavía no está conectado a la UI ni publicado. Sol lo aceptó; las observaciones P3 de pruebas quedaron cubiertas. Suite 795/795, TypeScript, builds cliente y Worker aprobados.
 - El remoto `grupo-paris-dev` había sido confirmado vacío. Falta el secreto `SUPABASE_DEV_DB_URL` en Actions para iniciar el preflight sin escrituras de 001–014. No enviar su valor en el chat.
 - Después del preflight: aplicar/auditar 001–014 en DEV; revisar y aplicar SQL015 por separado; integrar Auth/permisos y vistas remotas por módulo; luego evidencia/Storage, hosting/correo y aceptación desde PC personal.

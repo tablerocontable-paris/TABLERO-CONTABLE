@@ -1,5 +1,33 @@
 # Estado vigente — migración de workspace, 23/10/2026
 
+## Corte local actualizado — pantalla personal de solo lectura
+
+`main` remoto está en `ff90876d3f7d29e10be000aa3e60421e4ba20b6d`; Actions
+`39981745913` pasó suite, build y paquete Sites. La pantalla `Mi trabajo` ahora
+está implementada localmente, usa únicamente consultas del actor autenticado y
+permanece tras el opt-in Auth, apagado por defecto. Sol aceptó la revisión de
+seguridad tras corregir paginación Unicode, revocación/limpieza de datos y
+desbordes móviles. También se corrigieron las claves React usando ordinales y
+se añadió una prueba con IDs repetidos.
+
+Validación final local: pruebas enfocadas 23/23, suite completa 813/813 en 82
+archivos, TypeScript, build cliente, build Worker, diff-check y paquete del Site
+privado. El archivo local mide 1.666.943 bytes; SHA-256
+`b19035606a58b4e34bcf0307405e0384d8f0202939db3d1f8cb45fea4849088b`. No hubo
+validación visual en navegador. El corte queda listo para publicar directo a
+`main`; requiere CI posterior.
+
+Supabase DEV sigue activo y vacío: 0 migraciones y 0 tablas. La migración remota
+espera que se configure el secreto Actions `SUPABASE_DEV_DB_URL`; luego se corre
+el preflight 001–014 sin escrituras, se revisa y sólo después se aplica DEV.
+SQL015 va separado. Faltan integración Auth/RPC real, permisos, escrituras
+operativas, evidencia/Storage, hosting/correo y aceptación desde PC personal.
+El repositorio/Site permanecen privados, con datos ficticios y sin activar el
+espacio operativo.
+
+Este bloque reemplaza los estados anteriores de “lector sin UI”, `158b2a0` y
+“sólo diagnóstico”. El resto del registro queda como historial.
+
 ## Corte local en curso — repositorio Supabase de lectura
 
 El bootstrap Auth permanece publicado y apagado por defecto. Se implementó un
