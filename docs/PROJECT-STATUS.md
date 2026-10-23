@@ -1,20 +1,29 @@
-# Estado vigente — workspacePage local, 23/10/2026
+# Estado vigente — migración de workspace, 23/10/2026
 
-Sol aceptó el contrato bootstrap (`42849A54…018E96D`) y luego el contrato de
-checklist extenso (`34C7A45A02100E28617E5E180753472F148E6E1D96152003A9757DF61128E36D`),
-ambos para implementación local. SQL015 añade `workspacePageV2` y
-`taskChecklistPage`, preservando el delegate v1/SQL014. El SQL normalizado LF
-está fijado en `CC49480D1317F1B44CD29F245508F9C8FB0B0894FE4E66C1B22F8E00D36B33F2`.
-El contrato clasifica controles históricos sin truncarlos y permite leerlos por
-segmentos Unicode con autorización y revisión comprobadas en cada página. La
-aceptación Sol del código/hash sigue pendiente. La validación local actual está
-registrada en `docs/architecture/REMOTE-WORKSPACE-CHECKLIST-PAGING-IMPLEMENTATION-LUNA-20261023.md`;
-el corte bootstrap anterior se conserva en su informe original.
+`main` se publicó directamente en GitHub en `cee3b402a6e3e3641e00582dc258098b54341899`;
+Actions terminó con éxito en suite completa, build y paquete Sites. El hook local
+aprobó 196/196 pruebas.
 
-SQL015 sólo está implementada localmente. No se aplicó a Supabase, no se
-desplegó y no se conectó la interfaz; el Site sigue privado y el área operativa
-permanece apagada. El preflight 001–014 es una puerta independiente; SQL015
-requiere su propio dictamen de código/hash antes de apply.
+Sol aceptó el código SQL015 para DEV con hash LF
+`CC49480D1317F1B44CD29F245508F9C8FB0B0894FE4E66C1B22F8E00D36B33F2`, tras aceptar
+el contrato bootstrap (`42849A54…018E96D`) y el contrato de checklist extenso
+(`34C7A45A02100E28617E5E180753472F148E6E1D96152003A9757DF61128E36D`).
+`workspacePageV2` y `taskChecklistPage` preservan SQL014 y la lectura de controles
+extensos sin truncarlos. Evidencia en el informe Luna y aceptación Sol del código.
+
+Supabase DEV se reconsultó el 23/10: está activo, con 0 migraciones y 0 tablas en
+`public`, `api` y `app_private`. No se hicieron escrituras remotas. Falta correr el
+preflight remoto de 001–014; GitHub requiere el secreto `SUPABASE_DEV_DB_URL`,
+que el usuario debe guardar en Settings → Secrets and variables → Actions, sin
+pegarlo en el chat. Luego aplicar/auditar 001–014 y, por separado, 015.
+
+El bootstrap de Supabase Auth para diagnóstico ya está implementado localmente y
+aceptado por Sol. Suite completa 787/787 en 80 archivos, TypeScript y builds de
+cliente/Worker aprobados. Falta publicarlo. El modo remoto se activa sólo con una
+bandera explícita; por defecto sigue cargando `LaboratoryWorkspace`. Aun activado,
+muestra sólo diagnóstico, sin tablero operativo. Evidencia:
+`docs/architecture/REMOTE-WORKSPACE-AUTH-BOOTSTRAP-IMPLEMENTATION-LUNA-20261023.md`.
+Cloudflare, correo, producción y prueba desde la PC personal siguen pendientes.
 
 # Corte de implementación local — 21/10/2026
 

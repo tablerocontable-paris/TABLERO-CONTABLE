@@ -1,0 +1,51 @@
+import React from "react";
+import { createRoot, type Root } from "react-dom/client";
+import {
+  ApplicationBootstrap,
+  resolveApplicationBootstrap,
+  type BootstrapEnvironment,
+  type ClientFactory,
+} from "./bootstrap";
+import { createSupabaseBrowserClient } from "./data/supabase/client";
+
+class Boundary extends React.Component<
+  { children: React.ReactNode },
+  { error: boolean }
+> {
+  state = { error: false };
+  static getDerivedStateFromError() {
+    return { error: true };
+  }
+  render() {
+    return this.state.error ? (
+      <main className="fatal">
+        <h1>No pudimos abrir el espacio de trabajo.</h1>
+        <p>
+          Los datos guardados se conservan. Recargá la página; si continúa,
+          avisá a administración.
+        </p>
+        <button onClick={() => location.reload()}>Reintentar</button>
+      </main>
+    ) : (
+      this.props.children
+    );
+  }
+}
+
+/** Resolve once outside React, then mount the same StrictMode tree used by main.tsx. */
+export function mountApplication(
+  container: Element,
+  env: BootstrapEnvironment,
+  clientFactory: ClientFactory = createSupabaseBrowserClient,
+): Root {
+  const bootstrap = resolveApplicationBootstrap(env, clientFactory);
+  const root = createRoot(container);
+  root.render(
+    <React.StrictMode>
+      <Boundary>
+        <ApplicationBootstrap bootstrap={bootstrap} />
+      </Boundary>
+    </React.StrictMode>,
+  );
+  return root;
+}

@@ -1,28 +1,30 @@
-# Estado actual de migración — 23/10/2026
+# Estado actual de migración — 23/10/2026, corte posterior a publicación
 
-El repositorio activo sigue siendo `work/site`; preservar su historia Git y el
-Site privado existente. El proyecto Supabase `grupo-paris-dev`
-(`kynqjfhqujnjojcmurwf`) está activo y, en la última lectura, tenía 0
-migraciones y 0 tablas en `public`, `api` y `app_private`.
+Repositorio activo `work/site`, remoto `tablerocontable-paris/TABLERO-CONTABLE`,
+`main` en `cee3b402a6e3e3641e00582dc258098b54341899`. Se preserva el Site privado.
+GitHub Actions para este SHA terminó con éxito: suite, build y paquete Sites.
 
-SQL014 conserva el hash aprobado para DEV
-`BC09CF9631A2F3E4BD19541C2A050AB1C663AE0E704D47D7E5A4752B114E0345`.
-SQL015 añade localmente `workspacePage`, `workspacePageV2` y
-`taskChecklistPage`; hash normalizado LF `CC49480D1317F1B44CD29F245508F9C8FB0B0894FE4E66C1B22F8E00D36B33F2`.
-El contrato Sol de detalle extenso está aceptado para implementación, no el
-código. Los historiales no se truncan: V2 clasifica checklist inline, paginado
-o para revisión y el RPC de detalle reconstruye controles por segmentos. El
-guard/workflow exige aceptación Sol del hash exacto antes de aplicar 015.
+Supabase `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`) está activo y reconsultado
+ahora: 0 migraciones y 0 tablas en `public`, `api` y `app_private`. SQL014
+conserva el hash aprobado DEV `BC09CF9631A2F3E4BD19541C2A050AB1C663AE0E704D47D7E5A4752B114E0345`.
+SQL015 tiene aceptación Sol para el hash LF
+`CC49480D1317F1B44CD29F245508F9C8FB0B0894FE4E66C1B22F8E00D36B33F2`, limitada
+a DEV. SQL015 todavía no se aplicó.
 
-El workflow de DEV separa la simulación/aplicación de 001–014 de la aplicación
-posterior de 015. El secreto `SUPABASE_DEV_DB_URL` no debe compartirse por chat;
-se configura directamente en GitHub Actions. No aplicar migraciones alojadas
-hasta que el preflight remoto valide destino, historial y dry-run exactos.
+La siguiente puerta es el workflow manual `supabase-dev-preflight.yml` para
+001–014, sin escrituras. Requiere `SUPABASE_DEV_DB_URL` guardada como secreto
+Actions en GitHub; nunca compartir su valor por chat. Después se ejecutará el
+preflight de destino/historial/dry-run, se aplicará y auditará 001–014; SQL015
+se hará en una etapa separada.
 
-La app todavía monta `LaboratoryWorkspace`; no se conectó al espacio
-Supabase Auth/RPC. Cloudflare, correo, datos/cuentas reales, producción y la
-prueba desde la PC personal siguen pendientes. Mantener Site privado y el área
-operativa apagada.
+El bootstrap optativo de Auth quedó implementado localmente y aceptado por Sol;
+la suite completa pasó con 787 pruebas en 80 archivos, además de TypeScript y
+builds cliente/Worker. Está sin publicar y el modo remoto sigue desactivado por
+defecto. Sólo muestra diagnóstico después de autenticar; no conecta el tablero
+operativo. Cloudflare, correo, producción y aceptación desde la PC personal
+siguen pendientes. Evidencia en
+`docs/architecture/REMOTE-WORKSPACE-AUTH-BOOTSTRAP-IMPLEMENTATION-LUNA-20261023.md`.
+Mantener datos ficticios, Site privado y el área operativa apagada.
 
 El historial de continuidad anterior se conserva debajo como referencia. Si
 contradice este estado actual, prevalece este bloque.
