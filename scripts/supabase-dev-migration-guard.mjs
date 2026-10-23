@@ -92,7 +92,10 @@ export function validateHistory(payload, phase, state = "before") {
 export function validateDryRun(text, phase) {
   assertPhase(phase);
   const expected = phase === "baseline_001_014" ? versions.slice(0, BASELINE_COUNT) : [versions[BASELINE_COUNT]];
-  const actual = text.match(/\b\d{12}\b/g) ?? [];
+  // Supabase CLI prints full filenames (`202609300001_foundation.sql`). A
+  // word boundary after the version does not match there because `_` is a
+  // word character; extract versions only when they prefix a migration file.
+  const actual = [...text.matchAll(/(?:^|\s)(\d{12})_[a-z0-9_-]+\.sql(?=$|\s)/gim)].map((match) => match[1]);
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
     throw new Error(`El dry-run no demuestra exactamente ${expected.length === 1 ? "015" : "001–014"} como pendientes.`);
   }

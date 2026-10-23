@@ -35,12 +35,16 @@ describe("Supabase DEV migration guard", () => {
   });
 
   it("requires the exact pending version list for each dry-run", () => {
-    const baseline = MIGRATIONS.slice(0, BASELINE_COUNT).map(([name]) => name.slice(0, 12));
+    const baselineFiles = MIGRATIONS.slice(0, BASELINE_COUNT).map(([name]) => name);
+    const baseline = baselineFiles.map((name) => name.slice(0, 12));
     const v015 = MIGRATIONS[BASELINE_COUNT][0].slice(0, 12);
-    expect(validateDryRun(baseline.join("\n"), "baseline_001_014")).toEqual(baseline);
-    expect(validateDryRun(v015, "apply_015")).toEqual([v015]);
-    expect(() => validateDryRun(`${baseline.join("\n")}\n${v015}`, "baseline_001_014")).toThrow();
-    expect(() => validateDryRun(`${v015}\n${MIGRATIONS[0][0].slice(0, 12)}`, "apply_015")).toThrow();
+    const cliOutput = (files: string[]) => `Would push these migrations:\n${files.map((file) => ` • ${file}`).join("\n")}\nFinished supabase db push.`;
+    expect(validateDryRun(cliOutput(baselineFiles), "baseline_001_014")).toEqual(baseline);
+    expect(validateDryRun(cliOutput([MIGRATIONS[BASELINE_COUNT][0]]), "apply_015")).toEqual([v015]);
+    expect(() => validateDryRun(cliOutput([...baselineFiles, MIGRATIONS[BASELINE_COUNT][0]]), "baseline_001_014")).toThrow();
+    expect(() => validateDryRun(cliOutput([MIGRATIONS[0][0]]), "baseline_001_014")).toThrow();
+    expect(() => validateDryRun(cliOutput([...baselineFiles, baselineFiles[0]]), "baseline_001_014")).toThrow();
+    expect(() => validateDryRun(cliOutput([...baselineFiles].reverse()), "baseline_001_014")).toThrow();
   });
 
   it("builds an isolated CLI project that cannot see SQL015 in the baseline stage", async () => {
