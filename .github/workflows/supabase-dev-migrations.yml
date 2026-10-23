@@ -81,22 +81,32 @@ jobs:
           import os, re, sys
           from urllib.parse import urlsplit, parse_qs
           raw = os.environ["SUPABASE_DEV_DB_URL"]
+          checks = {
+              "scheme_ok": False,
+              "expected_user_ok": False,
+              "password_present": False,
+              "session_pooler_region_ok": False,
+              "port_5432_ok": False,
+              "database_postgres_ok": False,
+              "sslmode_require_ok": False,
+          }
           try:
               parsed = urlsplit(raw)
               query = parse_qs(parsed.query, keep_blank_values=True)
-              valid = (
-                  parsed.scheme in ("postgres", "postgresql")
-                  and parsed.username == "postgres.kynqjfhqujnjojcmurwf"
-                  and bool(parsed.password)
-                  and bool(re.fullmatch(r"aws-[0-9]+-sa-east-1\.pooler\.supabase\.com", parsed.hostname or ""))
-                  and parsed.port == 5432
-                  and parsed.path == "/postgres"
-                  and query.get("sslmode") == ["require"]
-              )
+              checks["scheme_ok"] = parsed.scheme in ("postgres", "postgresql")
+              checks["expected_user_ok"] = parsed.username == "postgres.kynqjfhqujnjojcmurwf"
+              checks["password_present"] = bool(parsed.password)
+              checks["session_pooler_region_ok"] = bool(re.fullmatch(r"aws-[0-9]+-sa-east-1\.pooler\.supabase\.com", parsed.hostname or ""))
+              checks["port_5432_ok"] = parsed.port == 5432
+              checks["database_postgres_ok"] = parsed.path == "/postgres"
+              checks["sslmode_require_ok"] = query.get("sslmode") == ["require"]
           except ValueError:
-              valid = False
-          if not valid:
-              print("La conexión no corresponde al Session pooler de grupo-paris-dev.", file=sys.stderr)
+              pass
+          if not all(checks.values()):
+              print("Validación de URL DEV fallida (sólo indicadores seguros):", file=sys.stderr)
+              for name, passed in checks.items():
+                  print(f"  {name}: {'ok' if passed else 'revisar'}", file=sys.stderr)
+              print("Copiá la URI Session pooler del proyecto DEV y actualizá el secreto.", file=sys.stderr)
               raise SystemExit(1)
           print("URL del Session pooler DEV validada; contenido oculto.")
           PY

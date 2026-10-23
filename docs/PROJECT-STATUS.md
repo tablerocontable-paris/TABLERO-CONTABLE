@@ -1,10 +1,24 @@
 # Estado vigente — migración de workspace, 23/10/2026
 
+## Resultado del preflight remoto — 23/10/2026
+
+GitHub Actions run `40000787076` (commit `b6c9d2b`) confirmó que existe el
+secreto `SUPABASE_DEV_DB_URL`, pero falló la validación segura de formato/destino
+antes de conectarse a la base. No se consultó el historial remoto ni se ejecutó
+el dry-run; no hubo lecturas ni escrituras en Supabase. El log no revela qué
+campo no coincide. El agente de auditoría revisó el flujo sin acceder al secreto.
+
+El próximo paso es actualizar el secreto con la URI **Session pooler** copiada
+desde Supabase → Connect para `grupo-paris-dev`, puerto `5432`, base `postgres`,
+TLS requerido. Nunca compartir la URI ni la contraseña por chat. Después volver
+a ejecutar el workflow de preflight; aplicar migraciones sólo si el preflight
+termina y su destino, historial y dry-run se revisan correctamente.
+
 ## Corte de publicación y migración externa
 
 El repositorio privado `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`,
-está en `c99aea8970cce6b92e5dfd2af45b70034a7927ed`. GitHub Actions
-`39986039308` terminó correctamente: suite, build y validación del paquete
+está en `b6c9d2bf60da965c4431cababf6b0fcf95baf7cc`. GitHub Actions
+`39987783440` terminó correctamente: suite, build y validación del paquete
 Sites.
 
 El mismo Site privado `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85` se sincronizó
@@ -14,11 +28,9 @@ con los 634 archivos versionados de `main` y se publicó como versión 95 desde
 sigue limitada a la cuenta propietaria; no se agregaron visitantes ni se activó
 el área operativa.
 
-Supabase `grupo-paris-dev` continúa activo y vacío: 0 migraciones. GitHub muestra
-que el repositorio no tiene secretos de Actions. La próxima puerta es guardar
-`SUPABASE_DEV_DB_URL` como secreto; después se ejecuta el preflight de 001–014,
-se revisa su resultado y recién entonces se aplican esas migraciones en DEV.
-SQL015 queda como ejecución independiente. No se hicieron escrituras remotas.
+Supabase `grupo-paris-dev` continúa activo y vacío: 0 migraciones. El secreto
+`SUPABASE_DEV_DB_URL` existe en Actions; su URL no pasó la validación segura
+descripta arriba. No hubo conexión ni escrituras remotas.
 
 Siguen pendientes la migración/autenticación alojada y sus permisos, escrituras
 operativas, evidencia y Storage, hosting Cloudflare independiente, correo,

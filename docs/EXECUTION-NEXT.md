@@ -1,11 +1,24 @@
 # Estado vigente de ejecución — 23/10/2026
 
+## Bloqueo actual de Supabase DEV
+
+El secreto `SUPABASE_DEV_DB_URL` ya existe en Actions. El preflight `40000787076`
+validó rama, repositorio y migraciones 001–014, pero rechazó el formato/destino
+de la URL antes de consultar la base. La revisión del log no muestra cuál campo
+falló; no se imprimió el secreto, no hubo conexión, dry-run ni escrituras.
+
+Acción del propietario: en Supabase → proyecto `grupo-paris-dev` → **Connect**,
+copiar el URI de **Session pooler** y actualizar el secreto existente en GitHub
+Settings → Secrets and variables → Actions. No pegar credenciales en el chat.
+Luego ejecutar de nuevo el preflight. Si pasa, revisar historial y dry-run antes
+de cualquier aplicación. No ejecutar todavía las migraciones ni SQL015.
+
 ## Publicación confirmada y próxima puerta
 
-- GitHub privado `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`: `c99aea8970cce6b92e5dfd2af45b70034a7927ed`. Actions `39986039308` terminó en verde con pruebas, build y paquete Sites.
+- GitHub privado `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`: `b6c9d2bf60da965c4431cababf6b0fcf95baf7cc`. Actions `39987783440` terminó en verde con pruebas, build y paquete Sites.
 - El Site existente se sincronizó con los 634 archivos versionados y publicó la versión 95 desde el commit de su fuente `872f014a73ef1a7447d5ba58f3e6012518dca20c`. URL privada: `https://grupo-paris-contabilidad.valentino-magni.chatgpt.site`; audiencia limitada a la cuenta propietaria.
-- Supabase `grupo-paris-dev` está activo y vacío, con 0 migraciones. GitHub confirmó que aún no hay secretos de Actions.
-- Próximo paso: el propietario guarda `SUPABASE_DEV_DB_URL` en Settings → Secrets and variables → Actions. No pegar el valor en el chat. Luego ejecutar el preflight remoto de 001–014 sin escrituras y revisar destino, historial y dry-run antes de aplicar. SQL015 se aplica aparte.
+- Supabase `grupo-paris-dev` está activo y vacío, con 0 migraciones. `SUPABASE_DEV_DB_URL` existe en Actions, pero el preflight `40000787076` rechazó su formato/destino antes de conectar; no hubo dry-run ni escrituras.
+- Próximo paso del propietario: actualizar ese secreto con la URI Session pooler copiada desde Supabase → Connect para el proyecto DEV. No pegar credenciales en el chat. Repetir el preflight y revisar destino, historial y dry-run antes de aplicar. SQL015 se aplica aparte.
 - Después siguen la autenticación y permisos alojados, escrituras operativas, evidencia/Storage, hosting Cloudflare independiente, correo, producción y aceptación desde la PC personal.
 - La app continúa como laboratorio con perfiles ficticios; no se activó el espacio operativo ni se agregaron usuarios al Site.
 
