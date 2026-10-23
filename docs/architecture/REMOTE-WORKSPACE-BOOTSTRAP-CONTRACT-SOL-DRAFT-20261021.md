@@ -2,6 +2,56 @@
 
 Fecha: 21/10/2026. Estado: **borrador arquitectónico, no implementado ni aceptado**.
 
+## Revisión técnica local — 23/10/2026
+
+Esta revisión precisa los criterios para la aceptación del contrato; no equivale
+a la aceptación de GPT-6.1 Sol. No escribir SQL ni conectar la pantalla hasta
+resolver estos puntos:
+
+1. **La página inicial debe cubrir el tablero, no sólo la hoja de ruta.** Debe
+   devolver tareas de tipo `resultado` y `operativa`, además de estado, empresa,
+   equipo, persona, período, controles y fechas. `suggestedRoute` existente sólo
+   contiene resultados no completados; no sustituye este listado.
+2. **Evitar fan-out por tarjeta.** La primera página debe incluir agregados
+   mínimos por tarea para pintar las tarjetas (tiempo propio del sujeto y, para
+   operativas, cantidad/unidad y carga ponderada disponible). No incluir
+   referencias, observaciones, autoría detallada ni filas de actividad. Esto
+   evita disparar `operationalSummary` y `activityPage` por cada tarea. El
+   detalle de actividad se carga bajo demanda para la tarea abierta.
+3. **Bloqueos tipados, nunca texto libre.** Incluir `ready` y códigos de bloqueo
+   permitidos por el contrato de `readiness`; omitir `blocked_by` y cualquier
+   observación. Las dependencias visibles deben seguir la política existente
+   de dependencias ocultas, sin revelar títulos que el actor no puede consultar.
+4. **Autorización no equivale a actuar como el sujeto.** `subjectId = null`
+   representa al actor autenticado. Un sujeto distinto requiere rol de jefe o
+   encargado y autorización actual de `can_access_owner`; cada fila requiere
+   además `can_access_instance` para empresa vigente. Para cumplir “sólo su
+   equipo”, el encargado debe gestionar el `team_id` de la tarea, el sujeto debe
+   pertenecer actualmente a ese equipo y seguir bajo su relación supervisora.
+   El chequeo usa relaciones de base (`teams.manager_id`, `team_members` y
+   `profiles.manager_id`), nunca el filtro enviado por el cliente. Esta regla
+   debe incluir casos de baja o traslado entre equipos.
+5. **Capacidad de mutar es otra decisión.** El listado nunca devuelve credenciales
+   ni sustituye las comprobaciones de `command_v1`; los comandos validan al actor
+   autenticado, participante/reemplazo y vigencia. Una vista consultada no cambia
+   al actor ni habilita cronómetro, checklist o finalización.
+6. **Paginación y consistencia.** Cursor opaco validado por SQL, limitado
+   al sujeto, mes, filtros y último orden estable; máximo 100 filas. Cada página
+   vuelve a validar permisos. Una revocación entre páginas debe impedir seguir
+   consultando; no se promete snapshot estable de membresías. Orden recomendado:
+   vencimiento, programación y UUID, con nulos en posiciones explícitas.
+7. **Forma del DTO y costo.** Congelar claves exactas comunes y agregados
+   opcionales explícitos por tipo; fechas como `YYYY-MM-DD`, revisiones y
+   decimales como strings donde corresponde; límites de texto y checklist
+   iguales en SQL y Zod. Probar plan de consulta con 2.000 tareas sin agregar
+   datos privados a la respuesta.
+
+La página debe tener un único RPC paginado que agregue los datos de sus filas;
+no puede resolverse con un `Promise.all` por tarjeta. Si los agregados aumentan
+el costo de SQL por encima del objetivo, acordar una consulta bulk separada que
+reciba una lista acotada de IDs y vuelva a autorizar cada tarea; no degradar a
+consultas individuales.
+
 ## Hallazgo que bloquea la interfaz real
 
 `src/main.tsx` todavía monta `LaboratoryWorkspace`, que usa datos ficticios locales. `RemoteWorkspace` usa el Worker/D1 y guarda el estado completo; no se puede reutilizar para Supabase. `SupabaseAuthGate` autentica y consulta `get_context_v1`, pero los RPC de lectura actuales no devuelven el conjunto paginado de tareas necesario para pintar un tablero.
