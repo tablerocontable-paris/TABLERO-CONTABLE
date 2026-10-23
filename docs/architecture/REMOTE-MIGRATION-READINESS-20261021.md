@@ -1,3 +1,34 @@
+# Estado de plataformas externas — 23/10/2026
+
+## Comprobación más reciente
+
+La rama `main` del repositorio privado contiene el commit `6dea64af0c0344ba2175fc5a4a61b1ea56d80fce`. GitHub Actions `40001331220` terminó correctamente con suite, build y paquete Sites. Se mejoraron los mensajes de validación del URI de Supabase: ahora revelan sólo indicadores booleanos por campo y nunca imprimen el secreto.
+
+El preflight Supabase `40000787076` falló antes de conectar porque el URI configurado no pasó el control de formato/destino. No consultó historial ni hizo dry-run/escrituras. No se ha observado una nueva ejecución del preflight desde entonces. Requiere actualizar `SUPABASE_DEV_DB_URL` con el Session pooler del proyecto DEV y repetirlo.
+
+## Cloudflare
+
+El producto publicado sigue siendo el Site privado de OpenAI. No hay configuración Wrangler, despliegue de Cloudflare ni secretos de esa plataforma versionados. El Worker existente depende de D1 y de cabeceras de identidad que provee Sites; no se puede desplegar tal cual como backend operativo de Cloudflare. La ruta prevista debe esperar a integrar Supabase Auth/RPC y separar los datos del laboratorio.
+
+Preparación requerida antes de publicar: definir frontend en Cloudflare Pages o Workers Static Assets, resolver el destino del Worker D1 existente, separar entornos DEV/producción, bindings y secretos, y configurar acceso privado. No se ha conectado ni desplegado Cloudflare.
+
+## Correo
+
+Hay un contrato servidor de entregas con claim/retry y un proveedor ficticio para pruebas, pero no una integración real de Gmail ni otro proveedor. La persistencia ya prevista depende de tablas/RPC de Supabase; el envío real debe esperar a migrar y auditar DEV, integrar identidad y destinatarios verificados, y definir OAuth, remitente, deduplicación y política de reintentos. No se conectó Gmail ni se enviaron mensajes.
+
+## Secuencia vigente
+
+1. Corregir el secreto Supabase y completar preflight sin escrituras.
+2. Aplicar/auditar 001–014 en DEV; luego revisar SQL015 en su etapa separada.
+3. Integrar Auth, permisos y operaciones de la aplicación, manteniendo el laboratorio aislado.
+4. Preparar y validar Cloudflare con entorno privado de DEV.
+5. Implementar y probar el proveedor de correo elegido en entorno de prueba.
+6. Probar desde la PC personal antes de aceptar la migración.
+
+La auditoría de Cloudflare/correo fue read-only. No accedió a credenciales ni alteró servicios.
+
+---
+
 # Corte de implementación local — 21/10/2026
 
 La puerta `SupabaseAuthGate` ya tiene inicio/cierre de sesión, identidad derivada de `get_context_v1`, MFA TOTP requerido para jefe/encargado, guardas para respuestas asíncronas obsoletas y formulario de acceso. Validación actual (21/10/2026): 7 pruebas enfocadas; suite 760/760 en 77 archivos; TypeScript, build cliente y build Worker aprobados. La prueba nueva confirma enrolamiento TOTP obligatorio para encargado. Esto sigue sin conectar `src/main.tsx` ni activar el área operativa remota.

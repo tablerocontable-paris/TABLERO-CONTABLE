@@ -1,28 +1,30 @@
 # Estado actual de migración — actualizado 23/10/2026
 
-Repositorio activo `work/site`, remoto `tablerocontable-paris/TABLERO-CONTABLE`.
-Último commit remoto confirmado: `2b7e0d86e95e4bd33731af50fa5ccfae690e36e3`;
-Actions `39985971690` está corriendo (commit anterior aprobado). La pantalla optativa
-`Mi trabajo` de solo lectura existe localmente; Sol aceptó la revisión y la
-observación P3 de claves React se corrigió con ordinales y prueba de IDs
-repetidos. Validación local: enfocadas 23/23, suite 813/813 en 82 archivos,
-TypeScript, build cliente, build Worker, diff-check y paquete Sites aprobados.
-Paquete 1.666.943 bytes, SHA-256
-`b19035606a58b4e34bcf0307405e0384d8f0202939db3d1f8cb45fea4849088b`.
-Revisión visual en navegador pendiente; revisar CI del nuevo commit. Mantener
-mismo repo y Site privado.
+Repositorio activo `work/site`, remoto privado
+`tablerocontable-paris/TABLERO-CONTABLE`. El cambio de diagnóstico para el
+preflight, commit `6dea64af0c0344ba2175fc5a4a61b1ea56d80fce`, pasó GitHub Actions
+`40001331220` (suite, build y paquete Sites). El trabajo sigue en el mismo repo
+y Site privado; no crear reemplazos ni pull requests.
 
-Supabase `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`) está activo y vacío (0
-migraciones/tablas, última consulta 23/10). No hubo escritura remota. El siguiente
-paso remoto requiere secreto Actions `SUPABASE_DEV_DB_URL`, luego preflight sin
-escrituras 001–014, revisión de destino/historial/dry-run y aplicación/auditoría
-separada de SQL015. Después Auth/RPC reales, permisos y operaciones, evidencia/
-Storage, hosting/correo y aceptación desde PC personal. Datos ficticios; no
-activar área operativa ni usar producción.
+Supabase `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`) aún no recibió migraciones.
+El preflight `40000787076` falló en la validación de URL antes de conectar, sin
+consultas ni escrituras. El secreto `SUPABASE_DEV_DB_URL` existe; debe
+actualizarse con la URI Session pooler del proyecto DEV. Después repetir primero
+el preflight read-only, revisar destino/historial/dry-run, aplicar y auditar
+001–014 y tratar SQL015 por separado. No ejecutar producción.
 
-Este bloque supersede los estados inferiores que indiquen `158b2a0`, lector sin
-UI o pantalla sólo diagnóstica. Conservar los registros históricos y el scratch
-`.block` intacto.
+Cloudflare no está configurado: el Worker actual depende de D1 y de identidad
+que entrega Sites. Correo sólo tiene proveedor ficticio; no hay Gmail conectado.
+Ambos esperan la integración Supabase/Auth y una decisión/configuración de
+servicio. Auditoría y secuencia en
+`docs/architecture/REMOTE-MIGRATION-READINESS-20261021.md`.
+
+Mantener datos ficticios, laboratorio aislado y acceso privado; no activar área
+operativa ni invitar usuarios. Conservar el scratch no versionado
+`tests/review/m2-2c-legacy-task-control-replay-races.block`.
+
+Este bloque supersede los estados inferiores. Conservar los registros
+históricos y no modificar el scratch `.block`.
 
 <!-- Historial de continuidad -->
 

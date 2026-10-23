@@ -13,9 +13,15 @@ Settings → Secrets and variables → Actions. No pegar credenciales en el chat
 Luego ejecutar de nuevo el preflight. Si pasa, revisar historial y dry-run antes
 de cualquier aplicación. No ejecutar todavía las migraciones ni SQL015.
 
+El commit de diagnóstico `6dea64af0c0344ba2175fc5a4a61b1ea56d80fce` pasó
+GitHub Actions `40001331220` (suite, build y paquete Sites). La auditoría
+read-only de Cloudflare/correo está documentada en
+`docs/architecture/REMOTE-MIGRATION-READINESS-20261021.md`; esos trabajos siguen
+dependiendo de Supabase DEV y aún no hay conexiones reales.
+
 ## Publicación confirmada y próxima puerta
 
-- GitHub privado `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`: `b6c9d2bf60da965c4431cababf6b0fcf95baf7cc`. Actions `39987783440` terminó en verde con pruebas, build y paquete Sites.
+- La última validación verde de suite, build y paquete Sites corresponde al cambio de diagnóstico `6dea64af0c0344ba2175fc5a4a61b1ea56d80fce`, Actions `40001331220`.
 - El Site existente se sincronizó con los 634 archivos versionados y publicó la versión 95 desde el commit de su fuente `872f014a73ef1a7447d5ba58f3e6012518dca20c`. URL privada: `https://grupo-paris-contabilidad.valentino-magni.chatgpt.site`; audiencia limitada a la cuenta propietaria.
 - Supabase `grupo-paris-dev` está activo y vacío, con 0 migraciones. `SUPABASE_DEV_DB_URL` existe en Actions, pero el preflight `40000787076` rechazó su formato/destino antes de conectar; no hubo dry-run ni escrituras.
 - Próximo paso del propietario: actualizar ese secreto con la URI Session pooler copiada desde Supabase → Connect para el proyecto DEV. No pegar credenciales en el chat. Repetir el preflight y revisar destino, historial y dry-run antes de aplicar. SQL015 se aplica aparte.

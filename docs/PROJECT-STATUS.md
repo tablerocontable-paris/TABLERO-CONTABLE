@@ -7,6 +7,9 @@ secreto `SUPABASE_DEV_DB_URL`, pero falló la validación segura de formato/dest
 antes de conectarse a la base. No se consultó el historial remoto ni se ejecutó
 el dry-run; no hubo lecturas ni escrituras en Supabase. El log no revela qué
 campo no coincide. El agente de auditoría revisó el flujo sin acceder al secreto.
+El commit `6dea64af0c0344ba2175fc5a4a61b1ea56d80fce` agregó indicadores seguros
+por campo en ambos workflows; GitHub Actions `40001331220` validó ese commit
+con éxito (suite, build y paquete Sites).
 
 El próximo paso es actualizar el secreto con la URI **Session pooler** copiada
 desde Supabase → Connect para `grupo-paris-dev`, puerto `5432`, base `postgres`,
@@ -16,10 +19,9 @@ termina y su destino, historial y dry-run se revisan correctamente.
 
 ## Corte de publicación y migración externa
 
-El repositorio privado `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`,
-está en `b6c9d2bf60da965c4431cababf6b0fcf95baf7cc`. GitHub Actions
-`39987783440` terminó correctamente: suite, build y validación del paquete
-Sites.
+La última validación verde de suite, build y paquete Sites corresponde al cambio
+de diagnóstico `6dea64af0c0344ba2175fc5a4a61b1ea56d80fce`, Actions
+`40001331220`.
 
 El mismo Site privado `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85` se sincronizó
 con los 634 archivos versionados de `main` y se publicó como versión 95 desde
@@ -36,6 +38,11 @@ Siguen pendientes la migración/autenticación alojada y sus permisos, escritura
 operativas, evidencia y Storage, hosting Cloudflare independiente, correo,
 producción y aceptación desde la PC personal. La aplicación sigue en laboratorio
 con datos ficticios.
+
+Cloudflare y correo no se han conectado. El Worker actual depende de D1 y de
+identidad proporcionada por Sites; el correo sólo tiene proveedor de prueba.
+Auditoría read-only y secuencia detalladas en
+`docs/architecture/REMOTE-MIGRATION-READINESS-20261021.md`.
 
 Este bloque reemplaza los estados anteriores de “lector sin UI”, `158b2a0` y
 “sólo diagnóstico”. El resto del registro queda como historial.
