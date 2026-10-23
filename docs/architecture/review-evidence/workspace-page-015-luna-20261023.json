@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-23",
+  "scope": "local implementation only; no hosted database or deployment",
+  "acceptedContract": {
+    "path": "docs/architecture/REMOTE-WORKSPACE-BOOTSTRAP-CONTRACT-SOL-DRAFT-20261021.md",
+    "sha256": "42849A545D2B63DCFB0507592FB696F19AD070A4FD4C8B926ACB2E76B018E96D"
+  },
+  "acceptance": "docs/architecture/REMOTE-WORKSPACE-BOOTSTRAP-SOL-ACCEPTANCE-20261023.md",
+  "files": {
+    "supabase/migrations/202610150014_operational_api.sql": "BC09CF9631A2F3E4BD19541C2A050AB1C663AE0E704D47D7E5A4752B114E0345",
+    "supabase/migrations/202610230015_workspace_page.sql": "5ED9080322FCE405855FF70210F542D9694A7EA57C5A888B9AEE187CE64C5FFE",
+    "src/data/supabase/operational-contract.ts": "8D9AF39C150F920DC797F83CD1E16CD84B23BECC4B557492C070C9AD9BDC53B4",
+    "tests/supabase-workspace-page-015.test.ts": "327B7AE954BC829C877C5E0BC92DE01B8E566DFFC391F90B46293D24184BE061",
+    "tests/supabase-operational-contract.test.ts": "9BE08F294934FEAF7A9256BD5138EBA4511894315014176771C3E4F373FB16D4",
+    "tests/helpers/accounting-lab.ts": "D0C9D0DD6983B33D3BF077546A0E382EA4A846CE43E850FD35F8F5CBCCBA15BE"
+  },
+  "validation": [
+    {
+      "command": "node node_modules/vitest/vitest.mjs run tests/supabase-workspace-page-015.test.ts tests/supabase-operational-contract.test.ts --maxWorkers=2 --testTimeout=60000 --hookTimeout=30000 --silent=false",
+      "result": "21 passed in 2 files"
+    },
+    {
+      "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "result": "765 passed in 78 files; exit 0"
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc --noEmit; node node_modules/vite/bin/vite.js build --outDir dist/client; node scripts/build-worker.mjs",
+      "result": "exit 0; client bundle built; Worker build completed"
+    },
+    {
+      "command": "git diff --check",
+      "result": "exit 0"
+    }
+  ],
+  "synthetic2000TaskSmoke": {
+    "engine": "PGlite, local synthetic fixture",
+    "workspacePageLimit": 100,
+    "returnedItems": 100,
+    "nextCursor": true,
+    "apiCallMs": 646,
+    "responseBytes": 60663,
+    "explainAnalyzeBuffers": {
+      "topNode": "Limit",
+      "actualRows": 101,
+      "executionTimeMs": 529.051,
+      "sharedHitBlocks": 50052
+    },
+    "limitation": "Synthetic local timing is not a Supabase latency estimate or a representative session/concurrency benchmark."
+  },
+  "remoteActions": {
+    "databaseWrites": false,
+    "deployment": false,
+    "credentialsUsed": false,
+    "uiConnected": false
+  }
+}

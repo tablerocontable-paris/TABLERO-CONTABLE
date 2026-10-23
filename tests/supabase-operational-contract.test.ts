@@ -57,6 +57,8 @@ describe("operational API v1 protocol", () => {
     expect(decodeQueryV1({ contractVersion: 1, kind: "quality", filters: { taskId: id(1) }, cursor: null, limit: 2 }).ok).toBe(false);
     expect(decodeQueryV1({ contractVersion: "1", kind: "quality", filters: { taskId: id(1) }, cursor: null, limit: 1 }).ok).toBe(false);
     expect(decodeQueryV1({ contractVersion: 1, kind: "futureKind", filters: {}, cursor: null, limit: 1 }).ok).toBe(false);
+    expect(decodeQueryV1({ contractVersion: 1, kind: "workspacePage", filters: { subjectId: null, period: "2026-10-01", companyId: null, teamId: null, sector: null }, cursor: null, limit: 100 }).ok).toBe(true);
+    expect(decodeQueryV1({ contractVersion: 1, kind: "workspacePage", filters: { subjectId: id(1), period: "2026-10-02", companyId: null, teamId: null, sector: null }, cursor: null, limit: 100 }).ok).toBe(false);
   });
 
   it("rejects malformed runtime values without throwing and returns normalized union data", () => {
@@ -80,5 +82,13 @@ describe("operational API v1 protocol", () => {
     expect(decodeQueryResponseV1({ contractVersion: 1, kind: "quality", data: { taskId: id(1), current: null } }).ok).toBe(true);
     expect(decodeQueryResponseV1({ contractVersion: 1, kind: "quality", data: { taskId: id(1), current: { assessmentId: id(3), revision: "1", quality: 0, order: 0, timeliness: 0, mean: "0.00", observation: "Sin mejora", evaluatedBy: id(2), evaluatedAt: "2026-10-15T12:00:00Z" } } }).ok).toBe(true);
     expect(decodeQueryResponseV1({ contractVersion: 1, kind: "quality", data: { taskId: id(1), current: { assessmentId: id(3), revision: "1", quality: 0, order: 0, timeliness: 0, mean: "0.00", observation: "Sin mejora", evaluatedBy: id(2), evaluatedAt: "2026-10-15T12:00:00+00:00" } } }).ok).toBe(true);
+    const workspacePage = { contractVersion: 1, kind: "workspacePage", data: { evaluatedAt: "2026-10-15T12:00:00Z", nextCursor: null, items: [{ taskId: id(1), taskRevision: "1", ownerId: id(2), ownerDisplayName: "Ana", teamId: id(3), teamName: "Equipo", companyId: id(4), companyName: "Empresa", period: "2026-10-01", scheduledOn: null, title: "Cierre", kind: "operativa", measurementVersion: 2, status: "Pendiente", dueDate: null, priority: "Media", weight: null, target: null, unit: "facturas", checklist: [], ready: true, blockerCodes: [], hasHiddenDependencies: false, subjectWork: { recordedSeconds: "0", movementCount: "0", quantity: "0", unit: "facturas", ratedLoad: "0", weightedLoad: "0", unratedQuantity: "0" } }] } };
+    expect(decodeQueryResponseV1(workspacePage).ok).toBe(true);
+    const privateFields = structuredClone(workspacePage) as any;
+    privateFields.data.items[0].blockedBy = "motivo privado";
+    expect(decodeQueryResponseV1(privateFields).ok).toBe(false);
+    const ratedFromCurrentRate = structuredClone(workspacePage) as any;
+    ratedFromCurrentRate.data.items[0].subjectWork.currentRate = "1.5";
+    expect(decodeQueryResponseV1(ratedFromCurrentRate).ok).toBe(false);
   });
 });

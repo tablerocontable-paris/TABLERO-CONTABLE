@@ -1,3 +1,21 @@
+# Estado vigente — workspacePage local, 23/10/2026
+
+Sol aceptó el contrato bootstrap cuyo SHA-256 es
+`42849A545D2B63DCFB0507592FB696F19AD070A4FD4C8B926ACB2E76B018E96D` para
+implementar localmente la migración aditiva 015. `workspacePage` se agregó
+encima del último `api.query_v1` mediante delegación: SQL014 permanece byte por
+byte sin cambios y conserva sus kinds anteriores. Se añadieron esquemas Zod/TS,
+pruebas PGlite de autorización propia/supervisora, delegación, DTO exacto y
+selección sobre 2.000 tareas. Suite 765/765 en 78 archivos, TypeScript, build
+de cliente/Worker y `git diff --check` aprobados. Evidencia y límites:
+`docs/architecture/REMOTE-WORKSPACE-BOOTSTRAP-IMPLEMENTATION-LUNA-20261023.md`.
+
+SQL015 sólo está implementada y validada localmente. No se aplicó a Supabase,
+no se desplegó y no se conectó la interfaz; el Site sigue privado y el área
+operativa permanece apagada. Antes de cualquier aplicación remota, Sol debe
+revisar el código y su evidencia; el preflight aprobado para 001–014 sigue
+siendo una puerta independiente.
+
 # Corte de implementación local — 21/10/2026
 
 La puerta `SupabaseAuthGate` ya tiene inicio/cierre de sesión, identidad derivada de `get_context_v1`, MFA TOTP requerido para jefe/encargado, guardas para respuestas asíncronas obsoletas y formulario de acceso. Validación actual: 7 pruebas enfocadas; suite 760/760 en 77 archivos; TypeScript, build cliente y build Worker aprobados. La prueba nueva confirma que un encargado no entra al espacio antes de completar el enrolamiento TOTP. Esto sigue sin conectar `src/main.tsx` ni activar el área operativa remota.

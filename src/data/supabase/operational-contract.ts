@@ -159,6 +159,7 @@ const queryKinds = z.discriminatedUnion("kind", [
   exact({ contractVersion: z.literal(1), kind: z.literal("ownOnboarding"), filters: exact({}), cursor: z.null(), limit: z.literal(1) }),
   exact({ contractVersion: z.literal(1), kind: z.literal("parameterInbox"), filters: exact({ status: z.enum(["submitted", "changes_requested", "approved"]), ownerId: uuid.nullable() }), ...pagination }),
   exact({ contractVersion: z.literal(1), kind: z.literal("creationContext"), filters: exact({ ownerId: uuid }), cursor: z.null(), limit: z.literal(1) }),
+  exact({ contractVersion: z.literal(1), kind: z.literal("workspacePage"), filters: exact({ subjectId: uuid.nullable(), period: day.refine((v) => v.endsWith("-01")), companyId: uuid.nullable(), teamId: uuid.nullable(), sector: clean(1, 200).nullable() }), ...pagination }),
 ]);
 export const queryV1Schema = boundedJson(4_096).pipe(queryKinds);
 
@@ -221,6 +222,19 @@ const ownRequest = exact({ requestId: uuid, status: z.string(), revision: rev, d
 const ownOnboardingData = exact({ ownerRevision: rev, request: ownRequest.nullable() });
 const parameterInboxData = exact({ items: z.array(submittedRequest).max(100), nextCursor: z.string().max(2048).nullable() });
 const creationContextData = exact({ ownerId: uuid, creationRevision: rev, companies: z.array(exact({ id: uuid, name: z.string() })).max(1000), teams: z.array(exact({ id: uuid, name: z.string() })).max(1000) });
+const workspaceCommon = {
+  taskId: uuid, taskRevision: rev, ownerId: uuid, ownerDisplayName: z.string().min(1).max(200),
+  teamId: uuid, teamName: z.string().min(1).max(200), companyId: uuid, companyName: z.string().min(1).max(200),
+  period: day.nullable(), scheduledOn: day.nullable(), title: z.string().min(1).max(200),
+  status: z.enum(["Pendiente", "En curso", "Completada"]), dueDate: day.nullable(), priority: z.enum(["Alta", "Media", "Baja"]),
+  ready: z.boolean(), blockerCodes: z.array(z.enum(["external_wait", "available_later", "dependencies_pending"])), hasHiddenDependencies: z.boolean(),
+};
+const workspaceChecklist = z.array(exact({ id: uuid, text: z.string().min(1).max(1000), done: z.boolean() })).max(100);
+const workspaceResultItem = exact({ ...workspaceCommon, kind: z.literal("resultado"), measurementVersion: z.literal(1), weight: legacyDecimal.refine((v) => Number(v) > 0 && Number(v) <= 100), target: z.null(), unit: z.null(), checklist: workspaceChecklist, subjectWork: exact({ recordedSeconds: rev }) });
+const workspaceOperativeV1Item = exact({ ...workspaceCommon, kind: z.literal("operativa"), measurementVersion: z.literal(1), weight: legacyDecimal.refine((v) => Number(v) > 0 && Number(v) <= 100), target: safeInteger(1, 2_147_483_647), unit: z.string().min(1).max(80), checklist: workspaceChecklist, subjectWork: exact({ recordedSeconds: rev, movementCount: rev, quantity: rev, unit: z.string().min(1).max(80), ratedLoad: legacyDecimal, weightedLoad: legacyDecimal.nullable(), unratedQuantity: rev }) });
+const workspaceOperativeV2Item = exact({ ...workspaceCommon, kind: z.literal("operativa"), measurementVersion: z.literal(2), weight: z.null(), target: z.null(), unit: z.string().min(1).max(80), checklist: z.array(z.never()).max(0), subjectWork: exact({ recordedSeconds: rev, movementCount: rev, quantity: rev, unit: z.string().min(1).max(80), ratedLoad: legacyDecimal, weightedLoad: legacyDecimal.nullable(), unratedQuantity: rev }) });
+const workspaceItem = z.union([workspaceResultItem, workspaceOperativeV1Item, workspaceOperativeV2Item]);
+const workspacePageData = exact({ evaluatedAt: isoTimestamp, items: z.array(workspaceItem).max(100), nextCursor: z.string().max(2048).nullable() });
 const queryDataKinds = z.discriminatedUnion("kind", [
   exact({ kind: z.literal("activityPage"), data: exact({ items: z.array(activity), nextCursor: z.string().max(2048).nullable() }) }),
   exact({ kind: z.literal("operationalSummary"), data: exact({ taskId: uuid, unit: legacyUnit, movementCount: rev, quantity: rev, ratedLoad: decimal, weightedLoad: nullableDecimal, unratedQuantity: rev, recordedSeconds: rev, fullyWeighted: z.boolean(), requiresJointReview: z.boolean() }) }),
@@ -234,6 +248,7 @@ const queryDataKinds = z.discriminatedUnion("kind", [
   exact({ kind: z.literal("ownOnboarding"), data: ownOnboardingData }),
   exact({ kind: z.literal("parameterInbox"), data: parameterInboxData }),
   exact({ kind: z.literal("creationContext"), data: creationContextData }),
+  exact({ kind: z.literal("workspacePage"), data: workspacePageData }),
 ]);
 export const queryResponseV1Schema = z.discriminatedUnion("kind", [
   exact({ contractVersion: z.literal(1), kind: z.literal("activityPage"), data: z.object({ items: z.array(activity), nextCursor: z.string().max(2048).nullable() }).strict() }),
@@ -248,6 +263,7 @@ export const queryResponseV1Schema = z.discriminatedUnion("kind", [
   exact({ contractVersion: z.literal(1), kind: z.literal("ownOnboarding"), data: ownOnboardingData }),
   exact({ contractVersion: z.literal(1), kind: z.literal("parameterInbox"), data: parameterInboxData }),
   exact({ contractVersion: z.literal(1), kind: z.literal("creationContext"), data: creationContextData }),
+  exact({ contractVersion: z.literal(1), kind: z.literal("workspacePage"), data: workspacePageData }),
 ]);
 
 export type CommandV1 = z.infer<typeof commandV1Schema>;
