@@ -1,6 +1,6 @@
 # Estado vigente de ejecución — 23/10/2026
 
-- Commit `22ac0ad404d6e12e69828edde7026e5f9f114de4` está publicado en `main` del repo privado nuevo. GitHub Actions `39976297299` valida el último cambio; el commit anterior terminó con suite, build y paquete Sites exitosos.
+- Commit `8d11a9736cf4972adabc1ac8a46c452334f89b9a` está publicado en `main` del repo privado nuevo. GitHub Actions `39977063192` pasó suite, build y paquete Sites; el workflow `39977770601` valida este commit.
 - El hook aprobó 196/196 pruebas. El bootstrap optativo pasó revisión Sol y la suite completa 787/787 en 80 archivos, TypeScript y builds cliente/Worker. Código y evidencia ya están publicados.
 - Lectura Supabase de hoy: `grupo-paris-dev` activo, 0 migraciones y 0 tablas en `public`, `api` y `app_private`.
 - SQL015 está aceptada por Sol para DEV en el hash exacto `CC49480D1317F1B44CD29F245508F9C8FB0B0894FE4E66C1B22F8E00D36B33F2`, pero no aplicada.

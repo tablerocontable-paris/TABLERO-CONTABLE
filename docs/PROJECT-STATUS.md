@@ -1,9 +1,10 @@
 # Estado vigente — migración de workspace, 23/10/2026
 
-`main` se publicó directamente en GitHub en `22ac0ad404d6e12e69828edde7026e5f9f114de4`;
-Actions `39976297299` valida este SHA. El commit anterior terminó con suite
-completa, build y paquete Sites exitosos. El nuevo commit aprobó el hook local
-196/196; el corte local completo quedó en 787/787 y builds cliente/Worker.
+`main` se publicó directamente en GitHub en `8d11a9736cf4972adabc1ac8a46c452334f89b9a`.
+Actions `39977063192` validó el commit anterior con suite, build y paquete Sites
+exitosos; el workflow `39977770601` está validando ahora el SHA vigente. El hook
+local del último commit aprobó 196/196; el corte funcional completo quedó en
+787/787 y builds cliente/Worker.
 
 Sol aceptó el código SQL015 para DEV con hash LF
 `CC49480D1317F1B44CD29F245508F9C8FB0B0894FE4E66C1B22F8E00D36B33F2`, tras aceptar
