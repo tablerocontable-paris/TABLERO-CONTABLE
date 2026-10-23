@@ -38,9 +38,22 @@ Después de autenticarse sólo aparece una pantalla diagnóstica mínima; no mon
 - El build muestra avisos de Zod/Rollup y del bundle principal superior a
   500 kB; no son fallos de esta corrección.
 
-## Límites
+## Límites y continuidad
 
-Esta implementación está local y aún debe publicarse. No se activó la bandera,
-no se autenticó contra Supabase ni se hicieron escrituras. Supabase DEV sigue
-vacío; las migraciones 001–015 y la aceptación funcional desde la PC personal
-siguen pendientes.
+El bootstrap y el reporte ya están publicados en `main`; no se activó la bandera,
+no se autenticó contra Supabase ni se hicieron escrituras. El repositorio activo
+continúa siendo `work/site`.
+
+El 23/10 se agregó aparte un repositorio aislado de lectura para `workspacePageV2`
+y `taskChecklistPage`. No está conectado al bootstrap, no monta el tablero, no
+convierte DTOs a `State`, y no ofrece comandos ni persistencia. Sol lo aceptó
+localmente sin hallazgos bloqueantes. La revisión señaló dos mejoras P3 de
+cobertura, incorporadas en la prueba enfocada; su aceptación se refiere al
+código local y no demuestra integración con Supabase alojado.
+
+La suite completa más reciente comunicada antes de ese repositorio fue 795/795;
+el repositorio nuevo pasó su prueba enfocada 8/8 y TypeScript. La integración
+alojada sigue pendiente: DEV no tiene migraciones/tablas y el preflight necesita
+el secreto `SUPABASE_DEV_DB_URL` en GitHub Actions. Después siguen aplicación y
+auditoría de migraciones, UI remota y permisos, almacenamiento/evidencia,
+hosting/correo y aceptación funcional desde la PC personal.

@@ -1,10 +1,26 @@
 # Estado vigente — migración de workspace, 23/10/2026
 
-`main` se publicó directamente en GitHub en `8d11a9736cf4972adabc1ac8a46c452334f89b9a`.
-Actions `39977063192` validó el commit anterior con suite, build y paquete Sites
-exitosos; el workflow `39977770601` está validando ahora el SHA vigente. El hook
-local del último commit aprobó 196/196; el corte funcional completo quedó en
-787/787 y builds cliente/Worker.
+## Corte local en curso — repositorio Supabase de lectura
+
+El bootstrap Auth permanece publicado y apagado por defecto. Se implementó un
+repositorio aislado para consultar páginas `workspacePageV2` y segmentos de
+`taskChecklistPage`, sin conectar la interfaz, convertir datos a `State`, ni
+habilitar comandos. Sol lo aceptó sin hallazgos funcionales; se incorporaron sus
+dos observaciones P3 de cobertura. Verificación local actual: suite **795/795**
+en 81 archivos, TypeScript, build cliente y build Worker aprobados. La suite y
+los builds son locales; aún no representan conexión alojada. Código pendiente de
+publicación directa en `main`.
+
+La migración externa sigue bloqueada por el secreto `SUPABASE_DEV_DB_URL` en
+GitHub Actions. Supabase DEV se había consultado vacío (0 migraciones y 0 tablas);
+el preflight 001–014 aún no se ejecutó. Después siguen migración/auditoría DEV,
+SQL015 separado, autenticación y permisos alojados, UI remota por módulos,
+evidencia/almacenamiento, hosting/correo y aceptación desde la PC personal.
+
+`main` está publicado directamente en GitHub; último SHA confirmado antes de
+este corte local: `158b2a0d4ab0251f1a775b332ccd3497e59ec92f`. Actions
+`39978569509` aprobó suite, build y paquete Sites para ese SHA. El repositorio de
+lectura y este corte documental están pendientes de commit/CI.
 
 Sol aceptó el código SQL015 para DEV con hash LF
 `CC49480D1317F1B44CD29F245508F9C8FB0B0894FE4E66C1B22F8E00D36B33F2`, tras aceptar
@@ -20,8 +36,8 @@ que el usuario debe guardar en Settings → Secrets and variables → Actions, s
 pegarlo en el chat. Luego aplicar/auditar 001–014 y, por separado, 015.
 
 El bootstrap de Supabase Auth para diagnóstico ya está publicado y aceptado por
-Sol. Suite completa 787/787 en 80 archivos, TypeScript y builds de cliente/Worker
-aprobados. El modo remoto se activa sólo con una
+Sol. Su suite completa anterior fue 787/787 en 80 archivos; el corte actual pasó
+795/795 en 81 archivos, TypeScript y builds cliente/Worker. El modo remoto se activa sólo con una
 bandera explícita; por defecto sigue cargando `LaboratoryWorkspace`. Aun activado,
 muestra sólo diagnóstico, sin tablero operativo. Evidencia:
 `docs/architecture/REMOTE-WORKSPACE-AUTH-BOOTSTRAP-IMPLEMENTATION-LUNA-20261023.md`.

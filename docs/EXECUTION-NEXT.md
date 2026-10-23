@@ -1,6 +1,10 @@
 # Estado vigente de ejecución — 23/10/2026
 
-- Commit `8d11a9736cf4972adabc1ac8a46c452334f89b9a` está publicado en `main` del repo privado nuevo. GitHub Actions `39977063192` pasó suite, build y paquete Sites; el workflow `39977770601` valida este commit.
+- El repositorio local aislado `src/data/supabase/workspace-repository.ts` consulta únicamente `workspacePageV2` y `taskChecklistPage`; todavía no está conectado a la UI ni publicado. Sol lo aceptó; las observaciones P3 de pruebas quedaron cubiertas. Suite 795/795, TypeScript, builds cliente y Worker aprobados.
+- El remoto `grupo-paris-dev` había sido confirmado vacío. Falta el secreto `SUPABASE_DEV_DB_URL` en Actions para iniciar el preflight sin escrituras de 001–014. No enviar su valor en el chat.
+- Después del preflight: aplicar/auditar 001–014 en DEV; revisar y aplicar SQL015 por separado; integrar Auth/permisos y vistas remotas por módulo; luego evidencia/Storage, hosting/correo y aceptación desde PC personal.
+
+- Último commit publicado antes de este corte local: `158b2a0d4ab0251f1a775b332ccd3497e59ec92f`; GitHub Actions `39978569509` pasó suite, build y paquete Sites. El repositorio aislado de lectura queda pendiente de publicar y validar en CI.
 - El hook aprobó 196/196 pruebas. El bootstrap optativo pasó revisión Sol y la suite completa 787/787 en 80 archivos, TypeScript y builds cliente/Worker. Código y evidencia ya están publicados.
 - Lectura Supabase de hoy: `grupo-paris-dev` activo, 0 migraciones y 0 tablas en `public`, `api` y `app_private`.
 - SQL015 está aceptada por Sol para DEV en el hash exacto `CC49480D1317F1B44CD29F245508F9C8FB0B0894FE4E66C1B22F8E00D36B33F2`, pero no aplicada.
