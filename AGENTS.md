@@ -1,16 +1,16 @@
 # Estado actual de migración — actualizado 23/10/2026
 
 Repositorio activo `work/site`, remoto `tablerocontable-paris/TABLERO-CONTABLE`.
-Último commit remoto confirmado: `ff90876d3f7d29e10be000aa3e60421e4ba20b6d`;
-Actions `39981745913` aprobó suite, build y paquete Sites. La pantalla optativa
+Último commit remoto confirmado: `2b7e0d86e95e4bd33731af50fa5ccfae690e36e3`;
+Actions `39985971690` está corriendo (commit anterior aprobado). La pantalla optativa
 `Mi trabajo` de solo lectura existe localmente; Sol aceptó la revisión y la
 observación P3 de claves React se corrigió con ordinales y prueba de IDs
 repetidos. Validación local: enfocadas 23/23, suite 813/813 en 82 archivos,
 TypeScript, build cliente, build Worker, diff-check y paquete Sites aprobados.
 Paquete 1.666.943 bytes, SHA-256
 `b19035606a58b4e34bcf0307405e0384d8f0202939db3d1f8cb45fea4849088b`.
-Revisión visual en navegador y CI del nuevo commit pendientes. Mantener mismo
-repo y Site privado.
+Revisión visual en navegador pendiente; revisar CI del nuevo commit. Mantener
+mismo repo y Site privado.
 
 Supabase `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`) está activo y vacío (0
 migraciones/tablas, última consulta 23/10). No hubo escritura remota. El siguiente

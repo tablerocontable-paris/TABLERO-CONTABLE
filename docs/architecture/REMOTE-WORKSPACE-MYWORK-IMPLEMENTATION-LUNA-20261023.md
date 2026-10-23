@@ -33,7 +33,8 @@ largas a pantallas de 320 px.
   TypeScript, build cliente, build Worker, diff-check y paquete Sites aprobados.
   Paquete: 1.666.943 bytes, SHA-256
   `b19035606a58b4e34bcf0307405e0384d8f0202939db3d1f8cb45fea4849088b`.
-- Commit directo/CI del nuevo corte y verificación visual en navegador pendientes.
+- Commit directo sin PR: `2b7e0d86e95e4bd33731af50fa5ccfae690e36e3`.
+- GitHub Actions `39985971690` está en ejecución; revisión visual en navegador pendiente.
 
 ## Límites
 

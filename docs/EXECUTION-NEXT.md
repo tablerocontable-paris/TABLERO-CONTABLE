@@ -2,10 +2,10 @@
 
 ## Corte actualizado
 
-- `main` publicado: `ff90876d3f7d29e10be000aa3e60421e4ba20b6d`; Actions `39981745913` pasó suite, build y paquete Sites.
+- `main` publicado directamente, sin PR: `2b7e0d86e95e4bd33731af50fa5ccfae690e36e3`. Actions `39985971690` está corriendo; el commit anterior `ff90876` pasó.
 - `Mi trabajo` de solo lectura está implementada localmente bajo el bootstrap optativo Auth, apagado por defecto. Sol aceptó la revisión; se corrigieron las claves React por ordinal y se probó con IDs repetidos.
 - Validación final local: 23/23 enfocadas, 813/813 suite completa en 82 archivos, TypeScript, build cliente/Worker, diff-check y paquete Sites pasaron. Paquete: 1.666.943 bytes, SHA-256 `b19035606a58b4e34bcf0307405e0384d8f0202939db3d1f8cb45fea4849088b`. Falta revisión visual en navegador.
-- Próximo paso: hook/commit y publicación directa en `main`, comprobar CI y adjuntar evidencia actualizada.
+- Próximo paso: comprobar CI `39985971690` y registrar su resultado; después preparar el preflight remoto cuando exista el secreto.
 - Migración externa pendiente: guardar `SUPABASE_DEV_DB_URL` como secreto de Actions; correr preflight 001–014 sin escrituras; revisar destino/historial/dry-run; aplicar y auditar DEV; ejecutar SQL015 por separado.
 - Luego: validar Auth/RPC con cuenta de prueba, implementar escrituras permitidas, Storage/evidencia, hosting/correo y aceptación desde PC personal. Site privado, datos ficticios, área operativa apagada.
 

@@ -2,8 +2,9 @@
 
 ## Corte local actualizado — pantalla personal de solo lectura
 
-`main` remoto está en `ff90876d3f7d29e10be000aa3e60421e4ba20b6d`; Actions
-`39981745913` pasó suite, build y paquete Sites. La pantalla `Mi trabajo` ahora
+`main` remoto está en `2b7e0d86e95e4bd33731af50fa5ccfae690e36e3`; Actions
+`39985971690` está ejecutándose. El commit anterior `ff90876` pasó suite, build
+y paquete Sites. La pantalla `Mi trabajo` ahora
 está implementada localmente, usa únicamente consultas del actor autenticado y
 permanece tras el opt-in Auth, apagado por defecto. Sol aceptó la revisión de
 seguridad tras corregir paginación Unicode, revocación/limpieza de datos y
@@ -12,10 +13,11 @@ se añadió una prueba con IDs repetidos.
 
 Validación final local: pruebas enfocadas 23/23, suite completa 813/813 en 82
 archivos, TypeScript, build cliente, build Worker, diff-check y paquete del Site
-privado. El archivo local mide 1.666.943 bytes; SHA-256
+privado. Commit directo sin PR: `2b7e0d86e95e4bd33731af50fa5ccfae690e36e3`.
+El archivo local mide 1.666.943 bytes; SHA-256
 `b19035606a58b4e34bcf0307405e0384d8f0202939db3d1f8cb45fea4849088b`. No hubo
 validación visual en navegador. El corte queda listo para publicar directo a
-`main`; requiere CI posterior.
+`main`; el CI de ese commit está pendiente.
 
 Supabase DEV sigue activo y vacío: 0 migraciones y 0 tablas. La migración remota
 espera que se configure el secreto Actions `SUPABASE_DEV_DB_URL`; luego se corre
