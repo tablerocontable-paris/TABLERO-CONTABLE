@@ -33,6 +33,11 @@ El repositorio oficial privado es [`tablerocontable-paris/TABLERO-CONTABLE`](htt
 
 6. Para publicar cambios desde la PC personal, usá GitHub con la cuenta propietaria. El flujo acordado trabaja directamente en `main`, sin pull request. Antes de editar desde otra computadora, subí los cambios pendientes de la computadora actual; no edites ambas copias a la vez.
 
+El trabajo normal está en `main`. Se preservaron además dos ramas de archivo
+para recuperar historia anterior de Sites, fuera de la historia de `main`:
+`archive/sites-source-history-20261015` y
+`archive/site-analytics-stash-20261007`. No son ramas de trabajo/despliegue.
+
 ## Datos del laboratorio
 
 GitHub sincroniza el código y el historial Git; no sincroniza el estado ficticio guardado en el navegador (`paris-state-lab`) ni los archivos locales de IndexedDB. Para trasladar ese estado, exportá el respaldo desde la interfaz de «Vista de prueba», guardalo en un medio privado, y restauralo en la otra PC. El respaldo contiene datos ficticios y no está cifrado. No subirlo al repositorio.

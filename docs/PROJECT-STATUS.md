@@ -18,6 +18,11 @@ simulación local sin cuentas.
 El commit `d1577470cb2938d8f19adbe0be8f2f3c1c898359` publica el inventario y la
 propuesta de conceptos neutrales a `origin/main`; el control local aprobó
 196/196 pruebas, la suite 813/813, TypeScript y los builds de cliente/Worker.
+Después se publicaron en `origin/main` los agregados read-only del D1 y DEV como
+`6656d114b3fb9ff64358edba2e3afd5624e925ec`. La revisión de 46 bundles descubrió
+39 refs históricos fuera del ancestro de `main`; quedaron preservados en
+`archive/sites-source-history-20261015` y
+`archive/site-analytics-stash-20261007`, sin mezclarse con el producto vigente.
 Se mantiene intacto el artefacto `.block` de auditoría.
 
 ## Resultado de conexión y migración DEV — 26/10/2026

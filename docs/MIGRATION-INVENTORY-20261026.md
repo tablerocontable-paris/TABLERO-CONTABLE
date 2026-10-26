@@ -20,11 +20,19 @@ La documentación funcional y de migración vigente está en `docs/`, en especia
 - `architecture/REMOTE-MIGRATION-READINESS-20261021.md`: secuencia de servicios.
 - `architecture/LABORATORY-BACKUP-CONTRACT-20261007.md`: transporte del estado local.
 
-No se publica un duplicado de los bundles de transferencia: el historial Git
-completo ya viaja en el clon. La guía de PC está en `outputs/LEEME-PC-PERSONAL.md`.
-Los múltiples bundles/ZIP antiguos en `outputs/` y en la raíz son paquetes
-históricos, no fuentes adicionales. No borrar esos registros sin una revisión
-separada de retención y procedencia.
+Se contrastaron 46 bundles locales: sus 39 referencias Git no pertenecían a la
+línea del `main` vigente. Se preservaron en el mismo repositorio, sin mezclarlas
+con el producto actual, mediante dos ramas de archivo:
+
+- `archive/sites-source-history-20261015` → `f23af935f3897d7bb318f5b72ff1860beefe8dcd`.
+- `archive/site-analytics-stash-20261007` → `7a4f9d4614df572f5040b3d702591ca269c68b3b`.
+
+Las 39 referencias de esos bundles son alcanzables desde una de las dos ramas.
+Son historia/código de cortes anteriores, no una versión desplegable ni fuente
+activa; continuar el trabajo desde `main`. Los ZIP/TAR de transferencia y
+paquetes de despliegue son derivados y no hacen falta para reconstruir el
+historial Git. La guía de PC está en `outputs/LEEME-PC-PERSONAL.md`. No borrar
+paquetes locales sin revisión separada de procedencia y retención.
 
 ## Qué no se migra a GitHub
 
@@ -95,8 +103,9 @@ contar movimientos operativos como tareas completadas.
 ## Verificación y siguiente paso
 
 - El inventario quedó publicado directamente en `main` como commit
-  `d1577470cb2938d8f19adbe0be8f2f3c1c898359`, igual al remoto; no se creó otra
-  rama ni se inició una PR.
+  `d1577470cb2938d8f19adbe0be8f2f3c1c898359`; el conteo read-only se agregó en
+  `6656d114b3fb9ff64358edba2e3afd5624e925ec`. Las dos historias históricas se
+  preservan en las ramas de archivo indicadas; no se inició una PR.
 - El árbol de trabajo conserva el archivo `.block` ya mencionado.
 - El repositorio no puede incluir toda la PC ni todo Codex. Este inventario
   delimita explícitamente la continuidad técnica transferible.
