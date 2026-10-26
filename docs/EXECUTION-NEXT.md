@@ -1,22 +1,30 @@
 # Estado vigente de ejecución — 26/10/2026
 
-## Corte local más reciente — catálogo de inicio neutral
+## Corte publicado más reciente — 26/10/2026
 
-Implementados seis conceptos opcionales, versionados e independientes del
-catálogo común en la inducción del laboratorio. No hay preselección, cuotas
-inventadas ni cambio al seed; las operativas nuevas no asumen coeficiente. Al
-repetir una invitación simulada se conservan la selección y los borradores.
-Suite completa 817/817 (83 archivos) y `npm run build` aprobados localmente
-(TypeScript, Vite cliente y Worker). El bundle principal supera 500 kB y Vite
-lo reporta como advertencia. Commit, CI del cambio y actualización del Site
-siguen pendientes; no está habilitado para onboarding real/remoto.
+El catálogo de inicio neutral está implementado en el laboratorio y el parche
+de `zod` y `vite` se publicó directamente en `main` como
+`fb5b5d4751e841460d104479b22ebbe31ac9e1c7`. `npm audit --omit=dev` encontró cero
+vulnerabilidades de producción. GitHub Actions run `40383506637` terminó en
+éxito con instalación, suite, build y paquete Sites; el hook local aprobó
+198/198 casos. Siguen 7 avisos de dependencias de desarrollo (5 moderados, 2
+críticos); la migración de Vitest requiere revisión aparte.
 
-Publicado directamente en `main` y desplegado en el Site privado existente,
-versión 96. La suite completa y build de GitHub Actions pasaron. La audiencia
-permanece owner-only; falta confirmar la apertura desde la cuenta propietaria y
-su PC personal. Después retomar el gate de Data API expuesta sólo como `api` y
-la matriz de autorización en Supabase DEV. No activar el espacio operativo ni
-producción.
+El Site privado existente está publicado como v97, deployment
+`appgdep_6adfa65a1ed081918f5fc8fd05bb72a9` (`succeeded`):
+`https://grupo-paris-contabilidad.valentino-magni.chatgpt.site`. No se cambió
+la audiencia: sólo la cuenta propietaria `valentino.ialocal@gmail.com` tiene
+acceso; cero visitantes externos. En la PC personal hay que iniciar ChatGPT con
+esa misma cuenta y abrir el enlace. La conexión de GitHub no otorga acceso al
+Site. La apertura en el navegador del usuario aún no está confirmada.
+
+Esto confirma el despliegue privado del laboratorio, no producción ni aceptación
+sin errores. Próximos gates: (1) aceptación desde la PC personal y registro del
+mensaje exacto si no abre; (2) verificar en Supabase Dashboard que Data API
+exponga únicamente `api`; (3) auditar los 39 RPC `SECURITY DEFINER` y probar
+permisos positivos/negativos en DEV; (4) completar autenticación y escrituras,
+Storage/evidencia, hosting Cloudflare y correo; (5) aceptación integral antes de
+habilitar el espacio operativo. No se puede afirmar certeza del 100%.
 
 ## Continuidad PC personal y línea base neutral — 26/10/2026
 

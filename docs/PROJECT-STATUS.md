@@ -1,5 +1,32 @@
 # Estado vigente — migración de workspace, 26/10/2026
 
+## Publicación y acceso confirmados — 26/10/2026
+
+El parche de dependencias de producción quedó publicado directamente en `main`
+como commit `fb5b5d4751e841460d104479b22ebbe31ac9e1c7`. `npm audit --omit=dev`
+reportó cero vulnerabilidades de producción. GitHub Actions run `40383506637`
+pasó instalación, suite completa, build y empaquetado Sites. La suite local del
+pre-commit aprobó 198/198 casos. La auditoría completa conserva 7 avisos sólo
+de desarrollo (5 moderados, 2 críticos) que requieren una actualización mayor
+de Vitest separada; no se forzó ese cambio.
+
+El mismo Site privado se publicó como **v97**, deployment
+`appgdep_6adfa65a1ed081918f5fc8fd05bb72a9`, estado `succeeded`, desde el commit
+de fuente Sites `2d1c2f4916a633624ed5b8afa10708cad246547b`. URL:
+`https://grupo-paris-contabilidad.valentino-magni.chatgpt.site`. El acceso sigue
+en modo personalizado, sólo para la cuenta propietaria
+`valentino.ialocal@gmail.com`, sin visitantes externos. La solicitud de abrirlo
+en el panel quedó en cola; no se confirmó aceptación visual en el navegador del
+usuario. En la PC personal debe abrirlo con la misma cuenta de ChatGPT; la
+conexión de GitHub no concede acceso al Site.
+
+La publicación del Site de laboratorio está confirmada, pero no equivale a
+despliegue operativo: perfiles y datos siguen siendo ficticios. Permanecen como
+gates la aceptación desde la PC personal, confirmar que Supabase Data API exponga
+sólo `api`, auditar los 39 RPC `SECURITY DEFINER` y completar identidad/permisos,
+escrituras, Storage/evidencia, Cloudflare/correo y aceptación antes de habilitar
+producción. No hay certeza del 100% ni se activa el espacio operativo.
+
 ## Catálogo neutral de inicio — implementación local revisada, 26/10/2026
 
 El alta del laboratorio ofrece seis procesos iniciales neutrales, versionados
