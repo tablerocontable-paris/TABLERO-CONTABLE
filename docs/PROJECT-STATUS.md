@@ -12,11 +12,16 @@ común. La opción sólo aparece en el alta local del laboratorio, nunca en
 onboarding remoto. Se preservan borradores y selección al repetir una invitación
 simulada.
 
-Validación local del cambio: suite completa 817/817 en 83 archivos; `npm run
-build` aprobó TypeScript, cliente Vite y Worker. Vite mantiene el aviso conocido
-de un bundle principal mayor a 500 kB. El commit y la verificación de CI de este
-cambio siguen pendientes; hasta entonces no afirmar que está publicado.
-Tampoco implica onboarding autenticado ni disponibilidad en el Site.
+Validación: suite completa 817/817 en 83 archivos; TypeScript, cliente Vite y
+Worker aprobaron localmente. GitHub Actions run `40379419640` pasó instalación,
+suite, build y empaquetado para el commit `247b3c8702d196d9eb9c3a352473f59edb282433`
+en `main`. El mismo Site privado quedó actualizado en versión 96; deployment
+`appgdep_6adfa090f2488191bfacd1446b3594f2` terminó `succeeded` desde su historial
+de fuente, commit `38620dffce02190cad2b67c9b946c8f44f0d029d`. No cambió la
+audiencia owner-only. La apertura desde la cuenta propietaria/PC personal aún
+requiere aceptación visible. Vite mantiene el aviso conocido de un bundle
+principal mayor a 500 kB. Este cambio no crea onboarding autenticado ni activa
+el espacio operativo.
 
 ## Revalidación del corte — 26/10/2026
 

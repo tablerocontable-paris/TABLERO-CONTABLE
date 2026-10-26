@@ -11,11 +11,12 @@ Suite completa 817/817 (83 archivos) y `npm run build` aprobados localmente
 lo reporta como advertencia. Commit, CI del cambio y actualización del Site
 siguen pendientes; no está habilitado para onboarding real/remoto.
 
-Siguiente: revisión arquitectónica de los límites laboratorio/remoto, commit
-directo a `main` y CI verde; luego actualizar únicamente el Site privado
-existente, sin alterar audiencia, y verificar acceso desde la cuenta propietaria.
-Después retomar el gate de Data API expuesta sólo como `api` y matriz de
-autorización en Supabase DEV. No activar el espacio operativo ni producción.
+Publicado directamente en `main` y desplegado en el Site privado existente,
+versión 96. La suite completa y build de GitHub Actions pasaron. La audiencia
+permanece owner-only; falta confirmar la apertura desde la cuenta propietaria y
+su PC personal. Después retomar el gate de Data API expuesta sólo como `api` y
+la matriz de autorización en Supabase DEV. No activar el espacio operativo ni
+producción.
 
 ## Continuidad PC personal y línea base neutral — 26/10/2026
 
