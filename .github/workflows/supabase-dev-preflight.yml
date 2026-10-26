@@ -1,4 +1,4 @@
-name: Preflight Supabase DEV 001–014
+name: Verificar Supabase DEV 001–014
 
 on:
   workflow_dispatch:
@@ -94,14 +94,12 @@ jobs:
           print("URL DEV validada; contenido oculto.")
           PY
 
-      - name: Require an empty remote history and exact 001–014 dry-run
+      - name: Require the exact applied history for 001–014
         env:
           SUPABASE_DEV_DB_URL: ${{ secrets.SUPABASE_DEV_DB_URL }}
         run: |
           set -euo pipefail
           cli="$RUNNER_TEMP/supabase-cli/supabase"
           "$cli" --workdir "$SUPABASE_STAGE_ROOT" migration list --db-url "$SUPABASE_DEV_DB_URL" --output-format json > "$RUNNER_TEMP/migration-list-before.json"
-          node scripts/supabase-dev-migration-guard.mjs history . baseline_001_014 "$RUNNER_TEMP/migration-list-before.json" before
-          "$cli" --workdir "$SUPABASE_STAGE_ROOT" db push --dry-run --db-url "$SUPABASE_DEV_DB_URL" 2>&1 | tee "$RUNNER_TEMP/db-push-dry-run.txt"
-          node scripts/supabase-dev-migration-guard.mjs dry-run . baseline_001_014 "$RUNNER_TEMP/db-push-dry-run.txt"
-          echo 'Preflight completado sin modificar la base: remoto vacío, 16 migraciones 001–014 exactas y SQL015 excluida.'
+          node scripts/supabase-dev-migration-guard.mjs history . baseline_001_014 "$RUNNER_TEMP/migration-list-before.json" after
+          echo 'Conexión verificada: las 16 migraciones 001–014 están aplicadas en DEV. No se ejecutó SQL; SQL015 sigue excluida.'

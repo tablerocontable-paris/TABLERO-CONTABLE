@@ -27,8 +27,9 @@ const rows = (localCount: number, remoteCount: number) => Array.from({ length: l
 }));
 
 describe("Supabase DEV migration guard", () => {
-  it("stages only 001–014 for the first gate and only allows the 16→17 history transition at the second gate", () => {
+  it("checks empty baseline before apply and exact 16→16 baseline after apply", () => {
     expect(validateHistory({ migrations: rows(BASELINE_COUNT, 0) }, "baseline_001_014")).toEqual({ local: 16, remote: 0 });
+    expect(validateHistory({ migrations: rows(BASELINE_COUNT, BASELINE_COUNT) }, "baseline_001_014", "after")).toEqual({ local: 16, remote: 16 });
     expect(validateHistory({ migrations: rows(17, 16) }, "apply_015")).toEqual({ local: 17, remote: 16 });
     expect(() => validateHistory({ migrations: rows(17, 15) }, "apply_015")).toThrow();
     expect(() => validateHistory({ migrations: rows(17, 17) }, "apply_015")).toThrow();

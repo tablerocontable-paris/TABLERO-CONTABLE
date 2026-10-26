@@ -1,4 +1,4 @@
-# Estado actual de migración — actualizado 23/10/2026
+# Estado actual de migración — actualizado 26/10/2026
 
 Repositorio activo `work/site`, remoto privado
 `tablerocontable-paris/TABLERO-CONTABLE`. El cambio de diagnóstico para el
@@ -6,12 +6,17 @@ preflight, commit `6dea64af0c0344ba2175fc5a4a61b1ea56d80fce`, pasó GitHub Actio
 `40001331220` (suite, build y paquete Sites). El trabajo sigue en el mismo repo
 y Site privado; no crear reemplazos ni pull requests.
 
-Supabase `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`) aún no recibió migraciones.
-El preflight `40000787076` falló en la validación de URL antes de conectar, sin
-consultas ni escrituras. El secreto `SUPABASE_DEV_DB_URL` existe; debe
-actualizarse con la URI Session pooler del proyecto DEV. Después repetir primero
-el preflight read-only, revisar destino/historial/dry-run, aplicar y auditar
-001–014 y tratar SQL015 por separado. No ejecutar producción.
+Supabase `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`) recibió las 16 migraciones
+001–014. GitHub Actions run `40012156985` aplicó el segmento y verificó el
+historial; la lectura MCP del 26/10 confirmó las mismas 16 versiones. El
+preflight #3 (`40367149794`) validó el secreto `SUPABASE_DEV_DB_URL` y conectó,
+pero falló porque esperaba historial remoto vacío; el estado real ya contiene
+las 16 versiones exactas. Se corrigió el workflow para verificar ese estado sin
+ejecutar SQL. SQL015 sigue sin aplicar. No ejecutar producción.
+
+Queda auditar la configuración Data API (exponer sólo el esquema `api`) y
+completar las pruebas de permisos con identidades ficticias. No alterar grants
+ni habilitar el espacio operativo durante esa auditoría.
 
 Cloudflare no está configurado: el Worker actual depende de D1 y de identidad
 que entrega Sites. Correo sólo tiene proveedor ficticio; no hay Gmail conectado.

@@ -31,9 +31,9 @@ El repositorio oficial privado es [`tablerocontable-paris/TABLERO-CONTABLE`](htt
 
 GitHub sincroniza el código y el historial Git; no sincroniza el estado ficticio guardado en el navegador (`paris-state-lab`) ni los archivos locales de IndexedDB. Para trasladar ese estado, exportá el respaldo desde la interfaz de «Vista de prueba», guardalo en un medio privado, y restauralo en la otra PC. El respaldo contiene datos ficticios y no está cifrado. No subirlo al repositorio.
 
-El laboratorio local no necesita Supabase y seguirá siendo la pantalla predeterminada. La última lectura confirmó que `grupo-paris-dev` (región `sa-east-1`) estaba activo y vacío; el preflight remoto no llegó a conectarse. Aún no hay migraciones remotas aplicadas. SQL015 está aceptada por Sol para DEV con hash exacto, pero va después del preflight y de aplicar/auditar 001–014.
+El laboratorio local no necesita Supabase y seguirá siendo la pantalla predeterminada. `grupo-paris-dev` está activo y tiene aplicadas las 16 migraciones 001–014. El secreto `SUPABASE_DEV_DB_URL` validó y conectó correctamente el 26/10/2026; no hace falta volver a cambiarlo. El preflight #3 falló porque esperaba una base vacía y encontró el historial exacto ya aplicado; no fue un error de contraseña ni ejecutó SQL. SQL015 sigue pendiente.
 
-**Acción pendiente para continuar la migración:** el secreto `SUPABASE_DEV_DB_URL` ya existe, pero el preflight `40000787076` rechazó el formato/destino antes de conectarse. En Supabase, abrí el proyecto `grupo-paris-dev` → **Connect** y copiá el URI **Session pooler** (puerto 5432). En [GitHub Actions secrets](https://github.com/tablerocontable-paris/TABLERO-CONTABLE/settings/secrets/actions), editá el secreto existente y reemplazá su valor. No compartas la URI ni la contraseña por el chat ni en archivos del repo. Después se ejecutará primero el preflight de sólo lectura y se revisará destino, historial y dry-run antes de escribir en DEV.
+**Próximo paso de migración:** verificar en Supabase Dashboard que Data API exponga únicamente el esquema `api` y ejecutar pruebas de permisos con identidades ficticias. No ejecutar otra vez la aplicación 001–014; ya está hecha. Nunca compartas la URI o la contraseña por chat ni en archivos del repo.
 
 ## Qué queda alojado
 

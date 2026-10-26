@@ -1,34 +1,34 @@
-# Estado vigente de ejecución — 23/10/2026
+# Estado vigente de ejecución — 26/10/2026
 
-## Bloqueo actual de Supabase DEV
+## Supabase DEV: conexión resuelta y baseline aplicado
 
-El secreto `SUPABASE_DEV_DB_URL` ya existe en Actions. El preflight `40000787076`
-validó rama, repositorio y migraciones 001–014, pero rechazó el formato/destino
-de la URL antes de consultar la base. La revisión del log no muestra cuál campo
-falló; no se imprimió el secreto, no hubo conexión, dry-run ni escrituras.
+El secreto `SUPABASE_DEV_DB_URL` funciona. GitHub Actions run `40367149794`
+validó la URL y se conectó; el paso falló porque el workflow antiguo esperaba
+un historial vacío y DEV ya tiene 16 versiones remotas. Supabase MCP confirmó
+que coinciden exactamente con las migraciones locales 001–014. Ese run no
+ejecutó SQL. La aplicación previa fue correcta en Actions run `40012156985`.
 
-Acción del propietario: en Supabase → proyecto `grupo-paris-dev` → **Connect**,
-copiar el URI de **Session pooler** y actualizar el secreto existente en GitHub
-Settings → Secrets and variables → Actions. No pegar credenciales en el chat.
-Luego ejecutar de nuevo el preflight. Si pasa, revisar historial y dry-run antes
-de cualquier aplicación. No ejecutar todavía las migraciones ni SQL015.
+Se actualizó `supabase-dev-preflight.yml` para comprobar el historial exacto
+001–014 ya aplicado sin ejecutar SQL. SQL015 sigue pendiente. No vuelvas a
+cambiar la contraseña ni reejecutes la aplicación del baseline.
 
-El commit de diagnóstico `6dea64af0c0344ba2175fc5a4a61b1ea56d80fce` pasó
-GitHub Actions `40001331220` (suite, build y paquete Sites). La auditoría
-read-only de Cloudflare/correo está documentada en
-`docs/architecture/REMOTE-MIGRATION-READINESS-20261021.md`; esos trabajos siguen
-dependiendo de Supabase DEV y aún no hay conexiones reales.
+Siguiente gate: desde Supabase Dashboard, confirmar Data API → Exposed schemas
+con sólo `api`; luego completar pruebas positivas y negativas de permisos con
+identidades ficticias. El modo remoto de la app sigue apagado por defecto y el
+espacio operativo permanece inactivo. No tocar producción.
+
+Cloudflare y correo continúan pendientes. Evidencia de advisor en la auditoría
+Supabase DEV y readiness en
+`docs/architecture/REMOTE-MIGRATION-READINESS-20261021.md`. Los registros
+anteriores debajo se conservan como historial; no usar sus instrucciones de
+URI faltante o base vacía.
 
 ## Publicación confirmada y próxima puerta
 
-- La última validación verde de suite, build y paquete Sites corresponde al cambio de diagnóstico `6dea64af0c0344ba2175fc5a4a61b1ea56d80fce`, Actions `40001331220`.
-- El Site existente se sincronizó con los 634 archivos versionados y publicó la versión 95 desde el commit de su fuente `872f014a73ef1a7447d5ba58f3e6012518dca20c`. URL privada: `https://grupo-paris-contabilidad.valentino-magni.chatgpt.site`; audiencia limitada a la cuenta propietaria.
-- Supabase `grupo-paris-dev` está activo y vacío, con 0 migraciones. `SUPABASE_DEV_DB_URL` existe en Actions, pero el preflight `40000787076` rechazó su formato/destino antes de conectar; no hubo dry-run ni escrituras.
-- Próximo paso del propietario: actualizar ese secreto con la URI Session pooler copiada desde Supabase → Connect para el proyecto DEV. No pegar credenciales en el chat. Repetir el preflight y revisar destino, historial y dry-run antes de aplicar. SQL015 se aplica aparte.
-- Después siguen la autenticación y permisos alojados, escrituras operativas, evidencia/Storage, hosting Cloudflare independiente, correo, producción y aceptación desde la PC personal.
-- La app continúa como laboratorio con perfiles ficticios; no se activó el espacio operativo ni se agregaron usuarios al Site.
-
-Este corte supersede los estados inferiores que indiquen CI pendiente, Site sin publicar o último SHA anterior.
+- El Site existente conserva su versión y audiencia owner-only; no se cambió en este paso.
+- Supabase `grupo-paris-dev` tiene 16 migraciones 001–014 y tablas sin datos de negocio.
+- SQL015, Auth/UI remotos, permisos de identidad, Data API, Storage, Cloudflare, correo, producción y aceptación en PC personal siguen pendientes.
+- La aplicación continúa como laboratorio con perfiles ficticios; no se activó el espacio operativo ni se agregaron usuarios al Site.
 
 - El código ya conecta el modo opt-in de Supabase Auth con `MyWork` de sólo lectura. El laboratorio sigue por defecto; todavía no se probó el modo contra Supabase alojado ni hay escrituras RPC desde la UI.
 - No hubo un nuevo preflight después del rechazo de URL. El secreto `SUPABASE_DEV_DB_URL` existe en Actions; actualizarlo con el URI Session pooler de DEV y repetir el preflight read-only. No compartir su valor en el chat.

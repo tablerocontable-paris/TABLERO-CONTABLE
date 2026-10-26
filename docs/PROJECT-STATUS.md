@@ -1,21 +1,21 @@
-# Estado vigente — migración de workspace, 23/10/2026
+# Estado vigente — migración de workspace, 26/10/2026
 
-## Resultado del preflight remoto — 23/10/2026
+## Resultado de conexión y migración DEV — 26/10/2026
 
-GitHub Actions run `40000787076` (commit `b6c9d2b`) confirmó que existe el
-secreto `SUPABASE_DEV_DB_URL`, pero falló la validación segura de formato/destino
-antes de conectarse a la base. No se consultó el historial remoto ni se ejecutó
-el dry-run; no hubo lecturas ni escrituras en Supabase. El log no revela qué
-campo no coincide. El agente de auditoría revisó el flujo sin acceder al secreto.
-El commit `6dea64af0c0344ba2175fc5a4a61b1ea56d80fce` agregó indicadores seguros
-por campo en ambos workflows; GitHub Actions `40001331220` validó ese commit
-con éxito (suite, build y paquete Sites).
+El secreto `SUPABASE_DEV_DB_URL` valida y autentica. GitHub Actions run
+`40367149794` aprobó la URL sin imprimirla, conectó al pooler y leyó el historial
+remoto. El run terminó en fallo porque el preflight antiguo esperaba cero
+migraciones; encontró 16. Supabase MCP confirmó que son exactamente las
+versiones locales 001–014. Ese run no ejecutó SQL.
 
-El próximo paso es actualizar el secreto con la URI **Session pooler** copiada
-desde Supabase → Connect para `grupo-paris-dev`, puerto `5432`, base `postgres`,
-TLS requerido. Nunca compartir la URI ni la contraseña por chat. Después volver
-a ejecutar el workflow de preflight; aplicar migraciones sólo si el preflight
-termina y su destino, historial y dry-run se revisan correctamente.
+La aplicación previa está comprobada por GitHub Actions run `40012156985`: aplicó
+el segmento 001–014 y verificó 16 versiones locales y remotas. SQL015 sigue
+excluida. El workflow de verificación se actualizó para confirmar el estado
+completo sin ejecutar SQL.
+
+El siguiente gate es confirmar que Data API exponga sólo `api` y probar permisos
+positivos y negativos con identidades ficticias. Auth/UI remotos siguen apagados
+por defecto; no conectar producción ni activar el espacio operativo.
 
 ## Corte de publicación y migración externa
 
@@ -30,9 +30,8 @@ con los 634 archivos versionados de `main` y se publicó como versión 95 desde
 sigue limitada a la cuenta propietaria; no se agregaron visitantes ni se activó
 el área operativa.
 
-Supabase `grupo-paris-dev` continúa activo y vacío: 0 migraciones. El secreto
-`SUPABASE_DEV_DB_URL` existe en Actions; su URL no pasó la validación segura
-descripta arriba. No hubo conexión ni escrituras remotas.
+Supabase `grupo-paris-dev` continúa activo con las 16 migraciones 001–014 y sin
+datos de negocio. El Site privado conserva su audiencia actual.
 
 Siguen pendientes la migración/autenticación alojada y sus permisos, escrituras
 operativas, evidencia y Storage, hosting Cloudflare independiente, correo,
@@ -44,8 +43,9 @@ identidad proporcionada por Sites; el correo sólo tiene proveedor de prueba.
 Auditoría read-only y secuencia detalladas en
 `docs/architecture/REMOTE-MIGRATION-READINESS-20261021.md`.
 
-Este bloque reemplaza los estados anteriores de “lector sin UI”, `158b2a0` y
-“sólo diagnóstico”. El resto del registro queda como historial.
+Este bloque reemplaza los estados anteriores de “lector sin UI”, `158b2a0`,
+“sólo diagnóstico”, “URI inválida” y “base vacía”. El resto del registro queda
+como historial.
 
 ## Cableado local Supabase/Auth — estado vigente
 
@@ -59,9 +59,9 @@ con `get_context_v1`, exige TOTP cuando corresponde y `MyWork` consulta páginas
 Este primer recorrido es de sólo lectura: no contiene comandos RPC, escritura,
 gestión de equipo ni el tablero operativo completo. Su montaje no prueba un
 servicio alojado. El preflight `40000787076` falló antes de conectar, por lo que
-Auth, migraciones, RLS, grants y respuestas aún no están validados en Supabase
-DEV. La ruta antigua `RemoteWorkspace`/`site-worker.ts` usa D1 y autenticación de
-Sites y permanece fuera del arranque.
+Auth, RLS, grants y respuestas todavía requieren pruebas de aceptación en
+Supabase DEV. La ruta antigua `RemoteWorkspace`/`site-worker.ts` usa D1 y
+autenticación de Sites y permanece fuera del arranque.
 
 SQL015 está aceptada para DEV con hash LF
 `CC49480D1317F1B44CD29F245508F9C8FB0B0894FE4E66C1B22F8E00D36B33F2`, pero va
