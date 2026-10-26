@@ -1,5 +1,23 @@
 # Estado vigente — migración de workspace, 26/10/2026
 
+## Actualización de seguridad Supabase — migraciones 015/016
+
+El proyecto `grupo-paris-dev` está activo y la consulta vigente confirma que
+mantiene 16 migraciones aplicadas (001–014). SQL015 ya tiene aceptación Sol
+registrada; SQL016 también fue aceptada para DEV con SHA-256
+`F7E76313AD4132626034C5C9D38F1C70AFB140BB3E2CE3615FE89071945ED8F3`.
+La corrección local cierra la lectura legacy de encargado después de revocar
+una membresía. Sus pruebas focales independientes pasaron 10/10; aún no se
+ejecutaron contra el catálogo remoto ni se aplicó SQL016.
+
+Orden requerido: publicar primero 016 y la evidencia; ejecutar el workflow
+`apply_015` contra el historial actual; confirmar éxito; luego ejecutar
+`apply_016` con preflight de las 17 versiones previas y dry-run exclusivo de
+016. No aplicar SQL manualmente. Para datos reales sigue pendiente verificar en
+Dashboard que Data API exponga únicamente `api`, contrastar catálogo/ACL y
+completar las pruebas de permisos. La revisión Sol no equivale a aceptación de
+DEV ni de producción.
+
 ## Publicación vigente confirmada — 26/10/2026, v98
 
 El catálogo neutral v2 está actualizado en el mismo Site privado, versión **98**,
@@ -21,14 +39,12 @@ mismo árbol. La apertura en la PC personal aún necesita confirmación visual c
 la cuenta propietaria. El despliegue es del laboratorio, no autoriza datos reales
 ni activa producción.
 
-La revisión estática de Supabase 001–014 halló una ruta legacy de lectura para
-encargados que no comprueba `company_memberships.active` al revocar una empresa.
-Es un hallazgo P1 condicionado a que `public` esté expuesto en Data API. Antes de
-usar datos reales falta confirmar que sólo `api` esté expuesto, revisar ACL y
-propietarios instalados, corregir el flujo legacy mediante migración nueva si
-se conserva y sumar regresiones/permisos negativos. No se aplicó SQL ni se
-cambiaron grants en esta revisión. Informe: `architecture/SUPABASE-DEV-RPC-REVIEW-20261026.md`;
-advisors en `architecture/SUPABASE-DEV-ADVISORS-20261026.md`.
+La revisión estática de Supabase 001–014 encontró una ruta legacy de encargado
+que omitía el estado activo de la membresía. SQL016 corrige esa función y tiene
+aceptación Sol para DEV bajo preflight, pero todavía no está aplicada. El
+hallazgo y el plan de pruebas permanecen en
+`architecture/SUPABASE-DEV-RPC-REVIEW-20261026.md`; evidencia y límites de 016
+en `architecture/REMOTE-WORKSPACE-016-CODE-SOL-ACCEPTANCE-20261026.md`.
 
 ## Publicación y acceso confirmados — 26/10/2026
 

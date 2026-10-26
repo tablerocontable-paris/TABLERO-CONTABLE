@@ -4,12 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       migration_stage:
-        description: Choose the reviewed segment. Stage 015 is available only after Sol accepts its exact SQL hash.
+        description: Choose the migration segment. SQL016 remains blocked until Sol accepts its exact hash.
         required: true
         type: choice
         options:
           - baseline_001_014
           - apply_015
+          - apply_016
         default: baseline_001_014
       apply_migrations:
         description: Apply only the selected and validated segment after the target history and dry-run match exactly
@@ -62,7 +63,7 @@ jobs:
           MIGRATION_STAGE: ${{ inputs.migration_stage }}
         run: |
           set -euo pipefail
-          [[ "$MIGRATION_STAGE" == 'baseline_001_014' || "$MIGRATION_STAGE" == 'apply_015' ]]
+          [[ "$MIGRATION_STAGE" == 'baseline_001_014' || "$MIGRATION_STAGE" == 'apply_015' || "$MIGRATION_STAGE" == 'apply_016' ]]
           node scripts/supabase-dev-migration-guard.mjs verify-files . "$MIGRATION_STAGE"
           stage_root="$RUNNER_TEMP/supabase-stage-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           node scripts/supabase-dev-migration-guard.mjs stage . "$MIGRATION_STAGE" "$stage_root"
@@ -129,6 +130,8 @@ jobs:
           fi
           if [[ "$MIGRATION_STAGE" == 'apply_015' ]]; then
             node scripts/supabase-dev-migration-guard.mjs verify-acceptance . "$MIGRATION_STAGE"
+          elif [[ "$MIGRATION_STAGE" == 'apply_016' ]]; then
+            node scripts/supabase-dev-migration-guard.mjs verify-acceptance . "$MIGRATION_STAGE"
           fi
           [[ "$APPLY_MIGRATIONS" == 'true' ]]
           echo "Aplicando sólo el segmento exacto: $MIGRATION_STAGE"
@@ -138,5 +141,9 @@ jobs:
           if [[ "$MIGRATION_STAGE" == 'baseline_001_014' ]]; then
             echo 'Segmento 001–014 aplicado y verificado. SQL015 no estaba en el entorno de ejecución.'
           else
-            echo 'Sólo SQL015 aplicada y verificada después de confirmar exactamente 16 migraciones previas.'
+            if [[ "$MIGRATION_STAGE" == 'apply_015' ]]; then
+              echo 'Sólo SQL015 aplicada y verificada después de confirmar exactamente 16 migraciones previas.'
+            else
+              echo 'Sólo SQL016 aplicada y verificada después de confirmar exactamente 17 migraciones previas y aceptación Sol del hash exacto.'
+            fi
           fi

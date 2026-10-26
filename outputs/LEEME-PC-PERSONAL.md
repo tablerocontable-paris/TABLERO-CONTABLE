@@ -1,5 +1,22 @@
 # Grupo París en tu PC personal
 
+## Actualización 26/10/2026 — Supabase DEV
+
+El proyecto Supabase `grupo-paris-dev` está activo y tiene 16 migraciones
+aplicadas (001–014). SQL015 tiene aceptación Sol anterior; SQL016 fue aprobada
+para DEV con hash
+`F7E76313AD4132626034C5C9D38F1C70AFB140BB3E2CE3615FE89071945ED8F3` y corrige
+la lectura de tareas luego de revocar una membresía. La prueba focal pasó 10/10
+con revisión independiente. Al actualizar `main`, ejecutar en GitHub Actions
+`Supabase DEV migrations`: primero `apply_015` y, sólo tras éxito, `apply_016`,
+ambos con `apply_migrations=true`. El workflow valida el historial y el SQL
+exactos. No aplicar SQL manualmente. El código local de la 016 todavía no se
+había aplicado en el proyecto cuando se registró esta nota.
+
+Antes de cargar datos reales siguen pendientes: confirmar que Data API exponga
+únicamente `api`, contrastar las ACL/catálogos instalados y completar pruebas de
+permisos. La aceptación Sol del archivo no equivale a aceptación de producción.
+
 Estado al 26/10/2026: la versión v2 del catálogo neutral de primer ingreso está
 en `main`; el commit de código `ad1b4180556307755c7a4e0fd221316237fc341c` pasó
 GitHub Actions run `40409657073`. La actualización documental vigente es
@@ -62,7 +79,7 @@ GitHub sincroniza el código y el historial Git; no sincroniza el estado fictici
 
 El laboratorio local no necesita Supabase y seguirá siendo la pantalla predeterminada. `grupo-paris-dev` está activo y tiene aplicadas las 16 migraciones 001–014. El secreto `SUPABASE_DEV_DB_URL` validó y conectó correctamente el 26/10/2026; no hace falta volver a cambiarlo. El preflight #3 falló porque esperaba una base vacía y encontró el historial exacto ya aplicado; no fue un error de contraseña ni ejecutó SQL. SQL015 sigue pendiente.
 
-**Próximo paso de migración:** verificar en Supabase Dashboard que Data API exponga únicamente el esquema `api` y ejecutar pruebas de permisos con identidades ficticias. No ejecutar otra vez la aplicación 001–014; ya está hecha. Nunca compartas la URI o la contraseña por chat ni en archivos del repo.
+**Próximo paso de migración:** tras actualizar `main`, correr 015 y 016 en orden desde el workflow de GitHub. Luego verificar en Supabase Dashboard que Data API exponga únicamente `api` y ejecutar pruebas de permisos con identidades ficticias. No volver a ejecutar 001–014. Nunca compartas la URI o la contraseña por chat ni en archivos del repo.
 
 ## Qué queda alojado
 

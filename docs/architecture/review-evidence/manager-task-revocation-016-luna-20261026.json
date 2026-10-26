@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "project": "Grupo París — legacy manager task-read revocation",
+  "migration": {
+    "path": "supabase/migrations/202610260016_manager_task_revocation.sql",
+    "sha256Utf8Lf": "F7E76313AD4132626034C5C9D38F1C70AFB140BB3E2CE3615FE89071945ED8F3",
+    "scope": "replaces only public.read_coordinated_task_for_manager(uuid); SQL001–015 unchanged"
+  },
+  "migrationGuard": {
+    "baseline_001_014": "16 files; unchanged",
+    "apply_015": "17 files; unchanged and excludes SQL016",
+    "apply_016": "18 local files; exact pre-history 001–015 and dry-run of only 016 required",
+    "remoteApply": "eligible only after SQL015 is applied and the workflow preflight matches exact history and SQL016 dry-run"
+  },
+  "localValidation": {
+    "command": "node node_modules/vitest/vitest.mjs run tests/supabase-manager-task-revocation-016.test.ts tests/supabase-dev-migration-guard.test.ts --maxWorkers=1 --testTimeout=30000 --hookTimeout=30000",
+    "result": "passed",
+    "testFiles": 2,
+    "testsPassed": 10,
+    "exitCode": 0,
+    "coverage": [
+      "014→015→016 and second application",
+      "api.command_v1 membership revocation retaining the membership row",
+      "reactivation and future access_valid_from",
+      "jefe without company membership",
+      "encargado inside/outside owner scope, second company, and employee denial",
+      "existing cross-organization task, nonexistent task, and inactive actor",
+      "legacy coverage and responsibility participation do not widen owner scope",
+      "anonymous and PUBLIC execution denied",
+      "schemaVersion 3 DTO validated by the Zod schema with UUIDs and private-note exclusion"
+    ]
+  },
+  "otherChecks": {
+    "migrationHashLock": "passed",
+    "016AcceptanceGate": "passed only after separate Sol acceptance matched the exact SQL016 hash",
+    "gitDiffCheck": "passed",
+    "remoteSqlOrDeployment": "not run",
+    "fullSuite": {
+      "command": "node node_modules/vitest/vitest.mjs run --exclude tmp/** --maxWorkers=2 --testTimeout=20000 --hookTimeout=30000",
+      "testFilesPassed": 84,
+      "testsPassed": 838,
+      "exitCode": 0
+    },
+    "build": {
+      "command": "node ..\\npm-runtime\\package\\bin\\npm-cli.js run build",
+      "exitCode": 0,
+      "notes": "TypeScript, Vite client, and Worker build succeeded; existing Zod annotation and 620.87 KB main chunk warnings remain"
+    },
+    "sitePackage": {
+      "command": "node ..\\npm-runtime\\package\\bin\\npm-cli.js run package:site",
+      "exitCode": 0,
+      "archiveSha256": "8e6cb72ec820170a58eff7c2bb90af60b0d5b49d9bcee8ecd17e9448c55fb812"
+    }
+  },
+  "solReview": {
+    "result": "approved for grupo-paris-dev subject to exact preflight, after correcting the root-state-dependent acceptance test",
+    "migrationSha256Utf8Lf": "F7E76313AD4132626034C5C9D38F1C70AFB140BB3E2CE3615FE89071945ED8F3",
+    "independentFocusedTestsPassed": 10,
+    "exitCode": 0,
+    "limitations": [
+      "No SQL applied remotely",
+      "Remote Data API exposure and installed ACL/owners remain unverified",
+      "The standalone coverage case also has responsibility participation present"
+    ]
+  },
+  "generation": {
+    "supabaseCliAvailableLocally": false,
+    "method": "created locally using the repository's existing numbered migration naming/layout; no SQL was executed remotely"
+  }
+}

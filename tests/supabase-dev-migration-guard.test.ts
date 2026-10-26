@@ -9,6 +9,7 @@ import {
   validateDryRun,
   validateHistory,
   verifySql015ReviewAcceptance,
+  verifySql016ReviewAcceptance,
 } from "../scripts/supabase-dev-migration-guard.mjs";
 
 const temporaryRoots: string[] = [];
@@ -33,6 +34,9 @@ describe("Supabase DEV migration guard", () => {
     expect(validateHistory({ migrations: rows(17, 16) }, "apply_015")).toEqual({ local: 17, remote: 16 });
     expect(() => validateHistory({ migrations: rows(17, 15) }, "apply_015")).toThrow();
     expect(() => validateHistory({ migrations: rows(17, 17) }, "apply_015")).toThrow();
+    expect(validateHistory({ migrations: rows(18, 17) }, "apply_016")).toEqual({ local: 18, remote: 17 });
+    expect(() => validateHistory({ migrations: rows(18, 16) }, "apply_016")).toThrow();
+    expect(() => validateHistory({ migrations: rows(18, 18) }, "apply_016")).toThrow();
   });
 
   it("requires the exact pending version list for each dry-run", () => {
@@ -42,6 +46,7 @@ describe("Supabase DEV migration guard", () => {
     const cliOutput = (files: string[]) => `Would push these migrations:\n${files.map((file) => ` • ${file}`).join("\n")}\nFinished supabase db push.`;
     expect(validateDryRun(cliOutput(baselineFiles), "baseline_001_014")).toEqual(baseline);
     expect(validateDryRun(cliOutput([MIGRATIONS[BASELINE_COUNT][0]]), "apply_015")).toEqual([v015]);
+    expect(validateDryRun(cliOutput([MIGRATIONS[BASELINE_COUNT + 1][0]]), "apply_016")).toEqual([MIGRATIONS[BASELINE_COUNT + 1][0].slice(0, 12)]);
     expect(() => validateDryRun(cliOutput([...baselineFiles, MIGRATIONS[BASELINE_COUNT][0]]), "baseline_001_014")).toThrow();
     expect(() => validateDryRun(cliOutput([MIGRATIONS[0][0]]), "baseline_001_014")).toThrow();
     expect(() => validateDryRun(cliOutput([...baselineFiles, baselineFiles[0]]), "baseline_001_014")).toThrow();
@@ -62,6 +67,18 @@ describe("Supabase DEV migration guard", () => {
     expect(config).toContain("major_version = 17");
   });
 
+  it("keeps baseline_001_014 and apply_015 isolated from SQL016", async () => {
+    const temp = await mkdtemp(path.join(os.tmpdir(), "supabase-dev-stage-016-test-"));
+    temporaryRoots.push(temp);
+    const root = path.resolve(process.cwd());
+    const stage = path.join(temp, "apply-015");
+    await createStage(root, stage, "apply_015");
+    const staged = await readdir(path.join(stage, "supabase", "migrations"));
+    expect(staged).toHaveLength(BASELINE_COUNT + 1);
+    expect(staged).toContain("202610230015_workspace_page.sql");
+    expect(staged).not.toContain("202610260016_manager_task_revocation.sql");
+  });
+
   it("requires a separate Sol code/hash acceptance and rejects the contract acceptance or a wrong hash", async () => {
     const temp = await mkdtemp(path.join(os.tmpdir(), "supabase-015-acceptance-test-"));
     temporaryRoots.push(temp);
@@ -78,5 +95,19 @@ describe("Supabase DEV migration guard", () => {
     await expect(verifySql015ReviewAcceptance(temp)).rejects.toThrow("aceptación Sol del hash exacto");
     await writeFile(codeAcceptance, `Dictamen: **apto para aplicar SQL015 en grupo-paris-dev**\nSQL015 SHA-256: \`${expected}\`\n`);
     await expect(verifySql015ReviewAcceptance(temp)).resolves.toBeUndefined();
+  });
+
+  it("accepts SQL016 for application only when its exact separate hash acceptance exists", async () => {
+    const temp = await mkdtemp(path.join(os.tmpdir(), "supabase-016-acceptance-test-"));
+    temporaryRoots.push(temp);
+    const architecture = path.join(temp, "docs", "architecture");
+    await mkdir(architecture, { recursive: true });
+    await expect(verifySql016ReviewAcceptance(temp)).rejects.toThrow("sigue deshabilitada");
+    const file = path.join(architecture, "REMOTE-WORKSPACE-016-CODE-SOL-ACCEPTANCE-20261026.md");
+    const expected = MIGRATIONS[BASELINE_COUNT + 1][1];
+    await writeFile(file, `Dictamen: **apto para aplicar SQL016 en grupo-paris-dev**\nSQL016 SHA-256: \`${"0".repeat(64)}\`\n`);
+    await expect(verifySql016ReviewAcceptance(temp)).rejects.toThrow("sigue deshabilitada");
+    await writeFile(file, `Dictamen: **apto para aplicar SQL016 en grupo-paris-dev**\nSQL016 SHA-256: \`${expected}\`\n`);
+    await expect(verifySql016ReviewAcceptance(temp)).resolves.toBeUndefined();
   });
 });
