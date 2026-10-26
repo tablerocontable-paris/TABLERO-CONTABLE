@@ -2,20 +2,34 @@
 
 ## Continuidad PC personal y línea base neutral — 26/10/2026
 
-Ver `MIGRATION-INVENTORY-20261026.md` y
-`product/STARTER-CATALOG-AND-BASELINE-20261026.md`. Se documentó qué contenido
-del proyecto puede ir en GitHub, límites para estado local/privacidad y un
-catálogo inicial neutral. El conteo 13 perfiles/4 empresas/6 conceptos/73
-ocurrencias es exclusivamente seed ficticio; no comunica dotación real ni
-cumplimiento diario real.
+La continuidad técnica y decisiones del proyecto están en `main` y en las dos
+ramas de archivo. El último corte de código sincronizado, commit
+`366c2df92482dafcb66ec3f8d6d5e84f9e4b9aea`, pasó GitHub Actions
+`40373683135` (instalación limpia, suite, build y paquete Sites). Esta
+actualización documental requiere una nueva ejecución de CI. Mantener fuera
+del repo credenciales, memoria/chats privados, estado local del navegador y
+datos personales/de clientes. El respaldo de laboratorio debe moverse aparte y
+de forma privada si se necesita en la PC personal.
 
-Siguiente bloque: (1) ejecutar las comprobaciones locales disponibles mediante
-el runtime empaquetado, (2) agregar y publicar estos documentos directamente a
-`origin/main` si pasan revisión, (3) entregar al usuario instrucciones breves
-para descargar desde la PC de origen el respaldo privado de laboratorio y
-restaurarlo en la PC personal. No cargar respaldo JSON, memorias, adjuntos,
-conversaciones, datos de clientes ni credenciales al repo. Para el conteo real
-se requiere una exportación aprobada y anonimizada del sistema fuente.
+El catálogo neutral está documentado, pero no implementado en un alta real: el
+primer inicio actual sigue siendo laboratorio simulado y genera datos de seed.
+No cambiar sus IDs históricos. La estimación vigente sigue siendo sólo 13
+perfiles ficticios/73 ocurrencias de muestra; el Site contiene un snapshot del
+06/10 y Supabase DEV no contiene filas operativas. Para cifras actuales hace
+falta un extracto autorizado y anonimizado de la fuente real.
+
+**Próximos gates, en orden:** (1) obtener desde la cuenta propietaria el error
+exacto si el Site sigue sin abrir; el despliegue v95 está exitoso y es owner-only.
+(2) confirmar en Dashboard que Data API exponga sólo `api`; (3) auditar los 39
+RPC `SECURITY DEFINER` advertidos y completar pruebas de permisos positivas y
+negativas en DEV, sin modificar grants a ciegas; (4) implementar y probar el
+catálogo neutral como nueva versión de onboarding, preservando seed/respaldos;
+(5) importar el extracto real sólo tras autorización y anonimización; (6)
+continuar Auth/escrituras, evidencia/Storage, Cloudflare/correo y aceptación en
+PC personal. No habilitar producción ni el área operativa antes de la aceptación.
+
+Última consulta read-only de Advisors: ver
+`architecture/SUPABASE-DEV-ADVISORS-20261026.md`.
 
 ## Supabase DEV: conexión resuelta y baseline aplicado
 

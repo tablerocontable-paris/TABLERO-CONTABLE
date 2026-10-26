@@ -1,5 +1,15 @@
 # Estado vigente — migración de workspace, 26/10/2026
 
+## Revalidación del corte — 26/10/2026
+
+GitHub Actions run `40373683135` validó el commit `366c2df92482dafcb66ec3f8d6d5e84f9e4b9aea`: `npm ci`, suite completa, build y empaquetado Sites terminaron correctamente. El checkout `main` local coincide con `origin/main`; se conserva sin modificar el scratch `.block` indicado por `AGENTS.md`. Esta actualización documental aún requiere su propio control de CI.
+
+El Site privado existente está activo en versión 95 y su último despliegue (`appgdep_6adb8ba50788819197d78ab295aeb120`) figura `succeeded`. La audiencia sigue en modo `custom`, con acceso sólo de la cuenta propietaria y cero visitantes externos. Esto explica que el enlace no abra desde otra cuenta; no acredita aceptación en navegador de la cuenta propietaria.
+
+La consulta directa de Supabase Advisors el 26/10 detectó: seguridad INFO, 29 tablas con RLS sin policy; seguridad WARN, 39 funciones `SECURITY DEFINER` ejecutables por `authenticated`; rendimiento INFO, 124 claves foráneas sin índice; rendimiento WARN, 8 policies con reevaluación por fila; INFO, 12 índices no usados. No se cambiaron grants, policies ni exposición. Las tablas sin policies pueden ser intencionales y fallar cerradas; las funciones ejecutables requieren revisar esquema expuesto, grants y controles internos. No conectar Auth/UI ni usuarios hasta cerrar la matriz de permisos.
+
+Detalle y enlaces de remediación: `architecture/SUPABASE-DEV-ADVISORS-20261026.md`. El valor del ajuste de autoexposición está documentado como apagado, pero falta confirmar en Dashboard que **Exposed schemas** incluya únicamente `api`; los documentos históricos que dicen `public, extensions` más autoexposición activa describen un corte anterior.
+
 ## Inventario para continuidad entre computadoras — 26/10/2026
 
 El corte documentado en `MIGRATION-INVENTORY-20261026.md` conserva qué se

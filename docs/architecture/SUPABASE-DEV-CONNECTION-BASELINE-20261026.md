@@ -16,25 +16,27 @@ del baseline en estado aplicado (`history ... after`) y no intenta proponerlas d
 nuevo. No ejecuta SQL y excluye SQL015. La aplicación del segmento se mantiene
 en el workflow separado de migraciones.
 
-## Hallazgos de seguridad previamente revisados
+## Hallazgos de seguridad y rendimiento — reconsulta 26/10
 
-La lectura de advisors del 23/10 reportó 29 tablas RLS sin policies y 39
-funciones `SECURITY DEFINER` ejecutables por `authenticated`. La auditoría
-read-only identificó que las tablas concernidas no conceden SELECT/INSERT/
-UPDATE/DELETE a `anon` ni `authenticated`; el acceso queda denegado. Las
+La reconsulta read-only de Supabase Advisors del 26/10 sigue reportando 29
+tablas RLS sin policies (INFO) y 39 funciones `SECURITY DEFINER` ejecutables
+por `authenticated` (WARN). La revisión de grants registrada en la auditoría
+read-only encontró que las tablas no conceden SELECT/INSERT/UPDATE/DELETE a
+`anon` ni `authenticated`, por lo que no tienen acceso tabular directo. Las
 funciones revisadas tenían `search_path` vacío y no eran ejecutables por `anon`.
-Las funciones API v1 se invocan por esquema `api`; aun así, falta confirmar la
-configuración real de **Exposed schemas** en el Dashboard y dejar sólo `api`.
-No se cambió ningún grant o policy.
+Sin embargo, el Dashboard aún debe confirmar **Exposed schemas** sólo `api`;
+no se autoriza inferir que las funciones `public` no estén expuestas ni conectar
+Auth/UI antes de probar permisos positivos y negativos. No se cambió ningún
+grant o policy.
 
-Advisors de rendimiento: 124 claves foráneas sin índice, 8 policies con
-`auth_rls_initplan` y 12 índices no usados. No son bloqueo para comprobar
-conectividad; evaluar optimizaciones con carga representativa, sin aplicar
-cambios masivos a ciegas.
+Advisors de rendimiento: 124 claves foráneas sin índice (INFO), 8 policies con
+`auth_rls_initplan` (WARN) y 12 índices sin uso observado (INFO). Los índices
+sin uso no justifican eliminaciones mientras no exista carga representativa;
+evaluar optimizaciones de manera selectiva.
 
 ## Próximos gates
 
-1. Confirmar en Dashboard que Data API exponga sólo `api` (la autoexposición de nuevas tablas ya estaba apagada).
+1. Confirmar en Dashboard que Data API exponga sólo `api`; la autoexposición de nuevas tablas consta apagada.
 2. Probar permisos positivos y negativos con identidades ficticias: anon, empleado propio/tercero, encargado dentro/fuera de su ámbito y jefe; incluir notas privadas y RPC legacy directos.
 3. Cerrar auditoría de Auth/RLS/grants y validar la lectura remota de UI antes de considerar SQL015 o ampliar mutaciones.
 

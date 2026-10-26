@@ -4,8 +4,9 @@
 
 El repositorio privado `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`, es
 la fuente de verdad del **código, migraciones, contratos, pruebas, manuales y
-decisiones del proyecto**. Al corte de este documento, el checkout local está
-en `dd3ab2f54e926a194f4e57c2a562d7852f62075a`, igual que `origin/main`. El único
+decisiones del proyecto**. Al inicio de la reauditoría del 26/10/2026, el
+checkout local estaba sincronizado con `origin/main` en
+`366c2df92482dafcb66ec3f8d6d5e84f9e4b9aea`. El único
 archivo local no versionado observado es
 `tests/review/m2-2c-legacy-task-control-replay-races.block`; se conserva intacto
 porque el estado de continuidad lo identifica como artefacto de auditoría que
@@ -113,3 +114,18 @@ contar movimientos operativos como tareas completadas.
   de origen y, si el objetivo incluye medir la operación real, una exportación
   fuente autorizada. Sin esos insumos no se inventan conteos reales ni se afirma
   migración completa de datos.
+
+## Revalidación de GitHub Actions y Supabase Advisors — 26/10/2026
+
+GitHub Actions run `40373683135`, commit `366c2df92482dafcb66ec3f8d6d5e84f9e4b9aea`,
+terminó en verde: `npm ci`, suite completa, build y validación del paquete Sites.
+No convierte el conteo del seed ni el snapshot antiguo del Site en cifras reales.
+
+La consulta read-only actual de Supabase reportó 29 tablas con RLS sin policies
+(INFO), 39 funciones `SECURITY DEFINER` ejecutables por `authenticated` (WARN),
+124 foreign keys sin índice (INFO), 8 policies con `auth_rls_initplan` (WARN) y
+12 índices sin uso observado (INFO). No se aplicaron cambios. Debe confirmarse
+el esquema expuesto y revisar grants/contratos antes de conectar Auth/UI; la
+advertencia de función no demuestra por sí sola una ruta explotable, pero sí
+exige completar la revisión. Referencias y límites en
+`architecture/SUPABASE-DEV-ADVISORS-20261026.md`.
