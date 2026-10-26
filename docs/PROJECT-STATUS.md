@@ -1,5 +1,25 @@
 # Estado vigente — migración de workspace, 26/10/2026
 
+## Inventario para continuidad entre computadoras — 26/10/2026
+
+El corte documentado en `MIGRATION-INVENTORY-20261026.md` conserva qué se
+transfiere por GitHub y qué debe quedar fuera por ser credencial, memoria/chats
+privados o estado local. `docs/product/STARTER-CATALOG-AND-BASELINE-20261026.md`
+define conceptos neutrales para el alta inicial futura y separa muestra ficticia
+de línea base real. La muestra reproducible actual es 13 perfiles (1 jefe, 2
+encargados, 10 empleados), 4 empresas, 6 conceptos de catálogo (3 entregables,
+3 operativas) y 73 ocurrencias mensuales ficticias. No hay conteo verificado de
+usuarios reales ni tareas reales cumplidas por día; para calcularlo falta un
+extracto anonimizado y autorizado de la fuente operativa. El primer ingreso
+actual sigue siendo una simulación local sin cuentas.
+
+El estado Git observado es `dd3ab2f54e926a194f4e57c2a562d7852f62075a`, igual a
+`origin/main`; se mantiene intacto el artefacto local `.block` descrito en el
+estado de auditoría. La documentación nueva queda pendiente de commit/push y
+validación CI. El runtime tiene Node 24 y dependencias de proyecto instaladas,
+pero `npm` no está en PATH; se encontró runtime npm empaquetado bajo `work/` y
+se debe intentar invocarlo directamente, sin instalación global.
+
 ## Resultado de conexión y migración DEV — 26/10/2026
 
 El secreto `SUPABASE_DEV_DB_URL` valida y autentica. GitHub Actions run

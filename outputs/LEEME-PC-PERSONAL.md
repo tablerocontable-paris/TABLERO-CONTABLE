@@ -1,5 +1,11 @@
 # Grupo París en tu PC personal
 
+Para entender qué viaja por GitHub y qué requiere una copia privada, consultar
+`docs/MIGRATION-INVENTORY-20261026.md`. La línea base ficticia y los conceptos
+neutrales propuestos para el primer alta están en
+`docs/product/STARTER-CATALOG-AND-BASELINE-20261026.md`. El conteo del seed no
+representa empleados reales ni tareas cumplidas hoy.
+
 ## Código fuente: GitHub
 
 El repositorio oficial privado es [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocontable-paris/TABLERO-CONTABLE), rama `main`. La cuenta propietaria es `tablerocontable-paris`; los cambios nuevos se publican directamente en `main` y el commit vigente figura como **Tablero Contable**.

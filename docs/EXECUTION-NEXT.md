@@ -1,5 +1,22 @@
 # Estado vigente de ejecución — 26/10/2026
 
+## Continuidad PC personal y línea base neutral — 26/10/2026
+
+Ver `MIGRATION-INVENTORY-20261026.md` y
+`product/STARTER-CATALOG-AND-BASELINE-20261026.md`. Se documentó qué contenido
+del proyecto puede ir en GitHub, límites para estado local/privacidad y un
+catálogo inicial neutral. El conteo 13 perfiles/4 empresas/6 conceptos/73
+ocurrencias es exclusivamente seed ficticio; no comunica dotación real ni
+cumplimiento diario real.
+
+Siguiente bloque: (1) ejecutar las comprobaciones locales disponibles mediante
+el runtime empaquetado, (2) agregar y publicar estos documentos directamente a
+`origin/main` si pasan revisión, (3) entregar al usuario instrucciones breves
+para descargar desde la PC de origen el respaldo privado de laboratorio y
+restaurarlo en la PC personal. No cargar respaldo JSON, memorias, adjuntos,
+conversaciones, datos de clientes ni credenciales al repo. Para el conteo real
+se requiere una exportación aprobada y anonimizada del sistema fuente.
+
 ## Supabase DEV: conexión resuelta y baseline aplicado
 
 El secreto `SUPABASE_DEV_DB_URL` funciona. GitHub Actions run `40367149794`
