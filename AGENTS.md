@@ -8,9 +8,10 @@ Sites). El commit de continuidad `f62ee502bfd2270fe9d8784dfccb8bfec3bd2d1c`
 quedó publicado directamente en `main`, sin PR ni reescritura; su run 98
 (`40419944096`) terminó en éxito. La actualización documental `89e39cb`
 (`40420917541`) también pasó el run 99. Esta nueva anotación incorpora una
-relectura agregada y anonimizada del D1; revisar el último run de Actions antes
-de considerar validado su commit. La suite local completa pasó 838/838, build
-cliente/Worker, paquete Sites y pre-commit 212/212.
+relectura agregada y anonimizada del D1; el commit `0785600` pasó el run 100
+(`40422009760`). Verificar Actions después de cualquier commit nuevo. La suite
+local completa pasó 838/838, build cliente/Worker, paquete Sites y pre-commit
+212/212.
 
 ## Continuidad portable y uso de subagentes
 
