@@ -69,10 +69,18 @@ Sin esa fuente no corresponde estimar tareas reales cumplidas al día de hoy.
 
 ## Compatibilidad
 
-El catálogo de esta propuesta se documenta, pero no sustituye los seis IDs,
+El catálogo de esta propuesta no sustituye los seis IDs,
 nombres, snapshots ni respaldos legacy de `seed()` en esta etapa. Al implementar
 el onboarding autenticado debe guardarse como una nueva versión de plantilla y
 conservar las versiones anteriores en históricos y restauraciones. La aceptación
 requiere pruebas de: alta desde organización vacía, edición/descartado de
 conceptos, aprobación idempotente, cero asignaciones antes de aprobar y
 preservación de estados/respaldo anteriores.
+
+El prototipo local de laboratorio ofrece una selección opcional de seis conceptos
+con IDs `starter-v1-*`; no crea ni edita el catálogo común, conserva el snapshot
+seleccionado en cada asignación y permite reprogramar la frecuencia mediante un
+`starterId` explícito. Este flujo es sólo una simulación de inducción y no es una
+aprobación organizacional: no se ofrece cuando el guardado es remoto y no debe
+trasladarse al onboarding autenticado. Allí sigue vigente la secuencia superior
+de propuesta, revisión de jefatura y aprobación explícita antes de crear tareas.

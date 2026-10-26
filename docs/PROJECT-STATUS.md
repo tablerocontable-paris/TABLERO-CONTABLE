@@ -1,5 +1,23 @@
 # Estado vigente — migración de workspace, 26/10/2026
 
+## Catálogo neutral de inicio — implementación local revisada, 26/10/2026
+
+El alta del laboratorio ofrece seis procesos iniciales neutrales, versionados
+como `starter-v1-*`, todos opcionales y sin selección automática. No cambia el
+seed ni el catálogo común. Al seleccionarlos se materializan asignaciones
+independientes sin `templateId`; las operativas conservan cantidad sin cuota y
+sin peso supuesto. Las asignaciones llevan un `starterId` versionado explícito,
+que permite reprogramar recurrencias sin promover el concepto al catálogo
+común. La opción sólo aparece en el alta local del laboratorio, nunca en
+onboarding remoto. Se preservan borradores y selección al repetir una invitación
+simulada.
+
+Validación local del cambio: suite completa 817/817 en 83 archivos; `npm run
+build` aprobó TypeScript, cliente Vite y Worker. Vite mantiene el aviso conocido
+de un bundle principal mayor a 500 kB. El commit y la verificación de CI de este
+cambio siguen pendientes; hasta entonces no afirmar que está publicado.
+Tampoco implica onboarding autenticado ni disponibilidad en el Site.
+
 ## Revalidación del corte — 26/10/2026
 
 GitHub Actions run `40373683135` validó el commit `366c2df92482dafcb66ec3f8d6d5e84f9e4b9aea`: `npm ci`, suite completa, build y empaquetado Sites terminaron correctamente. El checkout `main` local coincide con `origin/main`; se conserva sin modificar el scratch `.block` indicado por `AGENTS.md`. Esta actualización documental aún requiere su propio control de CI.
@@ -26,8 +44,10 @@ anonimizada de la fuente real. El primer ingreso actual sigue siendo una
 simulación local sin cuentas.
 
 El commit `d1577470cb2938d8f19adbe0be8f2f3c1c898359` publica el inventario y la
-propuesta de conceptos neutrales a `origin/main`; el control local aprobó
-196/196 pruebas, la suite 813/813, TypeScript y los builds de cliente/Worker.
+propuesta inicial de conceptos neutrales a `origin/main`; esa etapa de diseño
+fue luego implementada en el laboratorio según la sección vigente superior.
+El control local aprobó 196/196 pruebas, la suite 813/813, TypeScript y los
+builds de cliente/Worker.
 Después se publicaron en `origin/main` los agregados read-only del D1 y DEV como
 `6656d114b3fb9ff64358edba2e3afd5624e925ec`. La revisión de 46 bundles descubrió
 39 refs históricos fuera del ancestro de `main`; quedaron preservados en

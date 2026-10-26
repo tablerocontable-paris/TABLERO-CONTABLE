@@ -131,6 +131,7 @@ import {
 } from "./domain/laboratory-work";
 import { applyCompletionAttribution, linkEvidenceToCompletions } from "./domain/workCycle";
 import { currentCatalogueVersion } from "./domain/processImprovement";
+import { materializeNeutralStarterAssignment } from "./domain/neutralStarterCatalog";
 import { submitHabitualTaskProposal } from "./domain/habitualTaskProposals";
 import {
   canConvertInternalRequest,
@@ -868,8 +869,22 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           ).includes(cid)
         )
           continue;
-        const t = state.templates.find((t) => t.id === tid)!;
+        const legacyTemplate = state.templates.find((t) => t.id === tid);
         const schedule = scheduleForCompany(tid, cid);
+        if (!legacyTemplate && laboratory && !remoteSave) {
+          const starterAssignment = materializeNeutralStarterAssignment(tid, {
+            id: `onboard-${active.id}-${cid}-${tid}`,
+            owner: active,
+            companyId: cid,
+            startMonth: month,
+            day: draft.day,
+            schedule,
+          });
+          if (starterAssignment) assignments.push(starterAssignment);
+          continue;
+        }
+        if (!legacyTemplate) continue;
+        const t = legacyTemplate;
         assignments.push({
           id: `onboard-${active.id}-${cid}-${tid}`,
           templateId: tid,

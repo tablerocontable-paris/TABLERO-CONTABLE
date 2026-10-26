@@ -1,5 +1,22 @@
 # Estado vigente de ejecución — 26/10/2026
 
+## Corte local más reciente — catálogo de inicio neutral
+
+Implementados seis conceptos opcionales, versionados e independientes del
+catálogo común en la inducción del laboratorio. No hay preselección, cuotas
+inventadas ni cambio al seed; las operativas nuevas no asumen coeficiente. Al
+repetir una invitación simulada se conservan la selección y los borradores.
+Suite completa 817/817 (83 archivos) y `npm run build` aprobados localmente
+(TypeScript, Vite cliente y Worker). El bundle principal supera 500 kB y Vite
+lo reporta como advertencia. Commit, CI del cambio y actualización del Site
+siguen pendientes; no está habilitado para onboarding real/remoto.
+
+Siguiente: revisión arquitectónica de los límites laboratorio/remoto, commit
+directo a `main` y CI verde; luego actualizar únicamente el Site privado
+existente, sin alterar audiencia, y verificar acceso desde la cuenta propietaria.
+Después retomar el gate de Data API expuesta sólo como `api` y matriz de
+autorización en Supabase DEV. No activar el espacio operativo ni producción.
+
 ## Continuidad PC personal y línea base neutral — 26/10/2026
 
 La continuidad técnica y decisiones del proyecto están en `main` y en las dos
@@ -11,22 +28,22 @@ del repo credenciales, memoria/chats privados, estado local del navegador y
 datos personales/de clientes. El respaldo de laboratorio debe moverse aparte y
 de forma privada si se necesita en la PC personal.
 
-El catálogo neutral está documentado, pero no implementado en un alta real: el
-primer inicio actual sigue siendo laboratorio simulado y genera datos de seed.
-No cambiar sus IDs históricos. La estimación vigente sigue siendo sólo 13
+El catálogo neutral está implementado sólo en el alta del laboratorio; el
+primer inicio remoto sigue sin ser un flujo real autenticado. El seed actual no
+se cambia y mantiene sus IDs históricos. La estimación vigente sigue siendo sólo 13
 perfiles ficticios/73 ocurrencias de muestra; el Site contiene un snapshot del
 06/10 y Supabase DEV no contiene filas operativas. Para cifras actuales hace
 falta un extracto autorizado y anonimizado de la fuente real.
 
-**Próximos gates, en orden:** (1) obtener desde la cuenta propietaria el error
-exacto si el Site sigue sin abrir; el despliegue v95 está exitoso y es owner-only.
-(2) confirmar en Dashboard que Data API exponga sólo `api`; (3) auditar los 39
-RPC `SECURITY DEFINER` advertidos y completar pruebas de permisos positivas y
-negativas en DEV, sin modificar grants a ciegas; (4) implementar y probar el
-catálogo neutral como nueva versión de onboarding, preservando seed/respaldos;
-(5) importar el extracto real sólo tras autorización y anonimización; (6)
-continuar Auth/escrituras, evidencia/Storage, Cloudflare/correo y aceptación en
-PC personal. No habilitar producción ni el área operativa antes de la aceptación.
+**Próximos gates, en orden:** (1) revisión arquitectónica, commit y CI verde
+para el catálogo neutral implementado localmente; actualizar únicamente el Site
+privado existente y comprobar acceso desde la cuenta propietaria; (2) obtener el
+error exacto si el Site sigue sin abrir; (3) confirmar en Dashboard que Data API
+exponga sólo `api`; (4) auditar los 39 RPC `SECURITY DEFINER` advertidos y
+completar pruebas de permisos positivas y negativas en DEV, sin modificar grants
+a ciegas; (5) importar el extracto real sólo tras autorización y anonimización;
+(6) continuar Auth/escrituras, evidencia/Storage, Cloudflare/correo y aceptación
+en PC personal. No habilitar producción ni el área operativa antes de la aceptación.
 
 Última consulta read-only de Advisors: ver
 `architecture/SUPABASE-DEV-ADVISORS-20261026.md`.

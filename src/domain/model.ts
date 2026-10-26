@@ -50,6 +50,8 @@ export interface Template {
 }
 export interface Assignment {
   retired?: boolean;
+  /** Versioned lab-only source for an opt-in neutral starter concept. */
+  starterId?: string;
   /** Catalogue snapshot used for future occurrences. Older records may be unversioned. */
   templateVersion?: number;
   id: string;

@@ -7,6 +7,7 @@ import {
   describeSchedule,
 } from "../domain/schedule";
 import { id } from "../domain/model";
+import { NEUTRAL_STARTER_CATALOG } from "../domain/neutralStarterCatalog";
 import StepListEditor, { parseSteps, validateSteps } from "./StepListEditor";
 import {
   ArrowRight,
@@ -77,7 +78,9 @@ export default function Onboarding({
   const proposalStepValues = (() => {
     try { return validateSteps(proposalForm.steps); } catch { return []; }
   })();
-  const chosen = state.templates.filter((t) =>
+  const starterCatalog = laboratory && !remote ? NEUTRAL_STARTER_CATALOG : [];
+  const availableTemplates = [...state.templates, ...starterCatalog];
+  const chosen = availableTemplates.filter((t) =>
     draft.selectedTemplateIds.includes(t.id),
   );
   const custom = [
@@ -328,6 +331,30 @@ export default function Onboarding({
                     </label>
                   ))}
               </div>
+              {starterCatalog.length > 0 && (
+                <section className="neutral-starter-catalog" aria-labelledby="neutral-starter-heading">
+                  <h3 id="neutral-starter-heading">Procesos iniciales neutrales · opcionales</h3>
+                  <p>Elegí sólo los procesos que correspondan. Son una guía general; no agregan conceptos al catálogo común ni definen obligaciones o vencimientos. Podés revisar empresas y frecuencia antes de terminar.</p>
+                  <div className="catalog-options">
+                    {starterCatalog.map((t) => (
+                      <label className={"catalog-option " + (draft.selectedTemplateIds.includes(t.id) ? "selected" : "")} key={t.id}>
+                        <input
+                          type="checkbox"
+                          checked={draft.selectedTemplateIds.includes(t.id)}
+                          onChange={(e) => patch({ selectedTemplateIds: e.target.checked
+                            ? [...draft.selectedTemplateIds, t.id]
+                            : draft.selectedTemplateIds.filter((id) => id !== t.id) })}
+                        />
+                        <div>
+                          <b>{t.title}</b>
+                          <p>{t.description}</p>
+                          <small>{t.kind === "operativa" ? `${t.unit} · sin cuota` : `${t.steps.length} controles sugeridos · sin meta`}</small>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </section>
+              )}
               <details>
                 <summary>Agregar un trabajo esporádico · una sola vez</summary>
                 <p>

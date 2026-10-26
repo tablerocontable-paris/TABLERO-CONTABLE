@@ -14,6 +14,7 @@ import {
   addDays,
   type Schedule,
 } from "./schedule";
+import { neutralStarterTask } from "./neutralStarterCatalog";
 
 export function canViewLabAssignment(state: State, actor: Profile, assignment: Assignment) {
   const currentActor = state.profiles.find((profile) => profile.id === actor.id);
@@ -44,7 +45,7 @@ export function reviseAssignment(
   validateSchedule(rule);
   const old = s.assignments.find((a) => a.id === assignmentId);
   if (!old || old.retired) throw Error("La planificación ya fue reemplazada.");
-  if (!old.templateId && rule.frequency !== "única")
+  if (!old.templateId && !neutralStarterTask(old.starterId || "") && rule.frequency !== "única")
     throw Error(
       "Una tarea habitual necesita un proceso estándar en el catálogo.",
     );

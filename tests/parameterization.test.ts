@@ -7,6 +7,7 @@ import {
 } from "../src/domain/parameterization";
 import { applyProposal, projectState } from "../src/server/site-policy";
 import type { State } from "../src/domain/model";
+import { NEUTRAL_STARTER_CATALOG } from "../src/domain/neutralStarterCatalog";
 
 const stamp = "2026-10-06T18:00:00.000Z";
 function prepared() {
@@ -34,6 +35,29 @@ describe("perfil, invitación de laboratorio y parametrización", () => {
       s.profiles[0].companyIds,
     );
     expect(next.tasks).toEqual(s.tasks);
+  });
+  it("repeated simulated invitation preserves neutral selections, saved drafts, and all legacy seed state", () => {
+    const s = seed();
+    const beforeTemplates = structuredClone(s.templates);
+    const beforeAssignments = structuredClone(s.assignments);
+    const beforeTasks = structuredClone(s.tasks);
+    const firstStarterId = NEUTRAL_STARTER_CATALOG[0]!.id;
+    s.onboarding.e0 = {
+      ...s.onboarding.e0,
+      selectedTemplateIds: ["cat1", firstStarterId],
+      customTasks: [{ id: "draft-kept", title: "Borrador guardado", steps: "Revisar respaldo", kind: "resultado", unit: "", target: 0 }],
+      completedAt: stamp,
+      step: 4,
+    };
+    const first = prepareLaboratoryInvitation(s, "e0");
+    const second = prepareLaboratoryInvitation(first, "e0");
+    expect(second.onboarding.e0.selectedTemplateIds).toEqual(["cat1", firstStarterId]);
+    expect(second.onboarding.e0.customTasks).toEqual(s.onboarding.e0.customTasks);
+    expect(second.onboarding.e0.step).toBe(0);
+    expect(second.onboarding.e0.completedAt).toBeNull();
+    expect(second.templates).toEqual(beforeTemplates);
+    expect(second.assignments).toEqual(beforeAssignments);
+    expect(second.tasks).toEqual(beforeTasks);
   });
   it("blocks invitations to unconfigured or inactive profiles", () => {
     const s = prepared();

@@ -1,8 +1,14 @@
 import type { Assignment, State } from "./model";
 import { currentCatalogueVersion } from "./processImprovement";
+import { neutralStarterTask } from "./neutralStarterCatalog";
 
 /** El contexto cambia por empresa; la identidad y controles los define el catálogo. */
 export function standardizeAssignment(s: State, a: Assignment): Assignment {
+  if (a.starterId) {
+    if (a.templateId || !neutralStarterTask(a.starterId))
+      throw Error("El concepto inicial versionado ya no está disponible.");
+    return a;
+  }
   if (!a.templateId) {
     if ((a.schedule?.frequency || a.frequency) !== "única")
       throw Error(
