@@ -282,7 +282,7 @@ export function deactivateProfile(
   const actor = s.profiles.find((item) => item.id === actorId && item.active);
   const current = s.profiles.find((item) => item.id === profile.id);
   const note = reason.trim();
-  if (actor?.role !== "jefe") throw Error("Sólo Juan Pablo / jefatura administra las bajas.");
+  if (actor?.role !== "jefe") throw Error("Sólo jefatura administra las bajas.");
   if (!current?.active || current.id === actor.id) throw Error("Elegí a otra persona con acceso activo.");
   if (note.length < 5 || note.length > 500) throw Error("Indicá un motivo de baja de entre 5 y 500 caracteres.");
   if (s.profiles.some((item) => item.active && item.managerId === current.id))
@@ -453,7 +453,7 @@ export function transferOrphanedTask(
 export function updateProfile(s: State, p: Profile, actorId: string): State {
   const actor = s.profiles.find((x) => x.id === actorId);
   if (!actor?.active || actor.role !== "jefe")
-    throw Error("Sólo Juan Pablo / jefatura administra los perfiles.");
+    throw Error("Sólo jefatura administra los perfiles.");
   if (!p.name.trim() || !p.companyIds.length)
     throw Error("Completá nombre y empresas.");
   const manager = s.profiles.find((x) => x.id === p.managerId);

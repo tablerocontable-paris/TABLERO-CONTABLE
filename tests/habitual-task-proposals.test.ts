@@ -62,7 +62,7 @@ describe("propuestas de tareas habituales del laboratorio", () => {
     const employee = state.profiles.find((profile) => profile.id === "e0")!;
     const manager = state.profiles.find((profile) => profile.id === "boss")!;
     state = submitHabitualTaskProposal(state, employee, proposalInput(), fixedNow, () => "submitted");
-    expect(() => requestHabitualProposalChanges(state, state.profiles.find((profile) => profile.id === "m1")!, "proposal-a", "Aclarar fuente", fixedNow)).toThrow(/Sólo Juan Pablo/);
+    expect(() => requestHabitualProposalChanges(state, state.profiles.find((profile) => profile.id === "m1")!, "proposal-a", "Aclarar fuente", fixedNow)).toThrow(/Sólo jefatura/);
     state = requestHabitualProposalChanges(state, manager, "proposal-a", "Aclarar de qué cuenta se toma el extracto.", fixedNow, () => "request");
     expect(state.habitualTaskProposals?.[0]).toMatchObject({ status: "changes_requested", managerNote: "Aclarar de qué cuenta se toma el extracto." });
     state = resubmitHabitualTaskProposal(state, employee, "proposal-a", proposalInput({ title: "Conciliación Banco Nación por cuenta", schedule: defaultSchedule("2026-10-10", "semanal") }), "2026-10-08T12:00:00.000Z", () => "resubmit");
@@ -117,7 +117,7 @@ describe("propuestas de tareas habituales del laboratorio", () => {
       kind: "resultado" as const, unit: "", weight: 4, target: 0, steps: ["Comparar comprobantes", "Controlar saldos"],
     };
     const proposal = state.habitualTaskProposals![0];
-    expect(() => approveHabitualTaskProposals(state, employee, [proposal.id], { kind: "create", template: standard }, currentMonth(), fixedNow)).toThrow(/Sólo Juan Pablo/);
+    expect(() => approveHabitualTaskProposals(state, employee, [proposal.id], { kind: "create", template: standard }, currentMonth(), fixedNow)).toThrow(/Sólo jefatura/);
     let generatedId = 0;
     state = approveHabitualTaskProposals(state, state.profiles.find((profile) => profile.id === "boss")!, [proposal.id], { kind: "create", template: standard }, currentMonth(), fixedNow, () => `generated-${++generatedId}`);
     const created = state.templates.find((template) => template.title === standard.title)!;

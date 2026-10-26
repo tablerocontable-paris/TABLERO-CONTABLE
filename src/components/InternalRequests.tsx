@@ -88,7 +88,7 @@ export default function InternalRequests({
         </select></label>
         {kind === "suggestion" && <label>Enviar a<select required value={recipient} onChange={(event) => setRecipient(event.target.value)}><option value="">Elegí el destino</option>{recipients.map((person) => <option key={person.id} value={person.id}>{person.name}</option>)}</select></label>}
         {kind === "technical_error" && <p className="internal-request-route">Destino: Cola de soporte técnico · simulada</p>}
-        {kind === "work_request" && <p className="internal-request-route">Destino: {recipients[0]?.name || "Juan Pablo"}</p>}
+        {kind === "work_request" && <p className="internal-request-route">Destino: {recipients[0]?.name || "jefatura"}</p>}
         <label>Urgencia<select value={urgency} onChange={(event) => setUrgency(event.target.value as InternalRequestUrgency)}>{urgencies.map((value) => <option key={value} value={value}>{internalRequestUrgencyLabels[value]}</option>)}</select></label>
         <label>Módulo<input required maxLength={80} list="internal-request-modules" value={module} onChange={(event) => setModule(event.target.value)} placeholder="Ej. Vencimientos, tablero, cierres" /><datalist id="internal-request-modules">{["Tablero", "Vencimientos", "Cierre del mes", "Anotaciones", "Equipo y estructura", "Planificación", "Catálogo y pesos"].map((name) => <option key={name} value={name} />)}</datalist></label>
         <label>Asunto<input name="subject" required maxLength={120} placeholder="Resumí el pedido" /></label>

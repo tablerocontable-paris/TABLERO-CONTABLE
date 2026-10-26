@@ -44,15 +44,23 @@ perfiles ficticios/73 ocurrencias de muestra; el Site contiene un snapshot del
 06/10 y Supabase DEV no contiene filas operativas. Para cifras actuales hace
 falta un extracto autorizado y anonimizado de la fuente real.
 
-**Próximos gates, en orden:** (1) revisión arquitectónica, commit y CI verde
-para el catálogo neutral implementado localmente; actualizar únicamente el Site
-privado existente y comprobar acceso desde la cuenta propietaria; (2) obtener el
-error exacto si el Site sigue sin abrir; (3) confirmar en Dashboard que Data API
-exponga sólo `api`; (4) auditar los 39 RPC `SECURITY DEFINER` advertidos y
-completar pruebas de permisos positivas y negativas en DEV, sin modificar grants
-a ciegas; (5) importar el extracto real sólo tras autorización y anonimización;
-(6) continuar Auth/escrituras, evidencia/Storage, Cloudflare/correo y aceptación
-en PC personal. No habilitar producción ni el área operativa antes de la aceptación.
+**Catálogo neutral v2:** GPT-6.1 Sol revisó y aceptó localmente el alcance y sus
+casos de compatibilidad; GPT-6 Luna implementó los ajustes. Resultado: 832/832
+pruebas en 83 archivos, TypeScript, builds cliente/Worker y `git diff --check`
+aprobados. Esta revisión cubre el prototipo de laboratorio, no el onboarding
+autenticado.
+
+**Próximos gates, en orden:** (1) registrar este corte y publicarlo directamente
+en `main` con autor Tablero Contable; verificar GitHub Actions; (2) actualizar el
+mismo Site privado, conservar acceso sólo de propietario y verificar el
+deployment; (3) abrirlo desde la PC personal con la cuenta propietaria y traer el
+código desde `main`; (4) confirmar en Dashboard que Data API exponga sólo `api`;
+(5) auditar los 39 RPC `SECURITY DEFINER` y completar pruebas positivas y
+negativas de permisos en DEV, sin modificar grants a ciegas; (6) obtener, sólo
+con autorización, un extracto anonimizado para estimar dotación y actividad
+reales; (7) continuar Auth/escrituras, evidencia/Storage, Cloudflare/correo y
+aceptación integral. No habilitar producción ni el área operativa antes de esa
+aceptación.
 
 Última consulta read-only de Advisors: ver
 `architecture/SUPABASE-DEV-ADVISORS-20261026.md`.

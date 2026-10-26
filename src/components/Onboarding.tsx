@@ -7,7 +7,7 @@ import {
   describeSchedule,
 } from "../domain/schedule";
 import { id } from "../domain/model";
-import { NEUTRAL_STARTER_CATALOG } from "../domain/neutralStarterCatalog";
+import { NEUTRAL_STARTER_CATALOG, NEUTRAL_STARTER_GROUP_DESCRIPTIONS, NEUTRAL_STARTER_SUGGESTIONS } from "../domain/neutralStarterCatalog";
 import StepListEditor, { parseSteps, validateSteps } from "./StepListEditor";
 import {
   ArrowRight,
@@ -21,6 +21,14 @@ import {
   Trash2,
 } from "lucide-react";
 import type { State, Profile, Onboarding as Draft } from "../domain/model";
+
+function withoutKey<T>(record: Record<string, T> | undefined, key: string) {
+  if (!record || !(key in record)) return record;
+  const next = { ...record };
+  delete next[key];
+  return next;
+}
+
 export default function Onboarding({
   state,
   month,
@@ -53,6 +61,8 @@ export default function Onboarding({
   const [customStepRows, setCustomStepRows] = useState<string[]>(() =>
     draft.customSteps ? draft.customSteps.split("\n") : [],
   );
+  const [starterSearch, setStarterSearch] = useState("");
+  const [starterOnlySelected, setStarterOnlySelected] = useState(false);
   const customStepError = (() => {
     if (!draft.customTitle.trim()) return "";
     try {
@@ -79,10 +89,10 @@ export default function Onboarding({
     try { return validateSteps(proposalForm.steps); } catch { return []; }
   })();
   const starterCatalog = laboratory && !remote ? NEUTRAL_STARTER_CATALOG : [];
+  const starterSuggestions = laboratory && !remote && profile.role !== "jefe" ? NEUTRAL_STARTER_SUGGESTIONS : [];
+  const starterLegacySelection = starterCatalog.filter((entry) => draft.selectedTemplateIds.includes(entry.id));
   const availableTemplates = [...state.templates, ...starterCatalog];
-  const chosen = availableTemplates.filter((t) =>
-    draft.selectedTemplateIds.includes(t.id),
-  );
+  const chosen = availableTemplates.filter((t) => draft.selectedTemplateIds.includes(t.id));
   const custom = [
     ...(draft.customTasks || []),
     ...(draft.customTitle.trim()
@@ -99,9 +109,13 @@ export default function Onboarding({
       : []),
   ];
   const all = [...chosen, ...custom];
+  const effectiveAll = profile.role === "jefe" ? [] : all;
   const scheduleFor = (tid: string, cid?: string) =>
     (laboratory && cid ? draft.companySchedules?.[tid]?.[cid] : undefined) ||
     draft.schedules?.[tid] || defaultSchedule(month + "-25");
+  const scheduleForProposal = (proposal: NonNullable<Draft["habitualTaskProposals"]>[number], companyId: string) =>
+    draft.companySchedules?.[proposal.id]?.[companyId] || draft.schedules?.[proposal.id] ||
+    (proposal.starterId ? { ...defaultSchedule(month + "-25"), hasDeadline: false } : defaultSchedule(month + "-25"));
   const targetFor = (tid: string, cid: string, fallback: number) =>
     laboratory ? (draft.companyTargets?.[tid]?.[cid] ?? fallback) : fallback;
   const companiesFor = (tid: string) =>
@@ -110,9 +124,34 @@ export default function Onboarding({
     );
   const proposalCompaniesFor = (proposal: NonNullable<Draft["habitualTaskProposals"]>[number]) =>
     proposal.companyIds.filter((cid) => draft.selectedCompanyIds.includes(cid));
+  const starterDrafts = (draft.habitualTaskProposals || []).filter((proposal) => !!proposal.starterId);
+  const starterDraftFor = (starterId: string) => starterDrafts.find((proposal) => proposal.starterId === starterId);
+  const normalizedStarterSearch = starterSearch.trim().toLocaleLowerCase("es-AR");
+  const matchingStarterSuggestionCount = starterSuggestions.filter((item) => {
+    const matches = !normalizedStarterSearch || `${item.title} ${item.group} ${item.aliases.join(" ")}`.toLocaleLowerCase("es-AR").includes(normalizedStarterSearch);
+    return matches && (!starterOnlySelected || !!starterDraftFor(item.id));
+  }).length;
+  const patchStarterDraft = (starterId: string, change: (proposal: NonNullable<Draft["habitualTaskProposals"]>[number]) => NonNullable<Draft["habitualTaskProposals"]>[number]) =>
+    patch({ habitualTaskProposals: (draft.habitualTaskProposals || []).map((proposal) => proposal.starterId === starterId ? change(proposal) : proposal) });
+  const patchProposalCompanies = (proposal: NonNullable<Draft["habitualTaskProposals"]>[number], companyIds: string[]) => {
+    const removedCompanyIds = proposal.companyIds.filter((companyId) => !companyIds.includes(companyId));
+    let companySchedules = draft.companySchedules;
+    let companyTargets = draft.companyTargets;
+    for (const companyId of removedCompanyIds) {
+      const schedules = withoutKey(companySchedules?.[proposal.id], companyId);
+      const targets = withoutKey(companyTargets?.[proposal.id], companyId);
+      if (companySchedules && schedules) companySchedules = { ...companySchedules, [proposal.id]: schedules };
+      if (companyTargets && targets) companyTargets = { ...companyTargets, [proposal.id]: targets };
+    }
+    patch({
+      habitualTaskProposals: (draft.habitualTaskProposals || []).map((row) => row.id === proposal.id ? { ...row, companyIds } : row),
+      ...(companySchedules ? { companySchedules } : {}),
+      ...(companyTargets ? { companyTargets } : {}),
+    });
+  };
   let validSchedules = true;
   let count = 0;
-  for (const t of all) {
+  for (const t of effectiveAll) {
     const companies = companiesFor(t.id);
     if (!companies.length) validSchedules = false;
     for (const cid of companies) {
@@ -127,14 +166,14 @@ export default function Onboarding({
       }
     }
   }
-  const proposals = laboratory ? draft.habitualTaskProposals || [] : [];
+  const proposals = laboratory && profile.role !== "jefe" ? draft.habitualTaskProposals || [] : [];
   let proposalCount = 0;
   for (const proposal of proposals) {
     const companies = proposalCompaniesFor(proposal);
     if (!companies.length) validSchedules = false;
     for (const cid of companies) {
       try {
-        occurrences(scheduleFor(proposal.id, cid), month);
+        occurrences(scheduleForProposal(proposal, cid), month);
         if (!laboratory && proposal.kind === "operativa") {
           const target = targetFor(proposal.id, cid, 0);
           if (!Number.isFinite(target) || target < 0 || !proposal.unit.trim()) validSchedules = false;
@@ -151,11 +190,25 @@ export default function Onboarding({
       : draft.step === 1
         ? draft.selectedCompanyIds.length > 0
         : draft.step === 2
-          ? profile.role === "jefe" || ((all.length > 0 || proposals.length > 0) && !customStepError && !proposalStepError)
+          ? profile.role === "jefe" || ((effectiveAll.length > 0 || proposals.length > 0) && !customStepError)
           : draft.step === 3
             ? validSchedules
             : true;
   const patch = (v: Partial<Draft>) => update({ ...draft, ...v });
+  const clearDraftReferences = (key: string) => ({
+    schedules: withoutKey(draft.schedules, key),
+    companySchedules: withoutKey(draft.companySchedules, key),
+    companyTargets: withoutKey(draft.companyTargets, key),
+    assignmentCompanyIds: withoutKey(draft.assignmentCompanyIds, key),
+  });
+  const removeProposalDraft = (proposal: NonNullable<Draft["habitualTaskProposals"]>[number]) => patch({
+    habitualTaskProposals: (draft.habitualTaskProposals || []).filter((row) => row.id !== proposal.id),
+    ...clearDraftReferences(proposal.id),
+  });
+  const removeLegacyStarter = (starter: (typeof NEUTRAL_STARTER_CATALOG)[number]) => patch({
+    selectedTemplateIds: draft.selectedTemplateIds.filter((selectedId) => selectedId !== starter.id),
+    ...clearDraftReferences(starter.id),
+  });
   return (
     <div className="induction">
       <aside className="induction-side">
@@ -283,6 +336,13 @@ export default function Onboarding({
               {profile.role === "jefe" ? (
                 <div className="note">
                   La inducción de jefatura no crea tareas personales. Podés continuar y luego configurar el organigrama y el catálogo.
+                  {starterDrafts.length > 0 && <section className="starter-manager-drafts" aria-label="Borradores v2 conservados">
+                    <p>Se conservan estos borradores; no se enviarán desde jefatura.</p>
+                    {starterDrafts.map((proposal) => <div className="custom-task-row" key={proposal.starterId}>
+                      <b>{proposal.title}</b>
+                      <button type="button" onClick={() => removeProposalDraft(proposal)}>Quitar borrador</button>
+                    </div>)}
+                  </section>}
                 </div>
               ) : (
                 <>
@@ -331,28 +391,85 @@ export default function Onboarding({
                     </label>
                   ))}
               </div>
-              {starterCatalog.length > 0 && (
+              {(starterSuggestions.length > 0 || starterLegacySelection.length > 0) && (
                 <section className="neutral-starter-catalog" aria-labelledby="neutral-starter-heading">
-                  <h3 id="neutral-starter-heading">Procesos iniciales neutrales · opcionales</h3>
-                  <p>Elegí sólo los procesos que correspondan. Son una guía general; no agregan conceptos al catálogo común ni definen obligaciones o vencimientos. Podés revisar empresas y frecuencia antes de terminar.</p>
+                  {starterSuggestions.length > 0 && <h3 id="neutral-starter-heading">Sugerencias para propuestas · opcionales</h3>}
+                  {starterSuggestions.length > 0 && <>
+                  <p>Las descripciones, tipo, unidad y controles son propuestas configurables, no datos fuente. Al finalizar la inducción se envían a jefatura para revisión; no crean trabajo ni fijan metas, pesos o vencimientos.</p>
+                  <label className="starter-search">Buscar sugerencias
+                    <input type="search" value={starterSearch} onChange={(event) => setStarterSearch(event.target.value)} placeholder="Buscar por nombre, alias o grupo" />
+                  </label>
+                  <label className="starter-filter"><input type="checkbox" checked={starterOnlySelected} onChange={(event) => setStarterOnlySelected(event.target.checked)} /> Sólo seleccionadas ({starterDrafts.length})</label>
+                  <div className="starter-suggestion-groups">
+                    {Object.entries(NEUTRAL_STARTER_GROUP_DESCRIPTIONS).map(([group, groupDescription]) => {
+                      const groupItems = starterSuggestions.filter((item) => item.group === group);
+                      const groupSelectedCount = groupItems.filter((item) => !!starterDraftFor(item.id)).length;
+                      const visibleItems = groupItems.filter((item) => {
+                        const query = starterSearch.trim().toLocaleLowerCase("es-AR");
+                        const matchesSearch = !query || `${item.title} ${item.group} ${item.aliases.join(" ")}`.toLocaleLowerCase("es-AR").includes(query);
+                        return matchesSearch && (!starterOnlySelected || !!starterDraftFor(item.id));
+                      });
+                      if (!visibleItems.length) return null;
+                      return <details className="starter-suggestion-group" key={group}>
+                        <summary><b>{group}</b><span>{groupItems.length} sugerencias · {groupSelectedCount} seleccionadas</span></summary>
+                        <p>{groupDescription}</p>
+                        <div className="starter-suggestion-list">
+                          {visibleItems.map((item) => {
+                            const selected = starterDraftFor(item.id);
+                            const initial = {
+                              id: `${item.id}:${profile.id}`, starterId: item.id, title: item.title, process: "",
+                              description: item.description, kind: item.suggestedKind, unit: item.suggestedUnit,
+                              steps: [...item.suggestedSteps], companyIds: [] as string[],
+                            };
+                            const value = selected || initial;
+                            const patchValue = (change: Partial<typeof initial>) => patchStarterDraft(item.id, (current) => ({ ...current, ...change }));
+                            return <details className="starter-suggestion-detail" key={item.id}>
+                              <summary><span><b>{item.title}</b>{selected && <small> · En borrador</small>}</span><small>{item.aliases.slice(0, 3).join(" · ")}</small></summary>
+                              <p>{item.description}</p>
+                              <p className="starter-configurable-note">Configuración inicial sugerida · editable · no es dato fuente</p>
+                              <dl className="starter-suggestion-meta"><dt>Tipo</dt><dd>{item.suggestedKind === "operativa" ? "Actividad con cantidad" : "Entregable con controles"}</dd>{item.suggestedUnit && <><dt>Unidad</dt><dd>{item.suggestedUnit}</dd></>}<dt>Controles sugeridos</dt><dd>{item.suggestedSteps.length} pasos</dd></dl>
+                              {!selected ? <button type="button" className="primary" onClick={() => patch({ habitualTaskProposals: [...(draft.habitualTaskProposals || []), initial] })}>Preparar propuesta editable</button> : <div className="starter-suggestion-editor">
+                                <label>Nombre editable<input value={value.title} maxLength={120} onChange={(event) => patchValue({ title: event.target.value })} /></label>
+                                <label>Descripción editable<textarea value={value.description} maxLength={1000} rows={3} onChange={(event) => patchValue({ description: event.target.value })} /></label>
+                                <label>Tipo editable<select value={value.kind} onChange={(event) => patchValue({ kind: event.target.value as Draft["customKind"], unit: event.target.value === "operativa" ? value.unit || item.suggestedUnit : "" })}><option value="resultado">Entregable con controles</option><option value="operativa">Actividad con cantidad</option></select></label>
+                                {value.kind === "operativa" && <label>Unidad editable<input value={value.unit} maxLength={40} onChange={(event) => patchValue({ unit: event.target.value })} /></label>}
+                                <label>Controles sugeridos editables</label>
+                                <StepListEditor value={value.steps} onChange={(steps) => patchValue({ steps })} />
+                                <fieldset><legend>Empresas para esta propuesta · selección manual</legend><div className="company-options">{state.companies.filter((company) => draft.selectedCompanyIds.includes(company.id)).map((company) => <label key={company.id}><input type="checkbox" checked={value.companyIds.includes(company.id)} onChange={(event) => {
+                                  const companyIds = event.target.checked ? [...new Set([...value.companyIds, company.id])] : value.companyIds.filter((companyId) => companyId !== company.id);
+                                  patchValue({ companyIds });
+                                  if (!event.target.checked) {
+                                    const selected = starterDraftFor(item.id);
+                                    if (selected) patchProposalCompanies(selected, companyIds);
+                                  }
+                                }} />{company.name}</label>)}</div></fieldset>
+                                <small>Se guardará como propuesta pendiente de revisión de jefatura. No se generan tareas, metas, pesos ni vencimientos.</small>
+                                <button type="button" onClick={() => removeProposalDraft(selected)}>Quitar selección</button>
+                              </div>}
+                            </details>;
+                          })}
+                        </div>
+                      </details>;
+                    })}
+                  </div>
+                  {matchingStarterSuggestionCount === 0 && <p>{starterOnlySelected ? "No hay sugerencias seleccionadas que coincidan con el filtro." : "No hay sugerencias con ese texto."}</p>}
+                  </>}
+                  <details>
+                    <summary>Historial v1 · conservar borradores antiguos</summary>
+                    <p>Los borradores antiguos conservan su selección, controles y frecuencia. Podés quitar una selección desde acá; las selecciones existentes mantienen su preview y materialización original.</p>
                   <div className="catalog-options">
-                    {starterCatalog.map((t) => (
-                      <label className={"catalog-option " + (draft.selectedTemplateIds.includes(t.id) ? "selected" : "")} key={t.id}>
-                        <input
-                          type="checkbox"
-                          checked={draft.selectedTemplateIds.includes(t.id)}
-                          onChange={(e) => patch({ selectedTemplateIds: e.target.checked
-                            ? [...draft.selectedTemplateIds, t.id]
-                            : draft.selectedTemplateIds.filter((id) => id !== t.id) })}
-                        />
+                    {starterLegacySelection.map((t) => (
+                      <div className="catalog-option selected" key={t.id}>
                         <div>
                           <b>{t.title}</b>
                           <p>{t.description}</p>
-                          <small>{t.kind === "operativa" ? `${t.unit} · sin cuota` : `${t.steps.length} controles sugeridos · sin meta`}</small>
+                          <small>{t.kind === "operativa" ? `${t.unit} · sin cuota` : `${t.steps.length} controles sugeridos`}</small>
                         </div>
-                      </label>
+                        <button type="button" aria-label={`Quitar selección histórica ${t.title}`} onClick={() => removeLegacyStarter(t)}>Quitar</button>
+                      </div>
                     ))}
                   </div>
+                  </details>
                 </section>
               )}
               <details>
@@ -360,7 +477,7 @@ export default function Onboarding({
                 <p>
                   Este espacio es para auditorías y correcciones puntuales. Si
                   falta un proceso habitual, cargalo en la propuesta de abajo;
-                  no va a generar tareas ni puntos hasta que lo revise Juan Pablo.
+                  jefatura decide si lo incorpora al catálogo.
                 </p>
                 <label>
                   Título
@@ -379,7 +496,7 @@ export default function Onboarding({
                     patch({ customSteps: next.join("\n") });
                   }}
                 />
-                <p>Se propone con peso 1 para revisión de Juan Pablo.</p>
+                <p>Se agrega al tablero como tarea puntual con peso 1. Jefatura puede revisar más adelante si corresponde incorporarla al catálogo.</p>
                 <button
                   type="button"
                   disabled={!draft.customTitle.trim() || !!customStepError}
@@ -432,7 +549,7 @@ export default function Onboarding({
                   <summary>Proponer una tarea habitual que falta</summary>
                   <p>
                     Conservamos tu nombre original y lo mostramos junto a posibles coincidencias.
-                    Juan Pablo decide si usa un estándar existente o crea uno; no se combina nada automáticamente.
+                    Jefatura decide si usa un estándar existente o crea uno; no se combina nada automáticamente.
                   </p>
                   <label>
                     Nombre de la tarea
@@ -516,7 +633,7 @@ export default function Onboarding({
               {proposals.map((proposal) => (
                 <div className="custom-task-row habitual-proposal-row" key={proposal.id}>
                   <span><b>{proposal.title}</b><small>Propuesta · todavía no crea tareas ni KPI</small></span>
-                  <button type="button" aria-label={`Quitar propuesta ${proposal.title}`} onClick={() => patch({ habitualTaskProposals: proposals.filter((row) => row.id !== proposal.id) })}>
+                  <button type="button" aria-label={`Quitar propuesta ${proposal.title}`} onClick={() => removeProposalDraft(proposal)}>
                     <Trash2 size={15} />
                   </button>
                 </div>
@@ -594,8 +711,8 @@ export default function Onboarding({
               ))}
               {proposals.length > 0 && (
                 <div className="habitual-proposal-schedules">
-                  <h3>Propuestas que revisará Juan Pablo</h3>
-                  <p>La frecuencia queda separada por empresa. No se crearán tareas hasta que la jefatura confirme el estándar.</p>
+                  <h3>Propuestas que revisará jefatura</h3>
+                  <p>La frecuencia se configura por empresa. Las sugerencias v2 comienzan sin vencimiento; cualquier ajuste de frecuencia o plazo es una elección explícita y sigue siendo sólo una propuesta.</p>
                   {proposals.map((proposal) => (
                     <section className="habitual-proposal-schedule" key={proposal.id}>
                       <h4>{proposal.title}</h4>
@@ -607,10 +724,7 @@ export default function Onboarding({
                               <input
                                 type="checkbox"
                                 checked={proposalCompaniesFor(proposal).includes(c.id)}
-                                onChange={(e) => patch({ habitualTaskProposals: proposals.map((row) => row.id !== proposal.id ? row : {
-                                  ...row,
-                                  companyIds: e.target.checked ? [...new Set([...row.companyIds, c.id])] : row.companyIds.filter((companyId) => companyId !== c.id),
-                                }) })}
+                                onChange={(e) => patchProposalCompanies(proposal, e.target.checked ? [...new Set([...proposal.companyIds, c.id])] : proposal.companyIds.filter((companyId) => companyId !== c.id))}
                               />
                               {c.name}
                             </label>
@@ -624,7 +738,7 @@ export default function Onboarding({
                             <p className="note">Actividad por movimientos, sin meta. La jefatura configura el coeficiente por empresa y vigencia en Coeficientes por movimiento; hasta entonces la carga queda pendiente de parametrizar.</p>
                           )}
                           <ScheduleEditor
-                            value={scheduleFor(proposal.id, cid)}
+                            value={scheduleForProposal(proposal, cid)}
                             onChange={(schedule) => patch({ companySchedules: { ...draft.companySchedules, [proposal.id]: { ...draft.companySchedules?.[proposal.id], [cid]: schedule } } })}
                             month={month}
                           />
@@ -689,7 +803,7 @@ export default function Onboarding({
                 {draft.selectedCompanyIds.map((cid) => (
                   <section key={cid}>
                     <h3>{state.companies.find((c) => c.id === cid)?.name}</h3>
-                    {all.filter((t) => companiesFor(t.id).includes(cid)).map((t) => (
+                    {effectiveAll.filter((t) => companiesFor(t.id).includes(cid)).map((t) => (
                       <div key={t.id}>
                         <span>
                           {t.title}
@@ -700,7 +814,7 @@ export default function Onboarding({
                     ))}
                     {proposals.filter((proposal) => proposalCompaniesFor(proposal).includes(cid)).map((proposal) => (
                       <div className="preview-proposal" key={proposal.id}>
-                        <span>{proposal.title}<small>Propuesta · {describeSchedule(scheduleFor(proposal.id, cid))}</small></span>
+                        <span>{proposal.title}<small>Propuesta · {describeSchedule(scheduleForProposal(proposal, cid))}</small></span>
                         <b>{proposal.kind === "operativa" ? `${proposal.unit || "Movimientos"} · sin cuota` : "Pendiente"}</b>
                       </div>
                     ))}
@@ -710,7 +824,7 @@ export default function Onboarding({
               <div className="note">
                 Las tareas del catálogo y los trabajos puntuales se preparan ahora.
                 Las propuestas habituales quedan separadas y no crean tareas ni
-                puntos hasta que Juan Pablo confirme el estándar. Cada empresa
+                puntos hasta que jefatura confirme el estándar. Cada empresa
                 conserva su frecuencia. Las tareas operativas se miden por movimientos registrados, no por una meta mensual.
               </div>
             </>

@@ -614,6 +614,11 @@ const schema = z.object({
     companyTargets: z.record(z.string(), z.record(z.string(), z.number().nonnegative())).optional(),
     assignmentCompanyIds: z.record(z.string(), z.array(z.string().min(1))).optional(),
     customTasks: z.array(z.object({ id: z.string().min(1), title: z.string().min(1), steps: z.string(), kind: z.enum(["resultado", "operativa"]), unit: z.string(), target: z.number().nonnegative() })).optional(),
+    habitualTaskProposals: z.array(z.object({
+      id: z.string().min(1), starterId: z.string().regex(/^starter-suggestion-v2-[a-z0-9-]+$/).optional(),
+      title: z.string(), process: z.string(), description: z.string(), kind: z.enum(["resultado", "operativa"]),
+      unit: z.string(), steps: z.array(z.string()), companyIds: z.array(z.string().min(1)),
+    })).optional(),
     habitualProposalForm: z.object({ title: z.string(), process: z.string(), description: z.string(), kind: z.enum(["resultado", "operativa"]), unit: z.string(), steps: z.array(z.string()) }).optional(),
   }).passthrough()),
   parameterReviews: z.record(z.string(), z.object({ onboardingCompletedAt: z.string(), reviewedAt: z.string(), reviewedBy: z.string() })).optional(),

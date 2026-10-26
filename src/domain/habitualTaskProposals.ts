@@ -123,7 +123,7 @@ export function groupHabitualTaskProposals(rows: HabitualTaskProposal[]): Propos
 }
 
 function requireManager(state: State, actor: Profile, proposals: HabitualTaskProposal[]) {
-  if (!actor.active || actor.role !== "jefe") throw Error("Sólo Juan Pablo puede revisar tareas habituales.");
+  if (!actor.active || actor.role !== "jefe") throw Error("Sólo jefatura puede revisar tareas habituales.");
   for (const proposal of proposals) {
     const owner = state.profiles.find((profile) => profile.id === proposal.ownerId);
     if (!owner?.active || !canSee(actor, owner.id, state.profiles)) throw Error("La propuesta ya no pertenece a un perfil autorizado.");

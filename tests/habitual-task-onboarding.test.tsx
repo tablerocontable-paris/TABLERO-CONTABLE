@@ -6,7 +6,7 @@ import Onboarding from "../src/components/Onboarding";
 import { seed } from "../src/data/repository";
 import { defaultSchedule } from "../src/domain/schedule";
 import type { Onboarding as Draft } from "../src/domain/model";
-import { NEUTRAL_STARTER_CATALOG, NEUTRAL_STARTER_CATALOG_VERSION } from "../src/domain/neutralStarterCatalog";
+import { NEUTRAL_STARTER_CATALOG, NEUTRAL_STARTER_CATALOG_VERSION, NEUTRAL_STARTER_GROUP_DESCRIPTIONS, NEUTRAL_STARTER_SUGGESTIONS, NEUTRAL_STARTER_SUGGESTIONS_VERSION } from "../src/domain/neutralStarterCatalog";
 
 beforeEach(() => {
   vi.stubGlobal("matchMedia", () => ({ matches: false, addEventListener() {}, removeEventListener() {} }));
@@ -35,7 +35,7 @@ function draft(step: number): Draft {
 }
 
 describe("inducción de tareas habituales", () => {
-  it("ofrece conceptos neutrales versionados sin selección automática ni colisión con el catálogo legacy", () => {
+  it("ofrece sugerencias v2 agrupadas y no seleccionadas; conserva los IDs v1", () => {
     const state = seed();
     const ids = NEUTRAL_STARTER_CATALOG.map((task) => task.id);
     expect(NEUTRAL_STARTER_CATALOG_VERSION).toBe(1);
@@ -46,17 +46,95 @@ describe("inducción de tareas habituales", () => {
     const update = vi.fn<(value: Draft) => void>();
     const freshDraft = { ...draft(2), selectedTemplateIds: [] };
     const view = render(<Onboarding state={state} month="2026-10" profile={state.profiles.find((profile) => profile.id === "e0")!} draft={freshDraft} update={update} finish={() => {}} pause={() => {}} laboratory />);
-    expect(screen.getByRole("heading", { name: /Procesos iniciales neutrales/ })).toBeTruthy();
-    for (const task of NEUTRAL_STARTER_CATALOG) {
-      const row = [...view.container.querySelectorAll<HTMLElement>(".catalog-option")].find((option) => option.textContent?.includes(task.title));
-      expect(row).toBeTruthy();
-      expect(row!.querySelector("input")!.checked).toBe(false);
-      expect(row!.textContent).toContain(task.description);
+    expect(NEUTRAL_STARTER_SUGGESTIONS_VERSION).toBe(2);
+    expect(Object.keys(NEUTRAL_STARTER_GROUP_DESCRIPTIONS)).toHaveLength(5);
+    expect(NEUTRAL_STARTER_SUGGESTIONS).toHaveLength(26);
+    expect(view.container.querySelectorAll(".starter-suggestion-group")).toHaveLength(5);
+    expect(screen.getByText(/no crean trabajo ni fijan metas, pesos o vencimientos/i)).toBeTruthy();
+    expect(view.container.querySelectorAll(".starter-suggestion-detail[open]")).toHaveLength(0);
+    expect(view.container.querySelectorAll(".starter-suggestion-detail .primary")).toHaveLength(26);
+    expect((screen.getByLabelText(/Sólo seleccionadas/) as HTMLInputElement).checked).toBe(false);
+    expect(freshDraft.habitualTaskProposals).toHaveLength(0);
+    expect(freshDraft.selectedTemplateIds).toEqual([]);
+    expect(NEUTRAL_STARTER_CATALOG.map((entry) => entry.id)).toEqual([
+      "starter-v1-bank-reconciliation", "starter-v1-tax-obligations", "starter-v1-document-recording",
+      "starter-v1-procedure-follow-up", "starter-v1-payment-processing", "starter-v1-accounting-close",
+    ]);
+  });
+
+  it("searches aliases, prepares editable proposal fields and retains the selection in its draft", () => {
+    const state = seed();
+    const initial: Draft = { ...draft(2), selectedTemplateIds: [], habitualTaskProposals: [] };
+    let saved = initial;
+    function Harness() {
+      const [current, setCurrent] = useState(initial);
+      return <Onboarding state={state} month="2026-10" profile={state.profiles.find((profile) => profile.id === "e0")!} draft={current} update={(next) => { saved = next; setCurrent(next); }} finish={() => {}} pause={() => {}} laboratory />;
     }
-    const selectedRow = [...view.container.querySelectorAll<HTMLElement>(".neutral-starter-catalog .catalog-option")]
-      .find((option) => option.textContent?.includes(NEUTRAL_STARTER_CATALOG[0]!.title))!;
-    fireEvent.click(within(selectedRow).getByRole("checkbox"));
-    expect(update.mock.calls[update.mock.calls.length - 1]![0].selectedTemplateIds).toEqual([NEUTRAL_STARTER_CATALOG[0]!.id]);
+    render(<Harness />);
+    fireEvent.change(screen.getByPlaceholderText("Buscar por nombre, alias o grupo"), { target: { value: "extracto" } });
+    expect(screen.getByText("Conciliación de cuenta bancaria")).toBeTruthy();
+    fireEvent.click(screen.getByText("Conciliación de cuenta bancaria"));
+    fireEvent.click(screen.getByRole("button", { name: "Preparar propuesta editable" }));
+    expect(saved.habitualTaskProposals).toHaveLength(1);
+    expect(saved.habitualTaskProposals?.[0]).toMatchObject({
+      starterId: NEUTRAL_STARTER_SUGGESTIONS[0]!.id,
+      title: "Conciliación de cuenta bancaria",
+      description: expect.any(String), kind: "resultado", steps: expect.arrayContaining([expect.any(String)]), companyIds: [],
+    });
+    expect(screen.getByLabelText("Nombre editable")).toBeTruthy();
+    expect(screen.getByLabelText("Descripción editable")).toBeTruthy();
+    expect(screen.getByText(/no se generan tareas, metas, pesos ni vencimientos/i)).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("Nombre editable"), { target: { value: "Nombre revisado" } });
+    expect(saved.habitualTaskProposals?.[0]?.title).toBe("Nombre revisado");
+    fireEvent.click(screen.getByText(/Sólo seleccionadas/));
+    expect(screen.getByText("11 sugerencias · 1 seleccionadas")).toBeTruthy();
+  });
+
+  it("permite continuar con una sugerencia válida aunque quede abierto un formulario habitual incompleto", async () => {
+    const state = seed();
+    const starter = NEUTRAL_STARTER_SUGGESTIONS[0]!;
+    const initial: Draft = {
+      ...draft(2), selectedTemplateIds: [],
+      habitualTaskProposals: [{ id: `${starter.id}:e0`, starterId: starter.id, title: starter.title,
+        process: "", description: starter.description, kind: starter.suggestedKind, unit: starter.suggestedUnit,
+        steps: [...starter.suggestedSteps], companyIds: ["c1"] }],
+      habitualProposalForm: { title: "Borrador sin terminar", process: "", description: "", kind: "resultado", unit: "", steps: ["x".repeat(301)] },
+    };
+    function Harness() {
+      const [current, setCurrent] = useState(initial);
+      return <Onboarding state={state} month="2026-10" profile={state.profiles.find((profile) => profile.id === "e0")!} draft={current} update={setCurrent} finish={() => {}} pause={() => {}} laboratory />;
+    }
+    render(<Harness />);
+    const next = screen.getByRole("button", { name: /^Continuar/ });
+    expect((next as HTMLButtonElement).disabled).toBe(false);
+    fireEvent.click(next);
+    expect(document.querySelector(".induction-top")?.textContent).toContain("4 DE 6");
+  });
+
+  it("reinicia el editor local al cambiar de perfil y guarda el nuevo control sólo en el perfil nuevo", () => {
+    const state = seed();
+    const profiles = state.profiles.filter((profile) => profile.id === "e0" || profile.id === "e1");
+    const drafts: Record<string, Draft> = { e0: { ...draft(2), customSteps: "Control anterior de otro perfil" }, e1: { ...draft(2), customTitle: "Tarea perfil nuevo", customSteps: "", customTasks: [] } };
+    function Harness() {
+      const [profileId, setProfileId] = useState("e0");
+      const profile = profiles.find((row) => row.id === profileId)!;
+      return <>
+        <button onClick={() => setProfileId("e1")}>Cambiar perfil</button>
+        <Onboarding key={profile.id} state={state} month="2026-10" profile={profile} draft={drafts[profileId]} update={(next) => { drafts[profileId] = next; }} finish={() => {}} pause={() => {}} laboratory />
+      </>;
+    }
+    render(<Harness />);
+    fireEvent.click(screen.getByText("Agregar un trabajo esporádico · una sola vez"));
+    expect((screen.getByLabelText("Paso 1") as HTMLInputElement).value).toBe("Control anterior de otro perfil");
+    fireEvent.click(screen.getByText("Cambiar perfil"));
+    fireEvent.click(screen.getByText("Agregar un trabajo esporádico · una sola vez"));
+    expect(screen.queryByLabelText("Paso 1")).toBeNull();
+    fireEvent.click(document.querySelector<HTMLElement>(".step-add")!);
+    fireEvent.change(screen.getByLabelText("Paso 1"), { target: { value: "Control exclusivo del perfil nuevo" } });
+    fireEvent.click(screen.getByRole("button", { name: /Agregar esta tarea/ }));
+    expect(drafts.e1.customTasks?.[0]?.steps).toBe("Control exclusivo del perfil nuevo");
+    expect(drafts.e0.customTasks).toHaveLength(0);
+    expect(drafts.e0.customSteps).toBe("Control anterior de otro perfil");
   });
 
   it("describe operativas por unidad sin mostrar el peso legacy como puntos", () => {
@@ -67,6 +145,8 @@ describe("inducción de tareas habituales", () => {
     expect(operation?.textContent).toContain("facturas · sin cuota");
     expect(operation?.textContent).not.toContain("pts");
     expect(operation?.textContent).not.toContain("120");
+    expect(screen.getByText(/tarea puntual con peso 1/i)).toBeTruthy();
+    expect(screen.queryByText(/no va a generar tareas ni puntos hasta que la revise jefatura/i)).toBeNull();
   });
   it("guarda la frecuencia de cada empresa por separado", () => {
     const state = seed();
@@ -81,6 +161,72 @@ describe("inducción de tareas habituales", () => {
     expect(screen.getAllByText(/sin cuota mensual/i)).toHaveLength(2);
     expect(screen.queryByLabelText("Meta mensual · facturas")).toBeNull();
     expect(screen.getByText(/las operativas se miden por movimientos registrados y tiempo, sin meta mensual/i)).toBeTruthy();
+  });
+
+  it("permite programar cada propuesta v2 por empresa y parte sin vencimiento", () => {
+    const state = seed();
+    const starter = NEUTRAL_STARTER_SUGGESTIONS[0]!;
+    const initial: Draft = {
+      ...draft(3), selectedTemplateIds: [],
+      habitualTaskProposals: [{
+        id: `${starter.id}:e0`, starterId: starter.id, title: starter.title, process: "",
+        description: starter.description, kind: starter.suggestedKind, unit: starter.suggestedUnit,
+        steps: [...starter.suggestedSteps], companyIds: ["c1", "c2"],
+      }],
+      companySchedules: {},
+    };
+    let saved = initial;
+    function Harness() {
+      const [current, setCurrent] = useState(initial);
+      return <Onboarding state={state} month="2026-10" profile={state.profiles.find((profile) => profile.id === "e0")!} draft={current} update={(next) => { saved = next; setCurrent(next); }} finish={() => {}} pause={() => {}} laboratory />;
+    }
+    render(<Harness />);
+    const proposal = document.querySelector<HTMLElement>(".habitual-proposal-schedule")!;
+    const companySections = within(proposal).getAllByText(/Empresa/).length;
+    expect(companySections).toBeGreaterThan(0);
+    const schedules = proposal.querySelectorAll<HTMLElement>(".induction-company-schedule");
+    expect(schedules).toHaveLength(2);
+    for (const section of schedules) expect((within(section).getByLabelText("Tiene vencimiento") as HTMLInputElement).checked).toBe(false);
+    fireEvent.change(within(schedules[0]!).getByLabelText("Frecuencia de la tarea"), { target: { value: "mensual" } });
+    fireEvent.change(within(schedules[1]!).getByLabelText("Frecuencia de la tarea"), { target: { value: "semanal" } });
+    expect(saved.companySchedules?.[`${starter.id}:e0`]?.c1?.frequency).toBe("mensual");
+    expect(saved.companySchedules?.[`${starter.id}:e0`]?.c2?.frequency).toBe("semanal");
+    expect(saved.companySchedules?.[`${starter.id}:e0`]?.c1?.hasDeadline).toBe(false);
+    expect(saved.companySchedules?.[`${starter.id}:e0`]?.c2?.hasDeadline).toBe(false);
+  });
+
+  it("sólo muestra sugerencias v2 a perfiles que preparan propuestas para jefatura", () => {
+    const state = seed();
+    const boss = state.profiles.find((profile) => profile.role === "jefe")!;
+    const starter = NEUTRAL_STARTER_SUGGESTIONS[0]!;
+    const draftWithSavedSuggestion: Draft = {
+      ...state.onboarding[boss.id]!, step: 2, selectedCompanyIds: [boss.companyIds[0]!],
+      habitualTaskProposals: [{ id: `${starter.id}:${boss.id}`, starterId: starter.id, title: starter.title,
+        process: "", description: starter.description, kind: starter.suggestedKind, unit: starter.suggestedUnit,
+        steps: [...starter.suggestedSteps], companyIds: [] }],
+    };
+    render(<Onboarding state={state} month="2026-10" profile={boss} draft={draftWithSavedSuggestion} update={() => {}} finish={() => {}} pause={() => {}} laboratory />);
+    expect(screen.queryByRole("heading", { name: /Sugerencias para propuestas/ })).toBeNull();
+    expect(screen.getByLabelText("Borradores v2 conservados").textContent).toMatch(/se conservan estos borradores; no se enviarán desde jefatura/i);
+  });
+
+  it("no muestra sugerencias v2 cuando el guardado no es sólo de laboratorio", () => {
+    const state = seed();
+    render(<Onboarding state={state} month="2026-10" profile={state.profiles.find((profile) => profile.id === "e0")!} draft={{ ...draft(2), selectedTemplateIds: [] }} update={() => {}} finish={() => {}} pause={() => {}} laboratory remote />);
+    expect(screen.queryByRole("heading", { name: /Sugerencias para propuestas/ })).toBeNull();
+    expect(document.querySelectorAll(".starter-suggestion-group")).toHaveLength(0);
+  });
+
+  it("permite quitar una selección v1 restaurada sin ofrecerla en un onboarding nuevo", () => {
+    const state = seed();
+    const v1 = NEUTRAL_STARTER_CATALOG[0]!;
+    const initial: Draft = { ...draft(2), selectedTemplateIds: [v1.id] };
+    const update = vi.fn<(value: Draft) => void>();
+    render(<Onboarding state={state} month="2026-10" profile={state.profiles.find((profile) => profile.id === "e0")!} draft={initial} update={update} finish={() => {}} pause={() => {}} laboratory />);
+    fireEvent.click(screen.getByText("Historial v1 · conservar borradores antiguos"));
+    expect(screen.getAllByText(v1.title).length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole("button", { name: `Quitar selección histórica ${v1.title}` }));
+    expect(update.mock.calls.at(-1)?.[0].selectedTemplateIds).not.toContain(v1.id);
   });
 
   it("captura el nombre libre como propuesta pendiente, no como tarea esporádica", () => {

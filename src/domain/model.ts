@@ -276,6 +276,8 @@ export interface Onboarding {
 }
 export interface HabitualTaskProposalDraft {
   id: string;
+  /** Stable source suggestion identity for v2 lab-only drafts. */
+  starterId?: string;
   title: string;
   process: string;
   description: string;

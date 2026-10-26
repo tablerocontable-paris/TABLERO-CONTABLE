@@ -27,6 +27,27 @@ sólo `api`, auditar los 39 RPC `SECURITY DEFINER` y completar identidad/permiso
 escrituras, Storage/evidencia, Cloudflare/correo y aceptación antes de habilitar
 producción. No hay certeza del 100% ni se activa el espacio operativo.
 
+## Catálogo neutral v2 y revisión de primer ingreso — 26/10/2026
+
+El laboratorio incorpora 26 sugerencias neutrales y opcionales
+`starter-suggestion-v2-*`, manteniendo intactos los seis IDs y flujos legacy
+`starter-v1-*`. Las sugerencias se pueden buscar, filtrar, desplegar y editar;
+terminar la inducción sólo deja propuestas pendientes de jefatura, sin crear
+tareas, cuotas, pesos ni vencimientos. La inducción remota autenticada sigue sin
+implementarse.
+
+La revisión independiente corrigió los casos de empresas retiradas, reglas
+latentes, propuestas incompletas de jefatura, validación de trabajos puntuales,
+cambio de perfil durante la inducción y formularios opcionales abandonados. La
+validación y la materialización ahora usan el mismo conjunto efectivo; los
+borradores fuera de alcance se conservan sin bloquear el envío. La suite local
+cerró **832/832 pruebas en 83 archivos**; TypeScript, build cliente, build
+Worker y `git diff --check` terminaron con código 0. Se mantienen avisos
+informativos por anotaciones de Zod, tamaño de bundle cliente (620,87 KB) y
+normalización LF/CRLF. Esta evidencia valida el árbol local, no producción.
+El avance todavía requiere sincronizar este corte con `main`, ejecutar CI y
+actualizar el mismo Site privado.
+
 ## Catálogo neutral de inicio — implementación local revisada, 26/10/2026
 
 El alta del laboratorio ofrece seis procesos iniciales neutrales, versionados

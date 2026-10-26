@@ -3,6 +3,76 @@ import type { Schedule } from "./schedule";
 
 /** Lab-only opt-in starter concepts. IDs are namespaced by immutable catalog version. */
 export const NEUTRAL_STARTER_CATALOG_VERSION = 1;
+/** Sol-approved v2 suggestions. These are proposal prompts, never assignments. */
+export const NEUTRAL_STARTER_SUGGESTIONS_VERSION = 2;
+const suggestion = (group: string, title: string, aliases: string[], suggestedKind: Template["kind"], suggestedUnit: string, description: string, suggestedSteps: string[]) => ({
+  id: NEUTRAL_STARTER_V2_IDS[title]!,
+  group, title, aliases, suggestedKind, suggestedUnit, description, suggestedSteps,
+});
+/** Frozen identifiers: title edits never change saved v2 proposal identity. */
+export const NEUTRAL_STARTER_V2_IDS: Readonly<Record<string, string>> = Object.freeze({
+  "Conciliación de cuenta bancaria": "starter-suggestion-v2-conciliacion-de-cuenta-bancaria",
+  "Procesamiento y control de pagos": "starter-suggestion-v2-procesamiento-y-control-de-pagos",
+  "Arqueo y control de caja": "starter-suggestion-v2-arqueo-y-control-de-caja",
+  "Registro y seguimiento de cobranzas": "starter-suggestion-v2-registro-y-seguimiento-de-cobranzas",
+  "Registro y control de cancelaciones de cupones": "starter-suggestion-v2-registro-y-control-de-cancelaciones-de-cupones",
+  "Registro de devoluciones a clientes": "starter-suggestion-v2-registro-de-devoluciones-a-clientes",
+  "Registro y control de cheques": "starter-suggestion-v2-registro-y-control-de-cheques",
+  "Registro y control de operaciones de crédito": "starter-suggestion-v2-registro-y-control-de-operaciones-de-credito",
+  "Aplicación y compensación de cobros": "starter-suggestion-v2-aplicacion-y-compensacion-de-cobros",
+  "Conciliación de plataformas de cobro": "starter-suggestion-v2-conciliacion-de-plataformas-de-cobro",
+  "Registro y control de cuotas de planes": "starter-suggestion-v2-registro-y-control-de-cuotas-de-planes",
+  "Registro de comprobantes": "starter-suggestion-v2-registro-de-comprobantes",
+  "Archivo y organización de documentación": "starter-suggestion-v2-archivo-y-organizacion-de-documentacion",
+  "Registro y control de asientos contables": "starter-suggestion-v2-registro-y-control-de-asientos-contables",
+  "Registro y control de información de sueldos": "starter-suggestion-v2-registro-y-control-de-informacion-de-sueldos",
+  "Preparación y control de obligaciones fiscales": "starter-suggestion-v2-preparacion-y-control-de-obligaciones-fiscales",
+  "Cierre contable por empresa": "starter-suggestion-v2-cierre-contable-por-empresa",
+  "Control y ajuste de inventario": "starter-suggestion-v2-control-y-ajuste-de-inventario",
+  "Preparación y registro de ajustes contables": "starter-suggestion-v2-preparacion-y-registro-de-ajustes-contables",
+  "Análisis de costos de operaciones": "starter-suggestion-v2-analisis-de-costos-de-operaciones",
+  "Análisis y resumen de operaciones": "starter-suggestion-v2-analisis-y-resumen-de-operaciones",
+  "Cierre mensual de indicadores": "starter-suggestion-v2-cierre-mensual-de-indicadores",
+  "Gestión y seguimiento de trámites": "starter-suggestion-v2-gestion-y-seguimiento-de-tramites",
+  "Revisión de seguimiento del equipo": "starter-suggestion-v2-revision-de-seguimiento-del-equipo",
+  "Actualización del registro de servicios": "starter-suggestion-v2-actualizacion-del-registro-de-servicios",
+  "Compra y control de insumos": "starter-suggestion-v2-compra-y-control-de-insumos",
+});
+export const NEUTRAL_STARTER_SUGGESTIONS = [
+  suggestion("Tesorería, bancos y cobranzas", "Conciliación de cuenta bancaria", ["extracto", "banco", "conciliacion bancaria"], "resultado", "", "Comparar los movimientos de una cuenta con los registros disponibles y dejar diferencias identificadas.", ["Reunir los movimientos y registros del período", "Comparar y documentar diferencias", "Dejar referencias para revisión"]),
+  suggestion("Tesorería, bancos y cobranzas", "Procesamiento y control de pagos", ["pago", "transferencias", "tesoreria"], "operativa", "pagos", "Registrar pagos procesados y conservar su referencia y resultado.", ["Reunir pagos autorizados para procesar", "Registrar fecha, referencia y resultado", "Revisar que el registro quede localizable"]),
+  suggestion("Tesorería, bancos y cobranzas", "Arqueo y control de caja", ["caja", "arqueo", "efectivo"], "resultado", "", "Comparar los valores contados con los registros disponibles y documentar diferencias.", ["Reunir registros del corte", "Contar y comparar los valores", "Documentar diferencias y revisión"]),
+  suggestion("Tesorería, bancos y cobranzas", "Registro y seguimiento de cobranzas", ["cobros", "cuentas por cobrar", "cobranzas"], "operativa", "cobranzas", "Registrar cobranzas y actualizar su seguimiento con referencias localizables.", ["Identificar la cobranza recibida", "Registrar importe y referencia", "Actualizar su estado de seguimiento"]),
+  suggestion("Tesorería, bancos y cobranzas", "Registro y control de cancelaciones de cupones", ["cupones", "tarjetas", "liquidaciones"], "operativa", "cancelaciones", "Registrar cancelaciones de cupones y conservar sus referencias para control.", ["Identificar la cancelación informada", "Registrar importe y referencia", "Comparar con el registro relacionado"]),
+  suggestion("Tesorería, bancos y cobranzas", "Registro de devoluciones a clientes", ["devoluciones", "reintegros", "clientes"], "operativa", "devoluciones", "Registrar devoluciones realizadas y vincularlas con la documentación disponible.", ["Identificar la devolución y su referencia", "Registrar importe y fecha", "Conservar el respaldo disponible"]),
+  suggestion("Tesorería, bancos y cobranzas", "Registro y control de cheques", ["cheques", "valores", "cartera"], "operativa", "cheques", "Mantener un registro de cheques y sus estados según la información disponible.", ["Identificar el cheque y sus datos", "Registrar movimiento y estado", "Actualizar la referencia de control"]),
+  suggestion("Tesorería, bancos y cobranzas", "Registro y control de operaciones de crédito", ["credito", "financiacion", "préstamos"], "operativa", "operaciones", "Registrar operaciones de crédito y conservar la información disponible para su seguimiento.", ["Identificar la operación y su referencia", "Registrar los datos disponibles", "Actualizar el estado de seguimiento"]),
+  suggestion("Tesorería, bancos y cobranzas", "Aplicación y compensación de cobros", ["imputacion de cobros", "compensaciones", "aplicacion de pagos"], "operativa", "aplicaciones", "Registrar cómo se aplican o compensan cobros conforme a la información revisada.", ["Identificar el cobro y los conceptos relacionados", "Registrar la aplicación o compensación", "Dejar referencias para revisión"]),
+  suggestion("Tesorería, bancos y cobranzas", "Conciliación de plataformas de cobro", ["pasarelas", "liquidaciones de plataformas", "procesadores de cobro"], "resultado", "", "Comparar movimientos informados por plataformas con los registros disponibles.", ["Reunir movimientos y liquidaciones disponibles", "Comparar importes y referencias", "Documentar diferencias"]),
+  suggestion("Tesorería, bancos y cobranzas", "Registro y control de cuotas de planes", ["cuotas", "planes de pago", "financiacion"], "operativa", "cuotas", "Registrar cuotas de planes y actualizar su seguimiento con datos disponibles.", ["Identificar el plan y la cuota", "Registrar movimiento y referencia", "Actualizar el seguimiento"]),
+  suggestion("Registración y documentación", "Registro de comprobantes", ["facturas", "recibidos", "emitidos", "comprobantes"], "operativa", "comprobantes", "Registrar comprobantes recibidos o emitidos con referencias que permitan localizarlos.", ["Identificar el comprobante", "Registrar sus datos y referencia", "Vincular la documentación disponible"]),
+  suggestion("Registración y documentación", "Archivo y organización de documentación", ["archivo", "documentos", "legajos"], "operativa", "documentos", "Organizar documentación y registrar referencias para facilitar su consulta.", ["Identificar la documentación recibida", "Ordenar y registrar su ubicación", "Revisar que la referencia permita encontrarla"]),
+  suggestion("Registración y documentación", "Registro y control de asientos contables", ["asientos", "diario", "registracion contable"], "operativa", "asientos", "Registrar asientos contables y conservar referencias para su revisión.", ["Reunir el respaldo disponible", "Registrar el asiento y su referencia", "Revisar la vinculación documental"]),
+  suggestion("Registración y documentación", "Registro y control de información de sueldos", ["sueldos", "nómina", "liquidacion salarial"], "operativa", "registros", "Organizar y controlar registros de información salarial según el proceso definido.", ["Reunir la información disponible", "Registrar datos y referencias", "Revisar integridad y acceso al respaldo"]),
+  suggestion("Contabilidad, inventario y obligaciones", "Preparación y control de obligaciones fiscales", ["impuestos", "tributos", "presentaciones fiscales"], "resultado", "", "Preparar y revisar la información de las obligaciones que defina la organización, sin asumir normas ni vencimientos.", ["Identificar la obligación configurada y su período", "Revisar documentación y cálculos disponibles", "Dejar constancia del control realizado"]),
+  suggestion("Contabilidad, inventario y obligaciones", "Cierre contable por empresa", ["cierre", "saldos", "empresa"], "resultado", "", "Revisar saldos del período y dejar un cierre trazable para la empresa.", ["Revisar saldos y movimientos del período", "Documentar ajustes y respaldos", "Dejar el cierre disponible para revisión"]),
+  suggestion("Contabilidad, inventario y obligaciones", "Control y ajuste de inventario", ["stock", "existencias", "inventario"], "resultado", "", "Comparar registros de inventario con la información disponible y documentar ajustes revisables.", ["Reunir los registros de inventario", "Comparar saldos e identificar diferencias", "Documentar ajustes y respaldo"]),
+  suggestion("Contabilidad, inventario y obligaciones", "Preparación y registro de ajustes contables", ["ajustes", "asientos de ajuste", "correcciones contables"], "resultado", "", "Preparar ajustes respaldados y registrar su referencia para revisión.", ["Identificar diferencias que requieren análisis", "Preparar el ajuste con respaldo disponible", "Registrar referencia y revisión"]),
+  suggestion("Análisis e indicadores", "Análisis de costos de operaciones", ["costos", "costos operativos", "gastos"], "resultado", "", "Analizar costos según los criterios y datos que defina la organización.", ["Reunir datos y período de análisis", "Aplicar criterios configurados", "Documentar resultados y observaciones"]),
+  suggestion("Análisis e indicadores", "Análisis y resumen de operaciones", ["operaciones", "resumen operativo", "actividad"], "resultado", "", "Analizar operaciones registradas y preparar un resumen con referencias a sus fuentes.", ["Definir el período y datos disponibles", "Revisar y resumir la información", "Dejar referencias y observaciones"]),
+  suggestion("Análisis e indicadores", "Cierre mensual de indicadores", ["indicadores", "kpi", "cierre mensual"], "resultado", "", "Consolidar indicadores configurados para el período y dejar su revisión documentada.", ["Reunir datos del período", "Calcular indicadores configurados", "Revisar y guardar el cierre"]),
+  suggestion("Coordinación y administración", "Gestión y seguimiento de trámites", ["tramites", "expedientes", "gestiones"], "operativa", "trámites", "Registrar trámites y actualizar su estado con identificadores y referencias disponibles.", ["Registrar inicio e identificador disponible", "Actualizar estado y próximo paso", "Conservar constancias y referencias"]),
+  suggestion("Coordinación y administración", "Revisión de seguimiento del equipo", ["equipo", "seguimiento", "coordinacion"], "resultado", "", "Revisar el seguimiento disponible del equipo y dejar observaciones para coordinación.", ["Reunir el seguimiento disponible", "Identificar asuntos que requieren revisión", "Registrar observaciones de coordinación"]),
+  suggestion("Coordinación y administración", "Actualización del registro de servicios", ["servicios", "registro de servicios", "prestaciones"], "operativa", "registros", "Actualizar registros de servicios según la información validada disponible.", ["Identificar registros a actualizar", "Incorporar la información revisada", "Verificar referencias y cambios"]),
+  suggestion("Coordinación y administración", "Compra y control de insumos", ["compras", "insumos", "abastecimiento"], "operativa", "compras", "Registrar compras de insumos y conservar datos de seguimiento y respaldo.", ["Identificar necesidad y autorización disponible", "Registrar compra y referencia", "Actualizar seguimiento y respaldo"]),
+];
+export const NEUTRAL_STARTER_GROUP_DESCRIPTIONS: Record<string, string> = {
+  "Tesorería, bancos y cobranzas": "Registros y revisiones de fondos, movimientos y cobros.",
+  "Registración y documentación": "Organización, registro y control de información y respaldos.",
+  "Contabilidad, inventario y obligaciones": "Procesos contables y controles definidos por cada organización.",
+  "Análisis e indicadores": "Lectura y consolidación de información según criterios configurados.",
+  "Coordinación y administración": "Seguimiento de procesos internos y tareas administrativas.",
+};
 export const NEUTRAL_STARTER_CATALOG: readonly Template[] = [
   {
     id: "starter-v1-bank-reconciliation",

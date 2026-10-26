@@ -163,7 +163,7 @@ function MyProposalCard({ proposal, state, actor, month, commit, notify }: {
     event.preventDefault();
     try {
       const next = resubmitHabitualTaskProposal(state, actor, proposal.id, { title, process, description, kind, unit, target: kind === "operativa" ? 0 : target, schedule, steps });
-      if (commit(next, "Reenvió propuesta habitual corregida", proposal.id)) notify("La propuesta volvió a la bandeja de revisión de Juan Pablo.");
+      if (commit(next, "Reenvió propuesta habitual corregida", proposal.id)) notify("La propuesta volvió a la bandeja de revisión de jefatura.");
     } catch (error) { notify((error as Error).message); }
   }
   return (

@@ -1,5 +1,21 @@
 # Inventario de continuidad y estimación inicial — 26/10/2026
 
+## Actualización del corte local — 26/10/2026
+
+El repositorio está en `main`; el código previo sincronizado era
+`7b9aa3d7344d2cf1f0d7d2eb62390c4aea9b1cc7`. El corte local añade el catálogo
+neutral v2 y sus controles de inducción, junto con esta documentación. GPT-6.1
+Sol hizo una revisión independiente; GPT-6 Luna cerró **832/832 pruebas en 83
+archivos**, TypeScript, build cliente, build Worker y diff-check. Aún falta
+registrar y verificar el commit remoto y publicar el mismo Site privado.
+
+La normalización preliminar y sus límites de conteo están en
+`docs/product/TASK-NORMALIZATION-DRAFT-20261026.md`. Las 26 sugerencias son una
+línea de partida configurable, no evidencia de que la empresa use esas 26
+familias. La captura sólo permite contar 14 nombres visibles; no hay IDs, estado
+activo ni cierre fechado. La cantidad de personas actuales y de tareas reales
+cumplidas hoy sigue sin determinarse.
+
 ## Qué se migra a GitHub
 
 El repositorio privado `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`, es
@@ -12,6 +28,16 @@ archivo local no versionado observado es
 porque el estado de continuidad lo identifica como artefacto de auditoría que
 no debe modificarse.
 
+Para trasladar el contexto sin versionar ni alterar ese original, se preparó
+una copia exacta en
+`docs/architecture/archive/M2-2C-legacy-task-control-replay-races.block.txt`.
+La nota
+`docs/architecture/archive/M2-2C-LEGACY-TASK-CONTROL-REPLAY-SCRATCH-20261026.md`
+registra procedencia, límites y SHA-256
+`586D39015E54F1E46BC564845CF4C77734F65DC2BCBEAE9D56C6C32218A46789`. Es un
+fragmento experimental no ejecutable ni aceptado, no un test ni evidencia de
+funcionamiento.
+
 La documentación funcional y de migración vigente está en `docs/`, en especial:
 
 - `PROJECT-STATUS.md`: estado técnico y cortes de verificación.
@@ -20,6 +46,8 @@ La documentación funcional y de migración vigente está en `docs/`, en especia
 - `PRODUCT-ROADMAP.md`: alcance y decisiones funcionales.
 - `architecture/REMOTE-MIGRATION-READINESS-20261021.md`: secuencia de servicios.
 - `architecture/LABORATORY-BACKUP-CONTRACT-20261007.md`: transporte del estado local.
+- `product/TASK-NORMALIZATION-DRAFT-20261026.md`: familias neutrales y límites del conteo visible.
+- `architecture/SITE-GITHUB-SOURCE-RECONCILIATION-20261026.md`: igualdad del código fuente entre el Site v97 y `main`.
 
 Se contrastaron 46 bundles locales: sus 39 referencias Git no pertenecían a la
 línea del `main` vigente. Se preservaron en el mismo repositorio, sin mezclarlas

@@ -193,7 +193,7 @@ export function setInternalRequestStatus(
 
 export function internalRequestRecipients(state: State, actor: Profile, kind: InternalRequestKind) {
   if (kind === "technical_error") return [{ id: "technical-support", name: "Cola de soporte técnico · simulada" }];
-  if (kind === "work_request") return [{ id: "boss", name: state.profiles.find((p) => p.id === "boss")?.name || "Juan Pablo" }];
+  if (kind === "work_request") return [{ id: "boss", name: state.profiles.find((p) => p.id === "boss")?.name || "jefatura" }];
   return state.profiles
     .filter((profile) => profile.active && profile.id !== actor.id && (profile.role === "jefe" || profile.role === "encargado"))
     .map(({ id, name }) => ({ id, name }));

@@ -77,10 +77,37 @@ requiere pruebas de: alta desde organización vacía, edición/descartado de
 conceptos, aprobación idempotente, cero asignaciones antes de aprobar y
 preservación de estados/respaldo anteriores.
 
-El prototipo local de laboratorio ofrece una selección opcional de seis conceptos
-con IDs `starter-v1-*`; no crea ni edita el catálogo común, conserva el snapshot
-seleccionado en cada asignación y permite reprogramar la frecuencia mediante un
-`starterId` explícito. Este flujo es sólo una simulación de inducción y no es una
+El prototipo local conserva los seis conceptos `starter-v1-*` para borradores y
+asignaciones históricas. No aparecen como opciones nuevas. Si un borrador antiguo
+ya los seleccionó, mantiene preview, frecuencia y materialización con el snapshot
+correspondiente; se pueden quitar antes de terminar. No se modifica el seed ni el
+catálogo común. Este flujo es sólo una simulación de inducción y no es una
 aprobación organizacional: no se ofrece cuando el guardado es remoto y no debe
 trasladarse al onboarding autenticado. Allí sigue vigente la secuencia superior
 de propuesta, revisión de jefatura y aprobación explícita antes de crear tareas.
+
+## Sugerencias v2 del laboratorio — 26/10/2026
+
+La versión 2 agrega las 26 sugerencias opcionales descritas en
+`TASK-NORMALIZATION-DRAFT-20261026.md`. Sus IDs estables usan el prefijo
+`starter-suggestion-v2-` y un slug del nombre neutral. Cada sugerencia contiene
+aliases de búsqueda, descripción, tipo, unidad sugerida y entre 2 y 4 controles
+iniciales. Esos campos se presentan como **propuesta configurable**, no como
+datos observados ni como estándar aprobado.
+
+El panel permite buscar por nombre, alias o grupo; abrir cinco grupos plegables;
+filtrar sólo lo seleccionado; inspeccionar el detalle antes de preparar una
+propuesta; y editar título, descripción, tipo, unidad y controles. La selección
+queda en el borrador de inducción bajo el ID estable. Empresas se eligen de forma
+explícita entre las empresas ya seleccionadas por la persona. Al terminar la
+inducción local se registra una propuesta pendiente de revisión de jefatura,
+idempotente por sugerencia, persona y empresa. No crea tareas ni plantillas y
+no asigna peso, meta, vencimiento, responsable u obligación normativa.
+
+Los seis IDs `starter-v1-*` no se ofrecen como opciones nuevas. Si un borrador
+antiguo ya los tenía seleccionados, conserva su vista previa, frecuencia y
+materialización originales; cada selección se puede quitar explícitamente. El
+catálogo v2 se ofrece sólo en laboratorio local
+(`laboratory && !remote`); no modifica seed, catálogo común, API ni Supabase.
+Los tres términos ambiguos identificados en el borrador de normalización
+permanecen excluidos hasta aclarar su alcance.

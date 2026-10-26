@@ -12,7 +12,7 @@ export function standardizeAssignment(s: State, a: Assignment): Assignment {
   if (!a.templateId) {
     if ((a.schedule?.frequency || a.frequency) !== "única")
       throw Error(
-        "Las tareas habituales deben elegirse del catálogo. Pedí a Juan Pablo que incorpore el proceso; las tareas particulares son puntuales.",
+        "Las tareas habituales deben elegirse del catálogo. Pedí a jefatura que incorpore el proceso; las tareas particulares son puntuales.",
       );
     return a;
   }

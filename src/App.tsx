@@ -182,6 +182,11 @@ const CommercialProgressPanel = lazy(() => import("./components/CommercialProgre
 const TaskEvidencePanel = lazy(() => import("./components/TaskEvidencePanel"));
 const EvidenceLinks = lazy(() => import("./components/TaskEvidencePanel").then((module) => ({ default: module.EvidenceLinks })));
 
+function retainProposalDraftMap<T>(source: Record<string, T> | undefined, proposals: Array<{ id: string }> | undefined): Record<string, T> {
+  const proposalIds = new Set((proposals || []).map((proposal) => proposal.id));
+  return Object.fromEntries(Object.entries(source || {}).filter(([key]) => proposalIds.has(key))) as Record<string, T>;
+}
+
 type Page =
   | "overview"
   | "day"
@@ -824,41 +829,53 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
     const preparesPersonalTasks = active.role !== "jefe";
     try {
       if (preparesPersonalTasks) {
-        for (const schedule of Object.values(draft.schedules || {}))
-          validateSchedule(schedule);
-        for (const schedules of Object.values(draft.companySchedules || {}))
-          for (const schedule of Object.values(schedules)) validateSchedule(schedule);
-        for (const targets of Object.values(draft.companyTargets || {}))
-          for (const target of Object.values(targets))
-            if (!Number.isFinite(target) || target < 0) throw Error("Las metas por empresa deben ser números válidos.");
+        const effectiveCompanies = new Map<string, Set<string>>();
+        const addEffectiveCompanies = (key: string, companyIds: string[]) => {
+          const selected = companyIds.filter((companyId) => draft.selectedCompanyIds.includes(companyId));
+          if (selected.length) effectiveCompanies.set(key, new Set(selected));
+        };
+        for (const taskId of draft.selectedTemplateIds) {
+          addEffectiveCompanies(taskId, draft.assignmentCompanyIds?.[taskId] || draft.selectedCompanyIds);
+        }
+        for (const task of draft.customTasks || []) {
+          addEffectiveCompanies(task.id, draft.assignmentCompanyIds?.[task.id] || draft.selectedCompanyIds);
+        }
+        if (draft.customTitle.trim()) addEffectiveCompanies("custom", draft.assignmentCompanyIds?.custom || draft.selectedCompanyIds);
+        if (laboratory && !remoteSave) {
+          for (const proposal of draft.habitualTaskProposals || []) addEffectiveCompanies(proposal.id, proposal.companyIds);
+        }
+        for (const [key, companyIds] of effectiveCompanies) {
+          const genericSchedule = draft.schedules?.[key];
+          for (const companyId of companyIds) {
+            const schedule = draft.companySchedules?.[key]?.[companyId] || genericSchedule;
+            if (schedule) validateSchedule(schedule);
+            const target = draft.companyTargets?.[key]?.[companyId];
+            if (target !== undefined && (!Number.isFinite(target) || target < 0))
+              throw Error("Las metas por empresa deben ser números válidos.");
+          }
+        }
         for (const task of draft.customTasks || [])
           validateSteps(task.steps.split(/\r?\n/));
         if (draft.customTitle.trim())
           validateSteps(String(draft.customSteps || "").split(/\r?\n/));
-        const customIds = [
-          ...(draft.customTasks || []).map((t) => t.id),
-          "custom",
-        ];
-        if (
-          customIds.some(
-            (key) =>
-              [draft.schedules?.[key], ...Object.values(draft.companySchedules?.[key] || {})]
-                .filter((schedule): schedule is Schedule => !!schedule)
-                .some((schedule) => schedule.frequency !== "única"),
-          )
-        )
-          throw Error(
-            "Los trabajos particulares son puntuales. Para repetirlos, Juan Pablo debe incorporar el proceso al catálogo.",
-          );
+        const customIds = new Set([...(draft.customTasks || []).map((task) => task.id), "custom"]);
+        for (const [key, companyIds] of effectiveCompanies) {
+          if (!customIds.has(key)) continue;
+          for (const companyId of companyIds) {
+            const schedule = draft.companySchedules?.[key]?.[companyId] || draft.schedules?.[key];
+            if (schedule && schedule.frequency !== "única")
+              throw Error("Los trabajos particulares son puntuales. Para repetirlos, jefatura debe incorporar el proceso al catálogo.");
+          }
+        }
       }
     } catch (e) {
       notify((e as Error).message);
       return;
     }
     const assignments: Assignment[] = [];
-    const scheduleForCompany = (taskId: string, companyId: string) =>
+    const scheduleForCompany = (taskId: string, companyId: string, noStarterDeadline = false) =>
       (laboratory && !remoteSave ? draft.companySchedules?.[taskId]?.[companyId] : undefined) ||
-      draft.schedules?.[taskId] || defaultSchedule(month + "-25");
+      draft.schedules?.[taskId] || (noStarterDeadline ? { ...defaultSchedule(month + "-25"), hasDeadline: false } : defaultSchedule(month + "-25"));
     const targetForCompany = (taskId: string, companyId: string, fallback: number) =>
       laboratory && !remoteSave ? (draft.companyTargets?.[taskId]?.[companyId] ?? fallback) : fallback;
     for (const cid of preparesPersonalTasks ? draft.selectedCompanyIds : []) {
@@ -958,7 +975,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
         for (const proposal of draft.habitualTaskProposals || []) {
           for (const cid of proposal.companyIds.filter((companyId) => draft.selectedCompanyIds.includes(companyId))) {
             const pending = submitHabitualTaskProposal({ ...state, habitualTaskProposals }, active, {
-              id: `${proposal.id}:${cid}`,
+              id: proposal.starterId ? `${proposal.starterId}:${active.id}:${cid}` : `${proposal.id}:${cid}`,
               companyId: cid,
               title: proposal.title,
               process: proposal.process,
@@ -966,7 +983,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
               kind: proposal.kind,
               unit: proposal.unit,
               target: targetForCompany(proposal.id, cid, 0),
-              schedule: scheduleForCompany(proposal.id, cid),
+              schedule: scheduleForCompany(proposal.id, cid, !!proposal.starterId),
               steps: proposal.steps,
             }, now, id);
             habitualTaskProposals = pending.habitualTaskProposals || habitualTaskProposals;
@@ -995,14 +1012,13 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           ...draft,
           ...(preparesPersonalTasks ? {} : {
             selectedTemplateIds: [],
-            assignmentCompanyIds: {},
-            schedules: {},
-            companySchedules: {},
-            companyTargets: {},
+            assignmentCompanyIds: retainProposalDraftMap(draft.assignmentCompanyIds, draft.habitualTaskProposals),
+            schedules: retainProposalDraftMap(draft.schedules, draft.habitualTaskProposals),
+            companySchedules: retainProposalDraftMap(draft.companySchedules, draft.habitualTaskProposals),
+            companyTargets: retainProposalDraftMap(draft.companyTargets, draft.habitualTaskProposals),
             customTitle: "",
             customSteps: "",
             customTasks: [],
-            habitualTaskProposals: [],
           }),
           completedAt: new Date().toISOString(),
           step: 5,
@@ -1357,6 +1373,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
     return (
       <Suspense fallback={<div className="section-loading" role="status">Cargando inducción…</div>}>
         <Onboarding
+          key={active.id}
           remote={!!remoteSave}
           month={month}
           state={state}
@@ -3840,7 +3857,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                   setModal(null);
                   setOwner("");
                   notify(
-                    remoteSave ? "Mes consolidado y reporte guardado para jefatura." : "Mes consolidado y reporte emitido para Juan Pablo en esta demostración.",
+                    remoteSave ? "Mes consolidado y reporte guardado para jefatura." : "Mes consolidado y reporte emitido para jefatura en esta demostración.",
                   );
                 }
               } catch (e) {

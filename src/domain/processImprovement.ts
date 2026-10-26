@@ -255,7 +255,7 @@ export function pinMatchingCatalogueAssignments(state: State): State {
 }
 
 export function addCatalogueTemplate(state: State, template: Template, actor: Profile, now = new Date().toISOString(), makeId: () => string = id) {
-  if (!actor.active || actor.role !== "jefe") throw Error("Sólo Juan Pablo puede incorporar procesos estándar.");
+  if (!actor.active || actor.role !== "jefe") throw Error("Sólo jefatura puede incorporar procesos estándar.");
   if (state.templates.some((row) => row.id === template.id)) throw Error("El proceso ya existe en el catálogo.");
   const version = snapshot(template, 1, now, dateART(now), actor.id, "catalog_change", "Alta de proceso estándar.", makeId);
   return { ...state, templates: [...state.templates, { ...template, steps: [...template.steps] }], catalogueVersions: [...(state.catalogueVersions || []), version] };
@@ -270,7 +270,7 @@ export function reviseCatalogueTemplate(
   now = new Date().toISOString(),
   makeId: () => string = id,
 ) {
-  if (!actor.active || actor.role !== "jefe") throw Error("Sólo Juan Pablo puede versionar el catálogo.");
+  if (!actor.active || actor.role !== "jefe") throw Error("Sólo jefatura puede versionar el catálogo.");
   const prepared = ensureCatalogueVersions(state, now, makeId);
   const current = prepared.templates.find((row) => row.id === templateId);
   if (!current) throw Error("El proceso ya no está disponible en el catálogo.");
@@ -321,7 +321,7 @@ export function reviewKaizenProposal(state: State, actor: Profile, proposalId: s
   const proposal = (state.improvementProposals || []).find((row) => row.id === proposalId);
   if (!proposal || proposal.status !== "proposed") throw Error("La propuesta ya no está pendiente de revisión.");
   if (!canCoordinateProcess(state, actor, proposal.proposedBy, proposal.companyId) && !canCoordinateProcess(state, actor, proposal.responsibleId, proposal.companyId))
-    throw Error("Sólo el encargado responsable o Juan Pablo pueden revisar esta propuesta.");
+    throw Error("Sólo el encargado responsable o jefatura pueden revisar esta propuesta.");
   const reviewNote = text(note, decision === "test" ? "el criterio para habilitar la prueba" : "el motivo del rechazo", 1000);
   const updated: KaizenProposal = decision === "test"
     ? { ...proposal, status: "testing", reviewNote, reviewedBy: actor.id, reviewedAt: now }
@@ -335,7 +335,7 @@ export function recordKaizenMeasurement(state: State, actor: Profile, proposalId
   if (!proposal || proposal.status !== "testing") throw Error("La propuesta no está en etapa de prueba.");
   if (!(actor.id === proposal.responsibleId && canAccessProcessSubject(state, actor, proposal.responsibleId, proposal.companyId)) &&
       !canCoordinateProcess(state, actor, proposal.responsibleId, proposal.companyId))
-    throw Error("Sólo la persona responsable, su encargado o Juan Pablo pueden registrar la medición.");
+    throw Error("Sólo la persona responsable, su encargado o jefatura pueden registrar la medición.");
   if (!Number.isFinite(input.afterValue) || input.afterValue < 0) throw Error("La medición posterior debe ser un número válido, igual o mayor a cero.");
   if (!validDate(input.measuredOn) || input.measuredOn < proposal.trialFrom || input.measuredOn > proposal.trialThrough)
     throw Error("La fecha de medición debe estar dentro del período de prueba aprobado.");
@@ -363,8 +363,8 @@ export function decideKaizenProposal(
   const proposal = (state.improvementProposals || []).find((row) => row.id === proposalId);
   if (!proposal || proposal.status !== "measured") throw Error("La propuesta necesita una medición final antes de decidir.");
   if (!hasProcessCompanyScope(state, currentActor, proposal.companyId)) throw Error("La empresa de la propuesta ya no está disponible en el ámbito vigente.");
-  if (decision === "adopt" && currentActor.role !== "jefe") throw Error("La adopción de un estándar requiere decisión de Juan Pablo.");
-  if (decision === "reject" && !canCoordinateProcess(state, actor, proposal.responsibleId, proposal.companyId)) throw Error("Sólo el encargado responsable o Juan Pablo pueden cerrar la propuesta.");
+  if (decision === "adopt" && currentActor.role !== "jefe") throw Error("La adopción de un estándar requiere decisión de jefatura.");
+  if (decision === "reject" && !canCoordinateProcess(state, actor, proposal.responsibleId, proposal.companyId)) throw Error("Sólo el encargado responsable o jefatura pueden cerrar la propuesta.");
   const decisionNote = text(note, decision === "adopt" ? "la comparación y criterio de adopción" : "el motivo del descarte", 1200);
   let nextState = state;
   let adoptedVersion: number | undefined;
@@ -437,7 +437,7 @@ export function completeFiveSAction(state: State, actor: Profile, reviewId: stri
   if (!review || !item || item.status !== "open") throw Error("La acción 5S ya no está pendiente.");
   if (!(actor.id === item.responsibleId && canAccessProcessSubject(state, actor, item.responsibleId, review.companyId)) &&
       !canCoordinateProcess(state, actor, item.responsibleId, review.companyId))
-    throw Error("Sólo la persona asignada, su encargado o Juan Pablo pueden cerrar esta acción.");
+    throw Error("Sólo la persona asignada, su encargado o jefatura pueden cerrar esta acción.");
   if (!validDate(completedOn) || completedOn < review.reviewedOn) throw Error("Indicá una fecha válida de verificación.");
   const nextItem: FiveSItem = { ...item, status: "done", completionEvidence: text(completionEvidence, "la evidencia de cierre", 1200), completedOn, completedBy: actor.id };
   const nextReview = { ...review, items: review.items.map((row) => row.id === areaId ? nextItem : row) };
