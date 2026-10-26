@@ -1,32 +1,59 @@
 # Estado actual de migración — actualizado 26/10/2026
 
 Repositorio activo `work/site`, remoto privado
-`tablerocontable-paris/TABLERO-CONTABLE`. El cambio de diagnóstico para el
-preflight, commit `6dea64af0c0344ba2175fc5a4a61b1ea56d80fce`, pasó GitHub Actions
-`40001331220` (suite, build y paquete Sites). El trabajo sigue en el mismo repo
-y Site privado; no crear reemplazos ni pull requests.
+`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`. Último commit confirmado
+en local y remoto: `13132ec5df85856eae378ff8d05efa9397d7c398`, autor **Tablero
+Contable**. Cambios directos a `main`, sin pull requests ni reescritura de
+historia. GitHub Actions run `40418925125` terminó con éxito: suite, build
+cliente/Worker y paquete Sites. En esta PC la suite completa pasó 838/838, el
+build cliente/Worker, paquete Sites y pre-commit 212/212.
 
-Supabase `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`) recibió las 16 migraciones
-001–014. GitHub Actions run `40012156985` aplicó el segmento y verificó el
-historial; la lectura MCP del 26/10 confirmó las mismas 16 versiones. El
-preflight #3 (`40367149794`) validó el secreto `SUPABASE_DEV_DB_URL` y conectó,
-pero falló porque esperaba historial remoto vacío; el estado real ya contiene
-las 16 versiones exactas. Se corrigió el workflow para verificar ese estado sin
-ejecutar SQL. SQL015 sigue sin aplicar. No ejecutar producción.
+## Continuidad portable y uso de subagentes
 
-Queda auditar la configuración Data API (exponer sólo el esquema `api`) y
-completar las pruebas de permisos con identidades ficticias. No alterar grants
-ni habilitar el espacio operativo durante esa auditoría.
+Usar subagentes cuando mejoren velocidad o calidad, en especial para revisión
+independiente de cambios de seguridad; no delegar por rutina. Mantener un solo
+subagente activo a la vez salvo que la tarea necesite paralelismo. Para este
+proyecto, GPT-6.1 Sol define/revisa contratos y GPT-6 Luna implementa el contrato
+aprobado cuando esos modelos estén disponibles.
 
-Cloudflare no está configurado: el Worker actual depende de D1 y de identidad
-que entrega Sites. Correo sólo tiene proveedor ficticio; no hay Gmail conectado.
-Ambos esperan la integración Supabase/Auth y una decisión/configuración de
-servicio. Auditoría y secuencia en
-`docs/architecture/REMOTE-MIGRATION-READINESS-20261021.md`.
+GitHub conserva el código, historial Git, instrucciones del proyecto,
+decisiones pertinentes, informes y evidencia técnica. No puede sincronizar la
+memoria global de Codex ni el historial bruto de chats. Registrar en `docs/` las
+decisiones útiles; nunca subir credenciales, sesiones de navegador ni datos
+reales de clientes/personas. La preferencia de subagentes se anota aquí para que
+viaje con `main`.
 
-Mantener datos ficticios, laboratorio aislado y acceso privado; no activar área
+## Estado de Supabase DEV
+
+Proyecto `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`) activo. La lectura actual del
+conector confirma 16 migraciones aplicadas: 001–014. SQL015 tiene aceptación Sol
+previa. SQL016 corrige lectura de tareas de encargado tras revocar una
+membresía; aceptación Sol para DEV condicionada al preflight, SHA-256
+`F7E76313AD4132626034C5C9D38F1C70AFB140BB3E2CE3615FE89071945ED8F3`. Ninguna de
+las dos migraciones 015/016 está aplicada. El orden es `apply_015`, verificar
+éxito e historial de 17, luego `apply_016` con dry-run exclusivo de 016. Usar
+únicamente `Supabase DEV migrations` en GitHub Actions con
+`apply_migrations=true`; no pegar SQL ni elegir la línea base. La automatización
+del navegador no pudo identificar de forma confiable la URL abierta, así que no
+se inició el workflow desde la interfaz.
+
+Antes de datos reales sigue pendiente verificar en Dashboard que Data API
+exponga únicamente `api`, cotejar catálogo/ACL instalados y completar la matriz
+de permisos en DEV. No habilitar el espacio operativo ni usar datos reales.
+
+## Estado de despliegue y preservación
+
+El mismo Site privado de laboratorio está en v98; la audiencia sigue owner-only.
+La aceptación visual desde la PC personal no está confirmada. Cloudflare y
+Gmail/correo todavía no están conectados. Supabase Auth operativo sigue
+deshabilitado. El inventario neutral del primer ingreso está en
+`docs/product/TASK-NORMALIZATION-DRAFT-20261026.md`; las capturas sólo permiten
+contar filas visibles, no personal actual ni tareas completadas hoy.
+
+Conservar los datos ficticios, Site privado e historias Git. No activar área
 operativa ni invitar usuarios. Conservar el scratch no versionado
-`tests/review/m2-2c-legacy-task-control-replay-races.block`.
+`tests/review/m2-2c-legacy-task-control-replay-races.block` sin leerlo, modificarlo,
+stagearlo ni borrarlo.
 
 Este bloque supersede los estados inferiores. Conservar los registros
 históricos y no modificar el scratch `.block`.
