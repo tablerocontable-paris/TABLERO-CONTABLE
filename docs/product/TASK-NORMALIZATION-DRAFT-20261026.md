@@ -89,10 +89,10 @@ privacidad.
 
 ## Estado de implementación
 
-La versión `starter-v1-*` actual es una simulación local de seis sugerencias y
-se conserva por compatibilidad. No es el primer ingreso autenticado. La
-propuesta v2 del catálogo agrupado debe seguir siendo una lista de propuestas
-sin selección predeterminada, y pasar por aprobación expresa antes de crear
-tareas. La línea base ficticia (13 perfiles, 4 empresas, 6 conceptos y 73
-ocurrencias de demostración) debe mostrarse siempre identificada como muestra,
-nunca como dato del trabajo actual.
+La versión `starter-v1-*` es una simulación local de seis sugerencias y se
+conserva por compatibilidad. El catálogo v2 agrupa 26 conceptos opcionales,
+editables y sin selección predeterminada; sólo genera propuestas pendientes de
+aprobación antes de crear tareas. No es todavía el primer ingreso autenticado.
+La línea base ficticia (13 perfiles, 4 empresas, 6 conceptos y 73 ocurrencias de
+demostración) debe mostrarse siempre identificada como muestra, nunca como dato
+del trabajo actual.

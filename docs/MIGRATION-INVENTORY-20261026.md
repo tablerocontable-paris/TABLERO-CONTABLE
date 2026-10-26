@@ -1,5 +1,28 @@
 # Inventario de continuidad y estimación inicial — 26/10/2026
 
+## Corte vigente posterior — 26/10/2026
+
+El mismo Site privado recibió el catálogo neutral v2 como versión **98**,
+deployment `appgdep_6adfd2a5c0ac81919f1d8a96c432f46c` (`succeeded`). La URL sigue
+siendo `https://grupo-paris-contabilidad.valentino-magni.chatgpt.site`, con
+acceso personalizado sólo para la cuenta propietaria y cero visitantes
+externos. GitHub `main` `ad1b4180556307755c7a4e0fd221316237fc341c` y el commit de
+fuente Sites `b0d09694d901e4d813d6d8fb333eef4af0491ec0` tienen el mismo árbol
+versionado. Se conservaron los historiales separados; no se forzó ni reescribió
+ninguno. El run `40409657073` terminó en éxito con suite, build y paquete.
+
+El v2 está publicado en el laboratorio, no es onboarding remoto autenticado ni
+permite cargar datos reales. Confirmar apertura desde la PC personal con la
+cuenta ChatGPT propietaria. No migrar a GitHub secretos, cookies, datos reales,
+estado local del navegador ni memoria/chats globales; el repositorio contiene
+la continuidad técnica pertinente y segura del proyecto.
+
+La auditoría de RPC detectó una consulta legacy que omite comprobar membresía
+activa tras una revocación, si `public` está expuesto. Falta confirmar esquema
+`api` únicamente, ACL/propietarios del servidor, resolver el flujo mediante
+migración nueva si se mantiene, y ejecutar pruebas de regresión y permisos
+negativos antes de conectar datos reales. No se modificó SQL en esta revisión.
+
 ## Actualización del corte — 26/10/2026
 
 El catálogo neutral v2 quedó publicado directamente en `main` como commit

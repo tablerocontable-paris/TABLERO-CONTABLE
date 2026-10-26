@@ -1,5 +1,35 @@
 # Estado vigente — migración de workspace, 26/10/2026
 
+## Publicación vigente confirmada — 26/10/2026, v98
+
+El catálogo neutral v2 está actualizado en el mismo Site privado, versión **98**,
+deployment `appgdep_6adfd2a5c0ac81919f1d8a96c432f46c`, estado `succeeded`:
+`https://grupo-paris-contabilidad.valentino-magni.chatgpt.site`. La audiencia
+sigue personalizada y owner-only para `valentino.ialocal@gmail.com`, sin
+visitantes externos. El paquete se construyó desde el árbol exacto de GitHub
+`main` en `ad1b4180556307755c7a4e0fd221316237fc341c`; el SHA de fuente propio de
+Sites es `b0d09694d901e4d813d6d8fb333eef4af0491ec0`. Los historiales Git siguen
+separados, sin force push ni mezcla de autores antiguos. El repo GitHub sigue
+siendo la fuente de verdad; para futuras publicaciones hay que repetir la
+sincronización de árbol validado en el checkout Sites.
+
+GitHub Actions run `40409657073` pasó `npm ci`, suite, build y validación del
+paquete. El build local del checkout Sites también pasó. La suite local que se
+inició allí se interrumpió durante su ejecución y no se cuenta como validación;
+el resultado completo es el de GitHub Actions y la corrida previa 832/832 del
+mismo árbol. La apertura en la PC personal aún necesita confirmación visual con
+la cuenta propietaria. El despliegue es del laboratorio, no autoriza datos reales
+ni activa producción.
+
+La revisión estática de Supabase 001–014 halló una ruta legacy de lectura para
+encargados que no comprueba `company_memberships.active` al revocar una empresa.
+Es un hallazgo P1 condicionado a que `public` esté expuesto en Data API. Antes de
+usar datos reales falta confirmar que sólo `api` esté expuesto, revisar ACL y
+propietarios instalados, corregir el flujo legacy mediante migración nueva si
+se conserva y sumar regresiones/permisos negativos. No se aplicó SQL ni se
+cambiaron grants en esta revisión. Informe: `architecture/SUPABASE-DEV-RPC-REVIEW-20261026.md`;
+advisors en `architecture/SUPABASE-DEV-ADVISORS-20261026.md`.
+
 ## Publicación y acceso confirmados — 26/10/2026
 
 El parche de dependencias de producción quedó publicado directamente en `main`

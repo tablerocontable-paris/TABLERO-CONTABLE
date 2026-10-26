@@ -1,5 +1,27 @@
 # Estado vigente de ejecución — 26/10/2026
 
+## Nuevo corte vigente — catálogo v2 publicado en Site v98
+
+La versión 98 del mismo Site privado se desplegó correctamente desde el commit
+de fuente Sites `b0d09694d901e4d813d6d8fb333eef4af0491ec0`. Su árbol coincide
+exactamente con GitHub `main` `ad1b4180556307755c7a4e0fd221316237fc341c`.
+Deployment `appgdep_6adfd2a5c0ac81919f1d8a96c432f46c`, URL
+`https://grupo-paris-contabilidad.valentino-magni.chatgpt.site`, owner-only para
+`valentino.ialocal@gmail.com`. No se cambió audiencia. Actions run
+`40409657073` pasó suite, build y paquete Sites; el build local pasó. La segunda
+suite local fue interrumpida y no se usa como evidencia.
+
+**Siguiente acción:** abrir el enlace en la PC personal con la cuenta ChatGPT
+propietaria y confirmar si carga. Si no, registrar el mensaje exacto y la cuenta
+activa; GitHub conectado no concede acceso al Site.
+
+**Gate de datos reales:** Supabase DEV requiere confirmar en Dashboard que sólo
+`api` esté expuesto y cerrar la revisión de RPC: se encontró una consulta legacy
+de encargado que no valida membresía activa al revocar una empresa. No exponer
+datos reales ni activar Auth operativo hasta corregir y probar ese caso. Luego
+seguir con autorización, identidad, Storage/evidencia, Cloudflare/correo y
+aceptación desde la PC personal. La suite verde no ofrece certeza del 100%.
+
 ## Corte publicado más reciente — 26/10/2026
 
 El catálogo de inicio neutral está implementado en el laboratorio y el parche

@@ -1,5 +1,21 @@
 # Correspondencia entre GitHub y Sites — 26/10/2026
 
+## Corte vigente — v2 y Sites v98
+
+Se desplegó v2 en el mismo Site privado como versión 98, deployment
+`appgdep_6adfd2a5c0ac81919f1d8a96c432f46c`, estado `succeeded`. Fuente Sites:
+`b0d09694d901e4d813d6d8fb333eef4af0491ec0`; su árbol Git es exactamente
+`8bdab82691471f476d0c30d494311488529d1b22`, idéntico al árbol de GitHub `main`
+commit `ad1b4180556307755c7a4e0fd221316237fc341c`. La publicación se preparó
+en un checkout aislado basado en el historial Sites y se superpuso el árbol
+versionado de `main`; así se conservó la historia de Sites sin mezclarla en el
+historial nuevo de GitHub ni forzar pushes. La audiencia permanece owner-only.
+
+La sincronización futura debe repetir este flujo aislado hasta definir una
+automatización segura que mantenga GitHub como fuente de verdad y Sites como
+destino. No asumir que un `git push` desde el checkout GitHub es aceptable: los
+historiales son independientes.
+
 ## Resultado comprobado
 
 El Site privado existente continúa en versión 97. La consulta Sites del
