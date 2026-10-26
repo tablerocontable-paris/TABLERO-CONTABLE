@@ -1,17 +1,28 @@
 # Grupo París en tu PC personal
 
-Estado del código al 26/10/2026: la versión v2 del catálogo neutral de primer
-ingreso está en `main`, commit `a51bc395dbd2d2ec65ee3f328287c1be8cd3d6b4`, con
-autor **Tablero Contable**. GitHub Actions run `40408104684` aprobó suite, build y
-paquete Sites. El Site privado todavía es v97; su actualización está pendiente
-de resolver el acceso de escritura a la fuente de Sites. Esto no impide clonar y
-ejecutar el código actualizado en esta PC.
+Estado al 26/10/2026: la versión v2 del catálogo neutral de primer ingreso está
+en `main`; el commit de código `ad1b4180556307755c7a4e0fd221316237fc341c` pasó
+GitHub Actions run `40409657073`. La actualización documental vigente es
+`a087d7b801827c9bc31fdc9fd23707f915741a49` (autor **Tablero Contable**); su
+validación CI está pendiente. El mismo Site privado ya está publicado como v98
+con estado `succeeded`. Para verlo, usá la cuenta ChatGPT propietaria del Site;
+la conexión a GitHub no da acceso a Sites.
 
 Para entender qué viaja por GitHub y qué requiere una copia privada, consultar
 `docs/MIGRATION-INVENTORY-20261026.md`. La línea base ficticia y los conceptos
 neutrales propuestos para el primer alta están en
 `docs/product/STARTER-CATALOG-AND-BASELINE-20261026.md`. El conteo del seed no
 representa empleados reales ni tareas cumplidas hoy.
+
+## Qué contexto se migra y qué queda fuera
+
+GitHub contiene el código, historial Git, especificaciones, decisiones,
+resultados de auditoría y próximos pasos pertinentes al proyecto. No puede
+contener toda la memoria global de Codex ni el historial bruto de chats; tampoco
+se deben subir credenciales, sesiones, estado privado del navegador ni datos
+reales de personas/clientes. Las decisiones útiles de los chats se registran en
+`docs/`; la copia local ficticia del laboratorio se exporta aparte desde la
+interfaz y no está cifrada.
 
 ## Código fuente: GitHub
 
@@ -55,4 +66,12 @@ El laboratorio local no necesita Supabase y seguirá siendo la pantalla predeter
 
 ## Qué queda alojado
 
-El Site privado de pruebas sigue en el proyecto Sites existente y conserva su audiencia actual. GitHub es la fuente de código para trabajar desde esta PC; no reemplaza automáticamente el Site ni traslada los datos del navegador. El bootstrap de Supabase Auth está publicado pero apagado por defecto; incluso si se activa sólo muestra diagnóstico. No hay todavía un tablero operativo conectado ni hosting propio. Cloudflare no está configurado y el correo sólo tiene proveedor ficticio; ambos siguen pendientes y dependen de integrar/auditar Supabase DEV.
+El Site privado de pruebas sigue en el proyecto Sites existente, ahora v98, y
+conserva su audiencia actual. GitHub es la fuente de código para trabajar desde
+esta PC; no reemplaza el Site ni traslada el estado del navegador. El bootstrap
+de Supabase Auth está publicado pero apagado por defecto. Antes de datos reales
+falta cerrar el hallazgo de permisos de la consulta legacy de encargado,
+confirmar exposición sólo de `api`, ACL instaladas y pruebas negativas; ver
+`docs/architecture/SUPABASE-DEV-RPC-REVIEW-20261026.md`. No hay todavía un
+tablero operativo conectado ni hosting propio. Cloudflare no está configurado y
+el correo sólo tiene proveedor ficticio.
