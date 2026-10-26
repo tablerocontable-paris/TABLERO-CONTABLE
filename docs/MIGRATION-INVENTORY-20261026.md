@@ -61,8 +61,29 @@ estático. Su conteo actual es:
 El conteo de 73 ocurrencias se obtiene de 12 perfiles con seis asignaciones cada
 uno y una copia extra: `12 × 6 + 1 = 73`.
 
-Estas cifras **no permiten estimar cuántas personas trabajan hoy ni cuántas
-tareas se cumplen por día**. Son datos de arranque repetibles, generados de nuevo
+## Snapshot persistido del Site y Supabase DEV — consulta 26/10/2026
+
+Una consulta read-only al D1 del Site existente encontró 49 filas en
+`paris_records`: 4 perfiles (2 jefe, 1 encargado y 1 empleado; las 4 filas
+marcadas activas), 4 empresas, 6 plantillas, 1 asignación, 1 tarea, 24 eventos
+de auditoría, 4 registros de inducción, 1 equipo, 2 pasos de recorrido y 2
+versiones del recorrido. La tarea almacenada está `En curso`; el snapshot no
+registra una tarea completada. La fila de estado del workspace tiene revisión
+24 y `updated_at` 2026-10-06. Esto es el contenido que existe en el Site, no una
+prueba de que los perfiles sean empleados reales ni de actividad al 26/10.
+
+Supabase `grupo-paris-dev` tiene las 16 migraciones aplicadas, pero las tablas
+consultadas tienen cero filas. No contiene el padrón ni el trabajo del Site.
+
+Por lo tanto, los conteos reproducibles son distintos y deben mantenerse
+separados: **13 perfiles/73 ocurrencias** del seed local; **4 perfiles/1 tarea
+en curso** en el D1 del Site, con snapshot del 06/10; **0 filas operativas** en
+Supabase DEV. No se puede afirmar cuántas personas están trabajando hoy ni
+cuántas tareas reales se completaron hoy. No copié filas, nombres, emails,
+auditoría ni contenido de tareas a GitHub.
+
+Las cifras del seed **no permiten estimar cuántas personas trabajan hoy ni
+cuántas tareas se cumplen por día**. Son datos de arranque repetibles, generados de nuevo
 cuando un navegador no tiene estado guardado; además, el seed incluye perfiles y
 registros ilustrativos que no son cuentas autenticadas. El sistema no dispone de
 un registro productivo conectado desde el que calcular actividad diaria. Para
@@ -73,7 +94,9 @@ contar movimientos operativos como tareas completadas.
 
 ## Verificación y siguiente paso
 
-- `main` coincide con `origin/main`; no se creó otra rama ni se inició una PR.
+- El inventario quedó publicado directamente en `main` como commit
+  `d1577470cb2938d8f19adbe0be8f2f3c1c898359`, igual al remoto; no se creó otra
+  rama ni se inició una PR.
 - El árbol de trabajo conserva el archivo `.block` ya mencionado.
 - El repositorio no puede incluir toda la PC ni todo Codex. Este inventario
   delimita explícitamente la continuidad técnica transferible.

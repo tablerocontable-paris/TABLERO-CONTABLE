@@ -6,19 +6,19 @@ El corte documentado en `MIGRATION-INVENTORY-20261026.md` conserva qué se
 transfiere por GitHub y qué debe quedar fuera por ser credencial, memoria/chats
 privados o estado local. `docs/product/STARTER-CATALOG-AND-BASELINE-20261026.md`
 define conceptos neutrales para el alta inicial futura y separa muestra ficticia
-de línea base real. La muestra reproducible actual es 13 perfiles (1 jefe, 2
-encargados, 10 empleados), 4 empresas, 6 conceptos de catálogo (3 entregables,
-3 operativas) y 73 ocurrencias mensuales ficticias. No hay conteo verificado de
-usuarios reales ni tareas reales cumplidas por día; para calcularlo falta un
-extracto anonimizado y autorizado de la fuente operativa. El primer ingreso
-actual sigue siendo una simulación local sin cuentas.
+de línea base real. El seed reproducible tiene 13 perfiles ficticios (1 jefe, 2
+encargados, 10 empleados), 4 empresas, 6 conceptos de catálogo y 73 ocurrencias
+mensuales. El D1 del Site tiene 4 perfiles activos, 4 empresas, 6 plantillas,
+1 asignación y 1 tarea en curso; el workspace no se actualiza desde el 06/10.
+Supabase DEV tiene cero filas operativas. Ninguno de esos conteos demuestra
+dotación o actividad de hoy. Falta una exportación actual, autorizada y
+anonimizada de la fuente real. El primer ingreso actual sigue siendo una
+simulación local sin cuentas.
 
-El estado Git observado es `dd3ab2f54e926a194f4e57c2a562d7852f62075a`, igual a
-`origin/main`; se mantiene intacto el artefacto local `.block` descrito en el
-estado de auditoría. La documentación nueva queda pendiente de commit/push y
-validación CI. El runtime tiene Node 24 y dependencias de proyecto instaladas,
-pero `npm` no está en PATH; se encontró runtime npm empaquetado bajo `work/` y
-se debe intentar invocarlo directamente, sin instalación global.
+El commit `d1577470cb2938d8f19adbe0be8f2f3c1c898359` publica el inventario y la
+propuesta de conceptos neutrales a `origin/main`; el control local aprobó
+196/196 pruebas, la suite 813/813, TypeScript y los builds de cliente/Worker.
+Se mantiene intacto el artefacto `.block` de auditoría.
 
 ## Resultado de conexión y migración DEV — 26/10/2026
 
