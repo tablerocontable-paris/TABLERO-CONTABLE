@@ -1,5 +1,12 @@
 # Grupo París en tu PC personal
 
+Estado del código al 26/10/2026: la versión v2 del catálogo neutral de primer
+ingreso está en `main`, commit `a51bc395dbd2d2ec65ee3f328287c1be8cd3d6b4`, con
+autor **Tablero Contable**. GitHub Actions run `40408104684` aprobó suite, build y
+paquete Sites. El Site privado todavía es v97; su actualización está pendiente
+de resolver el acceso de escritura a la fuente de Sites. Esto no impide clonar y
+ejecutar el código actualizado en esta PC.
+
 Para entender qué viaja por GitHub y qué requiere una copia privada, consultar
 `docs/MIGRATION-INVENTORY-20261026.md`. La línea base ficticia y los conceptos
 neutrales propuestos para el primer alta están en

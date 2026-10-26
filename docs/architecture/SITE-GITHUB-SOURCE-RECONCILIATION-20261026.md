@@ -50,3 +50,19 @@ proyecto.
 
 Esta evidencia corresponde a los commits enumerados arriba; no incluye los
 cambios locales no confirmados del catálogo v2 ni confirma su publicación.
+
+## Actualización posterior al corte v2 — 26/10/2026
+
+El código y los documentos del catálogo v2 se publicaron en el repositorio
+privado `tablerocontable-paris/TABLERO-CONTABLE`, `main`, commit
+`a51bc395dbd2d2ec65ee3f328287c1be8cd3d6b4`. El autor del commit es **Tablero
+Contable**, sin pull request. GitHub Actions run `40408104684` terminó en éxito
+con instalación, suite, build y empaquetado Sites. La suite local fue 832/832
+pruebas en 83 archivos; Sol aceptó la revisión de compatibilidad.
+
+El Site conserva v97 y su audiencia personalizada owner-only. La consulta
+`get_site`/`list_sites` confirma el mismo proyecto y propiedad; la herramienta
+de credenciales de escritura para la fuente responde `NOT_FOUND`. Por eso el
+commit v2 todavía no se sincronizó con la fuente de Sites y no se creó ni
+desplegó una versión nueva. No equivale a un error en GitHub ni a un cambio de
+cuenta; sigue pendiente resolver esa ruta de publicación.

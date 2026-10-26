@@ -50,17 +50,21 @@ pruebas en 83 archivos, TypeScript, builds cliente/Worker y `git diff --check`
 aprobados. Esta revisión cubre el prototipo de laboratorio, no el onboarding
 autenticado.
 
-**Próximos gates, en orden:** (1) registrar este corte y publicarlo directamente
-en `main` con autor Tablero Contable; verificar GitHub Actions; (2) actualizar el
-mismo Site privado, conservar acceso sólo de propietario y verificar el
-deployment; (3) abrirlo desde la PC personal con la cuenta propietaria y traer el
-código desde `main`; (4) confirmar en Dashboard que Data API exponga sólo `api`;
-(5) auditar los 39 RPC `SECURITY DEFINER` y completar pruebas positivas y
-negativas de permisos en DEV, sin modificar grants a ciegas; (6) obtener, sólo
-con autorización, un extracto anonimizado para estimar dotación y actividad
-reales; (7) continuar Auth/escrituras, evidencia/Storage, Cloudflare/correo y
-aceptación integral. No habilitar producción ni el área operativa antes de esa
-aceptación.
+**Estado de publicación:** el commit `a51bc395dbd2d2ec65ee3f328287c1be8cd3d6b4`
+está en `main`, con autor Tablero Contable y sin PR. Actions run `40408104684`
+terminó en éxito. El mismo Site sigue en v97. La lectura de Site lo reconoce
+como propio y privado; crear la credencial de su repositorio fuente falla con
+`NOT_FOUND`, así que no se intentó guardar ni desplegar una versión nueva.
+
+**Próximos gates, en orden:** (1) resolver la emisión de credencial de la fuente
+del Site existente y desplegar v2 sin cambiar audiencia; (2) abrirlo desde la PC
+personal con la cuenta propietaria y clonar/trabajar desde `main`; (3) confirmar
+en Dashboard que Data API exponga sólo `api`; (4) auditar los 39 RPC
+`SECURITY DEFINER` y completar pruebas positivas y negativas de permisos en DEV,
+sin modificar grants a ciegas; (5) obtener, sólo con autorización, un extracto
+anonimizado para estimar dotación y actividad reales; (6) continuar
+Auth/escrituras, evidencia/Storage, Cloudflare/correo y aceptación integral. No
+habilitar producción ni el área operativa antes de esa aceptación.
 
 Última consulta read-only de Advisors: ver
 `architecture/SUPABASE-DEV-ADVISORS-20261026.md`.

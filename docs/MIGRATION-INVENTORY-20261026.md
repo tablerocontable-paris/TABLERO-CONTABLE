@@ -1,13 +1,19 @@
 # Inventario de continuidad y estimación inicial — 26/10/2026
 
-## Actualización del corte local — 26/10/2026
+## Actualización del corte — 26/10/2026
 
-El repositorio está en `main`; el código previo sincronizado era
-`7b9aa3d7344d2cf1f0d7d2eb62390c4aea9b1cc7`. El corte local añade el catálogo
-neutral v2 y sus controles de inducción, junto con esta documentación. GPT-6.1
-Sol hizo una revisión independiente; GPT-6 Luna cerró **832/832 pruebas en 83
-archivos**, TypeScript, build cliente, build Worker y diff-check. Aún falta
-registrar y verificar el commit remoto y publicar el mismo Site privado.
+El catálogo neutral v2 quedó publicado directamente en `main` como commit
+`a51bc395dbd2d2ec65ee3f328287c1be8cd3d6b4`, con autor **Tablero Contable** y
+sin PR. El SHA remoto coincide. GitHub Actions run `40408104684` pasó instalación,
+suite, build y validación del paquete Sites. GPT-6.1 Sol aceptó la revisión
+independiente; la validación local cerró **832/832 pruebas en 83 archivos**,
+TypeScript, builds cliente/Worker y diff-check.
+
+El mismo Site privado aún está en v97. La consulta de lectura confirma que la
+cuenta actual es propietaria y que no hay visitantes externos, pero la emisión
+de credencial para su repositorio fuente devuelve `NOT_FOUND`; no se pudo
+sincronizar ni publicar v2. El original `.block` permanece sin seguimiento y
+sin cambios; la copia fiel está archivada en `docs/architecture/archive/`.
 
 La normalización preliminar y sus límites de conteo están en
 `docs/product/TASK-NORMALIZATION-DRAFT-20261026.md`. Las 26 sugerencias son una

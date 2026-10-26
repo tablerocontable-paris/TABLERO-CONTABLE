@@ -45,8 +45,15 @@ cerró **832/832 pruebas en 83 archivos**; TypeScript, build cliente, build
 Worker y `git diff --check` terminaron con código 0. Se mantienen avisos
 informativos por anotaciones de Zod, tamaño de bundle cliente (620,87 KB) y
 normalización LF/CRLF. Esta evidencia valida el árbol local, no producción.
-El avance todavía requiere sincronizar este corte con `main`, ejecutar CI y
-actualizar el mismo Site privado.
+El corte quedó publicado directamente en el repositorio privado correcto,
+`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`, commit
+`a51bc395dbd2d2ec65ee3f328287c1be8cd3d6b4`, autor **Tablero Contable**, sin
+pull request. GitHub Actions run `40408104684` pasó instalación, suite, build y
+validación del paquete Sites. El Site sigue en v97; la consulta de lectura
+confirma propietario y acceso personalizado sin visitantes externos, pero la
+emisión de credencial para sincronizar su fuente devuelve `NOT_FOUND`. No se
+creó otra versión ni se cambió la audiencia; el v2 aún no está publicado en el
+Site.
 
 ## Catálogo neutral de inicio — implementación local revisada, 26/10/2026
 
