@@ -1,5 +1,28 @@
 # Inventario de continuidad y estimación inicial — 26/10/2026
 
+## Estado de continuidad actualizado — 26/10/2026
+
+El proyecto continúa en `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`.
+El commit de producto `13132ec5df85856eae378ff8d05efa9397d7c398` pasó CI 97;
+el commit documental de continuidad `f62ee502bfd2270fe9d8784dfccb8bfec3bd2d1c`
+está publicado y su CI 98 ejecutaba la suite al momento de este corte. La
+preferencia de usar subagentes cuando aporten valor, normalmente uno por vez,
+quedó en `AGENTS.md`.
+
+El mismo Site sigue activo en v98, personalizado sólo para la cuenta propietaria.
+Supabase DEV tiene 16 migraciones aplicadas (001–014); las 015 y 016 están
+aceptadas para DEV, pero no aplicadas. Ejecutar `apply_015`, verificar historial
+de 17 y luego `apply_016` desde `Supabase DEV migrations` en GitHub Actions.
+No pegar SQL ni ejecutar este flujo contra producción.
+
+El catálogo neutral contiene 26 conceptos propuestos, opcionales y editables.
+La captura permite contar 14 nombres visibles y una fila «Sin asignar», pero no
+confirmar dotación actual. El seed de 13 perfiles y 73 ocurrencias es ficticio;
+no existe evidencia verificable de tareas reales completadas hoy. GitHub guarda
+el código, historial y continuidad técnica pertinente, pero no sincroniza
+memoria global ni chats brutos de Codex, el estado del navegador ni archivos
+locales. Consultar «Qué no se migra a GitHub» antes de transferir datos.
+
 ## Corte vigente posterior — 26/10/2026
 
 El mismo Site privado recibió el catálogo neutral v2 como versión **98**,

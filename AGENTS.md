@@ -1,12 +1,13 @@
 # Estado actual de migración — actualizado 26/10/2026
 
 Repositorio activo `work/site`, remoto privado
-`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`. Último commit confirmado
-en local y remoto: `13132ec5df85856eae378ff8d05efa9397d7c398`, autor **Tablero
-Contable**. Cambios directos a `main`, sin pull requests ni reescritura de
-historia. GitHub Actions run `40418925125` terminó con éxito: suite, build
-cliente/Worker y paquete Sites. En esta PC la suite completa pasó 838/838, el
-build cliente/Worker, paquete Sites y pre-commit 212/212.
+`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`. El último commit de
+producto `13132ec5df85856eae378ff8d05efa9397d7c398`, autor **Tablero Contable**,
+pasó GitHub Actions run `40418925125` (suite, build cliente/Worker y paquete
+Sites). El commit de continuidad `f62ee502bfd2270fe9d8784dfccb8bfec3bd2d1c`
+quedó publicado directamente en `main`, sin PR ni reescritura; su run 98
+(`40419944096`) seguía en `npm test` al corte. La suite local completa pasó
+838/838, build cliente/Worker, paquete Sites y pre-commit 212/212.
 
 ## Continuidad portable y uso de subagentes
 

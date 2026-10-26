@@ -10,10 +10,10 @@ La corrección local cierra la lectura legacy de encargado después de revocar
 una membresía. Sus pruebas focales independientes pasaron 10/10; aún no se
 ejecutaron contra el catálogo remoto ni se aplicó SQL016.
 
-Orden requerido: publicar primero 016 y la evidencia; ejecutar el workflow
-`apply_015` contra el historial actual; confirmar éxito; luego ejecutar
-`apply_016` con preflight de las 17 versiones previas y dry-run exclusivo de
-016. No aplicar SQL manualmente. Para datos reales sigue pendiente verificar en
+SQL016 y su evidencia ya están publicados en `main`. Orden vigente: ejecutar
+el workflow `apply_015` contra el historial actual; confirmar éxito y las 17
+versiones; luego ejecutar `apply_016` con preflight de esas 17 versiones y
+dry-run exclusivo de 016. No aplicar SQL manualmente. Para datos reales sigue pendiente verificar en
 Dashboard que Data API exponga únicamente `api`, contrastar catálogo/ACL y
 completar las pruebas de permisos. La revisión Sol no equivale a aceptación de
 DEV ni de producción.

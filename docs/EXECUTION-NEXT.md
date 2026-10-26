@@ -9,8 +9,8 @@ aceptación Sol local para el hash
 corrige la lectura de tareas de encargado luego de revocar una membresía.
 Pruebas focales de implementación y revisión independientes: 10/10, exit 0.
 
-Al publicar estos cambios, ejecutar desde GitHub Actions el workflow
-`Supabase DEV migrations` en dos pasos secuenciales: `apply_015` con
+Los cambios y aceptación Sol ya están publicados en `main`. Ejecutar desde
+GitHub Actions el workflow `Supabase DEV migrations` en dos pasos secuenciales: `apply_015` con
 `apply_migrations=true`; confirmar estado exitoso e historial de 17; después
 `apply_016` con `apply_migrations=true`, que debe mostrar sólo SQL016 en el
 dry-run. No elegir `baseline_001_014` ni pegar SQL en el Dashboard. Si el

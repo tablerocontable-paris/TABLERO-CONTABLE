@@ -1,6 +1,22 @@
 # Grupo París en tu PC personal
 
-## Actualización 26/10/2026 — Supabase DEV
+## Estado de continuidad actualizado — 26/10/2026
+
+La rama principal `main` está en el repositorio privado
+`tablerocontable-paris/TABLERO-CONTABLE`. El producto en el commit
+`13132ec5df85856eae378ff8d05efa9397d7c398` pasó CI 97; el commit documental
+`f62ee502bfd2270fe9d8784dfccb8bfec3bd2d1c` se publicó directamente en `main`,
+y CI 98 estaba ejecutando `npm test` al último control. Consultá Actions antes
+de tomar ese run como aprobado.
+
+La preferencia de usar subagentes cuando ayuden, normalmente uno a la vez, está
+registrada en `AGENTS.md`. El catálogo neutral de 26 conceptos es opcional y no
+crea trabajo sin aprobación. Las capturas sólo prueban 14 filas de personas
+visibles más «Sin asignar»; no permiten estimar el personal actual ni tareas
+reales completadas hoy. El estado con detalle y límites está en
+`docs/MIGRATION-INVENTORY-20261026.md`.
+
+## Supabase DEV
 
 El proyecto Supabase `grupo-paris-dev` está activo y tiene 16 migraciones
 aplicadas (001–014). SQL015 tiene aceptación Sol anterior; SQL016 fue aprobada
