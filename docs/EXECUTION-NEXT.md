@@ -30,6 +30,13 @@ URI faltante o base vacía.
 - SQL015, Auth/UI remotos, permisos de identidad, Data API, Storage, Cloudflare, correo, producción y aceptación en PC personal siguen pendientes.
 - La aplicación continúa como laboratorio con perfiles ficticios; no se activó el espacio operativo ni se agregaron usuarios al Site.
 
+## Historial de ejecución anterior al baseline — no vigente
+
+Los siguientes registros se conservan para trazabilidad. Sus referencias a
+URL pendiente, cero migraciones, migraciones por aplicar o cliente aún no
+montado corresponden a cortes anteriores y quedan supersedidos por el estado
+vigente de este documento.
+
 - El código ya conecta el modo opt-in de Supabase Auth con `MyWork` de sólo lectura. El laboratorio sigue por defecto; todavía no se probó el modo contra Supabase alojado ni hay escrituras RPC desde la UI.
 - No hubo un nuevo preflight después del rechazo de URL. El secreto `SUPABASE_DEV_DB_URL` existe en Actions; actualizarlo con el URI Session pooler de DEV y repetir el preflight read-only. No compartir su valor en el chat.
 - Después del preflight: aplicar/auditar 001–014 en DEV; revisar y aplicar SQL015 por separado; probar Auth/MFA y `MyWork` con identidades ficticias. Luego ampliar módulos y comandos RPC de forma incremental, incorporar Storage/evidencia, Cloudflare y correo, y aceptar desde la PC personal.

@@ -58,9 +58,9 @@ con `get_context_v1`, exige TOTP cuando corresponde y `MyWork` consulta páginas
 
 Este primer recorrido es de sólo lectura: no contiene comandos RPC, escritura,
 gestión de equipo ni el tablero operativo completo. Su montaje no prueba un
-servicio alojado. El preflight `40000787076` falló antes de conectar, por lo que
-Auth, RLS, grants y respuestas todavía requieren pruebas de aceptación en
-Supabase DEV. La ruta antigua `RemoteWorkspace`/`site-worker.ts` usa D1 y
+servicio alojado. El run `40367149794` sí conectó, pero todavía faltan pruebas
+de aceptación de Auth, RLS, grants y respuestas en Supabase DEV. La ruta antigua
+`RemoteWorkspace`/`site-worker.ts` usa D1 y
 autenticación de Sites y permanece fuera del arranque.
 
 SQL015 está aceptada para DEV con hash LF
