@@ -6,8 +6,11 @@ producto `13132ec5df85856eae378ff8d05efa9397d7c398`, autor **Tablero Contable**,
 pasó GitHub Actions run `40418925125` (suite, build cliente/Worker y paquete
 Sites). El commit de continuidad `f62ee502bfd2270fe9d8784dfccb8bfec3bd2d1c`
 quedó publicado directamente en `main`, sin PR ni reescritura; su run 98
-(`40419944096`) seguía en `npm test` al corte. La suite local completa pasó
-838/838, build cliente/Worker, paquete Sites y pre-commit 212/212.
+(`40419944096`) terminó en éxito. La actualización documental `89e39cb`
+(`40420917541`) también pasó el run 99. Esta nueva anotación incorpora una
+relectura agregada y anonimizada del D1; revisar el último run de Actions antes
+de considerar validado su commit. La suite local completa pasó 838/838, build
+cliente/Worker, paquete Sites y pre-commit 212/212.
 
 ## Continuidad portable y uso de subagentes
 
@@ -49,7 +52,10 @@ La aceptación visual desde la PC personal no está confirmada. Cloudflare y
 Gmail/correo todavía no están conectados. Supabase Auth operativo sigue
 deshabilitado. El inventario neutral del primer ingreso está en
 `docs/product/TASK-NORMALIZATION-DRAFT-20261026.md`; las capturas sólo permiten
-contar filas visibles, no personal actual ni tareas completadas hoy.
+contar filas visibles, no personal actual ni tareas completadas hoy. La
+relectura D1 del 26/10 encontró 4 perfiles activos y 1 tarea en curso, pero los
+datos y las dos señales de presencia tienen fecha 06/10; no son un estimado
+vigente. No copiar nombres/correos ni respaldo local a GitHub.
 
 Conservar los datos ficticios, Site privado e historias Git. No activar área
 operativa ni invitar usuarios. Conservar el scratch no versionado

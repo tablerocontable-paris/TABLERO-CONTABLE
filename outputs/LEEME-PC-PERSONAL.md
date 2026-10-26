@@ -3,11 +3,9 @@
 ## Estado de continuidad actualizado — 26/10/2026
 
 La rama principal `main` está en el repositorio privado
-`tablerocontable-paris/TABLERO-CONTABLE`. El producto en el commit
-`13132ec5df85856eae378ff8d05efa9397d7c398` pasó CI 97; el commit documental
-`f62ee502bfd2270fe9d8784dfccb8bfec3bd2d1c` se publicó directamente en `main`,
-y CI 98 estaba ejecutando `npm test` al último control. Consultá Actions antes
-de tomar ese run como aprobado.
+`tablerocontable-paris/TABLERO-CONTABLE`. Los commits de continuidad se publican
+directamente, sin PR. Antes de trabajar, hacé `git pull --ff-only origin main`
+y verificá en Actions que la validación del último commit haya terminado bien.
 
 La preferencia de usar subagentes cuando ayuden, normalmente uno a la vez, está
 registrada en `AGENTS.md`. El catálogo neutral de 26 conceptos es opcional y no
@@ -33,13 +31,11 @@ Antes de cargar datos reales siguen pendientes: confirmar que Data API exponga
 únicamente `api`, contrastar las ACL/catálogos instalados y completar pruebas de
 permisos. La aceptación Sol del archivo no equivale a aceptación de producción.
 
-Estado al 26/10/2026: la versión v2 del catálogo neutral de primer ingreso está
-en `main`; el commit de código `ad1b4180556307755c7a4e0fd221316237fc341c` pasó
-GitHub Actions run `40409657073`. La actualización documental vigente es
-`a087d7b801827c9bc31fdc9fd23707f915741a49` (autor **Tablero Contable**); su
-validación CI está pendiente. El mismo Site privado ya está publicado como v98
-con estado `succeeded`. Para verlo, usá la cuenta ChatGPT propietaria del Site;
-la conexión a GitHub no da acceso a Sites.
+El catálogo v2 está publicado en el mismo Site privado como v98, desde el
+commit de código `ad1b4180556307755c7a4e0fd221316237fc341c`; el run de validación
+del paquete Sites `40409657073` pasó. Hubo commits posteriores de correcciones y
+continuidad; revisá Actions para el estado actual. Para abrir el Site, usá la
+cuenta ChatGPT propietaria; conectar GitHub no concede acceso a Sites.
 
 Para entender qué viaja por GitHub y qué requiere una copia privada, consultar
 `docs/MIGRATION-INVENTORY-20261026.md`. La línea base ficticia y los conceptos
@@ -91,7 +87,9 @@ para recuperar historia anterior de Sites, fuera de la historia de `main`:
 
 ## Datos del laboratorio
 
-GitHub sincroniza el código y el historial Git; no sincroniza el estado ficticio guardado en el navegador (`paris-state-lab`) ni los archivos locales de IndexedDB. Para trasladar ese estado, exportá el respaldo desde la interfaz de «Vista de prueba», guardalo en un medio privado, y restauralo en la otra PC. El respaldo contiene datos ficticios y no está cifrado. No subirlo al repositorio.
+GitHub sincroniza el código y el historial Git; no sincroniza el estado ficticio guardado en el navegador (`paris-state-lab`), los archivos locales de IndexedDB ni la base D1 del Site. La relectura D1 del 26/10 encontró 4 perfiles marcados activos y 1 tarea en curso, pero el workspace y las dos señales de presencia no se actualizaban desde el 06/10. Es una muestra del laboratorio, no una dotación o actividad actual. Las colecciones revisadas no tienen una colección separada de comentarios. No copiamos nombres, correo, identificadores, auditoría ni respaldo local a GitHub.
+
+Para trasladar estado de navegador, exportá el respaldo desde la interfaz de «Vista de prueba», guardalo en un medio privado y restauralo en la otra PC. El respaldo contiene datos ficticios y no está cifrado. No subirlo al repositorio. El D1 sigue alojado en el Site y no se incorpora automáticamente al clon de GitHub.
 
 El laboratorio local no necesita Supabase y seguirá siendo la pantalla predeterminada. `grupo-paris-dev` está activo y tiene aplicadas las 16 migraciones 001–014. El secreto `SUPABASE_DEV_DB_URL` validó y conectó correctamente el 26/10/2026; no hace falta volver a cambiarlo. El preflight #3 falló porque esperaba una base vacía y encontró el historial exacto ya aplicado; no fue un error de contraseña ni ejecutó SQL. SQL015 sigue pendiente.
 

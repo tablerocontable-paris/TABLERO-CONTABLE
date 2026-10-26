@@ -152,14 +152,19 @@ uno y una copia extra: `12 × 6 + 1 = 73`.
 
 ## Snapshot persistido del Site y Supabase DEV — consulta 26/10/2026
 
-Una consulta read-only al D1 del Site existente encontró 49 filas en
+Una consulta read-only al D1 del Site existente, repetida el 26/10, encontró 49 filas en
 `paris_records`: 4 perfiles (2 jefe, 1 encargado y 1 empleado; las 4 filas
 marcadas activas), 4 empresas, 6 plantillas, 1 asignación, 1 tarea, 24 eventos
 de auditoría, 4 registros de inducción, 1 equipo, 2 pasos de recorrido y 2
 versiones del recorrido. La tarea almacenada está `En curso`; el snapshot no
 registra una tarea completada. La fila de estado del workspace tiene revisión
-24 y `updated_at` 2026-10-06. Esto es el contenido que existe en el Site, no una
-prueba de que los perfiles sean empleados reales ni de actividad al 26/10.
+24 y `updated_at` 2026-10-06. La relectura confirmó 4 perfiles marcados activos,
+una tarea en curso y ninguna con `completedAt`; el workspace no tuvo cambios
+desde el 06/10. Esto describe el contenido persistido en el Site, no acredita
+que los perfiles sean empleados reales ni permite calcular la actividad del
+26/10. Las dos filas de presencia también tienen `last_seen` del 06/10, por lo
+que no son sesiones en línea vigentes. En las colecciones observadas no hay una
+colección de comentarios; el estado local del navegador no se consultó.
 
 Supabase `grupo-paris-dev` tiene las 16 migraciones aplicadas, pero las tablas
 consultadas tienen cero filas. No contiene el padrón ni el trabajo del Site.

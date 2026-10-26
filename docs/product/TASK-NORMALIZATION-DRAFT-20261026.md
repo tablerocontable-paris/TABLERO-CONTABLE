@@ -74,10 +74,19 @@ originales nunca se deduplican por título.
 
 | Medida solicitada | Evidencia disponible | Resultado válido hoy |
 |---|---|---|
-| Personas actuales | 14 nombres y una fila sin asignar en una captura sin fecha ni estado activo | No determinable; sólo un mínimo de filas visibles en esa captura. |
-| Tareas únicas | Títulos parciales, repetidos y sin ID/período | No determinable. |
-| Tareas completadas hoy | Sin estado ni timestamp verificable de cierre | No determinable. |
+| Personas actuales | Captura: 14 nombres y una fila sin asignar; D1: 4 perfiles activos con estado actualizado el 06/10 | No determinable; ninguno acredita dotación vigente. |
+| Tareas únicas | Capturas parciales; el D1 conserva una tarea con ID en un snapshot del 06/10 | Una fila en ese snapshot; universo de tareas reales no determinable. |
+| Tareas completadas hoy | El D1 conserva 1 tarea «En curso», sin cierre y con workspace actualizado el 06/10 | No hay cierres en ese snapshot; no demuestra actividad real del día. |
 | Trabajo operativo diario | Sin movimientos fechados ni cantidad/unidad | No determinable. |
+
+Relectura de sólo lectura del D1 del Site actual, 26/10/2026: se encontraron 4
+perfiles marcados activos y 1 tarea, cuyo estado es «En curso» y cuyo campo de
+cierre está vacío. El workspace tiene su última actualización el 06/10/2026;
+las dos señales de presencia también son de esa fecha y no están vigentes. Es un
+snapshot atrasado del laboratorio; no permite afirmar que esos perfiles sean
+la dotación actual ni calcular completaciones del día. No se copiaron nombres,
+email, identificadores, comentarios ni filas de auditoría. El respaldo local
+del navegador no se consultó.
 
 Para cerrar estos números se necesita un extracto autorizado y anonimizado con:
 ID estable de persona, estado activo y equipo; ID de ocurrencia, empresa y
