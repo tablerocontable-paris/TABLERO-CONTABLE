@@ -1,11 +1,13 @@
 # Grupo París en tu PC personal
 
-## Estado de continuidad actualizado — 26/10/2026
+## Estado de continuidad actualizado — 27/10/2026
 
 La rama principal `main` está en el repositorio privado
 `tablerocontable-paris/TABLERO-CONTABLE`. Los commits de continuidad se publican
-directamente, sin PR. Antes de trabajar, hacé `git pull --ff-only origin main`
-y verificá en Actions que la validación del último commit haya terminado bien.
+directamente, sin PR. El último commit documental es
+`b199c900e3c5a0b04694f07ea01d4b32876e7790`, autor Tablero Contable; GitHub
+Actions run 104 terminó correctamente (suite, build y paquete Sites). Antes de
+editar, hacé `git pull --ff-only origin main`.
 
 La preferencia de usar subagentes cuando ayuden, normalmente uno a la vez, está
 registrada en `AGENTS.md`. El catálogo neutral de 26 conceptos es opcional y no
@@ -16,20 +18,17 @@ reales completadas hoy. El estado con detalle y límites está en
 
 ## Supabase DEV
 
-El proyecto Supabase `grupo-paris-dev` está activo y tiene 16 migraciones
-aplicadas (001–014). SQL015 tiene aceptación Sol anterior; SQL016 fue aprobada
-para DEV con hash
-`F7E76313AD4132626034C5C9D38F1C70AFB140BB3E2CE3615FE89071945ED8F3` y corrige
-la lectura de tareas luego de revocar una membresía. La prueba focal pasó 10/10
-con revisión independiente. Al actualizar `main`, ejecutar en GitHub Actions
-`Supabase DEV migrations`: primero `apply_015` y, sólo tras éxito, `apply_016`,
-ambos con `apply_migrations=true`. El workflow valida el historial y el SQL
-exactos. No aplicar SQL manualmente. El código local de la 016 todavía no se
-había aplicado en el proyecto cuando se registró esta nota.
+El proyecto Supabase `grupo-paris-dev` está activo y registra 18 versiones
+correspondientes a SQL001–016. Las corridas #1, #2 y #3 aplicaron y verificaron
+001–014, 015 y 016. No volver a aplicar la línea base ni 015/016. La corrida #4
+falló de forma segura porque se eligió la línea base con el historial completo;
+el control abortó antes de cualquier escritura. El workflow ahora inicia en
+`verify_current`, de sólo lectura.
 
-Antes de cargar datos reales siguen pendientes: confirmar que Data API exponga
-únicamente `api`, contrastar las ACL/catálogos instalados y completar pruebas de
-permisos. La aceptación Sol del archivo no equivale a aceptación de producción.
+Antes de Auth, datos reales o frontend conectado sigue pendiente verificar en el
+Dashboard que Data API exponga sólo `api`, revisar ACL/RPC y completar pruebas de
+permisos con identidades de DEV. La revisión no equivale a aceptación integral
+de producción.
 
 El catálogo v2 está publicado en el mismo Site privado como v98, desde el
 commit de código `ad1b4180556307755c7a4e0fd221316237fc341c`; el run de validación
@@ -87,13 +86,23 @@ para recuperar historia anterior de Sites, fuera de la historia de `main`:
 
 ## Datos del laboratorio
 
-GitHub sincroniza el código y el historial Git; no sincroniza el estado ficticio guardado en el navegador (`paris-state-lab`), los archivos locales de IndexedDB ni la base D1 del Site. La relectura D1 del 26/10 encontró 4 perfiles marcados activos y 1 tarea en curso, pero el workspace y las dos señales de presencia no se actualizaban desde el 06/10. Es una muestra del laboratorio, no una dotación o actividad actual. Las colecciones revisadas no tienen una colección separada de comentarios. No copiamos nombres, correo, identificadores, auditoría ni respaldo local a GitHub.
+GitHub sincroniza el código y el historial Git; no sincroniza el estado del
+navegador (`paris-state-lab`), IndexedDB ni la base D1 del Site. La relectura
+read-only del 27/10 encontró en el D1 de laboratorio cuatro perfiles marcados
+activos y una tarea en curso sin cierre; el workspace sigue fechado el 06/10.
+Esto no estima la dotación ni la actividad real del 27/10. Las colecciones
+revisadas no tienen una colección separada de comentarios. No copiamos nombres,
+emails, identificadores, auditoría ni respaldo del navegador a GitHub.
 
 Para trasladar estado de navegador, exportá el respaldo desde la interfaz de «Vista de prueba», guardalo en un medio privado y restauralo en la otra PC. El respaldo contiene datos ficticios y no está cifrado. No subirlo al repositorio. El D1 sigue alojado en el Site y no se incorpora automáticamente al clon de GitHub.
 
-El laboratorio local no necesita Supabase y seguirá siendo la pantalla predeterminada. `grupo-paris-dev` está activo y tiene aplicadas las 16 migraciones 001–014. El secreto `SUPABASE_DEV_DB_URL` validó y conectó correctamente el 26/10/2026; no hace falta volver a cambiarlo. El preflight #3 falló porque esperaba una base vacía y encontró el historial exacto ya aplicado; no fue un error de contraseña ni ejecutó SQL. SQL015 sigue pendiente.
+El laboratorio local no necesita Supabase y sigue siendo la vista predeterminada.
+El secreto `SUPABASE_DEV_DB_URL` ya conectó; no volver a cambiarlo. La línea
+base y SQL015/016 están aplicadas en DEV. El intento #4 no alteró la base.
 
-**Próximo paso de migración:** tras actualizar `main`, correr 015 y 016 en orden desde el workflow de GitHub. Luego verificar en Supabase Dashboard que Data API exponga únicamente `api` y ejecutar pruebas de permisos con identidades ficticias. No volver a ejecutar 001–014. Nunca compartas la URI o la contraseña por chat ni en archivos del repo.
+**Próximo paso de migración:** cerrar la auditoría de ACL/RPC y verificar la
+configuración Data API en el Dashboard; no hay migraciones pendientes de
+aplicación. No compartir URI ni contraseña por chat o archivos del repo.
 
 ## Qué queda alojado
 
