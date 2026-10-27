@@ -11,9 +11,9 @@ se modifican. Validación local: suite **845/845 en 85 archivos**, TypeScript,
 build cliente, build Worker y paquete Sites aprobados; pre-commit **214/214**.
 GitHub commit `9b54a4625f56e07fedbfba82d68696204f9a0e5d`, autor **Tablero
 Contable**, directo a `main`, sin PR; Actions #117 (`40555801302`) aprobó
-instalación, suite, build y paquete Sites. El último commit de documentación es
-`ea99133402fbdae73b3a4bb7e4de42e4d8fc70d3`, también directo a `main`, y
-Actions #118 (`40557105221`) pasó instalación, suite, build y paquete Sites.
+instalación, suite, build y paquete Sites. La continuidad documental se publicó
+en `e9fae71f3c1fda7414f0ad103c99f60275670c76`; Actions #119
+(`40558575748`) pasó instalación, suite, build y paquete Sites.
 El mismo Site quedó actualizado a
 v99, deployment `appgdep_6ae0e7e339d4819180adeda021e82d7a`, desde su fuente
 `a80e3013d00165f1bc0abd64a580545a4322e49b`; acceso personalizado conservado,
@@ -33,21 +33,23 @@ revisionados de borrador, envío, cambios y aprobación; el frontend no está
 conectado a ellos y el payload remoto no conserva el código/versión del
 concepto neutral. Las propuestas personalizadas remotas sólo permiten
 frecuencia única. El contrato borrador y el flujo por rol están en
-`docs/architecture/AUTHENTICATED-NEUTRAL-FIRST-LOGIN-CONTRACT-DRAFT-20261027.md`;
-no habilita Auth ni modifica las migraciones 001–016. Revisión de catálogo en
+`docs/architecture/AUTHENTICATED-NEUTRAL-FIRST-LOGIN-CONTRACT-DRAFT-20261027.md`.
+GPT-6.1 Sol aceptó sus decisiones de arquitectura sólo para el SHA-256
+`E65E1B467525B8AE4769E2F10EB33E238043078ED9D1E635468D0ADBD7C93D68`. La
+aceptación no cubre implementación ni migración. No habilita Auth ni modifica
+SQL001–016. En esta PC hay Node 24, pero no npm ni Supabase CLI; no se creó ni
+aplicó la migración 017. Revisión de catálogo en
 `docs/product/TASK-NORMALIZATION-DRAFT-20261026.md`.
 
 ## Continuidad y estimador — última actualización
 
 El estimador se publicó directamente en `main` como
 `daee754b9b688931e0779e271245acd6bd695526`; su enlace con la taxonomía v2 se
-publicó como `9b54a4625f56e07fedbfba82d68696204f9a0e5d`. La verificación vigente
-del corte documental `ea99133402fbdae73b3a4bb7e4de42e4d8fc70d3` es GitHub
-Actions #118 (`40557105221`): instalación, suite, build y empaquetado Sites
-terminaron en éxito. Los conteos locales anteriores (845/845 y 214/214)
-corresponden al corte de código 9b54a46, no son una ejecución de este commit
-documental. El build cliente conserva un aviso de chunk principal superior a
-500 kB.
+publicó como `9b54a4625f56e07fedbfba82d68696204f9a0e5d`. Actions #117
+validó ese corte de código; Actions #119 (`40558575748`) validó la última
+continuidad documental publicada (`e9fae71`). Los conteos locales 845/845 y
+214/214 corresponden al corte de código 9b54a46. El build cliente conserva un
+aviso de chunk principal superior a 500 kB.
 
 El estimador es local, con vocabulario neutral cerrado y entradas/salidas
 ignoradas por Git. No se recibió un extracto real autorizado: dotación actual y

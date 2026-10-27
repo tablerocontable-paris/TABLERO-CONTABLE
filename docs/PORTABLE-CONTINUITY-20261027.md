@@ -2,9 +2,9 @@
 
 ## Corte de continuidad más reciente — verificado 27/10/2026
 
-- `main` está sincronizada en `ea99133402fbdae73b3a4bb7e4de42e4d8fc70d3`;
-  el último commit de código es `9b54a4625f56e07fedbfba82d68696204f9a0e5d`.
-- GitHub Actions #118 (`40557105221`) terminó en éxito: instalación,
+- El último commit funcional es `9b54a4625f56e07fedbfba82d68696204f9a0e5d`;
+  el checkpoint documental `e9fae71f3c1fda7414f0ad103c99f60275670c76` pasó CI.
+- GitHub Actions #119 (`40558575748`) terminó en éxito: instalación,
   pruebas completas, build y empaquetado Sites. [Ejecución #118](https://github.com/tablerocontable-paris/TABLERO-CONTABLE/actions/runs/40557105221).
 - La versión 99 del Site existente está desplegada; su flujo de publicación es
   independiente de GitHub Actions y la audiencia personalizada se conservó.
@@ -16,9 +16,11 @@
   historial bruto de chats, memoria global de Codex, comentarios privados,
   credenciales, sesiones, archivos originales o datos identificables.
 
-La normalización local y su enlace con el estimador están implementados, pero
-el onboarding autenticado remoto no: el borrador requiere aprobación de
-arquitectura antes de migrar el esquema. Los totales reales de personal y tareas
+La normalización local y su enlace con el estimador están implementados. Sol
+aceptó el diseño del onboarding autenticado para el documento SHA-256
+`E65E1B467525B8AE4769E2F10EB33E238043078ED9D1E635468D0ADBD7C93D68`; el código
+y la migración posterior a 016 todavía no están implementados. En la PC de
+trabajo hay Node 24, pero no npm ni Supabase CLI. Los totales reales de personal y tareas
 completadas hoy siguen indeterminados hasta procesar un extracto vigente y
 autorizado fuera del repositorio. Las capturas compartidas no bastan para ese
 cálculo. La guía operativa está en `outputs/LEEME-PC-PERSONAL.md`.

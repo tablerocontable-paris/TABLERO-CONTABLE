@@ -5,19 +5,24 @@ privado [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocon
 
 ## Estado comprobado
 
-- HEAD actual: `ea99133402fbdae73b3a4bb7e4de42e4d8fc70d3`, documentación de
-  continuidad. El último cambio de código es `9b54a4625f56e07fedbfba82d68696204f9a0e5d`.
-- GitHub Actions #118 (`40557105221`) pasó instalación, pruebas completas,
+- El último cambio de código es `9b54a4625f56e07fedbfba82d68696204f9a0e5d`;
+  el checkpoint documental `e9fae71f3c1fda7414f0ad103c99f60275670c76` pasó CI.
+- GitHub Actions #119 (`40558575748`) pasó instalación, pruebas completas,
   build y empaquetado Sites. [Ver ejecución](https://github.com/tablerocontable-paris/TABLERO-CONTABLE/actions/runs/40557105221).
 - El Site privado existente está publicado como v99. GitHub Actions no lo
   despliega. El acceso personalizado no se amplió.
 - La clasificación neutral de 26 conceptos se conserva en el laboratorio y en
   el estimador. El onboarding del primer login autenticado aún no está integrado.
+- Sol aceptó el diseño documental del onboarding (SHA-256
+  `E65E1B467525B8AE4769E2F10EB33E238043078ED9D1E635468D0ADBD7C93D68`); la
+  implementación y migración 017 siguen pendientes.
 - Las capturas permiten contar sólo 14 filas con nombre y una «Sin asignar» en
   una lista parcial; no acreditan la dotación vigente ni tareas completadas hoy.
   No hay extracto actual autorizado, así que esos totales siguen sin determinar.
 - Supabase DEV tiene las migraciones 001–016. No repetirlas. Siguen pendientes
   la confirmación de Data API y las pruebas de permisos con identidades Auth.
+  La CLI de Supabase no está disponible en la PC de trabajo; no se creó ni se
+  aplicó la migración 017.
 
 ## Traer el proyecto a esta PC
 

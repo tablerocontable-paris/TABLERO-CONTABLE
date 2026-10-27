@@ -14,15 +14,25 @@ aprobados; hook **214/214**. GitHub commit
 `9b54a4625f56e07fedbfba82d68696204f9a0e5d`, autor Tablero Contable, directo en
 `main`, sin PR; Actions #117 (`40555801302`) pasó instalación, suite, build y
 validación Sites. El seguimiento documental quedó en
-`ea99133402fbdae73b3a4bb7e4de42e4d8fc70d3`, y Actions #118
-(`40557105221`) también pasó instalación, suite, build y paquete Sites. La
+`e9fae71f3c1fda7414f0ad103c99f60275670c76`, y Actions #119
+(`40558575748`) también pasó instalación, suite, build y paquete Sites. La
 versión **99** del Site existente se desplegó correctamente
 desde su rama fuente (`a80e3013d00165f1bc0abd64a580545a4322e49b`), manteniendo el
 acceso personalizado actual y sin visitantes externos. El build cliente conserva
 un aviso de chunk principal >500 kB. El onboarding autenticado y la clasificación
-remota siguen pendientes; no se activó Auth ni se modificó SQL001–016. Próximo:
-continuar el contrato remoto con revisión Sol antes de esquema, y usar el
-estimador sólo después de recibir un extracto vigente autorizado. Contrato/detalle en
+remota siguen pendientes; no se activó Auth ni se modificó SQL001–016. Sol
+aceptó sólo el diseño del contrato (SHA-256
+`E65E1B467525B8AE4769E2F10EB33E238043078ED9D1E635468D0ADBD7C93D68`). Próximo:
+implementar localmente la migración posterior a 016, API v3, tipos y UI según el
+contrato, validar replay/upgrade y someter el código a revisión Sol. En esta PC
+de trabajo no está disponible la CLI de Supabase y no se debe improvisar el
+archivo de migración ni aplicar SQL en remoto; continuar ese paso en una PC con
+la CLI disponible. La futura migración debe conceder EXECUTE explícitamente a
+`authenticated` sólo en funciones `api` autorizadas y no depender de grants
+automáticos; ver el [cambio de defaults de Data API de Supabase](https://supabase.com/changelog/45329-breaking-change-tables-not-exposed-to-data-and-graphql-api-automatically).
+Mantener Auth y escrituras remotas apagadas hasta aceptación específica DEV.
+Usar el estimador sólo después de recibir un extracto vigente autorizado.
+Contrato/detalle en
 `docs/architecture/AUTHENTICATED-NEUTRAL-FIRST-LOGIN-CONTRACT-DRAFT-20261027.md`.
 
 ## Revisión del catálogo neutral
