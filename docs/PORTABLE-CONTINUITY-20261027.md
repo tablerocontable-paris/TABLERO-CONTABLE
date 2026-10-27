@@ -21,7 +21,10 @@
   demostrar cobertura del trabajo real. Se conserva separada la recepción de
   cobranzas, su aplicación, el registro de liquidaciones y sus conciliaciones.
   El primer ingreso autenticado requiere especificar permisos, aprobación,
-  borrador recuperable y aceptación antes de crear tareas.
+  borrador recuperable y aceptación antes de crear tareas. Hay comandos
+  backend revisionados, pero el UI remoto no está integrado ni persiste el
+  código/version del concepto neutral. Ver contrato borrador en
+  `docs/architecture/AUTHENTICATED-NEUTRAL-FIRST-LOGIN-CONTRACT-DRAFT-20261027.md`.
 - Se conservan los IDs históricos `starter-v1-*` y los historiales.
 - La captura de equipo sólo acredita 14 filas con nombre y una fila «Sin
   asignar», no el padrón vigente. Las imágenes de tareas están incompletas y no
@@ -42,29 +45,34 @@
 
 ## Próximas acciones técnicas
 
-1. Comprobar GitHub Actions para los commits posteriores a `daee754`; la consulta
-   disponible no devolvió runs, así que el estado de CI de este corte no está
-   probado. No atribuirle los checks verdes de los commits anteriores.
-2. Para estimar datos reales, recibir un extracto autorizado y procesarlo
+1. Revisar el contrato de primer ingreso autenticado con la nueva clasificación
+   versionada y llevarlo a implementación tras cerrar el diseño. No habilitar
+   Auth operativo ni cambiar las migraciones 001–016.
+2. Migraciones 001–016: el catálogo instalado coincide con replay local; SQL011
+   tuvo un defecto funcional corregido por SQL016. No repetir la línea base.
+   Mantener pendientes la revisión Data API y pruebas con identidades Auth.
+   Evidencia: `docs/architecture/SUPABASE-DEV-SCHEMA-CATALOG-COMPARE-20261027.md`.
+3. Para estimar datos reales, recibir un extracto autorizado y procesarlo
    localmente con el utilitario. Mantener originales, clave y CSV seudonimizados
    fuera de GitHub; no almacenar cifras identificables en el repositorio.
-3. Completar el onboarding autenticado sólo después de cerrar la revisión de
+4. Completar el onboarding autenticado sólo después de cerrar la revisión de
    Auth/identidad y permisos en DEV; la inducción actual es de laboratorio y no
    puede crear asignaciones reales.
-4. Para uso real, cerrar Data API/Auth y pruebas de permisos, luego persistencia,
+5. Para uso real, cerrar Data API/Auth y pruebas de permisos, luego persistencia,
    producción, Cloudflare/correo y aceptación desde la PC personal. Ver gates en
    `docs/EXECUTION-NEXT.md`.
 
 ## Corte implementado y publicado
 
-Commit `daee754b9b688931e0779e271245acd6bd695526` en `main`, publicado
-directamente bajo el autor Tablero Contable y con SHA remoto coincidente. Incluye
-el estimador local, pruebas sintéticas, plantillas vacías, refinamiento de
-conceptos neutrales y este contexto portable. Suite completa **843/843 pruebas
-en 85 archivos**; TypeScript y builds cliente/Worker terminaron con código 0;
-hook **212/212**. El build cliente emite un aviso de chunk principal superior a
-500 kB. El conector de GitHub devolvió cero ejecuciones de Actions asociadas a
-este SHA al consultarlo; por lo tanto, CI de GitHub no se reporta como aprobado.
+Commit `daee754b9b688931e0779e271245acd6bd695526` contiene el estimador y
+contratos neutrales. El seguimiento más reciente publicado directamente en
+`main` es `c3ebaeb655d9350c3f0ffab60823a889004fbce7`, autor Tablero Contable,
+sin PR. Run GitHub Actions `40545238137` (#113) pasó suite, build y validación
+del paquete Sites para `c3ebaeb`; las pruebas focales fueron 17/17 y el hook
+212/212. La suite completa histórica es 843/843 en 85 archivos. El build cliente
+advierte un chunk principal superior a 500 kB. Los documentos de contrato
+autenticado añadidos después de ese SHA aún requieren validación de su nuevo
+commit.
 
 `main` contiene código, contratos, pruebas, historia Git y continuidad técnica
 segura. No incluye conversaciones brutas, datos identificables, credenciales,

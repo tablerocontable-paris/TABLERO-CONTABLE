@@ -5,10 +5,20 @@
 La auditoría independiente cotejó las 26 sugerencias v2 contra el borrador y
 no encontró omisiones dentro de ese borrador. No prueba que el catálogo cubra el
 trabajo real. El onboarding autenticado sigue pendiente: antes de habilitarlo,
-definir propuesta, revisión/aprobación, permisos por rol, borrador recuperable y
-aceptación explícita antes de crear tareas. Cobranzas, aplicación de cobros,
-liquidación de tarjetas y conciliación permanecen como conceptos distintos.
-Detalle: `docs/product/TASK-NORMALIZATION-DRAFT-20261026.md`.
+conectar el frontend al backend de aprobación existente y persistir el código y
+versión de concepto en las definiciones aprobadas. El contrato vigente de
+onboarding no transporta esa clasificación; las definiciones personalizadas
+remotas son de frecuencia única. No modificar SQL001–016; revisar primero el
+contrato borrador en
+`docs/architecture/AUTHENTICATED-NEUTRAL-FIRST-LOGIN-CONTRACT-DRAFT-20261027.md`.
+Cobranzas, aplicación de cobros, liquidación de tarjetas y conciliación siguen
+separadas. Detalle de cobertura en
+`docs/product/TASK-NORMALIZATION-DRAFT-20261026.md`.
+
+La documentación de este contrato se publicó en `c3ebaeb655d9350c3f0ffab60823a889004fbce7`;
+Actions run `40545238137` (#113) pasó suite, build y paquete Sites para ese SHA.
+Los cambios documentales posteriores a `c3ebaeb` todavía necesitan su propia
+ejecución de CI.
 
 ## Estimador local y continuidad portable — actualización
 
@@ -19,11 +29,11 @@ salidas con `.gitignore`, y documentación en
 `docs/product/ANONYMIZED-WORKFORCE-ESTIMATE.md`. Hay cuatro pruebas sintéticas
 focales. La última suite completa aprobó **843/843 pruebas en 85 archivos**;
 TypeScript, build cliente y build Worker aprobaron en esta copia. El build
-cliente conserva un aviso de bundle principal superior a 500 kB. Commit
-`daee754b9b688931e0779e271245acd6bd695526` se publicó directamente en `main`;
-hook **212/212** y SHA remoto confirmados. La consulta de Actions devolvió cero
-ejecuciones para este SHA; CI no se declara aprobado hasta obtener una ejecución
-observable.
+cliente conserva un aviso de bundle principal superior a 500 kB. Commit del
+estimador `daee754b9b688931e0779e271245acd6bd695526` y seguimiento documental
+`c3ebaeb655d9350c3f0ffab60823a889004fbce7` están publicados directamente en
+`main`; para `c3ebaeb`, hook **212/212** y Actions #113 aprobados. No trasladar
+esa validación a commits posteriores.
 No se recibió un extracto autorizado; la cantidad real de personas y tareas
 terminadas hoy continúa **sin determinarse**. No crear ni copiar datos reales a
 GitHub. El runtime Node incluido permite ejecutar el código en esta PC sin
@@ -59,6 +69,12 @@ cualquier escritura. El estado de Supabase no cambió en ese run. La comparació
 confirma que los cuerpos instalados de las funciones añadidas/reemplazadas por
 015 y 016 tienen hashes MD5 de cuerpo coincidentes con el repositorio; cada
 workflow verificó también el SHA-256 del archivo completo.
+
+El cotejo del catálogo contra replay local, documentado en
+`docs/architecture/SUPABASE-DEV-SCHEMA-CATALOG-COMPARE-20261027.md`, coincide
+en relaciones, columnas, políticas, funciones, restricciones, índices,
+triggers y privilegios. SQL011 sí tuvo un defecto semántico de membresía
+revocada; SQL016 lo corrige. No reejecutar 001–014 ni modificar su historial.
 
 El workflow de DEV quedó convertido a verificación exclusivamente de lectura:
 exige las 18 versiones y ya no ofrece re-aplicar el baseline ni 015/016. También

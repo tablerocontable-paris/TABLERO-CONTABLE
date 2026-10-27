@@ -7,21 +7,25 @@ borrador funcional: cobertura completa del borrador, sin afirmar cobertura del
 trabajo real. Se mantienen separadas cobranzas, aplicación de cobros,
 liquidaciones de tarjetas y conciliaciones para evitar dobles conteos. La
 inducción v2 continúa sólo en el laboratorio local; no existe aún onboarding
-del primer ingreso autenticado. Su siguiente definición debe especificar
-permisos de propuesta/aprobación, persistencia de borrador y conversión
-explícita a tareas. Revisión registrada en
+del primer ingreso autenticado. El backend de DEV sí contiene comandos
+revisionados de borrador, envío, cambios y aprobación; el frontend no está
+conectado a ellos y el payload remoto no conserva el código/versión del
+concepto neutral. Las propuestas personalizadas remotas sólo permiten
+frecuencia única. El contrato borrador y el flujo por rol están en
+`docs/architecture/AUTHENTICATED-NEUTRAL-FIRST-LOGIN-CONTRACT-DRAFT-20261027.md`;
+no habilita Auth ni modifica las migraciones 001–016. Revisión de catálogo en
 `docs/product/TASK-NORMALIZATION-DRAFT-20261026.md`.
 
 ## Continuidad y estimador — última actualización
 
-El corte funcional del estimador y la revisión de conceptos neutrales está
-publicado directamente en `main` como `daee754b9b688931e0779e271245acd6bd695526`,
-bajo el autor Tablero Contable. El seguimiento documental se publicó en el
-mismo repositorio; no se abrió PR. Suite **843/843 en 85 archivos**, TypeScript,
-build cliente, build Worker y hook pre-commit **212/212** pasaron. El build
-cliente advierte un chunk principal superior a 500 kB. El conector de GitHub no
-devolvió ejecuciones de Actions para el corte cuando se consultó; su CI queda
-sin confirmar.
+El estimador se publicó directamente en `main` como
+`daee754b9b688931e0779e271245acd6bd695526`. El seguimiento documental más
+reciente es `c3ebaeb655d9350c3f0ffab60823a889004fbce7`, también directo y bajo
+Tablero Contable, sin PR. Para ese SHA, run GitHub Actions
+`40545238137` (#113) pasó suite, build y validación del paquete Sites; hook
+pre-commit **212/212** y pruebas focales **17/17** pasaron localmente. La suite
+completa histórica es **843/843 en 85 archivos**. El build cliente mantiene un
+aviso de chunk principal superior a 500 kB.
 
 El estimador es local, con vocabulario neutral cerrado y entradas/salidas
 ignoradas por Git. No se recibió un extracto real autorizado: dotación actual y
@@ -57,20 +61,20 @@ el remoto ya tenía 18 versiones: esperaba 16 locales/0 remotas y detectó
 16/18. El guard detuvo la ejecución antes del dry-run y del `db push`; ese
 intento no escribió en Supabase. No volver a ejecutar la línea base.
 
-La migración 001–014 se aplicó correctamente como proceso según el run
-`40012156985`, con historial y hashes verificados. La captura del run
-#4 corresponde a otro intento posterior, que seleccionó por error la línea base
-001–014 cuando las 18 versiones ya estaban aplicadas; el guard lo detuvo antes
-de escribir. SQL011 sí tenía un defecto funcional en la lectura de encargado
-tras revocar membresía. SQL016 corrigió esa ruta; la función remota actual
-delega en una cadena que comprueba `company_memberships.active`. El workflow de
-migraciones ahora sólo verifica el historial en modo lectura y no ofrece
-re-aplicar 001–014/015/016; también se retiró el preflight duplicado. La revisión
-RPC 001–014 es un corte histórico; el inventario
-remoto 001–016 ya se contó en 142 funciones `SECURITY DEFINER`, con permisos y
-propietarios registrados en el informe de auditoría. Faltan la revisión
-función-por-función del alcance expuesto y pruebas contra identidades Auth
-hosteadas. Esto no demuestra ausencia de otros defectos semánticos.
+El cotejo posterior del catálogo remoto contra un replay de los 18 archivos
+versionados encontró coincidencia en 57 relaciones, 445 columnas, 28 políticas,
+159 funciones/procedimientos, 360 restricciones declaradas, 116 índices, 42
+triggers y los privilegios comparados. Por eso, la afirmación de que el esquema
+instalado de 001–014 difiere de los archivos no está confirmada; el run #4 fue
+un reintento equivocado, sin escrituras. El run #1 aplicó la línea base. Esto no
+borra el defecto semántico de SQL011: SQL016 lo corrigió y está instalado. La
+metodología, huellas y límites quedan en
+`docs/architecture/SUPABASE-DEV-SCHEMA-CATALOG-COMPARE-20261027.md`.
+
+No reejecutar ni editar 001–014. El workflow de migraciones sigue sólo en
+lectura. La paridad del catálogo no prueba permisos con identidades Auth reales,
+configuración de esquemas expuestos del Dashboard ni aceptación de producción.
+Auth y el área operativa continúan apagados.
 
 ## Auditoría read-only del esquema instalado
 
