@@ -1,70 +1,83 @@
-# Estado actual de migración — actualizado 26/10/2026
+# Estado actual del proyecto — actualizado 27/10/2026
 
 Repositorio activo `work/site`, remoto privado
-`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`. El último commit de
-producto `13132ec5df85856eae378ff8d05efa9397d7c398`, autor **Tablero Contable**,
-pasó GitHub Actions run `40418925125` (suite, build cliente/Worker y paquete
-Sites). El commit de continuidad `f62ee502bfd2270fe9d8784dfccb8bfec3bd2d1c`
-quedó publicado directamente en `main`, sin PR ni reescritura; su run 98
-(`40419944096`) terminó en éxito. La actualización documental `89e39cb`
-(`40420917541`) también pasó el run 99. Esta nueva anotación incorpora una
-relectura agregada y anonimizada del D1; el commit `0785600` pasó el run 100
-(`40422009760`). Verificar Actions después de cualquier commit nuevo. La suite
-local completa pasó 838/838, build cliente/Worker, paquete Sites y pre-commit
-212/212.
+`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`. HEAD `8bb4fcf` (autor
+**Tablero Contable**) actualiza la auditoría del catálogo remoto de Supabase;
+GitHub Actions run `40535714588` (#107) pasó instalación, suite, build y paquete
+Sites. El hook local pasó 212/212. Verificar Actions tras cada nuevo push.
 
-## Continuidad portable y uso de subagentes
+## Objetivo y primera experiencia
 
-Usar subagentes cuando mejoren velocidad o calidad, en especial para revisión
-independiente de cambios de seguridad; no delegar por rutina. Mantener un solo
-subagente activo a la vez salvo que la tarea necesite paralelismo. Para este
-proyecto, GPT-6.1 Sol define/revisa contratos y GPT-6 Luna implementa el contrato
-aprobado cuando esos modelos estén disponibles.
+El catálogo neutral de primer ingreso contiene 26 sugerencias v2 en cinco
+familias. Son editables y opcionales en el laboratorio local; al terminarlas
+generan propuestas para aprobación, no tareas reales. El flujo de primer ingreso
+autenticado todavía no está implementado. Mantener los seis IDs `starter-v1-*`
+y los historiales anteriores compatibles. Fuentes: `src/domain/neutralStarterCatalog.ts`,
+`docs/product/TASK-NORMALIZATION-DRAFT-20261026.md` y
+`docs/product/STARTER-CATALOG-AND-BASELINE-20261026.md`.
 
-GitHub conserva el código, historial Git, instrucciones del proyecto,
-decisiones pertinentes, informes y evidencia técnica. No puede sincronizar la
-memoria global de Codex ni el historial bruto de chats. Registrar en `docs/` las
-decisiones útiles; nunca subir credenciales, sesiones de navegador ni datos
-reales de clientes/personas. La preferencia de subagentes se anota aquí para que
-viaje con `main`.
+## Continuidad portable, privacidad y subagentes
 
-## Estado de Supabase DEV
+Usar subagentes cuando mejoren calidad o velocidad; normalmente uno por vez,
+especialmente para revisión independiente. Continuar pasos rutinarios sin
+interrumpir al usuario. GPT-6.1 Sol define/revisa contratos y GPT-6 Luna
+implementa contratos aprobados cuando esos modelos estén disponibles.
 
-Proyecto `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`) activo. La lectura actual del
-conector confirma 16 migraciones aplicadas: 001–014. SQL015 tiene aceptación Sol
-previa. SQL016 corrige lectura de tareas de encargado tras revocar una
-membresía; aceptación Sol para DEV condicionada al preflight, SHA-256
-`F7E76313AD4132626034C5C9D38F1C70AFB140BB3E2CE3615FE89071945ED8F3`. Ninguna de
-las dos migraciones 015/016 está aplicada. El orden es `apply_015`, verificar
-éxito e historial de 17, luego `apply_016` con dry-run exclusivo de 016. Usar
-únicamente `Supabase DEV migrations` en GitHub Actions con
-`apply_migrations=true`; no pegar SQL ni elegir la línea base. La automatización
-del navegador no pudo identificar de forma confiable la URL abierta, así que no
-se inició el workflow desde la interfaz.
+GitHub conserva código, historia, instrucciones y decisiones/evidencia útil; no
+puede sincronizar la memoria global de Codex ni el historial bruto del chat. No
+subir credenciales, sesiones de navegador, comentarios/notas privadas ni datos
+identificables de personas/clientes. Registrar decisiones del proyecto en
+`docs/`; migrar contexto útil, no volcados indiscriminados.
 
-Antes de datos reales sigue pendiente verificar en Dashboard que Data API
-exponga únicamente `api`, cotejar catálogo/ACL instalados y completar la matriz
-de permisos en DEV. No habilitar el espacio operativo ni usar datos reales.
+## Supabase DEV y migraciones
 
-## Estado de despliegue y preservación
+Proyecto `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`) activo. La consulta remota
+confirma 18 versiones, correspondientes a SQL001–016. Runs #1–#3 aplicaron
+001–014, 015 y 016 con hashes/preflight verificados. Run #4
+(`40522765334`) eligió por error `baseline_001_014` cuando ya había 18 versiones;
+el guard registró `local=16, remoto=18` y falló antes de dry-run y `db push`, sin
+escrituras. El run #1 confirma que el baseline se aplicó correctamente como
+proceso. Sí se halló un defecto funcional en la lectura legacy de SQL011 tras
+revocar membresía; SQL016 lo corrigió y su cadena remota actual exige membresía
+activa. El workflow de DEV quedó sólo de lectura y ya no permite re-aplicar
+001–014 ni 015/016; se retiró el preflight duplicado. No habilitar escrituras
+hasta diseñar una etapa nueva, específica y revisada para futuras migraciones.
 
-El mismo Site privado de laboratorio está en v98; la audiencia sigue owner-only.
-La aceptación visual desde la PC personal no está confirmada. Cloudflare y
-Gmail/correo todavía no están conectados. Supabase Auth operativo sigue
-deshabilitado. El inventario neutral del primer ingreso está en
-`docs/product/TASK-NORMALIZATION-DRAFT-20261026.md`; las capturas sólo permiten
-contar filas visibles, no personal actual ni tareas completadas hoy. La
-relectura D1 del 26/10 encontró 4 perfiles activos y 1 tarea en curso, pero los
-datos y las dos señales de presencia tienen fecha 06/10; no son un estimado
-vigente. No copiar nombres/correos ni respaldo local a GitHub.
+El catálogo read-only encontró 57 tablas con RLS, 28 políticas públicas, ningún
+DML directo para `anon`/`authenticated`; `authenticated` tiene SELECT sujeto a
+políticas en 28 tablas públicas. Las 142 funciones `SECURITY DEFINER` en
+`public`, `api` y `app_private` pertenecen a `postgres` y tienen `search_path`
+vacío. 39 RPC públicas y 3 RPC de `api` permiten ejecución autenticada; ninguna
+permite `anon` o `PUBLIC`. Falta comprobar en Dashboard qué esquemas expone Data
+API y probar permisos con sesiones Auth DEV. Dos funciones trigger no-definer
+tienen EXECUTE heredado de PUBLIC; sólo hardening de defensa en profundidad,
+sin llamada RPC ordinaria ni DML público.
 
-Conservar los datos ficticios, Site privado e historias Git. No activar área
-operativa ni invitar usuarios. Conservar el scratch no versionado
-`tests/review/m2-2c-legacy-task-control-replay-races.block` sin leerlo, modificarlo,
-stagearlo ni borrarlo.
+## Personal y trabajo observado
 
-Este bloque supersede los estados inferiores. Conservar los registros
-históricos y no modificar el scratch `.block`.
+Las capturas muestran 14 filas con nombre más una fila «Sin asignar», pero son
+parciales y sin fecha de corte. El snapshot D1 consultado el 27/10 sigue fechado
+06/10: cuatro perfiles ficticios marcados activos y una tarea en curso, sin
+cierre. No estima personal ni tareas completadas hoy. No copiar nombres,
+correos, títulos de tareas, comentarios, identificadores ni auditoría en crudo.
+Para cifras reales se requiere una exportación autorizada y anonimizada con IDs
+estables, estado y marcas de tiempo; el esquema de entrada y cálculo reproducible
+queda en curso.
+
+## Site y preservación
+
+Conservar el mismo Site privado `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85`,
+versión 98, owner-only; no crear reemplazo ni ampliar audiencia. El CI del repo
+no publica el Site. Mantener Supabase Auth operativo apagado, datos ficticios y
+espacio operativo sin activar. Cloudflare/correo y aceptación visual en PC
+personal siguen pendientes.
+
+Conservar el scratch no versionado
+`tests/review/m2-2c-legacy-task-control-replay-races.block` sin leerlo,
+modificarlo, stagearlo ni borrarlo.
+
+Este bloque supersede los estados inferiores. Las entradas debajo son historia;
+conservarlas, pero no usarlas como estado actual. No modificar el scratch `.block`.
 
 <!-- Historial de continuidad -->
 

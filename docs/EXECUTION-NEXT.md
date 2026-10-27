@@ -18,14 +18,16 @@ La lectura remota confirma las 18 versiones 001–016 instaladas. Actions run
 correctamente. No volver a correr `baseline_001_014`.
 
 El run `40522765334` falló de forma segura: recibió `baseline_001_014`, pero el
-remoto ya tenía 18 versiones; el control detuvo el job antes de cualquier
-escritura. El estado de Supabase no cambió en ese run. La comparación de hoy
+remoto ya tenía 18 versiones; el control detuvo el job antes del `dry-run` y de
+cualquier escritura. El estado de Supabase no cambió en ese run. La comparación de hoy
 confirma que los cuerpos instalados de las funciones añadidas/reemplazadas por
 015 y 016 tienen hashes MD5 de cuerpo coincidentes con el repositorio; cada
 workflow verificó también el SHA-256 del archivo completo.
 
-Se agregó `verify_current`, etapa predeterminada de sólo lectura que exige las
-18 versiones y rechaza `apply_migrations=true`. La auditoría read-only del
+El workflow de DEV quedó convertido a verificación exclusivamente de lectura:
+exige las 18 versiones y ya no ofrece re-aplicar el baseline ni 015/016. También
+se retiró el workflow duplicado de preflight 001–014. Las migraciones futuras
+necesitan una etapa nueva, exacta y revisada. La auditoría read-only del
 catálogo remoto del 27/10 halló RLS en 57 tablas, 28 policies en `public`,
 ninguna policy en 20 tablas `app_private`, ningún DML directo para `anon` ni
 `authenticated` y SELECT sujeto a policy en 28 tablas públicas sólo para
@@ -37,9 +39,10 @@ dos funciones trigger no-definer con EXECUTE heredado de PUBLIC para hardening.
 Queda pendiente confirmar exposición del esquema Data API y probar límites
 mediante identidades Auth reales de DEV.
 
-No hay pruebas de que la ejecución de 001–014 haya fallado; el historial indica
-que el lote se aplicó correctamente. La revisión previa identificó el caso de
-membresía revocada en SQL011, corregido por SQL016. El inventario en
+La evidencia del run `40012156985` confirma que 001–014 se aplicó correctamente
+como proceso. Sí existía un defecto funcional en SQL011 para la lectura de
+encargados tras revocar una membresía; SQL016 lo corrigió. La definición remota
+actual delega en un helper que exige membresía activa. El inventario en
 `SUPABASE-DEV-RPC-REVIEW-20261026.md` ahora separa el conteo histórico del
 catálogo remoto vigente. Dashboard y pruebas con identidades hosteadas aún son
 pendientes; esto no equivale a aceptación integral del esquema ni de Auth.

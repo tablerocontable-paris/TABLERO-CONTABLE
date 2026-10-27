@@ -27,13 +27,16 @@ el remoto ya tenía 18 versiones: esperaba 16 locales/0 remotas y detectó
 16/18. El guard detuvo la ejecución antes del dry-run y del `db push`; ese
 intento no escribió en Supabase. No volver a ejecutar la línea base.
 
-No hay evidencia en los runs de que la migración 001–014 se aplicara mal como
-proceso: su ejecución registrada fue exitosa y hash-locked. La captura del run
+La migración 001–014 se aplicó correctamente como proceso según el run
+`40012156985`, con historial y hashes verificados. La captura del run
 #4 corresponde a otro intento posterior, que seleccionó por error la línea base
 001–014 cuando las 18 versiones ya estaban aplicadas; el guard lo detuvo antes
-de escribir. SQL016 corrigió el defecto funcional de lectura de encargado tras
-revocar membresía en la función legacy de 011, y su cuerpo instalado coincide
-con el archivo. La revisión RPC 001–014 es un corte histórico; el inventario
+de escribir. SQL011 sí tenía un defecto funcional en la lectura de encargado
+tras revocar membresía. SQL016 corrigió esa ruta; la función remota actual
+delega en una cadena que comprueba `company_memberships.active`. El workflow de
+migraciones ahora sólo verifica el historial en modo lectura y no ofrece
+re-aplicar 001–014/015/016; también se retiró el preflight duplicado. La revisión
+RPC 001–014 es un corte histórico; el inventario
 remoto 001–016 ya se contó en 142 funciones `SECURITY DEFINER`, con permisos y
 propietarios registrados en el informe de auditoría. Faltan la revisión
 función-por-función del alcance expuesto y pruebas contra identidades Auth
