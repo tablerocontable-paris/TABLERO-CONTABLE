@@ -1,69 +1,29 @@
-# Grupo París en tu PC personal
+# Continuar Grupo París desde otra PC
 
-## Estado de continuidad actualizado — 27/10/2026
+Actualizado: 27/10/2026. La fuente de código e historia es el repositorio
+privado [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocontable-paris/TABLERO-CONTABLE), rama `main`.
 
-La rama principal `main` está en el repositorio privado
-`tablerocontable-paris/TABLERO-CONTABLE`. Los commits de continuidad se publican
-directamente, sin PR, bajo el autor Tablero Contable. El corte de auditoría
-del 27/10/2026 se publicó en `a3a370f9f139f31df48bdc8f3f33796b8cce52d7`; GitHub
-Actions run 106 pasó suite, build y validación del paquete Sites. Antes de editar,
-hacé `git pull --ff-only origin main` y consultá Actions para confirmar el CI
-del HEAD actual.
+## Estado comprobado
 
-La preferencia de usar subagentes cuando ayuden, normalmente uno a la vez, está
-registrada en `AGENTS.md`. El catálogo neutral de 26 conceptos es opcional y no
-crea trabajo sin aprobación. Las capturas sólo prueban 14 filas de personas
-visibles más «Sin asignar»; no permiten estimar el personal actual ni tareas
-reales completadas hoy. El estado con detalle y límites está en
-`docs/MIGRATION-INVENTORY-20261026.md`.
+- HEAD actual: `ea99133402fbdae73b3a4bb7e4de42e4d8fc70d3`, documentación de
+  continuidad. El último cambio de código es `9b54a4625f56e07fedbfba82d68696204f9a0e5d`.
+- GitHub Actions #118 (`40557105221`) pasó instalación, pruebas completas,
+  build y empaquetado Sites. [Ver ejecución](https://github.com/tablerocontable-paris/TABLERO-CONTABLE/actions/runs/40557105221).
+- El Site privado existente está publicado como v99. GitHub Actions no lo
+  despliega. El acceso personalizado no se amplió.
+- La clasificación neutral de 26 conceptos se conserva en el laboratorio y en
+  el estimador. El onboarding del primer login autenticado aún no está integrado.
+- Las capturas permiten contar sólo 14 filas con nombre y una «Sin asignar» en
+  una lista parcial; no acreditan la dotación vigente ni tareas completadas hoy.
+  No hay extracto actual autorizado, así que esos totales siguen sin determinar.
+- Supabase DEV tiene las migraciones 001–016. No repetirlas. Siguen pendientes
+  la confirmación de Data API y las pruebas de permisos con identidades Auth.
 
-## Supabase DEV
+## Traer el proyecto a esta PC
 
-El proyecto Supabase `grupo-paris-dev` está activo y registra 18 versiones
-correspondientes a SQL001–016. Las corridas #1, #2 y #3 aplicaron y verificaron
-001–014, 015 y 016. No volver a aplicar la línea base ni 015/016. La corrida #4
-falló de forma segura porque se eligió la línea base con el historial completo;
-el control abortó antes de cualquier escritura. No hay evidencia de que 001–014
-se hayan aplicado mal: la ejecución correspondiente figura exitosa y con hashes
-verificados. El workflow ahora inicia en
-`verify_current`, de sólo lectura.
-
-Antes de Auth, datos reales o frontend conectado sigue pendiente verificar en el
-Dashboard que Data API exponga sólo `api` y completar pruebas de permisos con
-identidades de DEV. El catálogo instalado reporta 142 funciones `SECURITY
-DEFINER`, todas de `postgres` y con `search_path` vacío; 39 RPC en `public` y 3
-en `api` son ejecutables por `authenticated`, ninguna por `anon` o `PUBLIC`.
-La revisión no equivale a aceptación integral de producción.
-
-El catálogo v2 está publicado en el mismo Site privado como v98, desde el
-commit de código `ad1b4180556307755c7a4e0fd221316237fc341c`; el run de validación
-del paquete Sites `40409657073` pasó. Hubo commits posteriores de correcciones y
-continuidad; revisá Actions para el estado actual. Para abrir el Site, usá la
-cuenta ChatGPT propietaria; conectar GitHub no concede acceso a Sites.
-
-Para entender qué viaja por GitHub y qué requiere una copia privada, consultar
-`docs/MIGRATION-INVENTORY-20261026.md`. La línea base ficticia y los conceptos
-neutrales propuestos para el primer alta están en
-`docs/product/STARTER-CATALOG-AND-BASELINE-20261026.md`. El conteo del seed no
-representa empleados reales ni tareas cumplidas hoy.
-
-## Qué contexto se migra y qué queda fuera
-
-GitHub contiene el código, historial Git, especificaciones, decisiones,
-resultados de auditoría y próximos pasos pertinentes al proyecto. No puede
-contener toda la memoria global de Codex ni el historial bruto de chats; tampoco
-se deben subir credenciales, sesiones, estado privado del navegador ni datos
-reales de personas/clientes. Las decisiones útiles de los chats se registran en
-`docs/`; la copia local ficticia del laboratorio se exporta aparte desde la
-interfaz y no está cifrada.
-
-## Código fuente: GitHub
-
-El repositorio oficial privado es [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocontable-paris/TABLERO-CONTABLE), rama `main`. La cuenta propietaria es `tablerocontable-paris`; los cambios nuevos se publican directamente en `main` y el commit vigente figura como **Tablero Contable**.
-
-1. En la PC personal, instalá Git for Windows y Node.js 24 LTS.
-2. Iniciá sesión en GitHub con la cuenta `tablerocontable-paris` y confirmá que podés abrir el repositorio privado.
-3. En PowerShell, cloná el proyecto e instalá las dependencias:
+1. Iniciá sesión en GitHub con la cuenta que tiene acceso al repositorio privado.
+2. Instalá Git for Windows y Node.js 24 LTS si todavía no están instalados.
+3. En PowerShell:
 
    ```powershell
    git clone https://github.com/tablerocontable-paris/TABLERO-CONTABLE.git
@@ -73,8 +33,8 @@ El repositorio oficial privado es [`tablerocontable-paris/TABLERO-CONTABLE`](htt
    npm run dev -- --host 127.0.0.1
    ```
 
-4. Abrí `http://127.0.0.1:5173` y, para editar, abrí la carpeta `TABLERO-CONTABLE` en tu editor.
-5. Para traer cambios nuevos a esa PC, detené el servidor y ejecutá:
+4. Abrí `http://127.0.0.1:5173`.
+5. Para actualizar esta copia, detené el servidor y ejecutá:
 
    ```powershell
    git switch main
@@ -82,41 +42,34 @@ El repositorio oficial privado es [`tablerocontable-paris/TABLERO-CONTABLE`](htt
    npm ci
    ```
 
-6. Para publicar cambios desde la PC personal, usá GitHub con la cuenta propietaria. El flujo acordado trabaja directamente en `main`, sin pull request. Antes de editar desde otra computadora, subí los cambios pendientes de la computadora actual; no edites ambas copias a la vez.
+Trabajá en una sola PC por vez. Antes de cambiar, subí los commits desde la PC
+activa; luego traelos con `git pull --ff-only`. Los cambios acordados se publican
+directamente en `main`, sin Pull Request.
 
-El trabajo normal está en `main`. Se preservaron además dos ramas de archivo
-para recuperar historia anterior de Sites, fuera de la historia de `main`:
-`archive/sites-source-history-20261015` y
-`archive/site-analytics-stash-20261007`. No son ramas de trabajo/despliegue.
+## Qué sincroniza GitHub y qué no
 
-## Datos del laboratorio
+GitHub conserva código, historial Git, especificaciones, decisiones de proyecto,
+pruebas y evidencias técnicas saneadas. La memoria global de Codex y el historial
+bruto de chats no se sincronizan como archivos del proyecto. Las decisiones
+útiles ya se resumen en `AGENTS.md`, `docs/PROJECT-STATUS.md`,
+`docs/EXECUTION-NEXT.md` y `docs/PORTABLE-CONTINUITY-20261027.md`.
 
-GitHub sincroniza el código y el historial Git; no sincroniza el estado del
-navegador (`paris-state-lab`), IndexedDB ni la base D1 del Site. La relectura
-read-only del 27/10 encontró en el D1 de laboratorio cuatro perfiles marcados
-activos y una tarea en curso sin cierre; el workspace sigue fechado el 06/10.
-Esto no estima la dotación ni la actividad real del 27/10. Las colecciones
-revisadas no tienen una colección separada de comentarios. No copiamos nombres,
-emails, identificadores, auditoría ni respaldo del navegador a GitHub.
+El clon no incluye estado de navegador (`paris-state-lab`), IndexedDB ni la base
+D1 alojada del Site. El respaldo de laboratorio se exporta/restaura desde la
+interfaz y debe guardarse fuera de GitHub: no está cifrado. No se suben imágenes
+originales, nombres, tareas identificables, comentarios privados, datos de
+clientes, credenciales ni sesiones. Para calcular cifras reales hace falta un
+extracto autorizado procesado localmente conforme a
+`docs/product/ANONYMIZED-WORKFORCE-ESTIMATE.md`.
 
-Para trasladar estado de navegador, exportá el respaldo desde la interfaz de «Vista de prueba», guardalo en un medio privado y restauralo en la otra PC. El respaldo contiene datos ficticios y no está cifrado. No subirlo al repositorio. El D1 sigue alojado en el Site y no se incorpora automáticamente al clon de GitHub.
+## Servicios y estado operativo
 
-El laboratorio local no necesita Supabase y sigue siendo la vista predeterminada.
-El secreto `SUPABASE_DEV_DB_URL` ya conectó; no volver a cambiarlo. La línea
-base y SQL015/016 están aplicadas en DEV. El intento #4 no alteró la base.
+El Site de laboratorio sigue en el proyecto existente y conserva su audiencia.
+Supabase DEV está separado; Auth operativo y el espacio operativo siguen
+apagados. No hay infraestructura de producción ni despliegue automático del
+Site conectado a GitHub. No compartas `SUPABASE_DEV_DB_URL` ni otra credencial
+por chat, GitHub o este instructivo.
 
-**Próximo paso de migración:** cerrar la auditoría de ACL/RPC y verificar la
-configuración Data API en el Dashboard; no hay migraciones pendientes de
-aplicación. No compartir URI ni contraseña por chat o archivos del repo.
-
-## Qué queda alojado
-
-El Site privado de pruebas sigue en el proyecto Sites existente, ahora v98, y
-conserva su audiencia actual. GitHub es la fuente de código para trabajar desde
-esta PC; no reemplaza el Site ni traslada el estado del navegador. El bootstrap
-de Supabase Auth está publicado pero apagado por defecto. Antes de datos reales
-falta cerrar el hallazgo de permisos de la consulta legacy de encargado,
-confirmar exposición sólo de `api`, ACL instaladas y pruebas negativas; ver
-`docs/architecture/SUPABASE-DEV-RPC-REVIEW-20261026.md`. No hay todavía un
-tablero operativo conectado ni hosting propio. Cloudflare no está configurado y
-el correo sólo tiene proveedor ficticio.
+Para retomar el trabajo, leer primero `AGENTS.md`,
+`docs/PROJECT-STATUS.md` y `docs/EXECUTION-NEXT.md`. No usar bundles/ZIPs
+anteriores como fuente de código: clonar `main` desde GitHub.

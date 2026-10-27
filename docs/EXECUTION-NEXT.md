@@ -13,7 +13,10 @@ No se tocó el contrato autenticado ni SQL001–016. Suite completa **845/845 en
 aprobados; hook **214/214**. GitHub commit
 `9b54a4625f56e07fedbfba82d68696204f9a0e5d`, autor Tablero Contable, directo en
 `main`, sin PR; Actions #117 (`40555801302`) pasó instalación, suite, build y
-validación Sites. La versión **99** del Site existente se desplegó correctamente
+validación Sites. El seguimiento documental quedó en
+`ea99133402fbdae73b3a4bb7e4de42e4d8fc70d3`, y Actions #118
+(`40557105221`) también pasó instalación, suite, build y paquete Sites. La
+versión **99** del Site existente se desplegó correctamente
 desde su rama fuente (`a80e3013d00165f1bc0abd64a580545a4322e49b`), manteniendo el
 acceso personalizado actual y sin visitantes externos. El build cliente conserva
 un aviso de chunk principal >500 kB. El onboarding autenticado y la clasificación
@@ -37,10 +40,10 @@ Cobranzas, aplicación de cobros, liquidación de tarjetas y conciliación sigue
 separadas. Detalle de cobertura en
 `docs/product/TASK-NORMALIZATION-DRAFT-20261026.md`.
 
-La documentación del contrato y el cotejo Supabase se publicaron directamente
-en `main` como `14304ff79557ada887fd2f3d8e0f616ff4d4786d`, bajo Tablero
-Contable y sin PR. Actions run `40547953494` (#114) pasó instalación, suite,
-build y paquete Sites para ese SHA; el hook local fue 212/212.
+La documentación del contrato y el cotejo Supabase se publicaron inicialmente
+en `14304ff79557ada887fd2f3d8e0f616ff4d4786d` (Actions #114); ese registro es
+histórico. El último corte documental es `ea99133402fbdae73b3a4bb7e4de42e4d8fc70d3`
+y Actions #118 (`40557105221`) pasó instalación, suite, build y paquete Sites.
 
 ## Estimador local y continuidad portable — actualización
 
@@ -61,20 +64,21 @@ terminadas hoy continúa **sin determinarse**. No crear ni copiar datos reales a
 GitHub. El runtime Node incluido permite ejecutar el código en esta PC sin
 instalar npm.
 
-El resumen portable está en `docs/PORTABLE-CONTINUITY-20261027.md`. Migra
+El resumen portable está en `docs/PORTABLE-CONTINUITY-20261027.md` y la guía
+para traer `main` a la PC personal en `outputs/LEEME-PC-PERSONAL.md`. Migra
 decisiones y evidencia técnica segura, no conversaciones brutas, memoria global
 de Codex, comentarios privados, datos identificables, credenciales o sesiones.
-La versión Sites v98 sigue publicada y privada según la consulta actual del
-conector; su acceso requiere la cuenta propietaria.
+La versión Sites v99 sigue publicada y privada; su acceso requiere la cuenta
+propietaria. La audiencia se mantuvo sin ampliaciones.
 
 ## Continuidad de GitHub
 
-El estimador y el contexto portable se publicaron directamente en `main` como
-`daee754b9b688931e0779e271245acd6bd695526`, bajo el autor Tablero Contable; un
-commit documental posterior completó el estado de verificación. No se abrió PR.
-La última consulta del conector devolvió cero ejecuciones asociadas a esos SHA;
-CI sigue sin confirmar. Los runs #105–107 son evidencia del corte anterior y no
-se atribuyen a estos cambios. El run #4 de migraciones fue detenido por el
+El estimador se publicó en `daee754b9b688931e0779e271245acd6bd695526`; el
+código neutral, en `9b54a4625f56e07fedbfba82d68696204f9a0e5d`; y la continuidad
+actual, en `ea99133402fbdae73b3a4bb7e4de42e4d8fc70d3`, todo directamente en
+`main`, bajo Tablero Contable y sin PR. Actions #117 y #118 pasaron sus
+comprobaciones. Los runs #105–107 son evidencia histórica. El run #4 de
+migraciones fue detenido por el
 preflight antes de escritura; el workflow vigente inicia en `verify_current`,
 de sólo lectura.
 
@@ -145,7 +149,7 @@ La migración no certifica catálogo/ACL instalados ni seguridad integrada. Ante
 de datos reales todavía falta verificar Data API (sólo esquema `api`), consultar
 advisors, contrastar permisos instalados y ejecutar matriz negativa en DEV.
 
-## Nuevo corte vigente — catálogo v2 publicado en Site v98
+## Registro histórico — catálogo v2 publicado en Site v98 (26/10/2026)
 
 La versión 98 del mismo Site privado se desplegó correctamente desde el commit
 de fuente Sites `b0d09694d901e4d813d6d8fb333eef4af0491ec0`. Su árbol coincide

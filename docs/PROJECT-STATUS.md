@@ -1,8 +1,8 @@
-# Estado vigente — Supabase DEV revisado, 27/10/2026
+# Estado vigente — corte verificado 27/10/2026
 
 ## Clasificación neutral local — publicada y desplegada
 
-Se está cerrando el enlace determinista de los 26 conceptos v2 con el
+Quedó implementado el enlace determinista de los 26 conceptos v2 con el
 estimador local. El código estable y su versión se conservan en propuestas,
 revisiones, catálogo, asignaciones y tareas generadas; los datos históricos
 quedan sin clasificar cuando no existe evidencia. Se comprueban correspondencias
@@ -11,7 +11,10 @@ se modifican. Validación local: suite **845/845 en 85 archivos**, TypeScript,
 build cliente, build Worker y paquete Sites aprobados; pre-commit **214/214**.
 GitHub commit `9b54a4625f56e07fedbfba82d68696204f9a0e5d`, autor **Tablero
 Contable**, directo a `main`, sin PR; Actions #117 (`40555801302`) aprobó
-instalación, suite, build y paquete Sites. El mismo Site quedó actualizado a
+instalación, suite, build y paquete Sites. El último commit de documentación es
+`ea99133402fbdae73b3a4bb7e4de42e4d8fc70d3`, también directo a `main`, y
+Actions #118 (`40557105221`) pasó instalación, suite, build y paquete Sites.
+El mismo Site quedó actualizado a
 v99, deployment `appgdep_6ae0e7e339d4819180adeda021e82d7a`, desde su fuente
 `a80e3013d00165f1bc0abd64a580545a4322e49b`; acceso personalizado conservado,
 un usuario autorizado, cero visitantes externos. El build cliente mantiene el
@@ -37,12 +40,13 @@ no habilita Auth ni modifica las migraciones 001–016. Revisión de catálogo e
 ## Continuidad y estimador — última actualización
 
 El estimador se publicó directamente en `main` como
-`daee754b9b688931e0779e271245acd6bd695526`. El último corte documental
-validado es `14304ff79557ada887fd2f3d8e0f616ff4d4786d`, autor Tablero Contable,
-sin PR. GitHub Actions run `40547953494` (#114) aprobó `npm ci`, suite, build y
-paquete Sites; el hook local fue **212/212** y las pruebas focales de
-migraciones 011–016 **27/27**. La suite completa histórica es **843/843 en 85
-archivos**. El build cliente mantiene un aviso de chunk principal superior a
+`daee754b9b688931e0779e271245acd6bd695526`; su enlace con la taxonomía v2 se
+publicó como `9b54a4625f56e07fedbfba82d68696204f9a0e5d`. La verificación vigente
+del corte documental `ea99133402fbdae73b3a4bb7e4de42e4d8fc70d3` es GitHub
+Actions #118 (`40557105221`): instalación, suite, build y empaquetado Sites
+terminaron en éxito. Los conteos locales anteriores (845/845 y 214/214)
+corresponden al corte de código 9b54a46, no son una ejecución de este commit
+documental. El build cliente conserva un aviso de chunk principal superior a
 500 kB.
 
 El estimador es local, con vocabulario neutral cerrado y entradas/salidas
@@ -163,7 +167,7 @@ Dashboard que Data API exponga únicamente `api`, contrastar catálogo/ACL y
 completar las pruebas de permisos. La revisión Sol no equivale a aceptación de
 DEV ni de producción.
 
-## Publicación vigente confirmada — 26/10/2026, v98
+## Registro histórico — publicación del 26/10/2026, v98
 
 El catálogo neutral v2 está actualizado en el mismo Site privado, versión **98**,
 deployment `appgdep_6adfd2a5c0ac81919f1d8a96c432f46c`, estado `succeeded`:

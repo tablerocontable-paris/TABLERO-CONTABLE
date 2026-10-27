@@ -1,5 +1,28 @@
 # Continuidad portable del proyecto — 27/10/2026
 
+## Corte de continuidad más reciente — verificado 27/10/2026
+
+- `main` está sincronizada en `ea99133402fbdae73b3a4bb7e4de42e4d8fc70d3`;
+  el último commit de código es `9b54a4625f56e07fedbfba82d68696204f9a0e5d`.
+- GitHub Actions #118 (`40557105221`) terminó en éxito: instalación,
+  pruebas completas, build y empaquetado Sites. [Ejecución #118](https://github.com/tablerocontable-paris/TABLERO-CONTABLE/actions/runs/40557105221).
+- La versión 99 del Site existente está desplegada; su flujo de publicación es
+  independiente de GitHub Actions y la audiencia personalizada se conservó.
+- Los documentos de estado y la guía de traslado para la PC personal se
+  actualizaron en este corte. Clonar siempre `main`; no usar ZIPs viejos como
+  fuente de código.
+- Este repositorio conserva contexto técnico sintetizado, decisiones,
+  contratos, pruebas y evidencias saneadas. No contiene ni debe contener el
+  historial bruto de chats, memoria global de Codex, comentarios privados,
+  credenciales, sesiones, archivos originales o datos identificables.
+
+La normalización local y su enlace con el estimador están implementados, pero
+el onboarding autenticado remoto no: el borrador requiere aprobación de
+arquitectura antes de migrar el esquema. Los totales reales de personal y tareas
+completadas hoy siguen indeterminados hasta procesar un extracto vigente y
+autorizado fuera del repositorio. Las capturas compartidas no bastan para ese
+cálculo. La guía operativa está en `outputs/LEEME-PC-PERSONAL.md`.
+
 ## Fuente de verdad
 
 - Repositorio privado: `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`.
@@ -80,12 +103,13 @@ La dotación y el trabajo real de hoy siguen sin determinarse: no se recibió un
 extracto vigente autorizado.
 
 Commit `daee754b9b688931e0779e271245acd6bd695526` contiene el estimador y
-contratos neutrales. El último corte documental validado es
-`14304ff79557ada887fd2f3d8e0f616ff4d4786d`, publicado directamente en `main`
-bajo Tablero Contable y sin PR. Actions run `40547953494` (#114) aprobó
-instalación, suite, build y paquete Sites; el hook local fue 212/212 y las
-pruebas focales 27/27. La suite completa histórica es 843/843 en 85 archivos.
-El build cliente advierte un chunk principal superior a 500 kB.
+contratos neutrales. Como registro histórico, el commit documental
+`14304ff79557ada887fd2f3d8e0f616ff4d4786d` pasó Actions #114. El corte
+vigente es `ea99133402fbdae73b3a4bb7e4de42e4d8fc70d3`, validado por Actions
+#118 (`40557105221`); el último código funcional es 9b54a46, validado por
+Actions #117. La suite completa 845/845 y hook 214/214 corresponden a ese
+corte de código; la actualización posterior fue documental. El build cliente
+advierte un chunk principal superior a 500 kB.
 
 `main` contiene código, contratos, pruebas, historia Git y continuidad técnica
 segura. No incluye conversaciones brutas, datos identificables, credenciales,
