@@ -65,14 +65,12 @@
 ## Corte implementado y publicado
 
 Commit `daee754b9b688931e0779e271245acd6bd695526` contiene el estimador y
-contratos neutrales. El seguimiento más reciente publicado directamente en
-`main` es `c3ebaeb655d9350c3f0ffab60823a889004fbce7`, autor Tablero Contable,
-sin PR. Run GitHub Actions `40545238137` (#113) pasó suite, build y validación
-del paquete Sites para `c3ebaeb`; las pruebas focales fueron 17/17 y el hook
-212/212. La suite completa histórica es 843/843 en 85 archivos. El build cliente
-advierte un chunk principal superior a 500 kB. Los documentos de contrato
-autenticado añadidos después de ese SHA aún requieren validación de su nuevo
-commit.
+contratos neutrales. El último corte documental validado es
+`14304ff79557ada887fd2f3d8e0f616ff4d4786d`, publicado directamente en `main`
+bajo Tablero Contable y sin PR. Actions run `40547953494` (#114) aprobó
+instalación, suite, build y paquete Sites; el hook local fue 212/212 y las
+pruebas focales 27/27. La suite completa histórica es 843/843 en 85 archivos.
+El build cliente advierte un chunk principal superior a 500 kB.
 
 `main` contiene código, contratos, pruebas, historia Git y continuidad técnica
 segura. No incluye conversaciones brutas, datos identificables, credenciales,

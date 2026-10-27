@@ -19,13 +19,13 @@ no habilita Auth ni modifica las migraciones 001–016. Revisión de catálogo e
 ## Continuidad y estimador — última actualización
 
 El estimador se publicó directamente en `main` como
-`daee754b9b688931e0779e271245acd6bd695526`. El seguimiento documental más
-reciente es `c3ebaeb655d9350c3f0ffab60823a889004fbce7`, también directo y bajo
-Tablero Contable, sin PR. Para ese SHA, run GitHub Actions
-`40545238137` (#113) pasó suite, build y validación del paquete Sites; hook
-pre-commit **212/212** y pruebas focales **17/17** pasaron localmente. La suite
-completa histórica es **843/843 en 85 archivos**. El build cliente mantiene un
-aviso de chunk principal superior a 500 kB.
+`daee754b9b688931e0779e271245acd6bd695526`. El último corte documental
+validado es `14304ff79557ada887fd2f3d8e0f616ff4d4786d`, autor Tablero Contable,
+sin PR. GitHub Actions run `40547953494` (#114) aprobó `npm ci`, suite, build y
+paquete Sites; el hook local fue **212/212** y las pruebas focales de
+migraciones 011–016 **27/27**. La suite completa histórica es **843/843 en 85
+archivos**. El build cliente mantiene un aviso de chunk principal superior a
+500 kB.
 
 El estimador es local, con vocabulario neutral cerrado y entradas/salidas
 ignoradas por Git. No se recibió un extracto real autorizado: dotación actual y

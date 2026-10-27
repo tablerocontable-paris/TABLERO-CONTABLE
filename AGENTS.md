@@ -1,15 +1,14 @@
 # Estado actual del proyecto — actualizado 27/10/2026
 
 Repositorio activo `work/site`, remoto privado
-`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`. El corte vigente de
-documentación se publicó directamente bajo el autor **Tablero Contable** en
-`c3ebaeb655d9350c3f0ffab60823a889004fbce7`; `origin/main` coincidía al
-confirmar. Pruebas focales 17/17, hook 212/212 y GitHub Actions run
-`40545238137` (#113: suite, build y validación del paquete Sites) pasaron para
-ese SHA. No atribuir estos resultados a cambios posteriores. La revisión de
-cobertura del catálogo y el contrato borrador remoto están registrados en los
-documentos enlazados abajo. El cotejo remoto Supabase DEV del 27/10 coincide
-con replay local de las 18 migraciones versionadas; SQL011 tuvo un defecto
+`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`. El corte validado más
+reciente se publicó directamente bajo el autor **Tablero Contable** en
+`14304ff79557ada887fd2f3d8e0f616ff4d4786d`; GitHub Actions run
+`40547953494` (#114: suite, build y validación del paquete Sites) pasó y el hook
+local fue 212/212. Pruebas focales 27/27 pasaron para las migraciones 011–016.
+La revisión de cobertura del catálogo y el contrato borrador remoto están en
+los documentos enlazados abajo. El cotejo Supabase DEV del 27/10 coincide con
+el replay local de las 18 migraciones versionadas; SQL011 tuvo un defecto
 semántico corregido en SQL016. Evidencia en
 `docs/architecture/SUPABASE-DEV-SCHEMA-CATALOG-COMPARE-20261027.md`.
 

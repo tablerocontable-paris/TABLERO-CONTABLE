@@ -15,10 +15,10 @@ Cobranzas, aplicación de cobros, liquidación de tarjetas y conciliación sigue
 separadas. Detalle de cobertura en
 `docs/product/TASK-NORMALIZATION-DRAFT-20261026.md`.
 
-La documentación de este contrato se publicó en `c3ebaeb655d9350c3f0ffab60823a889004fbce7`;
-Actions run `40545238137` (#113) pasó suite, build y paquete Sites para ese SHA.
-Los cambios documentales posteriores a `c3ebaeb` todavía necesitan su propia
-ejecución de CI.
+La documentación del contrato y el cotejo Supabase se publicaron directamente
+en `main` como `14304ff79557ada887fd2f3d8e0f616ff4d4786d`, bajo Tablero
+Contable y sin PR. Actions run `40547953494` (#114) pasó instalación, suite,
+build y paquete Sites para ese SHA; el hook local fue 212/212.
 
 ## Estimador local y continuidad portable — actualización
 
