@@ -1,5 +1,20 @@
 # Estado vigente de ejecución — 27/10/2026
 
+## Clasificación neutral local — validada localmente
+
+Las sugerencias de primer ingreso v2 ya se conectan con códigos estables
+compartidos con el estimador. La clasificación se conserva al enviar y
+aprobar una propuesta local, crear su versión de catálogo, asignarla y
+materializar ocurrencias. Se validan los códigos y la correspondencia entre
+origen y registros; unidades sugeridas no se convierten automáticamente a las
+unidades del estimador. Datos antiguos sin clasificación permanecen así.
+No se tocó el contrato autenticado ni SQL001–016. Suite completa **845/845 en
+85 archivos**, TypeScript, build cliente, build Worker y paquete Sites
+aprobados. El build cliente conserva un aviso de chunk principal >500 kB.
+Próximo paso: commit directo en `main` y comprobar CI; esto no despliega el
+Site ni activa Auth. Contrato/detalle en
+`docs/architecture/AUTHENTICATED-NEUTRAL-FIRST-LOGIN-CONTRACT-DRAFT-20261027.md`.
+
 ## Revisión del catálogo neutral
 
 La auditoría independiente cotejó las 26 sugerencias v2 contra el borrador y

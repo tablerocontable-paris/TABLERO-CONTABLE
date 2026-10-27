@@ -1,5 +1,6 @@
 import { canSee, dateART, id, isClosed, type Profile, type State, type Template } from "./model";
 import { validDate } from "./schedule";
+import type { NeutralConceptCode } from "./workforceTaxonomy.mjs";
 
 export type CatalogueVersionSource =
   | "initial_snapshot"
@@ -27,6 +28,8 @@ export interface CatalogueVersion {
   source: CatalogueVersionSource;
   changeReason: string;
   sourceProposalId?: string;
+  neutralConceptCode?: NeutralConceptCode;
+  taxonomyVersion?: 2;
 }
 
 export type KaizenStatus = "proposed" | "testing" | "measured" | "adopted" | "rejected";
@@ -187,11 +190,12 @@ export function canViewFiveSReview(state: State, actor: Profile, review: FiveSRe
     review.items.some((item) => canAccessProcessSubject(state, actor, item.responsibleId, review.companyId));
 }
 
-function sameTemplateSnapshot(version: Pick<CatalogueVersion, "title" | "sector" | "kind" | "weight" | "unit" | "target" | "description" | "steps">, template: Template) {
+function sameTemplateSnapshot(version: Pick<CatalogueVersion, "title" | "sector" | "kind" | "weight" | "unit" | "target" | "description" | "steps" | "neutralConceptCode" | "taxonomyVersion">, template: Template) {
   return version.title === template.title && version.sector === template.sector &&
     version.kind === template.kind && version.weight === template.weight &&
     version.unit === template.unit && version.target === template.target &&
-    version.description === template.description && JSON.stringify(version.steps) === JSON.stringify(template.steps);
+    version.description === template.description && JSON.stringify(version.steps) === JSON.stringify(template.steps) &&
+    version.neutralConceptCode === template.neutralConceptCode && version.taxonomyVersion === template.taxonomyVersion;
 }
 
 function snapshot(
@@ -211,6 +215,7 @@ function snapshot(
     unit: template.unit, target: template.target, steps: [...template.steps],
     description: template.description, capturedAt, effectiveOn, createdBy,
     source, changeReason, ...(sourceProposalId ? { sourceProposalId } : {}),
+    ...(template.neutralConceptCode ? { neutralConceptCode: template.neutralConceptCode, taxonomyVersion: template.taxonomyVersion } : {}),
   };
 }
 
@@ -248,7 +253,8 @@ export function pinMatchingCatalogueAssignments(state: State): State {
     const version = currentCatalogueVersion(state, assignment.templateId);
     if (!template || !version || assignment.title !== template.title || assignment.sector !== template.sector ||
         assignment.kind !== template.kind || assignment.weight !== template.weight || assignment.unit !== template.unit ||
-        assignment.target !== template.target || JSON.stringify(assignment.steps) !== JSON.stringify(template.steps)) return assignment;
+        assignment.target !== template.target || JSON.stringify(assignment.steps) !== JSON.stringify(template.steps) ||
+        assignment.neutralConceptCode !== template.neutralConceptCode || assignment.taxonomyVersion !== template.taxonomyVersion) return assignment;
     return { ...assignment, templateVersion: version };
   });
   return { ...state, assignments };

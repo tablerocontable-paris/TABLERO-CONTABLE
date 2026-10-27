@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { seed, load, persist } from "../src/data/repository";
 import { materialize, currentMonth } from "../src/domain/model";
 import { defaultSchedule } from "../src/domain/schedule";
+import { NEUTRAL_STARTER_SUGGESTIONS } from "../src/domain/neutralStarterCatalog";
 import {
   approveHabitualTaskProposals,
   groupHabitualTaskProposals,
@@ -33,6 +34,7 @@ describe("propuestas de tareas habituales del laboratorio", () => {
     let state = seed();
     state.assignments = [];
     state.tasks = [];
+    state.activity = [];
     const employee = state.profiles.find((profile) => profile.id === "e0")!;
     state = submitHabitualTaskProposal(state, employee, proposalInput({ id: "first", title: "CONC BNA EMPRESA 1", process: "" }), fixedNow, () => "history-1");
     state = submitHabitualTaskProposal(state, state.profiles.find((profile) => profile.id === "e1")!, proposalInput({ id: "second", companyId: "c2", title: "CONCILIACION BANCO NACION E2", process: "" }), fixedNow, () => "history-2");
@@ -124,6 +126,59 @@ describe("propuestas de tareas habituales del laboratorio", () => {
     expect(created.title).toBe(standard.title);
     expect(state.catalogueVersions?.find((version) => version.templateId === created.id)).toMatchObject({ version: 1, createdBy: "boss", source: "catalog_change" });
     expect(state.assignments[0]).toMatchObject({ templateId: created.id, templateVersion: 1, ownerId: "e0", companyId: "c1" });
+  });
+
+  it("conserva el concepto neutral desde sugerencia hasta catálogo, asignación, tarea y persistencia", () => {
+    let state = seed();
+    state.assignments = [];
+    state.tasks = [];
+    state.activity = [];
+    const employee = state.profiles.find((profile) => profile.id === "e0")!;
+    const manager = state.profiles.find((profile) => profile.id === "boss")!;
+    const starter = NEUTRAL_STARTER_SUGGESTIONS[0]!;
+    state = submitHabitualTaskProposal(state, employee, proposalInput({
+      id: "starter-bank-recon", starterId: starter.id,
+      neutralConceptCode: starter.neutralConceptCode, taxonomyVersion: starter.taxonomyVersion,
+      title: starter.title, process: "",
+    }), fixedNow);
+    expect(state.habitualTaskProposals?.[0]).toMatchObject({
+      starterId: starter.id, neutralConceptCode: "bank_reconciliation", taxonomyVersion: 2,
+      submissions: [{ starterId: starter.id, neutralConceptCode: "bank_reconciliation", taxonomyVersion: 2 }],
+    });
+
+    state = approveHabitualTaskProposals(state, manager, ["starter-bank-recon"], {
+      kind: "create", template: {
+        title: "Conciliación bancaria estándar", sector: "Tesorería",
+        description: "Comparar movimientos y documentar diferencias.", kind: "resultado",
+        unit: "", weight: 3, target: 0, steps: ["Comparar movimientos"],
+      },
+    }, "2026-10", fixedNow, (() => { let next = 0; return () => `bank-id-${++next}`; })());
+    const templateId = state.habitualTaskProposals?.[0]?.templateId;
+    const template = state.templates.find((row) => row.id === templateId)!;
+    expect(template).toMatchObject({ neutralConceptCode: "bank_reconciliation", taxonomyVersion: 2 });
+    expect(state.catalogueVersions?.find((row) => row.templateId === template.id)).toMatchObject({
+      neutralConceptCode: "bank_reconciliation", taxonomyVersion: 2,
+    });
+    expect(state.assignments[0]).toMatchObject({ neutralConceptCode: "bank_reconciliation", taxonomyVersion: 2 });
+
+    state = materialize(state, "2026-10");
+    expect(state.tasks.find((task) => task.assignmentId === state.assignments[0]?.id)).toMatchObject({
+      neutralConceptCode: "bank_reconciliation", taxonomyVersion: 2,
+    });
+    persist(state, true);
+    expect(load(true).tasks.find((task) => task.assignmentId === state.assignments[0]?.id)).toMatchObject({
+      neutralConceptCode: "bank_reconciliation", taxonomyVersion: 2,
+    });
+  });
+
+  it("rechaza una clasificación que contradice el ID inmutable de la sugerencia", () => {
+    const state = seed();
+    const employee = state.profiles.find((profile) => profile.id === "e0")!;
+    const starter = NEUTRAL_STARTER_SUGGESTIONS[0]!;
+    expect(() => submitHabitualTaskProposal(state, employee, proposalInput({
+      starterId: starter.id, neutralConceptCode: "payment_processing", taxonomyVersion: 2,
+    }), fixedNow)).toThrow(/no corresponde a la sugerencia/);
+    expect(state.habitualTaskProposals).toBeUndefined();
   });
 
   it("rechaza empresas ajenas y conserva payloads anteriores sin la colección nueva", () => {

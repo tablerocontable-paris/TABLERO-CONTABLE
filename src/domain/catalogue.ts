@@ -27,6 +27,7 @@ export function standardizeAssignment(s: State, a: Assignment): Assignment {
     weight: t.weight,
     unit: t.unit,
     steps: [...t.steps],
+    ...(t.neutralConceptCode === undefined ? {} : { neutralConceptCode: t.neutralConceptCode, taxonomyVersion: t.taxonomyVersion }),
     ...(templateVersion === undefined ? {} : { templateVersion }),
   };
 }

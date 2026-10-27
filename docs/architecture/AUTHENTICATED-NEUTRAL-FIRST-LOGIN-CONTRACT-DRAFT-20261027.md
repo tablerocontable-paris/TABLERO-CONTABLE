@@ -5,6 +5,22 @@ Estado: diseño pendiente de revisión; no habilita Auth, API, invitaciones ni p
 
 ## Evidencia actual
 
+### Clasificación local, 27/10/2026
+
+En el laboratorio, las 26 sugerencias v2 ya tienen una asignación uno a uno a
+un código neutral estable en `src/domain/workforceTaxonomy.mjs`. El código y
+`taxonomyVersion=2` acompañan el borrador, los envíos y revisiones de una
+propuesta, y su aprobación local los copia a la versión de catálogo, asignación
+y ocurrencias materializadas. El almacenamiento valida la pareja código/versión
+y la coherencia entre sugerencia, plantilla, asignación y tarea. Las filas
+históricas pueden seguir sin clasificación; no se completan por similitud de
+título.
+
+Esta mejora sólo cubre los modelos del laboratorio y el estimador local. El
+flujo de primer ingreso autenticado sigue sin conexión y su esquema remoto no
+se modificó: la identidad/versión neutral aún requiere contrato de API y una
+migración nueva, revisada, antes de persistirla en Supabase.
+
 - `NEUTRAL_STARTER_SUGGESTIONS` v2 contiene 26 sugerencias y coincide con las
   26 filas de `TASK-NORMALIZATION-DRAFT-20261026.md`.
 - `Onboarding.tsx` oculta las sugerencias cuando `remote` está activo. El

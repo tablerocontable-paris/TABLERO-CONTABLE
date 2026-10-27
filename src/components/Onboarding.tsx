@@ -417,7 +417,8 @@ export default function Onboarding({
                           {visibleItems.map((item) => {
                             const selected = starterDraftFor(item.id);
                             const initial = {
-                              id: `${item.id}:${profile.id}`, starterId: item.id, title: item.title, process: "",
+                              id: `${item.id}:${profile.id}`, starterId: item.id, neutralConceptCode: item.neutralConceptCode,
+                              taxonomyVersion: item.taxonomyVersion, title: item.title, process: "",
                               description: item.description, kind: item.suggestedKind, unit: item.suggestedUnit,
                               steps: [...item.suggestedSteps], companyIds: [] as string[],
                             };

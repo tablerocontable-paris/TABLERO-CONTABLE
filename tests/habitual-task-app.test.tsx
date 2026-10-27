@@ -33,7 +33,8 @@ describe("integración de propuestas en la inducción", () => {
         c2: { ...defaultSchedule("2026-10-05", "semanal"), hasDeadline: false },
       } }, companyTargets: {}, assignmentCompanyIds: {}, schedules: {},
       customTitle: "", customSteps: "", customTasks: [], habitualTaskProposals: [{
-        id: `${starter.id}:e0`, starterId: starter.id, title: starter.title, process: "",
+        id: `${starter.id}:e0`, starterId: starter.id, neutralConceptCode: starter.neutralConceptCode,
+        taxonomyVersion: starter.taxonomyVersion, title: starter.title, process: "",
         description: starter.description, kind: starter.suggestedKind, unit: starter.suggestedUnit,
         steps: [...starter.suggestedSteps], companyIds: ["c1", "c2"],
       }],
@@ -41,7 +42,9 @@ describe("integración de propuestas en la inducción", () => {
     state.onboarding.e0 = draft;
     persist(state as State, true);
     const reloaded = load(true);
-    expect(reloaded.onboarding.e0?.habitualTaskProposals?.[0]?.starterId).toBe(starter.id);
+    expect(reloaded.onboarding.e0?.habitualTaskProposals?.[0]).toMatchObject({
+      starterId: starter.id, neutralConceptCode: starter.neutralConceptCode, taxonomyVersion: starter.taxonomyVersion,
+    });
     render(<App initialState={reloaded} laboratoryMode />);
     fireEvent.click(await screen.findByRole("button", { name: /Preparar mi tablero/ }));
     await waitFor(() => {
@@ -52,6 +55,7 @@ describe("integración de propuestas en la inducción", () => {
     expect(once.habitualTaskProposals).toHaveLength(2);
     expect(once.habitualTaskProposals?.find((proposal) => proposal.companyId === "c1")).toMatchObject({
       id: `${starter.id}:e0:c1`, ownerId: "e0", companyId: "c1", status: "pending", title: starter.title,
+      neutralConceptCode: starter.neutralConceptCode, taxonomyVersion: starter.taxonomyVersion,
       schedule: { frequency: "mensual", startDate: "2026-10-03", hasDeadline: false },
     });
     expect(once.habitualTaskProposals?.find((proposal) => proposal.companyId === "c2")?.schedule).toMatchObject({

@@ -7,6 +7,7 @@ import {
 import { stopClock, type TimeSession, type Absence } from "./workforce";
 import { generatePeriodReport, type PeriodReport } from "./reports";
 import { endOfARTDate, summarizeTimeliness, type TimelinessSummary } from "./timeliness";
+import type { NeutralConceptCode } from "./workforceTaxonomy.mjs";
 export type Role = "jefe" | "encargado" | "empleado";
 export type Status = "Pendiente" | "En curso" | "Completada";
 export type Kind = "resultado" | "operativa";
@@ -47,6 +48,9 @@ export interface Template {
   target: number;
   steps: string[];
   description: string;
+  /** Optional, versioned neutral reporting concept; absent on unreviewed history. */
+  neutralConceptCode?: NeutralConceptCode;
+  taxonomyVersion?: 2;
 }
 export interface Assignment {
   retired?: boolean;
@@ -54,6 +58,8 @@ export interface Assignment {
   starterId?: string;
   /** Catalogue snapshot used for future occurrences. Older records may be unversioned. */
   templateVersion?: number;
+  neutralConceptCode?: NeutralConceptCode;
+  taxonomyVersion?: 2;
   id: string;
   templateId: string | null;
   title: string;
@@ -81,6 +87,8 @@ export interface Task {
   originRequestId?: string;
   /** Standard version captured when this occurrence was materialized. */
   templateVersion?: number;
+  neutralConceptCode?: NeutralConceptCode;
+  taxonomyVersion?: 2;
   scheduledOn?: string;
   /** Actor who performed the latest completion in this local laboratory. */
   completedBy?: string;
@@ -278,6 +286,8 @@ export interface HabitualTaskProposalDraft {
   id: string;
   /** Stable source suggestion identity for v2 lab-only drafts. */
   starterId?: string;
+  neutralConceptCode?: NeutralConceptCode;
+  taxonomyVersion?: 2;
   title: string;
   process: string;
   description: string;
@@ -290,10 +300,13 @@ export interface HabitualTaskProposal {
   id: string;
   ownerId: string;
   companyId: string;
+  starterId?: string;
   originalTitle: string;
   title: string;
   process: string;
   description: string;
+  neutralConceptCode?: NeutralConceptCode;
+  taxonomyVersion?: 2;
   kind: Kind;
   unit: string;
   target: number;
@@ -308,9 +321,12 @@ export interface HabitualTaskProposal {
   templateVersion?: number;
   submissions: {
     revision: number;
+    starterId?: string;
     title: string;
     process: string;
     description: string;
+    neutralConceptCode?: NeutralConceptCode;
+    taxonomyVersion?: 2;
     kind: Kind;
     unit: string;
     target: number;
@@ -596,6 +612,7 @@ export function materialize(s: State, month: string): State {
         assignmentId: a.id,
         templateId: a.templateId,
         ...(a.templateVersion === undefined ? {} : { templateVersion: a.templateVersion }),
+        ...(a.neutralConceptCode === undefined ? {} : { neutralConceptCode: a.neutralConceptCode, taxonomyVersion: a.taxonomyVersion }),
         title: a.title,
         ownerId: a.ownerId,
         companyId: a.companyId,

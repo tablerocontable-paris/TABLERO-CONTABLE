@@ -14,6 +14,15 @@ import { currentCatalogueVersion, ensureCatalogueVersions, pinMatchingCatalogueA
 import { seedFiscalObligations } from "../domain/fiscalObligations";
 import { validDate, validateSchedule, type Schedule } from "../domain/schedule";
 import { calendarEventFieldsError } from "../domain/calendar-validation";
+import { CONCEPT_CODES, STARTER_CONCEPT_CODES } from "../domain/workforceTaxonomy.mjs";
+
+function validateNeutralMetadata(value: Record<string, unknown>, path: (string | number)[], context: z.RefinementCtx) {
+  const code = value.neutralConceptCode;
+  const version = value.taxonomyVersion;
+  if (code === undefined && version === undefined) return;
+  if (typeof code !== "string" || !CONCEPT_CODES.has(code) || version !== 2)
+    context.addIssue({ code: "custom", path, message: "La clasificación neutral debe conservar código y versión válidos." });
+}
 
 const validSnapshotInstant = (value: string) => {
   const match = /^(\d{4}-\d{2}-\d{2})T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-](?:0\d|1\d|2[0-3]):[0-5]\d)$/.exec(value);
@@ -251,11 +260,12 @@ const scheduleSchema = z.object({
   hasDeadline: z.boolean(), dueOffsetDays: z.number().int(),
 });
 const proposalSubmissionSchema = z.object({
-  revision: z.number().int().positive(), title: z.string().min(1).max(120),
+  revision: z.number().int().positive(), starterId: z.string().regex(/^starter-suggestion-v2-[a-z0-9-]+$/).optional(), title: z.string().min(1).max(120),
   process: z.string().max(160), description: z.string().min(1).max(1000),
   kind: z.enum(["resultado", "operativa"]), unit: z.string().max(40),
   target: z.number().nonnegative(), schedule: scheduleSchema,
   steps: z.array(z.string().min(1).max(300)).max(50), submittedAt: z.string(),
+  neutralConceptCode: z.string().optional(), taxonomyVersion: z.literal(2).optional(),
 });
 const jointResponsibilitySnapshotSchema = z.object({
   version: z.literal(1), revision: z.literal(1), mode: z.literal("joint"),
@@ -267,6 +277,7 @@ const jointResponsibilitySnapshotSchema = z.object({
 });
 const snapshotTaskSchema = z.object({
   id: z.string().min(1), ownerId: z.string().min(1), companyId: z.string().min(1),
+  neutralConceptCode: z.string().optional(), taxonomyVersion: z.literal(2).optional(),
   month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/), kind: z.enum(["resultado", "operativa"]),
   weight: z.number().finite().nonnegative(),
   due: z.string().optional(), availableFrom: z.string().nullable().optional(),
@@ -491,6 +502,7 @@ const schema = z.object({
     effectiveOn: z.string().nullable(), createdBy: z.string().nullable(),
     source: z.enum(["initial_snapshot", "catalog_change", "kaizen_adoption", "legacy_reconciliation"]),
     changeReason: z.string().min(1).max(500), sourceProposalId: z.string().optional(),
+    neutralConceptCode: z.string().optional(), taxonomyVersion: z.literal(2).optional(),
   })).optional(),
   improvementProposals: z.array(z.object({
     id: z.string(), templateId: z.string(), companyId: z.string(), templateTitle: z.string(),
@@ -535,8 +547,10 @@ const schema = z.object({
   })).optional(),
   habitualTaskProposals: z.array(z.object({
     id: z.string().min(1), ownerId: z.string().min(1), companyId: z.string().min(1),
+    starterId: z.string().regex(/^starter-suggestion-v2-[a-z0-9-]+$/).optional(),
     originalTitle: z.string().min(1).max(120), title: z.string().min(1).max(120),
     process: z.string().max(160), description: z.string().min(1).max(1000),
+    neutralConceptCode: z.string().optional(), taxonomyVersion: z.literal(2).optional(),
     kind: z.enum(["resultado", "operativa"]), unit: z.string().max(40),
     target: z.number().nonnegative(), schedule: scheduleSchema,
     steps: z.array(z.string().min(1).max(300)).max(50),
@@ -616,6 +630,7 @@ const schema = z.object({
     customTasks: z.array(z.object({ id: z.string().min(1), title: z.string().min(1), steps: z.string(), kind: z.enum(["resultado", "operativa"]), unit: z.string(), target: z.number().nonnegative() })).optional(),
     habitualTaskProposals: z.array(z.object({
       id: z.string().min(1), starterId: z.string().regex(/^starter-suggestion-v2-[a-z0-9-]+$/).optional(),
+      neutralConceptCode: z.string().optional(), taxonomyVersion: z.literal(2).optional(),
       title: z.string(), process: z.string(), description: z.string(), kind: z.enum(["resultado", "operativa"]),
       unit: z.string(), steps: z.array(z.string()), companyIds: z.array(z.string().min(1)),
     })).optional(),
@@ -682,6 +697,32 @@ const schema = z.object({
   };
   unique(state.companies, "companies"); unique(state.profiles, "profiles"); unique(state.teams, "teams");
   unique(state.templates, "templates"); unique(state.assignments, "assignments"); unique(state.tasks, "tasks");
+  const validateRows = (rows: Array<Record<string, unknown>> | undefined, path: string) =>
+    rows?.forEach((row, index) => validateNeutralMetadata(row, [path, index], context));
+  validateRows(state.templates as unknown as Array<Record<string, unknown>>, "templates");
+  validateRows(state.assignments as unknown as Array<Record<string, unknown>>, "assignments");
+  validateRows(state.tasks as unknown as Array<Record<string, unknown>>, "tasks");
+  validateRows(state.catalogueVersions as unknown as Array<Record<string, unknown>> | undefined, "catalogueVersions");
+  validateRows(state.habitualTaskProposals as unknown as Array<Record<string, unknown>> | undefined, "habitualTaskProposals");
+  state.habitualTaskProposals?.forEach((proposal, proposalIndex) => {
+    validateNeutralMetadata(proposal as unknown as Record<string, unknown>, ["habitualTaskProposals", proposalIndex], context);
+    if (proposal.starterId && proposal.neutralConceptCode && STARTER_CONCEPT_CODES[proposal.starterId] !== proposal.neutralConceptCode)
+      context.addIssue({ code: "custom", path: ["habitualTaskProposals", proposalIndex, "neutralConceptCode"], message: "El concepto neutral no corresponde al ID versionado de la sugerencia." });
+    proposal.submissions.forEach((submission, submissionIndex) => {
+      validateNeutralMetadata(submission as unknown as Record<string, unknown>, ["habitualTaskProposals", proposalIndex, "submissions", submissionIndex], context);
+      if (submission.starterId && submission.neutralConceptCode && STARTER_CONCEPT_CODES[submission.starterId] !== submission.neutralConceptCode)
+        context.addIssue({ code: "custom", path: ["habitualTaskProposals", proposalIndex, "submissions", submissionIndex, "neutralConceptCode"], message: "El concepto neutral no corresponde al ID versionado de la sugerencia." });
+    });
+  });
+  state.closures.forEach((closure, closureIndex) => closure.tasks.forEach((task, taskIndex) =>
+    validateNeutralMetadata(task as unknown as Record<string, unknown>, ["closures", closureIndex, "tasks", taskIndex], context)));
+  state.companyClosures?.forEach((closure, closureIndex) => closure.tasks.forEach((task, taskIndex) =>
+    validateNeutralMetadata(task as unknown as Record<string, unknown>, ["companyClosures", closureIndex, "tasks", taskIndex], context)));
+  Object.entries(state.onboarding).forEach(([profileId, draft]) => draft.habitualTaskProposals?.forEach((proposal, proposalIndex) => {
+    validateNeutralMetadata(proposal as unknown as Record<string, unknown>, ["onboarding", profileId, "habitualTaskProposals", proposalIndex], context);
+    if (proposal.starterId && proposal.neutralConceptCode && STARTER_CONCEPT_CODES[proposal.starterId] !== proposal.neutralConceptCode)
+      context.addIssue({ code: "custom", path: ["onboarding", profileId, "habitualTaskProposals", proposalIndex, "neutralConceptCode"], message: "El concepto neutral no corresponde al ID versionado de la sugerencia." });
+  }));
   const profileById = new Map(state.profiles.map((profile) => [profile.id, profile]));
   const teamIds = new Set(state.teams.map((team) => team.id));
   const companyIds = new Set(state.companies.map((company) => company.id));
@@ -713,8 +754,14 @@ const schema = z.object({
   }
   state.assignments.forEach((assignment, index) => {
     const owner = profileById.get(assignment.ownerId);
-    if (!owner || !companyIds.has(assignment.companyId) || (assignment.templateId && !state.templates.some((template) => template.id === assignment.templateId)))
+    const template = assignment.templateId ? state.templates.find((row) => row.id === assignment.templateId) : undefined;
+    const sourceVersion = assignment.templateId && assignment.templateVersion
+      ? state.catalogueVersions?.find((row) => row.templateId === assignment.templateId && row.version === assignment.templateVersion)
+      : template;
+    if (!owner || !companyIds.has(assignment.companyId) || (assignment.templateId && !template))
       context.addIssue({ code: "custom", path: ["assignments", index], message: "La asignación debe referenciar responsable, empresa y catálogo existentes." });
+    if (sourceVersion && (assignment.neutralConceptCode !== sourceVersion.neutralConceptCode || assignment.taxonomyVersion !== sourceVersion.taxonomyVersion))
+      context.addIssue({ code: "custom", path: ["assignments", index, "neutralConceptCode"], message: "La asignación debe conservar la clasificación neutral del catálogo de origen." });
     const schedule = (assignment as { schedule?: unknown }).schedule;
     const validFrequencies = ["única", "diaria", "semanal", "mensual"];
     const rawAssignment = assignment as unknown as Record<string, unknown>;
@@ -747,6 +794,8 @@ const schema = z.object({
       context.addIssue({ code: "custom", path: ["tasks", index], message: "La tarea requiere una persona, empresa y equipo existentes y coherentes." });
     if (task.assignmentId && (!assignment || assignment.companyId !== task.companyId))
       context.addIssue({ code: "custom", path: ["tasks", index, "assignmentId"], message: "La tarea debe conservar la asignación de origen correspondiente." });
+    if (assignment && (task.neutralConceptCode !== assignment.neutralConceptCode || task.taxonomyVersion !== assignment.taxonomyVersion))
+      context.addIssue({ code: "custom", path: ["tasks", index, "neutralConceptCode"], message: "La tarea debe conservar la clasificación neutral de su asignación de origen." });
     if (task.templateId && !state.templates.some((template) => template.id === task.templateId))
       context.addIssue({ code: "custom", path: ["tasks", index, "templateId"], message: "La tarea referencia un catálogo inexistente." });
     if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(task.month) || (task.due !== "" && !validDate(task.due)))

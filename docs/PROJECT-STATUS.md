@@ -1,5 +1,18 @@
 # Estado vigente — Supabase DEV revisado, 27/10/2026
 
+## Clasificación neutral local — validada localmente
+
+Se está cerrando el enlace determinista de los 26 conceptos v2 con el
+estimador local. El código estable y su versión se conservan en propuestas,
+revisiones, catálogo, asignaciones y tareas generadas; los datos históricos
+quedan sin clasificar cuando no existe evidencia. Se comprueban correspondencias
+entre sugerencia, catálogo, asignación y tarea. La capa remota y SQL001–016 no
+se modifican. Validación local: suite **845/845 en 85 archivos**, TypeScript,
+build cliente, build Worker y paquete Sites aprobados; build cliente mantiene
+el aviso de chunk principal superior a 500 kB. Cambios aún sin commit/CI ni
+publicación en GitHub o Sites. Ver
+`docs/architecture/AUTHENTICATED-NEUTRAL-FIRST-LOGIN-CONTRACT-DRAFT-20261027.md`.
+
 ## Revisión de onboarding neutral — 27/10/2026
 
 Una revisión independiente comparó los 26 conceptos neutrales v2 con el

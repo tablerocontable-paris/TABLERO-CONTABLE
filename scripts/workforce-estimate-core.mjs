@@ -1,4 +1,5 @@
 import { createHmac } from "node:crypto";
+import { CONCEPT_CODES } from "../src/domain/workforceTaxonomy.mjs";
 
 export const SOURCE_HEADERS = Object.freeze({
   people: ["source_person_id", "active_from", "active_until"],
@@ -17,15 +18,7 @@ export const ANONYMIZED_HEADERS = Object.freeze({
 const TASK_STATUSES = new Set(["pending", "in_progress", "blocked", "completed", "cancelled"]);
 const EVENT_TYPES = new Set(["completed", "reopened", "cancelled", "restored"]);
 const SAFE_CODE = /^[a-z0-9]+(?:[-_][a-z0-9]+)*$/;
-export const CONCEPT_CODES = Object.freeze(new Set([
-  "bank_reconciliation", "payment_processing", "cash_reconciliation", "collections_tracking",
-  "card_coupon_settlement", "customer_refunds", "cheque_tracking", "credit_operations",
-  "receipt_application", "payment_platform_reconciliation", "payment_plan_tracking",
-  "document_recording", "document_organization", "accounting_entries", "payroll_records",
-  "tax_obligations", "company_accounting_close", "inventory_control", "accounting_adjustments",
-  "cost_analysis", "operations_analysis", "monthly_indicator_close", "procedure_tracking",
-  "team_review", "service_register_update", "supplies_control", "other_pending_review",
-]));
+export { CONCEPT_CODES };
 export const UNIT_CODES = Object.freeze(new Set([
   "invoice", "payment", "collection", "settlement", "refund", "cheque", "installment",
   "document", "entry", "employee_record", "tax_obligation", "company_close", "inventory_item",

@@ -1,14 +1,20 @@
 import type { Assignment, Profile, Template } from "./model";
 import type { Schedule } from "./schedule";
+import { STARTER_CONCEPT_CODES, WORKFORCE_TAXONOMY_VERSION } from "./workforceTaxonomy.mjs";
 
 /** Lab-only opt-in starter concepts. IDs are namespaced by immutable catalog version. */
 export const NEUTRAL_STARTER_CATALOG_VERSION = 1;
 /** Sol-approved v2 suggestions. These are proposal prompts, never assignments. */
 export const NEUTRAL_STARTER_SUGGESTIONS_VERSION = 2;
-const suggestion = (group: string, title: string, aliases: string[], suggestedKind: Template["kind"], suggestedUnit: string, description: string, suggestedSteps: string[]) => ({
-  id: NEUTRAL_STARTER_V2_IDS[title]!,
-  group, title, aliases, suggestedKind, suggestedUnit, description, suggestedSteps,
-});
+const suggestion = (group: string, title: string, aliases: string[], suggestedKind: Template["kind"], suggestedUnit: string, description: string, suggestedSteps: string[]) => {
+  const id = NEUTRAL_STARTER_V2_IDS[title]!;
+  const conceptCode = STARTER_CONCEPT_CODES[id];
+  if (!conceptCode) throw new Error(`La sugerencia neutral «${title}» no tiene concepto versionado.`);
+  return {
+    id, neutralConceptCode: conceptCode, taxonomyVersion: WORKFORCE_TAXONOMY_VERSION,
+    group, title, aliases, suggestedKind, suggestedUnit, description, suggestedSteps,
+  };
+};
 /** Frozen identifiers: title edits never change saved v2 proposal identity. */
 export const NEUTRAL_STARTER_V2_IDS: Readonly<Record<string, string>> = Object.freeze({
   "Conciliación de cuenta bancaria": "starter-suggestion-v2-conciliacion-de-cuenta-bancaria",

@@ -1,10 +1,12 @@
 import { addCatalogueTemplate, currentCatalogueVersion, ensureCatalogueVersions } from "./processImprovement";
 import { canSee, id, type HabitualTaskProposal, type Profile, type State, type Template } from "./model";
 import { validateSchedule, type Schedule } from "./schedule";
+import { CONCEPT_CODES, STARTER_CONCEPT_CODES, WORKFORCE_TAXONOMY_VERSION, type NeutralConceptCode } from "./workforceTaxonomy.mjs";
 
 export interface HabitualProposalInput {
   id: string;
   companyId: string;
+  starterId?: string;
   title: string;
   process: string;
   description: string;
@@ -13,6 +15,8 @@ export interface HabitualProposalInput {
   target: number;
   schedule: Schedule;
   steps: string[];
+  neutralConceptCode?: NeutralConceptCode;
+  taxonomyVersion?: 2;
 }
 
 export interface StandardProposalInput {
@@ -31,6 +35,19 @@ export type ProposalGroup = {
   suggestedMatch: boolean;
   proposals: HabitualTaskProposal[];
 };
+
+function classification(input: Pick<HabitualProposalInput, "neutralConceptCode" | "taxonomyVersion" | "starterId">) {
+  if (input.neutralConceptCode === undefined && input.taxonomyVersion === undefined && !input.starterId) return {};
+  const mappedCode = input.starterId ? STARTER_CONCEPT_CODES[input.starterId] : undefined;
+  const neutralConceptCode = input.neutralConceptCode ?? mappedCode;
+  const taxonomyVersion = input.taxonomyVersion ?? (mappedCode ? WORKFORCE_TAXONOMY_VERSION : undefined);
+  if (!neutralConceptCode || taxonomyVersion !== WORKFORCE_TAXONOMY_VERSION ||
+      !CONCEPT_CODES.has(neutralConceptCode))
+    throw Error("La clasificación neutral está incompleta o no pertenece a una versión admitida.");
+  if (input.starterId && mappedCode !== neutralConceptCode)
+    throw Error("La clasificación neutral no corresponde a la sugerencia versionada seleccionada.");
+  return { neutralConceptCode, taxonomyVersion: WORKFORCE_TAXONOMY_VERSION as 2 };
+}
 
 function cleanProposal(input: Omit<HabitualProposalInput, "id" | "companyId">) {
   const title = input.title.trim().replace(/\s+/g, " ");
@@ -65,8 +82,10 @@ export function submitHabitualTaskProposal(
     return state;
   }
   const clean = cleanProposal(input);
+  const neutral = classification(input);
   const snapshot = {
     revision: 1,
+    ...(input.starterId ? { starterId: input.starterId } : {}),
     title: clean.title,
     process: clean.process,
     description: clean.description,
@@ -75,13 +94,16 @@ export function submitHabitualTaskProposal(
     target: input.target,
     schedule: structuredClone(input.schedule),
     steps: clean.steps,
+    ...neutral,
     submittedAt: now,
   };
   const proposal: HabitualTaskProposal = {
     id: input.id,
     ownerId: actor.id,
     companyId: input.companyId,
+    ...(input.starterId ? { starterId: input.starterId } : {}),
     originalTitle: clean.title,
+    ...neutral,
     ...snapshot,
     submittedAt: now,
     updatedAt: now,
@@ -114,7 +136,7 @@ export function groupHabitualTaskProposals(rows: HabitualTaskProposal[]): Propos
   const groups = new Map<string, HabitualTaskProposal[]>();
   for (const proposal of rows.filter((row) => row.status === "pending")) {
     const process = normalizeWords(`${proposal.title} ${proposal.process}`);
-    const key = [proposal.kind, proposal.kind === "operativa" ? normalizeWords(proposal.unit) : "", process].join("\u001f");
+    const key = [proposal.kind, proposal.kind === "operativa" ? normalizeWords(proposal.unit) : "", proposal.neutralConceptCode || "", proposal.taxonomyVersion || "", process].join("\u001f");
     groups.set(key, [...(groups.get(key) || []), proposal]);
   }
   return [...groups.entries()]
@@ -167,15 +189,20 @@ export function resubmitHabitualTaskProposal(
   if (!currentActor?.active || proposal.ownerId !== currentActor.id) throw Error("Sólo quien presentó la propuesta puede corregirla.");
   if (!currentActor.companyIds.includes(proposal.companyId)) throw Error("La empresa de esta propuesta ya no está asignada a tu perfil.");
   const clean = cleanProposal(input);
+  const suppliedNeutral = classification(input);
+  if ((input.neutralConceptCode !== undefined || input.taxonomyVersion !== undefined) &&
+      (suppliedNeutral.neutralConceptCode !== proposal.neutralConceptCode || suppliedNeutral.taxonomyVersion !== proposal.taxonomyVersion))
+    throw Error("La clasificación neutral aprobada no se puede cambiar al reenviar una propuesta.");
+  const neutral = classification({ ...proposal, starterId: proposal.starterId });
   const changed = proposal.title !== clean.title || proposal.process !== clean.process || proposal.description !== clean.description ||
     proposal.kind !== input.kind || proposal.unit !== clean.unit || proposal.target !== input.target ||
     JSON.stringify(proposal.schedule) !== JSON.stringify(input.schedule) || JSON.stringify(proposal.steps) !== JSON.stringify(clean.steps);
   if (!changed) throw Error("Hacé al menos el cambio solicitado antes de reenviar.");
   const revision = proposal.revision + 1;
   const submission = {
-    revision, title: clean.title, process: clean.process, description: clean.description,
+    revision, ...(proposal.starterId ? { starterId: proposal.starterId } : {}), title: clean.title, process: clean.process, description: clean.description,
     kind: input.kind, unit: clean.unit, target: input.target,
-    schedule: structuredClone(input.schedule), steps: clean.steps, submittedAt: now,
+    schedule: structuredClone(input.schedule), steps: clean.steps, ...neutral, submittedAt: now,
   };
   return {
     ...state,
@@ -204,14 +231,19 @@ export function approveHabitualTaskProposals(
   requireManager(state, actor, selected);
   if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) throw Error("El período de asignación no es válido.");
   if (new Set(selected.map((row) => row.kind)).size !== 1 ||
-      new Set(selected.map((row) => row.kind === "operativa" ? normalizeWords(row.unit) : "")).size !== 1)
+      new Set(selected.map((row) => row.kind === "operativa" ? normalizeWords(row.unit) : "")).size !== 1 ||
+      new Set(selected.map((row) => `${row.neutralConceptCode || ""}:${row.taxonomyVersion || ""}`)).size !== 1)
     throw Error("El grupo mezcla tipos o unidades que no comparten un estándar.");
+
+  const neutral = classification(selected[0]!);
 
   let next = ensureCatalogueVersions(state, now, makeId);
   let template: Template | undefined;
   if (decision.kind === "link") {
     template = next.templates.find((row) => row.id === decision.templateId);
     if (!template) throw Error("El estándar seleccionado ya no está disponible.");
+    if (template.neutralConceptCode !== neutral.neutralConceptCode || template.taxonomyVersion !== neutral.taxonomyVersion)
+      throw Error("El estándar y la propuesta no comparten una clasificación neutral confirmada.");
   } else {
     const input = decision.template;
     const title = input.title.trim().replace(/\s+/g, " ");
@@ -232,6 +264,7 @@ export function approveHabitualTaskProposals(
       weight: input.weight, unit: input.kind === "operativa" ? input.unit.trim() : "",
       target: 0,
       steps, description: input.description.trim(),
+      ...neutral,
     };
     next = addCatalogueTemplate(next, template, actor, now, makeId);
   }
@@ -244,6 +277,7 @@ export function approveHabitualTaskProposals(
     id: `habitual-proposal-assignment:${proposal.id}`,
     templateId: template!.id,
     templateVersion,
+    ...neutral,
     title: template!.title,
     ownerId: proposal.ownerId,
     companyId: proposal.companyId,
