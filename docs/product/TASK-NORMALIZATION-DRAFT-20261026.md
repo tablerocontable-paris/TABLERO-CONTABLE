@@ -98,6 +98,29 @@ Los adjuntos y comentarios quedan fuera. El proceso local está especificado en
 ningún extracto real. Los IDs estables se protegen con una clave HMAC local, pero
 la salida aún puede permitir reidentificación por fechas o rareza; no publicarla.
 
+## Revisión independiente de cobertura — 27/10/2026
+
+La comparación del catálogo v2 con las 26 filas de este borrador encontró
+cobertura completa: no se identificaron familias explícitas del borrador que
+falte representar. Esto valida la correspondencia documental, no que esas
+familias describan todo el trabajo real de la organización.
+
+Se deben mantener separadas recepción/registro de cobranzas, aplicación de
+cobros y conciliación de plataformas; también registro de liquidaciones de
+tarjetas/cupones y conciliación con banco o contabilidad. Son momentos de
+procesamiento distintos y unirlos podría duplicar o perder movimientos. Los
+términos aún pendientes de aclarar en este borrador no se convierten en
+sugerencias normalizadas hasta entender su alcance.
+
+El onboarding de v2 sigue habilitado sólo para el laboratorio local. Antes de
+conectarlo al primer ingreso autenticado hay que especificar por rol: quién
+propone conceptos, quién revisa y aprueba, cuándo se convierten en tareas, qué
+datos se solicitan y cómo se retoma o cancela una configuración incompleta.
+La lista debe seguir opcional, editable, sin preselecciones y sin asignaciones
+automáticas. Para hacerla más fácil de recorrer, la inducción puede presentar
+un nombre breve y ejemplos con detalle desplegable, conservando el nombre
+formal en catálogo e historial.
+
 ## Estado de implementación
 
 El estimador local distingue personas vigentes al corte, ocurrencias lógicas

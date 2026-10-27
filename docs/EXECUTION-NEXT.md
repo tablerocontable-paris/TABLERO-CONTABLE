@@ -1,5 +1,15 @@
 # Estado vigente de ejecución — 27/10/2026
 
+## Revisión del catálogo neutral
+
+La auditoría independiente cotejó las 26 sugerencias v2 contra el borrador y
+no encontró omisiones dentro de ese borrador. No prueba que el catálogo cubra el
+trabajo real. El onboarding autenticado sigue pendiente: antes de habilitarlo,
+definir propuesta, revisión/aprobación, permisos por rol, borrador recuperable y
+aceptación explícita antes de crear tareas. Cobranzas, aplicación de cobros,
+liquidación de tarjetas y conciliación permanecen como conceptos distintos.
+Detalle: `docs/product/TASK-NORMALIZATION-DRAFT-20261026.md`.
+
 ## Estimador local y continuidad portable — actualización
 
 El estimador de personas/tareas fue implementado localmente en

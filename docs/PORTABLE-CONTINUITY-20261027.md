@@ -17,6 +17,11 @@
 - Primera experiencia: 26 conceptos neutrales v2, sugeridos y editables; aún no
   existe onboarding remoto autenticado. Las sugerencias no son afirmaciones de
   qué procesos usa realmente la organización.
+- Revisión independiente del 27/10: los 26 conceptos cubren el borrador, sin
+  demostrar cobertura del trabajo real. Se conserva separada la recepción de
+  cobranzas, su aplicación, el registro de liquidaciones y sus conciliaciones.
+  El primer ingreso autenticado requiere especificar permisos, aprobación,
+  borrador recuperable y aceptación antes de crear tareas.
 - Se conservan los IDs históricos `starter-v1-*` y los historiales.
 - La captura de equipo sólo acredita 14 filas con nombre y una fila «Sin
   asignar», no el padrón vigente. Las imágenes de tareas están incompletas y no

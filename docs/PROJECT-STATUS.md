@@ -1,5 +1,17 @@
 # Estado vigente — Supabase DEV revisado, 27/10/2026
 
+## Revisión de onboarding neutral — 27/10/2026
+
+Una revisión independiente comparó los 26 conceptos neutrales v2 con el
+borrador funcional: cobertura completa del borrador, sin afirmar cobertura del
+trabajo real. Se mantienen separadas cobranzas, aplicación de cobros,
+liquidaciones de tarjetas y conciliaciones para evitar dobles conteos. La
+inducción v2 continúa sólo en el laboratorio local; no existe aún onboarding
+del primer ingreso autenticado. Su siguiente definición debe especificar
+permisos de propuesta/aprobación, persistencia de borrador y conversión
+explícita a tareas. Revisión registrada en
+`docs/product/TASK-NORMALIZATION-DRAFT-20261026.md`.
+
 ## Continuidad y estimador — última actualización
 
 El corte funcional del estimador y la revisión de conceptos neutrales está
