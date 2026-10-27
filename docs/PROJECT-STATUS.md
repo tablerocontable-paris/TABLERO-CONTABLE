@@ -4,11 +4,12 @@
 
 El repositorio activo es `work/site`, remoto privado
 `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`. El commit actual
-`2b6a03ceeca6ce330abe073a646130e109547078`, autor **Tablero Contable**, dejó
-`verify_current` como selección inicial del workflow, en modo sin escrituras.
-GitHub Actions run `40526479997` terminó en éxito (suite, build y validación
-Sites). En local pasaron 839 pruebas en 84 archivos, TypeScript, builds cliente
-y Worker, validación Sites, `git diff --check` y hook 212/212.
+`31b49631d6a23b6f8d56e928e2a95ed57a2f1224`, autor **Tablero Contable**, está
+publicado directamente en `main`. GitHub Actions run `40533524080` (#105)
+terminó en éxito: `npm ci`, suite, build y validación del paquete Sites. El
+corte anterior `b199c900e3c5a0b04694f07ea01d4b32876e7790` también tuvo CI
+exitoso en run #104. La corrida #105 no modifica el Site publicado ni despliega
+producción.
 
 El proyecto `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`) registra las 18
 versiones correspondientes a los archivos 001–016. GitHub Actions confirma la
@@ -26,11 +27,15 @@ el remoto ya tenía 18 versiones: esperaba 16 locales/0 remotas y detectó
 intento no escribió en Supabase. No volver a ejecutar la línea base.
 
 No hay evidencia en los runs de que la migración 001–014 se aplicara mal como
-proceso: su ejecución registrada fue exitosa y hash-locked. Sí existía el
-defecto funcional de lectura de encargado tras revocar membresía en la función
-legacy de 011; 016 la reemplazó y su cuerpo instalado coincide con el archivo.
-Esto no demuestra ausencia de otros defectos semánticos ni sustituye pruebas
-con identidades autenticadas.
+proceso: su ejecución registrada fue exitosa y hash-locked. La captura del run
+#4 corresponde a otro intento posterior, que seleccionó por error la línea base
+001–014 cuando las 18 versiones ya estaban aplicadas; el guard lo detuvo antes
+de escribir. SQL016 corrigió el defecto funcional de lectura de encargado tras
+revocar membresía en la función legacy de 011, y su cuerpo instalado coincide
+con el archivo. La revisión RPC 001–014 es un corte histórico; ya está ampliada
+documentalmente con cambios 015–016, pero falta el inventario acumulado final de
+funciones y los permisos probados contra identidades del Supabase hosteado.
+Esto no demuestra ausencia de otros defectos semánticos.
 
 ## Auditoría read-only del esquema instalado
 

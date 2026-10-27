@@ -4,10 +4,11 @@
 
 La rama principal `main` está en el repositorio privado
 `tablerocontable-paris/TABLERO-CONTABLE`. Los commits de continuidad se publican
-directamente, sin PR. El último commit documental es
-`b199c900e3c5a0b04694f07ea01d4b32876e7790`, autor Tablero Contable; GitHub
-Actions run 104 terminó correctamente (suite, build y paquete Sites). Antes de
-editar, hacé `git pull --ff-only origin main`.
+directamente, sin PR, bajo el autor Tablero Contable. En el corte del 27/10/2026,
+el commit `31b49631d6a23b6f8d56e928e2a95ed57a2f1224` terminó con GitHub Actions
+run 105 exitoso: suite, build y validación del paquete Sites. Antes de editar,
+hacé `git pull --ff-only origin main` y consultá Actions para confirmar el CI
+del HEAD actual.
 
 La preferencia de usar subagentes cuando ayuden, normalmente uno a la vez, está
 registrada en `AGENTS.md`. El catálogo neutral de 26 conceptos es opcional y no
@@ -22,13 +23,17 @@ El proyecto Supabase `grupo-paris-dev` está activo y registra 18 versiones
 correspondientes a SQL001–016. Las corridas #1, #2 y #3 aplicaron y verificaron
 001–014, 015 y 016. No volver a aplicar la línea base ni 015/016. La corrida #4
 falló de forma segura porque se eligió la línea base con el historial completo;
-el control abortó antes de cualquier escritura. El workflow ahora inicia en
+el control abortó antes de cualquier escritura. No hay evidencia de que 001–014
+se hayan aplicado mal: la ejecución correspondiente figura exitosa y con hashes
+verificados. El workflow ahora inicia en
 `verify_current`, de sólo lectura.
 
 Antes de Auth, datos reales o frontend conectado sigue pendiente verificar en el
-Dashboard que Data API exponga sólo `api`, revisar ACL/RPC y completar pruebas de
-permisos con identidades de DEV. La revisión no equivale a aceptación integral
-de producción.
+Dashboard que Data API exponga sólo `api`, actualizar el inventario RPC
+acumulado 001–016, revisar ACL efectivos y completar pruebas de permisos con
+identidades de DEV. La auditoría de 001–014 se amplió en texto para SQL015/016,
+pero sus recuentos históricos no son un inventario final. La revisión no
+equivale a aceptación integral de producción.
 
 El catálogo v2 está publicado en el mismo Site privado como v98, desde el
 commit de código `ad1b4180556307755c7a4e0fd221316237fc341c`; el run de validación

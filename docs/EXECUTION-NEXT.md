@@ -2,11 +2,12 @@
 
 ## Continuidad de GitHub
 
-El commit `2b6a03ceeca6ce330abe073a646130e109547078` está publicado
+El commit `31b49631d6a23b6f8d56e928e2a95ed57a2f1224` está publicado
 directamente en `main`, sin PR, bajo el autor Tablero Contable. GitHub Actions
-run `40526479997` pasó suite, build y validación del paquete Sites. El run #4
-fallido fue una selección de etapa incorrecta, detenida antes de cualquier
-escritura; no representa un fallo de la base. El workflow ahora inicia en
+run `40533524080` (#105) terminó en éxito con suite, build y validación Sites.
+El run #104 del commit anterior también pasó. El run #4 de migraciones falló por seleccionar
+una etapa incorrecta; el preflight lo detuvo antes de cualquier escritura y no
+representa un fallo de la base. El workflow de migraciones inicia en
 `verify_current`, de sólo lectura.
 
 ## Supabase DEV — historial ya completo
@@ -38,8 +39,12 @@ probar sus límites mediante identidades DEV.
 
 No hay pruebas de que la ejecución de 001–014 haya fallado; el historial indica
 que el lote se aplicó correctamente. La revisión previa sí identificó el caso
-de membresía revocada en SQL011, corregido por SQL016. Esto no equivale a
-aceptación integral del esquema ni de Auth.
+de membresía revocada en SQL011, corregido por SQL016. La auditoría RPC ya
+documenta el alcance 015–016; el conteo heredado de 39 RPC públicas / 138
+definiciones se conserva como resultado del corte 001–014, no como inventario
+final. Resta producir inventario 001–016 y comprobar exposición/ACL y permisos
+con identidades en Supabase DEV. Esto no equivale a aceptación integral del
+esquema ni de Auth.
 
 ---
 

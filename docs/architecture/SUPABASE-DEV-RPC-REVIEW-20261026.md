@@ -1,13 +1,41 @@
-# Revisión estática de RPC Supabase DEV — 26/10/2026
+# Revisión estática de RPC Supabase DEV — corte histórico 26/10/2026
 
 ## Alcance y límites
 
-Lectura estática de las migraciones versionadas 001–014, siguiendo reemplazos,
-renombres, eliminaciones y grants. No se ejecutó SQL ni se modificó DEV. Se
-excluyó SQL015, que no está aplicado. El análisis reconstruye definiciones y
-ACL desde archivos; no demuestra los propietarios efectivos, la configuración
-del Dashboard, el estado instalado del catálogo ni el comportamiento de Auth
-contra el proyecto remoto.
+Lectura estática original de las migraciones versionadas 001–014, siguiendo
+reemplazos, renombres, eliminaciones y grants. Esta sección conserva ese corte
+como antecedente y no describe el estado final tras SQL015/016. No se ejecutó
+SQL ni se modificó DEV. El análisis reconstruye definiciones y ACL desde
+archivos; no demuestra los propietarios efectivos, la configuración del
+Dashboard, el estado instalado del catálogo ni el comportamiento de Auth contra
+el proyecto remoto.
+
+## Actualización de alcance 015–016 — 27/10/2026
+
+La lectura de este informe se completó con los cambios de
+`202610230015_workspace_page.sql` y `202610260016_manager_task_revocation.sql`.
+SQL015 crea las funciones internas `app_private.api_workspace_page`,
+`api_workspace_page_v2` y `api_task_checklist_page` como `SECURITY DEFINER`,
+revoca su ejecución a los roles de cliente y reemplaza `api.query_v1` por un
+dispatcher que sólo concede `EXECUTE` a `authenticated`. SQL016 reemplaza
+`public.read_coordinated_task_for_manager(uuid)` y conserva su guard de
+autorización; no introduce grants nuevos. En ambos archivos las definiciones
+`SECURITY DEFINER` declaran `search_path=''`.
+
+La regresión `tests/supabase-manager-task-revocation-016.test.ts` cubre el
+recorrido local de instalación 014→015→016, ACL simuladas (`authenticated`
+permitido, `anon` y `PUBLIC` denegados), revocación/reactivación, límites de
+equipo/organización, perfil inactivo y exclusión de notas privadas. La evidencia
+registrada informa 10 pruebas focales aprobadas y suite/build/package en el
+árbol evaluado. Esto no ejecuta las pruebas contra Auth/Data API del proyecto
+hosteado.
+
+El inventario numérico de 39 RPC públicas y 138 definiciones `SECURITY
+DEFINER` de abajo pertenece al corte 001–014; no se debe presentar como un
+recuento final actualizado. Falta generar el inventario acumulado 001–016 y
+contrastar funciones, propietarios y ACL efectivos en DEV. También siguen sin
+verificación en esta revisión la lista de esquemas expuestos del Dashboard y
+las pruebas de denegación con identidades hosteadas.
 
 ## Resultado de la reconstrucción
 
