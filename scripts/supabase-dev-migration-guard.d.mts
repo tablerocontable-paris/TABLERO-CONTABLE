@@ -1,4 +1,4 @@
-export type MigrationPhase = "baseline_001_014" | "apply_015" | "apply_016";
+export type MigrationPhase = "verify_current" | "baseline_001_014" | "apply_015" | "apply_016";
 export const MIGRATIONS: ReadonlyArray<readonly [string, string]>;
 export const BASELINE_COUNT: number;
 export function verifyMigrationFiles(root: string): Promise<void>;

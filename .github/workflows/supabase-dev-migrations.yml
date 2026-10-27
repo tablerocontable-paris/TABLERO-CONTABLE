@@ -4,14 +4,15 @@ on:
   workflow_dispatch:
     inputs:
       migration_stage:
-        description: Choose the migration segment. SQL016 remains blocked until Sol accepts its exact hash.
+        description: Verify the installed history without writes, or select one exact migration segment.
         required: true
         type: choice
         options:
+          - verify_current
           - baseline_001_014
           - apply_015
           - apply_016
-        default: baseline_001_014
+        default: verify_current
       apply_migrations:
         description: Apply only the selected and validated segment after the target history and dry-run match exactly
         required: true
@@ -63,7 +64,7 @@ jobs:
           MIGRATION_STAGE: ${{ inputs.migration_stage }}
         run: |
           set -euo pipefail
-          [[ "$MIGRATION_STAGE" == 'baseline_001_014' || "$MIGRATION_STAGE" == 'apply_015' || "$MIGRATION_STAGE" == 'apply_016' ]]
+          [[ "$MIGRATION_STAGE" == 'verify_current' || "$MIGRATION_STAGE" == 'baseline_001_014' || "$MIGRATION_STAGE" == 'apply_015' || "$MIGRATION_STAGE" == 'apply_016' ]]
           node scripts/supabase-dev-migration-guard.mjs verify-files . "$MIGRATION_STAGE"
           stage_root="$RUNNER_TEMP/supabase-stage-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           node scripts/supabase-dev-migration-guard.mjs stage . "$MIGRATION_STAGE" "$stage_root"
@@ -122,6 +123,11 @@ jobs:
           cli="$RUNNER_TEMP/supabase-cli/supabase"
           "$cli" --workdir "$SUPABASE_STAGE_ROOT" migration list --db-url "$SUPABASE_DEV_DB_URL" --output-format json > "$RUNNER_TEMP/migration-list-before.json"
           node scripts/supabase-dev-migration-guard.mjs history . "$MIGRATION_STAGE" "$RUNNER_TEMP/migration-list-before.json" before
+          if [[ "$MIGRATION_STAGE" == 'verify_current' ]]; then
+            [[ "$APPLY_MIGRATIONS" != 'true' ]]
+            echo 'Historial completo 001–016 verificado; esta etapa no ejecuta escrituras.'
+            exit 0
+          fi
           "$cli" --workdir "$SUPABASE_STAGE_ROOT" db push --dry-run --db-url "$SUPABASE_DEV_DB_URL" 2>&1 | tee "$RUNNER_TEMP/db-push-dry-run.txt"
           node scripts/supabase-dev-migration-guard.mjs dry-run . "$MIGRATION_STAGE" "$RUNNER_TEMP/db-push-dry-run.txt"
           if [[ "$APPLY_MIGRATIONS" != 'true' ]]; then

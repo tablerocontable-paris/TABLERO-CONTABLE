@@ -1,4 +1,67 @@
-# Estado vigente — migración de workspace, 26/10/2026
+# Estado vigente — Supabase DEV revisado, 27/10/2026
+
+## Resultado verificado de migraciones
+
+El proyecto `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`) registra las 18
+versiones correspondientes a los archivos 001–016. GitHub Actions confirma la
+secuencia: run `40012156985` aplicó y verificó la línea base 001–014; run
+`40522413076` aplicó 015; run `40522611976` aplicó 016. Los tres terminaron en
+éxito con el control de hashes, preflight, historial antes/después y dry-run.
+La comparación read-only de hoy confirma que el hash MD5 de los cuerpos
+instalados de `api_workspace_page`, `api_workspace_page_v2`, `api.query_v1` y
+`read_coordinated_task_for_manager` coincide con 015/016 del repositorio; la
+aplicación además validó el SHA-256 del archivo SQL completo.
+
+El run `40522765334` (#4) falló porque se seleccionó `baseline_001_014` cuando
+el remoto ya tenía 18 versiones: esperaba 16 locales/0 remotas y detectó
+16/18. El guard detuvo la ejecución antes del dry-run y del `db push`; ese
+intento no escribió en Supabase. No volver a ejecutar la línea base.
+
+No hay evidencia en los runs de que la migración 001–014 se aplicara mal como
+proceso: su ejecución registrada fue exitosa y hash-locked. Sí existía el
+defecto funcional de lectura de encargado tras revocar membresía en la función
+legacy de 011; 016 la reemplazó y su cuerpo instalado coincide con el archivo.
+Esto no demuestra ausencia de otros defectos semánticos ni sustituye pruebas
+con identidades autenticadas.
+
+## Auditoría read-only del esquema instalado
+
+El catálogo contiene 37 tablas en `public` y 20 en `app_private`; todas tienen
+RLS habilitado. Hay 28 policies públicas y ninguna en tablas privadas. No se
+otorgó DML directo a `anon` ni `authenticated`; `authenticated` tiene SELECT en
+28 tablas públicas, sujeto a sus policies. `app_private` no concede USAGE a
+esos roles. `api` concede USAGE sólo a `authenticated`. Los advisors siguen
+marcando 29 tablas con RLS sin policy (20 privadas y 9 públicas), aviso INFO
+compatible con denegación por defecto, pero requiere revisar las nueve tablas
+públicas individualmente.
+
+Las nueve tablas públicas sin policies son `private_block_note_receipts`,
+`task_coverage_bindings`, `task_coverage_plan_assignment_rules`,
+`task_coverage_plan_instances`, `task_coverage_plans`,
+`task_mutation_receipts`, `task_responsibility_heads`,
+`task_responsibility_members` y `task_responsibility_sets`. El catálogo confirma
+que `anon` y `authenticated` no tienen SELECT directo sobre ellas.
+
+La configuración de esquemas expuestos de Data API no está confirmada en esta
+revisión. El catálogo muestra que `public` concede USAGE a `anon` y
+`authenticated`; antes de usar Auth, datos reales o frontend conectado se debe
+verificar en Dashboard que Data API exponga sólo `api`, mantener apagada la
+autoexposición y completar la matriz de permisos. El área operativa sigue
+apagada y no hay datos reales.
+
+El catálogo remoto muestra 39 funciones `SECURITY DEFINER` de `public`
+ejecutables por `authenticated`, sin DML directo; por eso la falta de una vía de
+tabla no basta para aceptar la seguridad de las RPC. La configuración del
+Dashboard y las pruebas con identidades aún son gates obligatorios.
+
+El workflow manual ahora ofrece `verify_current` sin escrituras como opción
+predeterminada. Próximo gate: revisión individual de ACL/RPC y tablas públicas,
+confirmación del Dashboard y pruebas positivas/negativas con identidades de
+DEV. No se requiere re-aplicar 001–016.
+
+---
+
+# Estado histórico — migración de workspace, 26/10/2026
 
 ## Actualización de seguridad Supabase — migraciones 015/016
 

@@ -28,6 +28,12 @@ const rows = (localCount: number, remoteCount: number) => Array.from({ length: l
 }));
 
 describe("Supabase DEV migration guard", () => {
+  it("verifies the full installed history without allowing a write stage", () => {
+    expect(validateHistory({ migrations: rows(MIGRATIONS.length, MIGRATIONS.length) }, "verify_current")).toEqual({ local: 18, remote: 18 });
+    expect(() => validateHistory({ migrations: rows(MIGRATIONS.length, MIGRATIONS.length - 1) }, "verify_current")).toThrow();
+    expect(validateDryRun("No migrations to apply.", "verify_current")).toEqual([]);
+  });
+
   it("checks empty baseline before apply and exact 16→16 baseline after apply", () => {
     expect(validateHistory({ migrations: rows(BASELINE_COUNT, 0) }, "baseline_001_014")).toEqual({ local: 16, remote: 0 });
     expect(validateHistory({ migrations: rows(BASELINE_COUNT, BASELINE_COUNT) }, "baseline_001_014", "after")).toEqual({ local: 16, remote: 16 });

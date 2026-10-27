@@ -1,4 +1,40 @@
-# Estado vigente de ejecución — 26/10/2026
+# Estado vigente de ejecución — 27/10/2026
+
+## Supabase DEV — historial ya completo
+
+La lectura remota confirma las 18 versiones 001–016 instaladas. Actions run
+`40012156985` aplicó 001–014; `40522413076` aplicó 015; `40522611976` aplicó
+016. Los controles exactos de archivos, historial, dry-run y salida finalizaron
+correctamente. No volver a correr `baseline_001_014`.
+
+El run `40522765334` falló de forma segura: recibió `baseline_001_014`, pero el
+remoto ya tenía 18 versiones; el control detuvo el job antes de cualquier
+escritura. El estado de Supabase no cambió en ese run. La comparación de hoy
+confirma que los cuerpos instalados de las funciones añadidas/reemplazadas por
+015 y 016 tienen hashes MD5 de cuerpo coincidentes con el repositorio; cada
+workflow verificó también el SHA-256 del archivo completo.
+
+Se agregó `verify_current`, etapa predeterminada de sólo lectura que exige las
+18 versiones y rechaza `apply_migrations=true`. El bloque siguiente es auditar
+ACL/RPC y tablas públicas, verificar en Dashboard que Data API exponga sólo
+`api` y probar permisos autenticados/negados en DEV. La consulta de catálogo
+halló RLS en 57 tablas, 28 policies en `public`, ninguna policy en 20 tablas
+`app_private`, ningún DML directo para `anon`/`authenticated` y privilegio
+SELECT autenticado en 28 tablas públicas. Advisors reportan 29 RLS sin policy;
+las nueve públicas son receipts/relaciones de coberturas y no tienen SELECT
+directo para esos roles. Revisarlas igualmente antes de conectar usuarios o
+datos reales. Se observan 39 RPC `SECURITY DEFINER` públicas ejecutables por
+`authenticated`; queda pendiente comprobar exposición del esquema Data API y
+probar sus límites mediante identidades DEV.
+
+No hay pruebas de que la ejecución de 001–014 haya fallado; el historial indica
+que el lote se aplicó correctamente. La revisión previa sí identificó el caso
+de membresía revocada en SQL011, corregido por SQL016. Esto no equivale a
+aceptación integral del esquema ni de Auth.
+
+---
+
+# Estado histórico de ejecución — 26/10/2026
 
 ## Siguiente secuencia — Supabase DEV 015→016
 

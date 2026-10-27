@@ -28,7 +28,7 @@ export const MIGRATIONS = [
 ];
 
 export const BASELINE_COUNT = 16;
-const phaseNames = new Set(["baseline_001_014", "apply_015", "apply_016"]);
+const phaseNames = new Set(["verify_current", "baseline_001_014", "apply_015", "apply_016"]);
 const versions = MIGRATIONS.map(([filename]) => filename.slice(0, 12));
 
 function assertPhase(phase) {
@@ -83,7 +83,7 @@ export function validateHistory(payload, phase, state = "before") {
   const targetCount = phase === "baseline_001_014" ? BASELINE_COUNT : phase === "apply_015" ? BASELINE_COUNT + 1 : MIGRATIONS.length;
   const localExpected = versions.slice(0, targetCount);
   let remoteExpected;
-  if (state === "after") remoteExpected = localExpected;
+  if (phase === "verify_current" || state === "after") remoteExpected = localExpected;
   else remoteExpected = phase === "baseline_001_014" ? [] : versions.slice(0, targetCount - 1);
   if (JSON.stringify(local) !== JSON.stringify(localExpected) || JSON.stringify(remote) !== JSON.stringify(remoteExpected)) {
     throw new Error(`Historial incorrecto para ${phase}/${state}: local=${local.length}, remoto=${remote.length}.`);
@@ -93,7 +93,7 @@ export function validateHistory(payload, phase, state = "before") {
 
 export function validateDryRun(text, phase) {
   assertPhase(phase);
-  const expected = phase === "baseline_001_014" ? versions.slice(0, BASELINE_COUNT) : [versions[phase === "apply_015" ? BASELINE_COUNT : BASELINE_COUNT + 1]];
+  const expected = phase === "verify_current" ? [] : phase === "baseline_001_014" ? versions.slice(0, BASELINE_COUNT) : [versions[phase === "apply_015" ? BASELINE_COUNT : BASELINE_COUNT + 1]];
   // Supabase CLI prints full filenames (`202609300001_foundation.sql`). A
   // word boundary after the version does not match there because `_` is a
   // word character; extract versions only when they prefix a migration file.
