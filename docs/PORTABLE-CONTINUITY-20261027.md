@@ -48,18 +48,19 @@
    en DEV, definir persistencia segura, luego producción, Cloudflare/correo y
    aceptación desde la PC personal. Ver gates en `docs/EXECUTION-NEXT.md`.
 
-## Estado de esta copia al iniciar la continuidad
+## Corte implementado y publicado
 
-HEAD `2ff373c700547f0eb2c9c34ae1278984706d2737`, remoto `origin/main` igual.
-Después se implementó el estimador, plantillas vacías, cobertura sintética y
-documentación portable. La última suite completa aprobó **843/843 en 85
-archivos**; TypeScript, build cliente y build Worker terminaron con código 0. El
-build cliente reporta un chunk sobre 500 kB. El hook y CI de GitHub todavía
-deben confirmarse para el commit de esta etapa.
+Commit `daee754b9b688931e0779e271245acd6bd695526` en `main`, publicado
+directamente bajo el autor Tablero Contable y con SHA remoto coincidente. Incluye
+el estimador local, pruebas sintéticas, plantillas vacías, refinamiento de
+conceptos neutrales y este contexto portable. Suite completa **843/843 pruebas
+en 85 archivos**; TypeScript y builds cliente/Worker terminaron con código 0;
+hook **212/212**. El build cliente emite un aviso de chunk principal superior a
+500 kB. El conector de GitHub devolvió cero ejecuciones de Actions asociadas a
+este SHA al consultarlo; por lo tanto, CI de GitHub no se reporta como aprobado.
 
-Al terminar esta etapa, se debe registrar el SHA del commit que contenga los
-cambios en `.gitignore`, `AGENTS.md`, `package.json`, el catálogo neutral, los
-scripts/declaraciones del estimador, las plantillas vacías, pruebas y documentos.
-El archivo
+`main` contiene código, contratos, pruebas, historia Git y continuidad técnica
+segura. No incluye conversaciones brutas, datos identificables, credenciales,
+sesiones ni archivos personales. El archivo
 `tests/review/m2-2c-legacy-task-control-replay-races.block` es scratch protegido;
 no leerlo, modificarlo, incluirlo ni borrarlo.

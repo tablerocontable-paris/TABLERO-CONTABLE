@@ -9,8 +9,11 @@ salidas con `.gitignore`, y documentación en
 `docs/product/ANONYMIZED-WORKFORCE-ESTIMATE.md`. Hay cuatro pruebas sintéticas
 focales. La última suite completa aprobó **843/843 pruebas en 85 archivos**;
 TypeScript, build cliente y build Worker aprobaron en esta copia. El build
-cliente conserva un aviso de bundle principal superior a 500 kB. Falta el hook
-de commit, push directo y CI de GitHub para este corte.
+cliente conserva un aviso de bundle principal superior a 500 kB. Commit
+`daee754b9b688931e0779e271245acd6bd695526` se publicó directamente en `main`;
+hook **212/212** y SHA remoto confirmados. La consulta de Actions devolvió cero
+ejecuciones para este SHA; CI no se declara aprobado hasta obtener una ejecución
+observable.
 No se recibió un extracto autorizado; la cantidad real de personas y tareas
 terminadas hoy continúa **sin determinarse**. No crear ni copiar datos reales a
 GitHub. El runtime Node incluido permite ejecutar el código en esta PC sin
