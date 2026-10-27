@@ -79,14 +79,15 @@ originales nunca se deduplican por título.
 | Tareas completadas hoy | El D1 conserva 1 tarea «En curso», sin cierre y con workspace actualizado el 06/10 | No hay cierres en ese snapshot; no demuestra actividad real del día. |
 | Trabajo operativo diario | Sin movimientos fechados ni cantidad/unidad | No determinable. |
 
-Relectura de sólo lectura del D1 del Site actual, 26/10/2026: se encontraron 4
+Relectura de sólo lectura del D1 del Site actual, 27/10/2026: se encontraron 4
 perfiles marcados activos y 1 tarea, cuyo estado es «En curso» y cuyo campo de
-cierre está vacío. El workspace tiene su última actualización el 06/10/2026;
-las dos señales de presencia también son de esa fecha y no están vigentes. Es un
-snapshot atrasado del laboratorio; no permite afirmar que esos perfiles sean
-la dotación actual ni calcular completaciones del día. No se copiaron nombres,
-email, identificadores, comentarios ni filas de auditoría. El respaldo local
-del navegador no se consultó.
+cierre está vacío. La fecha `updated_at` del workspace continúa en
+`2026-10-06T16:24:10Z`; las dos señales de presencia también son de esa fecha y
+no están vigentes. Por lo tanto, el conteo describe únicamente la muestra del
+laboratorio guardada el 06/10, no la dotación actual ni las completaciones del
+27/10. El Site contiene datos de prueba identificables: no se copiaron nombres,
+emails, identificadores, títulos de tareas, comentarios ni filas de auditoría a
+GitHub. El respaldo local del navegador no se consultó.
 
 Para cerrar estos números se necesita un extracto autorizado y anonimizado con:
 ID estable de persona, estado activo y equipo; ID de ocurrencia, empresa y
