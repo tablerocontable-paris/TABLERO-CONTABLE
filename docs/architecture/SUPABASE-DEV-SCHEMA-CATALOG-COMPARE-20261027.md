@@ -57,6 +57,21 @@ perfecta: SQL011 tenía una lectura de encargado que no exigía membresía activ
 después de una revocación. SQL016 corrige esa ruta; la función remota final
 coincide con el replay local de SQL016 y sus regresiones sintéticas pasan.
 
+La frase «001–014 migró mal» mezcla dos asuntos distintos. Los defectos
+históricos encontrados en SQL004–008 y SQL014 se corrigieron durante sus
+iteraciones antes de fijar los hashes actuales; no se deben volver a ejecutar
+esas versiones antiguas. En cambio, el defecto de membresía revocada de SQL011
+sí persistió en el esquema instalado hasta que SQL016 reemplazó esa función.
+La revisión del SQL016 y la comparación de catálogo respaldan que esa función
+reparadora está instalada. Esto no equivale a certificar con Auth y HTTP
+alojados todos los permisos de las 18 migraciones.
+
+No hay evidencia para crear una migración 017 ahora: el run #4 no escribió,
+SQL016 corrige el único defecto explotable confirmado en la revisión de
+permisos citada, y no se identificó otra diferencia concreta que justifique
+DDL adicional. No reejecutar SQL001–016 ni usar `migration repair` para intentar
+resolver el fallo del workflow.
+
 ## Límites y siguiente paso
 
 La comparación acredita paridad del catálogo, no comportamiento integral de
