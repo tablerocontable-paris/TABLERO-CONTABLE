@@ -37,16 +37,18 @@
 
 ## Próximas acciones técnicas
 
-1. Terminar y probar el estimador con fixtures sintéticos; revisar CLI, seguridad
-   de entradas, zona horaria y reconciliación de intervalos.
-2. Registrar contrato y evidencia reproducible en este repositorio y continuar
-   su flujo directo a `main`, sin PR si el usuario mantiene esa preferencia.
-3. Sólo después, procesar un extracto real si se recibe de forma autorizada;
-   preservar originales localmente y compartir, como máximo, métricas agregadas
-   revisadas. No almacenar esas cifras o identificadores en el repositorio.
-4. Para terminar el producto real: resolver Data API/Auth y pruebas de permisos
-   en DEV, definir persistencia segura, luego producción, Cloudflare/correo y
-   aceptación desde la PC personal. Ver gates en `docs/EXECUTION-NEXT.md`.
+1. Comprobar GitHub Actions para los commits posteriores a `daee754`; la consulta
+   disponible no devolvió runs, así que el estado de CI de este corte no está
+   probado. No atribuirle los checks verdes de los commits anteriores.
+2. Para estimar datos reales, recibir un extracto autorizado y procesarlo
+   localmente con el utilitario. Mantener originales, clave y CSV seudonimizados
+   fuera de GitHub; no almacenar cifras identificables en el repositorio.
+3. Completar el onboarding autenticado sólo después de cerrar la revisión de
+   Auth/identidad y permisos en DEV; la inducción actual es de laboratorio y no
+   puede crear asignaciones reales.
+4. Para uso real, cerrar Data API/Auth y pruebas de permisos, luego persistencia,
+   producción, Cloudflare/correo y aceptación desde la PC personal. Ver gates en
+   `docs/EXECUTION-NEXT.md`.
 
 ## Corte implementado y publicado
 
