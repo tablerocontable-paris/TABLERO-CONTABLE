@@ -1,6 +1,6 @@
 # Estado vigente — Supabase DEV revisado, 27/10/2026
 
-## Clasificación neutral local — validada localmente
+## Clasificación neutral local — publicada y desplegada
 
 Se está cerrando el enlace determinista de los 26 conceptos v2 con el
 estimador local. El código estable y su versión se conservan en propuestas,
@@ -8,9 +8,14 @@ revisiones, catálogo, asignaciones y tareas generadas; los datos históricos
 quedan sin clasificar cuando no existe evidencia. Se comprueban correspondencias
 entre sugerencia, catálogo, asignación y tarea. La capa remota y SQL001–016 no
 se modifican. Validación local: suite **845/845 en 85 archivos**, TypeScript,
-build cliente, build Worker y paquete Sites aprobados; build cliente mantiene
-el aviso de chunk principal superior a 500 kB. Cambios aún sin commit/CI ni
-publicación en GitHub o Sites. Ver
+build cliente, build Worker y paquete Sites aprobados; pre-commit **214/214**.
+GitHub commit `9b54a4625f56e07fedbfba82d68696204f9a0e5d`, autor **Tablero
+Contable**, directo a `main`, sin PR; Actions #117 (`40555801302`) aprobó
+instalación, suite, build y paquete Sites. El mismo Site quedó actualizado a
+v99, deployment `appgdep_6ae0e7e339d4819180adeda021e82d7a`, desde su fuente
+`a80e3013d00165f1bc0abd64a580545a4322e49b`; acceso personalizado conservado,
+un usuario autorizado, cero visitantes externos. El build cliente mantiene el
+aviso de chunk principal superior a 500 kB. Ver
 `docs/architecture/AUTHENTICATED-NEUTRAL-FIRST-LOGIN-CONTRACT-DRAFT-20261027.md`.
 
 ## Revisión de onboarding neutral — 27/10/2026
@@ -45,7 +50,7 @@ ignoradas por Git. No se recibió un extracto real autorizado: dotación actual 
 tareas completadas hoy siguen sin determinarse. La continuidad portable segura
 está en `docs/PORTABLE-CONTINUITY-20261027.md`; conversaciones brutas, datos
 identificables, credenciales, sesiones y memoria global no se copian al repo.
-Sites sigue publicado como v98 y privado; el CI del repositorio no lo publica.
+El CI del repositorio no publica Sites; v99 se desplegó por separado.
 
 ## Resultado verificado de migraciones
 

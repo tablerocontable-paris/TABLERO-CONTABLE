@@ -1,6 +1,6 @@
 # Estado vigente de ejecución — 27/10/2026
 
-## Clasificación neutral local — validada localmente
+## Clasificación neutral — publicada y desplegada
 
 Las sugerencias de primer ingreso v2 ya se conectan con códigos estables
 compartidos con el estimador. La clasificación se conserva al enviar y
@@ -10,9 +10,16 @@ origen y registros; unidades sugeridas no se convierten automáticamente a las
 unidades del estimador. Datos antiguos sin clasificación permanecen así.
 No se tocó el contrato autenticado ni SQL001–016. Suite completa **845/845 en
 85 archivos**, TypeScript, build cliente, build Worker y paquete Sites
-aprobados. El build cliente conserva un aviso de chunk principal >500 kB.
-Próximo paso: commit directo en `main` y comprobar CI; esto no despliega el
-Site ni activa Auth. Contrato/detalle en
+aprobados; hook **214/214**. GitHub commit
+`9b54a4625f56e07fedbfba82d68696204f9a0e5d`, autor Tablero Contable, directo en
+`main`, sin PR; Actions #117 (`40555801302`) pasó instalación, suite, build y
+validación Sites. La versión **99** del Site existente se desplegó correctamente
+desde su rama fuente (`a80e3013d00165f1bc0abd64a580545a4322e49b`), manteniendo el
+acceso personalizado actual y sin visitantes externos. El build cliente conserva
+un aviso de chunk principal >500 kB. El onboarding autenticado y la clasificación
+remota siguen pendientes; no se activó Auth ni se modificó SQL001–016. Próximo:
+continuar el contrato remoto con revisión Sol antes de esquema, y usar el
+estimador sólo después de recibir un extracto vigente autorizado. Contrato/detalle en
 `docs/architecture/AUTHENTICATED-NEUTRAL-FIRST-LOGIN-CONTRACT-DRAFT-20261027.md`.
 
 ## Revisión del catálogo neutral

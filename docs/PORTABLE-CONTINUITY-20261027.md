@@ -4,7 +4,9 @@
 
 - Repositorio privado: `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`.
 - Site existente: `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85`, versión publicada
-  98, privado para su cuenta propietaria. El CI de GitHub no publica el Site.
+  99, deployment `appgdep_6ae0e7e339d4819180adeda021e82d7a`. Mantiene el modo
+  de acceso personalizado existente: un usuario autorizado, cero visitantes
+  externos. El CI de GitHub no publica el Site.
 - Supabase: `grupo-paris-dev`; migraciones SQL001–016 están instaladas. El
   workflow vigente verifica en sólo lectura; no volver a aplicar el baseline.
 - Estado operativo: perfiles y datos del laboratorio son ficticios; no activar
@@ -26,6 +28,13 @@
   código/version del concepto neutral. Ver contrato borrador en
   `docs/architecture/AUTHENTICATED-NEUTRAL-FIRST-LOGIN-CONTRACT-DRAFT-20261027.md`.
 - Se conservan los IDs históricos `starter-v1-*` y los historiales.
+- La taxonomía estable v2 del laboratorio ya enlaza los 26 conceptos con el
+  estimador y persiste la clasificación por propuesta, snapshot, estándar,
+  asignación y ocurrencia. No se infiere desde títulos ni unidades. El cambio
+  `9b54a4625f56e07fedbfba82d68696204f9a0e5d` pasó Actions #117
+  (`40555801302`), suite local 845/845, pre-commit 214/214, TypeScript, builds
+  cliente/Worker y paquete Sites. Se desplegó en Site v99 desde la rama fuente
+  independiente, commit `a80e3013d00165f1bc0abd64a580545a4322e49b`.
 - La captura de equipo sólo acredita 14 filas con nombre y una fila «Sin
   asignar», no el padrón vigente. Las imágenes de tareas están incompletas y no
   permiten estimar el trabajo real de hoy.
@@ -63,6 +72,12 @@
    `docs/EXECUTION-NEXT.md`.
 
 ## Corte implementado y publicado
+
+La clasificación neutral local quedó publicada en GitHub `main` con el commit
+`9b54a4625f56e07fedbfba82d68696204f9a0e5d` y desplegada en Site v99. Auth
+operativo permanece apagado y las migraciones SQL001–016 no se alteraron.
+La dotación y el trabajo real de hoy siguen sin determinarse: no se recibió un
+extracto vigente autorizado.
 
 Commit `daee754b9b688931e0779e271245acd6bd695526` contiene el estimador y
 contratos neutrales. El último corte documental validado es
