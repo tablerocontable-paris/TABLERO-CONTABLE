@@ -2,6 +2,14 @@
 
 ## Resultado verificado de migraciones
 
+El repositorio activo es `work/site`, remoto privado
+`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`. El commit actual
+`2b6a03ceeca6ce330abe073a646130e109547078`, autor **Tablero Contable**, dejó
+`verify_current` como selección inicial del workflow, en modo sin escrituras.
+GitHub Actions run `40526479997` terminó en éxito (suite, build y validación
+Sites). En local pasaron 839 pruebas en 84 archivos, TypeScript, builds cliente
+y Worker, validación Sites, `git diff --check` y hook 212/212.
+
 El proyecto `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`) registra las 18
 versiones correspondientes a los archivos 001–016. GitHub Actions confirma la
 secuencia: run `40012156985` aplicó y verificó la línea base 001–014; run
@@ -43,7 +51,8 @@ Las nueve tablas públicas sin policies son `private_block_note_receipts`,
 que `anon` y `authenticated` no tienen SELECT directo sobre ellas.
 
 La configuración de esquemas expuestos de Data API no está confirmada en esta
-revisión. El catálogo muestra que `public` concede USAGE a `anon` y
+revisión: la página del Dashboard no entregó su contenido legible a la sesión.
+El catálogo muestra que `public` concede USAGE a `anon` y
 `authenticated`; antes de usar Auth, datos reales o frontend conectado se debe
 verificar en Dashboard que Data API exponga sólo `api`, mantener apagada la
 autoexposición y completar la matriz de permisos. El área operativa sigue

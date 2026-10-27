@@ -1,5 +1,14 @@
 # Estado vigente de ejecución — 27/10/2026
 
+## Continuidad de GitHub
+
+El commit `2b6a03ceeca6ce330abe073a646130e109547078` está publicado
+directamente en `main`, sin PR, bajo el autor Tablero Contable. GitHub Actions
+run `40526479997` pasó suite, build y validación del paquete Sites. El run #4
+fallido fue una selección de etapa incorrecta, detenida antes de cualquier
+escritura; no representa un fallo de la base. El workflow ahora inicia en
+`verify_current`, de sólo lectura.
+
 ## Supabase DEV — historial ya completo
 
 La lectura remota confirma las 18 versiones 001–016 instaladas. Actions run
