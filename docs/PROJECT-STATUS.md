@@ -3,13 +3,14 @@
 ## Resultado verificado de migraciones
 
 El repositorio activo es `work/site`, remoto privado
-`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`. El commit actual
+`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`. El corte de código
 `31b49631d6a23b6f8d56e928e2a95ed57a2f1224`, autor **Tablero Contable**, está
 publicado directamente en `main`. GitHub Actions run `40533524080` (#105)
-terminó en éxito: `npm ci`, suite, build y validación del paquete Sites. El
-corte anterior `b199c900e3c5a0b04694f07ea01d4b32876e7790` también tuvo CI
-exitoso en run #104. La corrida #105 no modifica el Site publicado ni despliega
-producción.
+terminó en éxito con instalación, suite, build y paquete Sites. La actualización
+documental de auditoría se publicó como
+`a3a370f9f139f31df48bdc8f3f33796b8cce52d7`, bajo el mismo autor; run
+`40534554189` (#106) también pasó suite, build y validación Sites. Estos runs
+no despliegan el Site ni producción.
 
 El proyecto `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`) registra las 18
 versiones correspondientes a los archivos 001–016. GitHub Actions confirma la
@@ -32,18 +33,20 @@ proceso: su ejecución registrada fue exitosa y hash-locked. La captura del run
 001–014 cuando las 18 versiones ya estaban aplicadas; el guard lo detuvo antes
 de escribir. SQL016 corrigió el defecto funcional de lectura de encargado tras
 revocar membresía en la función legacy de 011, y su cuerpo instalado coincide
-con el archivo. La revisión RPC 001–014 es un corte histórico; ya está ampliada
-documentalmente con cambios 015–016, pero falta el inventario acumulado final de
-funciones y los permisos probados contra identidades del Supabase hosteado.
-Esto no demuestra ausencia de otros defectos semánticos.
+con el archivo. La revisión RPC 001–014 es un corte histórico; el inventario
+remoto 001–016 ya se contó en 142 funciones `SECURITY DEFINER`, con permisos y
+propietarios registrados en el informe de auditoría. Faltan la revisión
+función-por-función del alcance expuesto y pruebas contra identidades Auth
+hosteadas. Esto no demuestra ausencia de otros defectos semánticos.
 
 ## Auditoría read-only del esquema instalado
 
-El catálogo contiene 37 tablas en `public` y 20 en `app_private`; todas tienen
-RLS habilitado. Hay 28 policies públicas y ninguna en tablas privadas. No se
-otorgó DML directo a `anon` ni `authenticated`; `authenticated` tiene SELECT en
-28 tablas públicas, sujeto a sus policies. `app_private` no concede USAGE a
-esos roles. `api` concede USAGE sólo a `authenticated`. Los advisors siguen
+La consulta read-only del catálogo remoto del 27/10 encontró 37 tablas en
+`public` y 20 en `app_private`, todas con RLS. Hay 28 policies públicas y
+ninguna en tablas privadas. `anon` no tiene SELECT; `authenticated` tiene
+SELECT en 28 tablas públicas, sujeto a sus policies. Ninguno de esos roles tiene
+DML directo. `app_private` no concede USAGE a esos roles. `api` concede USAGE a
+`authenticated`, no a `anon`; `public` concede USAGE a ambos. Los advisors siguen
 marcando 29 tablas con RLS sin policy (20 privadas y 9 públicas), aviso INFO
 compatible con denegación por defecto, pero requiere revisar las nueve tablas
 públicas individualmente.
@@ -63,10 +66,20 @@ verificar en Dashboard que Data API exponga sólo `api`, mantener apagada la
 autoexposición y completar la matriz de permisos. El área operativa sigue
 apagada y no hay datos reales.
 
-El catálogo remoto muestra 39 funciones `SECURITY DEFINER` de `public`
-ejecutables por `authenticated`, sin DML directo; por eso la falta de una vía de
-tabla no basta para aceptar la seguridad de las RPC. La configuración del
-Dashboard y las pruebas con identidades aún son gates obligatorios.
+La lectura del catálogo contó 142 funciones `SECURITY DEFINER` en `public`,
+`api` y `app_private`; las 142 pertenecen a `postgres` y tienen `search_path`
+vacío. De ellas, 39 RPC de `public` y 3 RPC de `api` permiten `EXECUTE` a
+`authenticated`; ninguna función `SECURITY DEFINER` da acceso a `anon` o a
+`PUBLIC`. Las funciones internas de `app_private` no son ejecutables por esos
+roles. Se detectaron además dos funciones públicas no-`SECURITY DEFINER` de
+retorno `trigger` con `EXECUTE` heredado de `PUBLIC` (`normalize_assignment_schedule`,
+`reject_template_version_change`); no son llamadas RPC ordinarias, pero queda
+como hardening de defensa en profundidad revisar/revocar ese ACL en migración.
+
+La configuración de esquemas expuestos por Data API no se pudo confirmar desde
+el Dashboard. La matriz local no reemplaza pruebas contra sesiones Auth reales.
+Ambas comprobaciones siguen siendo gates obligatorios antes de conectar
+usuarios o datos reales.
 
 El workflow manual ahora ofrece `verify_current` sin escrituras como opción
 predeterminada. Próximo gate: revisión individual de ACL/RPC y tablas públicas,

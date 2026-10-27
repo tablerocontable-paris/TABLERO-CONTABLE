@@ -4,9 +4,9 @@
 
 La rama principal `main` está en el repositorio privado
 `tablerocontable-paris/TABLERO-CONTABLE`. Los commits de continuidad se publican
-directamente, sin PR, bajo el autor Tablero Contable. En el corte del 27/10/2026,
-el commit `31b49631d6a23b6f8d56e928e2a95ed57a2f1224` terminó con GitHub Actions
-run 105 exitoso: suite, build y validación del paquete Sites. Antes de editar,
+directamente, sin PR, bajo el autor Tablero Contable. El corte de auditoría
+del 27/10/2026 se publicó en `a3a370f9f139f31df48bdc8f3f33796b8cce52d7`; GitHub
+Actions run 106 pasó suite, build y validación del paquete Sites. Antes de editar,
 hacé `git pull --ff-only origin main` y consultá Actions para confirmar el CI
 del HEAD actual.
 
@@ -29,11 +29,11 @@ verificados. El workflow ahora inicia en
 `verify_current`, de sólo lectura.
 
 Antes de Auth, datos reales o frontend conectado sigue pendiente verificar en el
-Dashboard que Data API exponga sólo `api`, actualizar el inventario RPC
-acumulado 001–016, revisar ACL efectivos y completar pruebas de permisos con
-identidades de DEV. La auditoría de 001–014 se amplió en texto para SQL015/016,
-pero sus recuentos históricos no son un inventario final. La revisión no
-equivale a aceptación integral de producción.
+Dashboard que Data API exponga sólo `api` y completar pruebas de permisos con
+identidades de DEV. El catálogo instalado reporta 142 funciones `SECURITY
+DEFINER`, todas de `postgres` y con `search_path` vacío; 39 RPC en `public` y 3
+en `api` son ejecutables por `authenticated`, ninguna por `anon` o `PUBLIC`.
+La revisión no equivale a aceptación integral de producción.
 
 El catálogo v2 está publicado en el mismo Site privado como v98, desde el
 commit de código `ad1b4180556307755c7a4e0fd221316237fc341c`; el run de validación

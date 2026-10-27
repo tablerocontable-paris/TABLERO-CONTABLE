@@ -32,10 +32,30 @@ hosteado.
 
 El inventario numérico de 39 RPC públicas y 138 definiciones `SECURITY
 DEFINER` de abajo pertenece al corte 001–014; no se debe presentar como un
-recuento final actualizado. Falta generar el inventario acumulado 001–016 y
-contrastar funciones, propietarios y ACL efectivos en DEV. También siguen sin
-verificación en esta revisión la lista de esquemas expuestos del Dashboard y
-las pruebas de denegación con identidades hosteadas.
+recuento final actualizado. La consulta read-only al catálogo DEV del 27/10
+obtuvo el recuento acumulado siguiente:
+
+| Esquema | Funciones `SECURITY DEFINER` | Ejecutables por `authenticated` | Ejecutables por `anon`/`PUBLIC` |
+|---|---:|---:|---:|
+| `public` | 88 | 39 | 0 |
+| `api` | 12 | 3 | 0 |
+| `app_private` | 42 | 0 | 0 |
+| **Total** | **142** | **42** | **0** |
+
+Las 142 son propiedad de `postgres` y tienen `search_path` vacío. `api` otorga
+USAGE a `authenticated` y no a `anon`; `app_private` no otorga USAGE a ninguno.
+`public` otorga USAGE a ambos, por lo que falta confirmar en Dashboard si ese
+esquema sigue expuesto por Data API. Se encontraron dos funciones públicas
+`RETURNS trigger`, no `SECURITY DEFINER`, con `EXECUTE` de `PUBLIC`:
+`normalize_assignment_schedule` y `reject_template_version_change`. Sus tipos de
+retorno impiden invocarlas como RPC ordinarias y `anon` no tiene DML directo;
+un subagente las clasificó como hardening de defensa en profundidad, no como
+una vía de acceso demostrada. La revocación requiere una prueba local de que los
+triggers existentes continúan ejecutándose antes de considerar una migración.
+
+El catálogo efectivo ya fue contrastado en DEV. Siguen sin verificación la lista
+de esquemas expuestos del Dashboard y las pruebas de denegación con identidades
+Auth hosteadas.
 
 ## Resultado de la reconstrucción
 
