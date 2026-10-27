@@ -41,7 +41,7 @@ pesos ni vencimientos sin revisión y aprobación de jefatura.
 | Tesorería, bancos y cobranzas | Procesamiento y control de pagos | Incluye pagos a proveedores y su referencia; pago de sueldos no implica liquidar haberes. |
 | Tesorería, bancos y cobranzas | Arqueo y control de caja | Registrar control y diferencias, sin inferir faltantes. |
 | Tesorería, bancos y cobranzas | Registro y seguimiento de cobranzas | Registrar movimientos y estado con referencia. |
-| Tesorería, bancos y cobranzas | Registro y control de cancelaciones de cupones | Plataforma y período quedan como contexto. |
+| Tesorería, bancos y cobranzas | Registro y control de liquidaciones de tarjetas y cupones | Registrar la liquidación del procesador; conciliarla con banco/contabilidad en un control separado. |
 | Tesorería, bancos y cobranzas | Registro de devoluciones a clientes | Mantener la referencia al movimiento de origen cuando exista. |
 | Tesorería, bancos y cobranzas | Registro y control de cheques | Distinguir cheques y eCheq sólo si la fuente lo requiere. |
 | Tesorería, bancos y cobranzas | Registro y control de operaciones de crédito | No inferir evaluación o aprobación crediticia. |
@@ -89,15 +89,24 @@ laboratorio guardada el 06/10, no la dotación actual ni las completaciones del
 emails, identificadores, títulos de tareas, comentarios ni filas de auditoría a
 GitHub. El respaldo local del navegador no se consultó.
 
-Para cerrar estos números se necesita un extracto autorizado y anonimizado con:
-ID estable de persona, estado activo y equipo; ID de ocurrencia, empresa y
-período; estado; fechas de programación, finalización, anulación y reapertura;
-zona horaria; relación de tarea conjunta/cobertura; y movimientos operativos
-individuales con cantidad, unidad y fecha. Los adjuntos y comentarios deben
-quedar fuera salvo autorización explícita, necesidad funcional y revisión de
-privacidad.
+Para cerrar estos números se necesita un extracto autorizado y seudonimizado
+con IDs estables, estado activo, ID de ocurrencia y período, estado al corte,
+fechas de programación/finalización/anulación, eventos de reapertura, zona
+horaria, relación conjunta/cobertura y movimientos con cantidad, unidad y fecha.
+Los adjuntos y comentarios quedan fuera. El proceso local está especificado en
+`docs/product/ANONYMIZED-WORKFORCE-ESTIMATE.md`; no se ha recibido ni procesado
+ningún extracto real. Los IDs estables se protegen con una clave HMAC local, pero
+la salida aún puede permitir reidentificación por fechas o rareza; no publicarla.
 
 ## Estado de implementación
+
+El estimador local distingue personas vigentes al corte, ocurrencias lógicas
+por estado (una sola por grupo de tarea conjunta), asignaciones fuente, cierres
+finales vigentes, eventos de cierre/reapertura y movimientos por cantidad/unidad.
+No calcula personal real hasta recibir un extracto
+autorizado y actual. Sus plantillas están vacías y sus pruebas usan fixtures
+ficticios. Se aceptan únicamente códigos de concepto y unidades de vocabulario
+neutro cerrado; toda categoría nueva requiere revisión explícita.
 
 La versión `starter-v1-*` es una simulación local de seis sugerencias y se
 conserva por compatibilidad. El catálogo v2 agrupa 26 conceptos opcionales,

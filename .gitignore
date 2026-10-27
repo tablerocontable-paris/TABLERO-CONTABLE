@@ -5,6 +5,7 @@ supabase/.temp/
 .env.*
 !.env.example
 coverage/
+/private-data/
 /outputs/*
 !/outputs/LEEME-PC-PERSONAL.md
 !/outputs/independent-sol-review-20261014/

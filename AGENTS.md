@@ -62,7 +62,11 @@ cierre. No estima personal ni tareas completadas hoy. No copiar nombres,
 correos, títulos de tareas, comentarios, identificadores ni auditoría en crudo.
 Para cifras reales se requiere una exportación autorizada y anonimizada con IDs
 estables, estado y marcas de tiempo; el esquema de entrada y cálculo reproducible
-queda en curso.
+está documentado en `docs/product/ANONYMIZED-WORKFORCE-ESTIMATE.md` e
+implementado localmente en `scripts/workforce-estimate*.mjs`. Los casos
+sintéticos se cubren en `tests/workforce-estimate.test.ts`; aún no hay un
+extracto real y por eso no hay estimación real calculada. Tratar las salidas como
+seudónimos potencialmente reidentificables y mantenerlas fuera de Git.
 
 ## Site y preservación
 

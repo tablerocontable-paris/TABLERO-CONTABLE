@@ -1,5 +1,27 @@
 # Estado vigente de ejecución — 27/10/2026
 
+## Estimador local y continuidad portable — actualización
+
+El estimador de personas/tareas fue implementado localmente en
+`scripts/workforce-estimate*.mjs`, con plantillas vacías, vocabularios neutrales
+cerrados, clave HMAC generada sólo en `private-data/`, aislamiento de entradas y
+salidas con `.gitignore`, y documentación en
+`docs/product/ANONYMIZED-WORKFORCE-ESTIMATE.md`. Hay cuatro pruebas sintéticas
+focales. La última suite completa aprobó **843/843 pruebas en 85 archivos**;
+TypeScript, build cliente y build Worker aprobaron en esta copia. El build
+cliente conserva un aviso de bundle principal superior a 500 kB. Falta el hook
+de commit, push directo y CI de GitHub para este corte.
+No se recibió un extracto autorizado; la cantidad real de personas y tareas
+terminadas hoy continúa **sin determinarse**. No crear ni copiar datos reales a
+GitHub. El runtime Node incluido permite ejecutar el código en esta PC sin
+instalar npm.
+
+El resumen portable está en `docs/PORTABLE-CONTINUITY-20261027.md`. Migra
+decisiones y evidencia técnica segura, no conversaciones brutas, memoria global
+de Codex, comentarios privados, datos identificables, credenciales o sesiones.
+La versión Sites v98 sigue publicada y privada según la consulta actual del
+conector; su acceso requiere la cuenta propietaria.
+
 ## Continuidad de GitHub
 
 El commit `a3a370f9f139f31df48bdc8f3f33796b8cce52d7` está publicado
