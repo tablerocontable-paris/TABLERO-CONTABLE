@@ -27,13 +27,14 @@ conector; su acceso requiere la cuenta propietaria.
 
 ## Continuidad de GitHub
 
-El commit `a3a370f9f139f31df48bdc8f3f33796b8cce52d7` está publicado
-directamente en `main`, sin PR, bajo el autor Tablero Contable. GitHub Actions
-run `40534554189` (#106) terminó en éxito con suite, build y validación Sites;
-run #105 del commit anterior también pasó. El run #4 de migraciones falló por
-seleccionar una etapa incorrecta; el preflight lo detuvo antes de cualquier escritura y no
-representa un fallo de la base. El workflow de migraciones inicia en
-`verify_current`, de sólo lectura.
+El estimador y el contexto portable se publicaron directamente en `main` como
+`daee754b9b688931e0779e271245acd6bd695526`, bajo el autor Tablero Contable; un
+commit documental posterior completó el estado de verificación. No se abrió PR.
+La última consulta del conector devolvió cero ejecuciones asociadas a esos SHA;
+CI sigue sin confirmar. Los runs #105–107 son evidencia del corte anterior y no
+se atribuyen a estos cambios. El run #4 de migraciones fue detenido por el
+preflight antes de escritura; el workflow vigente inicia en `verify_current`,
+de sólo lectura.
 
 ## Supabase DEV — historial ya completo
 

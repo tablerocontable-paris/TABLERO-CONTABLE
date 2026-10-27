@@ -1,5 +1,23 @@
 # Estado vigente — Supabase DEV revisado, 27/10/2026
 
+## Continuidad y estimador — última actualización
+
+El corte funcional del estimador y la revisión de conceptos neutrales está
+publicado directamente en `main` como `daee754b9b688931e0779e271245acd6bd695526`,
+bajo el autor Tablero Contable. El seguimiento documental se publicó en el
+mismo repositorio; no se abrió PR. Suite **843/843 en 85 archivos**, TypeScript,
+build cliente, build Worker y hook pre-commit **212/212** pasaron. El build
+cliente advierte un chunk principal superior a 500 kB. El conector de GitHub no
+devolvió ejecuciones de Actions para el corte cuando se consultó; su CI queda
+sin confirmar.
+
+El estimador es local, con vocabulario neutral cerrado y entradas/salidas
+ignoradas por Git. No se recibió un extracto real autorizado: dotación actual y
+tareas completadas hoy siguen sin determinarse. La continuidad portable segura
+está en `docs/PORTABLE-CONTINUITY-20261027.md`; conversaciones brutas, datos
+identificables, credenciales, sesiones y memoria global no se copian al repo.
+Sites sigue publicado como v98 y privado; el CI del repositorio no lo publica.
+
 ## Resultado verificado de migraciones
 
 El repositorio activo es `work/site`, remoto privado

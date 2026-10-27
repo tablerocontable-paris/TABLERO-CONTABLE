@@ -1,10 +1,13 @@
 # Estado actual del proyecto — actualizado 27/10/2026
 
 Repositorio activo `work/site`, remoto privado
-`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`. HEAD `8bb4fcf` (autor
-**Tablero Contable**) actualiza la auditoría del catálogo remoto de Supabase;
-GitHub Actions run `40535714588` (#107) pasó instalación, suite, build y paquete
-Sites. El hook local pasó 212/212. Verificar Actions tras cada nuevo push.
+`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`. El corte del estimador y
+contexto portable se publicó directamente bajo el autor **Tablero Contable** en
+`daee754b9b688931e0779e271245acd6bd695526`; el seguimiento de su validación está
+registrado en `docs/EXECUTION-NEXT.md` y `docs/PORTABLE-CONTINUITY-20261027.md`.
+Suite completa 843/843, TypeScript/build cliente/Worker y hook 212/212 pasaron.
+El conector de GitHub aún no mostró ejecuciones de Actions para este corte; no
+afirmar CI aprobado sin comprobarlo.
 
 ## Objetivo y primera experiencia
 
