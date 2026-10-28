@@ -229,7 +229,7 @@ describe("integración de propuestas en la inducción", () => {
     expect(saved.onboarding[boss.id]?.companyTargets?.[starterDraftId]?.[bossCompanies[0]!]).toBe(0);
   });
 
-  it("materializa un v1 ya seleccionado en el borrador histórico y conserva su versión", async () => {
+  it("conserva selecciones v1 del borrador pero no materializa nombres neutrales como tareas nuevas", async () => {
     const state = seed();
     state.activeId = "e0";
     state.assignments = [];
@@ -241,12 +241,30 @@ describe("integración de propuestas en la inducción", () => {
       selectedCompanyIds: ["c1"], selectedTemplateIds: [legacyId], assignmentCompanyIds: {},
       schedules: {}, companySchedules: {}, companyTargets: {}, customTitle: "", customSteps: "", customTasks: [], habitualTaskProposals: [],
     };
+    persist(state, true);
     render(<App initialState={state as State} laboratoryMode />);
     fireEvent.click(await screen.findByRole("button", { name: /Preparar mi tablero/ }));
-    await waitFor(() => expect(load(true).assignments).toHaveLength(1));
+    await screen.findByText("Elegí al menos una unidad de negocio antes de confirmar tus tareas.");
     const saved = load(true);
-    expect(saved.assignments[0]).toMatchObject({ starterId: legacyId, title: "Conciliación de cuenta bancaria", templateId: null });
-    expect(saved.tasks.some((task) => task.assignmentId === saved.assignments[0]?.id)).toBe(true);
+    expect(saved.assignments).toHaveLength(0);
+    expect(saved.tasks).toHaveLength(0);
+    expect(saved.onboarding.e0?.selectedTemplateIds).toEqual([legacyId]);
+    expect(saved.onboarding.e0?.completedAt).toBeNull();
+  });
+
+  it("encamina un borrador v1 sin unidad al catálogo París y no expone tareas libres", () => {
+    const state = seed();
+    const profile = state.profiles.find((row) => row.id === "e0")!;
+    const draft: Draft = {
+      ...state.onboarding.e0!, version: 1, step: 2, selectedCompanyIds: ["c1"],
+      selectedBusinessUnitCodes: [], selectedTemplateIds: ["starter-v1-bank-reconciliation"],
+    };
+    render(<Onboarding state={state} month="2026-10" profile={profile} draft={draft} update={vi.fn()} finish={vi.fn()} pause={vi.fn()} laboratory />);
+    expect(document.querySelector(".paris-task-catalog")).not.toBeNull();
+    expect(screen.getByText(/borrador conserva selecciones de una versión anterior/i)).toBeTruthy();
+    expect(screen.queryByText("Sugerencias para propuestas · opcionales")).toBeNull();
+    expect(screen.queryByText("Agregar un trabajo esporádico · una sola vez")).toBeNull();
+    expect((screen.getByRole("button", { name: /Continuar/ }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it("al quitar una propuesta limpia sus claves de programación y permite terminar otra selección válida", async () => {
@@ -287,17 +305,18 @@ describe("integración de propuestas en la inducción", () => {
     expect(removedDraft.assignmentCompanyIds).not.toHaveProperty(proposalId);
     removalView.unmount();
     state.onboarding.e0 = { ...removedDraft, step: 5 };
+    persist(state as State, true);
     render(<App initialState={state as State} laboratoryMode />);
     fireEvent.click(await screen.findByRole("button", { name: /Preparar mi tablero/ }));
 
-    await waitFor(() => expect(load(true).onboarding.e0?.completedAt).toBeTruthy());
+    await screen.findByText(/borrador conserva tareas anteriores sin clasificación Grupo París/i);
     const saved = load(true);
     expect(saved.onboarding.e0?.habitualTaskProposals).toEqual([]);
     expect(saved.onboarding.e0?.schedules).not.toHaveProperty(proposalId);
     expect(saved.onboarding.e0?.companySchedules).not.toHaveProperty(proposalId);
     expect(saved.onboarding.e0?.companyTargets).not.toHaveProperty(proposalId);
     expect(saved.onboarding.e0?.assignmentCompanyIds).not.toHaveProperty(proposalId);
-    expect(saved.assignments.some((assignment) => assignment.ownerId === "e0")).toBe(true);
+    expect(saved.assignments).toHaveLength(0);
   });
 
   it("al retirar una empresa limpia sólo sus mapas y envía la propuesta para la empresa restante", async () => {
@@ -402,10 +421,12 @@ describe("integración de propuestas en la inducción", () => {
     editView.unmount();
 
     state.onboarding.e0 = { ...editedDraft, step: 5 };
+    persist(state as State, true);
     render(<App initialState={state as State} laboratoryMode />);
     fireEvent.click(await screen.findByRole("button", { name: /Preparar mi tablero/ }));
-    await waitFor(() => expect(load(true).assignments.some((assignment) => assignment.id === `onboard-e0-c1-${customTask.id}`)).toBe(true));
+    await screen.findByText(/borrador conserva tareas anteriores sin clasificación Grupo París/i);
     const saved = load(true);
+    expect(saved.assignments).toHaveLength(0);
     expect(saved.assignments.some((assignment) => assignment.id === `onboard-e0-c2-${customTask.id}`)).toBe(false);
     expect(saved.onboarding.e0?.companySchedules?.[customTask.id]?.c2).toEqual(invalidLatentSchedule);
   });
@@ -451,12 +472,13 @@ describe("integración de propuestas en la inducción", () => {
 
     cleanup();
     state.onboarding.e0 = { ...editedDraft, step: 5 };
+    persist(state as State, true);
     render(<App initialState={state as State} laboratoryMode />);
     fireEvent.click(await screen.findByRole("button", { name: /Preparar mi tablero/ }));
-    await waitFor(() => expect(load(true).onboarding.e0?.completedAt).toBeTruthy());
+    await screen.findByText(/borrador conserva tareas anteriores sin clasificación Grupo París/i);
     const saved = load(true);
     expect(saved.onboarding.e0?.companySchedules?.[removedTemplate!.id]?.c1).toEqual(invalidLatentSchedule);
     expect(saved.onboarding.e0?.companySchedules?.[removedCustom.id]?.c1).toEqual(invalidLatentSchedule);
-    expect(saved.assignments.some((assignment) => assignment.ownerId === "e0")).toBe(true);
+    expect(saved.assignments).toHaveLength(0);
   });
 });

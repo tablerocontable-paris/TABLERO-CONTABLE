@@ -5,6 +5,7 @@ import ScheduleEditor from "./ScheduleEditor";
 import { getParisTask, parisTaskParameterKey, PARIS_BUSINESS_UNITS } from "../domain/parisTaskCatalog";
 import {
   approveHabitualTaskProposals,
+  hasConsistentParisProposalClassification,
   groupHabitualTaskProposals,
   pendingHabitualTaskProposals,
   proposalsForProfile,
@@ -35,7 +36,7 @@ function ProposalGroupCard({ group, suggestedMatch, state, actor, month, commit,
   group: HabitualTaskProposal[]; suggestedMatch: boolean; state: State; actor: Profile; month: string; commit: Commit; notify: Notify;
 }) {
   const first = group[0];
-  const requiresCanonicalSelection = group.some((proposal) => (proposal.taskCode && (proposal.submissions || []).some((submission) => !submission.taskCode)) || (!proposal.taskCode && (proposal.businessUnitCode || proposal.taskCatalogVersion !== undefined || (proposal.submissions || []).some((submission) => submission.businessUnitCode || submission.taskCatalogVersion !== undefined))));
+  const requiresCanonicalSelection = group.some((proposal) => !hasConsistentParisProposalClassification(proposal));
   const [templateId, setTemplateId] = useState("");
   const [standard, setStandard] = useState({
     title: first.title,
@@ -56,7 +57,7 @@ function ProposalGroupCard({ group, suggestedMatch, state, actor, month, commit,
 
   function approve(decision: { kind: "link"; templateId: string } | { kind: "create"; template: { title: string; sector: string; description: string; kind: Template["kind"]; unit: string; weight: number; target: number; steps: string[] } }) {
     try {
-      const next = approveHabitualTaskProposals(state, actor, group.map((proposal) => proposal.id), decision, month, new Date().toISOString());
+      const next = approveHabitualTaskProposals(state, actor, group.map((proposal) => proposal.id), decision, month, new Date().toISOString(), undefined, { requireParisTaskClassification: true });
       if (commit(materialize(next, month), decision.kind === "link" ? "Vinculó propuestas a un estándar" : "Creó un estándar y aprobó propuestas", group[0].id))
         notify(`Se activaron ${group.length} asignaciones independientes en el laboratorio.`);
     } catch (error) { notify((error as Error).message); }
@@ -74,7 +75,7 @@ function ProposalGroupCard({ group, suggestedMatch, state, actor, month, commit,
         <small>{first.kind === "operativa" ? `Actividad · ${first.unit}` : "Entregable con controles"}</small>
       </div>
       {suggestedMatch && <p className="habitual-proposal-hint">La coincidencia sólo orienta la revisión. No se fusionaron nombres, empresas ni asignaciones.</p>}
-      {requiresCanonicalSelection && <p className="notice-banner" role="note">Esta propuesta mezcla historial con y sin clasificación estándar. No se puede activar ni incorporar al catálogo. Conservá el historial y pedí que se revise antes de generar trabajo.</p>}
+      {requiresCanonicalSelection && <p className="notice-banner" role="note">Esta propuesta conserva un historial sin clasificación completa del catálogo Grupo París y no se puede activar. Mantenela pendiente; para generar trabajo, enviá una propuesta nueva seleccionando tarea, unidad de negocio y parámetros obligatorios. El historial anterior se conserva.</p>}
       <div className="habitual-proposal-members">
         {group.map((proposal) => (
           <section className="habitual-proposal-member" key={proposal.id}>

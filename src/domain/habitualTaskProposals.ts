@@ -35,6 +35,19 @@ export interface StandardProposalInput {
   steps: string[];
 }
 
+export function hasConsistentParisProposalClassification(proposal: HabitualTaskProposal): boolean {
+  if (!proposal.taskCode || !isParisTaskCatalogVersion(proposal.taskCatalogVersion) ||
+      !isParisBusinessUnitCode(proposal.businessUnitCode || "") ||
+      !hasRequiredParisTaskParameters(proposal.taskCode, proposal.taskParameters || {}, proposal.taskCatalogVersion)) return false;
+  const parameters = JSON.stringify(Object.entries(proposal.taskParameters || {}).sort(([left], [right]) => left.localeCompare(right)));
+  return (proposal.submissions || []).every((submission) =>
+    submission.taskCode === proposal.taskCode &&
+    submission.taskCatalogVersion === proposal.taskCatalogVersion &&
+    submission.businessUnitCode === proposal.businessUnitCode &&
+    JSON.stringify(Object.entries(submission.taskParameters || {}).sort(([left], [right]) => left.localeCompare(right))) === parameters,
+  );
+}
+
 export type ProposalGroup = {
   key: string;
   suggestedMatch: boolean;
@@ -249,6 +262,7 @@ export function approveHabitualTaskProposals(
   month: string,
   now = new Date().toISOString(),
   makeId: () => string = id,
+  options: { requireParisTaskClassification?: boolean } = {},
 ): State {
   const ids = [...new Set(proposalIds)];
   if (!ids.length || ids.length !== proposalIds.length) throw Error("Seleccioná propuestas distintas para revisar.");
@@ -256,6 +270,8 @@ export function approveHabitualTaskProposals(
   if (proposals.some((row) => !row || row.status !== "pending")) throw Error("Todas las propuestas deben seguir pendientes.");
   const selected = proposals as HabitualTaskProposal[];
   requireManager(state, actor, selected);
+  if (options.requireParisTaskClassification && selected.some((proposal) => !hasConsistentParisProposalClassification(proposal)))
+    throw Error("La propuesta necesita una tarea, versión de catálogo, unidad de negocio y parámetros válidos antes de generar asignaciones.");
   if (selected.some((proposal) => (proposal.taskCode && (proposal.submissions || []).some((submission) => !submission.taskCode)) || (!proposal.taskCode && (proposal.businessUnitCode || proposal.taskCatalogVersion !== undefined ||
       (proposal.submissions || []).some((submission) => submission.businessUnitCode || submission.taskCatalogVersion !== undefined)))))
     throw Error("La propuesta todavía no está vinculada a una tarea del catálogo Grupo París. Conservá la revisión histórica y pedí que se vuelva a seleccionar desde el catálogo antes de activarla.");

@@ -16,20 +16,21 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 
-function pendingProposals() {
+function pendingProposals(canonical = false) {
   let state = seed();
   state.assignments = [];
   state.tasks = [];
   state.notifications = [];
   const input = {
-    title: "Conciliación Banco Nación",
-    process: "Banco Nación",
+    title: canonical ? "Conciliación bancaria" : "Conciliación Banco Nación",
+    process: canonical ? "" : "Banco Nación",
     description: "Comparar los movimientos y dejar las diferencias documentadas.",
     kind: "resultado" as const,
     unit: "",
     target: 0,
     schedule: defaultSchedule("2026-10-10", "mensual"),
     steps: ["Descargar el extracto", "Comparar movimientos"],
+    ...(canonical ? { taskCode: "gpar_bank_reconciliation", taskCatalogVersion: PARIS_TASK_CATALOG_VERSION, businessUnitCode: "paris_autos" as const, taskParameters: { banco: "Banco Nación", cuenta: "Principal" } } : {}),
   };
   state = submitHabitualTaskProposal(state, state.profiles.find((profile) => profile.id === "e0")!, {
     ...input, id: "proposal-c1", companyId: "c1",
@@ -47,14 +48,24 @@ describe("interfaz de propuestas de tareas habituales", () => {
     const paris = { ...original, taskCode: "gpar_bank_reconciliation", taskCatalogVersion: PARIS_TASK_CATALOG_VERSION, businessUnitCode: "paris_autos" as const, submissions: [{ ...original.submissions[0]!, revision: 1 }, { ...original.submissions[0]!, revision: 2, taskCode: "gpar_bank_reconciliation", taskCatalogVersion: PARIS_TASK_CATALOG_VERSION, businessUnitCode: "paris_autos" as const }], revision: 2 };
     const state = { ...base, habitualTaskProposals: [paris] };
     render(<HabitualTaskProposalInbox state={state} actor={state.profiles.find((profile) => profile.id === "boss")!} month={currentMonth()} commit={() => true} notify={() => {}} />);
-    expect(screen.getByText(/mezcla historial con y sin clasificación estándar/i)).toBeTruthy();
+    expect(screen.getByText(/conserva un historial sin clasificación completa del catálogo Grupo París/i)).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Vincular y activar/ })).toBeNull();
     expect(screen.queryByText(/Crear un estándar para/)).toBeNull();
     expect(screen.getAllByText(/Solicitar correcciones/).length).toBeGreaterThan(0);
   });
 
-  it("muestra coincidencias como sugerencia y exige que jefatura vincule el estándar", () => {
+  it("mantiene propuestas neutrales pendientes hasta seleccionar la tarea estándar", () => {
     const state = pendingProposals();
+    const manager = state.profiles.find((profile) => profile.id === "boss")!;
+    render(<HabitualTaskProposalInbox state={state} actor={manager} month={currentMonth()} commit={() => true} notify={() => {}} />);
+    expect(screen.getByText(/conserva un historial sin clasificación completa del catálogo Grupo París/i)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /Vincular y activar/ })).toBeNull();
+    expect(screen.queryByText(/Crear un estándar para/)).toBeNull();
+    expect(screen.getAllByText(/Solicitar correcciones/).length).toBeGreaterThan(0);
+  });
+
+  it("permite activar propuestas canónicas conservando la asignación por persona y empresa", () => {
+    const state = pendingProposals(true);
     const manager = state.profiles.find((profile) => profile.id === "boss")!;
     const notify = vi.fn();
     let committed: State | undefined;
@@ -68,17 +79,18 @@ describe("interfaz de propuestas de tareas habituales", () => {
 
     expect(screen.getByRole("button", { name: "Plegar Propuestas de tareas habituales" }).getAttribute("aria-expanded")).toBe("true");
     expect(screen.getByText("Posible coincidencia · 2")).toBeTruthy();
-    expect(screen.getByText(/No se fusionaron nombres, empresas ni asignaciones/)).toBeTruthy();
+    expect(screen.getByText(/La coincidencia sólo orienta la revisión/)).toBeTruthy();
     const approve = screen.getByRole("button", { name: "Vincular y activar 2 asignaciones" });
     expect((approve as HTMLButtonElement).disabled).toBe(true);
-    fireEvent.change(screen.getByLabelText("Estándar existente para Conciliación Banco Nación"), { target: { value: "cat1" } });
-    fireEvent.click(approve);
+    fireEvent.click(screen.getByText("Crear un estándar para el grupo"));
+    fireEvent.click(screen.getByRole("button", { name: "Crear estándar y activar 2 asignaciones" }));
 
     expect(committed?.habitualTaskProposals?.every((proposal) => proposal.status === "approved")).toBe(true);
     expect(committed?.assignments).toHaveLength(2);
     expect(committed?.assignments.map((assignment) => [assignment.ownerId, assignment.companyId])).toEqual([["e0", "c1"], ["e1", "c2"]]);
     const materialized = materialize(committed!, currentMonth());
     expect(materialized.tasks.map((task) => task.companyId).sort()).toEqual(["c1", "c2"]);
+    expect(committed?.templates.find((template) => template.taskCode === "gpar_bank_reconciliation")).toBeTruthy();
     expect(notify).toHaveBeenCalledWith("Se activaron 2 asignaciones independientes en el laboratorio.");
   });
 

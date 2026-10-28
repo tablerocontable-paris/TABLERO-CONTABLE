@@ -838,11 +838,13 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
   function finishOnboarding() {
     const preparesPersonalTasks = active.role !== "jefe";
     const hasLegacyOnboardingSelections = draft.selectedTemplateIds.length > 0 || (draft.customTasks?.length || 0) > 0 || !!draft.customTitle.trim() || (draft.habitualTaskProposals || []).some((proposal) => !proposal.taskCode);
-    const parisOnboarding = laboratory && !remoteSave && active.role !== "jefe" && (!hasLegacyOnboardingSelections || (draft.selectedBusinessUnitCodes?.length || 0) > 0);
+    const hasLegacyV1StarterSelection = draft.selectedTemplateIds.some((taskId) => taskId.startsWith("starter-v1-"));
+    const parisOnboarding = laboratory && !remoteSave && active.role !== "jefe" && (!hasLegacyOnboardingSelections || (draft.selectedBusinessUnitCodes?.length || 0) > 0 || hasLegacyV1StarterSelection);
+    const selectedTemplateIds = parisOnboarding ? [] : draft.selectedTemplateIds;
     try {
       if (parisOnboarding && !(draft.selectedBusinessUnitCodes?.length || 0))
         throw Error("Elegí al menos una unidad de negocio antes de confirmar tus tareas.");
-      if (parisOnboarding && !(draft.version < 3 && hasLegacyOnboardingSelections)) {
+      if (parisOnboarding) {
         const canonicalSelections = (draft.habitualTaskProposals || []).filter((proposal) => !!proposal.taskCode);
         if (!canonicalSelections.length)
           throw Error("Elegí al menos una tarea del catálogo Grupo París para preparar el tablero.");
@@ -851,19 +853,23 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
             !proposal.companyIds.some((companyId) => draft.selectedCompanyIds.includes(companyId))))
           throw Error("Cada tarea estándar necesita una unidad y al menos una empresa seleccionadas.");
       }
+      if (laboratory && !remoteSave && active.role !== "jefe" && !parisOnboarding && (draft.selectedTemplateIds.length || (draft.customTasks?.length || 0) || draft.customTitle.trim()))
+        throw Error("Este borrador conserva tareas anteriores sin clasificación Grupo París. No se activaron: quitá esas selecciones y elegí tareas del catálogo con su unidad de negocio.");
       if (preparesPersonalTasks) {
         const effectiveCompanies = new Map<string, Set<string>>();
         const addEffectiveCompanies = (key: string, companyIds: string[]) => {
           const selected = companyIds.filter((companyId) => draft.selectedCompanyIds.includes(companyId));
           if (selected.length) effectiveCompanies.set(key, new Set(selected));
         };
-        for (const taskId of draft.selectedTemplateIds.filter((taskId) => !parisOnboarding || !!state.templates.find((template) => template.id === taskId)?.taskCode)) {
+        for (const taskId of selectedTemplateIds) {
           addEffectiveCompanies(taskId, draft.assignmentCompanyIds?.[taskId] || draft.selectedCompanyIds);
         }
-        for (const task of draft.customTasks || []) {
-          addEffectiveCompanies(task.id, draft.assignmentCompanyIds?.[task.id] || draft.selectedCompanyIds);
+        if (!parisOnboarding) {
+          for (const task of draft.customTasks || []) {
+            addEffectiveCompanies(task.id, draft.assignmentCompanyIds?.[task.id] || draft.selectedCompanyIds);
+          }
+          if (draft.customTitle.trim()) addEffectiveCompanies("custom", draft.assignmentCompanyIds?.custom || draft.selectedCompanyIds);
         }
-        if (draft.customTitle.trim()) addEffectiveCompanies("custom", draft.assignmentCompanyIds?.custom || draft.selectedCompanyIds);
         if (laboratory && !remoteSave) {
           for (const proposal of draft.habitualTaskProposals || []) if (!parisOnboarding || proposal.taskCode) addEffectiveCompanies(proposal.id, proposal.companyIds);
         }
@@ -877,10 +883,10 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
               throw Error("Las metas por empresa deben ser números válidos.");
           }
         }
-        for (const task of draft.customTasks || [])
-          validateSteps(task.steps.split(/\r?\n/));
-        if (draft.customTitle.trim())
-          validateSteps(String(draft.customSteps || "").split(/\r?\n/));
+        if (!parisOnboarding) {
+          for (const task of draft.customTasks || []) validateSteps(task.steps.split(/\r?\n/));
+          if (draft.customTitle.trim()) validateSteps(String(draft.customSteps || "").split(/\r?\n/));
+        }
         const customIds = new Set([...(draft.customTasks || []).map((task) => task.id), "custom"]);
         for (const [key, companyIds] of effectiveCompanies) {
           if (!customIds.has(key)) continue;
@@ -902,7 +908,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
     const targetForCompany = (taskId: string, companyId: string, fallback: number) =>
       laboratory && !remoteSave ? (draft.companyTargets?.[taskId]?.[companyId] ?? fallback) : fallback;
     for (const cid of preparesPersonalTasks ? draft.selectedCompanyIds : []) {
-      for (const tid of draft.selectedTemplateIds.filter((taskId) => !parisOnboarding || !!state.templates.find((template) => template.id === taskId)?.taskCode)) {
+      for (const tid of selectedTemplateIds) {
         if (
           !(
             draft.assignmentCompanyIds?.[tid] || draft.selectedCompanyIds
@@ -1411,11 +1417,9 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           state={state}
           profile={active}
           draft={draft}
+          onboardingNotice={notice}
           update={(d) =>
-            commit({
-              ...state,
-              onboarding: { ...state.onboarding, [active.id]: d },
-            })
+            (setNotice(""), commit({ ...state, onboarding: { ...state.onboarding, [active.id]: d } }))
           }
           finish={finishOnboarding}
           laboratory={laboratory && !remoteSave}

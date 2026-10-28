@@ -35,6 +35,7 @@ export default function Onboarding({
   month,
   profile,
   draft,
+  onboardingNotice = "",
   update,
   finish,
   pause,
@@ -45,6 +46,7 @@ export default function Onboarding({
   month: string;
   profile: Profile;
   draft: Draft;
+  onboardingNotice?: string;
   update: (d: Draft) => void;
   finish: () => void;
   pause: () => void;
@@ -90,7 +92,8 @@ export default function Onboarding({
     try { return validateSteps(proposalForm.steps); } catch { return []; }
   })();
   const hasLegacyOnboardingSelections = draft.selectedTemplateIds.length > 0 || (draft.customTasks?.length || 0) > 0 || !!draft.customTitle.trim() || (draft.habitualTaskProposals || []).some((proposal) => !proposal.taskCode);
-  const isParisFirstLogin = laboratory && !remote && profile.role !== "jefe" && (!hasLegacyOnboardingSelections || (draft.selectedBusinessUnitCodes?.length || 0) > 0);
+  const hasLegacyV1StarterSelection = draft.selectedTemplateIds.some((taskId) => taskId.startsWith("starter-v1-"));
+  const isParisFirstLogin = laboratory && !remote && profile.role !== "jefe" && (!hasLegacyOnboardingSelections || (draft.selectedBusinessUnitCodes?.length || 0) > 0 || hasLegacyV1StarterSelection);
   const starterCatalog = laboratory && !remote && !isParisFirstLogin ? NEUTRAL_STARTER_CATALOG : [];
   const starterSuggestions = laboratory && !remote && profile.role !== "jefe" && !isParisFirstLogin ? NEUTRAL_STARTER_SUGGESTIONS : [];
   const starterLegacySelection = starterCatalog.filter((entry) => draft.selectedTemplateIds.includes(entry.id));
@@ -269,6 +272,7 @@ export default function Onboarding({
         </small>
       </aside>
       <section className="induction-body">
+        {onboardingNotice && <p className="notice-banner" role="alert">{onboardingNotice}</p>}
         <div className="induction-top">
           <span>PASO {draft.step + 1} DE 6</span>
           <ThemeControl />
@@ -393,7 +397,20 @@ export default function Onboarding({
                 <>
               {parisTaskCatalog.length > 0 && <section className="paris-task-catalog" aria-labelledby="paris-task-catalog-heading">
                 <h3 id="paris-task-catalog-heading">Tareas estándar de Grupo París</h3>
-                {hasLegacyOnboardingSelections && <p className="notice-banner" role="note">Este borrador conserva selecciones de una versión anterior. No se convertirán en tareas nuevas; elegí las tareas del catálogo y su unidad de negocio. Las selecciones anteriores permanecen guardadas como historial del borrador.</p>}
+                {hasLegacyOnboardingSelections && <>
+                  <p className="notice-banner" role="note">Este borrador conserva selecciones de una versión anterior. No se convertirán en tareas nuevas; elegí las tareas del catálogo y su unidad de negocio. Las selecciones anteriores permanecen guardadas como historial del borrador.</p>
+                  <section className="legacy-onboarding-drafts" aria-labelledby="legacy-onboarding-heading">
+                    <h3 id="legacy-onboarding-heading">Historial v1 · conservar borradores antiguos</h3>
+                    {draft.selectedTemplateIds.map((selectedId) => {
+                      const title = state.templates.find((template) => template.id === selectedId)?.title || NEUTRAL_STARTER_CATALOG.find((starter) => starter.id === selectedId)?.title || selectedId;
+                      const actionLabel = selectedId.startsWith("starter-v1-") ? "Quitar selección histórica" : "Quitar selección anterior";
+                      return <div className="custom-task-row" key={selectedId}><span><b>{title}</b> · sin clasificación estándar</span><button type="button" aria-label={`${actionLabel} ${title}`} onClick={() => patch({ selectedTemplateIds: draft.selectedTemplateIds.filter((id) => id !== selectedId), ...clearDraftReferences(selectedId) })}>Quitar</button></div>;
+                    })}
+                    {(draft.customTasks || []).map((task) => <div className="custom-task-row" key={task.id}><span>{task.title} · trabajo libre anterior</span><button type="button" aria-label={`Quitar trabajo anterior ${task.title}`} onClick={() => patch({ customTasks: (draft.customTasks || []).filter((row) => row.id !== task.id), ...clearDraftReferences(task.id) })}>Quitar</button></div>)}
+                    {draft.customTitle.trim() && <div className="custom-task-row"><span>{draft.customTitle} · trabajo libre anterior</span><button type="button" aria-label={`Quitar trabajo anterior ${draft.customTitle}`} onClick={() => patch({ customTitle: "", customSteps: "", ...clearDraftReferences("custom") })}>Quitar</button></div>}
+                    {(draft.habitualTaskProposals || []).filter((proposal) => !proposal.taskCode).map((proposal) => <div className="custom-task-row" key={proposal.id}><span>{proposal.title} · propuesta sin clasificar</span><button type="button" aria-label={`Quitar propuesta anterior ${proposal.title}`} onClick={() => removeProposalDraft(proposal)}>Quitar</button></div>)}
+                  </section>
+                </>}
                 <p>Elegí el nombre estándar y la unidad de negocio. Las {parisTasksUnderReview.length} opciones provisionales están marcadas en la lista y quedan fuera de comparaciones entre unidades hasta confirmar su alcance.</p>
                 <label className="starter-search">Buscar tarea estándar
                   <input type="search" value={starterSearch} onChange={(event) => setStarterSearch(event.target.value)} placeholder="Ej.: conciliación bancaria" />
@@ -527,8 +544,8 @@ export default function Onboarding({
                   </div>
                   {matchingStarterSuggestionCount === 0 && <p>{starterOnlySelected ? "No hay sugerencias seleccionadas que coincidan con el filtro." : "No hay sugerencias con ese texto."}</p>}
                   </>}
-                  <details>
-                    <summary>Historial v1 · conservar borradores antiguos</summary>
+                  <section className="legacy-onboarding-drafts">
+                    <h3>Historial v1 · conservar borradores antiguos</h3>
                     <p>Los borradores antiguos conservan su selección, controles y frecuencia. Podés quitar una selección desde acá; las selecciones existentes mantienen su preview y materialización original.</p>
                   <div className="catalog-options">
                     {starterLegacySelection.map((t) => (
@@ -542,7 +559,7 @@ export default function Onboarding({
                       </div>
                     ))}
                   </div>
-                  </details>
+                  </section>
                 </section>
               )}
               {!isParisFirstLogin && <details>

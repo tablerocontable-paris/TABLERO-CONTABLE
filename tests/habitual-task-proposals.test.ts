@@ -50,6 +50,40 @@ describe("propuestas de tareas habituales del laboratorio", () => {
     expect(mixed.assignments).toEqual(state.assignments);
   });
 
+  it("el laboratorio estricto no activa propuestas neutrales aunque el grupo sea homogéneo", () => {
+    let state = seed();
+    const employee = state.profiles.find((profile) => profile.id === "e0")!;
+    const manager = state.profiles.find((profile) => profile.id === "boss")!;
+    state.assignments = [];
+    state.tasks = [];
+    state = submitHabitualTaskProposal(state, employee, proposalInput(), fixedNow);
+    expect(() => approveHabitualTaskProposals(state, manager, ["proposal-a"], {
+      kind: "create", template: { title: "Conciliación libre", sector: "Tesorería", description: "Comparar movimientos y documentar diferencias.", kind: "resultado", unit: "", weight: 1, target: 0, steps: ["Comparar movimientos"] },
+    }, currentMonth(), fixedNow, undefined, { requireParisTaskClassification: true })).toThrow(/tarea, versión de catálogo, unidad de negocio y parámetros válidos/i);
+    expect(state.habitualTaskProposals?.[0]?.status).toBe("pending");
+    expect(state.assignments).toHaveLength(0);
+  });
+
+  it("el laboratorio estricto bloquea una clasificación actual que difiere del envío histórico", () => {
+    let state = seed();
+    state.assignments = [];
+    state.tasks = [];
+    const employee = state.profiles.find((profile) => profile.id === "e0")!;
+    const manager = state.profiles.find((profile) => profile.id === "boss")!;
+    state = submitHabitualTaskProposal(state, employee, proposalInput({
+      title: "Conciliación bancaria", process: "", taskCode: "gpar_bank_reconciliation",
+      taskCatalogVersion: 5, businessUnitCode: "paris_autos",
+      taskParameters: { banco: "Banco Francés", cuenta: "Cuenta principal" },
+    }), fixedNow);
+    state.habitualTaskProposals![0]!.submissions[0]!.taskParameters = { banco: "Banco Francés", cuenta: "Cuenta secundaria" };
+    const unchanged = structuredClone(state.habitualTaskProposals);
+    expect(() => approveHabitualTaskProposals(state, manager, ["proposal-a"], {
+      kind: "create", template: { title: "Conciliación bancaria", sector: "Tesorería", description: "Comparar movimientos y documentar diferencias.", kind: "resultado", unit: "", weight: 1, target: 0, steps: ["Comparar movimientos y documentar diferencias"] },
+    }, currentMonth(), fixedNow, undefined, { requireParisTaskClassification: true })).toThrow(/tarea, versión de catálogo, unidad de negocio y parámetros válidos/i);
+    expect(state.habitualTaskProposals).toEqual(unchanged);
+    expect(state.assignments).toHaveLength(0);
+  });
+
   it("conserva propuestas pendientes y sólo agrupa coincidencias como sugerencias", () => {
     let state = seed();
     state.assignments = [];
