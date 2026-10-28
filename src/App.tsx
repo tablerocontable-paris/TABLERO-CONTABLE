@@ -3991,6 +3991,7 @@ function NewTask({
   const [kind, setKind] = useState<"resultado" | "operativa">("resultado");
   const t = state.templates.find((t) => t.id === template);
   const parisTask = laboratory ? selectableParisTasks().find((task) => task.code === parisTaskCode) : undefined;
+  const parisTaskKind = parisTask?.kind === "operational" ? "operativa" : parisTask ? "resultado" : undefined;
   const selectedOwnerProfile = state.profiles.find((profile) => profile.id === selectedOwner);
   const allowedCompanies = state.companies.filter((candidate) => selectedOwnerProfile?.companyIds.includes(candidate.id) &&
     (active.role === "jefe" || active.companyIds.includes(candidate.id)));
@@ -4024,9 +4025,7 @@ function NewTask({
       setTaskError("Completá los datos obligatorios para identificar esta tarea.");
       return;
     }
-    const selectedKind = laboratory && parisTask
-      ? parisTask.kind === "operational" ? "operativa" : "resultado"
-      : t?.kind || kind;
+    const selectedKind = laboratory && parisTaskKind ? parisTaskKind : t?.kind || kind;
     let checklist: string[] = [];
     let target = 0;
     try {
@@ -4105,7 +4104,7 @@ function NewTask({
             }} />
           </label>;
         })}
-        {parisTask && <p className="note">La tarea se guardará como <b>{parisTask.label}</b>. El detalle de pedido o anotación queda como contexto y no cambia el nombre canónico.</p>}
+        {parisTask && <p className="note">La tarea se guardará como <b>{parisTask.label}</b>{parisTask.unit ? <> · Unidad de registro: <b>{parisTask.unit}</b></> : null}. El detalle de pedido o anotación queda como contexto y no cambia el nombre canónico.</p>}
       </div> : <label>
         Elegí del catálogo
         <select
@@ -4183,7 +4182,7 @@ function NewTask({
               ))}
             </select>
           </label>
-          <label>
+          {!laboratory && <label>
             Sector
             <select
               name="sector"
@@ -4199,8 +4198,8 @@ function NewTask({
                 <option key={s}>{s}</option>
               ))}
             </select>
-          </label>
-          <label>
+          </label>}
+          {!laboratory && <label>
             Tipo de trabajo
             <select
               value={kind}
@@ -4212,7 +4211,7 @@ function NewTask({
                 Operativa · se registra cantidad
               </option>
             </select>
-          </label>
+          </label>}
           <label>
             Peso · definido por jefe
             <select
@@ -4237,7 +4236,7 @@ function NewTask({
               <option>Baja</option>
             </select>
           </label>
-          {kind === "operativa" && (
+          {!laboratory && kind === "operativa" && (
             <>
               <label>
                 Unidad
@@ -4264,7 +4263,7 @@ function NewTask({
           onlyOnce={active.role !== "jefe" || !!seedAnnotation || !!seedRequest || !t}
         />
         {scheduleError && <p role="alert">{scheduleError}</p>}
-        {kind === "resultado" && (
+        {((!laboratory && kind === "resultado") || (laboratory && parisTask?.kind === "deliverable")) && (
           <div className="checklist-field">
             <p className="checklist-field-title">Checklist · un paso por línea</p>
             <StepListEditor
@@ -4277,7 +4276,7 @@ function NewTask({
             />
           </div>
         )}
-        {taskError && kind !== "resultado" && <p className="step-list-error" role="alert">{taskError}</p>}
+        {taskError && (laboratory ? parisTask?.kind === "operational" : kind !== "resultado") && <p className="step-list-error" role="alert">{taskError}</p>}
         <div className="note">
           {seedRequest ? "Se creará una sola tarea para el período de la fecha elegida, con el peso definido por jefatura." : `Se crea una instancia para ${monthLabel(month)}. Dos empresas conservan estados e indicadores independientes.`}
         </div>

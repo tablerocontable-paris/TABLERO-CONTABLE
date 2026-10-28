@@ -10,10 +10,20 @@ los opcionales no. Conversión de pedidos/anotaciones mantiene su vínculo; el
 flujo fuera del laboratorio no cambia. No reclasifica historial ni modifica
 interfaces/API Supabase.
 
-Comprobación local: **871/871 pruebas en 87 archivos**, TypeScript, build
-cliente, Worker, paquete Sites y hook **223/223**. Publicado directamente en
-`main`; Actions #139 está en curso. El Site existente continúa en v104, por lo
-que esta corrección todavía no está visible allí.
+Comprobación local del corte funcional: **871/871 pruebas en 87 archivos**,
+TypeScript, build cliente, Worker, paquete Sites y hook **223/223**. Publicado
+directamente en `main`; Actions #140 (`40742326097`) aprobó el SHA `deb4b9e`,
+mientras #139 (`40742037924`) quedó cancelado por el corte posterior. El Site
+existente continúa en v104, por lo que la corrección todavía no está visible
+allí.
+
+La auditoría de creación confirma el cierre del alta ordinaria. Hay propuestas
+históricas y procesos libres sin código que requieren definición de vínculo
+canónico antes de permitir su aprobación como trabajo nuevo; no reclasificar
+ni renombrar datos pasados automáticamente. La corrección del formulario
+(tipo, checklist y unidad derivados del catálogo) pasó 871/871 pruebas,
+TypeScript, build cliente, Worker y paquete Sites localmente; queda lista para
+publicarse en GitHub, sin desplegar el Site.
 
 ## Normalización Grupo París — catálogo v5 desplegado
 

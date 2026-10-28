@@ -106,6 +106,15 @@ describe("anotaciones y recorrido integrados", () => {
     fireEvent.click(screen.getByRole("button", { name: "Nueva tarea" }));
     fireEvent.change(screen.getByLabelText("Elegí del catálogo"), { target: { value: "gpar_bank_reconciliation" } });
     fireEvent.change(screen.getByLabelText("Unidad de negocio"), { target: { value: "paris_autos" } });
+    expect(screen.getByText("Checklist · un paso por línea")).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("Elegí del catálogo"), { target: { value: "supplier_invoice_load" } });
+    expect(screen.queryByText("Checklist · un paso por línea")).toBeNull();
+    const taskDialog = within(screen.getByRole("dialog", { name: "Nueva tarea, con todo su contexto" }));
+    expect(taskDialog.queryByLabelText("Tipo de trabajo")).toBeNull();
+    expect(taskDialog.queryByLabelText("Sector")).toBeNull();
+    expect(taskDialog.getByText((_, element) => element?.tagName === "P" && element.textContent?.includes("Unidad de registro: facturas") === true)).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("Elegí del catálogo"), { target: { value: "gpar_bank_reconciliation" } });
+    expect(screen.getByText("Checklist · un paso por línea")).toBeTruthy();
     fireEvent.submit(screen.getByRole("dialog", { name: "Nueva tarea, con todo su contexto" }).querySelector("form")!);
     expect(screen.getByRole("alert").textContent).toContain("datos obligatorios");
     expect(storedLab().assignments).toHaveLength(0);
@@ -127,6 +136,29 @@ describe("anotaciones y recorrido integrados", () => {
       taskCatalogVersion: 5,
       businessUnitCode: "paris_autos",
       taskParameters: { banco: "Banco Francés", cuenta: "Cuenta principal" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Nueva tarea" }));
+    fireEvent.change(screen.getByLabelText("Elegí del catálogo"), { target: { value: "supplier_invoice_load" } });
+    fireEvent.change(screen.getByLabelText("Unidad de negocio"), { target: { value: "doral" } });
+    const operationalDialog = within(screen.getByRole("dialog", { name: "Nueva tarea, con todo su contexto" }));
+    expect(operationalDialog.queryByText("Checklist · un paso por línea")).toBeNull();
+    expect(operationalDialog.getByText((_, element) => element?.tagName === "P" && element.textContent?.includes("Unidad de registro: facturas") === true)).toBeTruthy();
+    fireEvent.submit(screen.getByRole("dialog", { name: "Nueva tarea, con todo su contexto" }).querySelector("form")!);
+    const operational = storedLab();
+    expect(operational.assignments.at(-1)).toMatchObject({
+      title: "Carga de facturas de proveedores",
+      kind: "operativa",
+      unit: "facturas",
+      taskCode: "supplier_invoice_load",
+      businessUnitCode: "doral",
+    });
+    expect(operational.tasks.at(-1)).toMatchObject({
+      title: "Carga de facturas de proveedores",
+      kind: "operativa",
+      unit: "facturas",
+      taskCode: "supplier_invoice_load",
+      businessUnitCode: "doral",
     });
   });
 

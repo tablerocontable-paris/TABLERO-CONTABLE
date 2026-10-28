@@ -13,9 +13,21 @@ reclasifican.
 
 Validación de este cambio: **871/871 pruebas en 87 archivos**, TypeScript,
 build cliente, build Worker, paquete Sites y hook de commit **223/223**. Commit
-`d1fc8a9` está publicado directamente en GitHub `main`; Actions #139 está
-validando el mismo SHA. Este cambio aún no se desplegó al Site, que permanece
-en v104. No modifica `/api`, Auth ni SQL001–016.
+`d1fc8a9` está publicado directamente en GitHub `main`, incluido en el corte
+documental `deb4b9e`; Actions #140 (`40742326097`) terminó en éxito para
+`deb4b9e`. Actions #139 (`40742037924`) quedó cancelado al llegar el corte
+posterior. Este cambio aún no se desplegó al Site, que permanece en v104. No
+modifica `/api`, Auth ni SQL001–016.
+
+La auditoría de rutas confirma que Nueva tarea y las conversiones de pedidos y
+anotaciones usan el catálogo canónico. Quedan propuestas históricas y procesos
+libres sin código; no se deben convertir ni renombrar automáticamente. Antes
+de aprobarlos como trabajo nuevo hay que definir el vínculo explícito a una
+tarea canónica y conservar la revisión histórica. La presentación del
+formulario ahora deriva tipo, checklist y unidad del catálogo; una regresión
+cubre asignaciones canónicas de resultado y operativas. La suite completa
+871/871, TypeScript, build cliente, Worker y paquete Sites pasaron localmente;
+la corrección quedó lista para publicar en GitHub. No se desplegó al Site.
 
 ## Catálogo Grupo París — normalización inicial
 
