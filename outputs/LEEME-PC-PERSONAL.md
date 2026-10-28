@@ -6,10 +6,10 @@ traslado del proyecto.
 ## Fuente de código
 
 - Repositorio privado de GitHub: [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocontable-paris/TABLERO-CONTABLE)
-- Rama activa: `main`; contiene las versiones aceptadas del proyecto. Confirmá
-  el último commit y el estado de publicación leyendo `docs/PROJECT-STATUS.md`
-  al abrir el repo; la normalización del catálogo continúa en v5 y puede estar
-  pendiente de publicación hasta que termine esta etapa.
+- Rama activa: `main`; versión disponible `f5263f1` (catálogo v5). Para
+  actualizar una copia existente, ejecutá `git pull --ff-only origin main`.
+  El Site privado se actualizó a v104. Consultá `docs/PROJECT-STATUS.md` y
+  `docs/EXECUTION-NEXT.md` para leer el estado exacto de GitHub Actions.
 - El código no se entrega en ZIP: cloná el repositorio para conservar historia
   y poder traer los cambios futuros.
 - Los cambios acordados se publican directamente en `main`, sin Pull Request.
@@ -73,7 +73,7 @@ npm ci
 - La normalización inicial de Grupo París está en el onboarding del laboratorio.
   Las siete unidades están fijadas: PARIS AUTOS, DORAL, PARIS CARS, PARIS TRAC,
   MOTOR, FIDEICOMISO DESARROLLO y POSTVENTA.
-- El catálogo v4 ofrece las 55 tareas observadas con nombres canónicos y códigos
+- El catálogo v5 ofrece las 55 tareas observadas con nombres canónicos y códigos
   versionados. Veinticinco son comparables; treinta son provisionales y se
   pueden elegir/registrar con código propio, pero no se comparan entre unidades
   hasta confirmar su alcance. “Carga de otras facturas” exige indicar el
@@ -82,12 +82,12 @@ npm ci
   búsqueda que conduce a esa tarea canónica. Banco, cuenta y unidad se guardan
   como campos separados. Los registros históricos sin código no se clasifican
   automáticamente.
-- La validación local v4 pasó TypeScript, suite completa (867/867 en 87
-  archivos), build del cliente y Worker, empaquetado Sites, revisión
-  independiente y hook (223/223). GitHub confirmó el push directo a `main`, sin
-  PR; GitHub CI valida los commits de `main`. El mismo Site privado ya publica
-  v4 como versión 103. GitHub y Sites son repositorios separados: los pushes a
-  GitHub no despliegan el Site automáticamente.
+- La validación local v5 pasó TypeScript, suite completa (870/870 en 87
+  archivos), build del cliente y Worker y empaquetado Sites. La paridad entre
+  el catálogo y la documentación pasa 55/55. GitHub confirmó el push directo a
+  `main`, sin PR; GitHub Actions #135 pasó para el commit funcional. El mismo Site privado
+  publica v5 como versión 104. GitHub y Sites son repositorios separados: los
+  pushes a GitHub no despliegan el Site automáticamente.
 - El Site conserva acceso personalizado al propietario y cero visitantes
   externos. Está en
   <https://grupo-paris-contabilidad.valentino-magni.chatgpt.site>.

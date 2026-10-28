@@ -1,10 +1,10 @@
 # Estado vigente de ejecución — 28/10/2026
 
-## Normalización Grupo París — revisión v5 en curso
+## Normalización Grupo París — catálogo v5 desplegado
 
 La inducción local del laboratorio contiene siete unidades fijas y 55 tareas estandarizadas (`src/domain/parisTaskCatalog.ts`). V5 permite elegir las 55; 25 son comparables y 30 provisionales. Una auditoría cruzada detectó dos filas cuya elegibilidad no coincidía con el borrador: V5 excluye `supplier_invoice_load` de comparación hasta confirmar el alcance de portales y habilita `customer_collections`, marcada Confirmada. Conserva el total de 25/30. V1–V4 siguen disponibles para leer métricas anteriores; no se recalculan.
 
-V4 había quitado el campo redundante de unidad en dos tareas y agregado `CONC BANC FRANC` como alias de búsqueda; V5 conserva ambos cambios. La suite completa pasa 870/870 en 87 archivos; catálogo/documentación 55/55; TypeScript y build cliente/Worker terminan bien. El build deja avisos de anotaciones de Zod y del bundle principal de ~656 kB. Próximo: generar paquete Sites desde el commit final, sincronizar en la fuente Sites y desplegar el mismo Site privado. Cambios sin impacto en SQL001–016 ni onboarding autenticado.
+V4 había quitado el campo redundante de unidad en dos tareas y agregado `CONC BANC FRANC` como alias de búsqueda; V5 conserva ambos cambios. La suite completa pasa 870/870 en 87 archivos; catálogo/documentación 55/55; TypeScript, builds cliente/Worker y paquete Sites terminaron bien. GitHub `main`: `f5263f1`; Actions #135 terminó en éxito en ese commit. El mismo Site privado se desplegó en v104. El build deja avisos de anotaciones de Zod y del bundle principal de ~656 kB. Cambios sin impacto en SQL001–016 ni onboarding autenticado.
 
 No se modificaron `/api`, Supabase Auth ni SQL001–016. Esta publicación es del laboratorio privado con perfiles/datos ficticios; no representa una versión operativa ni habilita acceso a usuarios reales. Los pasos para continuar desde otra PC están en `outputs/LEEME-PC-PERSONAL.md`. Guía de continuidad y límites de sincronización: `docs/PORTABLE-CONTINUITY-20261027.md`.
 

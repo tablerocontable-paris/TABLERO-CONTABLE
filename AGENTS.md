@@ -1,23 +1,26 @@
 # Continuidad y estado actual del proyecto — actualizado 28/10/2026
 
 Repositorio activo `work/site`, remoto privado
-`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`, HEAD `b0fdda472fb1704e178cbd64f5007024eda8dc8d`.
-El catálogo v4 se publicó directamente bajo la cuenta **Tablero Contable**, sin
-PR. Validación local del código: 867/867 pruebas en 87 archivos, TypeScript,
-build de cliente y Worker, paquete Sites, revisión independiente y hook
-223/223. GitHub Actions valida cada push; consultar el run del HEAD actual antes
-de afirmar que pasó.
+`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`, HEAD
+`f5263f1b4a2c401268083e7de6a50de53242966c`. El catálogo v5 se publicó
+directamente bajo la cuenta **Tablero Contable**, sin PR. Validación local:
+870/870 pruebas en 87 archivos, TypeScript, build de cliente y Worker. Site
+privado v104 desplegado desde la fuente
+`2a965026c40cad97a108f2e78dadd5f3c55edb37`; una persona autorizada, cero
+visitantes externos. GitHub Actions #135 confirmó éxito en el commit funcional.
 
 ## Catálogo de tareas y primera experiencia
 
-El catálogo Grupo París v4 ofrece siete unidades de negocio y 55 tareas con
-código y nombre canónicos. Veinticinco están confirmadas para comparación; 30
+El catálogo Grupo París v5 ofrece siete unidades de negocio y 55 tareas con
+código y nombre canónicos. Veinticinco están habilitadas para comparación; 30
 son provisionales, seleccionables y registrables, pero excluidas de
-comparaciones entre unidades hasta confirmar su alcance. `CONC BANC FRANC` es
-alias de búsqueda para Conciliación bancaria y nunca se guarda como tarea
-independiente. El mismo Site privado está publicado en versión 103 desde la
-fuente Sites `90df8234f0f66748b49cf113844050c43b8caf9a`, con acceso
-personalizado sólo al propietario y cero visitantes externos. Fuentes:
+comparaciones entre unidades hasta confirmar su alcance. V5 excluye
+`supplier_invoice_load` hasta revisar portales y habilita `customer_collections`,
+que ya figura como confirmada en el contrato. `CONC BANC FRANC` es alias de
+búsqueda para Conciliación bancaria y nunca se guarda como tarea independiente.
+El mismo Site privado está publicado en v104 desde la fuente Sites
+`2a965026c40cad97a108f2e78dadd5f3c55edb37`, con acceso personalizado sólo al
+propietario y cero visitantes externos. Fuentes:
 `src/domain/parisTaskCatalog.ts`,
 `docs/product/BUSINESS-UNIT-TASK-CATALOG-DRAFT-20261028.md` y
 `docs/PROJECT-STATUS.md`.

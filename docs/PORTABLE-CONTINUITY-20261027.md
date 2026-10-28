@@ -6,14 +6,12 @@ PC o aplicación; la documentación anterior de este archivo quedó reemplazada.
 ## Fuentes vigentes
 
 - Repositorio privado: [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocontable-paris/TABLERO-CONTABLE), rama `main`.
-- El corte aceptado actualmente está en `main`; las correcciones del catálogo
-  v5 están en validación/publicación. Al retomar, comprobar el SHA en `main` y
-  consultar `docs/PROJECT-STATUS.md` para confirmar qué versión está publicada.
-  Los cambios se publican directamente bajo `tablerocontable-paris`, sin PR;
-  el repositorio permanece privado.
-- Site de laboratorio existente (versión 103 al inicio de la revisión v5):
+- Catálogo v5 está en `main`, commit `f5263f1b4a2c401268083e7de6a50de53242966c`;
+  se publica directamente bajo `tablerocontable-paris`, sin PR. GitHub Actions
+  #135 pasó para ese SHA. El repositorio permanece privado.
+- Site de laboratorio existente, v5 desplegado como versión 104:
   <https://grupo-paris-contabilidad.valentino-magni.chatgpt.site>, fuente Sites
-  `90df8234f0f66748b49cf113844050c43b8caf9a`. Conserva acceso
+  `2a965026c40cad97a108f2e78dadd5f3c55edb37`. Conserva acceso
   personalizado al propietario, sin invitados externos.
 - GitHub y la fuente del Site son repositorios distintos. Un push a GitHub no
   despliega el Site automáticamente; la publicación se hace con Sites y conserva
@@ -30,12 +28,12 @@ alcance. Banco, cuenta, sucursal, sistema, período y otros datos son parámetro
 separados, no parte del nombre de tarea. “Carga de otras facturas” exige indicar
 el subtipo. Catálogos v1 y v2 se conservan para leer registros anteriores.
 
-La suite completa v4 pasó **867/867 pruebas en 87 archivos**; TypeScript, build
-del cliente, Worker y paquete Sites también pasaron. El hook previo al commit
-pasó **223/223**; catálogo/onboarding focal pasó **21/21**. La revisión
-independiente no encontró regresiones.
-El build conserva avisos de Rollup por comentarios de Zod y por el chunk
-principal (655 kB). No se tocaron Supabase, Auth operativo, `/api` ni SQL001–016.
+La suite completa v5 pasó **870/870 pruebas en 87 archivos**; TypeScript, build
+del cliente, Worker y paquete Sites también pasaron. La paridad del contrato de
+catálogo pasó **55/55**. GitHub Actions #135 para el commit `f5263f1` estaba en
+curso en la última consulta. El build conserva avisos de Rollup por comentarios
+de Zod y por el chunk principal (~656 kB). No se tocaron Supabase, Auth
+operativo, `/api` ni SQL001–016.
 
 El Site y el repositorio siguen en modo laboratorio: perfiles y datos ficticios.
 El despliegue no constituye aceptación para producción ni habilita usuarios
