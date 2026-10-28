@@ -1,6 +1,19 @@
 # Estado vigente de ejecución — 28/10/2026
 
-## Alta puntual con identidad canónica — publicada en GitHub; revisión posterior local
+## Corte publicado para continuidad entre PC — 28/10/2026
+
+El último corte funcional está en `main`, commit
+`d37792b8a1b9fd29697ecaed726ecaeaae003cc0`, autor **Tablero Contable**,
+publicado directamente y sin Pull Request. Valida el cierre de onboarding
+nuevo con unidades/tareas canónicas y bloquea la activación de propuestas con
+historial de clasificación incompleto o mezclado, preservando su historial.
+Validación local: suite **873/873 en 87 archivos**, rutas modificadas **92/92**,
+TypeScript, build cliente/Worker y paquete Sites aprobados. GitHub Actions #142
+está en ejecución; el run #141 del commit anterior terminó en éxito. El Site
+privado sigue en v104 y no recibió este corte. No modifica `/api`, Auth ni
+SQL001–016. Guía para la PC personal: `outputs/LEEME-PC-PERSONAL.md`.
+
+## Alta puntual con identidad canónica — publicada en GitHub
 
 Commit `d1fc8a9` endurece “Nueva tarea” en el laboratorio: sólo permite elegir
 las 55 tareas y siete unidades de negocio del catálogo París, toma el nombre de
@@ -17,16 +30,15 @@ mientras #139 (`40742037924`) quedó cancelado por el corte posterior. El Site
 existente continúa en v104, por lo que la corrección todavía no está visible
 allí.
 
-La revisión local agregó validación al finalizar onboarding nuevo y evita
+La revisión agregó validación al finalizar onboarding nuevo y evita
 activar propuestas donde una revisión actual codificada como París conserva
 versiones anteriores sin código. La bandeja mantiene visible el historial y
 oculta controles de activación en esos casos; neutral puro sigue su flujo. Los
 borradores anteriores no se renombran ni reclasifican. Validación local actual:
 873/873 suite, TypeScript, build cliente/Worker, paquete Sites y pruebas
-seriales de rutas tocadas 92/92. El código nuevo aún no tiene commit ni
-verificación GitHub Actions; no se desplegó al Site, que sigue v104. Pendiente:
-publicar directo en main, confirmar Actions y actualizar el paquete/estado de
-traslado con el SHA resultante.
+seriales de rutas tocadas 92/92. El corte quedó publicado en `main` como
+`d37792b8a1b9fd29697ecaed726ecaeaae003cc0`; Actions #142 corre todavía. No se
+desplegó al Site, que sigue v104.
 
 ## Normalización Grupo París — catálogo v5 desplegado
 

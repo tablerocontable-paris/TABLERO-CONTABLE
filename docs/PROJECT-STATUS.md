@@ -11,19 +11,14 @@ mantienen el contexto y vínculo de origen; el formulario operativo fuera del
 laboratorio no cambia. Las asignaciones puntuales existentes e históricas no se
 reclasifican.
 
-Validación del alta puntual en el corte `5d309c8`: **871/871 pruebas en 87
-archivos**, TypeScript, build cliente/Worker, paquete Sites y hook 223/223.
-En la revisión siguiente se agregaron controles al finalizar borradores de
-onboarding y al aprobar propuestas con historial que mezcla una revisión
-París codificada con otra sin código. Esa protección mantiene visibles las
-propuestas, pero oculta la activación hasta revisión y valida también en el
-dominio. Corte local actual: suite **873/873 en 87 archivos**, TypeScript,
-build cliente/Worker y paquete Sites aprobados; pruebas seriales de las rutas
-tocadas **92/92**. El build conserva avisos de Zod y chunk principal de ~659
-kB. Estos cambios están listos localmente para publicarse directamente en
-GitHub `main`; Actions aún no se consultó desde esta PC porque no está
-instalado `gh`. El Site sigue en v104; no se desplegó. No modifica `/api`, Auth
-ni SQL001–016.
+Validación local: suite **873/873 en 87 archivos**, TypeScript, build
+cliente/Worker y paquete Sites aprobados; las rutas tocadas pasaron **92/92**.
+El cambio se publicó directamente en GitHub `main` como
+`d37792b8a1b9fd29697ecaed726ecaeaae003cc0`, autor **Tablero Contable**, sin
+Pull Request. Actions #142 está **en ejecución** (consultado 28/10/2026); el
+run previo #141 pasó. El build conserva avisos de Zod y chunk principal de
+~659 kB. El Site sigue en v104; no se desplegó. No modifica `/api`, Auth ni
+SQL001–016.
 
 La auditoría de rutas confirma que Nueva tarea y las conversiones de pedidos y
 anotaciones usan el catálogo canónico. Las propuestas puramente neutrales
@@ -31,8 +26,8 @@ continúan con su flujo de revisión; las que tienen metadatos París incompleto
 o historial París/no clasificado no pueden activarse como trabajo nuevo hasta
 resolver la clasificación. Los borradores anteriores se conservan, no se
 renombran ni se reclasifican. La presentación del formulario deriva tipo,
-checklist y unidad del catálogo. El cambio local actual todavía no tiene commit
-ni despliegue; la versión publicada del Site permanece v104.
+checklist y unidad del catálogo. Este corte ya está publicado en GitHub; la
+versión publicada del Site permanece v104 y no incluye estas protecciones.
 
 ## Catálogo Grupo París — normalización inicial
 

@@ -6,12 +6,14 @@ traslado del proyecto.
 ## Fuente de código
 
 - Repositorio privado de GitHub: [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocontable-paris/TABLERO-CONTABLE)
-- Rama activa: `main`; incluye el catálogo v5 y la normalización del alta
-  puntual (último commit publicado `5d309c8`). Para
+- Rama activa: `main`; incluye el catálogo v5, la normalización del alta
+  puntual y las protecciones de onboarding/propuestas (último corte funcional
+  `d37792b8a1b9fd29697ecaed726ecaeaae003cc0`). Para
   actualizar una copia existente, ejecutá `git pull --ff-only origin main`.
-  El Site privado sigue en v104; el último commit aún no fue desplegado allí.
-  Consultá `docs/PROJECT-STATUS.md` y
-  `docs/EXECUTION-NEXT.md` para leer el estado exacto de GitHub Actions.
+  GitHub Actions #142 está en ejecución; #141 pasó para el commit anterior.
+  El Site privado sigue en v104; estos últimos cambios de GitHub no se
+  desplegaron allí. Consultá `docs/PROJECT-STATUS.md` y
+  `docs/EXECUTION-NEXT.md` para el estado actualizado.
 - El código no se entrega en ZIP: cloná el repositorio para conservar historia
   y poder traer los cambios futuros.
 - Los cambios acordados se publican directamente en `main`, sin Pull Request.
@@ -91,8 +93,10 @@ npm ci
   paquete Sites y hook 223/223. La revisión local posterior añadió controles
   al onboarding y propuestas con historial de clasificación mezclada: suite
   873/873, rutas relevantes seriales 92/92, TypeScript, builds y paquete Sites
-  aprobados. Esa revisión todavía no tiene commit ni validación de GitHub
-  Actions; `gh` no está disponible en la PC del trabajo.
+  aprobados. El corte está publicado directamente en `main` como
+  `d37792b8a1b9fd29697ecaed726ecaeaae003cc0`; Actions #142 sigue ejecutándose.
+  `gh` no está instalado en la PC del trabajo, pero se consultó Actions por el
+  conector de GitHub.
   La paridad entre
   el catálogo y la documentación pasa 55/55. GitHub confirmó el push directo a
   `main`, sin PR; GitHub Actions #135 pasó para el commit funcional. El mismo Site privado
