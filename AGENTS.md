@@ -1,9 +1,9 @@
 # Continuidad y estado actual del proyecto — actualizado 28/10/2026
 
 Repositorio activo `work/site`, remoto privado
-`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`, HEAD
-`f5263f1b4a2c401268083e7de6a50de53242966c`. El catálogo v5 se publicó
-directamente bajo la cuenta **Tablero Contable**, sin PR. Validación local:
+`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`. El catálogo v5 se
+publicó directamente bajo la cuenta **Tablero Contable**, sin PR; commit
+funcional `f5263f1b4a2c401268083e7de6a50de53242966c`. Validación local:
 870/870 pruebas en 87 archivos, TypeScript, build de cliente y Worker. Site
 privado v104 desplegado desde la fuente
 `2a965026c40cad97a108f2e78dadd5f3c55edb37`; una persona autorizada, cero
