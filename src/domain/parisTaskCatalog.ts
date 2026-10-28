@@ -1,6 +1,6 @@
 /** Organization-specific selection catalog. This does not replace neutral v2. */
-export const PARIS_TASK_CATALOG_VERSION = 4 as const;
-export type ParisTaskCatalogVersion = 1 | 2 | 3 | typeof PARIS_TASK_CATALOG_VERSION;
+export const PARIS_TASK_CATALOG_VERSION = 5 as const;
+export type ParisTaskCatalogVersion = 1 | 2 | 3 | 4 | typeof PARIS_TASK_CATALOG_VERSION;
 
 export const PARIS_BUSINESS_UNITS = [
   { code: "paris_autos", label: "PARIS AUTOS" },
@@ -107,8 +107,8 @@ export const PARIS_TASK_CATALOG_V3: readonly ParisTaskDefinition[] = PARIS_TASK_
   comparisonEligible: task.state === "selectable",
 }));
 
-/** Version 4 removes unit-of-business text duplicated by businessUnitCode. */
-export const PARIS_TASK_CATALOG: readonly ParisTaskDefinition[] = PARIS_TASK_CATALOG_V3.map((task) => ({
+/** Frozen version 4: canonical bank alias and unit stored only in businessUnitCode. */
+export const PARIS_TASK_CATALOG_V4: readonly ParisTaskDefinition[] = PARIS_TASK_CATALOG_V3.map((task) => ({
   ...task,
   aliases: task.code === "gpar_bank_reconciliation"
     ? [...task.aliases, "conc banc franc"]
@@ -118,10 +118,18 @@ export const PARIS_TASK_CATALOG: readonly ParisTaskDefinition[] = PARIS_TASK_CAT
   ),
 }));
 
+/** Version 5 aligns comparison eligibility with the reviewed task definitions. */
+export const PARIS_TASK_CATALOG: readonly ParisTaskDefinition[] = PARIS_TASK_CATALOG_V4.map((task) => ({
+  ...task,
+  ...(task.code === "supplier_invoice_load" ? { comparisonEligible: false } : {}),
+  ...(task.code === "customer_collections" ? { comparisonEligible: true } : {}),
+}));
+
 const catalogsByVersion = new Map<ParisTaskCatalogVersion, readonly ParisTaskDefinition[]>([
   [1, PARIS_TASK_CATALOG_V1],
   [2, PARIS_TASK_CATALOG_V2],
   [3, PARIS_TASK_CATALOG_V3],
+  [4, PARIS_TASK_CATALOG_V4],
   [PARIS_TASK_CATALOG_VERSION, PARIS_TASK_CATALOG],
 ]);
 

@@ -6,10 +6,12 @@ PC o aplicación; la documentación anterior de este archivo quedó reemplazada.
 ## Fuentes vigentes
 
 - Repositorio privado: [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocontable-paris/TABLERO-CONTABLE), rama `main`.
-- Catálogo v4 está publicado directamente en `main` como `d9da38f`; su guía se
-  registró en `e3f389c`. GitHub confirmó el push bajo `tablerocontable-paris`,
-  sin PR; GitHub CI valida los commits publicados. El repositorio permanece privado.
-- Site de laboratorio existente, v4 desplegado como versión 103:
+- El corte aceptado actualmente está en `main`; las correcciones del catálogo
+  v5 están en validación/publicación. Al retomar, comprobar el SHA en `main` y
+  consultar `docs/PROJECT-STATUS.md` para confirmar qué versión está publicada.
+  Los cambios se publican directamente bajo `tablerocontable-paris`, sin PR;
+  el repositorio permanece privado.
+- Site de laboratorio existente (versión 103 al inicio de la revisión v5):
   <https://grupo-paris-contabilidad.valentino-magni.chatgpt.site>, fuente Sites
   `90df8234f0f66748b49cf113844050c43b8caf9a`. Conserva acceso
   personalizado al propietario, sin invitados externos.
@@ -19,10 +21,10 @@ PC o aplicación; la documentación anterior de este archivo quedó reemplazada.
 
 ## Estado funcional comprobado
 
-El catálogo v4 ofrece las siete unidades solicitadas: PARIS AUTOS, DORAL,
+El catálogo v5 ofrece las siete unidades solicitadas: PARIS AUTOS, DORAL,
 PARIS CARS, PARIS TRAC, MOTOR, FIDEICOMISO DESARROLLO y POSTVENTA. El catálogo
-v4 tiene 55 tareas con códigos y nombres canónicos. Las 55 se pueden elegir;
-25 están confirmadas para comparación y 30 son provisionales, cada una con
+v5 tiene 55 tareas con códigos y nombres canónicos. Las 55 se pueden elegir;
+25 están habilitadas para comparación y 30 son provisionales, cada una con
 código propio y excluida de comparaciones entre unidades hasta confirmar su
 alcance. Banco, cuenta, sucursal, sistema, período y otros datos son parámetros
 separados, no parte del nombre de tarea. “Carga de otras facturas” exige indicar

@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   findParisTaskAlias,
@@ -6,6 +7,7 @@ import {
   PARIS_TASK_CATALOG_V1,
   PARIS_TASK_CATALOG_V2,
   PARIS_TASK_CATALOG_V3,
+  PARIS_TASK_CATALOG_V4,
   PARIS_TASK_CATALOG_VERSION,
   getParisTask,
   isParisTaskParameterSet,
@@ -31,8 +33,8 @@ describe("catálogo de tareas de Grupo París", () => {
     expect(findParisTaskAlias("Coinciliacion Mercado Pago")?.code).not.toBe(findParisTaskAlias("Cancelacion cupones MP Paris Autos")?.code);
   });
 
-  it("versiona las tareas nuevas y conserva las lecturas históricas v1 a v3", () => {
-    expect(PARIS_TASK_CATALOG_VERSION).toBe(4);
+  it("versiona las tareas nuevas y conserva las lecturas históricas v1 a v4", () => {
+    expect(PARIS_TASK_CATALOG_VERSION).toBe(5);
     expect(PARIS_TASK_CATALOG_V2).toHaveLength(PARIS_TASK_CATALOG_V1.length + 5);
     expect(PARIS_TASK_CATALOG).toHaveLength(PARIS_TASK_CATALOG_V2.length);
     expect(getParisTask("procedure_follow_up", 1)).toBeUndefined();
@@ -41,20 +43,23 @@ describe("catálogo de tareas de Grupo París", () => {
     expect(getParisTask("gpar_bank_reconciliation", 1)?.label).toBe("Conciliación bancaria");
     expect(getParisTask("gpar_bank_reconciliation", 2)?.label).toBe("Conciliación bancaria");
     expect(getParisTask("gpar_bank_reconciliation", 3)?.label).toBe("Conciliación bancaria");
+    expect(getParisTask("gpar_bank_reconciliation", 4)?.label).toBe("Conciliación bancaria");
     expect(PARIS_TASK_CATALOG_V3).toHaveLength(PARIS_TASK_CATALOG_V2.length);
     expect(getParisTask("salary_accounting_entry", 3)?.parameters).toContain("unidad");
     expect(getParisTask("vat_accounting_entry", 3)?.parameters).toContain("unidad");
   });
 
-  it("usa businessUnitCode como dimensión única de unidad en v4", () => {
-    expect(getParisTask("salary_accounting_entry", 4)?.parameters).toEqual(["período"]);
-    expect(getParisTask("vat_accounting_entry", 4)?.parameters).toEqual(["período", "tipo"]);
-    expect(getParisTask("salary_accounting_entry", 4)?.parameters).not.toContain("unidad");
-    expect(getParisTask("vat_accounting_entry", 4)?.parameters).not.toContain("unidad");
-    expect(isParisTaskParameterSet("vat_accounting_entry", { unidad: "PARIS AUTOS" }, 4)).toBe(false);
+  it("usa businessUnitCode como dimensión única de unidad desde v4", () => {
+    for (const version of [4, 5]) {
+      expect(getParisTask("salary_accounting_entry", version)?.parameters).toEqual(["período"]);
+      expect(getParisTask("vat_accounting_entry", version)?.parameters).toEqual(["período", "tipo"]);
+      expect(getParisTask("salary_accounting_entry", version)?.parameters).not.toContain("unidad");
+      expect(getParisTask("vat_accounting_entry", version)?.parameters).not.toContain("unidad");
+      expect(isParisTaskParameterSet("vat_accounting_entry", { unidad: "PARIS AUTOS" }, version)).toBe(false);
+    }
   });
 
-  it("mantiene códigos, nombres y estados entre v3 y v4, con aliases de búsqueda explícitos", () => {
+  it("mantiene intacta v4 al versionar su alias y parámetros", () => {
     for (const v3Task of PARIS_TASK_CATALOG_V3) {
       const expectedV4 = {
         ...v3Task,
@@ -66,6 +71,37 @@ describe("catálogo de tareas de Grupo París", () => {
         ),
       };
       expect(getParisTask(v3Task.code, 4)).toEqual(expectedV4);
+      expect(getParisTask(v3Task.code, 4)).toEqual(PARIS_TASK_CATALOG_V4.find((task) => task.code === v3Task.code));
+    }
+  });
+
+  it("corrige elegibilidad sin alterar el snapshot histórico v4", () => {
+    expect(getParisTask("supplier_invoice_load", 4)?.comparisonEligible).toBe(true);
+    expect(getParisTask("customer_collections", 4)?.comparisonEligible).toBe(false);
+    expect(getParisTask("supplier_invoice_load", 5)?.comparisonEligible).toBe(false);
+    expect(getParisTask("customer_collections", 5)?.comparisonEligible).toBe(true);
+    expect(PARIS_TASK_CATALOG.filter((task) => task.comparisonEligible !== false)).toHaveLength(25);
+    expect(PARIS_TASK_CATALOG.filter((task) => task.comparisonEligible === false)).toHaveLength(30);
+  });
+
+  it("mantiene los criterios de comparación en paridad con las 55 filas del borrador", () => {
+    const contract = readFileSync(new URL("../docs/product/BUSINESS-UNIT-TASK-CATALOG-DRAFT-20261028.md", import.meta.url), "utf8");
+    const taskSection = contract.split("## Tareas canónicas observadas")[1]?.split("\n## ")[0] || "";
+    const rows = taskSection.split(/\r?\n/)
+      .filter((line) => /^\|\s*`[^`]+`\s*\|/.test(line))
+      .map((line) => {
+        const columns = line.split("|").map((column) => column.trim());
+        return { code: columns[1]?.replaceAll("`", ""), status: columns[5] };
+      });
+    const statusByCode = new Map(rows.map((row) => [row.code, row.status]));
+
+    expect(rows).toHaveLength(55);
+    expect(statusByCode.size).toBe(55);
+    expect(PARIS_TASK_CATALOG).toHaveLength(rows.length);
+    for (const task of PARIS_TASK_CATALOG) {
+      const status = statusByCode.get(task.code);
+      expect(status, `falta ${task.code} en el borrador`).toBeDefined();
+      expect(task.comparisonEligible !== false, task.code).toBe(status === "Confirmada");
     }
   });
 
@@ -79,7 +115,7 @@ describe("catálogo de tareas de Grupo París", () => {
     expect(findParisTaskAlias("Liquidación y control de IVA")?.code).toBe("vat_settlement_control");
   });
 
-  it("permite elegir las 55 tareas observadas y señala las 30 con comparación provisional", () => {
+  it("permite elegir las 55 tareas observadas y señala las 30 sin comparación entre unidades", () => {
     expect(PARIS_TASK_CATALOG).toHaveLength(55);
     expect(selectableParisTasks()).toHaveLength(55);
     expect(selectableParisTasks(2)).toHaveLength(25);
@@ -87,6 +123,8 @@ describe("catálogo de tareas de Grupo París", () => {
     expect(selectableParisTasks().every((task) => task.state === "selectable")).toBe(true);
     expect(findParisTaskAlias("Análisis Bonis PYMES")?.state).toBe("selectable");
     expect(findParisTaskAlias("Análisis Bonis PYMES")?.comparisonEligible).toBe(false);
+    expect(findParisTaskAlias("Carga de facturas de proveedores")?.comparisonEligible).toBe(false);
+    expect(findParisTaskAlias("Registro de cobros de clientes")?.comparisonEligible).toBe(true);
     expect(findParisTaskAlias("Carga de otras facturas")?.comparisonEligible).toBe(false);
     expect(findParisTaskAlias("Carga de otras facturas")?.requiredParameters).toContain("tipo específico");
   });

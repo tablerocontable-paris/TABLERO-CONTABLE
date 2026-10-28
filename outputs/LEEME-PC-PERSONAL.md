@@ -6,8 +6,10 @@ traslado del proyecto.
 ## Fuente de código
 
 - Repositorio privado de GitHub: [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocontable-paris/TABLERO-CONTABLE)
-- Rama activa: `main`; commit funcional v4 `d9da38f`, ya publicado. Para
-  actualizar una copia existente, ejecutá `git pull --ff-only origin main`.
+- Rama activa: `main`; contiene las versiones aceptadas del proyecto. Confirmá
+  el último commit y el estado de publicación leyendo `docs/PROJECT-STATUS.md`
+  al abrir el repo; la normalización del catálogo continúa en v5 y puede estar
+  pendiente de publicación hasta que termine esta etapa.
 - El código no se entrega en ZIP: cloná el repositorio para conservar historia
   y poder traer los cambios futuros.
 - Los cambios acordados se publican directamente en `main`, sin Pull Request.

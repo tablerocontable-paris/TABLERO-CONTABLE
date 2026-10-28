@@ -51,7 +51,7 @@ confirmación.
   categoría de análisis ni como reemplazo del nombre canónico.
 - Un mismo código permite comparar el proceso entre unidades; la comparación
   debe conservar unidad, banco/marca/sucursal y período como dimensiones.
-- Todas las tareas observadas se pueden registrar desde el catálogo v4. Las que
+- Todas las tareas observadas se pueden registrar desde el catálogo v5. Las que
   tienen significado todavía no confirmado se marcan como provisionales, usan
   códigos separados y no participan en comparaciones entre unidades hasta que
   jefatura confirme que describen el mismo flujo y unidad de medida.
@@ -62,7 +62,7 @@ confirmación.
 ## Tareas canónicas observadas
 
 Los códigos debajo son las claves estables de la implementación del catálogo
-del laboratorio (versión 2). La clasificación `Confirmada` indica que el
+específico del laboratorio; su versión vigente es 5. La clasificación `Confirmada` indica que el
 proceso principal resulta claro por el título; `Revisar` indica que hace falta
 una decisión funcional antes de habilitarlo como selección oficial.
 
@@ -150,26 +150,34 @@ unidades por deducción.
 
 ## Compatibilidad y alcance de implementación
 
-El catálogo Grupo París versión 4 ya está conectado en el laboratorio local:
+El catálogo Grupo París versión 5 ya está conectado en el laboratorio local:
 primer ingreso, propuestas, aprobación, asignaciones, tareas materializadas y
 analítica. La unidad (`businessUnitCode`) se conserva separada de la empresa
 legal (`companyId`); nombres y códigos no son editables por quien registra el
 trabajo. Banco y cuenta se solicitan aparte para conciliaciones. Las operativas
 se miden por movimientos sin cuotas artificiales.
 
-Las versiones 1 (50 tareas), 2 (55 tareas) y 3 (55 tareas) se conservan para
-leer propuestas y trabajo ya guardado. La versión 4 ofrece las 55 tareas en el
-primer ingreso; 25 están confirmadas y 30 siguen provisionales, separadas por
-código y excluidas de comparaciones entre unidades. V4 elimina el parámetro
+Las versiones 1 (50 tareas), 2 (55 tareas), 3 (55 tareas) y 4 (55 tareas) se
+conservan para leer propuestas y trabajo ya guardado. La versión 5 ofrece las 55
+tareas en el primer ingreso; 25 están habilitadas para comparar y 30 siguen
+provisionales, separadas por código y excluidas de comparaciones entre unidades.
+V4 eliminó el parámetro
 libre `unidad` de registración contable de sueldos e IVA porque la unidad ya se
 guarda en `businessUnitCode`; las versiones históricas mantienen ese campo para
 validar registros anteriores. Las métricas conservan la versión y marcan las
 filas provisionales. Los datos históricos sin código no se clasifican por el
 título ni se reescriben.
 
-V4 reconoce también `CONC BANC FRANC` como alias de búsqueda de Conciliación
+V5 conserva el alias `CONC BANC FRANC` que V4 agregó para buscar Conciliación
 bancaria. El alias conduce a la misma tarjeta y al mismo código canónico; nunca
 se almacena como nombre de una tarea independiente.
+
+V5 alineó dos criterios de comparación con la columna Estado de esta tabla:
+`supplier_invoice_load` sigue disponible para registrar movimientos, pero queda
+fuera de comparaciones entre unidades hasta confirmar el alcance de portales;
+`customer_collections` queda habilitada para comparar cobros registrados. V1–V4
+conservan sus criterios históricos; no se recalculan ni reclasifican sus
+métricas.
 
 Este cambio cubre sólo el laboratorio privado con datos ficticios. No modifica
 SQL001–016, API operativa, Auth remoto ni el onboarding autenticado. La conexión
@@ -178,9 +186,9 @@ remoto independiente antes de habilitar cuentas reales.
 
 ## Próxima revisión funcional
 
-La versión 4 ofrece las 55 tareas observadas para registro: 25 confirmadas y 30
-provisionales. Las versiones 1 (50 tareas), 2 (55 tareas) y 3 (55 tareas) se
-conservan para leer trabajo del laboratorio ya guardado. Los códigos
+La versión 5 ofrece las 55 tareas observadas para registro: 25 comparables y 30
+provisionales. Las versiones 1 (50 tareas), 2 (55 tareas), 3 (55 tareas) y 4
+(55 tareas) se conservan para leer trabajo del laboratorio ya guardado. Los códigos
 provisionales pueden registrar trabajo, pero quedan marcados como no
 comparables entre unidades hasta que su alcance y unidad de medida se validen.
 

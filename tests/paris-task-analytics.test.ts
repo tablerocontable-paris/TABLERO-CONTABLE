@@ -41,10 +41,26 @@ describe("medición del catálogo de tareas Grupo París", () => {
       task("v2", "paris_autos", { banco: "Banco Francés" }, { taskCatalogVersion: 2 }),
       task("v3", "paris_autos", { banco: "Banco Francés" }, { taskCatalogVersion: 3 }),
       task("v4", "paris_autos", { banco: "Banco Francés" }, { taskCatalogVersion: 4 }),
+      task("v5", "paris_autos", { banco: "Banco Francés" }, { taskCatalogVersion: 5 }),
     ], []);
-    expect(rows).toHaveLength(4);
-    expect(rows.map((row) => row.taskCatalogVersion)).toEqual([1, 2, 3, 4]);
+    expect(rows).toHaveLength(5);
+    expect(rows.map((row) => row.taskCatalogVersion)).toEqual([1, 2, 3, 4, 5]);
     expect(rows.every((row) => row.title === "Conciliación bancaria")).toBe(true);
+  });
+
+  it("aplica el criterio v5 sólo al trabajo nuevo y respeta elegibilidad v4 histórica", () => {
+    const rows = summarizeParisTaskWork([
+      task("supplier-v4", "paris_autos", {}, { taskCode: "supplier_invoice_load", taskCatalogVersion: 4 }),
+      task("supplier-v5", "paris_autos", {}, { taskCode: "supplier_invoice_load", taskCatalogVersion: 5 }),
+      task("collections-v4", "paris_autos", {}, { taskCode: "customer_collections", taskCatalogVersion: 4 }),
+      task("collections-v5", "paris_autos", {}, { taskCode: "customer_collections", taskCatalogVersion: 5 }),
+    ], []);
+    expect(rows).toEqual(expect.arrayContaining([
+      expect.objectContaining({ taskCode: "supplier_invoice_load", taskCatalogVersion: 4, comparisonEligible: true }),
+      expect.objectContaining({ taskCode: "supplier_invoice_load", taskCatalogVersion: 5, comparisonEligible: false }),
+      expect.objectContaining({ taskCode: "customer_collections", taskCatalogVersion: 4, comparisonEligible: false }),
+      expect.objectContaining({ taskCode: "customer_collections", taskCatalogVersion: 5, comparisonEligible: true }),
+    ]));
   });
 
   it("registra una tarea provisional sin marcarla comparable entre unidades", () => {
