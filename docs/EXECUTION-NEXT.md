@@ -15,8 +15,8 @@ prueba de navegador confirma propuestas canónicas pendientes por empresa y que
 no se crean tareas/asignaciones hasta aprobación, junto con cierres, tareas,
 cronómetros, ausencia, aislamiento, temas y móvil. Implementación publicada en
 `main` como `cd84168`, guía personal actualizada en `e8299c8`, sin Pull Request.
-GitHub Actions #148 sigue en ejecución. No desplegar a Sites; Site v104 sigue
-sin cambios.
+GitHub Actions #150 pasó para el HEAD `54e8b4d`. No desplegar a Sites sin una
+etapa de publicación aprobada; Site v104 sigue sin cambios.
 
 ## Corte GitHub: seguridad de clasificación en onboarding
 
@@ -32,7 +32,7 @@ aprobó el HEAD documental `77bbae7`. Las propuestas antiguas sin clasificación
 aún un flujo de reclasificación; no aprobarlas ni inferir códigos desde el
 texto histórico. Site privado v104 sin cambios ni despliegue.
 
-## Estado del catálogo publicado antes de V6
+## Estado del catálogo y límites de homologación
 
 El catálogo V6 controla Francés y Nación para `gpar_bank_reconciliation` y
 mantiene otros bancos pendientes de homologación, sin inventar opciones.

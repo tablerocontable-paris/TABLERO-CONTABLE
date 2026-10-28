@@ -2,52 +2,44 @@
 
 ## Corte actual — 28/10/2026
 
-El corte funcional `5bcf11a` ya está publicado directamente en `main`, sin
-Pull Request. Incluye validación estricta para onboarding y
-propuestas con catálogo París: los historiales antiguos se conservan, y las
-propuestas sin clasificación o con revisiones inconsistentes no se pueden
-activar como trabajo nuevo. Todavía no existe una vía para reclasificar esas
-propuestas antiguas; crear una propuesta nueva desde el catálogo mantiene su
-historial original intacto.
+El corte actual está publicado directamente en `main`, sin Pull Request. La
+implementación V6 está en `cd84168`; las guías de traslado/estado se actualizaron
+en `e8299c8` y `54e8b4d`. HEAD actual `54e8b4d`; GitHub Actions #150 pasó suite,
+build y validación del paquete Sites.
 
-En V5, `gpar_bank_reconciliation` es la tarea canónica. “Conciliación Banco
-Francés” y “CONC BANC FRANC” conducen a esa misma tarea; el banco y la cuenta
-son parámetros separados y requeridos. El cambio local V6 en curso prepara
-opciones controladas para Banco Francés y Banco Nación, las únicas dos
-entidades respaldadas por las fuentes revisadas. “Otro banco · pendiente de
-normalizar” guarda un detalle pero queda fuera de comparaciones. No es un
-padrón exhaustivo. Los demás parámetros continúan libres; V1–V5 y sus métricas
+V6 conserva las 55 tareas del catálogo y controla Banco Francés y Banco Nación
+como parámetros de `gpar_bank_reconciliation`. Los demás bancos quedan
+pendientes de homologar y excluidos de comparaciones. No se presume que las dos
+opciones disponibles sean un padrón exhaustivo. V1–V5 y sus métricas históricas
 no se reescriben.
 
-Validación de este corte local: suite **877/877 en 87 archivos**, TypeScript,
-build cliente, Worker y paquete Sites aprobados. Vite informa el aviso de
-bundle principal >500 kB y comentarios `@__PURE__` de Zod; los comandos
-terminaron correctamente. Pruebas focales posteriores al ajuste de texto:
-35/35 en los tres archivos afectados; hook de commit: 229/229.
-`git diff --check` pasó. La revisión
-independiente no encontró hallazgos críticos/altos; sí confirma que falta un
-flujo de reclasificación de propuestas antiguas. El commit funcional
-`5bcf11a`, `66b4d4a` y `77bbae7` ya están publicados; Actions #146 de
-`77bbae7` pasó suite, build y paquete Sites. El Site privado sigue en v104 y
-no se publica con estos pasos.
-Conservar el scratch no versionado protegido sin inspeccionarlo, modificarlo o
-stagearlo.
+Validación local del cambio funcional: **880/880 pruebas en 87 archivos**,
+TypeScript, builds cliente/Worker/Sites, Playwright en Edge y `git diff --check`
+aprobados; el recorrido no observó errores JS ni llamadas a `/api`. El hook
+pre-commit pasó 230/230. El build conserva avisos de Zod y del bundle principal
+(>500 kB). La revisión anterior confirmó que las propuestas antiguas sin
+clasificación todavía no tienen vía de reclasificación. Treinta tareas siguen
+provisionales y no se comparan entre unidades hasta homologar su alcance.
+
+El Site privado conserva v104, owner-only, y no se actualiza con pushes a
+GitHub. Esta etapa continúa en laboratorio con perfiles/datos ficticios; no se
+activaron usuarios reales, Auth operativo, `/api` ni nuevas migraciones
+Supabase. Conservar el scratch no versionado protegido sin inspeccionarlo,
+modificarlo o stagearlo.
 
 Repositorio activo `work/site`, remoto privado
-`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`. El corte `5bcf11a` se
-publicó bajo la cuenta **Tablero Contable**, sin Pull Request. La continuidad
-está en `66b4d4a` y `77bbae7`. El Site privado permanece en v104, owner-only; GitHub no lo
-despliega automáticamente.
+`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`, autor de publicación
+**Tablero Contable**. Consultar `docs/PROJECT-STATUS.md`,
+`docs/EXECUTION-NEXT.md` y `outputs/LEEME-PC-PERSONAL.md` antes de continuar.
 
 ## Catálogo de tareas y primera experiencia
 
-V6 está en implementación local, aún no publicada: mantiene las 55 tareas y
-su elegibilidad general 25/30, incorpora Banco Francés/Banco Nación como
-selecciones versionadas para conciliación y registra bancos no listados como
-no comparables hasta homologarlos. No declarar este corte disponible en GitHub
-ni Sites hasta que suite completa, builds, revisión y CI pasen.
+V6 está publicado en GitHub `main` y validado por Actions #150. Mantiene las 55
+tareas y su elegibilidad general 25/30, incorpora Banco Francés/Banco Nación
+como selecciones versionadas para conciliación y registra bancos no listados
+como no comparables hasta homologarlos. Todavía no está desplegado a Sites.
 
-El catálogo Grupo París V5 (último corte publicado) ofrece siete unidades de negocio y 55 tareas con
+El catálogo Grupo París V6 (último corte publicado en GitHub) ofrece siete unidades de negocio y 55 tareas con
 código y nombre canónicos. Veinticinco están habilitadas para comparación; 30
 son provisionales, seleccionables y registrables, pero excluidas de
 comparaciones entre unidades hasta confirmar su alcance. V5 excluye

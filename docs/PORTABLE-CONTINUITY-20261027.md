@@ -3,17 +3,17 @@
 Actualizado el 28/10/2026. Éste es el estado para retomar el proyecto desde otra
 PC o aplicación; la documentación anterior de este archivo quedó reemplazada.
 
-Al 28/10/2026 se está preparando localmente el catálogo V6 para normalizar
-Banco Francés y Banco Nación en conciliaciones. **Aún no está en GitHub**: no
-hagas `pull` hasta que esta guía indique el commit validado. V6 conserva las
-versiones históricas e identifica otros bancos como pendientes/no comparables.
+Al 28/10/2026, catálogo V6 publicado directamente en `main` como `cd84168`;
+continuidad actualizada en `e8299c8` y `54e8b4d`. Actions #150 pasó para el HEAD
+`54e8b4d`. V6 normaliza Banco Francés y Banco Nación para conciliaciones,
+conserva versiones históricas e identifica otros bancos como pendientes/no
+comparables. El Site privado sigue en v104 y no recibió este cambio.
 
 ## Fuentes vigentes
 
 - Repositorio privado: [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocontable-paris/TABLERO-CONTABLE), rama `main`.
-- Catálogo v5 está en `main`, commit `f5263f1b4a2c401268083e7de6a50de53242966c`;
-  se publica directamente bajo `tablerocontable-paris`, sin PR. GitHub Actions
-  #135 pasó para ese SHA. El repositorio permanece privado.
+- Catálogo v6 está en `main` bajo `tablerocontable-paris`, sin PR; Actions #150
+  pasó para `54e8b4d`. El repositorio permanece privado.
 - Site de laboratorio existente, v5 desplegado como versión 104:
   <https://grupo-paris-contabilidad.valentino-magni.chatgpt.site>, fuente Sites
   `2a965026c40cad97a108f2e78dadd5f3c55edb37`. Conserva acceso
@@ -24,21 +24,21 @@ versiones históricas e identifica otros bancos como pendientes/no comparables.
 
 ## Estado funcional comprobado
 
-El catálogo v5 ofrece las siete unidades solicitadas: PARIS AUTOS, DORAL,
+El catálogo v6 ofrece las siete unidades solicitadas: PARIS AUTOS, DORAL,
 PARIS CARS, PARIS TRAC, MOTOR, FIDEICOMISO DESARROLLO y POSTVENTA. El catálogo
-v5 tiene 55 tareas con códigos y nombres canónicos. Las 55 se pueden elegir;
+v6 tiene 55 tareas con códigos y nombres canónicos. Las 55 se pueden elegir;
 25 están habilitadas para comparación y 30 son provisionales, cada una con
 código propio y excluida de comparaciones entre unidades hasta confirmar su
 alcance. Banco, cuenta, sucursal, sistema, período y otros datos son parámetros
 separados, no parte del nombre de tarea. “Carga de otras facturas” exige indicar
 el subtipo. Catálogos v1 y v2 se conservan para leer registros anteriores.
 
-La suite completa v5 pasó **870/870 pruebas en 87 archivos**; TypeScript, build
-del cliente, Worker y paquete Sites también pasaron. La paridad del contrato de
-catálogo pasó **55/55**. GitHub Actions #135 para el commit `f5263f1` estaba en
-curso en la última consulta. El build conserva avisos de Rollup por comentarios
-de Zod y por el chunk principal (~656 kB). No se tocaron Supabase, Auth
-operativo, `/api` ni SQL001–016.
+La suite completa V6 pasó **880/880 pruebas en 87 archivos**; TypeScript,
+build cliente/Worker, paquete Sites y recorrido Playwright en Edge también
+pasaron. GitHub Actions #150 aprobó el HEAD `54e8b4d` (commit funcional
+`cd84168`). El build conserva avisos de Rollup por comentarios de Zod y por el
+chunk principal (>500 kB). No se tocaron Supabase, Auth operativo, `/api` ni
+SQL001–016.
 
 El Site y el repositorio siguen en modo laboratorio: perfiles y datos ficticios.
 El despliegue no constituye aceptación para producción ni habilita usuarios

@@ -150,7 +150,7 @@ unidades por deducción.
 
 ## Compatibilidad y alcance de implementación
 
-### Catálogo V6 para dimensión bancaria (implementación local)
+### Catálogo V6 para dimensión bancaria (publicado en GitHub)
 
 V6 conserva `gpar_bank_reconciliation` y agrega opciones controladas Banco
 Francés (`frances`) y Banco Nación (`nacion`), sustentadas por nombres
@@ -160,18 +160,19 @@ código; el banco persiste como dimensión separada. “Otro banco · pendiente 
 normalizar” requiere un nombre y queda fuera de comparación. La lista no es
 exhaustiva. Los parámetros V1–V5 permanecen intactos.
 
-Estado de esta guía: cambios locales aún no publicados ni desplegados. Confirmar
-suite, builds, revisión y CI antes de declarar el corte completo.
+Publicado directamente en `main` como `cd84168`; continuidad actualizada en
+`54e8b4d`. Suite 880/880, builds y revisión Playwright local aprobados; Actions
+#150 pasó para `54e8b4d`. No se desplegó al Site, que sigue en v104.
 
-El catálogo Grupo París versión 5 ya está conectado en el laboratorio local:
+El catálogo Grupo París versión 6 ya está conectado en el laboratorio local:
 primer ingreso, propuestas, aprobación, asignaciones, tareas materializadas y
 analítica. La unidad (`businessUnitCode`) se conserva separada de la empresa
 legal (`companyId`); nombres y códigos no son editables por quien registra el
 trabajo. Banco y cuenta se solicitan aparte para conciliaciones. Las operativas
 se miden por movimientos sin cuotas artificiales.
 
-Las versiones 1 (50 tareas), 2 (55 tareas), 3 (55 tareas) y 4 (55 tareas) se
-conservan para leer propuestas y trabajo ya guardado. La versión 5 ofrece las 55
+Las versiones 1 (50 tareas), 2 (55 tareas), 3 (55 tareas), 4 (55 tareas) y 5
+(55 tareas) se conservan para leer propuestas y trabajo ya guardado. La versión 6 ofrece las 55
 tareas en el primer ingreso; 25 están habilitadas para comparar y 30 siguen
 provisionales, separadas por código y excluidas de comparaciones entre unidades.
 V4 eliminó el parámetro

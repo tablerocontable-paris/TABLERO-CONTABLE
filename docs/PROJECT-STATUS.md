@@ -1,6 +1,6 @@
 # Estado vigente — actualización 28/10/2026
 
-## Catálogo V6 — estandarización controlada de bancos (local, no publicado)
+## Catálogo V6 — publicado en GitHub; no desplegado a Sites
 
 V6 añade opciones canónicas de banco en conciliación: Banco Francés y Banco
 Nación, respaldadas por nombres presentes en las fuentes del repositorio. Las
@@ -18,9 +18,9 @@ build cliente, Worker, paquete Sites y recorrido Playwright en Edge aprobados;
 el navegador confirmó que onboarding conserva cuatro propuestas distintas
 (dos tareas × dos empresas) sin crear tareas/asignaciones antes de aprobación,
 además de cierres, cronómetros, aislamiento, temas y móvil. `git diff --check`
-aprobado. Implementación publicada directamente en `main` como `cd84168` y guía
-actualizada en `e8299c8`; GitHub Actions #148 está en ejecución. No desplegar en
-Sites; este trabajo sólo toca el laboratorio local.
+aprobado. Implementación publicada directamente en `main` como `cd84168`; guías
+actualizadas en `e8299c8` y `54e8b4d`. GitHub Actions #150 pasó para el HEAD
+`54e8b4d`. V6 no se desplegó en Sites, que permanece en v104.
 
 ## Guardas para onboarding y activación de propuestas — corte GitHub
 
