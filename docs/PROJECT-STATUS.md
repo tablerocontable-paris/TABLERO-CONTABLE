@@ -1,5 +1,26 @@
 # Estado vigente — actualización 28/10/2026
 
+## Catálogo V6 — estandarización controlada de bancos (local, no publicado)
+
+V6 añade opciones canónicas de banco en conciliación: Banco Francés y Banco
+Nación, respaldadas por nombres presentes en las fuentes del repositorio. Las
+búsquedas “Conciliación Banco Francés”, “Conciliación Banco Nación” y
+`CONC BANC FRANC` llevan al mismo código `gpar_bank_reconciliation`, guardando
+el banco separado (`frances` / `nacion`). Otros bancos quedan como “pendiente
+de normalizar”, con nombre detallado y fuera de comparación. No se presume que
+esas opciones cubran todos los bancos reales.
+
+Propuestas del onboarding, alta puntual, corrección de propuestas y análisis
+comparten controles para esta dimensión. Métricas nuevas V6 sin banco o con un
+banco pendiente no se comparan; V1–V5 conservan parámetros e indicadores
+históricos. Validación local final: suite **880/880 en 87 archivos**, TypeScript,
+build cliente, Worker, paquete Sites y recorrido Playwright en Edge aprobados;
+el navegador confirmó que onboarding conserva cuatro propuestas distintas
+(dos tareas × dos empresas) sin crear tareas/asignaciones antes de aprobación,
+además de cierres, cronómetros, aislamiento, temas y móvil. `git diff --check`
+aprobado. Commit y GitHub Actions de este corte: pendientes. No desplegar en
+Sites; este trabajo sólo toca el laboratorio local.
+
 ## Guardas para onboarding y activación de propuestas — corte GitHub
 
 La revisión del flujo encontró que las propuestas antiguas sin clasificación
@@ -24,7 +45,7 @@ aprobó el HEAD `77bbae7`. Ya se puede actualizar la PC personal con
 `git pull --ff-only origin main`. Site privado v104 sin cambios; no afecta
 `/api`, Auth ni SQL001–016.
 
-### Límite del catálogo para análisis por banco
+### Historial previo del catálogo y comparabilidad pendiente
 
 En V5, “Conciliación Banco Francés” y `CONC BANC FRANC` son formas de buscar
 la tarea canónica “Conciliación bancaria”; banco y cuenta quedan en parámetros
@@ -78,7 +99,7 @@ versión publicada del Site permanece v104 y no incluye estas protecciones.
 
 ## Catálogo Grupo París — normalización inicial
 
-La inducción local del laboratorio ofrece las siete unidades solicitadas y 55 tareas con código y nombre canónicos. La versión 5 conserva las 55 opciones; 25 son comparables y 30 siguen provisionales. V5 deja fuera de comparaciones a `supplier_invoice_load` mientras se confirma el alcance de portales y habilita `customer_collections`, que estaba marcada Confirmada en el contrato. La lista y el total 25/30 se mantienen. Unidad, banco, cuenta, sucursal y período son dimensiones separadas. V4 quitó el texto libre redundante `unidad` de registración contable de sueldos e IVA: `businessUnitCode` es la única dimensión de unidad. V1–V4 siguen disponibles para historial; los registros sin código no se reclasifican.
+La inducción local del laboratorio ofrece las siete unidades solicitadas y 55 tareas con código y nombre canónicos. V6 conserva las 55 opciones; 25 son comparables y 30 siguen provisionales. V5 dejó fuera de comparaciones a `supplier_invoice_load` mientras se confirma el alcance de portales y habilitó `customer_collections`, que estaba marcada Confirmada en el contrato. Unidad, banco, cuenta, sucursal y período son dimensiones separadas. V6 normaliza los bancos Francés y Nación para conciliación; V1–V5 siguen disponibles para historial y los registros sin código no se reclasifican.
 
 V4 agregó el alias de búsqueda `CONC BANC FRANC` para la tarea canónica Conciliación bancaria; V5 lo conserva. La selección guarda código y nombre canónicos. V5 está publicado en el Site de laboratorio, versión 104, desde la fuente Sites `2a965026c40cad97a108f2e78dadd5f3c55edb37`. Validación local del corte funcional: suite completa 870/870 en 87 archivos, TypeScript, build cliente, Worker y paquete Sites; GitHub Actions #135 para `f5263f1` terminó en éxito. En una auditoría posterior se alinearon cuatro nombres del borrador con las etiquetas canónicas del selector; la prueba ahora exige paridad de los 55 códigos, nombres y criterios de comparación. El build conserva avisos de comentarios de Zod y un chunk principal de aproximadamente 656 kB.
 

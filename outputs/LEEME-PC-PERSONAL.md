@@ -1,5 +1,8 @@
 # Continuar el proyecto desde tu PC personal
 
+**Aviso:** el catálogo V6 está en trabajo local y todavía no se publicó. No
+actualices desde GitHub hasta que esta guía incluya el SHA validado.
+
 Actualizado el 28/10/2026. Esta guía reemplaza instrucciones anteriores de
 traslado del proyecto.
 

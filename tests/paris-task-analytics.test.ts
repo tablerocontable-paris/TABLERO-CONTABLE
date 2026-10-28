@@ -63,6 +63,22 @@ describe("medición del catálogo de tareas Grupo París", () => {
     ]));
   });
 
+  it("compara bancos V6 sólo cuando el banco está normalizado y mantiene textos V5 históricos", () => {
+    const rows = summarizeParisTaskWork([
+      task("frances", "paris_autos", { banco: "frances", cuenta: "Principal" }, { taskCatalogVersion: 6 }),
+      task("frances-other", "doral", { banco: "frances", cuenta: "Principal" }, { taskCatalogVersion: 6 }),
+      task("unknown", "paris_autos", { banco: "unverified", banco_no_catalogado: "Banco Z" }, { taskCatalogVersion: 6 }),
+      task("missing", "paris_autos", { cuenta: "Principal" }, { taskCatalogVersion: 6 }),
+      task("legacy", "paris_autos", { banco: "Banco Francés" }, { taskCatalogVersion: 5 }),
+    ], []);
+    expect(rows).toHaveLength(5);
+    expect(rows.find((row) => row.parameters.banco === "frances" && row.businessUnitCode === "paris_autos")?.comparisonEligible).toBe(true);
+    expect(rows.find((row) => row.parameters.banco === "frances" && row.businessUnitCode === "doral")?.comparisonEligible).toBe(true);
+    expect(rows.find((row) => row.parameters.banco === "unverified")?.comparisonEligible).toBe(false);
+    expect(rows.find((row) => row.parameters.cuenta === "Principal" && row.taskCatalogVersion === 6 && !row.parameters.banco)?.comparisonEligible).toBe(false);
+    expect(rows.find((row) => row.taskCatalogVersion === 5)?.comparisonEligible).toBe(true);
+  });
+
   it("registra una tarea provisional sin marcarla comparable entre unidades", () => {
     const row = summarizeParisTaskWork([
       task("provisional", "paris_autos", { tipo_especifico: "gastos varios" }, {

@@ -3,6 +3,11 @@
 Actualizado el 28/10/2026. Éste es el estado para retomar el proyecto desde otra
 PC o aplicación; la documentación anterior de este archivo quedó reemplazada.
 
+Al 28/10/2026 se está preparando localmente el catálogo V6 para normalizar
+Banco Francés y Banco Nación en conciliaciones. **Aún no está en GitHub**: no
+hagas `pull` hasta que esta guía indique el commit validado. V6 conserva las
+versiones históricas e identifica otros bancos como pendientes/no comparables.
+
 ## Fuentes vigentes
 
 - Repositorio privado: [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocontable-paris/TABLERO-CONTABLE), rama `main`.

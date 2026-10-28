@@ -8,9 +8,14 @@ import {
   PARIS_TASK_CATALOG_V2,
   PARIS_TASK_CATALOG_V3,
   PARIS_TASK_CATALOG_V4,
+  PARIS_TASK_CATALOG_V5,
   PARIS_TASK_CATALOG_VERSION,
   getParisTask,
+  getParisTaskSelectionPreset,
+  hasRequiredParisTaskParameters,
   isParisTaskParameterSet,
+  isParisTaskParameterComparisonEligible,
+  normalizeParisTaskParameters,
   selectableParisTasks,
 } from "../src/domain/parisTaskCatalog";
 
@@ -34,7 +39,7 @@ describe("catálogo de tareas de Grupo París", () => {
   });
 
   it("versiona las tareas nuevas y conserva las lecturas históricas v1 a v4", () => {
-    expect(PARIS_TASK_CATALOG_VERSION).toBe(5);
+    expect(PARIS_TASK_CATALOG_VERSION).toBe(6);
     expect(PARIS_TASK_CATALOG_V2).toHaveLength(PARIS_TASK_CATALOG_V1.length + 5);
     expect(PARIS_TASK_CATALOG).toHaveLength(PARIS_TASK_CATALOG_V2.length);
     expect(getParisTask("procedure_follow_up", 1)).toBeUndefined();
@@ -73,6 +78,30 @@ describe("catálogo de tareas de Grupo París", () => {
       expect(getParisTask(v3Task.code, 4)).toEqual(expectedV4);
       expect(getParisTask(v3Task.code, 4)).toEqual(PARIS_TASK_CATALOG_V4.find((task) => task.code === v3Task.code));
     }
+  });
+
+  it("mantiene v5 histórica y controla los bancos de conciliación en v6", () => {
+    expect(getParisTask("gpar_bank_reconciliation", 5)).toEqual(PARIS_TASK_CATALOG_V5.find((task) => task.code === "gpar_bank_reconciliation"));
+    expect(getParisTask("gpar_bank_reconciliation", 5)?.parameters).toEqual(["banco", "cuenta", "período"]);
+    expect(getParisTask("gpar_bank_reconciliation", 6)?.parameters).toContain("banco no catalogado");
+    expect(normalizeParisTaskParameters("gpar_bank_reconciliation", { banco: "Banco Francés", cuenta: " Cuenta 1 " }, 6)).toEqual({ banco: "frances", cuenta: "Cuenta 1" });
+    expect(normalizeParisTaskParameters("gpar_bank_reconciliation", { banco: "CONC BANC FRANC" }, 6).banco).toBe("frances");
+    expect(normalizeParisTaskParameters("gpar_bank_reconciliation", { banco: "bna" }, 6).banco).toBe("nacion");
+    expect(isParisTaskParameterSet("gpar_bank_reconciliation", { banco: "banco frances" }, 6)).toBe(false);
+    expect(isParisTaskParameterSet("gpar_bank_reconciliation", { banco: "frances", cuenta: "Cuenta 1" }, 6)).toBe(true);
+    expect(isParisTaskParameterSet("gpar_bank_reconciliation", { banco: "unverified", "banco_no_catalogado": "Banco inventado" }, 6)).toBe(true);
+    expect(hasRequiredParisTaskParameters("gpar_bank_reconciliation", { banco: "unverified", "banco_no_catalogado": "Banco inventado", cuenta: "Cuenta 1" }, 6)).toBe(true);
+    expect(hasRequiredParisTaskParameters("gpar_bank_reconciliation", { banco: "unverified", cuenta: "Cuenta 1" }, 6)).toBe(false);
+    expect(hasRequiredParisTaskParameters("gpar_bank_reconciliation", { banco: "frances", cuenta: "Cuenta 1", "banco_no_catalogado": "Otro" }, 6)).toBe(false);
+    expect(getParisTaskSelectionPreset("gpar_bank_reconciliation", "conc banc franc", 6)).toMatchObject({ label: "Conciliación Banco Francés", parameters: { banco: "frances" } });
+    expect(getParisTaskSelectionPreset("gpar_bank_reconciliation", "frances", 6)?.parameters.banco).toBe("frances");
+    expect(getParisTaskSelectionPreset("gpar_bank_reconciliation", "Conciliación Banco Nación", 6)?.parameters.banco).toBe("nacion");
+    expect(getParisTaskSelectionPreset("gpar_bank_reconciliation", "banco", 6)).toBeUndefined();
+    expect(isParisTaskParameterComparisonEligible("gpar_bank_reconciliation", { banco: "frances" }, 6)).toBe(true);
+    expect(isParisTaskParameterComparisonEligible("gpar_bank_reconciliation", undefined, 6)).toBe(false);
+    expect(isParisTaskParameterComparisonEligible("gpar_bank_reconciliation", {}, 6)).toBe(false);
+    expect(isParisTaskParameterComparisonEligible("gpar_bank_reconciliation", { banco: "unverified" }, 6)).toBe(false);
+    expect(isParisTaskParameterComparisonEligible("gpar_bank_reconciliation", { banco: "Banco Francés" }, 5)).toBe(true);
   });
 
   it("corrige elegibilidad sin alterar el snapshot histórico v4", () => {

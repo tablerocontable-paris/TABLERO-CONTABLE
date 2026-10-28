@@ -2,7 +2,8 @@ import { useState, type FormEvent } from "react";
 import { Panel, Empty } from "./ui";
 import StepListEditor, { validateSteps } from "./StepListEditor";
 import ScheduleEditor from "./ScheduleEditor";
-import { getParisTask, parisTaskParameterKey, PARIS_BUSINESS_UNITS } from "../domain/parisTaskCatalog";
+import { formatParisTaskParameterValue, getParisTask, parisTaskParameterKey, PARIS_BUSINESS_UNITS } from "../domain/parisTaskCatalog";
+import ParisTaskParameterFields from "./ParisTaskParameterFields";
 import {
   approveHabitualTaskProposals,
   hasConsistentParisProposalClassification,
@@ -83,9 +84,9 @@ function ProposalGroupCard({ group, suggestedMatch, state, actor, month, commit,
               <b>{profileName(proposal)} · {companyName(proposal)}</b>
               <p>{proposal.title}{proposal.process ? ` · ${proposal.process}` : ""}</p>
               <small>{businessUnitLabel(proposal.businessUnitCode)} · {proposal.schedule.frequency} · {proposal.kind === "operativa" ? `actividad por ${proposal.unit} · sin cuota` : `${proposal.steps.length} controles`} · envío {new Date(proposal.submittedAt).toLocaleDateString("es-AR")}</small>
-              {proposal.taskCode && Object.keys(proposal.taskParameters || {}).length > 0 && <dl className="paris-proposal-parameters">{(getParisTask(proposal.taskCode)?.parameters || []).map((label) => {
+              {proposal.taskCode && Object.keys(proposal.taskParameters || {}).length > 0 && <dl className="paris-proposal-parameters">{(getParisTask(proposal.taskCode, proposal.taskCatalogVersion)?.parameters || []).map((label) => {
                 const value = proposal.taskParameters?.[parisTaskParameterKey(label)];
-                return value ? <div key={label}><dt>{label}</dt><dd>{value}</dd></div> : null;
+                return value ? <div key={label}><dt>{label}</dt><dd>{formatParisTaskParameterValue(proposal.taskCode, parisTaskParameterKey(label), value, proposal.taskCatalogVersion)}</dd></div> : null;
               })}</dl>}
               <details>
                 <summary>Ver descripción y controles</summary>
@@ -195,10 +196,7 @@ function MyProposalCard({ proposal, state, actor, month, commit, notify }: {
         <form className="habitual-proposal-resubmit" onSubmit={resubmit}>
           <label>Nombre de la tarea<input required maxLength={120} value={title} readOnly={!!proposal.taskCode} onChange={(event) => setTitle(event.target.value)} /></label>
           <label>Banco o proceso<input maxLength={160} value={process} onChange={(event) => setProcess(event.target.value)} /></label>
-          {proposal.taskCode && <fieldset className="paris-task-parameters"><legend>Parámetros de la tarea estándar</legend><div className="paris-task-parameter-fields">{(getParisTask(proposal.taskCode)?.parameters || []).map((label) => {
-            const key = parisTaskParameterKey(label);
-            return <label key={key}>{label}<input maxLength={160} value={taskParameters[key] || ""} onChange={(event) => setTaskParameters({ ...taskParameters, [key]: event.target.value })} /></label>;
-          })}</div></fieldset>}
+          {proposal.taskCode && proposal.taskCatalogVersion && <fieldset className="paris-task-parameters"><legend>Parámetros de la tarea estándar</legend><ParisTaskParameterFields taskCode={proposal.taskCode} version={proposal.taskCatalogVersion} values={taskParameters} onChange={setTaskParameters} /></fieldset>}
           <label>Descripción<textarea required maxLength={1000} rows={2} value={description} onChange={(event) => setDescription(event.target.value)} /></label>
           <div className="form-grid">
             <label>Tipo<select value={kind} onChange={(event) => setKind(event.target.value as Template["kind"])}><option value="resultado">Entregable</option><option value="operativa">Actividad con cantidad</option></select></label>

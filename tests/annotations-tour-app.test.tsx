@@ -119,23 +119,23 @@ describe("anotaciones y recorrido integrados", () => {
     expect(screen.getByRole("alert").textContent).toContain("datos obligatorios");
     expect(storedLab().assignments).toHaveLength(0);
 
-    fireEvent.change(screen.getByLabelText("banco"), { target: { value: "Banco Francés" } });
-    fireEvent.change(screen.getByLabelText("cuenta"), { target: { value: "Cuenta principal" } });
+    fireEvent.change(screen.getByLabelText("banco · obligatorio"), { target: { value: "frances" } });
+    fireEvent.change(screen.getByLabelText("cuenta · obligatorio"), { target: { value: "Cuenta principal" } });
     fireEvent.submit(screen.getByRole("dialog", { name: "Nueva tarea, con todo su contexto" }).querySelector("form")!);
     const saved = storedLab();
     expect(saved.assignments.at(-1)).toMatchObject({
       title: "Conciliación bancaria",
       taskCode: "gpar_bank_reconciliation",
-      taskCatalogVersion: 5,
+      taskCatalogVersion: 6,
       businessUnitCode: "paris_autos",
-      taskParameters: { banco: "Banco Francés", cuenta: "Cuenta principal" },
+      taskParameters: { banco: "frances", cuenta: "Cuenta principal" },
     });
     expect(saved.tasks.at(-1)).toMatchObject({
       title: "Conciliación bancaria",
       taskCode: "gpar_bank_reconciliation",
-      taskCatalogVersion: 5,
+      taskCatalogVersion: 6,
       businessUnitCode: "paris_autos",
-      taskParameters: { banco: "Banco Francés", cuenta: "Cuenta principal" },
+      taskParameters: { banco: "frances", cuenta: "Cuenta principal" },
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Nueva tarea" }));
@@ -457,8 +457,8 @@ describe("anotaciones y recorrido integrados", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Convertir en tarea" }));
     fireEvent.change(screen.getByLabelText("Elegí del catálogo"), { target: { value: "gpar_bank_reconciliation" } });
     fireEvent.change(screen.getByLabelText("Unidad de negocio"), { target: { value: "paris_autos" } });
-    fireEvent.change(screen.getByLabelText("banco"), { target: { value: "Banco Francés" } });
-    fireEvent.change(screen.getByLabelText("cuenta"), { target: { value: "Cuenta principal" } });
+    fireEvent.change(screen.getByLabelText("banco · obligatorio"), { target: { value: "frances" } });
+    fireEvent.change(screen.getByLabelText("cuenta · obligatorio"), { target: { value: "Cuenta principal" } });
 
     const revoked = {
       ...state,
@@ -501,8 +501,8 @@ describe("anotaciones y recorrido integrados", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Convertir en tarea puntual" }));
     fireEvent.change(screen.getByLabelText("Elegí del catálogo"), { target: { value: "gpar_bank_reconciliation" } });
     fireEvent.change(screen.getByLabelText("Unidad de negocio"), { target: { value: "paris_autos" } });
-    fireEvent.change(screen.getByLabelText("banco"), { target: { value: "Banco Francés" } });
-    fireEvent.change(screen.getByLabelText("cuenta"), { target: { value: "Cuenta principal" } });
+    fireEvent.change(screen.getByLabelText("banco · obligatorio"), { target: { value: "frances" } });
+    fireEvent.change(screen.getByLabelText("cuenta · obligatorio"), { target: { value: "Cuenta principal" } });
     fireEvent.change(screen.getByLabelText("Responsable"), { target: { value: "e0" } });
     fireEvent.change(screen.getByLabelText("Empresa obligatoria"), { target: { value: "c1" } });
     expect((screen.getByLabelText("Elegí del catálogo") as HTMLSelectElement).value).toBe("gpar_bank_reconciliation");

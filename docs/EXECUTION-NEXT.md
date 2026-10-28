@@ -1,5 +1,22 @@
 # Estado vigente de ejecución — 28/10/2026
 
+## Trabajo local actual — catálogo V6 para bancos
+
+La implementación local introduce valores controlados para Banco Francés y
+Banco Nación en conciliación bancaria. Los nombres tienen respaldo en el
+repositorio, pero la lista es parcial. Otro banco se registra con nombre y
+marca pendiente, excluido de comparación hasta homologarlo. Las búsquedas por
+nombre/abreviatura mantienen un código de tarea y guardan el banco como
+parámetro versionado. Los datos V1–V5 se conservan.
+
+Validación local final: suite **880/880 en 87 archivos**, TypeScript, build
+cliente, Worker, paquete Sites y recorrido Playwright en Edge aprobados. La
+prueba de navegador confirma propuestas canónicas pendientes por empresa y que
+no se crean tareas/asignaciones hasta aprobación, junto con cierres, tareas,
+cronómetros, ausencia, aislamiento, temas y móvil. Commit directo en `main` y
+GitHub Actions de este corte quedan pendientes. No desplegar a Sites mientras
+tanto; Site v104 sigue sin cambios.
+
 ## Corte GitHub: seguridad de clasificación en onboarding
 
 Cambios implementados localmente en `5bcf11a`: bloquear activación de propuestas con
@@ -14,16 +31,13 @@ aprobó el HEAD documental `77bbae7`. Las propuestas antiguas sin clasificación
 aún un flujo de reclasificación; no aprobarlas ni inferir códigos desde el
 texto histórico. Site privado v104 sin cambios ni despliegue.
 
-## Siguiente paso de catálogo — pendiente de fuente completa
+## Estado del catálogo publicado antes de V6
 
-El catálogo V5 ya normaliza la identidad de cada tarea y las siete unidades,
-pero sus parámetros (incluido `banco`) todavía son campos de texto libre.
-Antes de medir por banco, acordar los valores institucionales reales, agregar
-opciones canónicas versionadas y mostrar la selección como parte del contexto
-de la tarea. Mantener `gpar_bank_reconciliation` como identidad común y guardar
-banco/cuenta como dimensiones: así el mismo proceso puede compararse entre
-unidades. No transformar cada abreviatura histórica en una nueva tarea ni
-inventar bancos/cuentas. Tres candidatas provisionales (VN, costo de créditos
+El catálogo V6 controla Francés y Nación para `gpar_bank_reconciliation` y
+mantiene otros bancos pendientes de homologación, sin inventar opciones.
+Mantener el mismo código de tarea y banco/cuenta como dimensiones para
+comparaciones entre unidades. No transformar cada abreviatura histórica en una
+nueva tarea. Tres candidatas provisionales (VN, costo de créditos
 y MO4) requieren normalizar dimensiones antes de compararlas; las otras 27
 requieren aclarar alcance, siglas o solapamientos. Ver los códigos en el
 borrador del catálogo. No habilitar comparaciones por código únicamente.

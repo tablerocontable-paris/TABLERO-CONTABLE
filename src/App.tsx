@@ -106,6 +106,7 @@ import {
 } from "./domain/model";
 import { classifyCommitStorageFailure, isLaboratoryStateCurrent, load, persist, blankOnboarding, KEY, StaleLaboratoryStateError, type CommitOutcome } from "./data/repository";
 import { Dialog, Panel, Empty, Meter } from "./components/ui";
+import ParisTaskParameterFields from "./components/ParisTaskParameterFields";
 import OperationalTaskCard from "./components/OperationalTaskCard";
 import OperationalRatePanel from "./components/OperationalRatePanel";
 import OperationalQualityReview from "./components/OperationalQualityReview";
@@ -138,8 +139,7 @@ import {
   PARIS_BUSINESS_UNITS,
   PARIS_TASK_CATALOG_VERSION,
   hasRequiredParisTaskParameters,
-  parisTaskParameterKey,
-  requiredParisTaskParameterKeys,
+  formatParisTaskParameterValue,
   selectableParisTasks,
   type ParisBusinessUnitCode,
 } from "./domain/parisTaskCatalog";
@@ -2520,7 +2520,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                       <tbody>{metrics.map((metric) => <tr key={metric.key}>
                         <td>{metric.title}{!metric.taskCode && <small className="unclassified-label"> · Sin clasificar</small>}{metric.taskCode && !metric.comparisonEligible && <small className="unclassified-label"> · Provisional, sin comparación entre unidades</small>}</td>
                         <td>{metric.businessUnitLabel}</td>
-                        <td>{Object.entries(metric.parameters).filter(([, value]) => value.trim()).map(([key, value]) => `${key.replace(/_/g, " ")}: ${value}`).join(" · ") || "Sin detalle"}</td>
+                        <td>{Object.entries(metric.parameters).filter(([, value]) => value.trim()).map(([key, value]) => `${key.replace(/_/g, " ")}: ${formatParisTaskParameterValue(metric.taskCode, key, value, metric.taskCatalogVersion)}`).join(" · ") || "Sin detalle"}</td>
                         <td>{metric.companies.length}</td><td>{metric.assigned}</td><td>{metric.completed}</td>
                         <td>{metric.kind === "operativa" ? metric.movementCount : "—"}</td>
                         <td>{metric.kind === "operativa" ? `${metric.movementQuantity.toLocaleString("es-AR")} ${metric.unit}` : "—"}</td>
@@ -4106,17 +4106,7 @@ function NewTask({
             {PARIS_BUSINESS_UNITS.map((unit) => <option key={unit.code} value={unit.code}>{unit.label}</option>)}
           </select>
         </label>
-        {parisTask?.parameters.map((parameter) => {
-          const key = parisTaskParameterKey(parameter);
-          const required = requiredParisTaskParameterKeys(parisTask.code).has(key);
-          return <label key={key}>
-            {parameter}{required ? " · obligatorio" : " · opcional"}
-            <input aria-label={parameter} value={taskParameters[key] || ""} maxLength={160} required={required} onChange={(event) => {
-              setTaskParameters((current) => ({ ...current, [key]: event.target.value }));
-              setTaskError("");
-            }} />
-          </label>;
-        })}
+        {parisTask && <ParisTaskParameterFields taskCode={parisTask.code} version={PARIS_TASK_CATALOG_VERSION} values={taskParameters} onChange={(values) => { setTaskParameters(values); setTaskError(""); }} />}
         {parisTask && <p className="note">La tarea se guardará como <b>{parisTask.label}</b>{parisTask.unit ? <> · Unidad de registro: <b>{parisTask.unit}</b></> : null}. El detalle de pedido o anotación queda como contexto y no cambia el nombre canónico.</p>}
       </div> : <label>
         Elegí del catálogo

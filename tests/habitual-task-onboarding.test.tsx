@@ -62,7 +62,7 @@ describe("inducción de tareas habituales", () => {
     ]);
   });
 
-  it("selects a canonical task and stores bank/account parameters without allowing a renamed task", () => {
+  it("selects a normalized bank preset and stores its canonical code without allowing a renamed task", () => {
     const state = seed();
     const initial: Draft = { ...draft(2), selectedTemplateIds: [], selectedBusinessUnitCodes: ["paris_autos"], habitualTaskProposals: [] };
     let saved = initial;
@@ -71,24 +71,51 @@ describe("inducción de tareas habituales", () => {
       return <Onboarding state={state} month="2026-10" profile={state.profiles.find((profile) => profile.id === "e0")!} draft={current} update={(next) => { saved = next; setCurrent(next); }} finish={() => {}} pause={() => {}} laboratory />;
     }
     render(<Harness />);
-    expect(document.querySelectorAll(".paris-task-catalog-item")).toHaveLength(55);
+    expect(document.querySelectorAll(".paris-task-catalog-item")).toHaveLength(57);
     expect(screen.getByText(/30 opciones provisionales están marcadas/i)).toBeTruthy();
     expect(screen.queryByText(/Opciones provisionales \(30\)/i)).toBeNull();
     fireEvent.change(screen.getByLabelText("Buscar tarea estándar"), { target: { value: "CONC BANC FRANC" } });
     expect(document.querySelectorAll(".paris-task-catalog-item")).toHaveLength(1);
     const bankRow = Array.from(document.querySelectorAll(".paris-task-catalog-item"))
       .find((row) => row.textContent?.includes("Conciliación bancaria")) as HTMLElement;
-    expect(bankRow.textContent).toContain("Conciliación bancaria");
+    expect(bankRow.textContent).toContain("Conciliación Banco Francés");
     fireEvent.click(within(bankRow).getByRole("button", { name: /PARIS AUTOS/ }));
-    fireEvent.change(screen.getByLabelText("banco · obligatorio"), { target: { value: "Banco Francés" } });
+    expect((screen.getByLabelText("banco · fijado por selección") as HTMLSelectElement).value).toBe("frances");
+    expect((screen.getByLabelText("banco · fijado por selección") as HTMLSelectElement).disabled).toBe(true);
     fireEvent.change(screen.getByLabelText("cuenta · obligatorio"), { target: { value: "Cuenta principal" } });
     expect(saved.habitualTaskProposals).toHaveLength(1);
     expect(saved.habitualTaskProposals?.[0]).toMatchObject({
-      taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 5, businessUnitCode: "paris_autos",
-      taskParameters: { banco: "Banco Francés", cuenta: "Cuenta principal" },
+      taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 6, businessUnitCode: "paris_autos",
+      taskParameters: { banco: "frances", cuenta: "Cuenta principal" },
       title: "Conciliación bancaria", kind: "resultado",
     });
     expect(screen.queryByLabelText("Nombre editable")).toBeNull();
+  });
+
+  it("offers a separate canonical bank option and flags unlisted bank names", () => {
+    const state = seed();
+    const initial: Draft = { ...draft(2), selectedTemplateIds: [], selectedBusinessUnitCodes: ["paris_autos"], habitualTaskProposals: [] };
+    let saved = initial;
+    function Harness() {
+      const [current, setCurrent] = useState(initial);
+      return <Onboarding state={state} month="2026-10" profile={state.profiles.find((profile) => profile.id === "e0")!} draft={current} update={(next) => { saved = next; setCurrent(next); }} finish={() => {}} pause={() => {}} laboratory />;
+    }
+    render(<Harness />);
+    fireEvent.change(screen.getByLabelText("Buscar tarea estándar"), { target: { value: "Conciliación Banco Nación" } });
+    const bankRow = document.querySelector<HTMLElement>(".paris-task-catalog-item")!;
+    expect(bankRow.textContent).toContain("Conciliación Banco Nación");
+    fireEvent.click(within(bankRow).getByRole("button", { name: /PARIS AUTOS/ }));
+    expect(saved.habitualTaskProposals?.[0]?.taskParameters).toEqual({ banco: "nacion" });
+    fireEvent.change(screen.getByLabelText("Buscar tarea estándar"), { target: { value: "frances" } });
+    expect(document.querySelectorAll(".paris-task-catalog-item")).toHaveLength(1);
+    expect(document.querySelector(".paris-task-catalog-item")?.textContent).toContain("Conciliación Banco Francés");
+    fireEvent.change(screen.getByLabelText("Buscar tarea estándar"), { target: { value: "Conciliación bancaria" } });
+    const canonicalRow = Array.from(document.querySelectorAll<HTMLElement>(".paris-task-catalog-item"))
+      .find((row) => row.textContent?.includes("Conciliación bancaria"))!;
+    fireEvent.click(within(canonicalRow).getByRole("button", { name: /PARIS AUTOS/ }));
+    fireEvent.change(screen.getByLabelText("banco · obligatorio"), { target: { value: "unverified" } });
+    expect((screen.getByRole("textbox", { name: "banco no catalogado · obligatorio" }) as HTMLInputElement).required).toBe(true);
+    expect(saved.habitualTaskProposals).toHaveLength(2);
   });
 
   it("allows a provisional observed task while requiring its subtype for later comparison", () => {
@@ -105,7 +132,7 @@ describe("inducción de tareas habituales", () => {
     expect(row.textContent).toContain("Provisional");
     fireEvent.click(within(row).getByRole("button", { name: /PARIS AUTOS/ }));
     expect(saved.habitualTaskProposals?.[0]).toMatchObject({
-      taskCode: "invoice_load_other", taskCatalogVersion: 5, businessUnitCode: "paris_autos",
+      taskCode: "invoice_load_other", taskCatalogVersion: 6, businessUnitCode: "paris_autos",
     });
     expect((screen.getByLabelText("tipo específico · obligatorio") as HTMLInputElement).required).toBe(true);
   });

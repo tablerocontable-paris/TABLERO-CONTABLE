@@ -8,7 +8,8 @@ import {
 } from "../domain/schedule";
 import { id } from "../domain/model";
 import { NEUTRAL_STARTER_CATALOG, NEUTRAL_STARTER_GROUP_DESCRIPTIONS, NEUTRAL_STARTER_SUGGESTIONS } from "../domain/neutralStarterCatalog";
-import { PARIS_BUSINESS_UNITS, PARIS_TASK_CATALOG, PARIS_TASK_CATALOG_VERSION, parisTaskParameterKey, requiredParisTaskParameterKeys, selectableParisTasks, type ParisBusinessUnitCode, type ParisTaskDefinition } from "../domain/parisTaskCatalog";
+import { PARIS_BUSINESS_UNITS, PARIS_TASK_CATALOG, PARIS_TASK_CATALOG_VERSION, getParisTaskSelectionPreset, selectableParisTasks, type ParisBusinessUnitCode, type ParisTaskDefinition, type ParisTaskSelectionPreset } from "../domain/parisTaskCatalog";
+import ParisTaskParameterFields from "./ParisTaskParameterFields";
 import StepListEditor, { parseSteps, validateSteps } from "./StepListEditor";
 import {
   ArrowRight,
@@ -100,7 +101,7 @@ export default function Onboarding({
   const parisTaskCatalog = isParisFirstLogin ? selectableParisTasks() : [];
   const parisTasksUnderReview = isParisFirstLogin ? PARIS_TASK_CATALOG.filter((task) => task.comparisonEligible === false) : [];
   const parisTaskDrafts = (draft.habitualTaskProposals || []).filter((proposal) => !!proposal.taskCode);
-  const parisTaskDraftFor = (taskCode: string, businessUnitCode: string) => parisTaskDrafts.find((proposal) => proposal.taskCode === taskCode && proposal.businessUnitCode === businessUnitCode);
+  const parisTaskDraftFor = (taskCode: string, businessUnitCode: string, bankCode?: string) => parisTaskDrafts.find((proposal) => proposal.taskCode === taskCode && proposal.businessUnitCode === businessUnitCode && (proposal.taskParameters?.banco || undefined) === bankCode);
   const availableTemplates = [...state.templates.filter((template) => !isParisFirstLogin || !!template.taskCode), ...starterCatalog];
   const chosen = availableTemplates.filter((t) => draft.selectedTemplateIds.includes(t.id));
   const custom = isParisFirstLogin ? [] : [
@@ -205,8 +206,8 @@ export default function Onboarding({
             ? validSchedules
             : true;
   const patch = (v: Partial<Draft>) => update({ ...draft, ...v });
-  const selectParisTask = (task: ParisTaskDefinition, businessUnitCode: ParisBusinessUnitCode) => {
-    const exists = parisTaskDraftFor(task.code, businessUnitCode);
+  const selectParisTask = (task: ParisTaskDefinition, businessUnitCode: ParisBusinessUnitCode, preset?: ReturnType<typeof getParisTaskSelectionPreset>) => {
+    const exists = parisTaskDraftFor(task.code, businessUnitCode, preset?.parameters.banco);
     if (exists) {
       patch({ habitualTaskProposals: (draft.habitualTaskProposals || []).filter((proposal) => proposal.id !== exists.id) });
       return;
@@ -215,11 +216,11 @@ export default function Onboarding({
     if (!selectedUnits.includes(businessUnitCode)) return;
     const kind = task.kind === "operational" ? "operativa" as const : "resultado" as const;
     patch({ habitualTaskProposals: [...(draft.habitualTaskProposals || []), {
-      id: `paris-task:${task.code}:${businessUnitCode}:${profile.id}`,
+      id: `paris-task:${task.code}:${businessUnitCode}:${profile.id}${preset?.parameters.banco ? `:${preset.parameters.banco}` : ""}`,
       taskCode: task.code,
       taskCatalogVersion: PARIS_TASK_CATALOG_VERSION,
       businessUnitCode,
-      taskParameters: {},
+      taskParameters: { ...(preset?.parameters || {}) },
       title: task.label,
       process: "",
       description: "Selección del catálogo Grupo París. Jefatura confirmará el procedimiento y los controles antes de asignar trabajo.",
@@ -416,20 +417,24 @@ export default function Onboarding({
                   <input type="search" value={starterSearch} onChange={(event) => setStarterSearch(event.target.value)} placeholder="Ej.: conciliación bancaria" />
                 </label>
                 <div className="paris-task-catalog-list">
-                  {parisTaskCatalog.filter((task) => !starterSearch.trim() || `${task.label} ${task.group} ${task.aliases.join(" ")}`.toLocaleLowerCase("es-AR").includes(starterSearch.trim().toLocaleLowerCase("es-AR"))).map((task) => <article className="paris-task-catalog-item" key={task.code}>
-                    <div><b>{task.label}{task.comparisonEligible === false && <small className="paris-task-provisional-badge"> · Provisional</small>}</b><small>{task.kind === "operational" ? `Actividad · ${task.unit}` : "Entregable con controles"} · {task.parameters.join(" · ")}{task.comparisonEligible === false ? " · Comparación entre unidades pendiente" : ""}</small></div>
+                  {parisTaskCatalog.flatMap((task): { task: ParisTaskDefinition; preset?: ParisTaskSelectionPreset }[] => {
+                    const normalizedSearch = starterSearch.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es-AR").replace(/[^a-z0-9]+/g, " ").trim().replace(/\s+/g, " ");
+                    const preset = getParisTaskSelectionPreset(task.code, starterSearch);
+                    const searchable = `${task.label} ${task.group} ${task.aliases.join(" ")}`.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es-AR").replace(/[^a-z0-9]+/g, " ").trim().replace(/\s+/g, " ");
+                    const matches = !normalizedSearch || searchable.includes(normalizedSearch);
+                    if (preset) return [{ task, preset }];
+                    if (!normalizedSearch && task.selectionPresets?.length) return [{ task }, ...task.selectionPresets.map((selectionPreset) => ({ task, preset: selectionPreset }))];
+                    return matches ? [{ task }] : [];
+                  }).map(({ task, preset }) => <article className="paris-task-catalog-item" key={`${task.code}:${preset?.label || "canonical"}`}>
+                    <div><b>{preset?.label || task.label}{task.comparisonEligible === false && <small className="paris-task-provisional-badge"> · Provisional</small>}</b><small>{preset ? `Tarea normalizada: ${task.label} · ${preset.parameters.banco === "frances" ? "Banco Francés" : "Banco Nación"}` : `${task.kind === "operational" ? `Actividad · ${task.unit}` : "Entregable con controles"} · ${task.parameters.join(" · ")}`}{task.comparisonEligible === false ? " · Comparación entre unidades pendiente" : ""}</small></div>
                     <div className="paris-task-unit-actions">{(draft.selectedBusinessUnitCodes || []).map((unitCode) => {
                       const unit = PARIS_BUSINESS_UNITS.find((entry) => entry.code === unitCode)!;
-                      const selected = parisTaskDraftFor(task.code, unitCode);
-                      return <button type="button" key={unitCode} aria-pressed={!!selected} className={selected ? "selected" : ""} onClick={() => selectParisTask(task, unitCode)}>{selected ? "✓ " : "+ "}{unit.label}</button>;
+                      const selected = parisTaskDraftFor(task.code, unitCode, preset?.parameters.banco);
+                      return <button type="button" key={unitCode} aria-pressed={!!selected} className={selected ? "selected" : ""} onClick={() => selectParisTask(task, unitCode, preset)}>{selected ? "✓ " : "+ "}{unit.label}</button>;
                     })}</div>
-                    {parisTaskDrafts.filter((proposal) => proposal.taskCode === task.code).map((proposal) => <fieldset className="paris-task-parameters" key={proposal.id}>
+                    {parisTaskDrafts.filter((proposal) => proposal.taskCode === task.code && (preset ? proposal.taskParameters?.banco === preset.parameters.banco : !proposal.taskParameters?.banco || proposal.taskParameters.banco === "unverified")).map((proposal) => <fieldset className="paris-task-parameters" key={proposal.id}>
                       <legend>{PARIS_BUSINESS_UNITS.find((unit) => unit.code === proposal.businessUnitCode)?.label} · datos para identificar el trabajo</legend>
-                      <div className="paris-task-parameter-fields">{task.parameters.map((label) => {
-                        const key = parisTaskParameterKey(label);
-                        const required = requiredParisTaskParameterKeys(task.code).has(key);
-                        return <label key={key}>{label}{required ? " · obligatorio" : " · opcional"}<input maxLength={160} required={required} value={proposal.taskParameters?.[key] || ""} placeholder={required ? "Dato necesario para medir" : "Opcional"} onChange={(event) => patch({ habitualTaskProposals: (draft.habitualTaskProposals || []).map((row) => row.id === proposal.id ? { ...row, taskParameters: { ...(row.taskParameters || {}), [key]: event.target.value } } : row) })} /></label>;
-                      })}</div>
+                      <ParisTaskParameterFields taskCode={task.code} version={PARIS_TASK_CATALOG_VERSION} values={proposal.taskParameters || {}} lockedKeys={preset ? new Set(["banco"]) : undefined} onChange={(values) => patch({ habitualTaskProposals: (draft.habitualTaskProposals || []).map((row) => row.id === proposal.id ? { ...row, taskParameters: values } : row) })} />
                     </fieldset>)}
                   </article>)}
                 </div>

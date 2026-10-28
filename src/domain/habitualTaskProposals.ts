@@ -2,7 +2,7 @@ import { addCatalogueTemplate, currentCatalogueVersion, ensureCatalogueVersions 
 import { canSee, id, type HabitualTaskProposal, type Profile, type State, type Template } from "./model";
 import { validateSchedule, type Schedule } from "./schedule";
 import { CONCEPT_CODES, STARTER_CONCEPT_CODES, WORKFORCE_TAXONOMY_VERSION, type NeutralConceptCode } from "./workforceTaxonomy.mjs";
-import { getParisTask, hasRequiredParisTaskParameters, isParisBusinessUnitCode, isParisTaskCatalogVersion, isParisTaskParameterSet, PARIS_TASK_CATALOG_VERSION } from "./parisTaskCatalog";
+import { getParisTask, hasRequiredParisTaskParameters, isParisBusinessUnitCode, isParisTaskCatalogVersion, isParisTaskParameterSet, normalizeParisTaskParameters, PARIS_TASK_CATALOG_VERSION } from "./parisTaskCatalog";
 
 export interface HabitualProposalInput {
   id: string;
@@ -72,7 +72,7 @@ function cleanProposal(input: Omit<HabitualProposalInput, "id" | "companyId">, a
   const process = input.process.trim().replace(/\s+/g, " ");
   const description = input.description.trim();
   const unit = input.unit.trim().replace(/\s+/g, " ");
-  const taskParameters = input.taskParameters === undefined ? undefined : Object.fromEntries(Object.entries(input.taskParameters).map(([key, value]) => [key, value.trim()]));
+  const taskParameters = input.taskParameters === undefined ? undefined : normalizeParisTaskParameters(input.taskCode || "", input.taskParameters, input.taskCatalogVersion || PARIS_TASK_CATALOG_VERSION);
   const steps = input.steps.map((step) => step.trim()).filter(Boolean);
   if (!title || title.length > 120) throw Error("La tarea necesita un nombre de hasta 120 caracteres.");
   if (process.length > 160) throw Error("El banco o proceso admite hasta 160 caracteres.");

@@ -12,11 +12,12 @@ historial original intacto.
 
 En V5, `gpar_bank_reconciliation` es la tarea canónica. “Conciliación Banco
 Francés” y “CONC BANC FRANC” conducen a esa misma tarea; el banco y la cuenta
-son parámetros separados y requeridos. Hoy todos los parámetros del catálogo
-se capturan como texto libre. Antes de comparar resultados por banco, definir
-una lista versionada de valores reales y opciones de interfaz; no inferirla de
-alias ni inventar entidades. Los parámetros libres restantes también son una
-limitación para comparaciones detalladas.
+son parámetros separados y requeridos. El cambio local V6 en curso prepara
+opciones controladas para Banco Francés y Banco Nación, las únicas dos
+entidades respaldadas por las fuentes revisadas. “Otro banco · pendiente de
+normalizar” guarda un detalle pero queda fuera de comparaciones. No es un
+padrón exhaustivo. Los demás parámetros continúan libres; V1–V5 y sus métricas
+no se reescriben.
 
 Validación de este corte local: suite **877/877 en 87 archivos**, TypeScript,
 build cliente, Worker y paquete Sites aprobados. Vite informa el aviso de
@@ -40,7 +41,13 @@ despliega automáticamente.
 
 ## Catálogo de tareas y primera experiencia
 
-El catálogo Grupo París v5 ofrece siete unidades de negocio y 55 tareas con
+V6 está en implementación local, aún no publicada: mantiene las 55 tareas y
+su elegibilidad general 25/30, incorpora Banco Francés/Banco Nación como
+selecciones versionadas para conciliación y registra bancos no listados como
+no comparables hasta homologarlos. No declarar este corte disponible en GitHub
+ni Sites hasta que suite completa, builds, revisión y CI pasen.
+
+El catálogo Grupo París V5 (último corte publicado) ofrece siete unidades de negocio y 55 tareas con
 código y nombre canónicos. Veinticinco están habilitadas para comparación; 30
 son provisionales, seleccionables y registrables, pero excluidas de
 comparaciones entre unidades hasta confirmar su alcance. V5 excluye

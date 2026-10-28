@@ -123,17 +123,14 @@ fs.mkdirSync(output, { recursive: true });
     await page.getByRole("button", { name: "Continuar inducción" }).click();
     await page.getByRole("button", { name: "Continuar", exact: true }).click();
     await page.locator(".choices input[type=checkbox]").nth(1).check();
+    await page.locator(".paris-business-unit-picker .choices input[type=checkbox]").first().check();
     await page.getByRole("button", { name: "Continuar", exact: true }).click();
-    await page
-      .locator(".catalog-option")
-      .filter({ hasText: "Conciliación Banco Nación" })
-      .locator("input")
-      .check();
-    await page
-      .locator(".catalog-option")
-      .filter({ hasText: "Carga de facturas" })
-      .locator("input")
-      .check();
+    const bankTask = page.locator(".paris-task-catalog-item").filter({ hasText: "Conciliación Banco Nación" });
+    await bankTask.getByRole("button", { name: /PARIS AUTOS/ }).click();
+    await bankTask.getByLabel("banco · fijado por selección").waitFor();
+    await bankTask.getByLabel("cuenta · obligatorio").fill("Cuenta QA");
+    const invoiceTask = page.locator(".paris-task-catalog-item").filter({ hasText: /^Carga de facturas de proveedores · Provisional/ });
+    await invoiceTask.getByRole("button", { name: /PARIS AUTOS/ }).click();
     await page.getByRole("button", { name: "Continuar", exact: true }).click();
     await page.reload();
     if (!(await page.locator(".induction-top").innerText()).includes("4 DE 6"))
@@ -144,17 +141,34 @@ fs.mkdirSync(output, { recursive: true });
     await page.getByRole("button", { name: "Preparar mi tablero" }).click();
     await page.getByRole("button", { name: "Pausar", exact: true }).click();
     await page.locator('[data-nav="tasks"]').click();
-    if ((await page.locator(".task-card").count()) !== 2)
-      throw Error("two distinct company results expected");
-    const card = page.locator(".task-card").first();
+    const onboardingState = await page.evaluate(() => JSON.parse(localStorage.getItem("paris-state-lab")));
+    const qaProfileId = onboardingState.profiles.find((profile) => profile.name === "Empleado QA")?.id;
+    const qaProposals = onboardingState.habitualTaskProposals.filter((proposal) => proposal.ownerId === qaProfileId);
+    if (qaProposals.length !== 4 || new Set(qaProposals.map((proposal) => `${proposal.taskCode}:${proposal.companyId}`)).size !== 4)
+      throw Error(`onboarding must create four distinct pending proposals (two tasks x two companies), got ${JSON.stringify(qaProposals.map(({ taskCode, companyId }) => ({ taskCode, companyId })))}`);
+    const bankProposals = qaProposals.filter((proposal) => proposal.taskCode === "gpar_bank_reconciliation");
+    if (bankProposals.length !== 2 || bankProposals.some((proposal) => proposal.taskParameters?.banco !== "nacion" || proposal.taskParameters?.cuenta !== "Cuenta QA"))
+      throw Error("bank proposals lost their canonical bank/account parameters");
+    if (onboardingState.tasks.length !== 73 || onboardingState.assignments.length !== 73)
+      throw Error("onboarding proposals must not create task instances or assignments before approval");
+    await selectProfile(page, "Vista de usuario", "Vista de prueba · actor simulado", "e0");
+    await page.locator('[data-nav="tasks"]').click();
+    const checklistTaskId = await page.evaluate(() => {
+      const state = JSON.parse(localStorage.getItem("paris-state-lab"));
+      const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Argentina/Buenos_Aires", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+      return state.tasks.find((task) => task.ownerId === state.activeId && task.kind === "resultado" && task.status === "Pendiente" && !task.blockedBy && (!task.availableFrom || task.availableFrom <= today) && (task.dependsOnTaskIds || []).every((id) => state.tasks.some((dependency) => dependency.id === id && dependency.status === "Completada")))?.id;
+    });
+    if (!checklistTaskId) throw Error("ready pending seeded deliverable missing");
+    const card = page.locator(`.task-card[data-task-id="${checklistTaskId}"]`);
     await card.locator(".card-title").click();
     const dialog = page.getByRole("dialog");
     await dialog.getByRole("heading", { name: "Checklist", exact: true }).waitFor();
     const checks = dialog.locator("input[type=checkbox]");
     const checklistCount = await checks.count();
     if (!checklistCount) throw Error("onboarding result task did not render its checklist");
+    await dialog.getByRole("button", { name: "Iniciar tarea" }).click();
     for (let i = 0; i < (await checks.count()); i++)
-      await checks.nth(i).check();
+      if (await checks.nth(i).isEnabled()) await checks.nth(i).check();
     await dialog.getByRole("button", { name: "Cerrar", exact: true }).click();
     let stored = await page.evaluate(() =>
       JSON.parse(localStorage.getItem("paris-state-lab")),
@@ -162,11 +176,9 @@ fs.mkdirSync(output, { recursive: true });
     let mine = stored.tasks.filter(
       (t) => t.ownerId === stored.activeId && t.kind === "resultado",
     );
-    if (
-      mine.filter((t) => t.status === "Completada").length !== 1 ||
-      mine.filter((t) => t.status === "Pendiente").length !== 1
-    )
-      throw Error(`company isolation/automatic transition: active=${stored.activeId}, owned=${mine.length}, states=${JSON.stringify(mine.map((t) => ({ id: t.id, companyId: t.companyId, title: t.title, status: t.status, checklist: t.checklist?.map((step) => step.done) })))}`);
+    const completedChecklistTask = mine.find((task) => task.id === checklistTaskId);
+    if (!completedChecklistTask || completedChecklistTask.status !== "Completada" || !completedChecklistTask.checklist?.every((step) => step.done))
+      throw Error(`existing deliverable checklist did not complete: ${JSON.stringify(mine.map((t) => ({ id: t.id, companyId: t.companyId, status: t.status, checklist: t.checklist?.map((step) => step.done) })))}`);
     await page.locator('[data-nav="operations"]').click();
     await page
       .getByRole("button", { name: "Registrar", exact: true })
@@ -192,17 +204,13 @@ fs.mkdirSync(output, { recursive: true });
     const closeFieldLabels = await page.locator(".lab-close-controls label").evaluateAll((labels) => labels.map((label) => ({ text: label.innerText, controlCount: label.querySelectorAll("select").length })));
     if (closeFieldLabels.length !== 1 || closeFieldLabels[0].text.split("\n")[0] !== "Alcance" || closeFieldLabels[0].controlCount !== 1)
       throw Error(`closure scope control label mismatch: ${JSON.stringify(closeFieldLabels)}`);
-    const qaId = await page.evaluate(() =>
-      JSON.parse(localStorage.getItem("paris-state-lab")).profiles.find(
-        (profile) => profile.name === "Empleado QA",
-      ).id,
-    );
+    const qaId = await page.evaluate(() => JSON.parse(localStorage.getItem("paris-state-lab")).profiles.find((profile) => profile.id === "e1").id);
     await page.locator(".lab-close-controls select").nth(0).selectOption("person");
     await page.locator(".lab-close-controls select").nth(1).selectOption(qaId);
     await page.locator(".lab-close-form textarea").fill("Revisión mensual QA");
     const closeConfirmation = page.locator(".lab-close-form input[type=checkbox]");
     await closeConfirmation.check();
-    await page.getByRole("button", { name: "Cerrar 2 unidades listas", exact: true }).click();
+    await page.getByRole("button", { name: "Cerrar 4 unidades listas", exact: true }).click();
     stored = await page.evaluate(() =>
       JSON.parse(localStorage.getItem("paris-state-lab")),
     );
@@ -210,13 +218,13 @@ fs.mkdirSync(output, { recursive: true });
       (c) => c.note === "Revisión mensual QA",
     );
     if (
-      closure.tasks.length !== 4 ||
-      new Set(closure.tasks.map((t) => t.companyId)).size !== 2
+      closure.tasks.length !== 6 ||
+      new Set(closure.tasks.map((t) => t.companyId)).size !== 4
     )
       throw Error("closure must include all companies despite filter");
     const companyClosures = stored.companyClosures.filter((entry) => entry.ownerId === qaId && entry.month === "2026-10");
-    if (companyClosures.length !== 2 || new Set(companyClosures.map((entry) => entry.companyId)).size !== 2)
-      throw Error("monthly consolidation did not preserve its two company closure units");
+    if (companyClosures.length !== 4 || new Set(companyClosures.map((entry) => entry.companyId)).size !== 4)
+      throw Error("monthly consolidation did not preserve its four company closure units");
     await page.getByRole("button", { name: "Desplegar Reportes emitidos al cierre" }).click();
     await page.getByRole("button", { name: "Ver reporte" }).first().click();
     await page.evaluate(() => {
@@ -250,7 +258,7 @@ fs.mkdirSync(output, { recursive: true });
     await page.locator('[data-nav="tasks"]').click();
     const closedCard = page
       .locator(".task-card")
-      .filter({ hasText: "Empleado QA" })
+      .filter({ hasText: "Lucía Fernández" })
       .first();
     if (
       (await closedCard.locator("button.quick").count()) ||
@@ -285,73 +293,52 @@ fs.mkdirSync(output, { recursive: true });
         (assignment) => assignment.id,
       ),
     );
-    await page.getByLabel("Elegí del catálogo").selectOption("cat1");
+    await page.getByLabel("Elegí del catálogo").selectOption("gpar_bank_reconciliation");
+    await page.getByLabel("Unidad de negocio").selectOption("paris_autos");
+    await page.getByLabel("banco · obligatorio").selectOption("frances");
+    await page.getByLabel("cuenta · obligatorio").fill("Principal");
     await page.locator('select[name="company"]').selectOption("c1");
     await page.locator('select[name="owner"]').selectOption("e0");
-    await page.getByLabel("Frecuencia de la tarea").selectOption("semanal");
-    await page
-      .getByLabel("Fecha de realización", { exact: true })
-      .fill("2026-10-05");
+    const frequencyOptions = await page.getByLabel("Frecuencia de la tarea").locator("option").allTextContents();
+    if (frequencyOptions.some((option) => /semanal|mensual|diaria/.test(option.toLowerCase())))
+      throw Error("unapproved canonical work exposed recurring schedule options");
+    await page.getByLabel("Fecha de realización", { exact: true }).fill("2026-10-05");
+    await page.getByLabel("Tiene vencimiento").check();
     await page.getByLabel(/Plazo desde cada/).fill("2");
-    await page
-      .getByRole("button", { name: "Crear tarea", exact: true })
-      .click();
-    const weeklyAssignmentId = await page.evaluate((previousIds) => {
+    await page.getByRole("button", { name: "Crear tarea", exact: true }).click();
+    const canonicalAssignmentId = await page.evaluate((previousIds) => {
       const state = JSON.parse(localStorage.getItem("paris-state-lab"));
       return state.assignments.find(
         (assignment) =>
           !previousIds.includes(assignment.id) &&
-          assignment.templateId === "cat1" &&
+          assignment.taskCode === "gpar_bank_reconciliation" &&
           assignment.ownerId === "e0" &&
           assignment.companyId === "c1",
       )?.id;
     }, previousAssignmentIds);
-    if (!weeklyAssignmentId) throw Error("weekly catalogue assignment missing");
-    let recurring = await page.evaluate((assignmentId) =>
+    if (!canonicalAssignmentId) throw Error("canonical one-off assignment missing");
+    let canonicalTasks = await page.evaluate((assignmentId) =>
       JSON.parse(localStorage.getItem("paris-state-lab")).tasks
         .filter((task) => task.assignmentId === assignmentId)
         .sort((a, b) => a.scheduledOn.localeCompare(b.scheduledOn)),
-      weeklyAssignmentId,
+      canonicalAssignmentId,
     );
-    if (recurring.length !== 4 || recurring[0].due !== "2026-10-07")
-      throw Error("weekly actual dates");
-    await page
-      .getByRole("button", { name: "Nueva tarea", exact: true })
-      .click();
-    await page.locator('input[name="title"]').fill("E2E puntual");
-    await page.locator('select[name="company"]').selectOption("c1");
-    await page.locator('select[name="owner"]').selectOption("e0");
-    await page.getByLabel("Tiene vencimiento").uncheck();
-    await page
-      .getByRole("button", { name: "Crear tarea", exact: true })
-      .click();
-    await page.getByLabel("Período", { exact: true }).fill("2026-11");
-    await page.waitForFunction((assignmentId) =>
-      JSON.parse(localStorage.getItem("paris-state-lab")).tasks.some(
-        (task) => task.assignmentId === assignmentId && task.month === "2026-11",
-      ), weeklyAssignmentId);
-    stored = await page.evaluate(() => JSON.parse(localStorage.getItem("paris-state-lab")));
-    if (
-      stored.tasks.some((t) => t.title === "E2E puntual" && t.month === "2026-11")
-      )
-      throw Error("one-off repeated");
-    if (stored.tasks.filter((t) => t.assignmentId === weeklyAssignmentId && t.month === "2026-11").length !== 5)
-      throw Error("november weekly instances");
+    if (canonicalTasks.length !== 1 || canonicalTasks[0].scheduledOn !== "2026-10-05" || canonicalTasks[0].due !== "2026-10-07")
+      throw Error("canonical one-off actual date or deadline");
     await page.getByLabel("Período", { exact: true }).fill("2026-10");
-    const weeklyTaskId = recurring.find((task) => task.month === "2026-10")?.id;
-    if (!weeklyTaskId) throw Error("weekly October task missing");
+    const canonicalTaskId = canonicalTasks[0].id;
     await selectProfile(page, "Vista de usuario", "Vista de prueba · actor simulado", "e0");
     await page.locator('[data-nav="tasks"]').click();
-    const timedCard = page.locator(`.task-card[data-task-id="${weeklyTaskId}"]`);
+    const timedCard = page.locator(`.task-card[data-task-id="${canonicalTaskId}"]`);
     await timedCard
-      .getByRole("button", { name: /Iniciar.*Conciliación Banco Nación/ })
+      .getByRole("button", { name: /Iniciar.*Conciliación bancaria/ })
       .click();
     await page.reload();
     stored = await page.evaluate(() =>
       JSON.parse(localStorage.getItem("paris-state-lab")),
     );
     let timing = stored.tasks.find(
-      (task) => task.assignmentId === weeklyAssignmentId && task.sessions?.some((session) => !session.end),
+      (task) => task.assignmentId === canonicalAssignmentId && task.sessions?.some((session) => !session.end),
     );
     if (!timing) throw Error("timer persistence");
     await page
@@ -389,24 +376,14 @@ fs.mkdirSync(output, { recursive: true });
       localStorage.getItem("paris-state-v3"),
     );
     await page.locator(".lab-banner").waitFor();
-    await page.locator('[data-nav="tasks"]').click();
-    await page
-      .getByRole("button", { name: "Nueva tarea", exact: true })
-      .click();
-    const responsibleId = await page.locator('select[name="owner"]').inputValue();
-    if (responsibleId === "boss") throw Error("Jefatura without a team was offered as an execution owner");
-    await page.locator('input[name="title"]').fill("SOLAMENTE LABORATORIO");
-    await page.locator('select[name="company"]').selectOption("c1");
-    await page
-      .getByRole("button", { name: "Crear tarea", exact: true })
-      .click();
     const isolatedLabTask = await page.evaluate(() => {
       const state = JSON.parse(localStorage.getItem("paris-state-lab"));
-      const task = state.tasks.find((entry) => entry.title === "SOLAMENTE LABORATORIO");
-      return { task, teamExists: state.teams.some((team) => team.id === task?.teamId) };
+      const task = state.tasks.find((entry) => entry.taskCode === "gpar_bank_reconciliation" && entry.ownerId === "e0" && entry.companyId === "c1" && entry.taskParameters?.cuenta === "Principal");
+      const owner = state.profiles.find((profile) => profile.id === "e0");
+      return { task, teamExists: state.teams.some((team) => team.id === owner?.teamId) };
     });
     if (!isolatedLabTask.task || !isolatedLabTask.teamExists)
-      throw Error("Laboratory task did not persist with an existing responsible team");
+      throw Error("Canonical laboratory task did not persist with an existing responsible team");
     if (
       (await page.evaluate(() => localStorage.getItem("paris-state-v3"))) !==
       mainBefore
@@ -507,7 +484,7 @@ fs.mkdirSync(output, { recursive: true });
     if (errors.length) throw Error(errors.join("\n"));
     if (apiRequests.length) throw Error(`isolated lab requested API routes: ${apiRequests.join(", ")}`);
     console.log(
-      "PASS induction, resume, company isolation, auto-checklist, activity, analysis grouping, complete monthly closure, write lock, recurrence dates, timers, absences, isolated lab, due reminders and persisted read receipt, system/light/dark themes, mobile. No JS errors or API requests.",
+      "PASS induction, resume, canonical pending proposals, company isolation, auto-checklist, activity, analysis grouping, complete monthly closure, write lock, canonical task classification, one-off deadline, timers, absences, isolated lab, due reminders and persisted read receipt, system/light/dark themes, mobile. No JS errors or API requests.",
     );
   } finally {
     if (browser) await browser.close();

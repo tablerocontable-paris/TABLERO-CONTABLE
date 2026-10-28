@@ -1,6 +1,6 @@
 /** Organization-specific selection catalog. This does not replace neutral v2. */
-export const PARIS_TASK_CATALOG_VERSION = 5 as const;
-export type ParisTaskCatalogVersion = 1 | 2 | 3 | 4 | typeof PARIS_TASK_CATALOG_VERSION;
+export const PARIS_TASK_CATALOG_VERSION = 6 as const;
+export type ParisTaskCatalogVersion = 1 | 2 | 3 | 4 | 5 | typeof PARIS_TASK_CATALOG_VERSION;
 
 export const PARIS_BUSINESS_UNITS = [
   { code: "paris_autos", label: "PARIS AUTOS" },
@@ -21,12 +21,26 @@ export interface ParisTaskDefinition {
   kind: "deliverable" | "operational";
   unit?: string;
   parameters: readonly string[];
+  /** Versioned, controlled values for fields whose vocabulary is known. */
+  parameterChoices?: Readonly<Record<string, readonly ParisTaskParameterChoice[]>>;
+  /** Search phrases that select a canonical task plus known parameter values. */
+  selectionPresets?: readonly ParisTaskSelectionPreset[];
   /** Fields required to distinguish this work in cross-unit reporting. */
   requiredParameters?: readonly string[];
   aliases: readonly string[];
   state: ParisTaskReviewState;
   /** Provisional tasks are recordable but excluded from cross-unit comparison. */
   comparisonEligible?: boolean;
+}
+export interface ParisTaskParameterChoice {
+  code: string;
+  label: string;
+  aliases: readonly string[];
+}
+export interface ParisTaskSelectionPreset {
+  label: string;
+  aliases: readonly string[];
+  parameters: Readonly<Record<string, string>>;
 }
 
 /**
@@ -118,18 +132,38 @@ export const PARIS_TASK_CATALOG_V4: readonly ParisTaskDefinition[] = PARIS_TASK_
   ),
 }));
 
-/** Version 5 aligns comparison eligibility with the reviewed task definitions. */
-export const PARIS_TASK_CATALOG: readonly ParisTaskDefinition[] = PARIS_TASK_CATALOG_V4.map((task) => ({
+/** Frozen version 5 aligns comparison eligibility with the reviewed task definitions. */
+export const PARIS_TASK_CATALOG_V5: readonly ParisTaskDefinition[] = PARIS_TASK_CATALOG_V4.map((task) => ({
   ...task,
   ...(task.code === "supplier_invoice_load" ? { comparisonEligible: false } : {}),
   ...(task.code === "customer_collections" ? { comparisonEligible: true } : {}),
 }));
+
+const bankChoices: readonly ParisTaskParameterChoice[] = [
+  { code: "frances", label: "Banco Francés", aliases: ["frances", "banco frances", "conciliacion banco frances", "conciliacion banco frances pa", "conc banc franc"] },
+  { code: "nacion", label: "Banco Nación", aliases: ["nacion", "banco nacion", "bna", "conciliacion banco nacion"] },
+  { code: "unverified", label: "Otro banco · pendiente de normalizar", aliases: [] },
+];
+
+/** Version 6 stores known banks as canonical codes and flags unlisted banks. */
+export const PARIS_TASK_CATALOG: readonly ParisTaskDefinition[] = PARIS_TASK_CATALOG_V5.map((task) => task.code === "gpar_bank_reconciliation"
+  ? {
+      ...task,
+      parameters: [...task.parameters, "banco no catalogado"],
+      parameterChoices: { banco: bankChoices },
+      selectionPresets: [
+        { label: "Conciliación Banco Francés", aliases: bankChoices[0]!.aliases, parameters: { banco: "frances" } },
+        { label: "Conciliación Banco Nación", aliases: bankChoices[1]!.aliases, parameters: { banco: "nacion" } },
+      ],
+    }
+  : task);
 
 const catalogsByVersion = new Map<ParisTaskCatalogVersion, readonly ParisTaskDefinition[]>([
   [1, PARIS_TASK_CATALOG_V1],
   [2, PARIS_TASK_CATALOG_V2],
   [3, PARIS_TASK_CATALOG_V3],
   [4, PARIS_TASK_CATALOG_V4],
+  [5, PARIS_TASK_CATALOG_V5],
   [PARIS_TASK_CATALOG_VERSION, PARIS_TASK_CATALOG],
 ]);
 
@@ -141,7 +175,7 @@ function normalize(value: string): string {
 const taskByCodeByVersion = new Map([...catalogsByVersion].map(([version, tasks]) => [version, new Map(tasks.map((task) => [task.code, task]))]));
 const taskByAlias = new Map<string, ParisTaskDefinition>();
 for (const task of PARIS_TASK_CATALOG) {
-  for (const alias of [task.label, ...task.aliases]) {
+  for (const alias of [task.label, ...task.aliases, ...(task.selectionPresets || []).flatMap((preset) => preset.aliases)]) {
     const key = normalize(alias);
     const existing = taskByAlias.get(key);
     if (existing && existing.code !== task.code) throw new Error(`Alias duplicado «${alias}» en el catálogo Grupo París.`);
@@ -161,20 +195,83 @@ export function parisTaskParameterKey(label: string): string {
   return normalize(label).replace(/\s+/g, "_");
 }
 
+export function getParisTaskParameterChoices(code: string, parameterKey: string, version: number = PARIS_TASK_CATALOG_VERSION): readonly ParisTaskParameterChoice[] {
+  const task = getParisTask(code, version);
+  const choices = task?.parameterChoices?.[parameterKey];
+  return choices ? [...choices] : [];
+}
+
+export function getParisTaskSelectionPreset(code: string, query: string, version: number = PARIS_TASK_CATALOG_VERSION): ParisTaskSelectionPreset | undefined {
+  const task = getParisTask(code, version);
+  const normalizedQuery = normalize(query);
+  if (!normalizedQuery) return undefined;
+  const matches = task?.selectionPresets?.filter((preset) =>
+    [preset.label, ...preset.aliases].some((phrase) => normalize(phrase).includes(normalizedQuery)),
+  ) || [];
+  return matches.length === 1 ? matches[0] : undefined;
+}
+
+export function normalizeParisTaskParameters(code: string, values: Record<string, string>, version: number = PARIS_TASK_CATALOG_VERSION): Record<string, string> {
+  const task = getParisTask(code, version);
+  if (!task?.parameterChoices) return Object.fromEntries(Object.entries(values).map(([key, value]) => [key, value.trim()]));
+  return Object.fromEntries(Object.entries(values).map(([key, value]) => {
+    const trimmed = value.trim();
+    const choices = task.parameterChoices?.[key];
+    if (!choices || !trimmed) return [key, trimmed];
+    const normalizedValue = normalize(trimmed);
+    const choice = choices.find((candidate) => candidate.code === trimmed || normalize(candidate.label) === normalizedValue || candidate.aliases.some((alias) => normalize(alias) === normalizedValue));
+    return [key, choice?.code || trimmed];
+  }));
+}
+
+export function formatParisTaskParameterValue(code: string | null | undefined, key: string, value: string, version: number | null | undefined): string {
+  if (!code || !version) return value;
+  const choice = getParisTaskParameterChoices(code, key, version).find((candidate) => candidate.code === value);
+  return choice?.label || value;
+}
+
+export function isParisTaskParameterComparisonEligible(code: string | null | undefined, parameters: Record<string, string> | undefined, version: number | null | undefined): boolean {
+  if (!isParisTaskComparisonEligible(code, version)) return false;
+  if (!code || !version) return true;
+  const definition = getParisTask(code, version);
+  if (!definition?.parameterChoices) return true;
+  if (!parameters) return !Object.values(definition.parameterChoices).some((choices) => choices.some((choice) => choice.code === "unverified"));
+  return !Object.entries(definition.parameterChoices).some(([key, choices]) => {
+    const isControlledDimension = choices.some((choice) => choice.code === "unverified");
+    return isControlledDimension && (!parameters[key] || parameters[key] === "unverified");
+  });
+}
+
 export function isParisTaskParameterSet(code: string, value: unknown, version: number = PARIS_TASK_CATALOG_VERSION): value is Record<string, string> {
   const task = getParisTask(code, version);
   if (!task || !value || typeof value !== "object" || Array.isArray(value)) return false;
   const allowed = new Set(task.parameters.map(parisTaskParameterKey));
   const parameters = value as Record<string, unknown>;
-  return Object.entries(parameters).every(([key, entry]) =>
+  const validEntries = Object.entries(parameters).every(([key, entry]) =>
     allowed.has(key) && typeof entry === "string" && entry.trim().length <= 160,
   );
+  if (!validEntries) return false;
+  for (const [key, choices] of Object.entries(task.parameterChoices || {})) {
+    const selected = parameters[key];
+    if (selected !== undefined && !choices.some((choice) => choice.code === selected)) return false;
+  }
+  return true;
 }
 
 export function hasRequiredParisTaskParameters(code: string, value: unknown, version: number = PARIS_TASK_CATALOG_VERSION): boolean {
   if (!isParisTaskParameterSet(code, value, version)) return false;
   const parameters = value as Record<string, string>;
-  return [...requiredParisTaskParameterKeys(code, version)].every((key) => (parameters[key] || "").trim().length > 0);
+  const task = getParisTask(code, version)!;
+  const required = [...requiredParisTaskParameterKeys(code, version)];
+  for (const [key, choices] of Object.entries(task.parameterChoices || {})) {
+    const selected = parameters[key];
+    if (selected === "unverified") {
+      const detailKey = parisTaskParameterKey("banco no catalogado");
+      required.push(detailKey);
+    } else if (parameters[parisTaskParameterKey("banco no catalogado")]) return false;
+    if (selected !== undefined && !choices.some((choice) => choice.code === selected)) return false;
+  }
+  return required.every((key) => (parameters[key] || "").trim().length > 0);
 }
 
 export function requiredParisTaskParameterKeys(code: string, version: number = PARIS_TASK_CATALOG_VERSION): ReadonlySet<string> {

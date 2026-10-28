@@ -150,6 +150,19 @@ unidades por deducción.
 
 ## Compatibilidad y alcance de implementación
 
+### Catálogo V6 para dimensión bancaria (implementación local)
+
+V6 conserva `gpar_bank_reconciliation` y agrega opciones controladas Banco
+Francés (`frances`) y Banco Nación (`nacion`), sustentadas por nombres
+observados en las fuentes existentes. “Conciliación Banco Francés”,
+“CONC BANC FRANC” y “Conciliación Banco Nación” son búsquedas/presets del mismo
+código; el banco persiste como dimensión separada. “Otro banco · pendiente de
+normalizar” requiere un nombre y queda fuera de comparación. La lista no es
+exhaustiva. Los parámetros V1–V5 permanecen intactos.
+
+Estado de esta guía: cambios locales aún no publicados ni desplegados. Confirmar
+suite, builds, revisión y CI antes de declarar el corte completo.
+
 El catálogo Grupo París versión 5 ya está conectado en el laboratorio local:
 primer ingreso, propuestas, aprobación, asignaciones, tareas materializadas y
 analítica. La unidad (`businessUnitCode`) se conserva separada de la empresa
