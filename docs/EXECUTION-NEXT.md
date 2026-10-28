@@ -1,5 +1,20 @@
 # Estado vigente de ejecución — 28/10/2026
 
+## Alta puntual con identidad canónica — publicada en GitHub
+
+Commit `d1fc8a9` endurece “Nueva tarea” en el laboratorio: sólo permite elegir
+las 55 tareas y siete unidades de negocio del catálogo París, toma el nombre de
+la definición V5 y conserva código, unidad y parámetros en asignación y tarea.
+Los parámetros requeridos por la definición bloquean el guardado si faltan;
+los opcionales no. Conversión de pedidos/anotaciones mantiene su vínculo; el
+flujo fuera del laboratorio no cambia. No reclasifica historial ni modifica
+interfaces/API Supabase.
+
+Comprobación local: **871/871 pruebas en 87 archivos**, TypeScript, build
+cliente, Worker, paquete Sites y hook **223/223**. Publicado directamente en
+`main`; Actions #139 está en curso. El Site existente continúa en v104, por lo
+que esta corrección todavía no está visible allí.
+
 ## Normalización Grupo París — catálogo v5 desplegado
 
 La inducción local del laboratorio contiene siete unidades fijas y 55 tareas estandarizadas (`src/domain/parisTaskCatalog.ts`). V5 permite elegir las 55; 25 son comparables y 30 provisionales. Una auditoría cruzada detectó dos filas cuya elegibilidad no coincidía con el borrador: V5 excluye `supplier_invoice_load` de comparación hasta confirmar el alcance de portales y habilita `customer_collections`, marcada Confirmada. Conserva el total de 25/30. V1–V4 siguen disponibles para leer métricas anteriores; no se recalculan.

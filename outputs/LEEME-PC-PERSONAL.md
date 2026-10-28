@@ -6,9 +6,11 @@ traslado del proyecto.
 ## Fuente de código
 
 - Repositorio privado de GitHub: [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocontable-paris/TABLERO-CONTABLE)
-- Rama activa: `main`; versión disponible `f5263f1` (catálogo v5). Para
+- Rama activa: `main`; incluye el catálogo v5 y la normalización del alta
+  puntual (commit `d1fc8a9`). Para
   actualizar una copia existente, ejecutá `git pull --ff-only origin main`.
-  El Site privado se actualizó a v104. Consultá `docs/PROJECT-STATUS.md` y
+  El Site privado sigue en v104; el último commit aún no fue desplegado allí.
+  Consultá `docs/PROJECT-STATUS.md` y
   `docs/EXECUTION-NEXT.md` para leer el estado exacto de GitHub Actions.
 - El código no se entrega en ZIP: cloná el repositorio para conservar historia
   y poder traer los cambios futuros.
@@ -82,8 +84,12 @@ npm ci
   búsqueda que conduce a esa tarea canónica. Banco, cuenta y unidad se guardan
   como campos separados. Los registros históricos sin código no se clasifican
   automáticamente.
-- La validación local v5 pasó TypeScript, suite completa (870/870 en 87
-  archivos), build del cliente y Worker y empaquetado Sites. La paridad entre
+- El catálogo v5 pasó TypeScript, suite completa (870/870 en 87 archivos),
+  build del cliente y Worker y empaquetado Sites. El commit `d1fc8a9` además
+  exige tareas/unidades canónicas en altas puntuales del laboratorio; su corte
+  pasó 871/871 pruebas, TypeScript, build del cliente/Worker, paquete Sites y
+  hook 223/223. GitHub Actions #139 valida ese SHA.
+  La paridad entre
   el catálogo y la documentación pasa 55/55. GitHub confirmó el push directo a
   `main`, sin PR; GitHub Actions #135 pasó para el commit funcional. El mismo Site privado
   publica v5 como versión 104. GitHub y Sites son repositorios separados: los

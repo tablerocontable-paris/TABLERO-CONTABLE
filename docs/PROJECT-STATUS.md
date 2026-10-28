@@ -1,5 +1,22 @@
 # Estado vigente — actualización 28/10/2026
 
+## Alta de tareas puntuales normalizada — 28/10/2026
+
+En el laboratorio, “Nueva tarea” ya no admite títulos libres ni tareas sin
+clasificación: exige elegir una de las 55 tareas canónicas y una de las siete
+unidades de negocio. Guarda código y versión V5; pide sólo los parámetros que
+el catálogo marca obligatorios y conserva los demás como opcionales. El nombre
+de tarjeta proviene del catálogo. Las conversiones de pedidos y anotaciones
+mantienen el contexto y vínculo de origen; el formulario operativo fuera del
+laboratorio no cambia. Las asignaciones puntuales existentes e históricas no se
+reclasifican.
+
+Validación de este cambio: **871/871 pruebas en 87 archivos**, TypeScript,
+build cliente, build Worker, paquete Sites y hook de commit **223/223**. Commit
+`d1fc8a9` está publicado directamente en GitHub `main`; Actions #139 está
+validando el mismo SHA. Este cambio aún no se desplegó al Site, que permanece
+en v104. No modifica `/api`, Auth ni SQL001–016.
+
 ## Catálogo Grupo París — normalización inicial
 
 La inducción local del laboratorio ofrece las siete unidades solicitadas y 55 tareas con código y nombre canónicos. La versión 5 conserva las 55 opciones; 25 son comparables y 30 siguen provisionales. V5 deja fuera de comparaciones a `supplier_invoice_load` mientras se confirma el alcance de portales y habilita `customer_collections`, que estaba marcada Confirmada en el contrato. La lista y el total 25/30 se mantienen. Unidad, banco, cuenta, sucursal y período son dimensiones separadas. V4 quitó el texto libre redundante `unidad` de registración contable de sueldos e IVA: `businessUnitCode` es la única dimensión de unidad. V1–V4 siguen disponibles para historial; los registros sin código no se reclasifican.
