@@ -6,12 +6,12 @@ traslado del proyecto.
 ## Fuente de código
 
 - Repositorio privado de GitHub: [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocontable-paris/TABLERO-CONTABLE)
-- Corte siguiente en preparación: la protección para no activar propuestas con
+- Corte publicado en GitHub: la protección para no activar propuestas con
   clasificación antigua/incompleta pasó localmente **877/877 pruebas**,
-  otras 122/122 pruebas focales, hook automático 229/229, TypeScript, build
-  cliente/Worker y paquete Sites. Commit `5bcf11a` ya publicado en `main`;
-  estoy confirmando el CI. Esperá mi confirmación final antes de actualizar el
-  clon.
+  otras 35/35 pruebas focales en los archivos afectados, hook automático
+  229/229, TypeScript, build cliente/Worker y paquete Sites. Código `5bcf11a`;
+  guía actualizada en `77bbae7`. Actions #146 aprobó suite, build y paquete
+  Sites para ese HEAD.
 - Nota sobre catálogo: la tarea “Conciliación bancaria” se selecciona una sola
   vez; “Conciliación Banco Francés” y `CONC BANC FRANC` buscan esa tarea y el
   banco se guarda como parámetro requerido. Ese campo y otros parámetros aún
@@ -19,15 +19,14 @@ traslado del proyecto.
   implementar opciones canónicas con la lista real del estudio. Las 30 tareas
   provisionales se registran pero aún no se comparan entre unidades.
 - Rama activa: `main`; incluye el catálogo v5, la normalización del alta
-  puntual y las protecciones de onboarding/propuestas (último corte funcional
-  `d37792b8a1b9fd29697ecaed726ecaeaae003cc0`). Para
+  puntual y las protecciones de onboarding/propuestas (corte funcional
+  `5bcf11a`; documentación `77bbae7`). Para
   actualizar una copia existente, ejecutá `git pull --ff-only origin main`.
-  GitHub Actions #142 está en ejecución; #141 pasó para el commit anterior.
+  GitHub Actions #146 pasó; #143 pasó para el commit anterior.
   El Site privado sigue en v104; estos últimos cambios de GitHub no se
   desplegaron allí. Consultá `docs/PROJECT-STATUS.md` y
   `docs/EXECUTION-NEXT.md` para el estado actualizado.
-- El último commit de continuidad es `4ae9416ddf83e89d01a8fcb273dea3fa278b1bd0`;
-  Actions #143 está pendiente. El estado inicial de la PC de trabajo conserva
+- Los últimos commits de continuidad son `66b4d4a` y `77bbae7`. El estado inicial de la PC de trabajo conserva
   un único scratch local protegido sin versionar; no forma parte del clon ni
   impide continuar desde `main`.
 - El código no se entrega en ZIP: cloná el repositorio para conservar historia

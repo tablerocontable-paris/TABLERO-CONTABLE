@@ -198,3 +198,28 @@ cupones”, “canon acumulados”, “conjunta con caja”, “carga de pagos P
 alcance exacto de transferencias y cobros por sector. Hasta entonces no se
 convierten en conceptos de análisis separados ni se les asigna unidad de negocio
 por deducción.
+
+### Auditoría de comparabilidad de las 30 tareas — 28/10/2026
+
+Una revisión de sólo las definiciones del repo encontró tres candidatas a
+comparar luego de normalizar también sus parámetros: `new_vehicle_invoice_load`
+(marca/sucursal/etapa; no fusionar con recepción de 0 km),
+`credit_cost_analysis` (línea/producto; conservar literalmente el contexto
+“PSA”) y `operations_analysis_mo4` (comparar MO4 sólo con la misma clase de
+reporte; no expandir la sigla). Todavía no se habilitan: los parámetros siguen
+siendo texto libre y código/unidad/período por sí solos sería demasiado grueso.
+
+Las otras 27 tareas provisionales permanecen fuera de comparación hasta aclarar
+su alcance, siglas o solapamientos: `supplier_invoice_load`,
+`invoice_load_other`, `service_invoice_load`, `supplier_payment`,
+`bank_transfer_register`, `supplier_payment_transfer`,
+`dealer_credits_payment_load`, `inventory_adjustment`, `service_register_update`,
+`supplies_purchase_control`, `cheque_nosis_verification`, `vehicle_collection`,
+`sector_cash_collections`, `vehicle_cash_collection`,
+`workshop_invoice_collection`, `vehicle_exit_collection`,
+`customer_refund_record`, `coupon_settlement`, `pda_result_adjustment`,
+`pymes_bonus_analysis`, `municipal_fees_accrual`,
+`vehicle_model_change_payment`, `vehicle_transfers_pda`,
+`supplier_payment_transfer_vn_vo_pda`, `cheque_operation_load`,
+`team_followup_review` y `gm_collection_register`. Siguen disponibles para
+registrar trabajo; no se inventan definiciones para habilitar gráficos.

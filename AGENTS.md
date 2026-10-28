@@ -1,6 +1,6 @@
 # Continuidad y estado actual del proyecto — actualizado 28/10/2026
 
-## Corte local actual — 28/10/2026
+## Corte actual — 28/10/2026
 
 El corte funcional `5bcf11a` ya está publicado directamente en `main`, sin
 Pull Request. Incluye validación estricta para onboarding y
@@ -22,19 +22,20 @@ Validación de este corte local: suite **877/877 en 87 archivos**, TypeScript,
 build cliente, Worker y paquete Sites aprobados. Vite informa el aviso de
 bundle principal >500 kB y comentarios `@__PURE__` de Zod; los comandos
 terminaron correctamente. Pruebas focales posteriores al ajuste de texto:
-122/122; hook de commit: 229/229. `git diff --check` pasó. La revisión
+35/35 en los tres archivos afectados; hook de commit: 229/229.
+`git diff --check` pasó. La revisión
 independiente no encontró hallazgos críticos/altos; sí confirma que falta un
 flujo de reclasificación de propuestas antiguas. El commit funcional
-`5bcf11a` y la continuidad documental `66b4d4a` ya están publicados; Actions
-del último commit sigue ejecutándose. El Site privado sigue en v104 y no se
-publica con estos pasos.
+`5bcf11a`, `66b4d4a` y `77bbae7` ya están publicados; Actions #146 de
+`77bbae7` pasó suite, build y paquete Sites. El Site privado sigue en v104 y
+no se publica con estos pasos.
 Conservar el scratch no versionado protegido sin inspeccionarlo, modificarlo o
 stagearlo.
 
 Repositorio activo `work/site`, remoto privado
 `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`. El corte `5bcf11a` se
 publicó bajo la cuenta **Tablero Contable**, sin Pull Request. La continuidad
-está en `66b4d4a`. El Site privado permanece en v104, owner-only; GitHub no lo
+está en `66b4d4a` y `77bbae7`. El Site privado permanece en v104, owner-only; GitHub no lo
 despliega automáticamente.
 
 ## Catálogo de tareas y primera experiencia

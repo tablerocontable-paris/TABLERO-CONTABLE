@@ -14,12 +14,13 @@ reclasificación; se puede crear una propuesta nueva desde el catálogo y
 preservar el registro anterior.
 
 Validación local: suite completa **877/877 pruebas en 87 archivos**; las
-pruebas focales posteriores al último ajuste pasaron **122/122** y el hook
+pruebas focales posteriores al último ajuste pasaron **35/35** en los tres
+archivos afectados, y el hook
 automático de commit **229/229**. TypeScript, build cliente, Worker, paquete
 Sites y `git diff --check` aprobaron. La build de cliente deja los avisos
 conocidos del bundle principal (>500 kB) y comentarios de Zod. Commit funcional
-`5bcf11a` ya está publicado directamente en `main`, sin PR. Después de
-confirmar Actions se puede actualizar la PC personal con
+`5bcf11a` ya está publicado directamente en `main`, sin PR; Actions #146
+aprobó el HEAD `77bbae7`. Ya se puede actualizar la PC personal con
 `git pull --ff-only origin main`. Site privado v104 sin cambios; no afecta
 `/api`, Auth ni SQL001–016.
 
@@ -34,6 +35,12 @@ el siguiente paso es acordar opciones de banco basadas en el listado real y
 versionarlas; no debe inferirse una lista completa de las capturas actuales.
 Las 30 tareas aún no elegibles para comparación entre unidades siguen
 registrables; su homologación analítica requiere revisar alcance y parámetros.
+La auditoría identificó tres candidatas documentales para analizar luego de
+normalizar dimensiones: carga de facturas de vehículos nuevos, análisis de
+costo de créditos y operaciones MO4. Las otras 27 necesitan definiciones de
+alcance, siglas o solapamientos. El desglose está en
+`docs/product/BUSINESS-UNIT-TASK-CATALOG-DRAFT-20261028.md`; todavía no se
+habilitan comparaciones nuevas.
 
 ## Alta de tareas puntuales normalizada — 28/10/2026
 

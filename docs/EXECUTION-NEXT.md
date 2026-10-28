@@ -5,11 +5,12 @@
 Cambios implementados localmente en `5bcf11a`: bloquear activación de propuestas con
 clasificación faltante/inconsistente; preservar el historial de selecciones
 antiguas del onboarding; y no materializar borradores libres como tareas París.
-Validación terminada: **877/877** suite, **122/122** focales posteriores,
+Validación terminada: **877/877** suite, **35/35** focales posteriores en los
+tres archivos afectados,
 **229/229** hook automático, TypeScript, build cliente/Worker, paquete Sites y
 `git diff --check`. Revisión final independiente sin hallazgos críticos/altos.
-Commit funcional `5bcf11a` ya publicado directamente a `main`; falta consultar
-el CI. Las propuestas antiguas sin clasificación se preservan pero no tienen
+Commit funcional `5bcf11a` ya publicado directamente a `main`; Actions #146
+aprobó el HEAD documental `77bbae7`. Las propuestas antiguas sin clasificación se preservan pero no tienen
 aún un flujo de reclasificación; no aprobarlas ni inferir códigos desde el
 texto histórico. Site privado v104 sin cambios ni despliegue.
 
@@ -22,8 +23,10 @@ opciones canónicas versionadas y mostrar la selección como parte del contexto
 de la tarea. Mantener `gpar_bank_reconciliation` como identidad común y guardar
 banco/cuenta como dimensiones: así el mismo proceso puede compararse entre
 unidades. No transformar cada abreviatura histórica en una nueva tarea ni
-inventar bancos/cuentas. Mantener fuera de comparación las 30 filas provisionales
-hasta revisar el alcance con la fuente de tareas completa.
+inventar bancos/cuentas. Tres candidatas provisionales (VN, costo de créditos
+y MO4) requieren normalizar dimensiones antes de compararlas; las otras 27
+requieren aclarar alcance, siglas o solapamientos. Ver los códigos en el
+borrador del catálogo. No habilitar comparaciones por código únicamente.
 
 ## Corte publicado para continuidad entre PC — 28/10/2026
 
