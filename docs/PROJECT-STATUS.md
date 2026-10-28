@@ -1,4 +1,26 @@
-# Estado vigente — corte verificado 27/10/2026
+# Estado vigente — corte documental 28/10/2026
+
+## Catálogo Grupo París — normalización inicial
+
+Se preparó `docs/product/BUSINESS-UNIT-TASK-CATALOG-DRAFT-20261028.md` a
+partir de los títulos legibles en las capturas enviadas. Define las siete
+unidades de negocio solicitadas como dimensión separada de empresa legal,
+normaliza familias de trabajo con códigos propuestos y separa bancos, marcas,
+sucursales y otras variantes como parámetros. Los nombres alternativos quedan
+como alias; las tareas ambiguas permanecen fuera del catálogo seleccionable
+hasta confirmar su significado. Las capturas son parciales y no permiten medir
+frecuencias.
+
+Esto es una especificación revisable, no un cambio de interfaz/base de datos:
+`companyId`, el primer ingreso, los títulos editables y los códigos neutrales
+v2 siguen sin cambios. El catálogo aún no está conectado a selección de unidad
+de negocio ni a tareas canónicas en onboarding; hace falta una evolución
+compatible del modelo local y del contrato autenticado, conservando tareas y
+reportes históricos. No se tocó Supabase ni SQL001–016. La revisión de
+continuidad debe usar este catálogo específico de Grupo París, no confundirlo con
+el conteo de personas o volúmenes.
+
+## Corte anterior verificado 27/10/2026
 
 ## Clasificación neutral local — publicada y desplegada
 

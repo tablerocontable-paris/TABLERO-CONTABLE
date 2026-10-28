@@ -1,4 +1,26 @@
-# Estado vigente de ejecución — 27/10/2026
+# Estado vigente de ejecución — 28/10/2026
+
+## Siguiente frente: catálogo operativo Grupo París
+
+Se normalizaron los títulos visibles y las siete unidades de negocio en
+`docs/product/BUSINESS-UNIT-TASK-CATALOG-DRAFT-20261028.md`. Éste es un
+borrador de catálogo para la organización: distingue tarea canónica de alias,
+unidad de negocio de empresa legal, y atributos como banco/sucursal/marca del
+nombre de tarea. Los términos ambiguos están marcados para aprobación antes de
+convertirlos en opciones activas. No representa ocurrencias ni métricas reales.
+
+Siguiente implementación: añadir al onboarding una selección cerrada de unidad
+de negocio y tareas canónicas con códigos inmutables, permitir parámetros
+estructurados, y conservar el flujo actual de propuesta/aprobación para nuevos
+conceptos. Guardar la unidad y versión de catálogo en borrador, propuesta,
+asignación y ocurrencia; mantener alias sólo para búsqueda. Separar
+`businessUnitCode` de `companyId`, hacer campos opcionales al leer datos
+históricos y exigirlos únicamente en nuevas asignaciones normalizadas. Actualizar
+analítica para agrupar por código + unidad y dejar las variantes no confirmadas
+como `sin clasificar`/pendientes, nunca inferirlas. Primero implementar sólo en
+el laboratorio local con pruebas de compatibilidad; no modificar SQL001–016 ni
+activar onboarding/Auth remoto hasta revisar y aprobar el contrato/migración
+posterior a 016 en una PC con Supabase CLI disponible.
 
 ## Clasificación neutral — publicada y desplegada
 
