@@ -3,9 +3,10 @@
 Actualizado el 28/10/2026. Éste es el estado para retomar el proyecto desde otra
 PC o aplicación; la documentación anterior de este archivo quedó reemplazada.
 
-Al 28/10/2026, catálogo V6 publicado directamente en `main` como `cd84168`;
-continuidad actualizada en `e8299c8` y `54e8b4d`. Actions #150 pasó para el HEAD
-`54e8b4d`. V6 normaliza Banco Francés y Banco Nación para conciliaciones,
+Al 28/10/2026, catálogo V6 publicado directamente en `main` como `cd84168`.
+Actions #150 pasó suite, build y paquete Sites para el corte funcional
+`54e8b4d`; la continuidad documental posterior pasó el hook 230/230. V6
+normaliza Banco Francés y Banco Nación para conciliaciones,
 conserva versiones históricas e identifica otros bancos como pendientes/no
 comparables. El Site privado sigue en v104 y no recibió este cambio.
 

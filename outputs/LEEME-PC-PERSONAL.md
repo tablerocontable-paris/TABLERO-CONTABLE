@@ -2,7 +2,9 @@
 
 **Actualizado el 28/10/2026:** V6 ya está publicado directamente en `main`, sin
 Pull Request. Código `cd841683bff0dc90c760f73ba133fe4c6511bfcd`. GitHub Actions
-#150 terminó con éxito para `54e8b4d`; la validación local pasó 880/880 pruebas, TypeScript,
+#150 pasó suite/build/paquete Sites para el corte funcional `54e8b4d`. Los
+commits documentales posteriores pasaron su hook de 230/230 pruebas. La suite
+completa local pasó 880/880, además de TypeScript,
 build cliente/Worker/Sites y recorrido de navegador en Edge. El laboratorio
 Sites sigue en v104 y no se actualizó. La guía se puede usar ya para clonar o
 actualizar la PC personal.
@@ -27,7 +29,8 @@ traslado del proyecto.
 - Rama activa: `main`; incluye catálogo V6, normalización del alta puntual y
   protecciones del onboarding/propuestas. Para
   actualizar una copia existente, ejecutá `git pull --ff-only origin main`.
-  GitHub Actions #150 pasó suite, build y paquete Sites para HEAD `54e8b4d`.
+  GitHub Actions #150 pasó suite, build y paquete Sites para el corte funcional
+  `54e8b4d`.
   El Site privado sigue en v104; estos últimos cambios de GitHub no se
   desplegaron allí. Consultá `docs/PROJECT-STATUS.md` y
   `docs/EXECUTION-NEXT.md` para el estado actualizado. V6 no se desplegó en el

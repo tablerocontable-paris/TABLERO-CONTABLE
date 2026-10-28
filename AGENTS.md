@@ -2,10 +2,11 @@
 
 ## Corte actual — 28/10/2026
 
-El corte actual está publicado directamente en `main`, sin Pull Request. La
-implementación V6 está en `cd84168`; las guías de traslado/estado se actualizaron
-en `e8299c8` y `54e8b4d`. HEAD actual `54e8b4d`; GitHub Actions #150 pasó suite,
-build y validación del paquete Sites.
+El corte funcional V6 está publicado directamente en `main`, sin Pull Request,
+en `cd84168`. GitHub Actions #150 pasó suite, build y paquete Sites para el
+corte validado `54e8b4d`. Después se reconciliaron los documentos de continuidad;
+los hooks de esos commits documentales pasaron 230/230 pruebas. No confundir el
+SHA de validación funcional con el último SHA documental de `main`.
 
 V6 conserva las 55 tareas del catálogo y controla Banco Francés y Banco Nación
 como parámetros de `gpar_bank_reconciliation`. Los demás bancos quedan

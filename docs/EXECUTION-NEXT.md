@@ -15,8 +15,10 @@ prueba de navegador confirma propuestas canónicas pendientes por empresa y que
 no se crean tareas/asignaciones hasta aprobación, junto con cierres, tareas,
 cronómetros, ausencia, aislamiento, temas y móvil. Implementación publicada en
 `main` como `cd84168`, guía personal actualizada en `e8299c8`, sin Pull Request.
-GitHub Actions #150 pasó para el HEAD `54e8b4d`. No desplegar a Sites sin una
-etapa de publicación aprobada; Site v104 sigue sin cambios.
+GitHub Actions #150 pasó suite, build y paquete Sites para el corte funcional
+`54e8b4d`. La continuidad documental posterior pasó el hook 230/230. No
+desplegar a Sites sin una etapa de publicación aprobada; Site v104 sigue sin
+cambios.
 
 ## Corte GitHub: seguridad de clasificación en onboarding
 

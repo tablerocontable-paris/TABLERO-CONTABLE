@@ -18,9 +18,10 @@ build cliente, Worker, paquete Sites y recorrido Playwright en Edge aprobados;
 el navegador confirmó que onboarding conserva cuatro propuestas distintas
 (dos tareas × dos empresas) sin crear tareas/asignaciones antes de aprobación,
 además de cierres, cronómetros, aislamiento, temas y móvil. `git diff --check`
-aprobado. Implementación publicada directamente en `main` como `cd84168`; guías
-actualizadas en `e8299c8` y `54e8b4d`. GitHub Actions #150 pasó para el HEAD
-`54e8b4d`. V6 no se desplegó en Sites, que permanece en v104.
+aprobado. Implementación publicada directamente en `main` como `cd84168`;
+GitHub Actions #150 pasó suite, build y paquete Sites para el corte funcional
+`54e8b4d`. Los posteriores commits de continuidad pasaron el hook 230/230.
+V6 no se desplegó en Sites, que permanece en v104.
 
 ## Guardas para onboarding y activación de propuestas — corte GitHub
 
