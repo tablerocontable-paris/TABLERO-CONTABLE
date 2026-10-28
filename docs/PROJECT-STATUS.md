@@ -1,6 +1,6 @@
 # Estado vigente — actualización 28/10/2026
 
-## Guardas para onboarding y activación de propuestas — corte local
+## Guardas para onboarding y activación de propuestas — corte GitHub
 
 La revisión del flujo encontró que las propuestas antiguas sin clasificación
 París podían llegar a los controles de aprobación. El laboratorio ahora exige
@@ -22,6 +22,18 @@ conocidos del bundle principal (>500 kB) y comentarios de Zod. Commit funcional
 confirmar Actions se puede actualizar la PC personal con
 `git pull --ff-only origin main`. Site privado v104 sin cambios; no afecta
 `/api`, Auth ni SQL001–016.
+
+### Límite del catálogo para análisis por banco
+
+En V5, “Conciliación Banco Francés” y `CONC BANC FRANC` son formas de buscar
+la tarea canónica “Conciliación bancaria”; banco y cuenta quedan en parámetros
+obligatorios. Esto evita crear identidades de tarea distintas por abreviatura.
+Sin embargo, el campo banco y los demás parámetros se ingresan como texto
+libre. Para comparar bancos sin dividir métricas por diferencias de escritura,
+el siguiente paso es acordar opciones de banco basadas en el listado real y
+versionarlas; no debe inferirse una lista completa de las capturas actuales.
+Las 30 tareas aún no elegibles para comparación entre unidades siguen
+registrables; su homologación analítica requiere revisar alcance y parámetros.
 
 ## Alta de tareas puntuales normalizada — 28/10/2026
 

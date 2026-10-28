@@ -1,6 +1,6 @@
 # Estado vigente de ejecución — 28/10/2026
 
-## Siguiente corte local: seguridad de clasificación en onboarding
+## Corte GitHub: seguridad de clasificación en onboarding
 
 Cambios implementados localmente en `5bcf11a`: bloquear activación de propuestas con
 clasificación faltante/inconsistente; preservar el historial de selecciones
@@ -12,6 +12,18 @@ Commit funcional `5bcf11a` ya publicado directamente a `main`; falta consultar
 el CI. Las propuestas antiguas sin clasificación se preservan pero no tienen
 aún un flujo de reclasificación; no aprobarlas ni inferir códigos desde el
 texto histórico. Site privado v104 sin cambios ni despliegue.
+
+## Siguiente paso de catálogo — pendiente de fuente completa
+
+El catálogo V5 ya normaliza la identidad de cada tarea y las siete unidades,
+pero sus parámetros (incluido `banco`) todavía son campos de texto libre.
+Antes de medir por banco, acordar los valores institucionales reales, agregar
+opciones canónicas versionadas y mostrar la selección como parte del contexto
+de la tarea. Mantener `gpar_bank_reconciliation` como identidad común y guardar
+banco/cuenta como dimensiones: así el mismo proceso puede compararse entre
+unidades. No transformar cada abreviatura histórica en una nueva tarea ni
+inventar bancos/cuentas. Mantener fuera de comparación las 30 filas provisionales
+hasta revisar el alcance con la fuente de tareas completa.
 
 ## Corte publicado para continuidad entre PC — 28/10/2026
 

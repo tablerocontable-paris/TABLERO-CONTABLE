@@ -12,6 +12,12 @@ traslado del proyecto.
   cliente/Worker y paquete Sites. Commit `5bcf11a` ya publicado en `main`;
   estoy confirmando el CI. Esperá mi confirmación final antes de actualizar el
   clon.
+- Nota sobre catálogo: la tarea “Conciliación bancaria” se selecciona una sola
+  vez; “Conciliación Banco Francés” y `CONC BANC FRANC` buscan esa tarea y el
+  banco se guarda como parámetro requerido. Ese campo y otros parámetros aún
+  admiten texto libre; para análisis comparables por banco falta acordar e
+  implementar opciones canónicas con la lista real del estudio. Las 30 tareas
+  provisionales se registran pero aún no se comparan entre unidades.
 - Rama activa: `main`; incluye el catálogo v5, la normalización del alta
   puntual y las protecciones de onboarding/propuestas (último corte funcional
   `d37792b8a1b9fd29697ecaed726ecaeaae003cc0`). Para

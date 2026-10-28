@@ -10,6 +10,14 @@ activar como trabajo nuevo. Todavía no existe una vía para reclasificar esas
 propuestas antiguas; crear una propuesta nueva desde el catálogo mantiene su
 historial original intacto.
 
+En V5, `gpar_bank_reconciliation` es la tarea canónica. “Conciliación Banco
+Francés” y “CONC BANC FRANC” conducen a esa misma tarea; el banco y la cuenta
+son parámetros separados y requeridos. Hoy todos los parámetros del catálogo
+se capturan como texto libre. Antes de comparar resultados por banco, definir
+una lista versionada de valores reales y opciones de interfaz; no inferirla de
+alias ni inventar entidades. Los parámetros libres restantes también son una
+limitación para comparaciones detalladas.
+
 Validación de este corte local: suite **877/877 en 87 archivos**, TypeScript,
 build cliente, Worker y paquete Sites aprobados. Vite informa el aviso de
 bundle principal >500 kB y comentarios `@__PURE__` de Zod; los comandos
@@ -17,17 +25,17 @@ terminaron correctamente. Pruebas focales posteriores al ajuste de texto:
 122/122; hook de commit: 229/229. `git diff --check` pasó. La revisión
 independiente no encontró hallazgos críticos/altos; sí confirma que falta un
 flujo de reclasificación de propuestas antiguas. El commit funcional
-`5bcf11a` ya está publicado; falta confirmar GitHub Actions después de publicar
-la continuidad documental. El Site privado sigue en v104 y no se publica con
-estos pasos.
+`5bcf11a` y la continuidad documental `66b4d4a` ya están publicados; Actions
+del último commit sigue ejecutándose. El Site privado sigue en v104 y no se
+publica con estos pasos.
 Conservar el scratch no versionado protegido sin inspeccionarlo, modificarlo o
 stagearlo.
 
 Repositorio activo `work/site`, remoto privado
 `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`. El corte `5bcf11a` se
-publicó bajo la cuenta **Tablero Contable**, sin Pull Request. La documentación
-de continuidad que acompaña este corte quedará en un commit separado. El Site
-privado permanece en v104, owner-only; GitHub no lo despliega automáticamente.
+publicó bajo la cuenta **Tablero Contable**, sin Pull Request. La continuidad
+está en `66b4d4a`. El Site privado permanece en v104, owner-only; GitHub no lo
+despliega automáticamente.
 
 ## Catálogo de tareas y primera experiencia
 
