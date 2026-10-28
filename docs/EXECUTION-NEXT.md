@@ -1,8 +1,8 @@
 # Estado vigente de ejecución — 28/10/2026
 
-## Trabajo local actual — catálogo V6 para bancos
+## Catálogo V6 publicado — pendientes funcionales
 
-La implementación local introduce valores controlados para Banco Francés y
+La implementación introduce valores controlados para Banco Francés y
 Banco Nación en conciliación bancaria. Los nombres tienen respaldo en el
 repositorio, pero la lista es parcial. Otro banco se registra con nombre y
 marca pendiente, excluido de comparación hasta homologarlo. Las búsquedas por
