@@ -13,9 +13,10 @@ Validación local final: suite **880/880 en 87 archivos**, TypeScript, build
 cliente, Worker, paquete Sites y recorrido Playwright en Edge aprobados. La
 prueba de navegador confirma propuestas canónicas pendientes por empresa y que
 no se crean tareas/asignaciones hasta aprobación, junto con cierres, tareas,
-cronómetros, ausencia, aislamiento, temas y móvil. Commit directo en `main` y
-GitHub Actions de este corte quedan pendientes. No desplegar a Sites mientras
-tanto; Site v104 sigue sin cambios.
+cronómetros, ausencia, aislamiento, temas y móvil. Implementación publicada en
+`main` como `cd84168`, guía personal actualizada en `e8299c8`, sin Pull Request.
+GitHub Actions #148 sigue en ejecución. No desplegar a Sites; Site v104 sigue
+sin cambios.
 
 ## Corte GitHub: seguridad de clasificación en onboarding
 
