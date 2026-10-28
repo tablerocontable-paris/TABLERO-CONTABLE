@@ -51,6 +51,10 @@ confirmación.
   categoría de análisis ni como reemplazo del nombre canónico.
 - Un mismo código permite comparar el proceso entre unidades; la comparación
   debe conservar unidad, banco/marca/sucursal y período como dimensiones.
+- Todas las tareas observadas se pueden registrar desde el catálogo v3. Las que
+  tienen significado todavía no confirmado se marcan como provisionales, usan
+  códigos separados y no participan en comparaciones entre unidades hasta que
+  jefatura confirme que describen el mismo flujo y unidad de medida.
 - No importar códigos de la taxonomía neutral actual por similitud textual sin
   revisar la semántica. Los códigos neutral-v2 existentes son contratos
   históricos y no se renumeran.
@@ -121,11 +125,13 @@ una decisión funcional antes de habilitarlo como selección oficial.
 | `vat_settlement_control` | Liquidación y control de IVA | Unidad, empresa legal, período, tipo de liquidación | Tarea de resultado visible; distinta de la registración contable de IVA. | Confirmada |
 
 La lista refleja familias vistas en las capturas, no certifica todavía que cada
-fila sea una función distinta del proceso real. Los ítems `Revisar` deben quedar
-en una bandeja de definición de catálogo, no seleccionables por todos, hasta que
-se confirme su alcance. Los siete nombres de unidades son exactamente los
-proporcionados por el usuario; no se asignan tareas a unidades salvo las
-abreviaturas inequívocas indicadas arriba.
+fila sea una función distinta del proceso real. Los ítems `Revisar` se ofrecen
+como opciones provisionales con códigos propios, pero sus cantidades no se
+comparan entre unidades hasta que se confirme el alcance. No se fusionan por
+abreviaturas ni por alias. “Carga de otras facturas” exige subtipo para no
+convertirse en una categoría residual sin detalle. Los siete nombres de unidades
+son exactamente los proporcionados por el usuario; no se asignan tareas a
+unidades por deducción.
 
 ## Reglas de medición
 
@@ -144,19 +150,19 @@ abreviaturas inequívocas indicadas arriba.
 
 ## Compatibilidad y alcance de implementación
 
-El catálogo Grupo París versión 2 ya está conectado en el laboratorio local:
+El catálogo Grupo París versión 3 ya está conectado en el laboratorio local:
 primer ingreso, propuestas, aprobación, asignaciones, tareas materializadas y
 analítica. La unidad (`businessUnitCode`) se conserva separada de la empresa
 legal (`companyId`); nombres y códigos no son editables por quien registra el
 trabajo. Banco y cuenta se solicitan aparte para conciliaciones. Las operativas
 se miden por movimientos sin cuotas artificiales.
 
-La versión 1, con 50 tareas, queda disponible para leer borradores y trabajo ya
-guardado. La versión 2 suma cinco entradas al catálogo: las cuatro tareas claras
-de las capturas y el cobro en caja de operaciones de vehículos, que sigue en
-revisión por sus siglas. Las métricas conservan la versión y separan series con
-definiciones distintas. Los datos históricos sin código no se clasifican por
-el título ni se reescriben.
+Las versiones 1 (50 tareas) y 2 (55 tareas) se conservan para leer propuestas y
+trabajo ya guardado. La versión 3 ofrece las 55 tareas en el primer ingreso;
+25 están confirmadas y 30 siguen provisionales, separadas por código y
+excluidas de comparaciones entre unidades. Las métricas conservan la versión y
+marcan las filas provisionales. Los datos históricos sin código no se clasifican
+por el título ni se reescriben.
 
 Este cambio cubre sólo el laboratorio privado con datos ficticios. No modifica
 SQL001–016, API operativa, Auth remoto ni el onboarding autenticado. La conexión
@@ -165,13 +171,13 @@ remoto independiente antes de habilitar cuentas reales.
 
 ## Próxima revisión funcional
 
-La versión 2 cubre 55 tareas: 25 seleccionables y 30 en revisión. La versión 1
-(50 tareas) se conserva para leer trabajo del laboratorio ya guardado; las
-métricas incluyen la versión y no mezclan definiciones distintas. De las cinco
-entradas agregadas, cuatro nombres de las capturas se pueden seleccionar y el
-cobro en caja de operaciones de vehículos sigue en revisión.
+La versión 3 ofrece las 55 tareas observadas para registro: 25 confirmadas y 30
+provisionales. La versión 1 (50 tareas) y la versión 2 (55 tareas) se conservan
+para leer trabajo del laboratorio ya guardado. Los códigos provisionales pueden
+registrar trabajo, pero quedan marcados como no comparables entre unidades hasta
+que su alcance y unidad de medida se validen.
 
-La revisión debe concentrarse sólo en los términos marcados `Revisar`:
+La revisión funcional debe concentrarse sólo en los términos marcados `Revisar`:
 confirmar siglas PDA/PSA/MO4/VN/VO/GM, significado de “Bonis”, “cancelación de
 cupones”, “canon acumulados”, “conjunta con caja”, “carga de pagos PDA” y el
 alcance exacto de transferencias y cobros por sector. Hasta entonces no se

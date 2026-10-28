@@ -4,20 +4,20 @@
 
 El catálogo canónico quedó implementado en la inducción local del laboratorio,
 publicado directamente en GitHub `main` y desplegado en el Site privado existente.
-La v2 mantiene las 50 tareas anteriores, agrega cuatro opciones claras de las
-capturas y separa una quinta entrada ambigua de cobros de vehículos. Tiene 55
-tareas: 25 seleccionables y 30 en revisión. Las siete unidades son las indicadas
-por el usuario. El nombre de tarea es cerrado; empresa, unidad, banco, cuenta,
-sucursal y período permanecen como dimensiones separadas. Se preserva lectura
-versionada del catálogo v1 para propuestas ya guardadas.
+La versión local 3 del catálogo ofrece las 55 tareas observadas para selección,
+cada una con código canónico. Veinticinco están confirmadas para comparación;
+treinta son provisionales y no se comparan entre unidades hasta confirmar su
+alcance. Las siete unidades son las indicadas por el usuario. El nombre de tarea
+es cerrado; empresa, unidad, banco, cuenta, sucursal y período permanecen como
+dimensiones separadas. Las versiones anteriores 1 y 2 se preservan para leer
+propuestas y registros existentes.
 
-La validación local de v2 pasó **863/863 en 87 archivos**, TypeScript, build
-cliente, Worker y paquete Sites; las pruebas focales pasaron **49/49** y el
-hook previo al commit **222/222**. El catálogo está en GitHub `main` mediante
-el commit `14c8c3f`, directo y sin PR. El mismo Site se actualizó a v101 desde
-el commit de fuente Sites `3961364`; acceso personalizado conserva sólo al
-propietario y cero visitantes externos. La revisión detectó y corrigió un alias
-faltante para “Cierre de cuenta mensual”.
+La validación local de v3 pasó **865/865 en 87 archivos**, TypeScript y build
+cliente/Worker/paquete Sites; las pruebas focales pasaron **51/51**. La v2 está
+en GitHub `main` como commit `14c8c3f` y en el Site privado como v101 desde el
+commit de fuente `3961364`. La v3 debe publicarse en `main` y actualizar el
+mismo Site; su acceso personalizado se conserva sólo para el propietario y con
+cero visitantes externos.
 Build conserva avisos de Rollup por comentarios de Zod y un chunk de 653 kB.
 Supabase, Auth, API y SQL001–016 no se tocaron. El trabajo histórico no se
 reclasifica por su título y las filas ambiguas no se ofrecen en primer ingreso.

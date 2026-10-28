@@ -8,7 +8,7 @@ function task(id: string, businessUnitCode: Task["businessUnitCode"], parameters
     teamId: "team", sector: "Tesorería", month: "2026-10", due: "2026-10-30", kind: "resultado", weight: 2,
     unit: "", target: 0, status: "Pendiente", checklist: [], completedAt: null, startedAt: null,
     priority: "Media", blockedBy: "", blockedSince: null,
-    taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 2, businessUnitCode, taskParameters: parameters,
+    taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 3, businessUnitCode, taskParameters: parameters,
     ...overrides,
   };
 }
@@ -39,10 +39,25 @@ describe("medición del catálogo de tareas Grupo París", () => {
     const rows = summarizeParisTaskWork([
       task("v1", "paris_autos", { banco: "Banco Francés" }, { taskCatalogVersion: 1 }),
       task("v2", "paris_autos", { banco: "Banco Francés" }, { taskCatalogVersion: 2 }),
+      task("v3", "paris_autos", { banco: "Banco Francés" }, { taskCatalogVersion: 3 }),
     ], []);
-    expect(rows).toHaveLength(2);
-    expect(rows.map((row) => row.taskCatalogVersion)).toEqual([1, 2]);
+    expect(rows).toHaveLength(3);
+    expect(rows.map((row) => row.taskCatalogVersion)).toEqual([1, 2, 3]);
     expect(rows.every((row) => row.title === "Conciliación bancaria")).toBe(true);
+  });
+
+  it("registra una tarea provisional sin marcarla comparable entre unidades", () => {
+    const row = summarizeParisTaskWork([
+      task("provisional", "paris_autos", { tipo_especifico: "gastos varios" }, {
+        title: "Carga de otras facturas", taskCode: "invoice_load_other", taskCatalogVersion: 3,
+        kind: "operativa", unit: "facturas",
+      }),
+    ], [])[0];
+
+    expect(row).toMatchObject({
+      taskCode: "invoice_load_other", taskCatalogVersion: 3,
+      comparisonEligible: false, movementCount: 0,
+    });
   });
 
   it("suma los movimientos de una operativa en su unidad común y muestra la cantidad medida", () => {

@@ -4,6 +4,7 @@ import {
   PARIS_BUSINESS_UNITS,
   PARIS_TASK_CATALOG,
   PARIS_TASK_CATALOG_V1,
+  PARIS_TASK_CATALOG_V2,
   PARIS_TASK_CATALOG_VERSION,
   getParisTask,
   selectableParisTasks,
@@ -28,12 +29,15 @@ describe("catálogo de tareas de Grupo París", () => {
   });
 
   it("versiona las tareas nuevas y conserva intacta la lectura del catálogo v1", () => {
-    expect(PARIS_TASK_CATALOG_VERSION).toBe(2);
-    expect(PARIS_TASK_CATALOG).toHaveLength(PARIS_TASK_CATALOG_V1.length + 5);
+    expect(PARIS_TASK_CATALOG_VERSION).toBe(3);
+    expect(PARIS_TASK_CATALOG_V2).toHaveLength(PARIS_TASK_CATALOG_V1.length + 5);
+    expect(PARIS_TASK_CATALOG).toHaveLength(PARIS_TASK_CATALOG_V2.length);
     expect(getParisTask("procedure_follow_up", 1)).toBeUndefined();
     expect(getParisTask("procedure_follow_up", 2)?.label).toBe("Control de trámites");
+    expect(getParisTask("procedure_follow_up", 3)?.label).toBe("Control de trámites");
     expect(getParisTask("gpar_bank_reconciliation", 1)?.label).toBe("Conciliación bancaria");
     expect(getParisTask("gpar_bank_reconciliation", 2)?.label).toBe("Conciliación bancaria");
+    expect(getParisTask("gpar_bank_reconciliation", 3)?.label).toBe("Conciliación bancaria");
   });
 
   it("incluye las cuatro tareas visibles que faltaban con nombre canónico", () => {
@@ -46,22 +50,28 @@ describe("catálogo de tareas de Grupo París", () => {
     expect(findParisTaskAlias("Liquidación y control de IVA")?.code).toBe("vat_settlement_control");
   });
 
-  it("oculta de la selección inicial las filas marcadas para revisión", () => {
+  it("permite elegir las 55 tareas observadas y señala las 30 con comparación provisional", () => {
     expect(PARIS_TASK_CATALOG).toHaveLength(55);
-    expect(selectableParisTasks()).toHaveLength(25);
-    expect(PARIS_TASK_CATALOG.filter((task) => task.state === "review")).toHaveLength(30);
+    expect(selectableParisTasks()).toHaveLength(55);
+    expect(selectableParisTasks(2)).toHaveLength(25);
+    expect(PARIS_TASK_CATALOG.filter((task) => task.comparisonEligible === false)).toHaveLength(30);
     expect(selectableParisTasks().every((task) => task.state === "selectable")).toBe(true);
-    expect(findParisTaskAlias("Análisis Bonis PYMES")?.state).toBe("review");
+    expect(findParisTaskAlias("Análisis Bonis PYMES")?.state).toBe("selectable");
+    expect(findParisTaskAlias("Análisis Bonis PYMES")?.comparisonEligible).toBe(false);
+    expect(findParisTaskAlias("Carga de otras facturas")?.comparisonEligible).toBe(false);
+    expect(findParisTaskAlias("Carga de otras facturas")?.requiredParameters).toContain("tipo específico");
   });
 
-  it("mantiene separadas las tareas cuyo alcance no está confirmado", () => {
+  it("registra con código propio los procesos provisionales sin fusionar aliases", () => {
     expect(findParisTaskAlias("Carga de pagos PDA")?.code).toBe("dealer_credits_payment_load");
-    expect(findParisTaskAlias("Carga de pagos PDA")?.state).toBe("review");
+    expect(findParisTaskAlias("Carga de pagos PDA")?.state).toBe("selectable");
+    expect(getParisTask("dealer_credits_payment_load", 2)?.state).toBe("review");
     expect(findParisTaskAlias("Cobranza VN/VO/PDA")?.code).toBe("vehicle_collection");
     expect(findParisTaskAlias("Carga de transferencias VN/VO/PDA")?.code).toBe("supplier_payment_transfer_vn_vo_pda");
-    expect(findParisTaskAlias("Carga de otras facturas")?.state).toBe("review");
+    expect(findParisTaskAlias("Carga de otras facturas")?.state).toBe("selectable");
+    expect(getParisTask("invoice_load_other", 2)?.state).toBe("review");
     expect(findParisTaskAlias("Cobro en caja VN VO PDA PV")?.code).toBe("vehicle_cash_collection");
-    expect(findParisTaskAlias("Cobro en caja VN VO PDA PV")?.state).toBe("review");
+    expect(findParisTaskAlias("Cobro en caja VN VO PDA PV")?.state).toBe("selectable");
     expect(findParisTaskAlias("Cobro en caja VN VO PDA PV")?.code).not.toBe("sector_cash_collections");
     expect(findParisTaskAlias("Cobranza VN/VO/PDA")?.code).toBe("vehicle_collection");
   });

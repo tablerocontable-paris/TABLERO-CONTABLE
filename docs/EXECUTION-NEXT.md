@@ -2,24 +2,23 @@
 
 ## Estado actual: normalización Grupo París en el laboratorio
 
-El flujo local de inducción ya ofrece las siete unidades de negocio y tareas
-canónicas (`src/domain/parisTaskCatalog.ts`). La versión 2 incluye 55 tareas:
-25 seleccionables y 30 en revisión. Conserva v1 (50 tareas) para leer trabajo
-guardado. El nombre canónico no se puede editar; unidad, banco/cuenta y demás
-parámetros se guardan aparte. La analítica conserva la versión, agrupa por
-código, unidad, período y parámetros, y deja el trabajo histórico sin código
-como no clasificado.
+El flujo local de inducción ofrece siete unidades y las 55 tareas observadas
+(`src/domain/parisTaskCatalog.ts`). La versión 3 permite elegir las 55: 25 están
+confirmadas para comparación y 30 quedan provisionales, registrables con códigos
+propios, pero excluidas de comparaciones entre unidades hasta confirmar su
+alcance. Conserva las versiones 1 (50 tareas) y 2 (55 tareas) para leer trabajo
+guardado. Nombre canónico cerrado; unidad, banco/cuenta y demás parámetros se
+guardan aparte. El historial sin código queda sin clasificar.
 
 El flujo de propuesta conserva controles y aprobación de jefatura, y no crea
 asignaciones hasta aprobar. Los grupos separan unidades y parámetros para evitar
 aprobar una cuenta o proceso bajo otra unidad. Se preserva el borrador legado
 para no romper el Worker estricto. No se modificó `/api`, Supabase Auth ni
-SQL001–016; esta implementación sólo es del laboratorio local. La versión v2
-pasó **863/863** pruebas en 87 archivos, TypeScript, build cliente, Worker y
-paquete Sites; el hook pasó **222/222**. Commit `14c8c3f` está en `main` sin PR
-y el mismo Site privado está actualizado a v101 desde su fuente `3961364`.
-La tarea siguiente es continuar clasificando los términos marcados para revisión
-cuando haya más detalle funcional, sin incorporarlos al selector libremente.
+SQL001–016; esta implementación sólo es del laboratorio local. La versión v3
+pasó **865/865** pruebas en 87 archivos, TypeScript, build cliente, Worker y
+paquete Sites. Falta commit y publicación directos en `main` y actualizar el
+mismo Site privado desde su fuente, sin cambiar la audiencia. Luego corresponde
+continuar la puesta a punto desde la PC personal.
 
 No se requieren exportaciones ni datos de personal para normalizar nombres y
 unidades. El borrador de referencia y los criterios de ambigüedad están en

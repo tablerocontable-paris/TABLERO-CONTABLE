@@ -78,11 +78,30 @@ describe("inducción de tareas habituales", () => {
     fireEvent.change(screen.getByLabelText("cuenta · obligatorio"), { target: { value: "Cuenta principal" } });
     expect(saved.habitualTaskProposals).toHaveLength(1);
     expect(saved.habitualTaskProposals?.[0]).toMatchObject({
-      taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 2, businessUnitCode: "paris_autos",
+      taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 3, businessUnitCode: "paris_autos",
       taskParameters: { banco: "Banco Francés", cuenta: "Cuenta principal" },
       title: "Conciliación bancaria", kind: "resultado",
     });
     expect(screen.queryByLabelText("Nombre editable")).toBeNull();
+  });
+
+  it("allows a provisional observed task while requiring its subtype for later comparison", () => {
+    const state = seed();
+    const initial: Draft = { ...draft(2), selectedTemplateIds: [], selectedBusinessUnitCodes: ["paris_autos"], habitualTaskProposals: [] };
+    let saved = initial;
+    function Harness() {
+      const [current, setCurrent] = useState(initial);
+      return <Onboarding state={state} month="2026-10" profile={state.profiles.find((profile) => profile.id === "e0")!} draft={current} update={(next) => { saved = next; setCurrent(next); }} finish={() => {}} pause={() => {}} laboratory />;
+    }
+    render(<Harness />);
+    const row = Array.from(document.querySelectorAll(".paris-task-catalog-item"))
+      .find((item) => item.textContent?.includes("Carga de otras facturas")) as HTMLElement;
+    expect(row.textContent).toContain("Provisional");
+    fireEvent.click(within(row).getByRole("button", { name: /PARIS AUTOS/ }));
+    expect(saved.habitualTaskProposals?.[0]).toMatchObject({
+      taskCode: "invoice_load_other", taskCatalogVersion: 3, businessUnitCode: "paris_autos",
+    });
+    expect((screen.getByLabelText("tipo específico · obligatorio") as HTMLInputElement).required).toBe(true);
   });
 
   it("permite continuar con una sugerencia válida aunque quede abierto un formulario habitual incompleto", async () => {

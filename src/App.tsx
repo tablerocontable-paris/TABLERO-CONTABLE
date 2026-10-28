@@ -2490,13 +2490,13 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                     month={month}
                   />
                 )}
-                {laboratory && !remoteSave && <Panel title="Trabajo por tarea normalizada" sub="Misma tarea y unidad de negocio agrupadas con parámetros separados; los registros antiguos sin código quedan sin clasificar." collapsible defaultOpen={false}>
+                {laboratory && !remoteSave && <Panel title="Trabajo por tarea normalizada" sub="Los códigos confirmados se agrupan por unidad y parámetros; las opciones provisionales se muestran aparte hasta validar equivalencias." collapsible defaultOpen={false}>
                   {(() => {
                     const metrics = summarizeParisTaskWork(filtered, state.activity);
                     return metrics.length ? <div className="table-wrap"><table>
                       <thead><tr><th>Tarea estándar</th><th>Unidad de negocio</th><th>Parámetros</th><th>Empresas</th><th>Asignadas</th><th>Completadas</th><th>Movimientos</th><th>Cantidad</th></tr></thead>
                       <tbody>{metrics.map((metric) => <tr key={metric.key}>
-                        <td>{metric.title}{!metric.taskCode && <small className="unclassified-label"> · Sin clasificar</small>}</td>
+                        <td>{metric.title}{!metric.taskCode && <small className="unclassified-label"> · Sin clasificar</small>}{metric.taskCode && !metric.comparisonEligible && <small className="unclassified-label"> · Provisional, sin comparación entre unidades</small>}</td>
                         <td>{metric.businessUnitLabel}</td>
                         <td>{Object.entries(metric.parameters).filter(([, value]) => value.trim()).map(([key, value]) => `${key.replace(/_/g, " ")}: ${value}`).join(" · ") || "Sin detalle"}</td>
                         <td>{metric.companies.length}</td><td>{metric.assigned}</td><td>{metric.completed}</td>

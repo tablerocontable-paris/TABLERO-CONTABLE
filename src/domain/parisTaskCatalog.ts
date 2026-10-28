@@ -1,6 +1,6 @@
 /** Organization-specific selection catalog. This does not replace neutral v2. */
-export const PARIS_TASK_CATALOG_VERSION = 2 as const;
-export type ParisTaskCatalogVersion = 1 | typeof PARIS_TASK_CATALOG_VERSION;
+export const PARIS_TASK_CATALOG_VERSION = 3 as const;
+export type ParisTaskCatalogVersion = 1 | 2 | typeof PARIS_TASK_CATALOG_VERSION;
 
 export const PARIS_BUSINESS_UNITS = [
   { code: "paris_autos", label: "PARIS AUTOS" },
@@ -25,6 +25,8 @@ export interface ParisTaskDefinition {
   requiredParameters?: readonly string[];
   aliases: readonly string[];
   state: ParisTaskReviewState;
+  /** Provisional tasks are recordable but excluded from cross-unit comparison. */
+  comparisonEligible?: boolean;
 }
 
 /**
@@ -39,7 +41,7 @@ export const PARIS_TASK_CATALOG_V1: readonly ParisTaskDefinition[] = [
   { code: "cash_count", label: "Arqueo de caja", group: "Tesorería", kind: "deliverable", parameters: ["sucursal", "caja", "turno o fecha"], aliases: ["arqueo caja", "arqueo de cajas"], state: "selectable" },
   { code: "document_archive", label: "Archivo y organización de documentación", group: "Documentación", kind: "operational", unit: "documentos", parameters: ["tipo de documento", "ubicación"], aliases: ["archivo de documentacion"], state: "selectable" },
   { code: "supplier_invoice_load", label: "Carga de facturas de proveedores", group: "Compras", kind: "operational", unit: "facturas", parameters: ["proveedor", "clase", "sucursal", "sistema u origen"], aliases: ["carga de factura proveedores", "carga facturas proveedores", "cargas facturas proveedores", "cargar facturas de compras", "carga de facturas gm", "carga facturas gm casos puntuales", "carga de factura chevrolet sa", "carga de facturas portal stellantis"], state: "selectable" },
-  { code: "invoice_load_other", label: "Carga de otras facturas", group: "Compras", kind: "operational", unit: "facturas", parameters: ["tipo", "proveedor", "sucursal"], aliases: ["carga de facturas varias"], state: "review" },
+  { code: "invoice_load_other", label: "Carga de otras facturas", group: "Compras", kind: "operational", unit: "facturas", parameters: ["tipo específico", "proveedor", "sucursal"], requiredParameters: ["tipo específico"], aliases: ["carga de facturas varias"], state: "review" },
   { code: "parts_invoice_load", label: "Carga de facturas de repuestos", group: "Compras", kind: "operational", unit: "facturas", parameters: ["sucursal"], aliases: ["carga facturas repuestos paris cars suc 3", "carga factura repuestos paris cars suc 81"], state: "selectable" },
   { code: "new_vehicle_invoice_load", label: "Carga de facturas de vehículos nuevos", group: "Compras", kind: "operational", unit: "facturas", parameters: ["marca", "sucursal", "etapa de recepción"], aliases: ["carga de facturas vehiculos nuevos chevrolet", "carga factura vn pa"], state: "review" },
   { code: "zero_km_invoice_receipt", label: "Registro de factura de unidad 0 km al recibirla", group: "Compras", kind: "operational", unit: "unidades", parameters: ["marca", "vehículo", "sucursal"], aliases: ["carga fc unidades 0km al recepcionar en sucursal"], state: "selectable" },
@@ -86,8 +88,8 @@ export const PARIS_TASK_CATALOG_V1: readonly ParisTaskDefinition[] = [
   { code: "gm_collection_register", label: "Registro de cobros de GM", group: "Tesorería", kind: "operational", unit: "cobros", parameters: ["entidad", "medio", "período"], aliases: ["cobros gm registro"], state: "review" },
 ];
 
-/** Version 2 adds the four explicit tasks from the supplied board captures. */
-export const PARIS_TASK_CATALOG: readonly ParisTaskDefinition[] = [
+/** Version 2 adds the explicit tasks from the supplied board captures. */
+export const PARIS_TASK_CATALOG_V2: readonly ParisTaskDefinition[] = [
   ...PARIS_TASK_CATALOG_V1.map((task) => task.code === "sector_cash_collections"
     ? { ...task, aliases: task.aliases.filter((alias) => alias !== "cobro en caja vn vo pda pv") }
     : task),
@@ -98,8 +100,16 @@ export const PARIS_TASK_CATALOG: readonly ParisTaskDefinition[] = [
   { code: "vehicle_cash_collection", label: "Registro de cobros en caja de operaciones de vehículos", group: "Tesorería", kind: "operational", unit: "cobros", parameters: ["tipo de operación", "sucursal o caja", "medio", "fecha"], aliases: ["cobro en caja vn vo pda pv"], state: "review" },
 ];
 
+/** Version 3 makes every observed task recordable without merging uncertain workflows. */
+export const PARIS_TASK_CATALOG: readonly ParisTaskDefinition[] = PARIS_TASK_CATALOG_V2.map((task) => ({
+  ...task,
+  state: "selectable" as const,
+  comparisonEligible: task.state === "selectable",
+}));
+
 const catalogsByVersion = new Map<ParisTaskCatalogVersion, readonly ParisTaskDefinition[]>([
   [1, PARIS_TASK_CATALOG_V1],
+  [2, PARIS_TASK_CATALOG_V2],
   [PARIS_TASK_CATALOG_VERSION, PARIS_TASK_CATALOG],
 ]);
 
@@ -159,12 +169,19 @@ export function isSelectableParisTaskCode(value: string, version: number = PARIS
   return getParisTask(value, version)?.state === "selectable";
 }
 
+export function isParisTaskComparisonEligible(code: string | null | undefined, version: number | null | undefined): boolean {
+  if (!code || !version) return false;
+  const definition = getParisTask(code, version);
+  return !!definition && (definition.comparisonEligible ?? definition.state === "selectable");
+}
+
 /** Exact alias lookup for search/import review; never silently edits saved work. */
 export function findParisTaskAlias(value: string): ParisTaskDefinition | undefined {
   return taskByAlias.get(normalize(value));
 }
 
-/** Only approved rows are offered for first-login selection. */
-export function selectableParisTasks(): readonly ParisTaskDefinition[] {
-  return PARIS_TASK_CATALOG.filter((task) => task.state === "selectable");
+/** All observed rows are offered; provisional rows keep distinct codes and parameters. */
+export function selectableParisTasks(version: number = PARIS_TASK_CATALOG_VERSION): readonly ParisTaskDefinition[] {
+  if (!isParisTaskCatalogVersion(version)) return [];
+  return (catalogsByVersion.get(version) || []).filter((task) => task.state === "selectable");
 }

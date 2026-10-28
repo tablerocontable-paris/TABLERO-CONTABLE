@@ -1,10 +1,11 @@
 import type { Activity, Task } from "./model";
-import { getParisTask, PARIS_BUSINESS_UNITS, type ParisBusinessUnitCode } from "./parisTaskCatalog";
+import { getParisTask, isParisTaskComparisonEligible, PARIS_BUSINESS_UNITS, type ParisBusinessUnitCode } from "./parisTaskCatalog";
 
 export interface ParisTaskWorkMetric {
   key: string;
   taskCode: string | null;
   taskCatalogVersion: number | null;
+  comparisonEligible: boolean;
   title: string;
   businessUnitCode: ParisBusinessUnitCode | null;
   businessUnitLabel: string;
@@ -33,6 +34,7 @@ export function summarizeParisTaskWork(tasks: Task[], activity: Activity[]): Par
       key,
       taskCode: definition?.code || null,
       taskCatalogVersion: definition ? taskCatalogVersion! : null,
+      comparisonEligible: isParisTaskComparisonEligible(task.taskCode, taskCatalogVersion),
       title: definition?.label || "Trabajo histórico sin clasificar",
       businessUnitCode: task.businessUnitCode || null,
       businessUnitLabel: task.businessUnitCode ? businessUnits.get(task.businessUnitCode) || "Unidad sin clasificar" : "Sin clasificar",

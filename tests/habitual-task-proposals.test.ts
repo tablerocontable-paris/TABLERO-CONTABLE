@@ -64,7 +64,7 @@ describe("propuestas de tareas habituales del laboratorio", () => {
     const employee = state.profiles.find((profile) => profile.id === "e0")!;
     const common = {
       title: "Conciliación bancaria", process: "", taskCode: "gpar_bank_reconciliation",
-      taskCatalogVersion: 2, taskParameters: { banco: "Banco Francés", cuenta: "Cuenta principal" },
+      taskCatalogVersion: 3, taskParameters: { banco: "Banco Francés", cuenta: "Cuenta principal" },
     };
     state = submitHabitualTaskProposal(state, employee, proposalInput({ id: "recon-pa", ...common, businessUnitCode: "paris_autos" }), fixedNow);
     state = submitHabitualTaskProposal(state, employee, proposalInput({ id: "recon-doral", ...common, businessUnitCode: "doral" }), fixedNow);
@@ -78,7 +78,7 @@ describe("propuestas de tareas habituales del laboratorio", () => {
     const state = seed();
     const employee = state.profiles.find((profile) => profile.id === "e0")!;
     expect(() => submitHabitualTaskProposal(state, employee, proposalInput({
-      taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 2, businessUnitCode: "paris_autos",
+      taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 3, businessUnitCode: "paris_autos",
     }), fixedNow)).toThrow(/datos obligatorios/);
   });
 
@@ -86,7 +86,7 @@ describe("propuestas de tareas habituales del laboratorio", () => {
     let state = seed();
     const employee = state.profiles.find((profile) => profile.id === "e0")!;
     state = submitHabitualTaskProposal(state, employee, proposalInput({
-      taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 2,
+      taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 3,
       businessUnitCode: "paris_autos", taskParameters: { banco: "Banco Francés", cuenta: "Cuenta principal" },
     }), fixedNow);
     state.habitualTaskProposals![0]!.taskParameters = {};
@@ -242,21 +242,21 @@ describe("propuestas de tareas habituales del laboratorio", () => {
     const manager = state.profiles.find((profile) => profile.id === "boss")!;
     const canonical = proposalInput({
       id: "paris-bank-recon", title: "Conciliación bancaria", process: "",
-      taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 2, businessUnitCode: "paris_autos",
+      taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 3, businessUnitCode: "paris_autos",
       taskParameters: { banco: "Banco Francés", cuenta: "Cuenta principal" },
     });
     expect(() => submitHabitualTaskProposal(state, employee, { ...canonical, title: "Conc Banc Franc" }, fixedNow)).toThrow(/no se pueden editar/);
     state = submitHabitualTaskProposal(state, employee, canonical, fixedNow);
-    expect(state.habitualTaskProposals?.[0]).toMatchObject({ taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 2, businessUnitCode: "paris_autos", taskParameters: { banco: "Banco Francés", cuenta: "Cuenta principal" } });
+    expect(state.habitualTaskProposals?.[0]).toMatchObject({ taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 3, businessUnitCode: "paris_autos", taskParameters: { banco: "Banco Francés", cuenta: "Cuenta principal" } });
     state = approveHabitualTaskProposals(state, manager, ["paris-bank-recon"], { kind: "create", template: {
       title: "Conciliación bancaria", sector: "Contabilidad", description: "Comparar movimientos de la cuenta.",
       kind: "resultado", unit: "", weight: 1, target: 0, steps: ["Comparar movimientos y documentar diferencias"],
     } }, "2026-10", fixedNow);
-    expect(state.templates.find((template) => template.taskCode === "gpar_bank_reconciliation")).toMatchObject({ taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 2 });
-    expect(state.assignments[0]).toMatchObject({ taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 2, businessUnitCode: "paris_autos", taskParameters: { banco: "Banco Francés", cuenta: "Cuenta principal" }, companyId: "c1" });
+    expect(state.templates.find((template) => template.taskCode === "gpar_bank_reconciliation")).toMatchObject({ taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 3 });
+    expect(state.assignments[0]).toMatchObject({ taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 3, businessUnitCode: "paris_autos", taskParameters: { banco: "Banco Francés", cuenta: "Cuenta principal" }, companyId: "c1" });
     state = materialize(state, "2026-10");
     expect(state.tasks.find((task) => task.assignmentId === state.assignments[0]?.id)).toMatchObject({
-      taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 2, businessUnitCode: "paris_autos", taskParameters: { banco: "Banco Francés", cuenta: "Cuenta principal" }, companyId: "c1",
+      taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 3, businessUnitCode: "paris_autos", taskParameters: { banco: "Banco Francés", cuenta: "Cuenta principal" }, companyId: "c1",
     });
     persist(state, true);
     expect(load(true).tasks.find((task) => task.assignmentId === state.assignments[0]?.id)).toMatchObject({
@@ -269,7 +269,7 @@ describe("propuestas de tareas habituales del laboratorio", () => {
     const employee = state.profiles.find((profile) => profile.id === "e0")!;
     const manager = state.profiles.find((profile) => profile.id === "boss")!;
     state = submitHabitualTaskProposal(state, employee, proposalInput({
-      id: "paris-placeholder", process: "", taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 2,
+      id: "paris-placeholder", process: "", taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 3,
       businessUnitCode: "paris_autos", taskParameters: { banco: "Banco Francés", cuenta: "Cuenta principal" },
       description: "Selección del catálogo Grupo París. Jefatura confirmará el procedimiento y los controles antes de asignar trabajo.",
       steps: ["Confirmar procedimiento y controles con jefatura."],

@@ -95,7 +95,7 @@ export default function Onboarding({
   const starterSuggestions = laboratory && !remote && profile.role !== "jefe" && !isParisFirstLogin ? NEUTRAL_STARTER_SUGGESTIONS : [];
   const starterLegacySelection = starterCatalog.filter((entry) => draft.selectedTemplateIds.includes(entry.id));
   const parisTaskCatalog = isParisFirstLogin ? selectableParisTasks() : [];
-  const parisTasksUnderReview = isParisFirstLogin ? PARIS_TASK_CATALOG.filter((task) => task.state === "review") : [];
+  const parisTasksUnderReview = isParisFirstLogin ? PARIS_TASK_CATALOG.filter((task) => task.comparisonEligible === false) : [];
   const parisTaskDrafts = (draft.habitualTaskProposals || []).filter((proposal) => !!proposal.taskCode);
   const parisTaskDraftFor = (taskCode: string, businessUnitCode: string) => parisTaskDrafts.find((proposal) => proposal.taskCode === taskCode && proposal.businessUnitCode === businessUnitCode);
   const availableTemplates = [...state.templates.filter((template) => !isParisFirstLogin || !!template.taskCode), ...starterCatalog];
@@ -393,13 +393,13 @@ export default function Onboarding({
                 <>
               {parisTaskCatalog.length > 0 && <section className="paris-task-catalog" aria-labelledby="paris-task-catalog-heading">
                 <h3 id="paris-task-catalog-heading">Tareas estándar de Grupo París</h3>
-                <p>Elegí el mismo nombre oficial para cada proceso. La unidad de negocio se registra aparte; las tareas nuevas quedan pendientes de revisión de jefatura.</p>
+                <p>Elegí el nombre estándar y la unidad de negocio. Las opciones provisionales tienen código propio y quedan fuera de comparaciones entre unidades hasta confirmar su alcance.</p>
                 <label className="starter-search">Buscar tarea estándar
                   <input type="search" value={starterSearch} onChange={(event) => setStarterSearch(event.target.value)} placeholder="Ej.: conciliación bancaria" />
                 </label>
                 <div className="paris-task-catalog-list">
                   {parisTaskCatalog.filter((task) => !starterSearch.trim() || `${task.label} ${task.group} ${task.aliases.join(" ")}`.toLocaleLowerCase("es-AR").includes(starterSearch.trim().toLocaleLowerCase("es-AR"))).map((task) => <article className="paris-task-catalog-item" key={task.code}>
-                    <div><b>{task.label}</b><small>{task.kind === "operational" ? `Actividad · ${task.unit}` : "Entregable con controles"} · {task.parameters.join(" · ")}</small></div>
+                    <div><b>{task.label}{task.comparisonEligible === false && <small className="paris-task-provisional-badge"> · Provisional</small>}</b><small>{task.kind === "operational" ? `Actividad · ${task.unit}` : "Entregable con controles"} · {task.parameters.join(" · ")}{task.comparisonEligible === false ? " · Comparación entre unidades pendiente" : ""}</small></div>
                     <div className="paris-task-unit-actions">{(draft.selectedBusinessUnitCodes || []).map((unitCode) => {
                       const unit = PARIS_BUSINESS_UNITS.find((entry) => entry.code === unitCode)!;
                       const selected = parisTaskDraftFor(task.code, unitCode);
@@ -417,9 +417,9 @@ export default function Onboarding({
                 </div>
                 {parisTaskDrafts.length > 0 && <p className="paris-task-selection-count">{parisTaskDrafts.length} selección{parisTaskDrafts.length === 1 ? "" : "es"} estándar para revisión</p>}
                 {parisTasksUnderReview.length > 0 && <details className="paris-task-review-list">
-                  <summary>Tareas registradas que requieren definir su alcance ({parisTasksUnderReview.length})</summary>
-                  <p>Se conserva el nombre normalizado, pero no se puede seleccionar ni medir hasta confirmar qué incluye. Así no se mezcla con otra tarea por una abreviatura parecida.</p>
-                  <ul>{parisTasksUnderReview.filter((task) => !starterSearch.trim() || `${task.label} ${task.group} ${task.aliases.join(" ")}`.toLocaleLowerCase("es-AR").includes(starterSearch.trim().toLocaleLowerCase("es-AR"))).map((task) => <li key={task.code}><b>{task.label}</b><small>{task.group} · requiere aclaración</small></li>)}</ul>
+                  <summary>Opciones provisionales ({parisTasksUnderReview.length})</summary>
+                  <p>Se pueden elegir y registrar con código propio. Sus cantidades no se consideran comparables entre unidades hasta confirmar que el flujo y la unidad de medida sean equivalentes.</p>
+                  <ul>{parisTasksUnderReview.filter((task) => !starterSearch.trim() || `${task.label} ${task.group} ${task.aliases.join(" ")}`.toLocaleLowerCase("es-AR").includes(starterSearch.trim().toLocaleLowerCase("es-AR"))).map((task) => <li key={task.code}><b>{task.label}</b><small>{task.group} · comparación pendiente</small></li>)}</ul>
                 </details>}
               </section>}
               {!isParisFirstLogin && <div className="catalog-options">
