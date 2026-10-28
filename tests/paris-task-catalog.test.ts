@@ -91,7 +91,7 @@ describe("catálogo de tareas de Grupo París", () => {
       .filter((line) => /^\|\s*`[^`]+`\s*\|/.test(line))
       .map((line) => {
         const columns = line.split("|").map((column) => column.trim());
-        return { code: columns[1]?.replaceAll("`", ""), status: columns[5] };
+        return { code: columns[1]?.replaceAll("`", ""), label: columns[2], status: columns[5] };
       });
     const statusByCode = new Map(rows.map((row) => [row.code, row.status]));
 
@@ -102,6 +102,7 @@ describe("catálogo de tareas de Grupo París", () => {
       const status = statusByCode.get(task.code);
       expect(status, `falta ${task.code} en el borrador`).toBeDefined();
       expect(task.comparisonEligible !== false, task.code).toBe(status === "Confirmada");
+      expect(rows.find((row) => row.code === task.code)?.label, `nombre de ${task.code}`).toBe(task.label);
     }
   });
 

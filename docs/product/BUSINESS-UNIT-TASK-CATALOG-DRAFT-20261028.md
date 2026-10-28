@@ -91,7 +91,7 @@ una decisión funcional antes de habilitarlo como selección oficial.
 | `credit_cost_analysis` | Análisis de costo de créditos | Unidad, línea/producto, período | “PSA” se conserva como contexto literal hasta confirmar sigla. | Revisar PSA |
 | `coupon_cost_analysis` | Análisis de costo de cupones | Unidad, medio/procesador, período | No confundir con registración de liquidaciones o conciliación. | Confirmada |
 | `procedure_cost_analysis` | Análisis de costo de trámites | Unidad, tipo de trámite, período | Mantener distinto de análisis de créditos. | Confirmada |
-| `operations_analysis_mo4` | Análisis y resumen de operaciones MO4 | Unidad, período, origen del reporte | Conservar “MO4” como etiqueta a confirmar, no expandir. | Revisar MO4 |
+| `operations_analysis_mo4` | Análisis y resumen de operaciones | Unidad, período, reporte MO4 | Conservar “MO4” como atributo del reporte a confirmar; no mezclarlo con el nombre canónico. | Revisar MO4 |
 | `pymes_bonus_analysis` | Análisis de Bonis PYMES | Unidad, período, criterio de cálculo | “Bonis” puede ser nombre de sistema, beneficio o error. No corregir por inferencia. | Revisar término |
 | `monthly_parts_metrics` | Cierre mensual de indicadores de repuestos | Unidad, período | Separado del cierre de indicadores de taller. | Confirmada |
 | `monthly_workshop_metrics` | Cierre mensual de indicadores de taller | Unidad, período | Separado del cierre de indicadores de repuestos. | Confirmada |
@@ -103,17 +103,17 @@ una decisión funcional antes de habilitarlo como selección oficial.
 | `vehicle_collection` | Cobro de operaciones de vehículos | Unidad, tipo de operación, medio, fecha | “VN, VO, PDA” conservados como contexto; confirmar expansiones y si PDA es unidad/proceso. | Revisar siglas |
 | `savings_plan_installment_collection` | Cobro de cuotas de planes de ahorro | Unidad, plan, cuota, período | No mezclar con carga de primeras cuotas. | Confirmada |
 | `vehicle_exit_collection` | Cobro asociado a la salida diaria de vehículos | Unidad, vehículo/operación, fecha | Confirmar si es caja, liberación o sólo control de cobranza. | Revisar alcance |
-| `coupon_settlement` | Registro de liquidación de cupones de Mercado Pago | Unidad, procesador, lote, fecha | “Cancelación de cupones” necesita aclarar si significa liquidación, cierre o anulación. | Revisar significado |
+| `coupon_settlement` | Registro de liquidación de cupones | Unidad, procesador, lote, fecha | Mercado Pago es procesador. “Cancelación de cupones” necesita aclarar si significa liquidación, cierre o anulación. | Revisar significado |
 | `customer_refund_record` | Registro de devoluciones a clientes en banco y sistema | Unidad, cliente, movimiento bancario, sistema/operación, fecha | “Quiter” es posible nombre de sistema; confirmar escritura, flujo y si es carga o conciliación. | Revisar Quiter y alcance |
 | `customer_receipt_application` | Aplicación de cobros de seguros a facturas pendientes | Unidad, aseguradora, factura, período | No es conciliación bancaria ni recepción de cobros. | Confirmada |
 | `credit_operation_load` | Carga de operaciones de créditos prendarios | Unidad, financiera, operación, vehículo | Distinta de carga de liquidaciones de crédito. | Confirmada |
 | `credit_settlement_load` | Carga de liquidaciones de créditos prendarios | Unidad, financiera (GPAT/BNA), operación, período | GPAT/BNA son parámetros de contraparte, no unidades de negocio. | Confirmada |
-| `savings_plan_first_installment_load` | Carga de primeras cuotas de planes | Unidad, plan, cuota, período | No es cobro de cuota. | Confirmada |
+| `savings_plan_first_installment_load` | Carga de primeras cuotas de planes de ahorro | Unidad, plan, cuota, período | No es cobro de cuota. | Confirmada |
 | `vehicle_model_change_payment` | Gestión del cambio de modelo y su pago | Unidad, operación, vehículo, fecha | Descomponer en dos códigos si gestión y pago son tareas separadas. | Revisar división |
 | `vehicle_transfers_pda` | Registro de transferencias de VN, VO y PDA | Unidad, tipo de operación, medio, período | No expandir siglas; mantener separada de las transferencias de pago a proveedores. | Revisar siglas |
 | `municipal_fees_accrual` | Registración de cánones municipales acumulados | Unidad, municipio, período | El original puede referirse a cálculo, devengamiento, pago o asiento. | Revisar significado |
 | `service_register_update` | Actualización del tablero de servicios de internet | Unidad, proveedor, servicio/período | “Completar tablero” necesita confirmar si actualiza, concilia o controla facturas. | Revisar alcance |
-| `supplies_purchase_control` | Compra y control de insumos informáticos y de limpieza | Unidad, categoría, proveedor, período | Mantener informáticos y limpieza como categorías del mismo proceso sólo si comparten flujo. | Revisar agrupación |
+| `supplies_purchase_control` | Compra y control de insumos | Unidad, categoría, proveedor, período | Informáticos y limpieza son categorías; confirmar que comparten flujo antes de compararlas entre sí. | Revisar agrupación |
 | `cheque_operation_load` | Carga de cheques en operación | Unidad, operación, tipo de cheque, sistema | No asumir que “cheqs” son eCheq ni expandir “operación”. | Revisar término |
 | `team_followup_review` | Revisión de seguimiento del equipo | Unidad/equipo, período | “Checkpoint supervisión” puede ser revisión periódica, no tarea operativa. | Revisar significado |
 | `gm_collection_register` | Registro de cobros de GM | Unidad, entidad, medio, período | Confirmar GM y distinguir de cualquier integración/carga. | Revisar sigla |
