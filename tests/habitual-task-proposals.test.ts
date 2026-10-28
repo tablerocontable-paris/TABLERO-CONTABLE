@@ -30,6 +30,26 @@ const proposalInput = (overrides: Partial<Parameters<typeof submitHabitualTaskPr
 beforeEach(() => localStorage.clear());
 
 describe("propuestas de tareas habituales del laboratorio", () => {
+  it("no activa propuestas históricas sin código estándar", () => {
+    let state = seed();
+    const employee = state.profiles.find((profile) => profile.id === "e0")!;
+    const manager = state.profiles.find((profile) => profile.id === "boss")!;
+    state = submitHabitualTaskProposal(state, employee, proposalInput(), fixedNow);
+    const paris = structuredClone(state.habitualTaskProposals![0]!);
+    paris.id = "proposal-paris";
+    paris.taskCode = "gpar_bank_reconciliation";
+    paris.taskCatalogVersion = 5;
+    paris.businessUnitCode = "paris_autos";
+    paris.submissions = [{ ...paris.submissions[0]!, taskCode: paris.taskCode, taskCatalogVersion: 5, businessUnitCode: "paris_autos" }];
+    const mixed = { ...state, habitualTaskProposals: [...(state.habitualTaskProposals || []), paris] };
+    const before = mixed.habitualTaskProposals;
+    expect(() => approveHabitualTaskProposals(mixed, manager, ["proposal-a", "proposal-paris"], {
+      kind: "create", template: { title: "Conciliación libre", sector: "Tesorería", description: "Revisar movimientos y dejar diferencias documentadas.", kind: "resultado", unit: "", weight: 1, target: 0, steps: ["Comparar movimientos"] },
+    }, currentMonth(), fixedNow)).toThrow(/mezcla tipos|no está vinculada a una tarea del catálogo Grupo París/i);
+    expect(mixed.habitualTaskProposals).toEqual(before);
+    expect(mixed.assignments).toEqual(state.assignments);
+  });
+
   it("conserva propuestas pendientes y sólo agrupa coincidencias como sugerencias", () => {
     let state = seed();
     state.assignments = [];

@@ -35,6 +35,7 @@ function ProposalGroupCard({ group, suggestedMatch, state, actor, month, commit,
   group: HabitualTaskProposal[]; suggestedMatch: boolean; state: State; actor: Profile; month: string; commit: Commit; notify: Notify;
 }) {
   const first = group[0];
+  const requiresCanonicalSelection = group.some((proposal) => (proposal.taskCode && (proposal.submissions || []).some((submission) => !submission.taskCode)) || (!proposal.taskCode && (proposal.businessUnitCode || proposal.taskCatalogVersion !== undefined || (proposal.submissions || []).some((submission) => submission.businessUnitCode || submission.taskCatalogVersion !== undefined))));
   const [templateId, setTemplateId] = useState("");
   const [standard, setStandard] = useState({
     title: first.title,
@@ -73,6 +74,7 @@ function ProposalGroupCard({ group, suggestedMatch, state, actor, month, commit,
         <small>{first.kind === "operativa" ? `Actividad · ${first.unit}` : "Entregable con controles"}</small>
       </div>
       {suggestedMatch && <p className="habitual-proposal-hint">La coincidencia sólo orienta la revisión. No se fusionaron nombres, empresas ni asignaciones.</p>}
+      {requiresCanonicalSelection && <p className="notice-banner" role="note">Esta propuesta mezcla historial con y sin clasificación estándar. No se puede activar ni incorporar al catálogo. Conservá el historial y pedí que se revise antes de generar trabajo.</p>}
       <div className="habitual-proposal-members">
         {group.map((proposal) => (
           <section className="habitual-proposal-member" key={proposal.id}>
@@ -108,6 +110,7 @@ function ProposalGroupCard({ group, suggestedMatch, state, actor, month, commit,
           </section>
         ))}
       </div>
+      {!requiresCanonicalSelection && <>
       <div className="habitual-proposal-decision">
         <label>
           Vincular a un estándar existente
@@ -138,6 +141,7 @@ function ProposalGroupCard({ group, suggestedMatch, state, actor, month, commit,
           } catch (error) { notify((error as Error).message); }
         }}>Crear estándar y activar {group.length} {group.length === 1 ? "asignación" : "asignaciones"}</button>
       </details>
+      </>}
     </article>
   );
 }

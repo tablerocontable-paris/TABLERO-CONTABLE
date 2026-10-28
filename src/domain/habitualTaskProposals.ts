@@ -256,6 +256,9 @@ export function approveHabitualTaskProposals(
   if (proposals.some((row) => !row || row.status !== "pending")) throw Error("Todas las propuestas deben seguir pendientes.");
   const selected = proposals as HabitualTaskProposal[];
   requireManager(state, actor, selected);
+  if (selected.some((proposal) => (proposal.taskCode && (proposal.submissions || []).some((submission) => !submission.taskCode)) || (!proposal.taskCode && (proposal.businessUnitCode || proposal.taskCatalogVersion !== undefined ||
+      (proposal.submissions || []).some((submission) => submission.businessUnitCode || submission.taskCatalogVersion !== undefined)))))
+    throw Error("La propuesta todavía no está vinculada a una tarea del catálogo Grupo París. Conservá la revisión histórica y pedí que se vuelva a seleccionar desde el catálogo antes de activarla.");
   if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) throw Error("El período de asignación no es válido.");
   if (new Set(selected.map((row) => row.kind)).size !== 1 ||
       new Set(selected.map((row) => row.kind === "operativa" ? normalizeWords(row.unit) : "")).size !== 1 ||

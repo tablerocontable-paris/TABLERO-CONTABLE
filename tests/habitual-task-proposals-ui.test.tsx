@@ -8,6 +8,7 @@ import { submitHabitualTaskProposal } from "../src/domain/habitualTaskProposals"
 import { HabitualTaskProposalInbox } from "../src/components/HabitualTaskProposals";
 import NotificationCenter from "../src/components/NotificationCenter";
 import { pendingParameterizations } from "../src/domain/parameterization";
+import { PARIS_TASK_CATALOG_VERSION, selectableParisTasks } from "../src/domain/parisTaskCatalog";
 
 beforeEach(() => {
   HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
@@ -40,6 +41,18 @@ function pendingProposals() {
 }
 
 describe("interfaz de propuestas de tareas habituales", () => {
+  it("oculta controles de activación cuando la revisión actual está mezclada con historial sin código", () => {
+    const base = pendingProposals();
+    const original = base.habitualTaskProposals![0]!;
+    const paris = { ...original, taskCode: "gpar_bank_reconciliation", taskCatalogVersion: PARIS_TASK_CATALOG_VERSION, businessUnitCode: "paris_autos" as const, submissions: [{ ...original.submissions[0]!, revision: 1 }, { ...original.submissions[0]!, revision: 2, taskCode: "gpar_bank_reconciliation", taskCatalogVersion: PARIS_TASK_CATALOG_VERSION, businessUnitCode: "paris_autos" as const }], revision: 2 };
+    const state = { ...base, habitualTaskProposals: [paris] };
+    render(<HabitualTaskProposalInbox state={state} actor={state.profiles.find((profile) => profile.id === "boss")!} month={currentMonth()} commit={() => true} notify={() => {}} />);
+    expect(screen.getByText(/mezcla historial con y sin clasificación estándar/i)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /Vincular y activar/ })).toBeNull();
+    expect(screen.queryByText(/Crear un estándar para/)).toBeNull();
+    expect(screen.getAllByText(/Solicitar correcciones/).length).toBeGreaterThan(0);
+  });
+
   it("muestra coincidencias como sugerencia y exige que jefatura vincule el estándar", () => {
     const state = pendingProposals();
     const manager = state.profiles.find((profile) => profile.id === "boss")!;

@@ -7,7 +7,7 @@ traslado del proyecto.
 
 - Repositorio privado de GitHub: [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocontable-paris/TABLERO-CONTABLE)
 - Rama activa: `main`; incluye el catálogo v5 y la normalización del alta
-  puntual (commit `d1fc8a9`). Para
+  puntual (último commit publicado `5d309c8`). Para
   actualizar una copia existente, ejecutá `git pull --ff-only origin main`.
   El Site privado sigue en v104; el último commit aún no fue desplegado allí.
   Consultá `docs/PROJECT-STATUS.md` y
@@ -86,9 +86,13 @@ npm ci
   automáticamente.
 - El catálogo v5 pasó TypeScript, suite completa (870/870 en 87 archivos),
   build del cliente y Worker y empaquetado Sites. El commit `d1fc8a9` además
-  exige tareas/unidades canónicas en altas puntuales del laboratorio; su corte
-  pasó 871/871 pruebas, TypeScript, build del cliente/Worker, paquete Sites y
-  hook 223/223. GitHub Actions #139 valida ese SHA.
+  exige tareas/unidades canónicas en altas puntuales del laboratorio; el corte
+  publicado `5d309c8` pasó 871/871 pruebas, TypeScript, build cliente/Worker,
+  paquete Sites y hook 223/223. La revisión local posterior añadió controles
+  al onboarding y propuestas con historial de clasificación mezclada: suite
+  873/873, rutas relevantes seriales 92/92, TypeScript, builds y paquete Sites
+  aprobados. Esa revisión todavía no tiene commit ni validación de GitHub
+  Actions; `gh` no está disponible en la PC del trabajo.
   La paridad entre
   el catálogo y la documentación pasa 55/55. GitHub confirmó el push directo a
   `main`, sin PR; GitHub Actions #135 pasó para el commit funcional. El mismo Site privado

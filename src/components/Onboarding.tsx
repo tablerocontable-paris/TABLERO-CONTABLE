@@ -393,6 +393,7 @@ export default function Onboarding({
                 <>
               {parisTaskCatalog.length > 0 && <section className="paris-task-catalog" aria-labelledby="paris-task-catalog-heading">
                 <h3 id="paris-task-catalog-heading">Tareas estándar de Grupo París</h3>
+                {hasLegacyOnboardingSelections && <p className="notice-banner" role="note">Este borrador conserva selecciones de una versión anterior. No se convertirán en tareas nuevas; elegí las tareas del catálogo y su unidad de negocio. Las selecciones anteriores permanecen guardadas como historial del borrador.</p>}
                 <p>Elegí el nombre estándar y la unidad de negocio. Las {parisTasksUnderReview.length} opciones provisionales están marcadas en la lista y quedan fuera de comparaciones entre unidades hasta confirmar su alcance.</p>
                 <label className="starter-search">Buscar tarea estándar
                   <input type="search" value={starterSearch} onChange={(event) => setStarterSearch(event.target.value)} placeholder="Ej.: conciliación bancaria" />

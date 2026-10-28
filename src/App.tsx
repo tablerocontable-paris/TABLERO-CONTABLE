@@ -842,6 +842,15 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
     try {
       if (parisOnboarding && !(draft.selectedBusinessUnitCodes?.length || 0))
         throw Error("Elegí al menos una unidad de negocio antes de confirmar tus tareas.");
+      if (parisOnboarding && !(draft.version < 3 && hasLegacyOnboardingSelections)) {
+        const canonicalSelections = (draft.habitualTaskProposals || []).filter((proposal) => !!proposal.taskCode);
+        if (!canonicalSelections.length)
+          throw Error("Elegí al menos una tarea del catálogo Grupo París para preparar el tablero.");
+        if (canonicalSelections.some((proposal) => !proposal.businessUnitCode ||
+            !(draft.selectedBusinessUnitCodes || []).includes(proposal.businessUnitCode) ||
+            !proposal.companyIds.some((companyId) => draft.selectedCompanyIds.includes(companyId))))
+          throw Error("Cada tarea estándar necesita una unidad y al menos una empresa seleccionadas.");
+      }
       if (preparesPersonalTasks) {
         const effectiveCompanies = new Map<string, Set<string>>();
         const addEffectiveCompanies = (key: string, companyIds: string[]) => {

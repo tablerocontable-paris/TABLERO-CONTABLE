@@ -1,6 +1,6 @@
 # Estado vigente de ejecución — 28/10/2026
 
-## Alta puntual con identidad canónica — publicada en GitHub
+## Alta puntual con identidad canónica — publicada en GitHub; revisión posterior local
 
 Commit `d1fc8a9` endurece “Nueva tarea” en el laboratorio: sólo permite elegir
 las 55 tareas y siete unidades de negocio del catálogo París, toma el nombre de
@@ -17,13 +17,16 @@ mientras #139 (`40742037924`) quedó cancelado por el corte posterior. El Site
 existente continúa en v104, por lo que la corrección todavía no está visible
 allí.
 
-La auditoría de creación confirma el cierre del alta ordinaria. Hay propuestas
-históricas y procesos libres sin código que requieren definición de vínculo
-canónico antes de permitir su aprobación como trabajo nuevo; no reclasificar
-ni renombrar datos pasados automáticamente. La corrección del formulario
-(tipo, checklist y unidad derivados del catálogo) pasó 871/871 pruebas,
-TypeScript, build cliente, Worker y paquete Sites localmente; queda lista para
-publicarse en GitHub, sin desplegar el Site.
+La revisión local agregó validación al finalizar onboarding nuevo y evita
+activar propuestas donde una revisión actual codificada como París conserva
+versiones anteriores sin código. La bandeja mantiene visible el historial y
+oculta controles de activación en esos casos; neutral puro sigue su flujo. Los
+borradores anteriores no se renombran ni reclasifican. Validación local actual:
+873/873 suite, TypeScript, build cliente/Worker, paquete Sites y pruebas
+seriales de rutas tocadas 92/92. El código nuevo aún no tiene commit ni
+verificación GitHub Actions; no se desplegó al Site, que sigue v104. Pendiente:
+publicar directo en main, confirmar Actions y actualizar el paquete/estado de
+traslado con el SHA resultante.
 
 ## Normalización Grupo París — catálogo v5 desplegado
 

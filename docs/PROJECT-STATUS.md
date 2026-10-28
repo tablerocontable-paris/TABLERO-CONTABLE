@@ -11,23 +11,28 @@ mantienen el contexto y vínculo de origen; el formulario operativo fuera del
 laboratorio no cambia. Las asignaciones puntuales existentes e históricas no se
 reclasifican.
 
-Validación de este cambio: **871/871 pruebas en 87 archivos**, TypeScript,
-build cliente, build Worker, paquete Sites y hook de commit **223/223**. Commit
-`d1fc8a9` está publicado directamente en GitHub `main`, incluido en el corte
-documental `deb4b9e`; Actions #140 (`40742326097`) terminó en éxito para
-`deb4b9e`. Actions #139 (`40742037924`) quedó cancelado al llegar el corte
-posterior. Este cambio aún no se desplegó al Site, que permanece en v104. No
-modifica `/api`, Auth ni SQL001–016.
+Validación del alta puntual en el corte `5d309c8`: **871/871 pruebas en 87
+archivos**, TypeScript, build cliente/Worker, paquete Sites y hook 223/223.
+En la revisión siguiente se agregaron controles al finalizar borradores de
+onboarding y al aprobar propuestas con historial que mezcla una revisión
+París codificada con otra sin código. Esa protección mantiene visibles las
+propuestas, pero oculta la activación hasta revisión y valida también en el
+dominio. Corte local actual: suite **873/873 en 87 archivos**, TypeScript,
+build cliente/Worker y paquete Sites aprobados; pruebas seriales de las rutas
+tocadas **92/92**. El build conserva avisos de Zod y chunk principal de ~659
+kB. Estos cambios están listos localmente para publicarse directamente en
+GitHub `main`; Actions aún no se consultó desde esta PC porque no está
+instalado `gh`. El Site sigue en v104; no se desplegó. No modifica `/api`, Auth
+ni SQL001–016.
 
 La auditoría de rutas confirma que Nueva tarea y las conversiones de pedidos y
-anotaciones usan el catálogo canónico. Quedan propuestas históricas y procesos
-libres sin código; no se deben convertir ni renombrar automáticamente. Antes
-de aprobarlos como trabajo nuevo hay que definir el vínculo explícito a una
-tarea canónica y conservar la revisión histórica. La presentación del
-formulario ahora deriva tipo, checklist y unidad del catálogo; una regresión
-cubre asignaciones canónicas de resultado y operativas. La suite completa
-871/871, TypeScript, build cliente, Worker y paquete Sites pasaron localmente;
-la corrección quedó lista para publicar en GitHub. No se desplegó al Site.
+anotaciones usan el catálogo canónico. Las propuestas puramente neutrales
+continúan con su flujo de revisión; las que tienen metadatos París incompletos
+o historial París/no clasificado no pueden activarse como trabajo nuevo hasta
+resolver la clasificación. Los borradores anteriores se conservan, no se
+renombran ni se reclasifican. La presentación del formulario deriva tipo,
+checklist y unidad del catálogo. El cambio local actual todavía no tiene commit
+ni despliegue; la versión publicada del Site permanece v104.
 
 ## Catálogo Grupo París — normalización inicial
 
