@@ -1,18 +1,23 @@
 # Continuar Grupo París desde otra PC
 
-Actualizado: 27/10/2026. La fuente de código e historia es el repositorio
+Actualizado: 28/10/2026. La fuente de código e historia es el repositorio
 privado [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocontable-paris/TABLERO-CONTABLE), rama `main`.
 
 ## Estado comprobado
 
-- El último cambio de código es `9b54a4625f56e07fedbfba82d68696204f9a0e5d`;
-  el checkpoint documental `e9fae71f3c1fda7414f0ad103c99f60275670c76` pasó CI.
+- El último corte es `ba26567` (`feat: add Paris business task catalog`),
+  precedido por el catálogo normalizado `740804c`. Ambos están directamente en
+  `main`, autor Tablero Contable, sin Pull Request. El commit de código pasó
+  prueba focal 3/3, TypeScript y pre-commit 214/214.
 - GitHub Actions #119 (`40558575748`) pasó instalación, pruebas completas,
   build y empaquetado Sites. [Ver ejecución](https://github.com/tablerocontable-paris/TABLERO-CONTABLE/actions/runs/40557105221).
 - El Site privado existente está publicado como v99. GitHub Actions no lo
   despliega. El acceso personalizado no se amplió.
 - La clasificación neutral de 26 conceptos se conserva en el laboratorio y en
-  el estimador. El onboarding del primer login autenticado aún no está integrado.
+  el estimador. El nuevo catálogo de Grupo París contiene siete unidades de
+  negocio, tareas canónicas, códigos y alias de búsqueda; las filas ambiguas no
+  se ofrecen como seleccionables. El catálogo todavía no está conectado a la
+  pantalla de primer ingreso ni se guarda en tareas/asignaciones.
 - Sol aceptó el diseño documental del onboarding (SHA-256
   `E65E1B467525B8AE4769E2F10EB33E238043078ED9D1E635468D0ADBD7C93D68`); la
   implementación y migración 017 siguen pendientes.
@@ -78,3 +83,8 @@ por chat, GitHub o este instructivo.
 Para retomar el trabajo, leer primero `AGENTS.md`,
 `docs/PROJECT-STATUS.md` y `docs/EXECUTION-NEXT.md`. No usar bundles/ZIPs
 anteriores como fuente de código: clonar `main` desde GitHub.
+
+Próximo trabajo concreto: integrar `src/domain/parisTaskCatalog.ts` al
+onboarding y persistir `businessUnitCode` + `taskCode` versionados en las
+propuestas, aprobaciones, asignaciones y tareas, sin alterar `companyId` ni los
+registros históricos. Revisar el contrato remoto antes de migrar Supabase.

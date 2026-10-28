@@ -1,4 +1,22 @@
-# Continuidad portable del proyecto — 27/10/2026
+# Continuidad portable del proyecto — 28/10/2026
+
+## Actualización 28/10 — catálogo Grupo París
+
+El commit `740804c` documenta las unidades y la normalización inicial; el
+commit `ba26567` incorpora el catálogo reutilizable
+`src/domain/parisTaskCatalog.ts` y `tests/paris-task-catalog.test.ts`. Se
+definieron siete códigos de unidad de negocio y tareas canónicas con códigos
+estables, alias de búsqueda exacta y estado `selectable`/`review`. Las capturas
+son parciales y no sirven para calcular volúmenes. La prueba focal aprobó 3/3,
+TypeScript terminó sin errores y el hook de commit aprobó 214/214 pruebas. Estos
+commits se publicaron directamente en `main` bajo Tablero Contable.
+
+El catálogo aún no está integrado en la UI de primer ingreso ni en la
+persistencia de propuestas, asignaciones y tareas. El próximo paso de código es
+conectar la selección de unidad y tarea y propagar ambos códigos/versiones por
+el flujo local, con compatibilidad histórica. La migración Supabase requiere
+revisión del contrato y una PC con CLI disponible; SQL001–016 permanecen
+intactos. Instructivo para otra PC: `outputs/LEEME-PC-PERSONAL.md`.
 
 ## Corte de continuidad más reciente — verificado 27/10/2026
 
