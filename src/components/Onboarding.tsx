@@ -393,7 +393,7 @@ export default function Onboarding({
                 <>
               {parisTaskCatalog.length > 0 && <section className="paris-task-catalog" aria-labelledby="paris-task-catalog-heading">
                 <h3 id="paris-task-catalog-heading">Tareas estándar de Grupo París</h3>
-                <p>Elegí el nombre estándar y la unidad de negocio. Las opciones provisionales tienen código propio y quedan fuera de comparaciones entre unidades hasta confirmar su alcance.</p>
+                <p>Elegí el nombre estándar y la unidad de negocio. Las {parisTasksUnderReview.length} opciones provisionales están marcadas en la lista y quedan fuera de comparaciones entre unidades hasta confirmar su alcance.</p>
                 <label className="starter-search">Buscar tarea estándar
                   <input type="search" value={starterSearch} onChange={(event) => setStarterSearch(event.target.value)} placeholder="Ej.: conciliación bancaria" />
                 </label>
@@ -416,11 +416,6 @@ export default function Onboarding({
                   </article>)}
                 </div>
                 {parisTaskDrafts.length > 0 && <p className="paris-task-selection-count">{parisTaskDrafts.length} selección{parisTaskDrafts.length === 1 ? "" : "es"} estándar para revisión</p>}
-                {parisTasksUnderReview.length > 0 && <details className="paris-task-review-list">
-                  <summary>Opciones provisionales ({parisTasksUnderReview.length})</summary>
-                  <p>Se pueden elegir y registrar con código propio. Sus cantidades no se consideran comparables entre unidades hasta confirmar que el flujo y la unidad de medida sean equivalentes.</p>
-                  <ul>{parisTasksUnderReview.filter((task) => !starterSearch.trim() || `${task.label} ${task.group} ${task.aliases.join(" ")}`.toLocaleLowerCase("es-AR").includes(starterSearch.trim().toLocaleLowerCase("es-AR"))).map((task) => <li key={task.code}><b>{task.label}</b><small>{task.group} · comparación pendiente</small></li>)}</ul>
-                </details>}
               </section>}
               {!isParisFirstLogin && <div className="catalog-options">
                 {[...state.templates]

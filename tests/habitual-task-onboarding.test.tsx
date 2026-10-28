@@ -71,14 +71,20 @@ describe("inducción de tareas habituales", () => {
       return <Onboarding state={state} month="2026-10" profile={state.profiles.find((profile) => profile.id === "e0")!} draft={current} update={(next) => { saved = next; setCurrent(next); }} finish={() => {}} pause={() => {}} laboratory />;
     }
     render(<Harness />);
+    expect(document.querySelectorAll(".paris-task-catalog-item")).toHaveLength(55);
+    expect(screen.getByText(/30 opciones provisionales están marcadas/i)).toBeTruthy();
+    expect(screen.queryByText(/Opciones provisionales \(30\)/i)).toBeNull();
+    fireEvent.change(screen.getByLabelText("Buscar tarea estándar"), { target: { value: "CONC BANC FRANC" } });
+    expect(document.querySelectorAll(".paris-task-catalog-item")).toHaveLength(1);
     const bankRow = Array.from(document.querySelectorAll(".paris-task-catalog-item"))
       .find((row) => row.textContent?.includes("Conciliación bancaria")) as HTMLElement;
+    expect(bankRow.textContent).toContain("Conciliación bancaria");
     fireEvent.click(within(bankRow).getByRole("button", { name: /PARIS AUTOS/ }));
     fireEvent.change(screen.getByLabelText("banco · obligatorio"), { target: { value: "Banco Francés" } });
     fireEvent.change(screen.getByLabelText("cuenta · obligatorio"), { target: { value: "Cuenta principal" } });
     expect(saved.habitualTaskProposals).toHaveLength(1);
     expect(saved.habitualTaskProposals?.[0]).toMatchObject({
-      taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 3, businessUnitCode: "paris_autos",
+      taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 4, businessUnitCode: "paris_autos",
       taskParameters: { banco: "Banco Francés", cuenta: "Cuenta principal" },
       title: "Conciliación bancaria", kind: "resultado",
     });
@@ -99,7 +105,7 @@ describe("inducción de tareas habituales", () => {
     expect(row.textContent).toContain("Provisional");
     fireEvent.click(within(row).getByRole("button", { name: /PARIS AUTOS/ }));
     expect(saved.habitualTaskProposals?.[0]).toMatchObject({
-      taskCode: "invoice_load_other", taskCatalogVersion: 3, businessUnitCode: "paris_autos",
+      taskCode: "invoice_load_other", taskCatalogVersion: 4, businessUnitCode: "paris_autos",
     });
     expect((screen.getByLabelText("tipo específico · obligatorio") as HTMLInputElement).required).toBe(true);
   });

@@ -51,7 +51,7 @@ confirmación.
   categoría de análisis ni como reemplazo del nombre canónico.
 - Un mismo código permite comparar el proceso entre unidades; la comparación
   debe conservar unidad, banco/marca/sucursal y período como dimensiones.
-- Todas las tareas observadas se pueden registrar desde el catálogo v3. Las que
+- Todas las tareas observadas se pueden registrar desde el catálogo v4. Las que
   tienen significado todavía no confirmado se marcan como provisionales, usan
   códigos separados y no participan en comparaciones entre unidades hasta que
   jefatura confirme que describen el mismo flujo y unidad de medida.
@@ -83,8 +83,8 @@ una decisión funcional antes de habilitarlo como selección oficial.
 | `supplier_payment_transfer` | Transferencias de pago a proveedores | Unidad, banco/cuenta, proveedor | Mantener separada de transferencia genérica si tiene controles propios. | Revisar separación |
 | `salary_data_load` | Carga de información de sueldos | Unidad, período, sistema | “Carga de sueldos” es distinta del asiento y del pago. | Confirmada |
 | `salary_bank_payment` | Pago de sueldos por banco | Unidad, banco/cuenta, período | No implica cargar recibos ni contabilizar asiento. | Confirmada |
-| `salary_accounting_entry` | Registración contable de sueldos | Unidad, período | “Asiento sueldos PA/PT” son parámetros de unidad. | Confirmada |
-| `vat_accounting_entry` | Registración contable de IVA | Unidad, período, tipo | “Asiento IVA DORAL/PA/PC/PT” comparte proceso con unidad como dimensión. | Confirmada |
+| `salary_accounting_entry` | Registración contable de sueldos | Período | “Asiento sueldos PA/PT” conserva la unidad sólo en `businessUnitCode`. | Confirmada |
+| `vat_accounting_entry` | Registración contable de IVA | Período, tipo | “Asiento IVA DORAL/PA/PC/PT” conserva la unidad sólo en `businessUnitCode`. | Confirmada |
 | `patent_debt_payment_entry` | Registración del pago de deuda de patentes | Unidad, jurisdicción, período | Separada de canon municipal hasta aclarar proceso. | Confirmada |
 | `pda_result_adjustment` | Ajuste de resultados PDA | Unidad, período, concepto de ajuste | Mantener PDA literal; no expandir sigla. | Revisar significado PDA |
 | `inventory_adjustment` | Ajustes de inventario | Unidad, sucursal, rubro/período | Confirmar si incluye recuento, análisis y asiento, o sólo registración del ajuste. | Revisar alcance |
@@ -150,19 +150,26 @@ unidades por deducción.
 
 ## Compatibilidad y alcance de implementación
 
-El catálogo Grupo París versión 3 ya está conectado en el laboratorio local:
+El catálogo Grupo París versión 4 ya está conectado en el laboratorio local:
 primer ingreso, propuestas, aprobación, asignaciones, tareas materializadas y
 analítica. La unidad (`businessUnitCode`) se conserva separada de la empresa
 legal (`companyId`); nombres y códigos no son editables por quien registra el
 trabajo. Banco y cuenta se solicitan aparte para conciliaciones. Las operativas
 se miden por movimientos sin cuotas artificiales.
 
-Las versiones 1 (50 tareas) y 2 (55 tareas) se conservan para leer propuestas y
-trabajo ya guardado. La versión 3 ofrece las 55 tareas en el primer ingreso;
-25 están confirmadas y 30 siguen provisionales, separadas por código y
-excluidas de comparaciones entre unidades. Las métricas conservan la versión y
-marcan las filas provisionales. Los datos históricos sin código no se clasifican
-por el título ni se reescriben.
+Las versiones 1 (50 tareas), 2 (55 tareas) y 3 (55 tareas) se conservan para
+leer propuestas y trabajo ya guardado. La versión 4 ofrece las 55 tareas en el
+primer ingreso; 25 están confirmadas y 30 siguen provisionales, separadas por
+código y excluidas de comparaciones entre unidades. V4 elimina el parámetro
+libre `unidad` de registración contable de sueldos e IVA porque la unidad ya se
+guarda en `businessUnitCode`; las versiones históricas mantienen ese campo para
+validar registros anteriores. Las métricas conservan la versión y marcan las
+filas provisionales. Los datos históricos sin código no se clasifican por el
+título ni se reescriben.
+
+V4 reconoce también `CONC BANC FRANC` como alias de búsqueda de Conciliación
+bancaria. El alias conduce a la misma tarjeta y al mismo código canónico; nunca
+se almacena como nombre de una tarea independiente.
 
 Este cambio cubre sólo el laboratorio privado con datos ficticios. No modifica
 SQL001–016, API operativa, Auth remoto ni el onboarding autenticado. La conexión
@@ -171,11 +178,11 @@ remoto independiente antes de habilitar cuentas reales.
 
 ## Próxima revisión funcional
 
-La versión 3 ofrece las 55 tareas observadas para registro: 25 confirmadas y 30
-provisionales. La versión 1 (50 tareas) y la versión 2 (55 tareas) se conservan
-para leer trabajo del laboratorio ya guardado. Los códigos provisionales pueden
-registrar trabajo, pero quedan marcados como no comparables entre unidades hasta
-que su alcance y unidad de medida se validen.
+La versión 4 ofrece las 55 tareas observadas para registro: 25 confirmadas y 30
+provisionales. Las versiones 1 (50 tareas), 2 (55 tareas) y 3 (55 tareas) se
+conservan para leer trabajo del laboratorio ya guardado. Los códigos
+provisionales pueden registrar trabajo, pero quedan marcados como no
+comparables entre unidades hasta que su alcance y unidad de medida se validen.
 
 La revisión funcional debe concentrarse sólo en los términos marcados `Revisar`:
 confirmar siglas PDA/PSA/MO4/VN/VO/GM, significado de “Bonis”, “cancelación de

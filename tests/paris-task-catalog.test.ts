@@ -5,8 +5,10 @@ import {
   PARIS_TASK_CATALOG,
   PARIS_TASK_CATALOG_V1,
   PARIS_TASK_CATALOG_V2,
+  PARIS_TASK_CATALOG_V3,
   PARIS_TASK_CATALOG_VERSION,
   getParisTask,
+  isParisTaskParameterSet,
   selectableParisTasks,
 } from "../src/domain/parisTaskCatalog";
 
@@ -21,15 +23,16 @@ describe("catálogo de tareas de Grupo París", () => {
 
   it("mantiene códigos únicos y no mezcla alias de procesos distintos", () => {
     expect(new Set(PARIS_TASK_CATALOG.map((task) => task.code)).size).toBe(PARIS_TASK_CATALOG.length);
-    expect(findParisTaskAlias("CONC BANC FRANC" )?.code).toBeUndefined();
+    expect(findParisTaskAlias("CONC BANC FRANC")?.code).toBe("gpar_bank_reconciliation");
+    expect(findParisTaskAlias("CONC BANC FRANC")?.label).toBe("Conciliación bancaria");
     expect(findParisTaskAlias("Conciliación Banco Francés – PA")?.label).toBe("Conciliación bancaria");
     expect(findParisTaskAlias("Carga de sueldos")?.code).not.toBe(findParisTaskAlias("Carga pago sueldos en banco")?.code);
     expect(findParisTaskAlias("Asiento sueldos PA")?.code).not.toBe(findParisTaskAlias("Carga de sueldos")?.code);
     expect(findParisTaskAlias("Coinciliacion Mercado Pago")?.code).not.toBe(findParisTaskAlias("Cancelacion cupones MP Paris Autos")?.code);
   });
 
-  it("versiona las tareas nuevas y conserva intacta la lectura del catálogo v1", () => {
-    expect(PARIS_TASK_CATALOG_VERSION).toBe(3);
+  it("versiona las tareas nuevas y conserva las lecturas históricas v1 a v3", () => {
+    expect(PARIS_TASK_CATALOG_VERSION).toBe(4);
     expect(PARIS_TASK_CATALOG_V2).toHaveLength(PARIS_TASK_CATALOG_V1.length + 5);
     expect(PARIS_TASK_CATALOG).toHaveLength(PARIS_TASK_CATALOG_V2.length);
     expect(getParisTask("procedure_follow_up", 1)).toBeUndefined();
@@ -38,6 +41,32 @@ describe("catálogo de tareas de Grupo París", () => {
     expect(getParisTask("gpar_bank_reconciliation", 1)?.label).toBe("Conciliación bancaria");
     expect(getParisTask("gpar_bank_reconciliation", 2)?.label).toBe("Conciliación bancaria");
     expect(getParisTask("gpar_bank_reconciliation", 3)?.label).toBe("Conciliación bancaria");
+    expect(PARIS_TASK_CATALOG_V3).toHaveLength(PARIS_TASK_CATALOG_V2.length);
+    expect(getParisTask("salary_accounting_entry", 3)?.parameters).toContain("unidad");
+    expect(getParisTask("vat_accounting_entry", 3)?.parameters).toContain("unidad");
+  });
+
+  it("usa businessUnitCode como dimensión única de unidad en v4", () => {
+    expect(getParisTask("salary_accounting_entry", 4)?.parameters).toEqual(["período"]);
+    expect(getParisTask("vat_accounting_entry", 4)?.parameters).toEqual(["período", "tipo"]);
+    expect(getParisTask("salary_accounting_entry", 4)?.parameters).not.toContain("unidad");
+    expect(getParisTask("vat_accounting_entry", 4)?.parameters).not.toContain("unidad");
+    expect(isParisTaskParameterSet("vat_accounting_entry", { unidad: "PARIS AUTOS" }, 4)).toBe(false);
+  });
+
+  it("mantiene códigos, nombres y estados entre v3 y v4, con aliases de búsqueda explícitos", () => {
+    for (const v3Task of PARIS_TASK_CATALOG_V3) {
+      const expectedV4 = {
+        ...v3Task,
+        aliases: v3Task.code === "gpar_bank_reconciliation"
+          ? [...v3Task.aliases, "conc banc franc"]
+          : v3Task.aliases,
+        parameters: v3Task.parameters.filter((parameter) =>
+          !(["salary_accounting_entry", "vat_accounting_entry"].includes(v3Task.code) && parameter === "unidad"),
+        ),
+      };
+      expect(getParisTask(v3Task.code, 4)).toEqual(expectedV4);
+    }
   });
 
   it("incluye las cuatro tareas visibles que faltaban con nombre canónico", () => {

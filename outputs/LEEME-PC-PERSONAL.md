@@ -6,7 +6,7 @@ traslado del proyecto.
 ## Fuente de código
 
 - Repositorio privado de GitHub: [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocontable-paris/TABLERO-CONTABLE)
-- Rama activa: `main`; último cambio funcional: `ecf4d35`.
+- Rama activa: `main`; el commit de catálogo v4 se anotará aquí al publicarlo.
 - El código no se entrega en ZIP: cloná el repositorio para conservar historia
   y poder traer los cambios futuros.
 - Los cambios acordados se publican directamente en `main`, sin Pull Request.
@@ -70,17 +70,19 @@ npm ci
 - La normalización inicial de Grupo París está en el onboarding del laboratorio.
   Las siete unidades están fijadas: PARIS AUTOS, DORAL, PARIS CARS, PARIS TRAC,
   MOTOR, FIDEICOMISO DESARROLLO y POSTVENTA.
-- El catálogo v3 ofrece las 55 tareas observadas con nombres canónicos y códigos
+- El catálogo v4 ofrece las 55 tareas observadas con nombres canónicos y códigos
   versionados. Veinticinco son comparables; treinta son provisionales y se
   pueden elegir/registrar con código propio, pero no se comparan entre unidades
   hasta confirmar su alcance. “Carga de otras facturas” exige indicar el
   subtipo. Los alias ayudan a encontrar la tarea, pero no crean nombres nuevos.
-- Conciliación bancaria usa un nombre común; banco, cuenta y unidad se guardan
+- Conciliación bancaria usa un nombre común; `CONC BANC FRANC` es un alias de
+  búsqueda que conduce a esa tarea canónica. Banco, cuenta y unidad se guardan
   como campos separados. Los registros históricos sin código no se clasifican
   automáticamente.
-- El commit `ecf4d35` pasó TypeScript, build del cliente y Worker, empaquetado
-  Sites, hook (223/223) y suite completa (865/865 en 87 archivos). El mismo Site
-  privado está actualizado a v102 desde el commit de fuente Sites `4e795dd`.
+- La validación local v4 pasó TypeScript, suite completa (867/867 en 87
+  archivos), build del cliente y Worker, empaquetado Sites y revisión
+  independiente. El hook, CI, commit y publicación se anotarán aquí al
+  concluir. El mismo Site privado está en v102 hasta esa publicación.
   GitHub y Sites son repositorios separados: los pushes a GitHub no despliegan
   el Site automáticamente.
 - El Site conserva acceso personalizado al propietario y cero visitantes

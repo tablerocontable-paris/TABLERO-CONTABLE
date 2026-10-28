@@ -1,6 +1,6 @@
 /** Organization-specific selection catalog. This does not replace neutral v2. */
-export const PARIS_TASK_CATALOG_VERSION = 3 as const;
-export type ParisTaskCatalogVersion = 1 | 2 | typeof PARIS_TASK_CATALOG_VERSION;
+export const PARIS_TASK_CATALOG_VERSION = 4 as const;
+export type ParisTaskCatalogVersion = 1 | 2 | 3 | typeof PARIS_TASK_CATALOG_VERSION;
 
 export const PARIS_BUSINESS_UNITS = [
   { code: "paris_autos", label: "PARIS AUTOS" },
@@ -31,8 +31,8 @@ export interface ParisTaskDefinition {
 
 /**
  * Canonical task names observed in the supplied screenshots. Parameters such
- * as bank, branch, brand and business unit must not be appended to the label.
- * Ambiguous rows stay out of default selection until their scope is confirmed.
+ * as bank, branch and brand must not be appended to the label. Business unit
+ * is represented by businessUnitCode, never duplicated as a free-text field.
  */
 /** Frozen version 1 snapshot. Keep it intact so saved lab work remains readable. */
 export const PARIS_TASK_CATALOG_V1: readonly ParisTaskDefinition[] = [
@@ -100,16 +100,28 @@ export const PARIS_TASK_CATALOG_V2: readonly ParisTaskDefinition[] = [
   { code: "vehicle_cash_collection", label: "Registro de cobros en caja de operaciones de vehículos", group: "Tesorería", kind: "operational", unit: "cobros", parameters: ["tipo de operación", "sucursal o caja", "medio", "fecha"], aliases: ["cobro en caja vn vo pda pv"], state: "review" },
 ];
 
-/** Version 3 makes every observed task recordable without merging uncertain workflows. */
-export const PARIS_TASK_CATALOG: readonly ParisTaskDefinition[] = PARIS_TASK_CATALOG_V2.map((task) => ({
+/** Frozen v3 snapshot. It preserves historical parameters exactly as recorded. */
+export const PARIS_TASK_CATALOG_V3: readonly ParisTaskDefinition[] = PARIS_TASK_CATALOG_V2.map((task) => ({
   ...task,
   state: "selectable" as const,
   comparisonEligible: task.state === "selectable",
 }));
 
+/** Version 4 removes unit-of-business text duplicated by businessUnitCode. */
+export const PARIS_TASK_CATALOG: readonly ParisTaskDefinition[] = PARIS_TASK_CATALOG_V3.map((task) => ({
+  ...task,
+  aliases: task.code === "gpar_bank_reconciliation"
+    ? [...task.aliases, "conc banc franc"]
+    : task.aliases,
+  parameters: task.parameters.filter((parameter) =>
+    !(["salary_accounting_entry", "vat_accounting_entry"].includes(task.code) && parameter === "unidad"),
+  ),
+}));
+
 const catalogsByVersion = new Map<ParisTaskCatalogVersion, readonly ParisTaskDefinition[]>([
   [1, PARIS_TASK_CATALOG_V1],
   [2, PARIS_TASK_CATALOG_V2],
+  [3, PARIS_TASK_CATALOG_V3],
   [PARIS_TASK_CATALOG_VERSION, PARIS_TASK_CATALOG],
 ]);
 

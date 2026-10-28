@@ -6,10 +6,11 @@ PC o aplicación; la documentación anterior de este archivo quedó reemplazada.
 ## Fuentes vigentes
 
 - Repositorio privado: [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocontable-paris/TABLERO-CONTABLE), rama `main`.
-- Último cambio funcional: `ecf4d3542d460bc684590d0e7f699f65c9212dfb`, autor
-  `tablerocontable-paris`; commit directo, sin PR. GitHub confirmó repositorio
-  privado, rama por defecto `main` y permisos de administración/escritura para
-  la cuenta conectada.
+- Catálogo v4 está validado localmente; se actualizará el SHA aquí después del
+  commit directo a `main`. El último cambio funcional publicado hasta entonces
+  es `ecf4d3542d460bc684590d0e7f699f65c9212dfb`, autor
+  `tablerocontable-paris`, sin PR. GitHub confirmó el repositorio privado,
+  rama por defecto `main` y permisos de administración/escritura.
 - Site de laboratorio existente:
   <https://grupo-paris-contabilidad.valentino-magni.chatgpt.site>, versión 102,
   fuente Sites `4e795dde520a62606f7cfe671ae0b7e10d0f2733`. Conserva acceso
@@ -20,9 +21,9 @@ PC o aplicación; la documentación anterior de este archivo quedó reemplazada.
 
 ## Estado funcional comprobado
 
-El laboratorio ahora ofrece las siete unidades solicitadas: PARIS AUTOS, DORAL,
+El catálogo v4 ofrece las siete unidades solicitadas: PARIS AUTOS, DORAL,
 PARIS CARS, PARIS TRAC, MOTOR, FIDEICOMISO DESARROLLO y POSTVENTA. El catálogo
-v3 tiene 55 tareas con códigos y nombres canónicos. Las 55 se pueden elegir;
+v4 tiene 55 tareas con códigos y nombres canónicos. Las 55 se pueden elegir;
 25 están confirmadas para comparación y 30 son provisionales, cada una con
 código propio y excluida de comparaciones entre unidades hasta confirmar su
 alcance. Banco, cuenta, sucursal, sistema, período y otros datos son parámetros

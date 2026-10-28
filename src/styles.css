@@ -3193,7 +3193,3 @@ input[readonly] { background: var(--surface-muted, #f5f6f8); color: var(--text, 
 .paris-proposal-parameters dt { color: var(--text-muted); }
 .paris-proposal-parameters dd { margin: 0; font-weight: 600; }
 .paris-configuration-required, .unclassified-label { color: var(--text-muted); }
-.paris-task-review-list { margin-top: 1rem; padding: 0.8rem 1rem; border: 1px dashed var(--border); border-radius: 0.75rem; color: var(--text-muted); }
-.paris-task-review-list > summary { cursor: pointer; font-weight: 650; color: var(--text); }
-.paris-task-review-list ul { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0.5rem 1.25rem; padding-left: 1.2rem; }
-.paris-task-review-list li small { display: block; }
