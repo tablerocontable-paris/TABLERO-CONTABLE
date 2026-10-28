@@ -6,8 +6,8 @@ traslado del proyecto.
 ## Fuente de código
 
 - Repositorio privado de GitHub: [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocontable-paris/TABLERO-CONTABLE)
-- Rama activa: `main`; commit funcional local v4 `d9da38f` (se podrá traer por
-  `git pull --ff-only origin main` después de que termine la publicación).
+- Rama activa: `main`; commit funcional v4 `d9da38f`, ya publicado. Para
+  actualizar una copia existente, ejecutá `git pull --ff-only origin main`.
 - El código no se entrega en ZIP: cloná el repositorio para conservar historia
   y poder traer los cambios futuros.
 - Los cambios acordados se publican directamente en `main`, sin Pull Request.
@@ -82,8 +82,9 @@ npm ci
   automáticamente.
 - La validación local v4 pasó TypeScript, suite completa (867/867 en 87
   archivos), build del cliente y Worker, empaquetado Sites, revisión
-  independiente y hook (223/223). Falta confirmar el push/CI de GitHub y la
-  publicación; el mismo Site privado está en v102 hasta esa publicación.
+  independiente y hook (223/223). GitHub confirmó el push directo a `main`, sin
+  PR; GitHub CI valida los commits de `main`. El Site privado sigue en v102 hasta publicar
+  v4.
   GitHub y Sites son repositorios separados: los pushes a GitHub no despliegan
   el Site automáticamente.
 - El Site conserva acceso personalizado al propietario y cero visitantes

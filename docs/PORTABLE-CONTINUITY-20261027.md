@@ -6,11 +6,9 @@ PC o aplicación; la documentación anterior de este archivo quedó reemplazada.
 ## Fuentes vigentes
 
 - Repositorio privado: [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocontable-paris/TABLERO-CONTABLE), rama `main`.
-- Catálogo v4 está validado en el commit local `d9da38f` de `main`; el push/CI
-  está pendiente. El último cambio funcional ya publicado es
-  `ecf4d3542d460bc684590d0e7f699f65c9212dfb`, autor `tablerocontable-paris`,
-  sin PR. GitHub confirmó el repositorio privado, rama por defecto `main` y
-  permisos de administración/escritura.
+- Catálogo v4 está publicado directamente en `main` como `d9da38f`; su guía se
+  registró en `e3f389c`. GitHub confirmó el push bajo `tablerocontable-paris`,
+  sin PR; GitHub CI valida los commits publicados. El repositorio permanece privado.
 - Site de laboratorio existente:
   <https://grupo-paris-contabilidad.valentino-magni.chatgpt.site>, versión 102,
   fuente Sites `4e795dde520a62606f7cfe671ae0b7e10d0f2733`. Conserva acceso
