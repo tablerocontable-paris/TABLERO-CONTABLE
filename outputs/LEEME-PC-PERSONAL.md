@@ -5,6 +5,23 @@ privado [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocon
 
 ## Estado comprobado
 
+### Catálogo de tareas normalizadas — 28/10/2026
+
+El corte local actual conecta el catálogo Grupo París al primer ingreso del
+laboratorio: PARIS AUTOS, DORAL, PARIS CARS, PARIS TRAC, MOTOR, FIDEICOMISO
+DESARROLLO y POSTVENTA. Las tareas seleccionables tienen nombres canónicos y
+códigos versionados; los alias ayudan a buscarlas, pero no se guardan como
+nombres. Para “Conciliación bancaria”, banco y cuenta son campos separados y
+obligatorios. Propuestas y análisis conservan unidad, tarea y parámetros para
+comparar el mismo trabajo entre empresas; los registros históricos sin código
+no se reclasifican automáticamente. Hay 21 tareas seleccionables y 29 en
+revisión, que no se ofrecen hasta aclarar su alcance.
+
+La implementación está en el checkout local y aún no está en GitHub ni en el
+Site. TypeScript y 85 pruebas focales terminaron bien. Supabase, Auth y SQL001–016
+no se modificaron. Tras confirmar suite/hook, se publicará directo en `main` y
+se verificará Actions; luego se actualizará el mismo Site privado.
+
 - El último corte es `ba26567` (`feat: add Paris business task catalog`),
   precedido por el catálogo normalizado `740804c`. Ambos están directamente en
   `main`, autor Tablero Contable, sin Pull Request. El commit de código pasó

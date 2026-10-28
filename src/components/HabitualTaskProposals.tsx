@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Panel, Empty } from "./ui";
 import StepListEditor, { validateSteps } from "./StepListEditor";
 import ScheduleEditor from "./ScheduleEditor";
+import { getParisTask, parisTaskParameterKey, PARIS_BUSINESS_UNITS } from "../domain/parisTaskCatalog";
 import {
   approveHabitualTaskProposals,
   groupHabitualTaskProposals,
@@ -45,10 +46,12 @@ function ProposalGroupCard({ group, suggestedMatch, state, actor, month, commit,
   const [steps, setSteps] = useState([...first.steps]);
   const [correctionNotes, setCorrectionNotes] = useState<Record<string, string>>({});
   const compatible = state.templates.filter((template) =>
-    template.kind === first.kind && (first.kind !== "operativa" || normalizeUnit(template.unit) === normalizeUnit(first.unit)),
+    template.kind === first.kind && (first.kind !== "operativa" || normalizeUnit(template.unit) === normalizeUnit(first.unit)) &&
+    (first.taskCode ? template.taskCode === first.taskCode && template.taskCatalogVersion === first.taskCatalogVersion : !template.taskCode),
   );
   const companyName = (proposal: HabitualTaskProposal) => state.companies.find((company) => company.id === proposal.companyId)?.name || "Empresa";
   const profileName = (proposal: HabitualTaskProposal) => state.profiles.find((profile) => profile.id === proposal.ownerId)?.name || "Perfil";
+  const needsParisConfiguration = !!first.taskCode && (standard.description.trim().length < 20 || /selección del catálogo grupo parís/i.test(standard.description) || !steps.some((step) => step.trim().length >= 10 && !/confirmar procedimiento y controles con jefatura/i.test(step.trim())));
 
   function approve(decision: { kind: "link"; templateId: string } | { kind: "create"; template: { title: string; sector: string; description: string; kind: Template["kind"]; unit: string; weight: number; target: number; steps: string[] } }) {
     try {
@@ -64,6 +67,7 @@ function ProposalGroupCard({ group, suggestedMatch, state, actor, month, commit,
         <div>
           <span className="quality-status">{suggestedMatch ? `Posible coincidencia · ${group.length}` : "Propuesta individual"}</span>
           <h3>{first.title}</h3>
+          {first.businessUnitCode && <small>Unidad de negocio: {businessUnitLabel(first.businessUnitCode)}</small>}
           {first.process && <p>Proceso o banco: {first.process}</p>}
         </div>
         <small>{first.kind === "operativa" ? `Actividad · ${first.unit}` : "Entregable con controles"}</small>
@@ -75,7 +79,11 @@ function ProposalGroupCard({ group, suggestedMatch, state, actor, month, commit,
             <div>
               <b>{profileName(proposal)} · {companyName(proposal)}</b>
               <p>{proposal.title}{proposal.process ? ` · ${proposal.process}` : ""}</p>
-              <small>{proposal.schedule.frequency} · {proposal.kind === "operativa" ? `actividad por ${proposal.unit} · sin cuota` : `${proposal.steps.length} controles`} · envío {new Date(proposal.submittedAt).toLocaleDateString("es-AR")}</small>
+              <small>{businessUnitLabel(proposal.businessUnitCode)} · {proposal.schedule.frequency} · {proposal.kind === "operativa" ? `actividad por ${proposal.unit} · sin cuota` : `${proposal.steps.length} controles`} · envío {new Date(proposal.submittedAt).toLocaleDateString("es-AR")}</small>
+              {proposal.taskCode && Object.keys(proposal.taskParameters || {}).length > 0 && <dl className="paris-proposal-parameters">{(getParisTask(proposal.taskCode)?.parameters || []).map((label) => {
+                const value = proposal.taskParameters?.[parisTaskParameterKey(label)];
+                return value ? <div key={label}><dt>{label}</dt><dd>{value}</dd></div> : null;
+              })}</dl>}
               <details>
                 <summary>Ver descripción y controles</summary>
                 <p>{proposal.description}</p>
@@ -114,7 +122,7 @@ function ProposalGroupCard({ group, suggestedMatch, state, actor, month, commit,
         <summary>Crear un estándar para {group.length === 1 ? "esta propuesta" : "el grupo"}</summary>
         <p>El estándar define nombre, rubro, controles y peso común. La frecuencia se conserva por perfil y empresa; el peso por movimiento se parametriza por empresa.</p>
         <div className="form-grid">
-          <label>Nombre estándar<input maxLength={120} value={standard.title} onChange={(event) => setStandard({ ...standard, title: event.target.value })} /></label>
+          <label>Nombre estándar<input maxLength={120} value={standard.title} readOnly={!!first.taskCode} onChange={(event) => setStandard({ ...standard, title: event.target.value })} /></label>
           <label>Rubro o sector<input maxLength={80} value={standard.sector} onChange={(event) => setStandard({ ...standard, sector: event.target.value })} /></label>
           <label>Peso común<input type="number" min={0} step="any" value={standard.weight} onChange={(event) => setStandard({ ...standard, weight: Number(event.target.value) })} /></label>
           {first.kind === "operativa" && <p className="catalogue-rate-note">La cantidad se registra libremente; jefatura define el coeficiente por movimiento en Actividad operativa.</p>}
@@ -122,7 +130,8 @@ function ProposalGroupCard({ group, suggestedMatch, state, actor, month, commit,
         <label>Objetivo del proceso<textarea maxLength={1000} rows={3} value={standard.description} onChange={(event) => setStandard({ ...standard, description: event.target.value })} /></label>
         <label>Controles comunes</label>
         <StepListEditor value={steps} onChange={setSteps} />
-        <button type="button" className="primary" onClick={() => {
+        {needsParisConfiguration && <p className="paris-configuration-required">Definí el procedimiento y al menos un control concreto antes de activar estas asignaciones.</p>}
+        <button type="button" className="primary" disabled={needsParisConfiguration} onClick={() => {
           try {
             const safeSteps = validateSteps(steps);
             approve({ kind: "create", template: { ...standard, target: 0, kind: first.kind, unit: first.kind === "operativa" ? first.unit : "", steps: safeSteps } });
@@ -152,6 +161,7 @@ function MyProposalCard({ proposal, state, actor, month, commit, notify }: {
 }) {
   const [title, setTitle] = useState(proposal.title);
   const [process, setProcess] = useState(proposal.process);
+  const [taskParameters, setTaskParameters] = useState(proposal.taskParameters || {});
   const [description, setDescription] = useState(proposal.description);
   const [kind, setKind] = useState(proposal.kind);
   const [unit, setUnit] = useState(proposal.unit);
@@ -162,7 +172,7 @@ function MyProposalCard({ proposal, state, actor, month, commit, notify }: {
   function resubmit(event: FormEvent) {
     event.preventDefault();
     try {
-      const next = resubmitHabitualTaskProposal(state, actor, proposal.id, { title, process, description, kind, unit, target: kind === "operativa" ? 0 : target, schedule, steps });
+      const next = resubmitHabitualTaskProposal(state, actor, proposal.id, { title, process, description, kind, unit, target: kind === "operativa" ? 0 : target, schedule, steps, taskCode: proposal.taskCode, taskCatalogVersion: proposal.taskCatalogVersion, businessUnitCode: proposal.businessUnitCode, taskParameters });
       if (commit(next, "Reenvió propuesta habitual corregida", proposal.id)) notify("La propuesta volvió a la bandeja de revisión de jefatura.");
     } catch (error) { notify((error as Error).message); }
   }
@@ -170,7 +180,7 @@ function MyProposalCard({ proposal, state, actor, month, commit, notify }: {
     <article className="habitual-proposal-group my-habitual-proposal">
       <div className="habitual-proposal-group-heading">
         <div><span className={`quality-status ${proposal.status === "approved" ? "quality-adopted" : proposal.status === "changes_requested" ? "quality-measured" : ""}`}>{proposalStatusLabel(proposal)}</span><h3>{proposal.title}</h3></div>
-        <small>Empresa: {state.companies.find((row) => row.id === proposal.companyId)?.name || "Empresa"}</small>
+        <small>Empresa: {state.companies.find((row) => row.id === proposal.companyId)?.name || "Empresa"}{proposal.businessUnitCode ? ` · Unidad: ${businessUnitLabel(proposal.businessUnitCode)}` : ""}</small>
       </div>
       <p>{proposal.process || proposal.description}</p>
       <small>Regla: {proposal.schedule.frequency} · {proposal.kind === "operativa" ? `cantidad ${proposal.unit} · sin cuota` : "meta no aplica"} · revisión {proposal.revision}</small>
@@ -178,8 +188,12 @@ function MyProposalCard({ proposal, state, actor, month, commit, notify }: {
       {proposal.status === "approved" && template && <p className="habitual-proposal-approved">Estándar confirmado: {template.title} · versión {proposal.templateVersion}</p>}
       {proposal.status === "changes_requested" && (
         <form className="habitual-proposal-resubmit" onSubmit={resubmit}>
-          <label>Nombre de la tarea<input required maxLength={120} value={title} onChange={(event) => setTitle(event.target.value)} /></label>
+          <label>Nombre de la tarea<input required maxLength={120} value={title} readOnly={!!proposal.taskCode} onChange={(event) => setTitle(event.target.value)} /></label>
           <label>Banco o proceso<input maxLength={160} value={process} onChange={(event) => setProcess(event.target.value)} /></label>
+          {proposal.taskCode && <fieldset className="paris-task-parameters"><legend>Parámetros de la tarea estándar</legend><div className="paris-task-parameter-fields">{(getParisTask(proposal.taskCode)?.parameters || []).map((label) => {
+            const key = parisTaskParameterKey(label);
+            return <label key={key}>{label}<input maxLength={160} value={taskParameters[key] || ""} onChange={(event) => setTaskParameters({ ...taskParameters, [key]: event.target.value })} /></label>;
+          })}</div></fieldset>}
           <label>Descripción<textarea required maxLength={1000} rows={2} value={description} onChange={(event) => setDescription(event.target.value)} /></label>
           <div className="form-grid">
             <label>Tipo<select value={kind} onChange={(event) => setKind(event.target.value as Template["kind"])}><option value="resultado">Entregable</option><option value="operativa">Actividad con cantidad</option></select></label>
@@ -202,4 +216,8 @@ function MyProposalCard({ proposal, state, actor, month, commit, notify }: {
 
 function normalizeUnit(value: string) {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, " ").toLocaleLowerCase("es-AR");
+}
+
+function businessUnitLabel(code?: string) {
+  return PARIS_BUSINESS_UNITS.find((unit) => unit.code === code)?.label || "Sin unidad clasificada";
 }

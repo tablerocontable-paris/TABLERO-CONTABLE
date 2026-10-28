@@ -29,4 +29,12 @@ describe("catálogo de tareas de Grupo París", () => {
     expect(selectableParisTasks().every((task) => task.state === "selectable")).toBe(true);
     expect(findParisTaskAlias("Análisis Bonis PYMES")?.state).toBe("review");
   });
+
+  it("mantiene separadas las tareas cuyo alcance no está confirmado", () => {
+    expect(findParisTaskAlias("Carga de pagos PDA")?.code).toBe("dealer_credits_payment_load");
+    expect(findParisTaskAlias("Carga de pagos PDA")?.state).toBe("review");
+    expect(findParisTaskAlias("Cobranza VN/VO/PDA")?.code).toBe("vehicle_collection");
+    expect(findParisTaskAlias("Carga de transferencias VN/VO/PDA")?.code).toBe("supplier_payment_transfer_vn_vo_pda");
+    expect(findParisTaskAlias("Carga de otras facturas")?.state).toBe("review");
+  });
 });

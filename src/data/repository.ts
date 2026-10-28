@@ -15,6 +15,7 @@ import { seedFiscalObligations } from "../domain/fiscalObligations";
 import { validDate, validateSchedule, type Schedule } from "../domain/schedule";
 import { calendarEventFieldsError } from "../domain/calendar-validation";
 import { CONCEPT_CODES, STARTER_CONCEPT_CODES } from "../domain/workforceTaxonomy.mjs";
+import { getParisTask, hasRequiredParisTaskParameters, isParisBusinessUnitCode, isParisTaskParameterSet, PARIS_TASK_CATALOG_VERSION } from "../domain/parisTaskCatalog";
 
 function validateNeutralMetadata(value: Record<string, unknown>, path: (string | number)[], context: z.RefinementCtx) {
   const code = value.neutralConceptCode;
@@ -22,6 +23,30 @@ function validateNeutralMetadata(value: Record<string, unknown>, path: (string |
   if (code === undefined && version === undefined) return;
   if (typeof code !== "string" || !CONCEPT_CODES.has(code) || version !== 2)
     context.addIssue({ code: "custom", path, message: "La clasificación neutral debe conservar código y versión válidos." });
+}
+
+function validateParisTaskMetadata(value: Record<string, unknown>, path: (string | number)[], context: z.RefinementCtx, requireUnit = true) {
+  const code = value.taskCode;
+  if (code === undefined) {
+    if (value.taskCatalogVersion !== undefined || value.businessUnitCode !== undefined || value.taskParameters !== undefined)
+      context.addIssue({ code: "custom", path, message: "La versión o unidad de negocio requiere un código de tarea canónico." });
+    return;
+  }
+  const definition = typeof code === "string" ? getParisTask(code) : undefined;
+  if (!definition || definition.state !== "selectable" || value.taskCatalogVersion !== PARIS_TASK_CATALOG_VERSION)
+    context.addIssue({ code: "custom", path, message: "La tarea debe pertenecer a una versión seleccionable del catálogo Grupo París." });
+  if (requireUnit && (typeof value.businessUnitCode !== "string" || !isParisBusinessUnitCode(value.businessUnitCode)))
+    context.addIssue({ code: "custom", path, message: "La ocurrencia debe conservar la unidad de negocio seleccionada." });
+  if (definition && typeof value.title === "string" && value.title !== definition.label)
+    context.addIssue({ code: "custom", path, message: "El nombre guardado debe coincidir con la tarea canónica del catálogo." });
+  if (definition && value.kind !== (definition.kind === "operational" ? "operativa" : "resultado"))
+    context.addIssue({ code: "custom", path, message: "El tipo de trabajo debe coincidir con la tarea canónica." });
+  if (definition && value.unit !== (definition.unit || ""))
+    context.addIssue({ code: "custom", path, message: "La unidad de conteo debe coincidir con la tarea canónica." });
+  if (definition && value.taskParameters !== undefined && !isParisTaskParameterSet(String(code), value.taskParameters))
+    context.addIssue({ code: "custom", path: [...path, "taskParameters"], message: "Los parámetros guardados no corresponden a la definición canónica de la tarea." });
+  if (definition && requireUnit && !hasRequiredParisTaskParameters(String(code), value.taskParameters || {}))
+    context.addIssue({ code: "custom", path: [...path, "taskParameters"], message: "La tarea canónica no conserva todos los parámetros obligatorios para medirla." });
 }
 
 const validSnapshotInstant = (value: string) => {
@@ -261,6 +286,7 @@ const scheduleSchema = z.object({
 });
 const proposalSubmissionSchema = z.object({
   revision: z.number().int().positive(), starterId: z.string().regex(/^starter-suggestion-v2-[a-z0-9-]+$/).optional(), title: z.string().min(1).max(120),
+  taskCode: z.string().optional(), taskCatalogVersion: z.number().int().positive().optional(), businessUnitCode: z.string().optional(), taskParameters: z.record(z.string(), z.string().max(160)).optional(),
   process: z.string().max(160), description: z.string().min(1).max(1000),
   kind: z.enum(["resultado", "operativa"]), unit: z.string().max(40),
   target: z.number().nonnegative(), schedule: scheduleSchema,
@@ -503,6 +529,7 @@ const schema = z.object({
     source: z.enum(["initial_snapshot", "catalog_change", "kaizen_adoption", "legacy_reconciliation"]),
     changeReason: z.string().min(1).max(500), sourceProposalId: z.string().optional(),
     neutralConceptCode: z.string().optional(), taxonomyVersion: z.literal(2).optional(),
+    taskCode: z.string().optional(), taskCatalogVersion: z.number().int().positive().optional(),
   })).optional(),
   improvementProposals: z.array(z.object({
     id: z.string(), templateId: z.string(), companyId: z.string(), templateTitle: z.string(),
@@ -548,6 +575,8 @@ const schema = z.object({
   habitualTaskProposals: z.array(z.object({
     id: z.string().min(1), ownerId: z.string().min(1), companyId: z.string().min(1),
     starterId: z.string().regex(/^starter-suggestion-v2-[a-z0-9-]+$/).optional(),
+    taskCode: z.string().optional(), taskCatalogVersion: z.number().int().positive().optional(), businessUnitCode: z.string().optional(),
+    taskParameters: z.record(z.string(), z.string().max(160)).optional(),
     originalTitle: z.string().min(1).max(120), title: z.string().min(1).max(120),
     process: z.string().max(160), description: z.string().min(1).max(1000),
     neutralConceptCode: z.string().optional(), taxonomyVersion: z.literal(2).optional(),
@@ -620,6 +649,7 @@ const schema = z.object({
   onboarding: z.record(z.string(), z.object({
     version: z.number().int().positive(), step: z.number().int().min(0), completedAt: z.string().nullable(),
     selectedCompanyIds: z.array(z.string().min(1)).max(1000), selectedTemplateIds: z.array(z.string().min(1)).max(2000),
+    selectedBusinessUnitCodes: z.array(z.string()).max(100).optional(),
     day: z.number().int().min(1).max(31), frequency: z.enum(["única", "diaria", "semanal", "mensual"]),
     home: z.enum(["day", "tasks"]), reminders: z.boolean(), name: z.string(), customTitle: z.string(),
     customSteps: z.string(), customKind: z.enum(["resultado", "operativa"]),
@@ -630,6 +660,8 @@ const schema = z.object({
     customTasks: z.array(z.object({ id: z.string().min(1), title: z.string().min(1), steps: z.string(), kind: z.enum(["resultado", "operativa"]), unit: z.string(), target: z.number().nonnegative() })).optional(),
     habitualTaskProposals: z.array(z.object({
       id: z.string().min(1), starterId: z.string().regex(/^starter-suggestion-v2-[a-z0-9-]+$/).optional(),
+      taskCode: z.string().optional(), taskCatalogVersion: z.number().int().positive().optional(), businessUnitCode: z.string().optional(),
+      taskParameters: z.record(z.string(), z.string().max(160)).optional(),
       neutralConceptCode: z.string().optional(), taxonomyVersion: z.literal(2).optional(),
       title: z.string(), process: z.string(), description: z.string(), kind: z.enum(["resultado", "operativa"]),
       unit: z.string(), steps: z.array(z.string()), companyIds: z.array(z.string().min(1)),
@@ -702,27 +734,49 @@ const schema = z.object({
   validateRows(state.templates as unknown as Array<Record<string, unknown>>, "templates");
   validateRows(state.assignments as unknown as Array<Record<string, unknown>>, "assignments");
   validateRows(state.tasks as unknown as Array<Record<string, unknown>>, "tasks");
+  state.templates.forEach((row, index) => validateParisTaskMetadata(row as unknown as Record<string, unknown>, ["templates", index], context, false));
+  state.assignments.forEach((row, index) => validateParisTaskMetadata(row as unknown as Record<string, unknown>, ["assignments", index], context));
+  state.tasks.forEach((row, index) => validateParisTaskMetadata(row as unknown as Record<string, unknown>, ["tasks", index], context));
   validateRows(state.catalogueVersions as unknown as Array<Record<string, unknown>> | undefined, "catalogueVersions");
+  state.catalogueVersions?.forEach((row, index) => validateParisTaskMetadata(row as unknown as Record<string, unknown>, ["catalogueVersions", index], context, false));
   validateRows(state.habitualTaskProposals as unknown as Array<Record<string, unknown>> | undefined, "habitualTaskProposals");
   state.habitualTaskProposals?.forEach((proposal, proposalIndex) => {
     validateNeutralMetadata(proposal as unknown as Record<string, unknown>, ["habitualTaskProposals", proposalIndex], context);
+    validateParisTaskMetadata(proposal as unknown as Record<string, unknown>, ["habitualTaskProposals", proposalIndex], context);
     if (proposal.starterId && proposal.neutralConceptCode && STARTER_CONCEPT_CODES[proposal.starterId] !== proposal.neutralConceptCode)
       context.addIssue({ code: "custom", path: ["habitualTaskProposals", proposalIndex, "neutralConceptCode"], message: "El concepto neutral no corresponde al ID versionado de la sugerencia." });
     proposal.submissions.forEach((submission, submissionIndex) => {
       validateNeutralMetadata(submission as unknown as Record<string, unknown>, ["habitualTaskProposals", proposalIndex, "submissions", submissionIndex], context);
+      validateParisTaskMetadata(submission as unknown as Record<string, unknown>, ["habitualTaskProposals", proposalIndex, "submissions", submissionIndex], context);
       if (submission.starterId && submission.neutralConceptCode && STARTER_CONCEPT_CODES[submission.starterId] !== submission.neutralConceptCode)
         context.addIssue({ code: "custom", path: ["habitualTaskProposals", proposalIndex, "submissions", submissionIndex, "neutralConceptCode"], message: "El concepto neutral no corresponde al ID versionado de la sugerencia." });
     });
   });
-  state.closures.forEach((closure, closureIndex) => closure.tasks.forEach((task, taskIndex) =>
-    validateNeutralMetadata(task as unknown as Record<string, unknown>, ["closures", closureIndex, "tasks", taskIndex], context)));
-  state.companyClosures?.forEach((closure, closureIndex) => closure.tasks.forEach((task, taskIndex) =>
-    validateNeutralMetadata(task as unknown as Record<string, unknown>, ["companyClosures", closureIndex, "tasks", taskIndex], context)));
-  Object.entries(state.onboarding).forEach(([profileId, draft]) => draft.habitualTaskProposals?.forEach((proposal, proposalIndex) => {
-    validateNeutralMetadata(proposal as unknown as Record<string, unknown>, ["onboarding", profileId, "habitualTaskProposals", proposalIndex], context);
-    if (proposal.starterId && proposal.neutralConceptCode && STARTER_CONCEPT_CODES[proposal.starterId] !== proposal.neutralConceptCode)
-      context.addIssue({ code: "custom", path: ["onboarding", profileId, "habitualTaskProposals", proposalIndex, "neutralConceptCode"], message: "El concepto neutral no corresponde al ID versionado de la sugerencia." });
+  state.closures.forEach((closure, closureIndex) => closure.tasks.forEach((task, taskIndex) => {
+    const path = ["closures", closureIndex, "tasks", taskIndex];
+    validateNeutralMetadata(task as unknown as Record<string, unknown>, path, context);
+    validateParisTaskMetadata(task as unknown as Record<string, unknown>, path, context);
   }));
+  state.companyClosures?.forEach((closure, closureIndex) => closure.tasks.forEach((task, taskIndex) => {
+    const path = ["companyClosures", closureIndex, "tasks", taskIndex];
+    validateNeutralMetadata(task as unknown as Record<string, unknown>, path, context);
+    validateParisTaskMetadata(task as unknown as Record<string, unknown>, path, context);
+  }));
+  Object.entries(state.onboarding).forEach(([profileId, draft]) => {
+    draft.selectedBusinessUnitCodes?.forEach((code, unitIndex) => {
+      if (!isParisBusinessUnitCode(code)) context.addIssue({ code: "custom", path: ["onboarding", profileId, "selectedBusinessUnitCodes", unitIndex], message: "La unidad de negocio seleccionada no pertenece al catálogo vigente." });
+    });
+    draft.habitualTaskProposals?.forEach((proposal, proposalIndex) => {
+      const path = ["onboarding", profileId, "habitualTaskProposals", proposalIndex];
+      validateNeutralMetadata(proposal as unknown as Record<string, unknown>, path, context);
+      // Onboarding selections are editable drafts and may be incomplete until submission.
+      validateParisTaskMetadata(proposal as unknown as Record<string, unknown>, path, context, false);
+      if (proposal.taskCode && (!draft.selectedBusinessUnitCodes?.includes(proposal.businessUnitCode || "") || proposal.companyIds.some((companyId) => !draft.selectedCompanyIds.includes(companyId))))
+        context.addIssue({ code: "custom", path, message: "La propuesta estándar debe usar una unidad y empresas elegidas en este primer ingreso." });
+      if (proposal.starterId && proposal.neutralConceptCode && STARTER_CONCEPT_CODES[proposal.starterId] !== proposal.neutralConceptCode)
+        context.addIssue({ code: "custom", path: [...path, "neutralConceptCode"], message: "El concepto neutral no corresponde al ID versionado de la sugerencia." });
+    });
+  });
   const profileById = new Map(state.profiles.map((profile) => [profile.id, profile]));
   const teamIds = new Set(state.teams.map((team) => team.id));
   const companyIds = new Set(state.companies.map((company) => company.id));
@@ -762,6 +816,8 @@ const schema = z.object({
       context.addIssue({ code: "custom", path: ["assignments", index], message: "La asignación debe referenciar responsable, empresa y catálogo existentes." });
     if (sourceVersion && (assignment.neutralConceptCode !== sourceVersion.neutralConceptCode || assignment.taxonomyVersion !== sourceVersion.taxonomyVersion))
       context.addIssue({ code: "custom", path: ["assignments", index, "neutralConceptCode"], message: "La asignación debe conservar la clasificación neutral del catálogo de origen." });
+    if (sourceVersion && (assignment.taskCode !== sourceVersion.taskCode || assignment.taskCatalogVersion !== sourceVersion.taskCatalogVersion))
+      context.addIssue({ code: "custom", path: ["assignments", index, "taskCode"], message: "La asignación debe conservar el código canónico y versión del catálogo de origen." });
     const schedule = (assignment as { schedule?: unknown }).schedule;
     const validFrequencies = ["única", "diaria", "semanal", "mensual"];
     const rawAssignment = assignment as unknown as Record<string, unknown>;
@@ -796,6 +852,8 @@ const schema = z.object({
       context.addIssue({ code: "custom", path: ["tasks", index, "assignmentId"], message: "La tarea debe conservar la asignación de origen correspondiente." });
     if (assignment && (task.neutralConceptCode !== assignment.neutralConceptCode || task.taxonomyVersion !== assignment.taxonomyVersion))
       context.addIssue({ code: "custom", path: ["tasks", index, "neutralConceptCode"], message: "La tarea debe conservar la clasificación neutral de su asignación de origen." });
+    if (assignment && (task.taskCode !== assignment.taskCode || task.taskCatalogVersion !== assignment.taskCatalogVersion || task.businessUnitCode !== assignment.businessUnitCode || JSON.stringify(task.taskParameters || {}) !== JSON.stringify(assignment.taskParameters || {})))
+      context.addIssue({ code: "custom", path: ["tasks", index, "taskCode"], message: "La tarea materializada debe conservar el código, unidad y parámetros de su asignación de origen." });
     if (task.templateId && !state.templates.some((template) => template.id === task.templateId))
       context.addIssue({ code: "custom", path: ["tasks", index, "templateId"], message: "La tarea referencia un catálogo inexistente." });
     if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(task.month) || (task.due !== "" && !validDate(task.due)))

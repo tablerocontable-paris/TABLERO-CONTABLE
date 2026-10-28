@@ -1,28 +1,30 @@
 # Estado vigente de ejecución — 28/10/2026
 
-## Siguiente frente: catálogo operativo Grupo París
+## Estado actual: normalización Grupo París en el laboratorio
 
-Se normalizaron los títulos visibles y las siete unidades de negocio en
-`docs/product/BUSINESS-UNIT-TASK-CATALOG-DRAFT-20261028.md`. Éste es un
-borrador de catálogo para la organización: distingue tarea canónica de alias,
-unidad de negocio de empresa legal, y atributos como banco/sucursal/marca del
-nombre de tarea. Los términos ambiguos están marcados para aprobación antes de
-convertirlos en opciones activas. No representa ocurrencias ni métricas reales.
-La estructura ejecutable está en `src/domain/parisTaskCatalog.ts`; su prueba
-focal valida códigos, unidades, alias y exclusión de tareas ambiguas.
+El flujo local de inducción ya ofrece las siete unidades de negocio y tareas
+canónicas del catálogo versionado (`src/domain/parisTaskCatalog.ts`). Hay 50
+códigos propuestos; 21 son seleccionables y 29 esperan definición de alcance.
+La persona no cambia el nombre canónico: los alias sólo ayudan a reconocer la
+tarea; banco/cuenta y otras dimensiones se guardan en campos separados. Banco y
+cuenta son obligatorios para conciliación bancaria. La analítica agrupa por
+código, unidad, período y parámetros; las tareas históricas sin clasificación
+se muestran como no clasificadas.
 
-Siguiente implementación: añadir al onboarding una selección cerrada de unidad
-de negocio y tareas canónicas con códigos inmutables, permitir parámetros
-estructurados, y conservar el flujo actual de propuesta/aprobación para nuevos
-conceptos. Guardar la unidad y versión de catálogo en borrador, propuesta,
-asignación y ocurrencia; mantener alias sólo para búsqueda. Separar
-`businessUnitCode` de `companyId`, hacer campos opcionales al leer datos
-históricos y exigirlos únicamente en nuevas asignaciones normalizadas. Actualizar
-analítica para agrupar por código + unidad y dejar las variantes no confirmadas
-como `sin clasificar`/pendientes, nunca inferirlas. Primero implementar sólo en
-el laboratorio local con pruebas de compatibilidad; no modificar SQL001–016 ni
-activar onboarding/Auth remoto hasta revisar y aprobar el contrato/migración
-posterior a 016 en una PC con Supabase CLI disponible.
+El flujo de propuesta conserva controles y aprobación de jefatura, y no crea
+asignaciones hasta aprobar. Los grupos separan unidades y parámetros para evitar
+aprobar una cuenta o proceso bajo otra unidad. Se preserva el borrador legado
+para no romper el Worker estricto. No se modificó `/api`, Supabase Auth ni
+SQL001–016; esta implementación es sólo del laboratorio local. Suite completa
+anterior **859/859**; TypeScript, 57 pruebas focales finales, build cliente/Worker
+y paquete Sites aprobados. La revisión independiente cerró los hallazgos de
+consistencia. Próximo: actualizar la continuidad portable, publicar el commit
+directamente en `main` y revisar GitHub Actions; luego actualizar el mismo Site
+privado manteniendo su audiencia.
+
+No se requieren exportaciones ni datos de personal para normalizar nombres y
+unidades. El borrador de referencia y los criterios de ambigüedad están en
+`docs/product/BUSINESS-UNIT-TASK-CATALOG-DRAFT-20261028.md`.
 
 ## Clasificación neutral — publicada y desplegada
 

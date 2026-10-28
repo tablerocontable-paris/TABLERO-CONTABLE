@@ -18,6 +18,54 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe("integración de propuestas en la inducción", () => {
+  it("conserva una selección incompleta de conciliación como borrador editable", () => {
+    const state = seed();
+    state.onboarding.e0!.selectedBusinessUnitCodes = ["paris_autos"];
+    state.onboarding.e0!.habitualTaskProposals = [{
+      id: "draft-bank-reconciliation", taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 1,
+      businessUnitCode: "paris_autos", taskParameters: {}, title: "Conciliación bancaria", process: "",
+      description: "Selección del catálogo Grupo París.", kind: "resultado", unit: "", steps: [], companyIds: ["c1"],
+    }];
+    persist(state, true);
+    expect(load(true).onboarding.e0?.habitualTaskProposals?.[0]).toMatchObject({
+      taskCode: "gpar_bank_reconciliation", businessUnitCode: "paris_autos", taskParameters: {},
+    });
+  });
+
+  it("permite elegir unidades de negocio y tareas canónicas sin editar sus nombres", () => {
+    const state = seed();
+    const profile = state.profiles.find((row) => row.id === "e0")!;
+    const update = vi.fn();
+    const stepOne: Draft = { ...state.onboarding.e0!, step: 1, selectedCompanyIds: ["c1"], selectedBusinessUnitCodes: [] };
+    const first = render(<Onboarding state={state} month="2026-10" profile={profile} draft={stepOne} update={update} finish={vi.fn()} pause={vi.fn()} laboratory />);
+    fireEvent.click(screen.getByLabelText("PARIS AUTOS"));
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ selectedBusinessUnitCodes: ["paris_autos"] }));
+    first.unmount();
+
+    const updateTask = vi.fn();
+    const stepTwo: Draft = { ...stepOne, step: 2, selectedBusinessUnitCodes: ["paris_autos"] };
+    render(<Onboarding state={state} month="2026-10" profile={profile} draft={stepTwo} update={updateTask} finish={vi.fn()} pause={vi.fn()} laboratory />);
+    const bankRow = Array.from(document.querySelectorAll(".paris-task-catalog-item"))
+      .find((row) => row.textContent?.includes("Conciliación bancaria"))!;
+    fireEvent.click(within(bankRow as HTMLElement).getByRole("button", { name: /PARIS AUTOS/ }));
+    expect(updateTask).toHaveBeenLastCalledWith(expect.objectContaining({
+      habitualTaskProposals: [expect.objectContaining({
+        taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 1,
+        businessUnitCode: "paris_autos", title: "Conciliación bancaria",
+      })],
+    }));
+  });
+
+  it("no ofrece tareas libres si un borrador nuevo intenta saltar la selección de unidad", () => {
+    const state = seed();
+    const profile = state.profiles.find((row) => row.id === "e0")!;
+    const draft: Draft = { ...state.onboarding.e0!, step: 2, selectedBusinessUnitCodes: [], selectedTemplateIds: [], habitualTaskProposals: [] };
+    render(<Onboarding state={state} month="2026-10" profile={profile} draft={draft} update={vi.fn()} finish={vi.fn()} pause={vi.fn()} laboratory />);
+    expect(document.querySelector(".paris-task-catalog")).not.toBeNull();
+    expect(screen.queryByText("Sugerencias habituales")).toBeNull();
+    expect((screen.getByRole("button", { name: /Continuar/ }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
   it("envía una sugerencia v2 como pendiente, sin materializar tareas, y no duplica al repetir la inducción", async () => {
     const state = seed();
     state.activeId = "e0";

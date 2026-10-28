@@ -8,6 +8,7 @@ import {
 } from "../domain/schedule";
 import { id } from "../domain/model";
 import { NEUTRAL_STARTER_CATALOG, NEUTRAL_STARTER_GROUP_DESCRIPTIONS, NEUTRAL_STARTER_SUGGESTIONS } from "../domain/neutralStarterCatalog";
+import { PARIS_BUSINESS_UNITS, PARIS_TASK_CATALOG, PARIS_TASK_CATALOG_VERSION, parisTaskParameterKey, requiredParisTaskParameterKeys, selectableParisTasks, type ParisBusinessUnitCode, type ParisTaskDefinition } from "../domain/parisTaskCatalog";
 import StepListEditor, { parseSteps, validateSteps } from "./StepListEditor";
 import {
   ArrowRight,
@@ -88,12 +89,18 @@ export default function Onboarding({
   const proposalStepValues = (() => {
     try { return validateSteps(proposalForm.steps); } catch { return []; }
   })();
-  const starterCatalog = laboratory && !remote ? NEUTRAL_STARTER_CATALOG : [];
-  const starterSuggestions = laboratory && !remote && profile.role !== "jefe" ? NEUTRAL_STARTER_SUGGESTIONS : [];
+  const hasLegacyOnboardingSelections = draft.selectedTemplateIds.length > 0 || (draft.customTasks?.length || 0) > 0 || !!draft.customTitle.trim() || (draft.habitualTaskProposals || []).some((proposal) => !proposal.taskCode);
+  const isParisFirstLogin = laboratory && !remote && profile.role !== "jefe" && (!hasLegacyOnboardingSelections || (draft.selectedBusinessUnitCodes?.length || 0) > 0);
+  const starterCatalog = laboratory && !remote && !isParisFirstLogin ? NEUTRAL_STARTER_CATALOG : [];
+  const starterSuggestions = laboratory && !remote && profile.role !== "jefe" && !isParisFirstLogin ? NEUTRAL_STARTER_SUGGESTIONS : [];
   const starterLegacySelection = starterCatalog.filter((entry) => draft.selectedTemplateIds.includes(entry.id));
-  const availableTemplates = [...state.templates, ...starterCatalog];
+  const parisTaskCatalog = isParisFirstLogin ? selectableParisTasks() : [];
+  const parisTasksUnderReview = isParisFirstLogin ? PARIS_TASK_CATALOG.filter((task) => task.state === "review") : [];
+  const parisTaskDrafts = (draft.habitualTaskProposals || []).filter((proposal) => !!proposal.taskCode);
+  const parisTaskDraftFor = (taskCode: string, businessUnitCode: string) => parisTaskDrafts.find((proposal) => proposal.taskCode === taskCode && proposal.businessUnitCode === businessUnitCode);
+  const availableTemplates = [...state.templates.filter((template) => !isParisFirstLogin || !!template.taskCode), ...starterCatalog];
   const chosen = availableTemplates.filter((t) => draft.selectedTemplateIds.includes(t.id));
-  const custom = [
+  const custom = isParisFirstLogin ? [] : [
     ...(draft.customTasks || []),
     ...(draft.customTitle.trim()
       ? [
@@ -166,7 +173,7 @@ export default function Onboarding({
       }
     }
   }
-  const proposals = laboratory && profile.role !== "jefe" ? draft.habitualTaskProposals || [] : [];
+  const proposals = laboratory && profile.role !== "jefe" ? (draft.habitualTaskProposals || []).filter((proposal) => !isParisFirstLogin || !!proposal.taskCode) : [];
   let proposalCount = 0;
   for (const proposal of proposals) {
     const companies = proposalCompaniesFor(proposal);
@@ -188,13 +195,37 @@ export default function Onboarding({
     draft.step === 0
       ? draft.name.trim().length > 1
       : draft.step === 1
-        ? draft.selectedCompanyIds.length > 0
+        ? draft.selectedCompanyIds.length > 0 && (!(laboratory && !remote && profile.role !== "jefe") || (draft.selectedBusinessUnitCodes?.length || 0) > 0)
         : draft.step === 2
-          ? profile.role === "jefe" || ((effectiveAll.length > 0 || proposals.length > 0) && !customStepError)
+          ? profile.role === "jefe" || (isParisFirstLogin ? parisTaskDrafts.length > 0 : (effectiveAll.length > 0 || proposals.length > 0) && !customStepError)
           : draft.step === 3
             ? validSchedules
             : true;
   const patch = (v: Partial<Draft>) => update({ ...draft, ...v });
+  const selectParisTask = (task: ParisTaskDefinition, businessUnitCode: ParisBusinessUnitCode) => {
+    const exists = parisTaskDraftFor(task.code, businessUnitCode);
+    if (exists) {
+      patch({ habitualTaskProposals: (draft.habitualTaskProposals || []).filter((proposal) => proposal.id !== exists.id) });
+      return;
+    }
+    const selectedUnits = draft.selectedBusinessUnitCodes || [];
+    if (!selectedUnits.includes(businessUnitCode)) return;
+    const kind = task.kind === "operational" ? "operativa" as const : "resultado" as const;
+    patch({ habitualTaskProposals: [...(draft.habitualTaskProposals || []), {
+      id: `paris-task:${task.code}:${businessUnitCode}:${profile.id}`,
+      taskCode: task.code,
+      taskCatalogVersion: PARIS_TASK_CATALOG_VERSION,
+      businessUnitCode,
+      taskParameters: {},
+      title: task.label,
+      process: "",
+      description: "Selección del catálogo Grupo París. Jefatura confirmará el procedimiento y los controles antes de asignar trabajo.",
+      kind,
+      unit: task.unit || "",
+      steps: ["Confirmar procedimiento y controles con jefatura."],
+      companyIds: [...draft.selectedCompanyIds],
+    }] });
+  };
   const clearDraftReferences = (key: string) => ({
     schedules: withoutKey(draft.schedules, key),
     companySchedules: withoutKey(draft.companySchedules, key),
@@ -321,6 +352,20 @@ export default function Onboarding({
                     </label>
                   ))}
               </div>
+              {laboratory && !remote && profile.role !== "jefe" && <fieldset className="paris-business-unit-picker">
+                <legend>¿En qué unidades de negocio trabajás?</legend>
+                <p>Se eligen por separado de las empresas legales. Podés seleccionar más de una.</p>
+                <div className="choices">
+                  {PARIS_BUSINESS_UNITS.map((unit) => <label key={unit.code} className={(draft.selectedBusinessUnitCodes || []).includes(unit.code) ? "choice selected" : "choice"}>
+                    <input type="checkbox" checked={(draft.selectedBusinessUnitCodes || []).includes(unit.code)} onChange={(event) => patch({ selectedBusinessUnitCodes: event.target.checked
+                      ? [...new Set([...(draft.selectedBusinessUnitCodes || []), unit.code])]
+                      : (draft.selectedBusinessUnitCodes || []).filter((code) => code !== unit.code),
+                      habitualTaskProposals: (draft.habitualTaskProposals || []).filter((proposal) => !proposal.taskCode || (event.target.checked || proposal.businessUnitCode !== unit.code)),
+                    })} />
+                    <Building2 size={18} />{unit.label}
+                  </label>)}
+                </div>
+              </fieldset>}
             </>
           ) : draft.step === 2 ? (
             <>
@@ -346,7 +391,38 @@ export default function Onboarding({
                 </div>
               ) : (
                 <>
-              <div className="catalog-options">
+              {parisTaskCatalog.length > 0 && <section className="paris-task-catalog" aria-labelledby="paris-task-catalog-heading">
+                <h3 id="paris-task-catalog-heading">Tareas estándar de Grupo París</h3>
+                <p>Elegí el mismo nombre oficial para cada proceso. La unidad de negocio se registra aparte; las tareas nuevas quedan pendientes de revisión de jefatura.</p>
+                <label className="starter-search">Buscar tarea estándar
+                  <input type="search" value={starterSearch} onChange={(event) => setStarterSearch(event.target.value)} placeholder="Ej.: conciliación bancaria" />
+                </label>
+                <div className="paris-task-catalog-list">
+                  {parisTaskCatalog.filter((task) => !starterSearch.trim() || `${task.label} ${task.group} ${task.aliases.join(" ")}`.toLocaleLowerCase("es-AR").includes(starterSearch.trim().toLocaleLowerCase("es-AR"))).map((task) => <article className="paris-task-catalog-item" key={task.code}>
+                    <div><b>{task.label}</b><small>{task.kind === "operational" ? `Actividad · ${task.unit}` : "Entregable con controles"} · {task.parameters.join(" · ")}</small></div>
+                    <div className="paris-task-unit-actions">{(draft.selectedBusinessUnitCodes || []).map((unitCode) => {
+                      const unit = PARIS_BUSINESS_UNITS.find((entry) => entry.code === unitCode)!;
+                      const selected = parisTaskDraftFor(task.code, unitCode);
+                      return <button type="button" key={unitCode} aria-pressed={!!selected} className={selected ? "selected" : ""} onClick={() => selectParisTask(task, unitCode)}>{selected ? "✓ " : "+ "}{unit.label}</button>;
+                    })}</div>
+                    {parisTaskDrafts.filter((proposal) => proposal.taskCode === task.code).map((proposal) => <fieldset className="paris-task-parameters" key={proposal.id}>
+                      <legend>{PARIS_BUSINESS_UNITS.find((unit) => unit.code === proposal.businessUnitCode)?.label} · datos para identificar el trabajo</legend>
+                      <div className="paris-task-parameter-fields">{task.parameters.map((label) => {
+                        const key = parisTaskParameterKey(label);
+                        const required = requiredParisTaskParameterKeys(task.code).has(key);
+                        return <label key={key}>{label}{required ? " · obligatorio" : " · opcional"}<input maxLength={160} required={required} value={proposal.taskParameters?.[key] || ""} placeholder={required ? "Dato necesario para medir" : "Opcional"} onChange={(event) => patch({ habitualTaskProposals: (draft.habitualTaskProposals || []).map((row) => row.id === proposal.id ? { ...row, taskParameters: { ...(row.taskParameters || {}), [key]: event.target.value } } : row) })} /></label>;
+                      })}</div>
+                    </fieldset>)}
+                  </article>)}
+                </div>
+                {parisTaskDrafts.length > 0 && <p className="paris-task-selection-count">{parisTaskDrafts.length} selección{parisTaskDrafts.length === 1 ? "" : "es"} estándar para revisión</p>}
+                {parisTasksUnderReview.length > 0 && <details className="paris-task-review-list">
+                  <summary>Tareas registradas que requieren definir su alcance ({parisTasksUnderReview.length})</summary>
+                  <p>Se conserva el nombre normalizado, pero no se puede seleccionar ni medir hasta confirmar qué incluye. Así no se mezcla con otra tarea por una abreviatura parecida.</p>
+                  <ul>{parisTasksUnderReview.filter((task) => !starterSearch.trim() || `${task.label} ${task.group} ${task.aliases.join(" ")}`.toLocaleLowerCase("es-AR").includes(starterSearch.trim().toLocaleLowerCase("es-AR"))).map((task) => <li key={task.code}><b>{task.label}</b><small>{task.group} · requiere aclaración</small></li>)}</ul>
+                </details>}
+              </section>}
+              {!isParisFirstLogin && <div className="catalog-options">
                 {[...state.templates]
                   .sort(
                     (a, b) =>
@@ -390,7 +466,7 @@ export default function Onboarding({
                       </div>
                     </label>
                   ))}
-              </div>
+              </div>}
               {(starterSuggestions.length > 0 || starterLegacySelection.length > 0) && (
                 <section className="neutral-starter-catalog" aria-labelledby="neutral-starter-heading">
                   {starterSuggestions.length > 0 && <h3 id="neutral-starter-heading">Sugerencias para propuestas · opcionales</h3>}
@@ -473,7 +549,7 @@ export default function Onboarding({
                   </details>
                 </section>
               )}
-              <details>
+              {!isParisFirstLogin && <details>
                 <summary>Agregar un trabajo esporádico · una sola vez</summary>
                 <p>
                   Este espacio es para auditorías y correcciones puntuales. Si
@@ -528,7 +604,7 @@ export default function Onboarding({
                 >
                   Agregar esta tarea y escribir otra
                 </button>
-              </details>
+              </details>}
               {(draft.customTasks || []).map((t) => (
                 <div className="custom-task-row" key={t.id}>
                   <b>{t.title}</b>

@@ -8,6 +8,7 @@ import { stopClock, type TimeSession, type Absence } from "./workforce";
 import { generatePeriodReport, type PeriodReport } from "./reports";
 import { endOfARTDate, summarizeTimeliness, type TimelinessSummary } from "./timeliness";
 import type { NeutralConceptCode } from "./workforceTaxonomy.mjs";
+import type { ParisBusinessUnitCode } from "./parisTaskCatalog";
 export type Role = "jefe" | "encargado" | "empleado";
 export type Status = "Pendiente" | "En curso" | "Completada";
 export type Kind = "resultado" | "operativa";
@@ -51,6 +52,9 @@ export interface Template {
   /** Optional, versioned neutral reporting concept; absent on unreviewed history. */
   neutralConceptCode?: NeutralConceptCode;
   taxonomyVersion?: 2;
+  /** Organization-specific task identity; absent on historical/neutral templates. */
+  taskCode?: string;
+  taskCatalogVersion?: number;
 }
 export interface Assignment {
   retired?: boolean;
@@ -60,6 +64,10 @@ export interface Assignment {
   templateVersion?: number;
   neutralConceptCode?: NeutralConceptCode;
   taxonomyVersion?: 2;
+  taskCode?: string;
+  taskCatalogVersion?: number;
+  businessUnitCode?: ParisBusinessUnitCode;
+  taskParameters?: Record<string, string>;
   id: string;
   templateId: string | null;
   title: string;
@@ -89,6 +97,10 @@ export interface Task {
   templateVersion?: number;
   neutralConceptCode?: NeutralConceptCode;
   taxonomyVersion?: 2;
+  taskCode?: string;
+  taskCatalogVersion?: number;
+  businessUnitCode?: ParisBusinessUnitCode;
+  taskParameters?: Record<string, string>;
   scheduledOn?: string;
   /** Actor who performed the latest completion in this local laboratory. */
   completedBy?: string;
@@ -245,6 +257,7 @@ export interface Annotation {
   convertedTaskId: string | null;
 }
 export interface Onboarding {
+  selectedBusinessUnitCodes?: ParisBusinessUnitCode[];
   assignmentCompanyIds?: Record<string, string[]>;
   schedules?: Record<string, Schedule>;
   /** New inductions save recurrence and target independently for each company. */
@@ -288,6 +301,10 @@ export interface HabitualTaskProposalDraft {
   starterId?: string;
   neutralConceptCode?: NeutralConceptCode;
   taxonomyVersion?: 2;
+  taskCode?: string;
+  taskCatalogVersion?: number;
+  businessUnitCode?: ParisBusinessUnitCode;
+  taskParameters?: Record<string, string>;
   title: string;
   process: string;
   description: string;
@@ -301,6 +318,10 @@ export interface HabitualTaskProposal {
   ownerId: string;
   companyId: string;
   starterId?: string;
+  taskCode?: string;
+  taskCatalogVersion?: number;
+  businessUnitCode?: ParisBusinessUnitCode;
+  taskParameters?: Record<string, string>;
   originalTitle: string;
   title: string;
   process: string;
@@ -322,6 +343,10 @@ export interface HabitualTaskProposal {
   submissions: {
     revision: number;
     starterId?: string;
+    taskCode?: string;
+    taskCatalogVersion?: number;
+    businessUnitCode?: ParisBusinessUnitCode;
+    taskParameters?: Record<string, string>;
     title: string;
     process: string;
     description: string;
@@ -613,6 +638,8 @@ export function materialize(s: State, month: string): State {
         templateId: a.templateId,
         ...(a.templateVersion === undefined ? {} : { templateVersion: a.templateVersion }),
         ...(a.neutralConceptCode === undefined ? {} : { neutralConceptCode: a.neutralConceptCode, taxonomyVersion: a.taxonomyVersion }),
+        ...(a.taskCode === undefined ? {} : { taskCode: a.taskCode, taskCatalogVersion: a.taskCatalogVersion, businessUnitCode: a.businessUnitCode }),
+        ...(a.taskParameters === undefined ? {} : { taskParameters: { ...a.taskParameters } }),
         title: a.title,
         ownerId: a.ownerId,
         companyId: a.companyId,

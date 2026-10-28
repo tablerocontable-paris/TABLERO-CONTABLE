@@ -30,6 +30,8 @@ export interface CatalogueVersion {
   sourceProposalId?: string;
   neutralConceptCode?: NeutralConceptCode;
   taxonomyVersion?: 2;
+  taskCode?: string;
+  taskCatalogVersion?: number;
 }
 
 export type KaizenStatus = "proposed" | "testing" | "measured" | "adopted" | "rejected";
@@ -190,12 +192,13 @@ export function canViewFiveSReview(state: State, actor: Profile, review: FiveSRe
     review.items.some((item) => canAccessProcessSubject(state, actor, item.responsibleId, review.companyId));
 }
 
-function sameTemplateSnapshot(version: Pick<CatalogueVersion, "title" | "sector" | "kind" | "weight" | "unit" | "target" | "description" | "steps" | "neutralConceptCode" | "taxonomyVersion">, template: Template) {
+function sameTemplateSnapshot(version: Pick<CatalogueVersion, "title" | "sector" | "kind" | "weight" | "unit" | "target" | "description" | "steps" | "neutralConceptCode" | "taxonomyVersion" | "taskCode" | "taskCatalogVersion">, template: Template) {
   return version.title === template.title && version.sector === template.sector &&
     version.kind === template.kind && version.weight === template.weight &&
     version.unit === template.unit && version.target === template.target &&
     version.description === template.description && JSON.stringify(version.steps) === JSON.stringify(template.steps) &&
-    version.neutralConceptCode === template.neutralConceptCode && version.taxonomyVersion === template.taxonomyVersion;
+    version.neutralConceptCode === template.neutralConceptCode && version.taxonomyVersion === template.taxonomyVersion &&
+    version.taskCode === template.taskCode && version.taskCatalogVersion === template.taskCatalogVersion;
 }
 
 function snapshot(
@@ -216,6 +219,7 @@ function snapshot(
     description: template.description, capturedAt, effectiveOn, createdBy,
     source, changeReason, ...(sourceProposalId ? { sourceProposalId } : {}),
     ...(template.neutralConceptCode ? { neutralConceptCode: template.neutralConceptCode, taxonomyVersion: template.taxonomyVersion } : {}),
+    ...(template.taskCode ? { taskCode: template.taskCode, taskCatalogVersion: template.taskCatalogVersion } : {}),
   };
 }
 
@@ -254,7 +258,8 @@ export function pinMatchingCatalogueAssignments(state: State): State {
     if (!template || !version || assignment.title !== template.title || assignment.sector !== template.sector ||
         assignment.kind !== template.kind || assignment.weight !== template.weight || assignment.unit !== template.unit ||
         assignment.target !== template.target || JSON.stringify(assignment.steps) !== JSON.stringify(template.steps) ||
-        assignment.neutralConceptCode !== template.neutralConceptCode || assignment.taxonomyVersion !== template.taxonomyVersion) return assignment;
+        assignment.neutralConceptCode !== template.neutralConceptCode || assignment.taxonomyVersion !== template.taxonomyVersion ||
+        assignment.taskCode !== template.taskCode || assignment.taskCatalogVersion !== template.taskCatalogVersion) return assignment;
     return { ...assignment, templateVersion: version };
   });
   return { ...state, assignments };

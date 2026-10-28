@@ -2,30 +2,33 @@
 
 ## Catálogo Grupo París — normalización inicial
 
-Se preparó `docs/product/BUSINESS-UNIT-TASK-CATALOG-DRAFT-20261028.md` a
-partir de los títulos legibles en las capturas enviadas. Define las siete
-unidades de negocio solicitadas como dimensión separada de empresa legal,
-normaliza familias de trabajo con códigos propuestos y separa bancos, marcas,
-sucursales y otras variantes como parámetros. Los nombres alternativos quedan
-como alias; las tareas ambiguas permanecen fuera del catálogo seleccionable
-hasta confirmar su significado. Las capturas son parciales y no permiten medir
-frecuencias.
+Implementación local en curso basada en las tareas visibles de las capturas y
+el borrador `docs/product/BUSINESS-UNIT-TASK-CATALOG-DRAFT-20261028.md`. El
+catálogo contiene 7 unidades de negocio y 50 códigos de tarea: 21 se pueden
+seleccionar y 29 siguen en revisión porque sus alcances o siglas son ambiguos.
+Cada persona elige unidad y tarea con nombre canónico; el código, unidad,
+versión y parámetros pasan de la inducción a la propuesta, asignación y tarea.
+Banco y cuenta son obligatorios para conciliación bancaria. La revisión agrupa
+por unidad y parámetros; la analítica muestra la misma tarea entre unidades y
+no infiere identidad en trabajo histórico.
 
-Los datos versionados reutilizables ya están en
-`src/domain/parisTaskCatalog.ts`: siete códigos de unidad, catálogo de tareas,
-alias exactos sin reescritura automática y una lista de selección que excluye
-los renglones pendientes de revisión. La prueba focal está en
-`tests/paris-task-catalog.test.ts`. Esta capa de dominio todavía no está
-conectada al onboarding ni guarda unidad/código en asignaciones o tareas.
+Validación: la suite completa anterior pasó **859/859 en 87 archivos**; después
+del último ajuste del borrador, TypeScript y 57/57 pruebas focales pasaron. El
+build cliente/Worker y paquete Sites también aprobaron. El build conserva avisos
+de Rollup por comentarios de Zod y un chunk principal de 653 kB. La revisión
+independiente confirmó separación de grupos, parámetros requeridos y
+compatibilidad de borradores. El alta canónica sigue
+siendo local al laboratorio; no habilitar ni publicar escrituras remotas.
+Supabase y SQL001–016 no se modificaron. Las 29 tareas en revisión requieren
+definición de jefatura antes de seleccionarse; las capturas parciales no prueban
+cobertura exhaustiva ni frecuencias. Un estado con tareas/propuestas canónicas
+ya enviadas sin parámetros requeridos será rechazado al cargar para no medirlo
+mal; esa combinación no se había publicado y requiere reparación explícita si
+aparece en un respaldo previo.
 
-Esto es una especificación revisable, no un cambio de interfaz/base de datos:
-`companyId`, el primer ingreso, los títulos editables y los códigos neutrales
-v2 siguen sin cambios. El catálogo aún no está conectado a selección de unidad
-de negocio ni a tareas canónicas en onboarding; hace falta una evolución
-compatible del modelo local y del contrato autenticado, conservando tareas y
-reportes históricos. No se tocó Supabase ni SQL001–016. La revisión de
-continuidad debe usar este catálogo específico de Grupo París, no confundirlo con
-el conteo de personas o volúmenes.
+La lectura de actividad real o estimaciones de personal/volumen no forma parte
+de esta corrección. No se necesitan datos reales para seleccionar y normalizar
+el catálogo.
 
 ## Corte anterior verificado 27/10/2026
 

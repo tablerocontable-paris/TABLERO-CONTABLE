@@ -35,7 +35,7 @@ function draft(step: number): Draft {
 }
 
 describe("inducción de tareas habituales", () => {
-  it("ofrece sugerencias v2 agrupadas y no seleccionadas; conserva los IDs v1", () => {
+  it("conserva sugerencias y selección de un onboarding legado; preserva los IDs v1", () => {
     const state = seed();
     const ids = NEUTRAL_STARTER_CATALOG.map((task) => task.id);
     expect(NEUTRAL_STARTER_CATALOG_VERSION).toBe(1);
@@ -44,8 +44,8 @@ describe("inducción de tareas habituales", () => {
     expect(ids.some((id) => state.templates.some((template) => template.id === id))).toBe(false);
     expect(new Set(state.templates.map((template) => template.id)).size).toBe(state.templates.length);
     const update = vi.fn<(value: Draft) => void>();
-    const freshDraft = { ...draft(2), selectedTemplateIds: [] };
-    const view = render(<Onboarding state={state} month="2026-10" profile={state.profiles.find((profile) => profile.id === "e0")!} draft={freshDraft} update={update} finish={() => {}} pause={() => {}} laboratory />);
+    const legacyDraft: Draft = { ...draft(2), selectedTemplateIds: ["cat3"] };
+    const view = render(<Onboarding state={state} month="2026-10" profile={state.profiles.find((profile) => profile.id === "e0")!} draft={legacyDraft} update={update} finish={() => {}} pause={() => {}} laboratory />);
     expect(NEUTRAL_STARTER_SUGGESTIONS_VERSION).toBe(2);
     expect(Object.keys(NEUTRAL_STARTER_GROUP_DESCRIPTIONS)).toHaveLength(5);
     expect(NEUTRAL_STARTER_SUGGESTIONS).toHaveLength(26);
@@ -54,40 +54,35 @@ describe("inducción de tareas habituales", () => {
     expect(view.container.querySelectorAll(".starter-suggestion-detail[open]")).toHaveLength(0);
     expect(view.container.querySelectorAll(".starter-suggestion-detail .primary")).toHaveLength(26);
     expect((screen.getByLabelText(/Sólo seleccionadas/) as HTMLInputElement).checked).toBe(false);
-    expect(freshDraft.habitualTaskProposals).toHaveLength(0);
-    expect(freshDraft.selectedTemplateIds).toEqual([]);
+    expect(legacyDraft.habitualTaskProposals).toHaveLength(0);
+    expect(legacyDraft.selectedTemplateIds).toEqual(["cat3"]);
     expect(NEUTRAL_STARTER_CATALOG.map((entry) => entry.id)).toEqual([
       "starter-v1-bank-reconciliation", "starter-v1-tax-obligations", "starter-v1-document-recording",
       "starter-v1-procedure-follow-up", "starter-v1-payment-processing", "starter-v1-accounting-close",
     ]);
   });
 
-  it("searches aliases, prepares editable proposal fields and retains the selection in its draft", () => {
+  it("selects a canonical task and stores bank/account parameters without allowing a renamed task", () => {
     const state = seed();
-    const initial: Draft = { ...draft(2), selectedTemplateIds: [], habitualTaskProposals: [] };
+    const initial: Draft = { ...draft(2), selectedTemplateIds: [], selectedBusinessUnitCodes: ["paris_autos"], habitualTaskProposals: [] };
     let saved = initial;
     function Harness() {
       const [current, setCurrent] = useState(initial);
       return <Onboarding state={state} month="2026-10" profile={state.profiles.find((profile) => profile.id === "e0")!} draft={current} update={(next) => { saved = next; setCurrent(next); }} finish={() => {}} pause={() => {}} laboratory />;
     }
     render(<Harness />);
-    fireEvent.change(screen.getByPlaceholderText("Buscar por nombre, alias o grupo"), { target: { value: "extracto" } });
-    expect(screen.getByText("Conciliación de cuenta bancaria")).toBeTruthy();
-    fireEvent.click(screen.getByText("Conciliación de cuenta bancaria"));
-    fireEvent.click(screen.getByRole("button", { name: "Preparar propuesta editable" }));
+    const bankRow = Array.from(document.querySelectorAll(".paris-task-catalog-item"))
+      .find((row) => row.textContent?.includes("Conciliación bancaria")) as HTMLElement;
+    fireEvent.click(within(bankRow).getByRole("button", { name: /PARIS AUTOS/ }));
+    fireEvent.change(screen.getByLabelText("banco · obligatorio"), { target: { value: "Banco Francés" } });
+    fireEvent.change(screen.getByLabelText("cuenta · obligatorio"), { target: { value: "Cuenta principal" } });
     expect(saved.habitualTaskProposals).toHaveLength(1);
     expect(saved.habitualTaskProposals?.[0]).toMatchObject({
-      starterId: NEUTRAL_STARTER_SUGGESTIONS[0]!.id,
-      title: "Conciliación de cuenta bancaria",
-      description: expect.any(String), kind: "resultado", steps: expect.arrayContaining([expect.any(String)]), companyIds: [],
+      taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 1, businessUnitCode: "paris_autos",
+      taskParameters: { banco: "Banco Francés", cuenta: "Cuenta principal" },
+      title: "Conciliación bancaria", kind: "resultado",
     });
-    expect(screen.getByLabelText("Nombre editable")).toBeTruthy();
-    expect(screen.getByLabelText("Descripción editable")).toBeTruthy();
-    expect(screen.getByText(/no se generan tareas, metas, pesos ni vencimientos/i)).toBeTruthy();
-    fireEvent.change(screen.getByLabelText("Nombre editable"), { target: { value: "Nombre revisado" } });
-    expect(saved.habitualTaskProposals?.[0]?.title).toBe("Nombre revisado");
-    fireEvent.click(screen.getByText(/Sólo seleccionadas/));
-    expect(screen.getByText("11 sugerencias · 1 seleccionadas")).toBeTruthy();
+    expect(screen.queryByLabelText("Nombre editable")).toBeNull();
   });
 
   it("permite continuar con una sugerencia válida aunque quede abierto un formulario habitual incompleto", async () => {
@@ -229,7 +224,7 @@ describe("inducción de tareas habituales", () => {
     expect(update.mock.calls.at(-1)?.[0].selectedTemplateIds).not.toContain(v1.id);
   });
 
-  it("captura el nombre libre como propuesta pendiente, no como tarea esporádica", () => {
+  it("solo conserva nombres libres para una propuesta explícita de tarea aún no catalogada", () => {
     const state = seed();
     const initial: Draft = { ...draft(2), selectedTemplateIds: [], companySchedules: {} };
     let saved = initial;
@@ -239,15 +234,15 @@ describe("inducción de tareas habituales", () => {
     }
     render(<Harness />);
     fireEvent.click(screen.getByText("Proponer una tarea habitual que falta"));
-    fireEvent.change(screen.getByLabelText("Nombre de la tarea"), { target: { value: "CONC BNA Empresa 1" } });
-    fireEvent.change(screen.getByLabelText("Banco o nombre del proceso · opcional"), { target: { value: "Banco Nación" } });
+    fireEvent.change(screen.getByLabelText("Nombre de la tarea"), { target: { value: "Control de documentación pendiente" } });
+    fireEvent.change(screen.getByLabelText("Banco o nombre del proceso · opcional"), { target: { value: "Documentación" } });
     fireEvent.change(screen.getByLabelText("¿Qué trabajo realizás?"), { target: { value: "Conciliar movimientos y dejar evidencia." } });
     const proposalForm = within(document.querySelector(".habitual-proposal-form")!);
     fireEvent.click(proposalForm.getByRole("button", { name: "Agregar paso" }));
     fireEvent.change(proposalForm.getByLabelText("Paso 1"), { target: { value: "Descargar el extracto" } });
     fireEvent.click(screen.getByRole("button", { name: "Agregar propuesta" }));
     expect(saved.habitualTaskProposals).toHaveLength(1);
-    expect(saved.habitualTaskProposals?.[0]).toMatchObject({ title: "CONC BNA Empresa 1", process: "Banco Nación", companyIds: ["c1", "c2"], steps: ["Descargar el extracto"] });
+    expect(saved.habitualTaskProposals?.[0]).toMatchObject({ title: "Control de documentación pendiente", process: "Documentación", companyIds: ["c1", "c2"], steps: ["Descargar el extracto"] });
     expect(saved.customTasks).toHaveLength(0);
   });
 

@@ -20,6 +20,8 @@ export interface ParisTaskDefinition {
   kind: "deliverable" | "operational";
   unit?: string;
   parameters: readonly string[];
+  /** Fields required to distinguish this work in cross-unit reporting. */
+  requiredParameters?: readonly string[];
   aliases: readonly string[];
   state: ParisTaskReviewState;
 }
@@ -30,16 +32,18 @@ export interface ParisTaskDefinition {
  * Ambiguous rows stay out of default selection until their scope is confirmed.
  */
 export const PARIS_TASK_CATALOG: readonly ParisTaskDefinition[] = [
-  { code: "gpar_bank_reconciliation", label: "Conciliación bancaria", group: "Tesorería", kind: "deliverable", parameters: ["banco", "cuenta", "período"], aliases: ["conciliacion banco frances", "conciliacion banco frances pa", "conciliacion bancaria", "conciliacion bancaria de todas las entidades bancarias"], state: "selectable" },
+  { code: "gpar_bank_reconciliation", label: "Conciliación bancaria", group: "Tesorería", kind: "deliverable", parameters: ["banco", "cuenta", "período"], requiredParameters: ["banco", "cuenta"], aliases: ["conciliacion banco frances", "conciliacion banco frances pa", "conciliacion bancaria", "conciliacion bancaria de todas las entidades bancarias"], state: "selectable" },
   { code: "gpar_mp_reconciliation", label: "Conciliación de movimientos de Mercado Pago", group: "Tesorería", kind: "deliverable", parameters: ["cuenta o comercio", "período"], aliases: ["coinciliacion mercado pago", "conciliacion mercado pago"], state: "selectable" },
   { code: "cash_count", label: "Arqueo de caja", group: "Tesorería", kind: "deliverable", parameters: ["sucursal", "caja", "turno o fecha"], aliases: ["arqueo caja", "arqueo de cajas"], state: "selectable" },
   { code: "document_archive", label: "Archivo y organización de documentación", group: "Documentación", kind: "operational", unit: "documentos", parameters: ["tipo de documento", "ubicación"], aliases: ["archivo de documentacion"], state: "selectable" },
   { code: "supplier_invoice_load", label: "Carga de facturas de proveedores", group: "Compras", kind: "operational", unit: "facturas", parameters: ["proveedor", "clase", "sucursal", "sistema u origen"], aliases: ["carga de factura proveedores", "carga facturas proveedores", "cargas facturas proveedores", "cargar facturas de compras", "carga de facturas gm", "carga facturas gm casos puntuales", "carga de factura chevrolet sa", "carga de facturas portal stellantis"], state: "selectable" },
+  { code: "invoice_load_other", label: "Carga de otras facturas", group: "Compras", kind: "operational", unit: "facturas", parameters: ["tipo", "proveedor", "sucursal"], aliases: ["carga de facturas varias"], state: "review" },
   { code: "parts_invoice_load", label: "Carga de facturas de repuestos", group: "Compras", kind: "operational", unit: "facturas", parameters: ["sucursal"], aliases: ["carga facturas repuestos paris cars suc 3", "carga factura repuestos paris cars suc 81"], state: "selectable" },
   { code: "new_vehicle_invoice_load", label: "Carga de facturas de vehículos nuevos", group: "Compras", kind: "operational", unit: "facturas", parameters: ["marca", "sucursal", "etapa de recepción"], aliases: ["carga de facturas vehiculos nuevos chevrolet", "carga factura vn pa"], state: "review" },
   { code: "zero_km_invoice_receipt", label: "Registro de factura de unidad 0 km al recibirla", group: "Compras", kind: "operational", unit: "unidades", parameters: ["marca", "vehículo", "sucursal"], aliases: ["carga fc unidades 0km al recepcionar en sucursal"], state: "selectable" },
   { code: "service_invoice_load", label: "Carga de facturas de proveedores de servicios", group: "Compras", kind: "operational", unit: "facturas", parameters: ["proveedor", "tratamiento de caja"], aliases: ["carga de facturas proveedores de servicios conjunta con caja"], state: "review" },
-  { code: "supplier_payment", label: "Preparación y registro de pagos a proveedores", group: "Tesorería", kind: "operational", unit: "pagos", parameters: ["proveedor", "banco o medio", "etapa"], aliases: ["carga de pagos a proveedores", "carga de pagos pda"], state: "review" },
+  { code: "supplier_payment", label: "Preparación y registro de pagos a proveedores", group: "Tesorería", kind: "operational", unit: "pagos", parameters: ["proveedor", "banco o medio", "etapa"], aliases: ["carga de pagos a proveedores"], state: "review" },
+  { code: "dealer_credits_payment_load", label: "Carga de pagos PDA", group: "Tesorería", kind: "operational", unit: "pagos", parameters: ["entidad", "proceso", "período"], aliases: [], state: "review" },
   { code: "bank_transfer_register", label: "Registro de transferencias bancarias", group: "Tesorería", kind: "operational", unit: "transferencias", parameters: ["banco", "cuenta", "destinatario", "motivo"], aliases: ["carga de transferencia bancaria", "carga de transferencias"], state: "review" },
   { code: "supplier_payment_transfer", label: "Transferencias de pago a proveedores", group: "Tesorería", kind: "operational", unit: "transferencias", parameters: ["banco", "cuenta", "proveedor"], aliases: ["carga de transferencias de pago a proveedores"], state: "review" },
   { code: "salary_data_load", label: "Carga de información de sueldos", group: "Sueldos", kind: "operational", unit: "registros", parameters: ["período", "sistema"], aliases: ["carga de sueldos", "carga sueldos"], state: "selectable" },
@@ -61,7 +65,8 @@ export const PARIS_TASK_CATALOG: readonly ParisTaskDefinition[] = [
   { code: "service_register_update", label: "Actualización del tablero de servicios de internet", group: "Administración", kind: "operational", unit: "servicios", parameters: ["proveedor", "servicio", "período"], aliases: ["completar tablero servicios internet"], state: "review" },
   { code: "supplies_purchase_control", label: "Compra y control de insumos", group: "Administración", kind: "operational", unit: "compras", parameters: ["categoría", "proveedor", "período"], aliases: ["compra y control insumos informaticos y limpieza"], state: "review" },
   { code: "cheque_nosis_verification", label: "Verificación de cheques en Nosis", group: "Tesorería", kind: "operational", unit: "cheques", parameters: ["cheque", "fecha"], aliases: ["cintrol nosis cheques", "control nosis cheques"], state: "review" },
-  { code: "customer_collections", label: "Registro de cobros de clientes", group: "Tesorería", kind: "operational", unit: "cobros", parameters: ["cliente", "medio", "fecha"], aliases: ["cobro a clientes", "cobranza vn vo pda"], state: "review" },
+  { code: "customer_collections", label: "Registro de cobros de clientes", group: "Tesorería", kind: "operational", unit: "cobros", parameters: ["cliente", "medio", "fecha"], aliases: ["cobro a clientes"], state: "review" },
+  { code: "vehicle_collection", label: "Cobro de operaciones de vehículos", group: "Tesorería", kind: "operational", unit: "cobros", parameters: ["tipo de operación", "medio", "fecha"], aliases: ["cobranza vn vo pda"], state: "review" },
   { code: "sector_cash_collections", label: "Registro de cobros de caja por sector", group: "Tesorería", kind: "operational", unit: "cobros", parameters: ["sector", "sucursal", "fecha"], aliases: ["cobro caja taller repuestos chapa", "cobro en caja vn vo pda pv"], state: "review" },
   { code: "workshop_invoice_collection", label: "Cobro de facturas de taller", group: "Tesorería", kind: "operational", unit: "facturas", parameters: ["cliente", "factura", "fecha"], aliases: ["cobro factura taller"], state: "review" },
   { code: "vehicle_exit_collection", label: "Cobro asociado a la salida diaria de vehículos", group: "Tesorería", kind: "operational", unit: "operaciones", parameters: ["vehículo", "operación", "fecha"], aliases: ["cobro de salida de vehiculos del dia"], state: "review" },
@@ -71,8 +76,9 @@ export const PARIS_TASK_CATALOG: readonly ParisTaskDefinition[] = [
   { code: "operations_analysis_mo4", label: "Análisis y resumen de operaciones", group: "Análisis", kind: "deliverable", parameters: ["período", "reporte MO4"], aliases: ["analisis y resumen de operaciones mo4 sep"], state: "review" },
   { code: "pymes_bonus_analysis", label: "Análisis de Bonis PYMES", group: "Análisis", kind: "deliverable", parameters: ["período", "criterio"], aliases: ["analisis bonis pymes"], state: "review" },
   { code: "municipal_fees_accrual", label: "Registración de cánones municipales acumulados", group: "Contabilidad", kind: "deliverable", parameters: ["municipio", "período"], aliases: ["canon municipal acumulados", "canon municipal acumulado"], state: "review" },
-  { code: "vehicle_model_change", label: "Gestión de cambio de modelo de vehículo", group: "Administración", kind: "operational", unit: "operaciones", parameters: ["vehículo", "fecha"], aliases: ["carga y pago de cambio de modelo"], state: "review" },
-  { code: "vehicle_transfers_pda", label: "Registro de transferencias de VN, VO y PDA", group: "Tesorería", kind: "operational", unit: "transferencias", parameters: ["tipo de operación", "medio", "período"], aliases: ["carga transferencias vn vo pda"], state: "review" },
+  { code: "vehicle_model_change_payment", label: "Gestión del cambio de modelo y su pago", group: "Administración", kind: "operational", unit: "operaciones", parameters: ["vehículo", "operación", "fecha"], aliases: ["carga y pago de cambio de modelo"], state: "review" },
+  { code: "vehicle_transfers_pda", label: "Registro de transferencias de VN, VO y PDA", group: "Tesorería", kind: "operational", unit: "transferencias", parameters: ["tipo de operación", "medio", "período"], aliases: [], state: "review" },
+  { code: "supplier_payment_transfer_vn_vo_pda", label: "Carga de transferencias de VN/VO/PDA", group: "Tesorería", kind: "operational", unit: "transferencias", parameters: ["tipo de operación", "medio", "período"], aliases: ["carga de transferencias vn vo pda"], state: "review" },
   { code: "cheque_operation_load", label: "Carga de cheques en operación", group: "Tesorería", kind: "operational", unit: "cheques", parameters: ["operación", "sistema"], aliases: ["carga de cheqs en operacion"], state: "review" },
   { code: "team_followup_review", label: "Revisión de seguimiento del equipo", group: "Supervisión", kind: "deliverable", parameters: ["equipo", "período"], aliases: ["checkpoint supervision del equipo"], state: "review" },
   { code: "gm_collection_register", label: "Registro de cobros de GM", group: "Tesorería", kind: "operational", unit: "cobros", parameters: ["entidad", "medio", "período"], aliases: ["cobros gm registro"], state: "review" },
@@ -96,6 +102,38 @@ for (const task of PARIS_TASK_CATALOG) {
 
 export function getParisTask(code: string): ParisTaskDefinition | undefined {
   return taskByCode.get(code);
+}
+
+export function parisTaskParameterKey(label: string): string {
+  return normalize(label).replace(/\s+/g, "_");
+}
+
+export function isParisTaskParameterSet(code: string, value: unknown): value is Record<string, string> {
+  const task = getParisTask(code);
+  if (!task || !value || typeof value !== "object" || Array.isArray(value)) return false;
+  const allowed = new Set(task.parameters.map(parisTaskParameterKey));
+  const parameters = value as Record<string, unknown>;
+  return Object.entries(parameters).every(([key, entry]) =>
+    allowed.has(key) && typeof entry === "string" && entry.trim().length <= 160,
+  );
+}
+
+export function hasRequiredParisTaskParameters(code: string, value: unknown): boolean {
+  if (!isParisTaskParameterSet(code, value)) return false;
+  const parameters = value as Record<string, string>;
+  return [...requiredParisTaskParameterKeys(code)].every((key) => (parameters[key] || "").trim().length > 0);
+}
+
+export function requiredParisTaskParameterKeys(code: string): ReadonlySet<string> {
+  return new Set((getParisTask(code)?.requiredParameters || []).map(parisTaskParameterKey));
+}
+
+export function isParisBusinessUnitCode(value: string): value is ParisBusinessUnitCode {
+  return PARIS_BUSINESS_UNITS.some((unit) => unit.code === value);
+}
+
+export function isSelectableParisTaskCode(value: string): boolean {
+  return taskByCode.get(value)?.state === "selectable";
 }
 
 /** Exact alias lookup for search/import review; never silently edits saved work. */

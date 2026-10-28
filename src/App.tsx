@@ -133,6 +133,7 @@ import { applyCompletionAttribution, linkEvidenceToCompletions } from "./domain/
 import { currentCatalogueVersion } from "./domain/processImprovement";
 import { materializeNeutralStarterAssignment } from "./domain/neutralStarterCatalog";
 import { submitHabitualTaskProposal } from "./domain/habitualTaskProposals";
+import { summarizeParisTaskWork } from "./domain/parisTaskAnalytics";
 import {
   canConvertInternalRequest,
   completeInternalRequestConversion,
@@ -827,14 +828,18 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
   const draft = state.onboarding[active.id] || blankOnboarding(active.name);
   function finishOnboarding() {
     const preparesPersonalTasks = active.role !== "jefe";
+    const hasLegacyOnboardingSelections = draft.selectedTemplateIds.length > 0 || (draft.customTasks?.length || 0) > 0 || !!draft.customTitle.trim() || (draft.habitualTaskProposals || []).some((proposal) => !proposal.taskCode);
+    const parisOnboarding = laboratory && !remoteSave && active.role !== "jefe" && (!hasLegacyOnboardingSelections || (draft.selectedBusinessUnitCodes?.length || 0) > 0);
     try {
+      if (parisOnboarding && !(draft.selectedBusinessUnitCodes?.length || 0))
+        throw Error("Elegí al menos una unidad de negocio antes de confirmar tus tareas.");
       if (preparesPersonalTasks) {
         const effectiveCompanies = new Map<string, Set<string>>();
         const addEffectiveCompanies = (key: string, companyIds: string[]) => {
           const selected = companyIds.filter((companyId) => draft.selectedCompanyIds.includes(companyId));
           if (selected.length) effectiveCompanies.set(key, new Set(selected));
         };
-        for (const taskId of draft.selectedTemplateIds) {
+        for (const taskId of draft.selectedTemplateIds.filter((taskId) => !parisOnboarding || !!state.templates.find((template) => template.id === taskId)?.taskCode)) {
           addEffectiveCompanies(taskId, draft.assignmentCompanyIds?.[taskId] || draft.selectedCompanyIds);
         }
         for (const task of draft.customTasks || []) {
@@ -842,7 +847,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
         }
         if (draft.customTitle.trim()) addEffectiveCompanies("custom", draft.assignmentCompanyIds?.custom || draft.selectedCompanyIds);
         if (laboratory && !remoteSave) {
-          for (const proposal of draft.habitualTaskProposals || []) addEffectiveCompanies(proposal.id, proposal.companyIds);
+          for (const proposal of draft.habitualTaskProposals || []) if (!parisOnboarding || proposal.taskCode) addEffectiveCompanies(proposal.id, proposal.companyIds);
         }
         for (const [key, companyIds] of effectiveCompanies) {
           const genericSchedule = draft.schedules?.[key];
@@ -879,7 +884,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
     const targetForCompany = (taskId: string, companyId: string, fallback: number) =>
       laboratory && !remoteSave ? (draft.companyTargets?.[taskId]?.[companyId] ?? fallback) : fallback;
     for (const cid of preparesPersonalTasks ? draft.selectedCompanyIds : []) {
-      for (const tid of draft.selectedTemplateIds) {
+      for (const tid of draft.selectedTemplateIds.filter((taskId) => !parisOnboarding || !!state.templates.find((template) => template.id === taskId)?.taskCode)) {
         if (
           !(
             draft.assignmentCompanyIds?.[tid] || draft.selectedCompanyIds
@@ -923,7 +928,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           priority: "Media",
         });
       }
-      const custom = [
+      const custom = parisOnboarding ? [] : [
         ...(draft.customTasks || []),
         ...(draft.customTitle.trim()
           ? [
@@ -974,11 +979,16 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
       try {
         const now = new Date().toISOString();
         for (const proposal of draft.habitualTaskProposals || []) {
+          if (parisOnboarding && !proposal.taskCode) continue;
           for (const cid of proposal.companyIds.filter((companyId) => draft.selectedCompanyIds.includes(companyId))) {
             const pending = submitHabitualTaskProposal({ ...state, habitualTaskProposals }, active, {
               id: proposal.starterId ? `${proposal.starterId}:${active.id}:${cid}` : `${proposal.id}:${cid}`,
               companyId: cid,
               starterId: proposal.starterId,
+            taskCode: proposal.taskCode,
+            taskCatalogVersion: proposal.taskCatalogVersion,
+            businessUnitCode: proposal.businessUnitCode,
+            taskParameters: proposal.taskParameters,
               title: proposal.title,
               process: proposal.process,
               description: proposal.description,
@@ -2480,6 +2490,22 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                     month={month}
                   />
                 )}
+                {laboratory && !remoteSave && <Panel title="Trabajo por tarea normalizada" sub="Misma tarea y unidad de negocio agrupadas con parámetros separados; los registros antiguos sin código quedan sin clasificar." collapsible defaultOpen={false}>
+                  {(() => {
+                    const metrics = summarizeParisTaskWork(filtered, state.activity);
+                    return metrics.length ? <div className="table-wrap"><table>
+                      <thead><tr><th>Tarea estándar</th><th>Unidad de negocio</th><th>Parámetros</th><th>Empresas</th><th>Asignadas</th><th>Completadas</th><th>Movimientos</th><th>Cantidad</th></tr></thead>
+                      <tbody>{metrics.map((metric) => <tr key={metric.key}>
+                        <td>{metric.title}{!metric.taskCode && <small className="unclassified-label"> · Sin clasificar</small>}</td>
+                        <td>{metric.businessUnitLabel}</td>
+                        <td>{Object.entries(metric.parameters).filter(([, value]) => value.trim()).map(([key, value]) => `${key.replace(/_/g, " ")}: ${value}`).join(" · ") || "Sin detalle"}</td>
+                        <td>{metric.companies.length}</td><td>{metric.assigned}</td><td>{metric.completed}</td>
+                        <td>{metric.kind === "operativa" ? metric.movementCount : "—"}</td>
+                        <td>{metric.kind === "operativa" ? `${metric.movementQuantity.toLocaleString("es-AR")} ${metric.unit}` : "—"}</td>
+                      </tr>)}</tbody>
+                    </table></div> : <Empty text="No hay tareas en el período y filtros seleccionados." />;
+                  })()}
+                </Panel>}
                 <div className="dashboard-row analytics-score-row">
                   <Panel
                     title="Cumplimiento ponderado"

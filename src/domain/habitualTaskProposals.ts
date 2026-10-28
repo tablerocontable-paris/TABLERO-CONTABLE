@@ -2,11 +2,16 @@ import { addCatalogueTemplate, currentCatalogueVersion, ensureCatalogueVersions 
 import { canSee, id, type HabitualTaskProposal, type Profile, type State, type Template } from "./model";
 import { validateSchedule, type Schedule } from "./schedule";
 import { CONCEPT_CODES, STARTER_CONCEPT_CODES, WORKFORCE_TAXONOMY_VERSION, type NeutralConceptCode } from "./workforceTaxonomy.mjs";
+import { getParisTask, hasRequiredParisTaskParameters, isParisBusinessUnitCode, isParisTaskParameterSet, PARIS_TASK_CATALOG_VERSION } from "./parisTaskCatalog";
 
 export interface HabitualProposalInput {
   id: string;
   companyId: string;
   starterId?: string;
+  taskCode?: string;
+  taskCatalogVersion?: number;
+  businessUnitCode?: import("./parisTaskCatalog").ParisBusinessUnitCode;
+  taskParameters?: Record<string, string>;
   title: string;
   process: string;
   description: string;
@@ -54,6 +59,7 @@ function cleanProposal(input: Omit<HabitualProposalInput, "id" | "companyId">) {
   const process = input.process.trim().replace(/\s+/g, " ");
   const description = input.description.trim();
   const unit = input.unit.trim().replace(/\s+/g, " ");
+  const taskParameters = input.taskParameters === undefined ? undefined : Object.fromEntries(Object.entries(input.taskParameters).map(([key, value]) => [key, value.trim()]));
   const steps = input.steps.map((step) => step.trim()).filter(Boolean);
   if (!title || title.length > 120) throw Error("La tarea necesita un nombre de hasta 120 caracteres.");
   if (process.length > 160) throw Error("El banco o proceso admite hasta 160 caracteres.");
@@ -62,8 +68,21 @@ function cleanProposal(input: Omit<HabitualProposalInput, "id" | "companyId">) {
     throw Error("La propuesta necesita entre 1 y 50 controles de hasta 300 caracteres.");
   if (!Number.isFinite(input.target) || input.target < 0) throw Error("El dato numérico de la propuesta no es válido.");
   if (input.kind === "operativa" && !unit) throw Error("Indicá la unidad de la tarea operativa.");
+  if (input.taskCode) {
+    const definition = getParisTask(input.taskCode);
+    if (!definition || definition.state !== "selectable" || input.taskCatalogVersion !== PARIS_TASK_CATALOG_VERSION ||
+        !input.businessUnitCode || !isParisBusinessUnitCode(input.businessUnitCode))
+      throw Error("La tarea estándar necesita un código, versión y unidad de negocio vigentes.");
+    const expectedKind = definition.kind === "operational" ? "operativa" : "resultado";
+    if (title !== definition.label || input.kind !== expectedKind || unit !== (definition.unit || ""))
+      throw Error("El nombre, tipo y unidad de una tarea estándar los define el catálogo; no se pueden editar.");
+    if (!isParisTaskParameterSet(input.taskCode, taskParameters || {}) || !hasRequiredParisTaskParameters(input.taskCode, taskParameters || {}))
+      throw Error("Completá los datos obligatorios para identificar esta tarea y verificá sus parámetros.");
+  } else if (input.taskCatalogVersion !== undefined || input.businessUnitCode !== undefined || taskParameters !== undefined) {
+    throw Error("La unidad de negocio sólo se puede asociar a una tarea estándar versionada.");
+  }
   validateSchedule(input.schedule);
-  return { title, process, description, unit, steps };
+  return { title, process, description, unit, steps, ...(taskParameters ? { taskParameters } : {}) };
 }
 
 export function submitHabitualTaskProposal(
@@ -86,6 +105,7 @@ export function submitHabitualTaskProposal(
   const snapshot = {
     revision: 1,
     ...(input.starterId ? { starterId: input.starterId } : {}),
+    ...(input.taskCode ? { taskCode: input.taskCode, taskCatalogVersion: input.taskCatalogVersion, businessUnitCode: input.businessUnitCode, ...(clean.taskParameters ? { taskParameters: clean.taskParameters } : {}) } : {}),
     title: clean.title,
     process: clean.process,
     description: clean.description,
@@ -102,6 +122,7 @@ export function submitHabitualTaskProposal(
     ownerId: actor.id,
     companyId: input.companyId,
     ...(input.starterId ? { starterId: input.starterId } : {}),
+    ...(input.taskCode ? { taskCode: input.taskCode, taskCatalogVersion: input.taskCatalogVersion, businessUnitCode: input.businessUnitCode, ...(clean.taskParameters ? { taskParameters: clean.taskParameters } : {}) } : {}),
     originalTitle: clean.title,
     ...neutral,
     ...snapshot,
@@ -136,7 +157,8 @@ export function groupHabitualTaskProposals(rows: HabitualTaskProposal[]): Propos
   const groups = new Map<string, HabitualTaskProposal[]>();
   for (const proposal of rows.filter((row) => row.status === "pending")) {
     const process = normalizeWords(`${proposal.title} ${proposal.process}`);
-    const key = [proposal.kind, proposal.kind === "operativa" ? normalizeWords(proposal.unit) : "", proposal.neutralConceptCode || "", proposal.taxonomyVersion || "", process].join("\u001f");
+    const parameterKey = JSON.stringify(Object.fromEntries(Object.entries(proposal.taskParameters || {}).sort(([a], [b]) => a.localeCompare(b))));
+    const key = [proposal.kind, proposal.kind === "operativa" ? normalizeWords(proposal.unit) : "", proposal.neutralConceptCode || "", proposal.taxonomyVersion || "", proposal.taskCode || "", proposal.taskCatalogVersion || "", proposal.businessUnitCode || "", parameterKey, process].join("\u001f");
     groups.set(key, [...(groups.get(key) || []), proposal]);
   }
   return [...groups.entries()]
@@ -193,14 +215,18 @@ export function resubmitHabitualTaskProposal(
   if ((input.neutralConceptCode !== undefined || input.taxonomyVersion !== undefined) &&
       (suppliedNeutral.neutralConceptCode !== proposal.neutralConceptCode || suppliedNeutral.taxonomyVersion !== proposal.taxonomyVersion))
     throw Error("La clasificación neutral aprobada no se puede cambiar al reenviar una propuesta.");
+  if (proposal.taskCode && (input.taskCode !== proposal.taskCode || input.taskCatalogVersion !== proposal.taskCatalogVersion || input.businessUnitCode !== proposal.businessUnitCode))
+    throw Error("La tarea estándar y la unidad de negocio no se pueden cambiar al reenviar la propuesta.");
   const neutral = classification({ ...proposal, starterId: proposal.starterId });
   const changed = proposal.title !== clean.title || proposal.process !== clean.process || proposal.description !== clean.description ||
     proposal.kind !== input.kind || proposal.unit !== clean.unit || proposal.target !== input.target ||
+    JSON.stringify(proposal.taskParameters || {}) !== JSON.stringify(clean.taskParameters || {}) ||
     JSON.stringify(proposal.schedule) !== JSON.stringify(input.schedule) || JSON.stringify(proposal.steps) !== JSON.stringify(clean.steps);
   if (!changed) throw Error("Hacé al menos el cambio solicitado antes de reenviar.");
   const revision = proposal.revision + 1;
   const submission = {
     revision, ...(proposal.starterId ? { starterId: proposal.starterId } : {}), title: clean.title, process: clean.process, description: clean.description,
+    ...(proposal.taskCode ? { taskCode: proposal.taskCode, taskCatalogVersion: proposal.taskCatalogVersion, businessUnitCode: proposal.businessUnitCode, ...(clean.taskParameters ? { taskParameters: clean.taskParameters } : {}) } : {}),
     kind: input.kind, unit: clean.unit, target: input.target,
     schedule: structuredClone(input.schedule), steps: clean.steps, ...neutral, submittedAt: now,
   };
@@ -232,8 +258,12 @@ export function approveHabitualTaskProposals(
   if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) throw Error("El período de asignación no es válido.");
   if (new Set(selected.map((row) => row.kind)).size !== 1 ||
       new Set(selected.map((row) => row.kind === "operativa" ? normalizeWords(row.unit) : "")).size !== 1 ||
-      new Set(selected.map((row) => `${row.neutralConceptCode || ""}:${row.taxonomyVersion || ""}`)).size !== 1)
-    throw Error("El grupo mezcla tipos o unidades que no comparten un estándar.");
+      new Set(selected.map((row) => `${row.neutralConceptCode || ""}:${row.taxonomyVersion || ""}`)).size !== 1 ||
+      new Set(selected.map((row) => `${row.taskCode || ""}:${row.taskCatalogVersion || ""}`)).size !== 1 ||
+      new Set(selected.map((row) => `${row.businessUnitCode || ""}:${JSON.stringify(Object.fromEntries(Object.entries(row.taskParameters || {}).sort(([a], [b]) => a.localeCompare(b))))}`)).size !== 1)
+    throw Error("El grupo mezcla tipos, unidades de negocio o parámetros que no comparten un estándar.");
+  if (selected.some((row) => row.taskCode && !hasRequiredParisTaskParameters(row.taskCode, row.taskParameters || {})))
+    throw Error("Completá los parámetros obligatorios de cada tarea antes de aprobarla.");
 
   const neutral = classification(selected[0]!);
 
@@ -244,6 +274,8 @@ export function approveHabitualTaskProposals(
     if (!template) throw Error("El estándar seleccionado ya no está disponible.");
     if (template.neutralConceptCode !== neutral.neutralConceptCode || template.taxonomyVersion !== neutral.taxonomyVersion)
       throw Error("El estándar y la propuesta no comparten una clasificación neutral confirmada.");
+    if (template.taskCode !== selected[0]!.taskCode || template.taskCatalogVersion !== selected[0]!.taskCatalogVersion)
+      throw Error("El estándar elegido no coincide con el código de tarea de la propuesta.");
   } else {
     const input = decision.template;
     const title = input.title.trim().replace(/\s+/g, " ");
@@ -257,6 +289,19 @@ export function approveHabitualTaskProposals(
     if (selected.some((row) => row.kind !== input.kind || (row.kind === "operativa" && normalizeWords(row.unit) !== normalizeWords(input.unit))))
       throw Error("El estándar debe conservar el tipo y la unidad de todas las propuestas del grupo.");
     const normalizedTitle = normalizeWords(title);
+    const taskCode = selected[0]!.taskCode;
+    const taskCatalogVersion = selected[0]!.taskCatalogVersion;
+    if (taskCode) {
+      const definition = getParisTask(taskCode);
+      if (!definition || definition.state !== "selectable" || taskCatalogVersion !== PARIS_TASK_CATALOG_VERSION || title !== definition.label || input.kind !== (definition.kind === "operational" ? "operativa" : "resultado") || (input.kind === "operativa" && normalizeWords(input.unit) !== normalizeWords(definition.unit || "")))
+        throw Error("La tarea estándar debe conservar su nombre, tipo, unidad y versión del catálogo.");
+      const description = input.description.trim();
+      const meaningfulSteps = input.steps.filter((step) => step.trim().length >= 10 && !/confirmar procedimiento y controles con jefatura/i.test(step.trim()));
+      if (description.length < 20 || /selección del catálogo grupo parís/i.test(description) || !meaningfulSteps.length)
+        throw Error("Antes de activar la tarea estándar, jefatura debe definir una descripción y al menos un control real.");
+      if (next.templates.some((row) => row.taskCode === taskCode && row.taskCatalogVersion === taskCatalogVersion))
+        throw Error("Este código ya tiene un estándar; vinculá la propuesta al estándar existente.");
+    }
     if (next.templates.some((row) => normalizeWords(row.title) === normalizedTitle))
       throw Error("Ya existe un estándar con ese nombre; vinculá las propuestas a ese proceso.");
     template = {
@@ -264,6 +309,7 @@ export function approveHabitualTaskProposals(
       weight: input.weight, unit: input.kind === "operativa" ? input.unit.trim() : "",
       target: 0,
       steps, description: input.description.trim(),
+      ...(taskCode ? { taskCode, taskCatalogVersion } : {}),
       ...neutral,
     };
     next = addCatalogueTemplate(next, template, actor, now, makeId);
@@ -290,6 +336,7 @@ export function approveHabitualTaskProposals(
     frequency: proposal.schedule.frequency,
     schedule: structuredClone(proposal.schedule),
     steps: [...template!.steps],
+    ...(proposal.taskCode ? { taskCode: proposal.taskCode, taskCatalogVersion: proposal.taskCatalogVersion, businessUnitCode: proposal.businessUnitCode, ...(proposal.taskParameters ? { taskParameters: { ...proposal.taskParameters } } : {}) } : {}),
     startMonth: month,
     priority: "Media" as const,
   }));

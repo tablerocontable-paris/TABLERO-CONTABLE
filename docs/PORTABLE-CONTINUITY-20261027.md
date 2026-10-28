@@ -1,5 +1,22 @@
 # Continuidad portable del proyecto — 28/10/2026
 
+## Actualización — catálogo normalizado conectado localmente
+
+El checkout de trabajo ya implementa la selección canónica en la inducción del
+laboratorio y conserva los códigos versionados de unidad/tarea y parámetros a
+través de propuesta, aprobación, asignación y ocurrencia. Unidades: PARIS AUTOS,
+DORAL, PARIS CARS, PARIS TRAC, MOTOR, FIDEICOMISO DESARROLLO y POSTVENTA.
+Conciliación bancaria exige banco y cuenta en campos separados; el nombre de
+tarea no es editable. El análisis agrupa por tarea, unidad, período y parámetros
+sin inferir códigos para el historial anterior. 21 códigos están disponibles y
+29 continúan en revisión. TypeScript y 85 pruebas focales pasaron. Falta validar
+la suite completa final y hook, publicar el commit en `main`, revisar Actions y
+desplegar al mismo Site privado. No se modificaron Supabase ni SQL001–016.
+
+Esta actualización reemplaza, para el estado del catálogo, los párrafos
+históricos que dicen que aún falta integrar la UI. Las siguientes PC deben
+traer el commit publicado más reciente en `main`.
+
 ## Actualización 28/10 — catálogo Grupo París
 
 El commit `740804c` documenta las unidades y la normalización inicial; el
