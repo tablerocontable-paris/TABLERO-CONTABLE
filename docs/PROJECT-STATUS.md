@@ -12,11 +12,12 @@ sucursal y período permanecen como dimensiones separadas. Se preserva lectura
 versionada del catálogo v1 para propuestas ya guardadas.
 
 La validación local de v2 pasó **863/863 en 87 archivos**, TypeScript, build
-cliente, Worker y paquete Sites. Las pruebas focales pasaron **49/49**. La
-revisión detectó y corrigió un alias faltante para “Cierre de cuenta mensual”.
-Pendiente: commit y push directo a `main`, luego actualizar el mismo Site
-privado y confirmar su versión/acceso. La última versión desplegada antes de
-v2 era v100, owner-only, con el commit `e3758a5` de su fuente conectada.
+cliente, Worker y paquete Sites; las pruebas focales pasaron **49/49** y el
+hook previo al commit **222/222**. El catálogo está en GitHub `main` mediante
+el commit `14c8c3f`, directo y sin PR. El mismo Site se actualizó a v101 desde
+el commit de fuente Sites `3961364`; acceso personalizado conserva sólo al
+propietario y cero visitantes externos. La revisión detectó y corrigió un alias
+faltante para “Cierre de cuenta mensual”.
 Build conserva avisos de Rollup por comentarios de Zod y un chunk de 653 kB.
 Supabase, Auth, API y SQL001–016 no se tocaron. El trabajo histórico no se
 reclasifica por su título y las filas ambiguas no se ofrecen en primer ingreso.

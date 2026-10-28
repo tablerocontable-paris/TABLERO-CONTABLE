@@ -16,8 +16,10 @@ aprobar una cuenta o proceso bajo otra unidad. Se preserva el borrador legado
 para no romper el Worker estricto. No se modificó `/api`, Supabase Auth ni
 SQL001–016; esta implementación sólo es del laboratorio local. La versión v2
 pasó **863/863** pruebas en 87 archivos, TypeScript, build cliente, Worker y
-paquete Sites. Falta publicar el commit directamente en `main` y actualizar el
-mismo Site privado, conservando su audiencia.
+paquete Sites; el hook pasó **222/222**. Commit `14c8c3f` está en `main` sin PR
+y el mismo Site privado está actualizado a v101 desde su fuente `3961364`.
+La tarea siguiente es continuar clasificando los términos marcados para revisión
+cuando haya más detalle funcional, sin incorporarlos al selector libremente.
 
 No se requieren exportaciones ni datos de personal para normalizar nombres y
 unidades. El borrador de referencia y los criterios de ambigüedad están en
