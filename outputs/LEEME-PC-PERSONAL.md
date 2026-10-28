@@ -17,10 +17,23 @@ traslado del proyecto.
    acceso al repositorio privado.
 2. Instalá Git for Windows y Node.js 24 LTS si todavía no están instalados.
    Node.js instala `npm`.
-3. En PowerShell, elegí una carpeta para el proyecto y ejecutá:
+3. Abrí PowerShell y comprobá las herramientas:
 
    ```powershell
-   cd $HOME\Documents
+   git --version
+   node --version
+   npm --version
+   ```
+
+   `node --version` debe mostrar una versión `v24.x`. Si `git clone` pide
+   iniciar sesión, usá la ventana de autenticación de Git Credential Manager
+   con la cuenta `tablerocontable-paris`; no pegues contraseñas ni tokens en
+   Codex.
+4. En PowerShell, elegí una carpeta para el proyecto y ejecutá:
+
+   ```powershell
+   New-Item -ItemType Directory -Force -Path "$HOME\Documents" | Out-Null
+   Set-Location "$HOME\Documents"
    git clone https://github.com/tablerocontable-paris/TABLERO-CONTABLE.git
    cd TABLERO-CONTABLE
    npm ci
@@ -28,10 +41,18 @@ traslado del proyecto.
    npm run dev -- --host 127.0.0.1
    ```
 
-4. Abrí `http://127.0.0.1:5173`.
-5. Para trabajar con Codex en esa PC, abrí la carpeta clonada en Codex y
-   conectá la misma cuenta de GitHub. Para cambios desde ChatGPT, usá la
-   integración GitHub vinculada a esa cuenta.
+5. Abrí `http://127.0.0.1:5173` para ver la copia local. Para trabajar con
+   Codex, abrí la carpeta `TABLERO-CONTABLE` clonada en Codex e iniciá sesión
+   en GitHub con la cuenta que tiene acceso al repositorio.
+6. Al abrir el repo en Codex, podés pedirle:
+
+   > Continuá este proyecto existente desde este repositorio. Antes de editar,
+   > leé `AGENTS.md`, `docs/PROJECT-STATUS.md`, `docs/EXECUTION-NEXT.md` y
+   > `outputs/LEEME-PC-PERSONAL.md`. Revisá `git status` y respetá las
+   > protecciones del proyecto. No crees otro repo ni otro Site.
+
+   Para trabajar desde ChatGPT en vez de Codex, abrí este repositorio con la
+   integración de GitHub vinculada a esa misma cuenta.
 
 ## Cambiar entre computadoras
 

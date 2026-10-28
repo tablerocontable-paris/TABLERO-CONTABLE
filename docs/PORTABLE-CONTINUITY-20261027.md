@@ -43,10 +43,15 @@ reales.
 
 1. Iniciá sesión en GitHub con `tablerocontable-paris` (repositorio privado).
 2. Instalá Git for Windows y Node.js 24 LTS si faltan. Node instala `npm`.
-3. En PowerShell:
+3. En PowerShell, comprobá `git --version`, `node --version` y `npm --version`;
+   Node debe mostrar `v24.x`. Si Git solicita autenticación, usá Git Credential
+   Manager y la cuenta con acceso al repo; no pegues contraseñas ni tokens en
+   Codex.
+4. En PowerShell:
 
    ```powershell
-   cd $HOME\Documents
+   New-Item -ItemType Directory -Force -Path "$HOME\Documents" | Out-Null
+   Set-Location "$HOME\Documents"
    git clone https://github.com/tablerocontable-paris/TABLERO-CONTABLE.git
    cd TABLERO-CONTABLE
    npm ci
@@ -54,10 +59,13 @@ reales.
    npm run dev -- --host 127.0.0.1
    ```
 
-4. Abrí `http://127.0.0.1:5173`.
-5. Si continuás con Codex, abrí la carpeta clonada en Codex e iniciá sesión con
-   la cuenta que tenga acceso al repositorio. Para actualizar, ejecutá
-   `git switch main` y `git pull --ff-only origin main`.
+5. Abrí `http://127.0.0.1:5173` para ver la copia local. En Codex, abrí la
+   carpeta clonada y pedile: “Continuá este proyecto existente desde este repo.
+   Antes de editar, leé `AGENTS.md`, `docs/PROJECT-STATUS.md`,
+   `docs/EXECUTION-NEXT.md` y `outputs/LEEME-PC-PERSONAL.md`; revisá `git status`
+   y respetá las protecciones del proyecto. No crees otro repo ni otro Site.”
+   Para actualizar la copia en otra fecha, ejecutá `git switch main` y
+   `git pull --ff-only origin main`.
 
 Trabajá desde una PC a la vez. Antes de cambiar, guardá y publicá los cambios en
 `main`; luego actualizá la otra copia. Las modificaciones acordadas se integran
