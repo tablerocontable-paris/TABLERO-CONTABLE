@@ -1,5 +1,6 @@
 /** Organization-specific selection catalog. This does not replace neutral v2. */
-export const PARIS_TASK_CATALOG_VERSION = 1 as const;
+export const PARIS_TASK_CATALOG_VERSION = 2 as const;
+export type ParisTaskCatalogVersion = 1 | typeof PARIS_TASK_CATALOG_VERSION;
 
 export const PARIS_BUSINESS_UNITS = [
   { code: "paris_autos", label: "PARIS AUTOS" },
@@ -31,7 +32,8 @@ export interface ParisTaskDefinition {
  * as bank, branch, brand and business unit must not be appended to the label.
  * Ambiguous rows stay out of default selection until their scope is confirmed.
  */
-export const PARIS_TASK_CATALOG: readonly ParisTaskDefinition[] = [
+/** Frozen version 1 snapshot. Keep it intact so saved lab work remains readable. */
+export const PARIS_TASK_CATALOG_V1: readonly ParisTaskDefinition[] = [
   { code: "gpar_bank_reconciliation", label: "Conciliación bancaria", group: "Tesorería", kind: "deliverable", parameters: ["banco", "cuenta", "período"], requiredParameters: ["banco", "cuenta"], aliases: ["conciliacion banco frances", "conciliacion banco frances pa", "conciliacion bancaria", "conciliacion bancaria de todas las entidades bancarias"], state: "selectable" },
   { code: "gpar_mp_reconciliation", label: "Conciliación de movimientos de Mercado Pago", group: "Tesorería", kind: "deliverable", parameters: ["cuenta o comercio", "período"], aliases: ["coinciliacion mercado pago", "conciliacion mercado pago"], state: "selectable" },
   { code: "cash_count", label: "Arqueo de caja", group: "Tesorería", kind: "deliverable", parameters: ["sucursal", "caja", "turno o fecha"], aliases: ["arqueo caja", "arqueo de cajas"], state: "selectable" },
@@ -84,12 +86,29 @@ export const PARIS_TASK_CATALOG: readonly ParisTaskDefinition[] = [
   { code: "gm_collection_register", label: "Registro de cobros de GM", group: "Tesorería", kind: "operational", unit: "cobros", parameters: ["entidad", "medio", "período"], aliases: ["cobros gm registro"], state: "review" },
 ];
 
+/** Version 2 adds the four explicit tasks from the supplied board captures. */
+export const PARIS_TASK_CATALOG: readonly ParisTaskDefinition[] = [
+  ...PARIS_TASK_CATALOG_V1.map((task) => task.code === "sector_cash_collections"
+    ? { ...task, aliases: task.aliases.filter((alias) => alias !== "cobro en caja vn vo pda pv") }
+    : task),
+  { code: "procedure_follow_up", label: "Control de trámites", group: "Administración", kind: "operational", unit: "trámites", parameters: ["tipo de trámite", "organismo o destino", "período"], aliases: ["control tramites", "seguimiento de tramites"], state: "selectable" },
+  { code: "payment_processing", label: "Procesamiento de pagos", group: "Tesorería", kind: "operational", unit: "pagos", parameters: ["tipo de pago", "medio", "empresa o destinatario", "período"], aliases: ["procesamiento pagos", "carga de pagos"], state: "selectable" },
+  { code: "monthly_accounting_close", label: "Cierre de cuentas mensuales", group: "Contabilidad", kind: "deliverable", parameters: ["período"], aliases: ["cierre de cuentas mensual", "cierre de cuenta mensual", "cierre mensual de cuentas"], state: "selectable" },
+  { code: "vat_settlement_control", label: "Liquidación y control de IVA", group: "Impuestos", kind: "deliverable", parameters: ["período", "tipo de liquidación"], aliases: ["liquidacion control iva", "liquidación y control mensual de iva"], state: "selectable" },
+  { code: "vehicle_cash_collection", label: "Registro de cobros en caja de operaciones de vehículos", group: "Tesorería", kind: "operational", unit: "cobros", parameters: ["tipo de operación", "sucursal o caja", "medio", "fecha"], aliases: ["cobro en caja vn vo pda pv"], state: "review" },
+];
+
+const catalogsByVersion = new Map<ParisTaskCatalogVersion, readonly ParisTaskDefinition[]>([
+  [1, PARIS_TASK_CATALOG_V1],
+  [PARIS_TASK_CATALOG_VERSION, PARIS_TASK_CATALOG],
+]);
+
 function normalize(value: string): string {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es-AR")
     .replace(/[^a-z0-9]+/g, " ").trim().replace(/\s+/g, " ");
 }
 
-const taskByCode = new Map(PARIS_TASK_CATALOG.map((task) => [task.code, task]));
+const taskByCodeByVersion = new Map([...catalogsByVersion].map(([version, tasks]) => [version, new Map(tasks.map((task) => [task.code, task]))]));
 const taskByAlias = new Map<string, ParisTaskDefinition>();
 for (const task of PARIS_TASK_CATALOG) {
   for (const alias of [task.label, ...task.aliases]) {
@@ -100,16 +119,20 @@ for (const task of PARIS_TASK_CATALOG) {
   }
 }
 
-export function getParisTask(code: string): ParisTaskDefinition | undefined {
-  return taskByCode.get(code);
+export function isParisTaskCatalogVersion(value: unknown): value is ParisTaskCatalogVersion {
+  return typeof value === "number" && catalogsByVersion.has(value as ParisTaskCatalogVersion);
+}
+
+export function getParisTask(code: string, version: number = PARIS_TASK_CATALOG_VERSION): ParisTaskDefinition | undefined {
+  return isParisTaskCatalogVersion(version) ? taskByCodeByVersion.get(version)?.get(code) : undefined;
 }
 
 export function parisTaskParameterKey(label: string): string {
   return normalize(label).replace(/\s+/g, "_");
 }
 
-export function isParisTaskParameterSet(code: string, value: unknown): value is Record<string, string> {
-  const task = getParisTask(code);
+export function isParisTaskParameterSet(code: string, value: unknown, version: number = PARIS_TASK_CATALOG_VERSION): value is Record<string, string> {
+  const task = getParisTask(code, version);
   if (!task || !value || typeof value !== "object" || Array.isArray(value)) return false;
   const allowed = new Set(task.parameters.map(parisTaskParameterKey));
   const parameters = value as Record<string, unknown>;
@@ -118,22 +141,22 @@ export function isParisTaskParameterSet(code: string, value: unknown): value is 
   );
 }
 
-export function hasRequiredParisTaskParameters(code: string, value: unknown): boolean {
-  if (!isParisTaskParameterSet(code, value)) return false;
+export function hasRequiredParisTaskParameters(code: string, value: unknown, version: number = PARIS_TASK_CATALOG_VERSION): boolean {
+  if (!isParisTaskParameterSet(code, value, version)) return false;
   const parameters = value as Record<string, string>;
-  return [...requiredParisTaskParameterKeys(code)].every((key) => (parameters[key] || "").trim().length > 0);
+  return [...requiredParisTaskParameterKeys(code, version)].every((key) => (parameters[key] || "").trim().length > 0);
 }
 
-export function requiredParisTaskParameterKeys(code: string): ReadonlySet<string> {
-  return new Set((getParisTask(code)?.requiredParameters || []).map(parisTaskParameterKey));
+export function requiredParisTaskParameterKeys(code: string, version: number = PARIS_TASK_CATALOG_VERSION): ReadonlySet<string> {
+  return new Set((getParisTask(code, version)?.requiredParameters || []).map(parisTaskParameterKey));
 }
 
 export function isParisBusinessUnitCode(value: string): value is ParisBusinessUnitCode {
   return PARIS_BUSINESS_UNITS.some((unit) => unit.code === value);
 }
 
-export function isSelectableParisTaskCode(value: string): boolean {
-  return taskByCode.get(value)?.state === "selectable";
+export function isSelectableParisTaskCode(value: string, version: number = PARIS_TASK_CATALOG_VERSION): boolean {
+  return getParisTask(value, version)?.state === "selectable";
 }
 
 /** Exact alias lookup for search/import review; never silently edits saved work. */

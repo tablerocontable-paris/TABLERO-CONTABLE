@@ -3,24 +3,21 @@
 ## Estado actual: normalización Grupo París en el laboratorio
 
 El flujo local de inducción ya ofrece las siete unidades de negocio y tareas
-canónicas del catálogo versionado (`src/domain/parisTaskCatalog.ts`). Hay 50
-códigos propuestos; 21 son seleccionables y 29 esperan definición de alcance.
-La persona no cambia el nombre canónico: los alias sólo ayudan a reconocer la
-tarea; banco/cuenta y otras dimensiones se guardan en campos separados. Banco y
-cuenta son obligatorios para conciliación bancaria. La analítica agrupa por
-código, unidad, período y parámetros; las tareas históricas sin clasificación
-se muestran como no clasificadas.
+canónicas (`src/domain/parisTaskCatalog.ts`). La versión 2 incluye 55 tareas:
+25 seleccionables y 30 en revisión. Conserva v1 (50 tareas) para leer trabajo
+guardado. El nombre canónico no se puede editar; unidad, banco/cuenta y demás
+parámetros se guardan aparte. La analítica conserva la versión, agrupa por
+código, unidad, período y parámetros, y deja el trabajo histórico sin código
+como no clasificado.
 
 El flujo de propuesta conserva controles y aprobación de jefatura, y no crea
 asignaciones hasta aprobar. Los grupos separan unidades y parámetros para evitar
 aprobar una cuenta o proceso bajo otra unidad. Se preserva el borrador legado
 para no romper el Worker estricto. No se modificó `/api`, Supabase Auth ni
-SQL001–016; esta implementación es sólo del laboratorio local. Suite completa
-anterior **859/859**; TypeScript, 57 pruebas focales finales, build cliente/Worker
-y paquete Sites aprobados. La revisión independiente cerró los hallazgos de
-consistencia. Próximo: actualizar la continuidad portable, publicar el commit
-directamente en `main` y revisar GitHub Actions; luego actualizar el mismo Site
-privado manteniendo su audiencia.
+SQL001–016; esta implementación sólo es del laboratorio local. La versión v2
+pasó **863/863** pruebas en 87 archivos, TypeScript, build cliente, Worker y
+paquete Sites. Falta publicar el commit directamente en `main` y actualizar el
+mismo Site privado, conservando su audiencia.
 
 No se requieren exportaciones ni datos de personal para normalizar nombres y
 unidades. El borrador de referencia y los criterios de ambigüedad están en

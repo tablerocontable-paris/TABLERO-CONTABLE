@@ -78,7 +78,7 @@ describe("inducción de tareas habituales", () => {
     fireEvent.change(screen.getByLabelText("cuenta · obligatorio"), { target: { value: "Cuenta principal" } });
     expect(saved.habitualTaskProposals).toHaveLength(1);
     expect(saved.habitualTaskProposals?.[0]).toMatchObject({
-      taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 1, businessUnitCode: "paris_autos",
+      taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 2, businessUnitCode: "paris_autos",
       taskParameters: { banco: "Banco Francés", cuenta: "Cuenta principal" },
       title: "Conciliación bancaria", kind: "resultado",
     });

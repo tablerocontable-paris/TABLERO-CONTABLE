@@ -8,7 +8,7 @@ function task(id: string, businessUnitCode: Task["businessUnitCode"], parameters
     teamId: "team", sector: "Tesorería", month: "2026-10", due: "2026-10-30", kind: "resultado", weight: 2,
     unit: "", target: 0, status: "Pendiente", checklist: [], completedAt: null, startedAt: null,
     priority: "Media", blockedBy: "", blockedSince: null,
-    taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 1, businessUnitCode, taskParameters: parameters,
+    taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 2, businessUnitCode, taskParameters: parameters,
     ...overrides,
   };
 }
@@ -33,6 +33,16 @@ describe("medición del catálogo de tareas Grupo París", () => {
     const historical = task("old", undefined, {}, { taskCode: undefined, taskCatalogVersion: undefined, businessUnitCode: undefined });
     const [row] = summarizeParisTaskWork([historical], []);
     expect(row).toMatchObject({ taskCode: null, title: "Trabajo histórico sin clasificar", businessUnitLabel: "Sin clasificar" });
+  });
+
+  it("separa métricas de versiones distintas y conserva la etiqueta histórica", () => {
+    const rows = summarizeParisTaskWork([
+      task("v1", "paris_autos", { banco: "Banco Francés" }, { taskCatalogVersion: 1 }),
+      task("v2", "paris_autos", { banco: "Banco Francés" }, { taskCatalogVersion: 2 }),
+    ], []);
+    expect(rows).toHaveLength(2);
+    expect(rows.map((row) => row.taskCatalogVersion)).toEqual([1, 2]);
+    expect(rows.every((row) => row.title === "Conciliación bancaria")).toBe(true);
   });
 
   it("suma los movimientos de una operativa en su unidad común y muestra la cantidad medida", () => {

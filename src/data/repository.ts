@@ -15,7 +15,7 @@ import { seedFiscalObligations } from "../domain/fiscalObligations";
 import { validDate, validateSchedule, type Schedule } from "../domain/schedule";
 import { calendarEventFieldsError } from "../domain/calendar-validation";
 import { CONCEPT_CODES, STARTER_CONCEPT_CODES } from "../domain/workforceTaxonomy.mjs";
-import { getParisTask, hasRequiredParisTaskParameters, isParisBusinessUnitCode, isParisTaskParameterSet, PARIS_TASK_CATALOG_VERSION } from "../domain/parisTaskCatalog";
+import { getParisTask, hasRequiredParisTaskParameters, isParisBusinessUnitCode, isParisTaskCatalogVersion, isParisTaskParameterSet } from "../domain/parisTaskCatalog";
 
 function validateNeutralMetadata(value: Record<string, unknown>, path: (string | number)[], context: z.RefinementCtx) {
   const code = value.neutralConceptCode;
@@ -32,8 +32,9 @@ function validateParisTaskMetadata(value: Record<string, unknown>, path: (string
       context.addIssue({ code: "custom", path, message: "La versión o unidad de negocio requiere un código de tarea canónico." });
     return;
   }
-  const definition = typeof code === "string" ? getParisTask(code) : undefined;
-  if (!definition || definition.state !== "selectable" || value.taskCatalogVersion !== PARIS_TASK_CATALOG_VERSION)
+  const version = value.taskCatalogVersion;
+  const definition = typeof code === "string" && isParisTaskCatalogVersion(version) ? getParisTask(code, version) : undefined;
+  if (!definition || definition.state !== "selectable")
     context.addIssue({ code: "custom", path, message: "La tarea debe pertenecer a una versión seleccionable del catálogo Grupo París." });
   if (requireUnit && (typeof value.businessUnitCode !== "string" || !isParisBusinessUnitCode(value.businessUnitCode)))
     context.addIssue({ code: "custom", path, message: "La ocurrencia debe conservar la unidad de negocio seleccionada." });
@@ -43,9 +44,9 @@ function validateParisTaskMetadata(value: Record<string, unknown>, path: (string
     context.addIssue({ code: "custom", path, message: "El tipo de trabajo debe coincidir con la tarea canónica." });
   if (definition && value.unit !== (definition.unit || ""))
     context.addIssue({ code: "custom", path, message: "La unidad de conteo debe coincidir con la tarea canónica." });
-  if (definition && value.taskParameters !== undefined && !isParisTaskParameterSet(String(code), value.taskParameters))
+  if (definition && isParisTaskCatalogVersion(version) && value.taskParameters !== undefined && !isParisTaskParameterSet(String(code), value.taskParameters, version))
     context.addIssue({ code: "custom", path: [...path, "taskParameters"], message: "Los parámetros guardados no corresponden a la definición canónica de la tarea." });
-  if (definition && requireUnit && !hasRequiredParisTaskParameters(String(code), value.taskParameters || {}))
+  if (definition && isParisTaskCatalogVersion(version) && requireUnit && !hasRequiredParisTaskParameters(String(code), value.taskParameters || {}, version))
     context.addIssue({ code: "custom", path: [...path, "taskParameters"], message: "La tarea canónica no conserva todos los parámetros obligatorios para medirla." });
 }
 

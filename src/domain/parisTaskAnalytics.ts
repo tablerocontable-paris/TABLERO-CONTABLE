@@ -4,6 +4,7 @@ import { getParisTask, PARIS_BUSINESS_UNITS, type ParisBusinessUnitCode } from "
 export interface ParisTaskWorkMetric {
   key: string;
   taskCode: string | null;
+  taskCatalogVersion: number | null;
   title: string;
   businessUnitCode: ParisBusinessUnitCode | null;
   businessUnitLabel: string;
@@ -23,13 +24,15 @@ export function summarizeParisTaskWork(tasks: Task[], activity: Activity[]): Par
   const groups = new Map<string, ParisTaskWorkMetric>();
   const businessUnits = new Map(PARIS_BUSINESS_UNITS.map((row) => [row.code, row.label]));
   for (const task of tasks) {
-    const definition = task.taskCode ? getParisTask(task.taskCode) : undefined;
+    const taskCatalogVersion = task.taskCatalogVersion;
+    const definition = task.taskCode && taskCatalogVersion ? getParisTask(task.taskCode, taskCatalogVersion) : undefined;
     const parameters = task.taskParameters || {};
     const parameterKey = JSON.stringify(Object.fromEntries(Object.entries(parameters).sort(([a], [b]) => a.localeCompare(b))));
-    const key = [task.taskCode || "unclassified", task.businessUnitCode || "unclassified", task.month, parameterKey].join("\u001f");
+    const key = [task.taskCode || "unclassified", taskCatalogVersion || "unclassified", task.businessUnitCode || "unclassified", task.month, parameterKey].join("\u001f");
     const metric = groups.get(key) || {
       key,
       taskCode: definition?.code || null,
+      taskCatalogVersion: definition ? taskCatalogVersion! : null,
       title: definition?.label || "Trabajo histórico sin clasificar",
       businessUnitCode: task.businessUnitCode || null,
       businessUnitLabel: task.businessUnitCode ? businessUnits.get(task.businessUnitCode) || "Unidad sin clasificar" : "Sin clasificar",
@@ -54,7 +57,7 @@ export function summarizeParisTaskWork(tasks: Task[], activity: Activity[]): Par
     if (!task || task.kind !== "operativa") continue;
     const parameters = task.taskParameters || {};
     const parameterKey = JSON.stringify(Object.fromEntries(Object.entries(parameters).sort(([a], [b]) => a.localeCompare(b))));
-    const key = [task.taskCode || "unclassified", task.businessUnitCode || "unclassified", task.month, parameterKey].join("\u001f");
+    const key = [task.taskCode || "unclassified", task.taskCatalogVersion || "unclassified", task.businessUnitCode || "unclassified", task.month, parameterKey].join("\u001f");
     const metric = groups.get(key);
     if (!metric) continue;
     metric.movementCount += 1;

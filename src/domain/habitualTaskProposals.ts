@@ -2,7 +2,7 @@ import { addCatalogueTemplate, currentCatalogueVersion, ensureCatalogueVersions 
 import { canSee, id, type HabitualTaskProposal, type Profile, type State, type Template } from "./model";
 import { validateSchedule, type Schedule } from "./schedule";
 import { CONCEPT_CODES, STARTER_CONCEPT_CODES, WORKFORCE_TAXONOMY_VERSION, type NeutralConceptCode } from "./workforceTaxonomy.mjs";
-import { getParisTask, hasRequiredParisTaskParameters, isParisBusinessUnitCode, isParisTaskParameterSet, PARIS_TASK_CATALOG_VERSION } from "./parisTaskCatalog";
+import { getParisTask, hasRequiredParisTaskParameters, isParisBusinessUnitCode, isParisTaskCatalogVersion, isParisTaskParameterSet, PARIS_TASK_CATALOG_VERSION } from "./parisTaskCatalog";
 
 export interface HabitualProposalInput {
   id: string;
@@ -54,7 +54,7 @@ function classification(input: Pick<HabitualProposalInput, "neutralConceptCode" 
   return { neutralConceptCode, taxonomyVersion: WORKFORCE_TAXONOMY_VERSION as 2 };
 }
 
-function cleanProposal(input: Omit<HabitualProposalInput, "id" | "companyId">) {
+function cleanProposal(input: Omit<HabitualProposalInput, "id" | "companyId">, allowHistoricalCatalogVersion = false) {
   const title = input.title.trim().replace(/\s+/g, " ");
   const process = input.process.trim().replace(/\s+/g, " ");
   const description = input.description.trim();
@@ -69,14 +69,15 @@ function cleanProposal(input: Omit<HabitualProposalInput, "id" | "companyId">) {
   if (!Number.isFinite(input.target) || input.target < 0) throw Error("El dato numérico de la propuesta no es válido.");
   if (input.kind === "operativa" && !unit) throw Error("Indicá la unidad de la tarea operativa.");
   if (input.taskCode) {
-    const definition = getParisTask(input.taskCode);
-    if (!definition || definition.state !== "selectable" || input.taskCatalogVersion !== PARIS_TASK_CATALOG_VERSION ||
+    const version = input.taskCatalogVersion;
+    const definition = isParisTaskCatalogVersion(version) ? getParisTask(input.taskCode, version) : undefined;
+    if (!definition || definition.state !== "selectable" || (!allowHistoricalCatalogVersion && version !== PARIS_TASK_CATALOG_VERSION) ||
         !input.businessUnitCode || !isParisBusinessUnitCode(input.businessUnitCode))
       throw Error("La tarea estándar necesita un código, versión y unidad de negocio vigentes.");
     const expectedKind = definition.kind === "operational" ? "operativa" : "resultado";
     if (title !== definition.label || input.kind !== expectedKind || unit !== (definition.unit || ""))
       throw Error("El nombre, tipo y unidad de una tarea estándar los define el catálogo; no se pueden editar.");
-    if (!isParisTaskParameterSet(input.taskCode, taskParameters || {}) || !hasRequiredParisTaskParameters(input.taskCode, taskParameters || {}))
+    if (!isParisTaskParameterSet(input.taskCode, taskParameters || {}, version) || !hasRequiredParisTaskParameters(input.taskCode, taskParameters || {}, version))
       throw Error("Completá los datos obligatorios para identificar esta tarea y verificá sus parámetros.");
   } else if (input.taskCatalogVersion !== undefined || input.businessUnitCode !== undefined || taskParameters !== undefined) {
     throw Error("La unidad de negocio sólo se puede asociar a una tarea estándar versionada.");
@@ -210,7 +211,7 @@ export function resubmitHabitualTaskProposal(
   const currentActor = state.profiles.find((profile) => profile.id === actor.id);
   if (!currentActor?.active || proposal.ownerId !== currentActor.id) throw Error("Sólo quien presentó la propuesta puede corregirla.");
   if (!currentActor.companyIds.includes(proposal.companyId)) throw Error("La empresa de esta propuesta ya no está asignada a tu perfil.");
-  const clean = cleanProposal(input);
+  const clean = cleanProposal(input, true);
   const suppliedNeutral = classification(input);
   if ((input.neutralConceptCode !== undefined || input.taxonomyVersion !== undefined) &&
       (suppliedNeutral.neutralConceptCode !== proposal.neutralConceptCode || suppliedNeutral.taxonomyVersion !== proposal.taxonomyVersion))
@@ -262,7 +263,7 @@ export function approveHabitualTaskProposals(
       new Set(selected.map((row) => `${row.taskCode || ""}:${row.taskCatalogVersion || ""}`)).size !== 1 ||
       new Set(selected.map((row) => `${row.businessUnitCode || ""}:${JSON.stringify(Object.fromEntries(Object.entries(row.taskParameters || {}).sort(([a], [b]) => a.localeCompare(b))))}`)).size !== 1)
     throw Error("El grupo mezcla tipos, unidades de negocio o parámetros que no comparten un estándar.");
-  if (selected.some((row) => row.taskCode && !hasRequiredParisTaskParameters(row.taskCode, row.taskParameters || {})))
+  if (selected.some((row) => row.taskCode && !hasRequiredParisTaskParameters(row.taskCode, row.taskParameters || {}, row.taskCatalogVersion)))
     throw Error("Completá los parámetros obligatorios de cada tarea antes de aprobarla.");
 
   const neutral = classification(selected[0]!);
@@ -292,8 +293,8 @@ export function approveHabitualTaskProposals(
     const taskCode = selected[0]!.taskCode;
     const taskCatalogVersion = selected[0]!.taskCatalogVersion;
     if (taskCode) {
-      const definition = getParisTask(taskCode);
-      if (!definition || definition.state !== "selectable" || taskCatalogVersion !== PARIS_TASK_CATALOG_VERSION || title !== definition.label || input.kind !== (definition.kind === "operational" ? "operativa" : "resultado") || (input.kind === "operativa" && normalizeWords(input.unit) !== normalizeWords(definition.unit || "")))
+      const definition = isParisTaskCatalogVersion(taskCatalogVersion) ? getParisTask(taskCode, taskCatalogVersion) : undefined;
+      if (!definition || definition.state !== "selectable" || title !== definition.label || input.kind !== (definition.kind === "operational" ? "operativa" : "resultado") || (input.kind === "operativa" && normalizeWords(input.unit) !== normalizeWords(definition.unit || "")))
         throw Error("La tarea estándar debe conservar su nombre, tipo, unidad y versión del catálogo.");
       const description = input.description.trim();
       const meaningfulSteps = input.steps.filter((step) => step.trim().length >= 10 && !/confirmar procedimiento y controles con jefatura/i.test(step.trim()));

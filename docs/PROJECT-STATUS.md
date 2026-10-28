@@ -2,33 +2,27 @@
 
 ## Catálogo Grupo París — normalización inicial
 
-Implementación local en curso basada en las tareas visibles de las capturas y
-el borrador `docs/product/BUSINESS-UNIT-TASK-CATALOG-DRAFT-20261028.md`. El
-catálogo contiene 7 unidades de negocio y 50 códigos de tarea: 21 se pueden
-seleccionar y 29 siguen en revisión porque sus alcances o siglas son ambiguos.
-Cada persona elige unidad y tarea con nombre canónico; el código, unidad,
-versión y parámetros pasan de la inducción a la propuesta, asignación y tarea.
-Banco y cuenta son obligatorios para conciliación bancaria. La revisión agrupa
-por unidad y parámetros; la analítica muestra la misma tarea entre unidades y
-no infiere identidad en trabajo histórico.
+El catálogo canónico quedó implementado en la inducción local del laboratorio,
+publicado directamente en GitHub `main` y desplegado en el Site privado existente.
+La v2 mantiene las 50 tareas anteriores, agrega cuatro opciones claras de las
+capturas y separa una quinta entrada ambigua de cobros de vehículos. Tiene 55
+tareas: 25 seleccionables y 30 en revisión. Las siete unidades son las indicadas
+por el usuario. El nombre de tarea es cerrado; empresa, unidad, banco, cuenta,
+sucursal y período permanecen como dimensiones separadas. Se preserva lectura
+versionada del catálogo v1 para propuestas ya guardadas.
 
-Validación: la suite completa anterior pasó **859/859 en 87 archivos**; después
-del último ajuste del borrador, TypeScript y 57/57 pruebas focales pasaron. El
-build cliente/Worker y paquete Sites también aprobaron. El build conserva avisos
-de Rollup por comentarios de Zod y un chunk principal de 653 kB. La revisión
-independiente confirmó separación de grupos, parámetros requeridos y
-compatibilidad de borradores. El alta canónica sigue
-siendo local al laboratorio; no habilitar ni publicar escrituras remotas.
-Supabase y SQL001–016 no se modificaron. Las 29 tareas en revisión requieren
-definición de jefatura antes de seleccionarse; las capturas parciales no prueban
-cobertura exhaustiva ni frecuencias. Un estado con tareas/propuestas canónicas
-ya enviadas sin parámetros requeridos será rechazado al cargar para no medirlo
-mal; esa combinación no se había publicado y requiere reparación explícita si
-aparece en un respaldo previo.
+La validación local de v2 pasó **863/863 en 87 archivos**, TypeScript, build
+cliente, Worker y paquete Sites. Las pruebas focales pasaron **49/49**. La
+revisión detectó y corrigió un alias faltante para “Cierre de cuenta mensual”.
+Pendiente: commit y push directo a `main`, luego actualizar el mismo Site
+privado y confirmar su versión/acceso. La última versión desplegada antes de
+v2 era v100, owner-only, con el commit `e3758a5` de su fuente conectada.
+Build conserva avisos de Rollup por comentarios de Zod y un chunk de 653 kB.
+Supabase, Auth, API y SQL001–016 no se tocaron. El trabajo histórico no se
+reclasifica por su título y las filas ambiguas no se ofrecen en primer ingreso.
 
-La lectura de actividad real o estimaciones de personal/volumen no forma parte
-de esta corrección. No se necesitan datos reales para seleccionar y normalizar
-el catálogo.
+No hace falta un extracto de personal o actividad para este trabajo de
+normalización.
 
 ## Corte anterior verificado 27/10/2026
 
