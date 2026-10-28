@@ -1,30 +1,16 @@
-# Estado vigente — corte documental 28/10/2026
+# Estado vigente — actualización 28/10/2026
 
 ## Catálogo Grupo París — normalización inicial
 
-El catálogo canónico quedó implementado en la inducción local del laboratorio,
-publicado directamente en GitHub `main` y desplegado en el Site privado existente.
-La versión local 3 del catálogo ofrece las 55 tareas observadas para selección,
-cada una con código canónico. Veinticinco están confirmadas para comparación;
-treinta son provisionales y no se comparan entre unidades hasta confirmar su
-alcance. Las siete unidades son las indicadas por el usuario. El nombre de tarea
-es cerrado; empresa, unidad, banco, cuenta, sucursal y período permanecen como
-dimensiones separadas. Las versiones anteriores 1 y 2 se preservan para leer
-propuestas y registros existentes.
+La inducción local del laboratorio ofrece las siete unidades solicitadas y 55 tareas con código y nombre canónicos. En la versión 3, las 55 se pueden seleccionar; 25 están confirmadas para comparación y 30 siguen provisionales, con código propio y excluidas de comparaciones entre unidades hasta confirmar su alcance. Unidad, banco, cuenta, sucursal y período son dimensiones separadas. Las versiones 1 y 2 se conservan para interpretar registros anteriores; los históricos sin código no se reclasifican por texto.
 
-La validación local de v3 pasó **865/865 en 87 archivos**, TypeScript y build
-cliente/Worker/paquete Sites; las pruebas focales pasaron **51/51**. La v2 está
-en GitHub `main` como commit `14c8c3f` y en el Site privado como v101 desde el
-commit de fuente `3961364`. La v3 debe publicarse en `main` y actualizar el
-mismo Site; su acceso personalizado se conserva sólo para el propietario y con
-cero visitantes externos.
-Build conserva avisos de Rollup por comentarios de Zod y un chunk de 653 kB.
-Supabase, Auth, API y SQL001–016 no se tocaron. El trabajo histórico no se
-reclasifica por su título y las filas ambiguas no se ofrecen en primer ingreso.
+El cambio funcional está en GitHub `main` como `ecf4d3542d460bc684590d0e7f699f65c9212dfb`, publicado directamente sin PR. El mismo Site privado se actualizó a v102 desde la fuente Sites `4e795dde520a62606f7cfe671ae0b7e10d0f2733`; continúa con acceso personalizado al propietario y cero visitantes externos. La suite pasó 865/865 en 87 archivos; foco 51/51; hook 223/223; TypeScript, builds cliente y Worker y paquete Sites pasaron. Rollup reportó comentarios Zod descartados y un chunk principal de 655 kB.
 
-No hace falta un extracto de personal o actividad para este trabajo de
-normalización.
+El laboratorio usa perfiles y datos ficticios. No se habilitaron usuarios reales ni `/api` operativo; Supabase Auth y SQL001–016 no se modificaron. El objetivo de esta etapa es normalización inicial, no aceptación de producción. No se necesitan exportaciones de personal para normalizar nombres de tareas y unidades.
 
+## Continuidad a PC personal
+
+La guía ejecutable está en `outputs/LEEME-PC-PERSONAL.md`; el detalle de estado portable, en `docs/PORTABLE-CONTINUITY-20261027.md`. El repo es privado `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`. Clonar `main`; no usar ZIPs antiguos. El estado del navegador, IndexedDB y la base D1 de Sites no viajan con GitHub; respaldos del laboratorio se exportan por separado y se guardan fuera del repo.
 ## Corte anterior verificado 27/10/2026
 
 ## Clasificación neutral local — publicada y desplegada

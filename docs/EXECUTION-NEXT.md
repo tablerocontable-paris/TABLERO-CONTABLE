@@ -1,29 +1,14 @@
 # Estado vigente de ejecución — 28/10/2026
 
-## Estado actual: normalización Grupo París en el laboratorio
+## Normalización Grupo París — implementada y publicada
 
-El flujo local de inducción ofrece siete unidades y las 55 tareas observadas
-(`src/domain/parisTaskCatalog.ts`). La versión 3 permite elegir las 55: 25 están
-confirmadas para comparación y 30 quedan provisionales, registrables con códigos
-propios, pero excluidas de comparaciones entre unidades hasta confirmar su
-alcance. Conserva las versiones 1 (50 tareas) y 2 (55 tareas) para leer trabajo
-guardado. Nombre canónico cerrado; unidad, banco/cuenta y demás parámetros se
-guardan aparte. El historial sin código queda sin clasificar.
+La inducción local del laboratorio contiene siete unidades fijas y 55 tareas estandarizadas (`src/domain/parisTaskCatalog.ts`). Catálogo v3 permite seleccionar las 55; 25 son comparables y 30 provisionales con códigos propios, sin compararlas entre unidades hasta confirmar el alcance. Banco, cuenta y otros atributos son parámetros separados. Versiones 1 y 2 siguen disponibles para datos guardados; los registros históricos sin código permanecen sin clasificar.
 
-El flujo de propuesta conserva controles y aprobación de jefatura, y no crea
-asignaciones hasta aprobar. Los grupos separan unidades y parámetros para evitar
-aprobar una cuenta o proceso bajo otra unidad. Se preserva el borrador legado
-para no romper el Worker estricto. No se modificó `/api`, Supabase Auth ni
-SQL001–016; esta implementación sólo es del laboratorio local. La versión v3
-pasó **865/865** pruebas en 87 archivos, TypeScript, build cliente, Worker y
-paquete Sites. Falta commit y publicación directos en `main` y actualizar el
-mismo Site privado desde su fuente, sin cambiar la audiencia. Luego corresponde
-continuar la puesta a punto desde la PC personal.
+El código se publicó directamente a GitHub `main` en `ecf4d3542d460bc684590d0e7f699f65c9212dfb`, sin PR. El mismo Site privado está en v102, desde `4e795dde520a62606f7cfe671ae0b7e10d0f2733`; la audiencia personalizada no cambió. Pasaron suite 865/865 en 87 archivos, foco 51/51, hook 223/223, TypeScript, build cliente, Worker y paquete Sites. Rollup conserva avisos por anotaciones Zod y chunk principal de 655 kB.
 
-No se requieren exportaciones ni datos de personal para normalizar nombres y
-unidades. El borrador de referencia y los criterios de ambigüedad están en
-`docs/product/BUSINESS-UNIT-TASK-CATALOG-DRAFT-20261028.md`.
+No se modificaron `/api`, Supabase Auth ni SQL001–016. Esta publicación es del laboratorio privado con perfiles/datos ficticios; no representa una versión operativa ni habilita acceso a usuarios reales. Los pasos para continuar desde otra PC están en `outputs/LEEME-PC-PERSONAL.md`. Guía de continuidad y límites de sincronización: `docs/PORTABLE-CONTINUITY-20261027.md`.
 
+## Historial de etapas anteriores
 ## Clasificación neutral — publicada y desplegada
 
 Las sugerencias de primer ingreso v2 ya se conectan con códigos estables
