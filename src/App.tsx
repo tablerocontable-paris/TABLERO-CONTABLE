@@ -135,6 +135,15 @@ import { materializeNeutralStarterAssignment } from "./domain/neutralStarterCata
 import { submitHabitualTaskProposal } from "./domain/habitualTaskProposals";
 import { summarizeParisTaskWork } from "./domain/parisTaskAnalytics";
 import {
+  PARIS_BUSINESS_UNITS,
+  PARIS_TASK_CATALOG_VERSION,
+  hasRequiredParisTaskParameters,
+  parisTaskParameterKey,
+  requiredParisTaskParameterKeys,
+  selectableParisTasks,
+  type ParisBusinessUnitCode,
+} from "./domain/parisTaskCatalog";
+import {
   canConvertInternalRequest,
   completeInternalRequestConversion,
   createInternalRequest,
@@ -3956,6 +3965,9 @@ function NewTask({
   create: (a: Assignment) => void;
 }) {
   const [template, setTemplate] = useState("");
+  const [parisTaskCode, setParisTaskCode] = useState("");
+  const [businessUnitCode, setBusinessUnitCode] = useState<ParisBusinessUnitCode | "">("");
+  const [taskParameters, setTaskParameters] = useState<Record<string, string>>({});
   const assignablePeople = people.filter((profile) =>
     !!profile.teamId && state.teams.some((team) => team.id === profile.teamId),
   );
@@ -3978,6 +3990,7 @@ function NewTask({
   const [taskError, setTaskError] = useState("");
   const [kind, setKind] = useState<"resultado" | "operativa">("resultado");
   const t = state.templates.find((t) => t.id === template);
+  const parisTask = laboratory ? selectableParisTasks().find((task) => task.code === parisTaskCode) : undefined;
   const selectedOwnerProfile = state.profiles.find((profile) => profile.id === selectedOwner);
   const allowedCompanies = state.companies.filter((candidate) => selectedOwnerProfile?.companyIds.includes(candidate.id) &&
     (active.role === "jefe" || active.companyIds.includes(candidate.id)));
@@ -3991,7 +4004,7 @@ function NewTask({
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
-    const title = String(f.get("title")).trim();
+    const title = laboratory ? parisTask?.label || "" : String(f.get("title")).trim();
     if (!title) return;
     try {
       validateSchedule(schedule);
@@ -4003,7 +4016,17 @@ function NewTask({
       setScheduleError("Las tareas habituales requieren un proceso del catálogo.");
       return;
     }
-    const selectedKind = t?.kind || kind;
+    if (laboratory && (!parisTask || !businessUnitCode)) {
+      setTaskError("Elegí una tarea y una unidad de negocio del catálogo para clasificarla.");
+      return;
+    }
+    if (laboratory && parisTask && !hasRequiredParisTaskParameters(parisTask.code, taskParameters)) {
+      setTaskError("Completá los datos obligatorios para identificar esta tarea.");
+      return;
+    }
+    const selectedKind = laboratory && parisTask
+      ? parisTask.kind === "operational" ? "operativa" : "resultado"
+      : t?.kind || kind;
     let checklist: string[] = [];
     let target = 0;
     try {
@@ -4031,11 +4054,17 @@ function NewTask({
       title,
       ownerId: selectedOwner,
       companyId: selectedCompany,
-      sector: t?.sector || String(f.get("sector") || active.sector),
+      sector: laboratory && parisTask ? parisTask.group : t?.sector || String(f.get("sector") || active.sector),
       kind: selectedKind,
       weight: t?.weight || (active.role === "jefe" ? Number(f.get("weight") || 0) : 1),
-      unit: selectedKind === "operativa" ? (t?.unit || String(f.get("unit") || "").trim()) : "",
+      unit: selectedKind === "operativa" ? (laboratory && parisTask ? parisTask.unit || "" : t?.unit || String(f.get("unit") || "").trim()) : "",
       target: selectedKind === "operativa" ? target : 0,
+      ...(laboratory && parisTask ? {
+        taskCode: parisTask.code,
+        taskCatalogVersion: PARIS_TASK_CATALOG_VERSION,
+        businessUnitCode: businessUnitCode as ParisBusinessUnitCode,
+        taskParameters: Object.fromEntries(Object.entries(taskParameters).filter(([, value]) => value.trim())),
+      } : {}),
       day: schedule.monthDay,
       frequency: schedule.frequency,
       steps:
@@ -4046,7 +4075,38 @@ function NewTask({
   }
   return (
     <Dialog title="Nueva tarea, con todo su contexto" onClose={close} wide>
-      <label>
+      {laboratory ? <div className="form-grid">
+        <label>
+          Tarea estandarizada
+          <select aria-label="Elegí del catálogo" value={parisTaskCode} onChange={(event) => {
+            setParisTaskCode(event.target.value);
+            setTaskParameters({});
+            setTaskError("");
+          }} required>
+            <option value="">Seleccioná una tarea</option>
+            {selectableParisTasks().map((task) => <option key={task.code} value={task.code}>{task.label}</option>)}
+          </select>
+        </label>
+        <label>
+          Unidad de negocio
+          <select aria-label="Unidad de negocio" value={businessUnitCode} onChange={(event) => setBusinessUnitCode(event.target.value as ParisBusinessUnitCode | "")} required>
+            <option value="">Seleccioná una unidad</option>
+            {PARIS_BUSINESS_UNITS.map((unit) => <option key={unit.code} value={unit.code}>{unit.label}</option>)}
+          </select>
+        </label>
+        {parisTask?.parameters.map((parameter) => {
+          const key = parisTaskParameterKey(parameter);
+          const required = requiredParisTaskParameterKeys(parisTask.code).has(key);
+          return <label key={key}>
+            {parameter}{required ? " · obligatorio" : " · opcional"}
+            <input aria-label={parameter} value={taskParameters[key] || ""} maxLength={160} required={required} onChange={(event) => {
+              setTaskParameters((current) => ({ ...current, [key]: event.target.value }));
+              setTaskError("");
+            }} />
+          </label>;
+        })}
+        {parisTask && <p className="note">La tarea se guardará como <b>{parisTask.label}</b>. El detalle de pedido o anotación queda como contexto y no cambia el nombre canónico.</p>}
+      </div> : <label>
         Elegí del catálogo
         <select
           value={template}
@@ -4066,10 +4126,10 @@ function NewTask({
             </option>
           ))}
         </select>
-      </label>
+      </label>}
       {seedRequest && <div className="request-origin-context"><b>Conversión explícita del pedido · {seedRequest.subject}</b><p>{seedRequest.description}</p><span>La conversión crea una sola tarea y cierra el pedido al confirmar. No hay asignaciones hasta guardar.</span></div>}
       <form key={template} onSubmit={submit}>
-        <label>
+        {laboratory ? <p><b>Tarea:</b> {parisTask?.label || "Seleccioná una tarea estandarizada"}</p> : <label>
           Título
           <input
             name="title"
@@ -4078,7 +4138,7 @@ function NewTask({
             defaultValue={t?.title || seedAnnotation?.title || seedRequest?.subject}
             readOnly={!!t}
           />
-        </label>
+        </label>}
         <div className="form-grid">
           <div>
             <label>

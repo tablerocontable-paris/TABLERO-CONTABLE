@@ -39,6 +39,7 @@ const record = (id: string, passes: boolean, observed: unknown) =>
     expect.objectContaining({ passes: true }),
   );
 const stored = () => JSON.parse(localStorage.getItem(KEY)!) as State;
+const storedLab = () => JSON.parse(localStorage.getItem("paris-state-lab")!) as State;
 function prepare(role = "e0") {
   const state = seed();
   state.activeId = role;
@@ -97,6 +98,38 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 describe("anotaciones y recorrido integrados", () => {
+  it("en laboratorio sólo crea tareas canónicas y guarda unidad y parámetros para medirlas", async () => {
+    const state = prepare("boss");
+    localStorage.setItem("paris-state-lab", JSON.stringify(state));
+    render(<App initialState={state} laboratoryMode />);
+    fireEvent.click(document.querySelector('[data-nav="tasks"]')!);
+    fireEvent.click(screen.getByRole("button", { name: "Nueva tarea" }));
+    fireEvent.change(screen.getByLabelText("Elegí del catálogo"), { target: { value: "gpar_bank_reconciliation" } });
+    fireEvent.change(screen.getByLabelText("Unidad de negocio"), { target: { value: "paris_autos" } });
+    fireEvent.submit(screen.getByRole("dialog", { name: "Nueva tarea, con todo su contexto" }).querySelector("form")!);
+    expect(screen.getByRole("alert").textContent).toContain("datos obligatorios");
+    expect(storedLab().assignments).toHaveLength(0);
+
+    fireEvent.change(screen.getByLabelText("banco"), { target: { value: "Banco Francés" } });
+    fireEvent.change(screen.getByLabelText("cuenta"), { target: { value: "Cuenta principal" } });
+    fireEvent.submit(screen.getByRole("dialog", { name: "Nueva tarea, con todo su contexto" }).querySelector("form")!);
+    const saved = storedLab();
+    expect(saved.assignments.at(-1)).toMatchObject({
+      title: "Conciliación bancaria",
+      taskCode: "gpar_bank_reconciliation",
+      taskCatalogVersion: 5,
+      businessUnitCode: "paris_autos",
+      taskParameters: { banco: "Banco Francés", cuenta: "Cuenta principal" },
+    });
+    expect(saved.tasks.at(-1)).toMatchObject({
+      title: "Conciliación bancaria",
+      taskCode: "gpar_bank_reconciliation",
+      taskCatalogVersion: 5,
+      businessUnitCode: "paris_autos",
+      taskParameters: { banco: "Banco Francés", cuenta: "Cuenta principal" },
+    });
+  });
+
   it("incluye la tarea y la cuota conjunta del segundo participante en la tabla de cierre", async () => {
     const state = prepare("boss");
     const example = seed().tasks.find((task) => task.ownerId === "e0" && task.kind === "resultado")!;
@@ -390,7 +423,10 @@ describe("anotaciones y recorrido integrados", () => {
     const view = render(<App initialState={state} laboratoryMode />);
     await openNotes();
     fireEvent.click(await screen.findByRole("button", { name: "Convertir en tarea" }));
-    fireEvent.change(screen.getByLabelText("Elegí del catálogo"), { target: { value: "cat1" } });
+    fireEvent.change(screen.getByLabelText("Elegí del catálogo"), { target: { value: "gpar_bank_reconciliation" } });
+    fireEvent.change(screen.getByLabelText("Unidad de negocio"), { target: { value: "paris_autos" } });
+    fireEvent.change(screen.getByLabelText("banco"), { target: { value: "Banco Francés" } });
+    fireEvent.change(screen.getByLabelText("cuenta"), { target: { value: "Cuenta principal" } });
 
     const revoked = {
       ...state,
@@ -405,7 +441,7 @@ describe("anotaciones y recorrido integrados", () => {
     expect(stored().tasks).toHaveLength(0);
     expect(stored().annotations?.[0]?.convertedTaskId).toBeNull();
     expect(screen.getByRole("dialog", { name: "Nueva tarea, con todo su contexto" })).toBeTruthy();
-    expect((screen.getByLabelText("Elegí del catálogo") as HTMLSelectElement).value).toBe("cat1");
+    expect((screen.getByLabelText("Elegí del catálogo") as HTMLSelectElement).value).toBe("gpar_bank_reconciliation");
     expect(screen.getByRole("alert").textContent).toContain("Empresa o responsable fuera del ámbito autorizado");
   });
 
@@ -431,10 +467,13 @@ describe("anotaciones y recorrido integrados", () => {
     const view = render(<App initialState={state} laboratoryMode />);
     fireEvent.click(document.querySelector('[data-nav="requests"]')!);
     fireEvent.click(await screen.findByRole("button", { name: "Convertir en tarea puntual" }));
-    fireEvent.change(screen.getByLabelText("Elegí del catálogo"), { target: { value: "cat1" } });
+    fireEvent.change(screen.getByLabelText("Elegí del catálogo"), { target: { value: "gpar_bank_reconciliation" } });
+    fireEvent.change(screen.getByLabelText("Unidad de negocio"), { target: { value: "paris_autos" } });
+    fireEvent.change(screen.getByLabelText("banco"), { target: { value: "Banco Francés" } });
+    fireEvent.change(screen.getByLabelText("cuenta"), { target: { value: "Cuenta principal" } });
     fireEvent.change(screen.getByLabelText("Responsable"), { target: { value: "e0" } });
     fireEvent.change(screen.getByLabelText("Empresa obligatoria"), { target: { value: "c1" } });
-    expect((screen.getByLabelText("Elegí del catálogo") as HTMLSelectElement).value).toBe("cat1");
+    expect((screen.getByLabelText("Elegí del catálogo") as HTMLSelectElement).value).toBe("gpar_bank_reconciliation");
     expect((screen.getByLabelText("Responsable") as HTMLSelectElement).value).toBe("e0");
     expect((screen.getByLabelText("Empresa obligatoria") as HTMLSelectElement).value).toBe("c1");
 
@@ -453,7 +492,7 @@ describe("anotaciones y recorrido integrados", () => {
     expect(saved.internalRequests?.[0]).toMatchObject({ id: request.id, status: "new" });
     expect(saved.internalRequests?.[0]?.convertedTaskId).toBeUndefined();
     expect(screen.getByRole("dialog", { name: "Nueva tarea, con todo su contexto" })).toBeTruthy();
-    expect((screen.getByLabelText("Elegí del catálogo") as HTMLSelectElement).value).toBe("cat1");
+    expect((screen.getByLabelText("Elegí del catálogo") as HTMLSelectElement).value).toBe("gpar_bank_reconciliation");
     expect((screen.getByLabelText("Responsable") as HTMLSelectElement).value).toBe("e0");
     expect((screen.getByLabelText("Empresa obligatoria") as HTMLSelectElement).value).toBe("");
     expect(screen.getByText(/La empresa seleccionada dejó de estar autorizada/)).toBeTruthy();
