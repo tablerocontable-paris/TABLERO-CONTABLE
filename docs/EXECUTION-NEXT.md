@@ -1,10 +1,10 @@
 # Estado vigente de ejecución — 28/10/2026
 
-## Normalización Grupo París — v4 en validación local
+## Normalización Grupo París — catálogo v4 desplegado
 
 La inducción local del laboratorio contiene siete unidades fijas y 55 tareas estandarizadas (`src/domain/parisTaskCatalog.ts`). Catálogo v4 permite seleccionar las 55; 25 son comparables y 30 provisionales con códigos propios, sin compararlas entre unidades hasta confirmar el alcance. Banco, cuenta y otros atributos son parámetros separados. V4 elimina el parámetro libre `unidad` duplicado en registración de sueldos e IVA, usando `businessUnitCode` como identidad única de unidad. V1–v3 siguen disponibles para leer datos guardados; los registros históricos sin código permanecen sin clasificar.
 
-La última versión publicada antes de V4 es catálogo v3 en GitHub `main` (`ecf4d3542d460bc684590d0e7f699f65c9212dfb`) y Site privado v102 desde `4e795dde520a62606f7cfe671ae0b7e10d0f2733`. V4 elimina el campo redundante de unidad en dos tareas y agrega `CONC BANC FRANC` como alias de búsqueda de Conciliación bancaria; nunca se persiste como título distinto. Validación local aprobada: suite 867/867, TypeScript, build cliente, Worker, paquete Sites, revisión independiente y hook 223/223. Commits `d9da38f` y `e3f389c` ya están publicados directamente en `main`; Actions #130 está validando el HEAD. Publicar luego el mismo Site y conservar su audiencia.
+V4 elimina el campo redundante de unidad en dos tareas y agrega `CONC BANC FRANC` como alias de búsqueda de Conciliación bancaria; nunca se persiste como título distinto. Validación local aprobada: suite 867/867, TypeScript, build cliente, Worker, paquete Sites, revisión independiente y hook 223/223. Commits `d9da38f` y `e3f389c` ya están publicados directamente en `main`; el Site existente está desplegado como v103 y conserva su audiencia owner-only. Actions #131 valida el HEAD documental `be2843a`. El build mantiene avisos conocidos de Rollup por anotaciones de Zod y el tamaño del chunk principal.
 
 No se modificaron `/api`, Supabase Auth ni SQL001–016. Esta publicación es del laboratorio privado con perfiles/datos ficticios; no representa una versión operativa ni habilita acceso a usuarios reales. Los pasos para continuar desde otra PC están en `outputs/LEEME-PC-PERSONAL.md`. Guía de continuidad y límites de sincronización: `docs/PORTABLE-CONTINUITY-20261027.md`.
 

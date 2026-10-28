@@ -83,10 +83,9 @@ npm ci
 - La validación local v4 pasó TypeScript, suite completa (867/867 en 87
   archivos), build del cliente y Worker, empaquetado Sites, revisión
   independiente y hook (223/223). GitHub confirmó el push directo a `main`, sin
-  PR; GitHub CI valida los commits de `main`. El Site privado sigue en v102 hasta publicar
-  v4.
-  GitHub y Sites son repositorios separados: los pushes a GitHub no despliegan
-  el Site automáticamente.
+  PR; GitHub CI valida los commits de `main`. El mismo Site privado ya publica
+  v4 como versión 103. GitHub y Sites son repositorios separados: los pushes a
+  GitHub no despliegan el Site automáticamente.
 - El Site conserva acceso personalizado al propietario y cero visitantes
   externos. Está en
   <https://grupo-paris-contabilidad.valentino-magni.chatgpt.site>.

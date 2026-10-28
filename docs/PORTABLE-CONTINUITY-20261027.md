@@ -9,9 +9,9 @@ PC o aplicación; la documentación anterior de este archivo quedó reemplazada.
 - Catálogo v4 está publicado directamente en `main` como `d9da38f`; su guía se
   registró en `e3f389c`. GitHub confirmó el push bajo `tablerocontable-paris`,
   sin PR; GitHub CI valida los commits publicados. El repositorio permanece privado.
-- Site de laboratorio existente:
-  <https://grupo-paris-contabilidad.valentino-magni.chatgpt.site>, versión 102,
-  fuente Sites `4e795dde520a62606f7cfe671ae0b7e10d0f2733`. Conserva acceso
+- Site de laboratorio existente, v4 desplegado como versión 103:
+  <https://grupo-paris-contabilidad.valentino-magni.chatgpt.site>, fuente Sites
+  `90df8234f0f66748b49cf113844050c43b8caf9a`. Conserva acceso
   personalizado al propietario, sin invitados externos.
 - GitHub y la fuente del Site son repositorios distintos. Un push a GitHub no
   despliega el Site automáticamente; la publicación se hace con Sites y conserva
