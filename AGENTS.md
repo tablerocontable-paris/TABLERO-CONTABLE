@@ -1,86 +1,46 @@
-# Estado actual del proyecto — actualizado 27/10/2026
+# Continuidad y estado actual del proyecto — actualizado 28/10/2026
 
 Repositorio activo `work/site`, remoto privado
-`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`. El corte validado más
-reciente se publicó directamente bajo el autor **Tablero Contable** en
-`14304ff79557ada887fd2f3d8e0f616ff4d4786d`; GitHub Actions run
-`40547953494` (#114: suite, build y validación del paquete Sites) pasó y el hook
-local fue 212/212. Pruebas focales 27/27 pasaron para las migraciones 011–016.
-La revisión de cobertura del catálogo y el contrato borrador remoto están en
-los documentos enlazados abajo. El cotejo Supabase DEV del 27/10 coincide con
-el replay local de las 18 migraciones versionadas; SQL011 tuvo un defecto
-semántico corregido en SQL016. Evidencia en
-`docs/architecture/SUPABASE-DEV-SCHEMA-CATALOG-COMPARE-20261027.md`.
+`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`, HEAD `b0fdda472fb1704e178cbd64f5007024eda8dc8d`.
+El catálogo v4 se publicó directamente bajo la cuenta **Tablero Contable**, sin
+PR. Validación local del código: 867/867 pruebas en 87 archivos, TypeScript,
+build de cliente y Worker, paquete Sites, revisión independiente y hook
+223/223. GitHub Actions valida cada push; consultar el run del HEAD actual antes
+de afirmar que pasó.
 
-## Objetivo y primera experiencia
+## Catálogo de tareas y primera experiencia
 
-El catálogo neutral de primer ingreso contiene 26 sugerencias v2 en cinco
-familias. Son editables y opcionales en el laboratorio local; al terminarlas
-generan propuestas para aprobación, no tareas reales. El flujo de primer ingreso
-autenticado todavía no está implementado. Mantener los seis IDs `starter-v1-*`
-y los historiales anteriores compatibles. Fuentes: `src/domain/neutralStarterCatalog.ts`,
-`docs/product/TASK-NORMALIZATION-DRAFT-20261026.md` y
-`docs/product/STARTER-CATALOG-AND-BASELINE-20261026.md`.
+El catálogo Grupo París v4 ofrece siete unidades de negocio y 55 tareas con
+código y nombre canónicos. Veinticinco están confirmadas para comparación; 30
+son provisionales, seleccionables y registrables, pero excluidas de
+comparaciones entre unidades hasta confirmar su alcance. `CONC BANC FRANC` es
+alias de búsqueda para Conciliación bancaria y nunca se guarda como tarea
+independiente. El mismo Site privado está publicado en versión 103 desde la
+fuente Sites `90df8234f0f66748b49cf113844050c43b8caf9a`, con acceso
+personalizado sólo al propietario y cero visitantes externos. Fuentes:
+`src/domain/parisTaskCatalog.ts`,
+`docs/product/BUSINESS-UNIT-TASK-CATALOG-DRAFT-20261028.md` y
+`docs/PROJECT-STATUS.md`.
 
-## Continuidad portable, privacidad y subagentes
+El onboarding autenticado todavía no está implementado. El flujo actual es sólo
+para el laboratorio local con perfiles/datos ficticios; las propuestas no se
+convierten en trabajo real automáticamente. Mantener compatibilidad de
+historiales y no clasificar registros antiguos por sus títulos.
 
-Usar subagentes cuando mejoren calidad o velocidad; normalmente uno por vez,
-especialmente para revisión independiente. Continuar pasos rutinarios sin
-interrumpir al usuario. GPT-6.1 Sol define/revisa contratos y GPT-6 Luna
-implementa contratos aprobados cuando esos modelos estén disponibles.
+## Continuidad, privacidad y servicios
 
-GitHub conserva código, historia, instrucciones y decisiones/evidencia útil; no
-puede sincronizar la memoria global de Codex ni el historial bruto del chat. No
-subir credenciales, sesiones de navegador, comentarios/notas privadas ni datos
-identificables de personas/clientes. Registrar decisiones del proyecto en
-`docs/`; migrar contexto útil, no volcados indiscriminados.
+La guía para otra PC es `outputs/LEEME-PC-PERSONAL.md`; antes de editar, leer
+`docs/PROJECT-STATUS.md` y `docs/EXECUTION-NEXT.md`. GitHub conserva código e
+historia, pero no memoria global de Codex, IndexedDB ni los datos locales del
+Site. El CI de GitHub no publica el Site: sincronizar/publicar su fuente por
+separado y conservar la audiencia actual.
 
-## Supabase DEV y migraciones
-
-Proyecto `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`) activo. La consulta remota
-confirma 18 versiones, correspondientes a SQL001–016. Runs #1–#3 aplicaron
-001–014, 015 y 016 con hashes/preflight verificados. Run #4
-(`40522765334`) eligió por error `baseline_001_014` cuando ya había 18 versiones;
-el guard registró `local=16, remoto=18` y falló antes de dry-run y `db push`, sin
-escrituras. El run #1 confirma que el baseline se aplicó correctamente como
-proceso. Sí se halló un defecto funcional en la lectura legacy de SQL011 tras
-revocar membresía; SQL016 lo corrigió y su cadena remota actual exige membresía
-activa. El workflow de DEV quedó sólo de lectura y ya no permite re-aplicar
-001–014 ni 015/016; se retiró el preflight duplicado. No habilitar escrituras
-hasta diseñar una etapa nueva, específica y revisada para futuras migraciones.
-
-El catálogo read-only encontró 57 tablas con RLS, 28 políticas públicas, ningún
-DML directo para `anon`/`authenticated`; `authenticated` tiene SELECT sujeto a
-políticas en 28 tablas públicas. Las 142 funciones `SECURITY DEFINER` en
-`public`, `api` y `app_private` pertenecen a `postgres` y tienen `search_path`
-vacío. 39 RPC públicas y 3 RPC de `api` permiten ejecución autenticada; ninguna
-permite `anon` o `PUBLIC`. Falta comprobar en Dashboard qué esquemas expone Data
-API y probar permisos con sesiones Auth DEV. Dos funciones trigger no-definer
-tienen EXECUTE heredado de PUBLIC; sólo hardening de defensa en profundidad,
-sin llamada RPC ordinaria ni DML público.
-
-## Personal y trabajo observado
-
-Las capturas muestran 14 filas con nombre más una fila «Sin asignar», pero son
-parciales y sin fecha de corte. El snapshot D1 consultado el 27/10 sigue fechado
-06/10: cuatro perfiles ficticios marcados activos y una tarea en curso, sin
-cierre. No estima personal ni tareas completadas hoy. No copiar nombres,
-correos, títulos de tareas, comentarios, identificadores ni auditoría en crudo.
-Para cifras reales se requiere una exportación autorizada y anonimizada con IDs
-estables, estado y marcas de tiempo; el esquema de entrada y cálculo reproducible
-está documentado en `docs/product/ANONYMIZED-WORKFORCE-ESTIMATE.md` e
-implementado localmente en `scripts/workforce-estimate*.mjs`. Los casos
-sintéticos se cubren en `tests/workforce-estimate.test.ts`; aún no hay un
-extracto real y por eso no hay estimación real calculada. Tratar las salidas como
-seudónimos potencialmente reidentificables y mantenerlas fuera de Git.
-
-## Site y preservación
-
-Conservar el mismo Site privado `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85`,
-versión 98, owner-only; no crear reemplazo ni ampliar audiencia. El CI del repo
-no publica el Site. Mantener Supabase Auth operativo apagado, datos ficticios y
-espacio operativo sin activar. Cloudflare/correo y aceptación visual en PC
-personal siguen pendientes.
+Supabase DEV tiene SQL001–016 aplicadas. Mantener Auth operativo apagado,
+`/api` operativo deshabilitado y datos ficticios. No modificar SQL001–016 ni
+activar el espacio operativo sin contrato y revisión específicos. No subir
+credenciales, sesiones, notas/comentarios privados ni datos identificables de
+personas o clientes. Usar subagentes cuando mejoren la calidad o velocidad,
+normalmente uno por vez; continuar pasos rutinarios sin interrumpir al usuario.
 
 Conservar el scratch no versionado
 `tests/review/m2-2c-legacy-task-control-replay-races.block` sin leerlo,
@@ -88,7 +48,6 @@ modificarlo, stagearlo ni borrarlo.
 
 Este bloque supersede los estados inferiores. Las entradas debajo son historia;
 conservarlas, pero no usarlas como estado actual. No modificar el scratch `.block`.
-
 <!-- Historial de continuidad -->
 
 # Estado anterior — 23/10/2026, corte posterior a publicación
