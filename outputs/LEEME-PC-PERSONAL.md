@@ -6,6 +6,12 @@ traslado del proyecto.
 ## Fuente de código
 
 - Repositorio privado de GitHub: [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocontable-paris/TABLERO-CONTABLE)
+- Corte siguiente en preparación: la protección para no activar propuestas con
+  clasificación antigua/incompleta pasó localmente **877/877 pruebas**,
+  otras 122/122 pruebas focales, hook automático 229/229, TypeScript, build
+  cliente/Worker y paquete Sites. Commit `5bcf11a` ya publicado en `main`;
+  estoy confirmando el CI. Esperá mi confirmación final antes de actualizar el
+  clon.
 - Rama activa: `main`; incluye el catálogo v5, la normalización del alta
   puntual y las protecciones de onboarding/propuestas (último corte funcional
   `d37792b8a1b9fd29697ecaed726ecaeaae003cc0`). Para
@@ -14,6 +20,10 @@ traslado del proyecto.
   El Site privado sigue en v104; estos últimos cambios de GitHub no se
   desplegaron allí. Consultá `docs/PROJECT-STATUS.md` y
   `docs/EXECUTION-NEXT.md` para el estado actualizado.
+- El último commit de continuidad es `4ae9416ddf83e89d01a8fcb273dea3fa278b1bd0`;
+  Actions #143 está pendiente. El estado inicial de la PC de trabajo conserva
+  un único scratch local protegido sin versionar; no forma parte del clon ni
+  impide continuar desde `main`.
 - El código no se entrega en ZIP: cloná el repositorio para conservar historia
   y poder traer los cambios futuros.
 - Los cambios acordados se publican directamente en `main`, sin Pull Request.

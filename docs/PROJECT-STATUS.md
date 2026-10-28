@@ -1,5 +1,28 @@
 # Estado vigente — actualización 28/10/2026
 
+## Guardas para onboarding y activación de propuestas — corte local
+
+La revisión del flujo encontró que las propuestas antiguas sin clasificación
+París podían llegar a los controles de aprobación. El laboratorio ahora exige
+clasificación canónica completa y consistente entre revisiones antes de
+activar una propuesta como trabajo nuevo. El onboarding conserva borradores y
+propuestas históricas, pero no los materializa si no tienen selección París;
+el historial puede quitarse explícitamente sin borrar otros datos. No se
+reclasifican títulos antiguos por inferencia. Las propuestas antiguas sin
+clasificación quedan bloqueadas y todavía no tienen un formulario de
+reclasificación; se puede crear una propuesta nueva desde el catálogo y
+preservar el registro anterior.
+
+Validación local: suite completa **877/877 pruebas en 87 archivos**; las
+pruebas focales posteriores al último ajuste pasaron **122/122** y el hook
+automático de commit **229/229**. TypeScript, build cliente, Worker, paquete
+Sites y `git diff --check` aprobaron. La build de cliente deja los avisos
+conocidos del bundle principal (>500 kB) y comentarios de Zod. Commit funcional
+`5bcf11a` ya está publicado directamente en `main`, sin PR. Después de
+confirmar Actions se puede actualizar la PC personal con
+`git pull --ff-only origin main`. Site privado v104 sin cambios; no afecta
+`/api`, Auth ni SQL001–016.
+
 ## Alta de tareas puntuales normalizada — 28/10/2026
 
 En el laboratorio, “Nueva tarea” ya no admite títulos libres ni tareas sin
@@ -19,6 +42,11 @@ Pull Request. Actions #142 está **en ejecución** (consultado 28/10/2026); el
 run previo #141 pasó. El build conserva avisos de Zod y chunk principal de
 ~659 kB. El Site sigue en v104; no se desplegó. No modifica `/api`, Auth ni
 SQL001–016.
+
+El apunte de continuidad para la PC personal se publicó en
+`4ae9416ddf83e89d01a8fcb273dea3fa278b1bd0`; Actions #143 está pendiente. El
+archivo no versionado `tests/review/m2-2c-legacy-task-control-replay-races.block`
+permanece intacto y fuera de Git, según la protección del proyecto.
 
 La auditoría de rutas confirma que Nueva tarea y las conversiones de pedidos y
 anotaciones usan el catálogo canónico. Las propuestas puramente neutrales

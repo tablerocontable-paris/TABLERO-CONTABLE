@@ -1,13 +1,33 @@
 # Continuidad y estado actual del proyecto — actualizado 28/10/2026
 
+## Corte local actual — 28/10/2026
+
+El corte funcional `5bcf11a` ya está publicado directamente en `main`, sin
+Pull Request. Incluye validación estricta para onboarding y
+propuestas con catálogo París: los historiales antiguos se conservan, y las
+propuestas sin clasificación o con revisiones inconsistentes no se pueden
+activar como trabajo nuevo. Todavía no existe una vía para reclasificar esas
+propuestas antiguas; crear una propuesta nueva desde el catálogo mantiene su
+historial original intacto.
+
+Validación de este corte local: suite **877/877 en 87 archivos**, TypeScript,
+build cliente, Worker y paquete Sites aprobados. Vite informa el aviso de
+bundle principal >500 kB y comentarios `@__PURE__` de Zod; los comandos
+terminaron correctamente. Pruebas focales posteriores al ajuste de texto:
+122/122; hook de commit: 229/229. `git diff --check` pasó. La revisión
+independiente no encontró hallazgos críticos/altos; sí confirma que falta un
+flujo de reclasificación de propuestas antiguas. El commit funcional
+`5bcf11a` ya está publicado; falta confirmar GitHub Actions después de publicar
+la continuidad documental. El Site privado sigue en v104 y no se publica con
+estos pasos.
+Conservar el scratch no versionado protegido sin inspeccionarlo, modificarlo o
+stagearlo.
+
 Repositorio activo `work/site`, remoto privado
-`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`. El catálogo v5 se
-publicó directamente bajo la cuenta **Tablero Contable**, sin PR; commit
-funcional `f5263f1b4a2c401268083e7de6a50de53242966c`. Validación local:
-870/870 pruebas en 87 archivos, TypeScript, build de cliente y Worker. Site
-privado v104 desplegado desde la fuente
-`2a965026c40cad97a108f2e78dadd5f3c55edb37`; una persona autorizada, cero
-visitantes externos. GitHub Actions #135 confirmó éxito en el commit funcional.
+`tablerocontable-paris/TABLERO-CONTABLE`, rama `main`. El corte `5bcf11a` se
+publicó bajo la cuenta **Tablero Contable**, sin Pull Request. La documentación
+de continuidad que acompaña este corte quedará en un commit separado. El Site
+privado permanece en v104, owner-only; GitHub no lo despliega automáticamente.
 
 ## Catálogo de tareas y primera experiencia
 

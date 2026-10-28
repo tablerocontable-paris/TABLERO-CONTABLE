@@ -1,17 +1,32 @@
 # Estado vigente de ejecución — 28/10/2026
 
+## Siguiente corte local: seguridad de clasificación en onboarding
+
+Cambios implementados localmente en `5bcf11a`: bloquear activación de propuestas con
+clasificación faltante/inconsistente; preservar el historial de selecciones
+antiguas del onboarding; y no materializar borradores libres como tareas París.
+Validación terminada: **877/877** suite, **122/122** focales posteriores,
+**229/229** hook automático, TypeScript, build cliente/Worker, paquete Sites y
+`git diff --check`. Revisión final independiente sin hallazgos críticos/altos.
+Commit funcional `5bcf11a` ya publicado directamente a `main`; falta consultar
+el CI. Las propuestas antiguas sin clasificación se preservan pero no tienen
+aún un flujo de reclasificación; no aprobarlas ni inferir códigos desde el
+texto histórico. Site privado v104 sin cambios ni despliegue.
+
 ## Corte publicado para continuidad entre PC — 28/10/2026
 
-El último corte funcional está en `main`, commit
+El corte funcional está en `main`, commit
 `d37792b8a1b9fd29697ecaed726ecaeaae003cc0`, autor **Tablero Contable**,
 publicado directamente y sin Pull Request. Valida el cierre de onboarding
 nuevo con unidades/tareas canónicas y bloquea la activación de propuestas con
 historial de clasificación incompleto o mezclado, preservando su historial.
 Validación local: suite **873/873 en 87 archivos**, rutas modificadas **92/92**,
 TypeScript, build cliente/Worker y paquete Sites aprobados. GitHub Actions #142
-está en ejecución; el run #141 del commit anterior terminó en éxito. El Site
-privado sigue en v104 y no recibió este corte. No modifica `/api`, Auth ni
-SQL001–016. Guía para la PC personal: `outputs/LEEME-PC-PERSONAL.md`.
+está en ejecución; el run #141 del commit anterior terminó en éxito. La
+actualización de continuidad está publicada en `4ae9416`; Actions #143 está
+pendiente. El Site privado sigue en v104 y no recibió estos cortes. No modifica
+`/api`, Auth ni SQL001–016. Guía para la PC personal:
+`outputs/LEEME-PC-PERSONAL.md`.
 
 ## Alta puntual con identidad canónica — publicada en GitHub
 
