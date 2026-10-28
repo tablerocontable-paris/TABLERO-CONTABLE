@@ -1,7 +1,11 @@
 # Continuar el proyecto desde tu PC personal
 
-**Aviso:** el catálogo V6 está en trabajo local y todavía no se publicó. No
-actualices desde GitHub hasta que esta guía incluya el SHA validado.
+**Actualizado el 28/10/2026:** V6 ya está publicado directamente en `main`, sin
+Pull Request. Código `cd841683bff0dc90c760f73ba133fe4c6511bfcd`. GitHub Actions
+#148 está ejecutándose; la validación local pasó 880/880 pruebas, TypeScript,
+build cliente/Worker/Sites y recorrido de navegador en Edge. El laboratorio
+Sites sigue en v104 y no se actualizó. La guía se puede usar ya para clonar o
+actualizar la PC personal.
 
 Actualizado el 28/10/2026. Esta guía reemplaza instrucciones anteriores de
 traslado del proyecto.
@@ -9,26 +13,26 @@ traslado del proyecto.
 ## Fuente de código
 
 - Repositorio privado de GitHub: [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocontable-paris/TABLERO-CONTABLE)
-- Corte publicado en GitHub: la protección para no activar propuestas con
+- Corte anterior en GitHub: la protección para no activar propuestas con
   clasificación antigua/incompleta pasó localmente **877/877 pruebas**,
   otras 35/35 pruebas focales en los archivos afectados, hook automático
   229/229, TypeScript, build cliente/Worker y paquete Sites. Código `5bcf11a`;
   guía actualizada en `77bbae7`. Actions #146 aprobó suite, build y paquete
   Sites para ese HEAD.
-- Nota sobre catálogo: la tarea “Conciliación bancaria” se selecciona una sola
-  vez; “Conciliación Banco Francés” y `CONC BANC FRANC` buscan esa tarea y el
-  banco se guarda como parámetro requerido. Ese campo y otros parámetros aún
-  admiten texto libre; para análisis comparables por banco falta acordar e
-  implementar opciones canónicas con la lista real del estudio. Las 30 tareas
-  provisionales se registran pero aún no se comparan entre unidades.
-- Rama activa: `main`; incluye el catálogo v5, la normalización del alta
-  puntual y las protecciones de onboarding/propuestas (corte funcional
-  `5bcf11a`; documentación `77bbae7`). Para
+- Catálogo V6: “Conciliación Banco Francés”, “Conciliación Banco Nación” y
+  `CONC BANC FRANC` conducen al mismo código de tarea. Banco Francés y Banco
+  Nación son opciones controladas; otros bancos quedan pendientes de
+  homologación y sin comparación. La lista es parcial, basada en evidencia del
+  repositorio.
+- Rama activa: `main`; incluye catálogo V6, normalización del alta puntual y
+  protecciones del onboarding/propuestas. Para
   actualizar una copia existente, ejecutá `git pull --ff-only origin main`.
-  GitHub Actions #146 pasó; #143 pasó para el commit anterior.
+  GitHub Actions #148 valida V6 y sigue ejecutándose; #146 aprobó el corte
+  anterior.
   El Site privado sigue en v104; estos últimos cambios de GitHub no se
   desplegaron allí. Consultá `docs/PROJECT-STATUS.md` y
-  `docs/EXECUTION-NEXT.md` para el estado actualizado.
+  `docs/EXECUTION-NEXT.md` para el estado actualizado. V6 no se desplegó en el
+  Site.
 - Los últimos commits de continuidad son `66b4d4a` y `77bbae7`. El estado inicial de la PC de trabajo conserva
   un único scratch local protegido sin versionar; no forma parte del clon ni
   impide continuar desde `main`.
@@ -95,7 +99,7 @@ npm ci
 - La normalización inicial de Grupo París está en el onboarding del laboratorio.
   Las siete unidades están fijadas: PARIS AUTOS, DORAL, PARIS CARS, PARIS TRAC,
   MOTOR, FIDEICOMISO DESARROLLO y POSTVENTA.
-- El catálogo v5 ofrece las 55 tareas observadas con nombres canónicos y códigos
+- El catálogo v6 ofrece las 55 tareas observadas con nombres canónicos y códigos
   versionados. Veinticinco son comparables; treinta son provisionales y se
   pueden elegir/registrar con código propio, pero no se comparan entre unidades
   hasta confirmar su alcance. “Carga de otras facturas” exige indicar el
