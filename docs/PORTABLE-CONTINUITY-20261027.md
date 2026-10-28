@@ -6,11 +6,11 @@ PC o aplicación; la documentación anterior de este archivo quedó reemplazada.
 ## Fuentes vigentes
 
 - Repositorio privado: [`tablerocontable-paris/TABLERO-CONTABLE`](https://github.com/tablerocontable-paris/TABLERO-CONTABLE), rama `main`.
-- Catálogo v4 está validado localmente; se actualizará el SHA aquí después del
-  commit directo a `main`. El último cambio funcional publicado hasta entonces
-  es `ecf4d3542d460bc684590d0e7f699f65c9212dfb`, autor
-  `tablerocontable-paris`, sin PR. GitHub confirmó el repositorio privado,
-  rama por defecto `main` y permisos de administración/escritura.
+- Catálogo v4 está validado en el commit local `d9da38f` de `main`; el push/CI
+  está pendiente. El último cambio funcional ya publicado es
+  `ecf4d3542d460bc684590d0e7f699f65c9212dfb`, autor `tablerocontable-paris`,
+  sin PR. GitHub confirmó el repositorio privado, rama por defecto `main` y
+  permisos de administración/escritura.
 - Site de laboratorio existente:
   <https://grupo-paris-contabilidad.valentino-magni.chatgpt.site>, versión 102,
   fuente Sites `4e795dde520a62606f7cfe671ae0b7e10d0f2733`. Conserva acceso
@@ -30,9 +30,10 @@ alcance. Banco, cuenta, sucursal, sistema, período y otros datos son parámetro
 separados, no parte del nombre de tarea. “Carga de otras facturas” exige indicar
 el subtipo. Catálogos v1 y v2 se conservan para leer registros anteriores.
 
-La suite completa pasó **865/865 pruebas en 87 archivos**; TypeScript, build del
-cliente, Worker y paquete Sites también pasaron. El hook previo al commit pasó
-**223/223** y las pruebas focales del catálogo/onboarding/analítica **51/51**.
+La suite completa v4 pasó **867/867 pruebas en 87 archivos**; TypeScript, build
+del cliente, Worker y paquete Sites también pasaron. El hook previo al commit
+pasó **223/223**; catálogo/onboarding focal pasó **21/21**. La revisión
+independiente no encontró regresiones.
 El build conserva avisos de Rollup por comentarios de Zod y por el chunk
 principal (655 kB). No se tocaron Supabase, Auth operativo, `/api` ni SQL001–016.
 
