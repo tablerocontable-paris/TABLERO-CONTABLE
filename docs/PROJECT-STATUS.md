@@ -11,6 +11,13 @@ como alias; las tareas ambiguas permanecen fuera del catálogo seleccionable
 hasta confirmar su significado. Las capturas son parciales y no permiten medir
 frecuencias.
 
+Los datos versionados reutilizables ya están en
+`src/domain/parisTaskCatalog.ts`: siete códigos de unidad, catálogo de tareas,
+alias exactos sin reescritura automática y una lista de selección que excluye
+los renglones pendientes de revisión. La prueba focal está en
+`tests/paris-task-catalog.test.ts`. Esta capa de dominio todavía no está
+conectada al onboarding ni guarda unidad/código en asignaciones o tareas.
+
 Esto es una especificación revisable, no un cambio de interfaz/base de datos:
 `companyId`, el primer ingreso, los títulos editables y los códigos neutrales
 v2 siguen sin cambios. El catálogo aún no está conectado a selección de unidad

@@ -8,6 +8,8 @@ borrador de catálogo para la organización: distingue tarea canónica de alias,
 unidad de negocio de empresa legal, y atributos como banco/sucursal/marca del
 nombre de tarea. Los términos ambiguos están marcados para aprobación antes de
 convertirlos en opciones activas. No representa ocurrencias ni métricas reales.
+La estructura ejecutable está en `src/domain/parisTaskCatalog.ts`; su prueba
+focal valida códigos, unidades, alias y exclusión de tareas ambiguas.
 
 Siguiente implementación: añadir al onboarding una selección cerrada de unidad
 de negocio y tareas canónicas con códigos inmutables, permitir parámetros
