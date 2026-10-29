@@ -1,6 +1,6 @@
 # Continuar el proyecto desde tu PC personal
 
-**Corte actual 29/10/2026:** el commit `ccc5785a156617fecb79ed0a42055f4b65afaa6d` está en GitHub `main`, sin Pull Request, y valida campos requeridos del catálogo durante el onboarding. Pasaron 888/888 pruebas en 88 archivos, TypeScript, builds cliente y Worker, Playwright/Edge y benchmark 30/30 (p95 644,84 ms); Actions #161 seguía en curso al corte. El mismo Site privado está en v108, owner-only. La UI interior con sesión autorizada y la PC personal todavía no se aceptaron. Esto no acredita certeza del 100%.
+**Corte actual 29/10/2026:** el commit `ccc5785a156617fecb79ed0a42055f4b65afaa6d` está en GitHub `main`, sin Pull Request, y valida campos requeridos del catálogo durante el onboarding. Pasaron 888/888 pruebas en 88 archivos, TypeScript, builds cliente y Worker, Playwright/Edge y benchmark 30/30 (p95 644,84 ms); Actions #161 fue cancelado al subir documentación; Actions #162 pasó tests, build y paquete Sites para el commit documental siguiente, con este mismo código. El mismo Site privado está en v108, owner-only. La UI interior con sesión autorizada y la PC personal todavía no se aceptaron. Esto no acredita certeza del 100%.
 
 En la PC personal, iniciar sesión en GitHub con la cuenta que tiene acceso y
 actualizar el clon con `git pull --ff-only origin main`. Después seguir los

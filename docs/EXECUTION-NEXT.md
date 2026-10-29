@@ -2,7 +2,7 @@
 
 ## Corte de código actual — IVA / Gemelo
 
-Commit `ccc5785a156617fecb79ed0a42055f4b65afaa6d` está directamente en GitHub `main` (sin PR). El onboarding valida los parámetros obligatorios de tareas canónicas antes de permitir avanzar. Para el corte pasaron 888/888 pruebas, TypeScript, build cliente y Worker, Playwright/Edge escritorio y móvil, benchmark 30/30 con p95 644,84 ms (24 perfiles, 2.000 tareas) y hook 235/235. Actions #161 seguía en curso al actualizar este documento. El mismo Site privado está en v108; fuente Sites `97eb08b28bac48489e24321866b4834051ee5587`, árbol `6ecb68ee3e1667f564134c7c18f4ab492c64582e`, coincidente con GitHub `main` al publicar. Audiencia owner-only, un usuario permitido, cero visitantes.
+Commit `ccc5785a156617fecb79ed0a42055f4b65afaa6d` está directamente en GitHub `main` (sin PR). El onboarding valida los parámetros obligatorios de tareas canónicas antes de permitir avanzar. Para el corte pasaron 888/888 pruebas, TypeScript, build cliente y Worker, Playwright/Edge escritorio y móvil, benchmark 30/30 con p95 644,84 ms (24 perfiles, 2.000 tareas) y hook 235/235. Actions #161 fue cancelado al entrar el commit documental siguiente; Actions #162 pasó tests, build y paquete Sites para ese commit, que conserva el mismo código vigente. El mismo Site privado está en v108; fuente Sites `97eb08b28bac48489e24321866b4834051ee5587`, árbol `6ecb68ee3e1667f564134c7c18f4ab492c64582e`, coincidente con GitHub `main` al publicar. Audiencia owner-only, un usuario permitido, cero visitantes.
 
 ### Siguiente bloque
 
