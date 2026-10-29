@@ -1,9 +1,9 @@
 # Estado vigente — actualización 29/10/2026
 
-## Revisión de continuidad — 29/10/2026, posterior a `c5dd7ab`
+## Revisión de continuidad — 29/10/2026, posterior a `4e4fea0`
 
-GitHub Actions **#181** terminó `success` para el HEAD documental
-`c5dd7ab43382bb95aff5947189d6afa2b47138a6` (suite, build y paquete Sites).
+GitHub Actions **#182** terminó `success` para el HEAD documental
+`4e4fea0bfe99737a8f427c22092ed7e6be892146` (suite, build y paquete Sites).
 El árbol local está sincronizado con `origin/main`; el único untracked es el
 scratch protegido.
 

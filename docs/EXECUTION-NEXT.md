@@ -1,7 +1,7 @@
 # Estado vigente de ejecución — 29/10/2026
 
-GitHub Actions **#181** terminó `success` para el HEAD documental
-`c5dd7ab43382bb95aff5947189d6afa2b47138a6` (suite, build y paquete Sites).
+GitHub Actions **#182** terminó `success` para el HEAD documental
+`4e4fea0bfe99737a8f427c22092ed7e6be892146` (suite, build y paquete Sites).
 Este corte es documental y no requiere nueva publicación del Site.
 
 Supabase Advisors se reconsultó en modo lectura a las 22:17 UTC y conservó
