@@ -23,8 +23,12 @@ quitar/volver a seleccionar “Otro banco”. Sobre ese código pasaron localmen
 Playwright/Edge. GitHub Actions **#189** terminó `success` para el HEAD
 documental `74b506e60fc8cf8ed5dd8341fe2fe629e9394ede`, incluyendo suite, build
 y paquete Sites. Este resultado sí valida el código funcional que contiene.
-El Site privado v109 no contiene estos últimos cambios. Las comprobaciones no
-sustituyen aceptación manual con sesión ni garantizan error cero.
+GitHub `main` ahora está en `90f40a6101a18fc7d950e88d01392eabfc523ca8` y
+Actions **#190** terminó `success` para ese corte documental. El mismo Site
+privado se publicó como **v110** desde la fuente Sites
+`d65a2a1d906fe1b13dee5bf94a2c70b9684cbe88`; el despliegue pasó y la audiencia
+sigue owner-only, con cero visitantes externos. Falta la aceptación manual de
+la interfaz interior con sesión. Estas comprobaciones no garantizan error cero.
 
 En esta PC, el benchmark Edge del árbol `74b506e` pasó 30 recorridos con 24
 perfiles/2.000 tareas y p95 502,98 ms; suite completa 892/892, build cliente y

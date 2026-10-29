@@ -12,6 +12,16 @@ recorridos calientes, p95 **502,98 ms** (<1.000 ms). Evidencia del benchmark:
 Estos resultados verifican el laboratorio local y CI; no cierran la aceptación
 manual autenticada, la homologación funcional ni la preparación para producción.
 
+Actions **#190** terminó `success` para GitHub `main`
+`90f40a6101a18fc7d950e88d01392eabfc523ca8` (suite, build y paquete Sites).
+El Site privado existente se actualizó a **v110** desde la misma base, con
+fuente Sites `d65a2a1d906fe1b13dee5bf94a2c70b9684cbe88` y árbol
+`b100a394e865908331e17e5ec0d215aafc43c85e`. El despliegue
+`appgdep_6ae3d9f57fa88191989e95248e30e1ff` terminó `succeeded`; la URL y la
+audiencia no cambiaron. Sites confirmó modo `custom`, un único usuario
+permitido (propietario) y cero visitantes externos. Queda pendiente aceptar
+manualmente la interfaz interior con sesión.
+
 ## Rendimiento local del laboratorio — 29/10/2026
 
 Sobre el árbol de código `74b506e`, Edge 156 completó 30 recorridos calientes

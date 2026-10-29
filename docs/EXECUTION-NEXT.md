@@ -8,6 +8,12 @@ completó 30 recorridos, p95 502,98 ms. Sigue pendiente la aceptación manual
 autenticada, la matriz unidad–tarea real y la corrección/verificación de
 Exposed schemas y permisos Auth DEV antes de activar servicio operativo.
 
+Actions **#190** confirmó `success` para `main` en `90f40a6`. El mismo Site
+privado está actualizado a **v110**, despliegue
+`appgdep_6ae3d9f57fa88191989e95248e30e1ff`, owner-only y sin visitantes
+externos. Aceptar todavía la UI interior con sesión; no se activó el espacio
+operativo.
+
 Benchmark Edge del árbol `74b506e`: 30 recorridos calientes, 24 perfiles y
 2.000 tareas; p95 **502,98 ms** (<1.000 ms), sin errores JavaScript ni llamadas
 a `/api`. Evidencia: `docs/architecture/review-evidence/laboratory-performance-20261029.json`.
@@ -51,13 +57,13 @@ de `public` disponibles para `authenticated` siguen siendo el motivo para
 retirar `public` de Exposed schemas antes de pruebas de sesión. El detalle está
 en `docs/architecture/SUPABASE-DEV-READONLY-ACCESS-AUDIT-20261029.md`.
 
-## Corte de código actual — IVA / Gemelo
+## Corte funcional anterior — catálogo V7 / Site v109
 
 El commit funcional `c28c365de14a8d7c099ca20cecc2e0ab01764a1d` está directamente en GitHub `main` (sin PR). El catálogo París V7 añade sucursales 3/81 a carga de facturas de repuestos, exige un detalle para las demás y las excluye de comparación hasta homologarlas; V1–V6 siguen congeladas. Pasaron localmente 890/890 pruebas, TypeScript, build cliente y Worker, Playwright/Edge en escritorio y móvil, y hook 236/236. GitHub Actions **#167** terminó `success` para ese SHA. El mismo Site privado está en v109; fuente Sites `0e004e951192b95e52552b6444b759a344b8ad7b`, árbol `1d4eb82585015f76fec91705bd4432f72d313c8c`, idéntico al árbol de GitHub `main` en c28c365. El despliegue terminó `succeeded`; audiencia personalizada sólo propietaria, cero visitantes externos.
 
 ### Siguiente bloque
 
-1. Cuando se pueda usar una sesión autorizada, aceptar la UI interior de v109 y completar recorridos manuales de permisos y responsive; Edge automatizado no sustituye esta aceptación.
+1. Aceptar la UI interior de v110 con sesión autorizada y completar recorridos manuales de permisos y responsive; Edge automatizado no sustituye esta aceptación.
 2. En la PC personal, seguir `outputs/LEEME-PC-PERSONAL.md`, clonar/actualizar `main` y ejecutar instalación, validaciones y recorrido local.
 3. Mantener las 30 tareas provisionales fuera de comparación. La reauditoría del 29/10 no encontró una candidata que pueda habilitarse con evidencia documental suficiente; VN, PSA y MO4 aún requieren confirmar proceso y alcance. El borrador del catálogo registra qué debe aclararse.
 4. Revisar en Dashboard la lista efectiva de esquemas Exposed de Data API y completar matriz de permisos con identidades Auth DEV. La auditoría read-only de grants está en `docs/architecture/SUPABASE-DEV-READONLY-ACCESS-AUDIT-20261029.md`; no sustituye estas pruebas. Mantener Auth operativo, `/api` y Supabase de producción desactivados hasta aceptar el laboratorio.
