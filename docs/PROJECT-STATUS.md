@@ -1,14 +1,15 @@
 # Estado vigente — actualización 29/10/2026
 
-## Revisión de continuidad — 29/10/2026, posterior a `bce6859`
+## Revisión de continuidad — 29/10/2026, posterior a `0e7af5e`
 
 La prueba documental del cuestionario V7 está en `main` como
 `5fe0cb66eee6af58149faf7d09dcd2efb0d6030d`: comprueba que los 30 códigos
 provisionales del catálogo coincidan exactamente con los 30 ítems de la ficha
-de homologación. La validación actual del HEAD documental `bce68591` pasó
-**891/891 pruebas en 88 archivos** localmente; Actions #174 pasó suite, build
-y paquete Sites. Actions #173 quedó cancelado al ser reemplazado por el push
-posterior; sus pasos de suite, build y paquete ya habían terminado en éxito.
+de homologación. La suite local completa pasó **891/891 pruebas en 88 archivos**
+con el mismo código funcional; Actions #175 pasó suite, build y paquete Sites
+para el HEAD actual `0e7af5e2818b66c1e58fd605083ada5a0827a474`. Actions #173
+quedó cancelado al ser reemplazado por un push posterior; sus pasos de suite,
+build y paquete ya habían terminado en éxito.
 
 Una sonda REST de sólo lectura confirmó que PostgREST expone actualmente
 `public` y `graphql_public`; `api`, `app_private` y `extensions` son rechazados.
@@ -20,9 +21,15 @@ control de Windows prohíbe automatizar cambios en settings de seguridad; debe
 corregirse manualmente en API Settings de DEV, y después repetirse la sonda.
 Producción permanece intacta.
 
-El commit `bce68591f3274322dcbe6f1557feeee02639c2b1` sólo actualiza la
-continuidad y agrega la evidencia REST; no cambia código funcional ni requiere
-publicar otra versión del Site.
+Relectura SQL read-only de las 21:52 UTC: ninguna de las 57 tablas de `public`
+y `app_private` da permisos efectivos de tabla a `anon`; todas tienen RLS.
+`public` conserva 39 RPC `SECURITY DEFINER` ejecutables por `authenticated` y
+`api` tiene tres. `anon` sólo tiene EXECUTE PostgreSQL sobre dos funciones de
+trigger no elevadas, que no se invocaron. Detalle:
+[`SUPABASE-DEV-READONLY-ACCESS-AUDIT-20261029.md`](architecture/SUPABASE-DEV-READONLY-ACCESS-AUDIT-20261029.md).
+
+Los commits `bce6859` y `0e7af5e` sólo actualizan evidencia/continuidad; no
+cambian código funcional ni requieren publicar otra versión del Site.
 
 ## Corte de código — IVA / Gemelo en GitHub `main`
 

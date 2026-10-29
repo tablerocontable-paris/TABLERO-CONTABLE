@@ -63,7 +63,44 @@ funciones `SECURITY DEFINER` en esos tres esquemas.
 También se confirmó el privilegio PostgreSQL `USAGE`: `authenticated` lo tiene
 en `api` y `public`; `anon` y `PUBLIC` lo tienen en `public`; ninguno lo tiene
 en `app_private`. `USAGE` en PostgreSQL no demuestra por sí solo que un esquema
-esté incluido en **Data API → Exposed schemas**. Esa configuración sigue sin
-confirmación; por tanto la auditoría no cierra el posible acceso HTTP a RPC
-legacy de `public` ni reemplaza las pruebas de autorización con sesiones Auth
-DEV.
+esté incluido en **Data API → Exposed schemas**. La verificación REST posterior
+confirmó que `public` y `graphql_public` sí están expuestos, mientras `api` y
+`app_private` se rechazan. La revalidación exacta está abajo.
+
+## Revalidación de privilegios efectivos — 29/10/2026 21:52 UTC
+
+Se repitió la inspección SQL de sólo lectura luego de detectar por REST que
+PostgREST acepta `public` y `graphql_public`, pero rechaza `api` y
+`app_private`. El resultado actual distingue permisos PostgreSQL efectivos de
+la lista Exposed schemas:
+
+- `public` tiene 37 tablas y `app_private`, 20; todas tienen RLS. `anon` no
+  tiene privilegios efectivos `SELECT`, `INSERT`, `UPDATE` ni `DELETE` en esas
+  tablas.
+- `api` contiene 12 funciones, las 12 `SECURITY DEFINER`; sólo tres son
+  ejecutables por `authenticated`, ninguna por `anon`, y todas tienen
+  `search_path` fijado.
+- `app_private` contiene 53 funciones (42 `SECURITY DEFINER`); ninguna es
+  ejecutable por `anon` o `authenticated`, y ninguna `SECURITY DEFINER` carece
+  de `search_path` fijado.
+- `public` contiene 94 funciones (88 `SECURITY DEFINER`). 39 funciones
+  `SECURITY DEFINER` son ejecutables por `authenticated`; 41 funciones totales
+  de `public` lo son. `anon` tiene EXECUTE sobre dos funciones no
+  `SECURITY DEFINER`: `normalize_assignment_schedule()` y
+  `reject_template_version_change()`. Sus definiciones las identifican como
+  triggers (`RETURNS trigger`); no se invocaron.
+- Las 88 funciones `SECURITY DEFINER` de `public` tienen `search_path` fijado.
+  Por tanto, el riesgo relevante que sigue pendiente es revisar el alcance de
+  las RPC legacy expuestas a `authenticated` mientras `public` siga en la
+  lista Exposed; las ACL/RLS de tablas no indican acceso anónimo directo.
+
+Los advisors se refrescaron a las 21:52 UTC y mantienen 29 tablas con RLS sin
+policies, 39 funciones `SECURITY DEFINER` ejecutables por `authenticated`,
+124 claves foráneas sin índice cubriente, 8 policies con reevaluación de
+funciones de auth y 12 índices no usados. Son avisos de configuración o
+rendimiento, no demostraciones de explotación. No se cambió ACL, RLS,
+migraciones, Dashboard, Auth ni datos.
+
+La evidencia REST de Exposed schemas, el resultado exacto y el próximo paso
+están en
+[`SUPABASE-DEV-EXPOSED-SCHEMAS-REST-CHECK-20261029.md`](SUPABASE-DEV-EXPOSED-SCHEMAS-REST-CHECK-20261029.md).

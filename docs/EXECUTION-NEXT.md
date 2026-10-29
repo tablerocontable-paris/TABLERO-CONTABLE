@@ -3,10 +3,10 @@
 ## Revisión posterior — 29/10/2026
 
 En `5fe0cb6` se añadió una prueba que fija la paridad entre los 30 códigos
-provisionales V7 y la ficha de homologación. El HEAD documental `bce68591`
-pasó 891/891 pruebas en 88 archivos y GitHub Actions #174 pasó suite, build y
-paquete Sites. Actions #173 fue cancelado por el push posterior; sus pasos de
-validación habían concluido en éxito antes de la cancelación.
+provisionales V7 y la ficha de homologación. La suite local pasó 891/891
+pruebas en 88 archivos y GitHub Actions #175 pasó suite, build y paquete Sites
+para `0e7af5e2818b66c1e58fd605083ada5a0827a474`. #173 quedó cancelado por un
+push posterior; los pasos de validación ya habían concluido en éxito.
 
 La sonda REST de sólo lectura confirma Exposed schemas = `public,
 graphql_public`; `api` no está expuesto. Debe cambiarse desde API Settings del
@@ -14,7 +14,12 @@ proyecto DEV para dejar únicamente `api` y repetirse la sonda. Esta sesión no
 puede modificar ese ajuste de seguridad desde UI: el conector carece de una
 operación para ello y la skill de control Windows lo prohíbe. Evidencia:
 `docs/architecture/SUPABASE-DEV-EXPOSED-SCHEMAS-REST-CHECK-20261029.md`.
-Hasta entonces, no activar Auth operativo, `/api` ni datos reales.
+Hasta entonces, no activar Auth operativo, `/api` ni datos reales. La
+revalidación SQL read-only de 21:52 UTC confirmó que ninguna tabla de `public`
+o `app_private` da permisos efectivos a `anon`; las 39 RPC `SECURITY DEFINER`
+de `public` disponibles para `authenticated` siguen siendo el motivo para
+retirar `public` de Exposed schemas antes de pruebas de sesión. El detalle está
+en `docs/architecture/SUPABASE-DEV-READONLY-ACCESS-AUDIT-20261029.md`.
 
 ## Corte de código actual — IVA / Gemelo
 
