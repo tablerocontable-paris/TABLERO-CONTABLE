@@ -199,6 +199,9 @@ svg {
   height: 56px;
   object-fit: contain;
 }
+.brand-wordmark { display:grid; gap:3px; min-width:0; }
+.brand-wordmark strong { color:#f4f4f5; font-size:25px; font-weight:760; line-height:1; letter-spacing:-1.2px; }
+.brand-wordmark span { width:auto; color:#a4a6ad; font-size:8px; letter-spacing:1.1px; line-height:1.3; }
 .brand > span {
   font-size: 9px;
   letter-spacing: 1.8px;
@@ -532,6 +535,55 @@ header span {
 }
 .panel-body[hidden] {
   display: none;
+}
+.gemelo-page { display:grid; gap:16px; }
+.gemelo-intro { display:flex; align-items:center; gap:14px; padding:18px 20px; }
+.gemelo-mark { display:grid; place-items:center; width:38px; height:38px; flex:none; border:1px solid var(--line); border-radius:10px; color:var(--ink); background:var(--surface-soft); }
+.gemelo-intro h2 { margin:0; font-size:14px; }
+.gemelo-intro p { margin:5px 0 0; color:var(--muted); font-size:12px; line-height:1.5; }
+.gemelo-demo-tag { margin-left:auto; padding:6px 9px; border:1px solid var(--line); border-radius:999px; color:var(--muted); font-size:10px; white-space:nowrap; }
+.gemelo-query { padding:18px 20px; }
+.gemelo-query > label { display:block; margin-bottom:10px; color:var(--ink); font-size:13px; font-weight:650; }
+.gemelo-query-hint { margin:9px 0 0; color:var(--muted); font-size:10px; line-height:1.5; }
+.gemelo-query-row { display:flex; align-items:center; gap:10px; min-height:46px; padding:4px 5px 4px 13px; border:1px solid var(--line); border-radius:9px; color:var(--muted); background:var(--surface); }
+.gemelo-query-row:focus-within { outline:2px solid var(--focus, #8ca0b8); outline-offset:1px; }
+.gemelo-query-row input { flex:1; min-width:0; border:0; outline:0; color:var(--ink); background:transparent; font:inherit; font-size:12px; }
+.gemelo-query-row .primary { display:inline-flex; align-items:center; gap:7px; min-height:36px; }
+.gemelo-shortcuts { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.gemelo-shortcuts button { min-height:31px; padding:5px 10px; border:1px solid var(--line); border-radius:999px; color:var(--muted); background:var(--surface-soft); font:inherit; font-size:11px; cursor:pointer; }
+.gemelo-shortcuts button.selected { color:var(--ink); border-color:var(--control-border); background:var(--surface); }
+.gemelo-results .panel { margin:0; }
+.gemelo-results .panel-head { padding:16px 19px; }
+.gemelo-results .panel-head .text-button { display:inline-flex; align-items:center; gap:6px; }
+.gemelo-result-count { display:grid; place-items:center; min-width:28px; height:28px; border-radius:8px; color:var(--ink); background:var(--surface-soft); font-size:12px; font-weight:650; }
+.gemelo-subsection-head { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:13px 19px 8px; border-top:1px solid var(--line); }
+.gemelo-subsection-head h3 { margin:0; color:var(--ink); font-size:11px; font-weight:650; }
+.gemelo-subsection-head span { color:var(--muted); font-size:10px; }
+.gemelo-list { margin:0; padding:0; list-style:none; }
+.gemelo-list li { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:13px 19px; border-bottom:1px solid var(--line); }
+.gemelo-list li:last-child { border-bottom:0; }
+.gemelo-list li > div:first-child { display:grid; gap:4px; min-width:0; }
+.gemelo-list strong { color:var(--ink); font-size:12px; font-weight:620; }
+.gemelo-list span,.gemelo-list small { color:var(--muted); font-size:10px; }
+.gemelo-list small { color:var(--ink-muted, var(--muted)); }
+.gemelo-list time { flex:none; color:var(--ink); font-size:11px; font-variant-numeric:tabular-nums; }
+.gemelo-task-meta { display:flex; align-items:center; gap:13px; flex:none; }
+.gemelo-task-meta .text-button { display:inline-flex; align-items:center; gap:4px; }
+.gemelo-priority { padding:4px 7px; border:1px solid var(--line); border-radius:999px; color:var(--muted); font-size:9px; }
+.gemelo-priority--alta { color:var(--ink); font-weight:650; }
+.gemelo-empty { margin:0; padding:18px 19px; color:var(--muted); font-size:12px; }
+.gemelo-source-note,.gemelo-limit { margin:0; color:var(--muted); font-size:10px; line-height:1.5; }
+.gemelo-source-note { padding:0 19px 14px; }
+.gemelo-limit { padding:0 2px; }
+@media (max-width: 700px) {
+  .gemelo-intro { align-items:flex-start; flex-wrap:wrap; }
+  .gemelo-demo-tag { margin-left:52px; }
+  .gemelo-query { padding:15px; }
+  .gemelo-query-row { flex-wrap:wrap; padding:10px; }
+  .gemelo-query-row input { flex-basis:calc(100% - 32px); min-height:32px; }
+  .gemelo-query-row .primary { margin-left:auto; }
+  .gemelo-list li { align-items:flex-start; padding:12px 14px; }
+  .gemelo-task-meta { flex-direction:column; align-items:flex-end; gap:7px; }
 }
 .chart {
   padding: 19px 16px 12px;

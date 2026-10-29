@@ -135,6 +135,7 @@ import { currentCatalogueVersion } from "./domain/processImprovement";
 import { materializeNeutralStarterAssignment } from "./domain/neutralStarterCatalog";
 import { submitHabitualTaskProposal } from "./domain/habitualTaskProposals";
 import { summarizeParisTaskWork } from "./domain/parisTaskAnalytics";
+import { buildGemeloContext } from "./domain/gemelo";
 import {
   PARIS_BUSINESS_UNITS,
   PARIS_TASK_CATALOG_VERSION,
@@ -191,6 +192,7 @@ const TaskSchedulePanel = lazy(() => import("./components/TaskSchedulePanel"));
 const CommercialProgressPanel = lazy(() => import("./components/CommercialProgressPanel"));
 const TaskEvidencePanel = lazy(() => import("./components/TaskEvidencePanel"));
 const EvidenceLinks = lazy(() => import("./components/TaskEvidencePanel").then((module) => ({ default: module.EvidenceLinks })));
+const Gemelo = lazy(() => import("./components/Gemelo"));
 
 function retainProposalDraftMap<T>(source: Record<string, T> | undefined, proposals: Array<{ id: string }> | undefined): Record<string, T> {
   const proposalIds = new Set((proposals || []).map((proposal) => proposal.id));
@@ -199,6 +201,7 @@ function retainProposalDraftMap<T>(source: Record<string, T> | undefined, propos
 
 type Page =
   | "overview"
+  | "gemelo"
   | "day"
   | "tasks"
   | "operations"
@@ -214,6 +217,7 @@ type Page =
   | "quality";
 const pages: { id: Page; name: string; icon: typeof Users }[] = [
   { id: "overview", name: "Resumen", icon: LayoutDashboard },
+  { id: "gemelo", name: "Gemelo", icon: Sparkles },
   { id: "day", name: "Mi día", icon: Flag },
   { id: "tasks", name: "Tablero de tareas", icon: Columns3 },
   { id: "operations", name: "Actividad operativa", icon: ActivityIcon },
@@ -649,6 +653,10 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
   ), [monthTasks, company, summaryOwnerFilter, sector, team, query, state]);
   const metricDay = dateART();
   const metricAsOf = useMemo(() => new Date().toISOString(), [state.tasks, state.activity, metricDay]);
+  const gemeloContext = useMemo(
+    () => buildGemeloContext(state, active, filtered, month, company, metricDay),
+    [state, active, filtered, month, company, metricDay],
+  );
   const metricTasks = useMemo(() => labOnly ? filtered.filter((task) => task.kind === "resultado") : filtered, [labOnly, filtered]);
   const summaryMetricTasks = useMemo(() => labOnly ? summaryFiltered.filter((task) => task.kind === "resultado") : summaryFiltered, [labOnly, summaryFiltered]);
   const m = useMemo(() => {
@@ -1755,6 +1763,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
       <aside className={`sidebar${labOnly ? " sidebar-lab" : ""}`}>
         <div className="brand">
           <img src="/logo-grupo-paris.svg" alt="Grupo París" />
+          <div className="brand-wordmark"><strong>IVA</strong><span>GESTIÓN CONTABLE</span></div>
         </div>
         <label className="workspace sidebar-workspace">
           <Building2 size={18} />
@@ -1770,6 +1779,7 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
         <nav>
           {pages
             .filter((p) =>
+              (p.id !== "gemelo" || (laboratory && !remoteSave)) &&
               ((p.id !== "catalog" && p.id !== "closing") || active.role === "jefe") &&
               (p.id !== "requests" || (laboratory && !remoteSave)) &&
               (p.id !== "quality" || (laboratory && !remoteSave)),
@@ -1926,9 +1936,11 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           )}
           <div className="heading">
             <div>
-              <span className="eyebrow">CONTABILIDAD · GRUPO PARÍS</span>
+              <span className="eyebrow">{page === "gemelo" ? "IVA · GEMELO" : "CONTABILIDAD · GRUPO PARÍS"}</span>
               <h1>
-                {page === "overview"
+                {page === "gemelo"
+                  ? "El trabajo contable, en contexto."
+                  : page === "overview"
                   ? active.role === "empleado"
                     ? "Tu trabajo, en perspectiva."
                     : active.role === "encargado"
@@ -1963,7 +1975,9 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
                                       : "Lo próximo, a la vista."}
               </h1>
               <p>
-                  {page === "overview" && active.role === "empleado"
+                  {page === "gemelo"
+                    ? "Tareas y vencimientos de tu ámbito, con próximos pasos claros."
+                    : page === "overview" && active.role === "empleado"
                     ? "Tus tareas, prioridades y resultados del período."
                     : page === "operations"
                   ? labOnly ? "Facturas, trámites y pagos: cantidades, carga ponderada y tiempo registrado." : "Facturas, trámites y pagos: cantidades, referencias y metas por mes."
@@ -2062,6 +2076,24 @@ export default function App({initialState, remoteSave, remoteOwner=false, presen
           </div>}
           <div className="view-content" key={page}>
             <Suspense fallback={<div className="section-loading" role="status" aria-live="polite">Cargando sección…</div>}>
+            {page === "gemelo" && labOnly && (
+              <Gemelo
+                actorId={active.id}
+                tasks={gemeloContext.tasks}
+                obligations={gemeloContext.obligations}
+                companyOf={companyOf}
+                onOpenTask={(taskId) => {
+                  const task = state.tasks.find((row) => row.id === taskId);
+                  if (!task || !calendarCanAccessTask(state, active, task)) return;
+                  setMonth(task.month);
+                  setBoardOwner(active.role === "empleado" ? active.id : task.ownerId);
+                  setOwner(active.role === "empleado" ? active.id : task.ownerId);
+                  setPage("tasks");
+                  setDetail(task.id);
+                }}
+                onOpenCalendar={() => setPage("calendar")}
+              />
+            )}
             {page === "requests" && laboratory && !remoteSave && <InternalRequests state={state} actor={active} onCreate={createRequest} onStatus={updateRequestStatus} onReply={replyRequest} onConvert={convertRequestToTask} onOpenTask={openRequestTask} />}
             {page === "quality" && laboratory && !remoteSave && <ProcessQuality state={state} actor={active} commit={commit} notify={notify} />}
             {(page === "overview" || page === "day") && (

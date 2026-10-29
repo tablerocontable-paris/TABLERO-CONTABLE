@@ -520,10 +520,19 @@ fs.mkdirSync(output, { recursive: true });
     const dialogWidth = await page.getByRole("dialog").evaluate((dialog) => dialog.getBoundingClientRect().width);
     if (dialogWidth > 390) throw Error(`mobile notification dialog overflows viewport: ${dialogWidth}`);
     await page.getByRole("button", { name: "Cerrar", exact: true }).click();
+    await page.locator('[data-nav="gemelo"]').click();
+    await page.getByRole("heading", { name: "El trabajo contable, en contexto." }).waitFor();
+    await page.getByRole("textbox", { name: "¿Qué necesitás resolver?" }).fill("Conciliación");
+    await page.getByRole("button", { name: "Consultar" }).click();
+    await page.getByRole("heading", { name: "Próximas acciones" }).waitFor();
+    if (!(await page.locator(".gemelo-list li").count())) throw Error("Gemelo task search did not return the canonical reconciliation tasks");
+    await page.screenshot({ path: output + "/gemelo-mobile.png", fullPage: true });
+    const gemeloOverflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);
+    if (gemeloOverflow) throw Error("Gemelo mobile viewport overflow");
     if (errors.length) throw Error(errors.join("\n"));
     if (apiRequests.length) throw Error(`isolated lab requested API routes: ${apiRequests.join(", ")}`);
     console.log(
-      "PASS induction, resume, canonical pending proposals, historical proposal reclassification, company isolation, auto-checklist, activity, analysis grouping, complete monthly closure, write lock, canonical task classification, one-off deadline, timers, absences, isolated lab, due reminders and persisted read receipt, system/light/dark themes, mobile. No JS errors or API requests.",
+      "PASS induction, resume, canonical pending proposals, historical proposal reclassification, company isolation, auto-checklist, activity, analysis grouping, complete monthly closure, write lock, canonical task classification, one-off deadline, timers, absences, isolated lab, due reminders and persisted read receipt, IVA/Gemelo navigation and search, system/light/dark themes, mobile. No JS errors or API requests.",
     );
   } finally {
     if (browser) await browser.close();
