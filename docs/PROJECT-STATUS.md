@@ -1,18 +1,17 @@
 # Estado vigente — actualización 29/10/2026
 
-## Revisión de continuidad — 29/10/2026, posterior a `0e7af5e`
+## Revisión de continuidad — 29/10/2026, posterior a `35e90a3`
 
 La prueba documental del cuestionario V7 está en `main` como
 `5fe0cb66eee6af58149faf7d09dcd2efb0d6030d`: comprueba que los 30 códigos
 provisionales del catálogo coincidan exactamente con los 30 ítems de la ficha
 de homologación. La suite local completa pasó **891/891 pruebas en 88 archivos**
-con el mismo código funcional; Actions #175 pasó suite, build y paquete Sites
-para el HEAD actual `0e7af5e2818b66c1e58fd605083ada5a0827a474`. Actions #173
-quedó cancelado al ser reemplazado por un push posterior; sus pasos de suite,
-build y paquete ya habían terminado en éxito.
+con el mismo código funcional. Actions #177 pasó suite, build y paquete Sites
+para el HEAD actual `35e90a3c1eea5b1ef58abd9060a04cf9314bf406`.
 
-Una sonda REST de sólo lectura confirmó que PostgREST expone actualmente
-`public` y `graphql_public`; `api`, `app_private` y `extensions` son rechazados.
+La sonda REST de sólo lectura repetida a las 22:10 UTC confirmó que PostgREST
+expone actualmente `public` y `graphql_public`; `api`, `app_private` y
+`extensions` son rechazados.
 Esto contradice el objetivo aprobado de exponer sólo `api` en DEV. Evidencia y
 alcance en
 [`SUPABASE-DEV-EXPOSED-SCHEMAS-REST-CHECK-20261029.md`](architecture/SUPABASE-DEV-EXPOSED-SCHEMAS-REST-CHECK-20261029.md).
@@ -28,8 +27,9 @@ y `app_private` da permisos efectivos de tabla a `anon`; todas tienen RLS.
 trigger no elevadas, que no se invocaron. Detalle:
 [`SUPABASE-DEV-READONLY-ACCESS-AUDIT-20261029.md`](architecture/SUPABASE-DEV-READONLY-ACCESS-AUDIT-20261029.md).
 
-Los commits `bce6859` y `0e7af5e` sólo actualizan evidencia/continuidad; no
-cambian código funcional ni requieren publicar otra versión del Site.
+Los commits `bce6859`, `0e7af5e`, `2f93da1` y `35e90a3` sólo actualizan
+evidencia/continuidad; no cambian código funcional ni requieren publicar otra
+versión del Site.
 
 ## Corte de código — IVA / Gemelo en GitHub `main`
 

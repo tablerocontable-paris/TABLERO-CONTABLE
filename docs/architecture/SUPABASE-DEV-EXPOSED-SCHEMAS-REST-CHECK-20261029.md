@@ -36,3 +36,12 @@ rechazados. No tocar producción, grants, migraciones ni Auth operativo.
 
 No se usó ni registró la clave publicable, URL completa de RPC ni secretos en
 este documento.
+
+## Repetición de la comprobación — 29/10/2026 22:10 UTC
+
+Se repitieron los GET a los perfiles `api`, `public`, `graphql_public`,
+`app_private` y `extensions` con una clave publicable vigente y otro nombre RPC
+inexistente. El resultado fue idéntico: `public` y `graphql_public` aceptados
+(404 `PGRST202` por función inexistente); los otros tres recibieron 406
+`PGRST106` con la lista expuesta `public, graphql_public`. No se invocaron
+funciones ni se escribió estado. La clave no se guardó ni imprimió.

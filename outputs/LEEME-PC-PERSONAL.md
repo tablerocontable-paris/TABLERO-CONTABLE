@@ -35,15 +35,17 @@ y las pruebas con sesiones Auth DEV siguen pendientes.
 
 El commit documental `5fe0cb66eee6af58149faf7d09dcd2efb0d6030d` agrega una
 prueba de paridad entre el catálogo V7 y su ficha de homologación. La suite
-local pasó 891/891 pruebas en 88 archivos; Actions #175 pasó suite, build y
-paquete Sites para `0e7af5e2818b66c1e58fd605083ada5a0827a474`.
+local pasó 891/891 pruebas en 88 archivos; Actions #177 pasó suite, build y
+paquete Sites para `35e90a3c1eea5b1ef58abd9060a04cf9314bf406`.
 
 Revisión SQL read-only: las tablas `public`/`app_private` no dan privilegios
 efectivos de tabla a `anon`, pero `public` sigue expuesto y conserva RPC
 `SECURITY DEFINER` ejecutables por `authenticated`. El objetivo de DEV es
 exponer sólo `api`; la evidencia detallada está en
 `docs/architecture/SUPABASE-DEV-READONLY-ACCESS-AUDIT-20261029.md` y
-`docs/architecture/SUPABASE-DEV-EXPOSED-SCHEMAS-REST-CHECK-20261029.md`.
+`docs/architecture/SUPABASE-DEV-EXPOSED-SCHEMAS-REST-CHECK-20261029.md`; el
+último chequeo REST del 29/10 a las 22:10 confirmó que la configuración no
+cambió.
 
 ## Clonar el repositorio
 
