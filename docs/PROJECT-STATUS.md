@@ -10,6 +10,25 @@ El mismo Site `Grupo París · Tablero contable` está publicado como **v108**, 
 
 No hay certeza del 100% ni garantía de ausencia de errores. Restan aceptación con sesión, uso del clon en PC personal y homologación de tareas provisionales con criterios reales antes de activar Auth/API/Supabase/hosting de producción.
 
+## Corte Supabase DEV — verificado 29/10/2026
+
+Consulta read-only actual: `grupo-paris-dev` está `ACTIVE_HEALTHY`, PostgreSQL
+17.11 y registra 18 migraciones (001–016). Los runs históricos prueban que
+001–014 se aplicaron en orden; luego 015 y 016 se aplicaron por separado. El
+run #4 no demuestra una migración fallida: intentó repetir `baseline_001_014`
+cuando el remoto ya tenía 18 versiones, y el guard lo frenó antes del dry-run y
+`db push`. No repetir el baseline ni editar migraciones históricas.
+
+Sí hubo un defecto funcional en SQL011: lectura de tarea de encargado después
+de revocar membresía activa. SQL016 lo corrigió; la función remota actual usa
+la comprobación de acceso vigente. La paridad de catálogo y las pruebas locales
+no equivalen a probar Auth/RLS alojados. El workflow actual de migraciones es
+sólo de verificación read-only. Antes de datos reales faltan confirmar en
+Dashboard los esquemas de Data API y terminar la matriz con identidades Auth de
+DEV. Los advisors informan 39 RPC `SECURITY DEFINER` ejecutables por
+`authenticated` y 29 tablas con RLS sin policy; requieren revisión por contrato,
+no se interpretan automáticamente como vulnerabilidad ni como aprobación.
+
 ## Corte anterior — v106 (histórico)
 
 ## Corte vigente — reclasificación histórica publicada en v106

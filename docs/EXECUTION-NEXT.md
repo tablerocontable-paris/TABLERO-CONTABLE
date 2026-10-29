@@ -12,6 +12,12 @@ Commit `ccc5785a156617fecb79ed0a42055f4b65afaa6d` está directamente en GitHub `
 
 El preflight no demuestra ausencia total de errores ni certeza del 100%. No tocar el scratch protegido `tests/review/m2-2c-legacy-task-control-replay-races.block`.
 
+### Estado Supabase DEV revisado el 29/10/2026
+
+El proyecto sigue activo y las 18 migraciones 001–016 están registradas. 001–014 se aplicaron correctamente; un reintento posterior eligió por error el baseline completo y el guard lo detuvo antes de escribir. SQL016 corrige el defecto funcional de membresía revocada detectado en SQL011. Mantener el workflow actual read-only; antes de datos reales completar la revisión de exposición Data API y la matriz de permisos con Auth DEV. No editar ni reejecutar migraciones históricas.
+
+GitHub Actions #163 pasó tests, build y validación del paquete Sites para el commit `f8b37c28a285809ea75e8be191f689a28bfa288f`. Esto verifica CI del corte documental, no la UI autenticada ni el Site con usuarios operativos.
+
 ## Corte anterior — reclasificación histórica, Site v106 (histórico)
 
 ## Cambio vigente — reclasificación de propuestas históricas, Site v106
