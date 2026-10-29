@@ -34,8 +34,9 @@ Debe cambiarse en API Settings del proyecto DEV y revalidarse; Auth operativo
 y las pruebas con sesiones Auth DEV siguen pendientes.
 
 El commit documental `5fe0cb66eee6af58149faf7d09dcd2efb0d6030d` agrega una
-prueba de paridad entre el catálogo V7 y su ficha de homologación. Actions #173
-estaba ejecutándose al redactar este corte; verificar su resultado en GitHub.
+prueba de paridad entre el catálogo V7 y su ficha de homologación. El HEAD
+actual `bce68591f3274322dcbe6f1557feeee02639c2b1` pasó 891/891 pruebas en 88
+archivos localmente y Actions #174 pasó suite, build y paquete Sites.
 
 ## Clonar el repositorio
 

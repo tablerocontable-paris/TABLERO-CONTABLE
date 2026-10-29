@@ -3,8 +3,10 @@
 ## Revisión posterior — 29/10/2026
 
 En `5fe0cb6` se añadió una prueba que fija la paridad entre los 30 códigos
-provisionales V7 y la ficha de homologación. Actions #173 debe consultarse antes
-de dar ese cambio por validado remotamente.
+provisionales V7 y la ficha de homologación. El HEAD documental `bce68591`
+pasó 891/891 pruebas en 88 archivos y GitHub Actions #174 pasó suite, build y
+paquete Sites. Actions #173 fue cancelado por el push posterior; sus pasos de
+validación habían concluido en éxito antes de la cancelación.
 
 La sonda REST de sólo lectura confirma Exposed schemas = `public,
 graphql_public`; `api` no está expuesto. Debe cambiarse desde API Settings del

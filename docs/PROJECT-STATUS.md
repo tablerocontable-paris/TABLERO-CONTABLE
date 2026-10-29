@@ -1,12 +1,14 @@
 # Estado vigente — actualización 29/10/2026
 
-## Revisión de continuidad — 29/10/2026, posterior a `5fe0cb6`
+## Revisión de continuidad — 29/10/2026, posterior a `bce6859`
 
 La prueba documental del cuestionario V7 está en `main` como
 `5fe0cb66eee6af58149faf7d09dcd2efb0d6030d`: comprueba que los 30 códigos
 provisionales del catálogo coincidan exactamente con los 30 ítems de la ficha
-de homologación. CI #173 se encuentra en ejecución al momento de este corte;
-no atribuirle resultado hasta consultar su cierre.
+de homologación. La validación actual del HEAD documental `bce68591` pasó
+**891/891 pruebas en 88 archivos** localmente; Actions #174 pasó suite, build
+y paquete Sites. Actions #173 quedó cancelado al ser reemplazado por el push
+posterior; sus pasos de suite, build y paquete ya habían terminado en éxito.
 
 Una sonda REST de sólo lectura confirmó que PostgREST expone actualmente
 `public` y `graphql_public`; `api`, `app_private` y `extensions` son rechazados.
@@ -17,6 +19,10 @@ No se cambió configuración. El conector no expone este ajuste y la skill de
 control de Windows prohíbe automatizar cambios en settings de seguridad; debe
 corregirse manualmente en API Settings de DEV, y después repetirse la sonda.
 Producción permanece intacta.
+
+El commit `bce68591f3274322dcbe6f1557feeee02639c2b1` sólo actualiza la
+continuidad y agrega la evidencia REST; no cambia código funcional ni requiere
+publicar otra versión del Site.
 
 ## Corte de código — IVA / Gemelo en GitHub `main`
 
