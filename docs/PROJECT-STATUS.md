@@ -1,6 +1,32 @@
-# Estado vigente — actualización 28/10/2026
+# Estado vigente — actualización 29/10/2026
 
-## Catálogo V6 — publicado en GitHub; no desplegado a Sites
+## Despliegue actual — Site privado v105
+
+El catálogo V6 ya se publicó en el mismo Site existente, versión **105**,
+proyecto `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85`, fuente Sites
+`c647ef793cd1f0e36e3e43b0e7102a43a40ce3ab`. La audiencia continúa
+personalizada al propietario, con cero visitantes externos. La navegación sin
+sesión muestra correctamente la pantalla de inicio de sesión; la UI interna
+no quedó validada con sesión autenticada. Despliegue confirmado por Sites con
+versión activa y archivo de 62 entradas (4.382.720 bytes).
+
+GitHub `main` estaba en `05e3e52a8088779668baba1af0ea3324060885d4` y Actions
+#153 pasó para ese SHA. En esta PC: **880/880 pruebas en 87 archivos**,
+TypeScript, build cliente, Worker y empaquetado Sites aprobados. No hay `npm`
+instalado; se invocaron directamente las herramientas ya presentes en
+`node_modules`. Persisten avisos de bundle cliente mayor a 500 kB y comentarios
+de Zod. El código de repositorio y el origen interno de Sites usan historias
+Git distintas; la publicación conservó ambas con un merge de dos padres cuyo
+árbol coincide exactamente con GitHub `main`.
+
+El Site sigue siendo un laboratorio privado de datos ficticios. Esto no prueba
+la operación integrada con usuarios reales, autenticación propia, API ni
+Supabase en producción; tampoco establece certeza de error cero.
+
+**El bloque siguiente es historial del corte anterior y sus afirmaciones de
+“no desplegado” quedan superadas por v105.**
+
+## Catálogo V6 — corte GitHub anterior al despliegue Sites v105 (histórico)
 
 V6 añade opciones canónicas de banco en conciliación: Banco Francés y Banco
 Nación, respaldadas por nombres presentes en las fuentes del repositorio. Las

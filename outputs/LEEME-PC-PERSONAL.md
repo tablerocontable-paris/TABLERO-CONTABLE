@@ -1,15 +1,15 @@
 # Continuar el proyecto desde tu PC personal
 
-**Actualizado el 28/10/2026:** V6 ya está publicado directamente en `main`, sin
-Pull Request. Código `cd841683bff0dc90c760f73ba133fe4c6511bfcd`. GitHub Actions
-#150 pasó suite/build/paquete Sites para el corte funcional `54e8b4d`. Los
-commits documentales posteriores pasaron su hook de 230/230 pruebas. La suite
-completa local pasó 880/880, además de TypeScript,
-build cliente/Worker/Sites y recorrido de navegador en Edge. El laboratorio
-Sites sigue en v104 y no se actualizó. La guía se puede usar ya para clonar o
-actualizar la PC personal.
+**Actualizado el 29/10/2026:** V6 está en GitHub `main` y desplegado como Site
+privado v105 en el mismo proyecto. GitHub Actions #153 pasó para el SHA
+`05e3e52a8088779668baba1af0ea3324060885d4`. En la PC de trabajo pasaron
+880/880 pruebas, TypeScript, build cliente, Worker y paquete Sites usando
+ejecutables locales de Node (npm no está instalado aquí). El Site conserva
+acceso sólo al propietario y cero visitantes externos. Sin iniciar sesión sólo
+se verificó la puerta de acceso, no la interfaz interna. La guía ya sirve para
+clonar o actualizar la PC personal; ese clon todavía debe probarse allí.
 
-Actualizado el 28/10/2026. Esta guía reemplaza instrucciones anteriores de
+Actualizado el 29/10/2026. Esta guía reemplaza instrucciones anteriores de
 traslado del proyecto.
 
 ## Fuente de código
@@ -31,10 +31,10 @@ traslado del proyecto.
   actualizar una copia existente, ejecutá `git pull --ff-only origin main`.
   GitHub Actions #150 pasó suite, build y paquete Sites para el corte funcional
   `54e8b4d`.
-  El Site privado sigue en v104; estos últimos cambios de GitHub no se
-  desplegaron allí. Consultá `docs/PROJECT-STATUS.md` y
-  `docs/EXECUTION-NEXT.md` para el estado actualizado. V6 no se desplegó en el
-  Site.
+  El Site privado está en v105, en el mismo proyecto y con audiencia privada.
+  Consultá `docs/PROJECT-STATUS.md` y `docs/EXECUTION-NEXT.md` para el estado
+  actualizado. El despliegue no activa Auth operativo, `/api` ni Supabase de
+  producción.
 - Los últimos commits de continuidad son `66b4d4a` y `77bbae7`. El estado inicial de la PC de trabajo conserva
   un único scratch local protegido sin versionar; no forma parte del clon ni
   impide continuar desde `main`.

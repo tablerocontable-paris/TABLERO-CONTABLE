@@ -1,12 +1,16 @@
-# Continuidad y estado actual del proyecto — actualizado 28/10/2026
+# Continuidad y estado actual del proyecto — actualizado 29/10/2026
 
-## Corte actual — 28/10/2026
+## Corte actual — 29/10/2026
 
-El corte funcional V6 está publicado directamente en `main`, sin Pull Request,
-en `cd84168`. GitHub Actions #150 pasó suite, build y paquete Sites para el
-corte validado `54e8b4d`. Después se reconciliaron los documentos de continuidad;
-los hooks de esos commits documentales pasaron 230/230 pruebas. No confundir el
-SHA de validación funcional con el último SHA documental de `main`.
+El corte funcional V6 sigue en GitHub `main`. Se desplegó en el **mismo Site
+privado** como versión **105**, con fuente Sites
+`c647ef793cd1f0e36e3e43b0e7102a43a40ce3ab`, mismo proyecto
+`appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85`, propietario único autorizado y
+cero visitantes externos. El despliegue no amplió audiencia ni activó el
+espacio operativo. GitHub Actions #153 pasó para el SHA de código
+`05e3e52a8088779668baba1af0ea3324060885d4`. En esta PC se ejecutaron
+880/880 pruebas, TypeScript, build cliente, Worker y paquete Sites; `npm` no
+está instalado. No se debe describir como prueba de uso real autenticado.
 
 V6 conserva las 55 tareas del catálogo y controla Banco Francés y Banco Nación
 como parámetros de `gpar_bank_reconciliation`. Los demás bancos quedan
@@ -22,11 +26,13 @@ pre-commit pasó 230/230. El build conserva avisos de Zod y del bundle principal
 clasificación todavía no tienen vía de reclasificación. Treinta tareas siguen
 provisionales y no se comparan entre unidades hasta homologar su alcance.
 
-El Site privado conserva v104, owner-only, y no se actualiza con pushes a
-GitHub. Esta etapa continúa en laboratorio con perfiles/datos ficticios; no se
-activaron usuarios reales, Auth operativo, `/api` ni nuevas migraciones
-Supabase. Conservar el scratch no versionado protegido sin inspeccionarlo,
-modificarlo o stagearlo.
+El Site privado v105 se actualizó mediante publicación explícita; no se
+actualiza con pushes a GitHub. El sitio exige inicio de sesión para acceso y la
+comprobación visual quedó limitada a confirmar esa puerta de acceso; no se
+validó la interfaz interna con una sesión autenticada. Esta etapa continúa en
+laboratorio con perfiles/datos ficticios; no se activaron usuarios reales,
+Auth operativo, `/api` ni nuevas migraciones Supabase. Conservar el scratch no
+versionado protegido sin inspeccionarlo, modificarlo o stagearlo.
 
 Repositorio activo `work/site`, remoto privado
 `tablerocontable-paris/TABLERO-CONTABLE`, rama `main`, autor de publicación
@@ -34,6 +40,11 @@ Repositorio activo `work/site`, remoto privado
 `docs/EXECUTION-NEXT.md` y `outputs/LEEME-PC-PERSONAL.md` antes de continuar.
 
 ## Catálogo de tareas y primera experiencia
+
+Este apartado conserva detalles del corte GitHub anterior a la publicación
+Sites v105. Toda mención debajo a que V6 no está desplegado o que el Site sigue
+en v104 es histórica; el estado vigente está arriba y en
+`docs/PROJECT-STATUS.md`.
 
 V6 está publicado en GitHub `main` y validado por Actions #150. Mantiene las 55
 tareas y su elegibilidad general 25/30, incorpora Banco Francés/Banco Nación

@@ -1,6 +1,37 @@
-# Estado vigente de ejecución — 28/10/2026
+# Estado vigente de ejecución — 29/10/2026
 
-## Catálogo V6 publicado — pendientes funcionales
+## Corte actual — Site privado v105
+
+El catálogo V6 está desplegado en el Site privado existente: versión **105**,
+proyecto `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85`, fuente Sites
+`c647ef793cd1f0e36e3e43b0e7102a43a40ce3ab`, propietario autorizado y cero
+visitantes externos. Se conserva el entorno ficticio; el acceso sin sesión
+presenta la pantalla de inicio de sesión. No se verificó el interior con una
+sesión autenticada.
+
+GitHub Actions #153 aprobó el HEAD de código
+`05e3e52a8088779668baba1af0ea3324060885d4`. En la PC de trabajo pasaron
+**880/880 pruebas**, TypeScript, build cliente, Worker y paquete Sites mediante
+los ejecutables locales de Node; npm no está instalado. El bundle cliente
+mantiene un aviso por superar 500 kB y la build de Zod muestra comentarios
+conocidos. Este resultado no equivale a certeza del 100% ni a aceptación real
+por usuarios.
+
+### Trabajo que todavía falta
+
+- Validar la interfaz interna del Site con sesión autorizada y completar
+  recorridos manuales de accesibilidad/responsive.
+- Homologar las 30 tareas provisionales, sin habilitar comparaciones hasta
+  confirmar alcance y parámetros; resolver cómo reclasificar propuestas
+  históricas incompletas sin inferir su clasificación.
+- Hacer la prueba de clon y desarrollo en la PC personal cuando esté disponible.
+- Mantener Auth operativo, `/api` y producción desactivados hasta que el
+  producto y las cuentas reales tengan una etapa de aceptación aprobada.
+
+Los siguientes apartados son históricos; sus menciones a “no desplegado” o
+v104 describen el estado anterior a la publicación de v105.
+
+## Catálogo V6 — corte anterior a v105 (histórico; pendientes funcionales)
 
 La implementación introduce valores controlados para Banco Francés y
 Banco Nación en conciliación bancaria. Los nombres tienen respaldo en el
