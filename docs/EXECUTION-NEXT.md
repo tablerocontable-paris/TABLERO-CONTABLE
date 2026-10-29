@@ -1,5 +1,19 @@
 # Estado vigente de ejecución — 29/10/2026
 
+## Revisión posterior — 29/10/2026
+
+En `5fe0cb6` se añadió una prueba que fija la paridad entre los 30 códigos
+provisionales V7 y la ficha de homologación. Actions #173 debe consultarse antes
+de dar ese cambio por validado remotamente.
+
+La sonda REST de sólo lectura confirma Exposed schemas = `public,
+graphql_public`; `api` no está expuesto. Debe cambiarse desde API Settings del
+proyecto DEV para dejar únicamente `api` y repetirse la sonda. Esta sesión no
+puede modificar ese ajuste de seguridad desde UI: el conector carece de una
+operación para ello y la skill de control Windows lo prohíbe. Evidencia:
+`docs/architecture/SUPABASE-DEV-EXPOSED-SCHEMAS-REST-CHECK-20261029.md`.
+Hasta entonces, no activar Auth operativo, `/api` ni datos reales.
+
 ## Corte de código actual — IVA / Gemelo
 
 El commit funcional `c28c365de14a8d7c099ca20cecc2e0ab01764a1d` está directamente en GitHub `main` (sin PR). El catálogo París V7 añade sucursales 3/81 a carga de facturas de repuestos, exige un detalle para las demás y las excluye de comparación hasta homologarlas; V1–V6 siguen congeladas. Pasaron localmente 890/890 pruebas, TypeScript, build cliente y Worker, Playwright/Edge en escritorio y móvil, y hook 236/236. GitHub Actions **#167** terminó `success` para ese SHA. El mismo Site privado está en v109; fuente Sites `0e004e951192b95e52552b6444b759a344b8ad7b`, árbol `1d4eb82585015f76fec91705bd4432f72d313c8c`, idéntico al árbol de GitHub `main` en c28c365. El despliegue terminó `succeeded`; audiencia personalizada sólo propietaria, cero visitantes externos.

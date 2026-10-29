@@ -26,8 +26,16 @@ La revalidación de permisos de Supabase DEV quedó registrada en el commit
 `b2911fc128092f73bdb61cdb2c43f0d2fe61c636`, sin cambiar el código
 funcional ni requerir publicar otra versión del Site. Su hook local pasó
 236/236 y GitHub Actions #170 terminó en `success` (suite, build y paquete
-Sites). La revisión mantiene pendientes la exposición efectiva de Data API y
-las pruebas con sesiones Auth DEV.
+Sites). Una sonda REST posterior confirmó que DEV expone `public` y
+`graphql_public`, mientras `api` y `app_private` son rechazados. El objetivo es
+dejar únicamente `api` expuesto. Evidencia:
+`docs/architecture/SUPABASE-DEV-EXPOSED-SCHEMAS-REST-CHECK-20261029.md`.
+Debe cambiarse en API Settings del proyecto DEV y revalidarse; Auth operativo
+y las pruebas con sesiones Auth DEV siguen pendientes.
+
+El commit documental `5fe0cb66eee6af58149faf7d09dcd2efb0d6030d` agrega una
+prueba de paridad entre el catálogo V7 y su ficha de homologación. Actions #173
+estaba ejecutándose al redactar este corte; verificar su resultado en GitHub.
 
 ## Clonar el repositorio
 

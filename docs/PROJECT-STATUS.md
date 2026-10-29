@@ -1,5 +1,23 @@
 # Estado vigente — actualización 29/10/2026
 
+## Revisión de continuidad — 29/10/2026, posterior a `5fe0cb6`
+
+La prueba documental del cuestionario V7 está en `main` como
+`5fe0cb66eee6af58149faf7d09dcd2efb0d6030d`: comprueba que los 30 códigos
+provisionales del catálogo coincidan exactamente con los 30 ítems de la ficha
+de homologación. CI #173 se encuentra en ejecución al momento de este corte;
+no atribuirle resultado hasta consultar su cierre.
+
+Una sonda REST de sólo lectura confirmó que PostgREST expone actualmente
+`public` y `graphql_public`; `api`, `app_private` y `extensions` son rechazados.
+Esto contradice el objetivo aprobado de exponer sólo `api` en DEV. Evidencia y
+alcance en
+[`SUPABASE-DEV-EXPOSED-SCHEMAS-REST-CHECK-20261029.md`](architecture/SUPABASE-DEV-EXPOSED-SCHEMAS-REST-CHECK-20261029.md).
+No se cambió configuración. El conector no expone este ajuste y la skill de
+control de Windows prohíbe automatizar cambios en settings de seguridad; debe
+corregirse manualmente en API Settings de DEV, y después repetirse la sonda.
+Producción permanece intacta.
+
 ## Corte de código — IVA / Gemelo en GitHub `main`
 
 El catálogo París V7 agrega sucursal controlada para `Carga de facturas de repuestos`: opciones observadas 3 y 81; cualquier otra sucursal exige detalle y queda excluida de comparaciones hasta homologarla. V1–V6 conservan sus definiciones históricas; las 55 tareas y la elegibilidad 25 comparables / 30 provisionales no cambian. La dimensión no crea nombres de tareas nuevos ni supone que 3 y 81 sean el padrón completo. Gemelo sigue siendo una consulta local explicable de datos autorizados, sin notas personales, mutaciones, cronómetros, IA externa, ARCA ni llamadas a `/api`.
