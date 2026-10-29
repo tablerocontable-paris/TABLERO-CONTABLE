@@ -1,4 +1,28 @@
-# Estado vigente — actualización 29/10/2026
+# Estado vigente — actualización 30/10/2026
+
+## Revalidación posterior al onboarding multicuenta — 30/10/2026
+
+GitHub Actions **#189** terminó `success` para `74b506e60fc8cf8ed5dd8341fe2fe629e9394ede`
+(suite completa, build y paquete Sites). Sobre el árbol actual se repitieron
+**892/892 pruebas en 88 archivos**, TypeScript, build cliente, Worker, paquete
+Sites y recorrido Playwright/Edge. El recorrido pasó sin errores JavaScript ni
+llamadas a `/api`. El benchmark local con 24 perfiles/2.000 tareas pasó 30/30
+recorridos calientes, p95 **502,98 ms** (<1.000 ms). Evidencia del benchmark:
+[`laboratory-performance-20261029.json`](architecture/review-evidence/laboratory-performance-20261029.json).
+Estos resultados verifican el laboratorio local y CI; no cierran la aceptación
+manual autenticada, la homologación funcional ni la preparación para producción.
+
+## Rendimiento local del laboratorio — 29/10/2026
+
+Sobre el árbol de código `74b506e`, Edge 156 completó 30 recorridos calientes
+de Analítica, Tareas y Resumen con fixture validada de 24 perfiles/2.000 tareas.
+P95: **502,98 ms** frente al límite estricto de 1.000 ms; cero errores de
+JavaScript y cero llamadas a `/api`. Equipo: Windows 11, Intel i3-N305, 8 CPU
+lógicas y 8,2 GB de RAM. Evidencia versionada:
+[`laboratory-performance-20261029.json`](architecture/review-evidence/laboratory-performance-20261029.json);
+el reporte bruto queda local en `outputs/` (ignorado por Git). Es una medición
+sintética en una sola máquina, no una aceptación autenticada ni garantía de
+rendimiento para usuarios reales.
 
 ## Selección de más de una cuenta por tarea — 29/10/2026
 

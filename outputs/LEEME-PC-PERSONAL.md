@@ -15,15 +15,22 @@ laboratorio privado, con perfiles/datos ficticios y acceso únicamente de la
 cuenta propietaria. No se habilitaron usuarios reales, Auth operativo, `/api`
 operativa ni Supabase de producción.
 
-El HEAD de código en GitHub `main` es
+El último commit funcional de `main` es
 `8d950075f555507fccf64922680e91bd244a274c`. Incluye el catálogo V7, selección
 de varias cuentas por tarea canónica en onboarding y la corrección para poder
-quitar/volver a seleccionar “Otro banco”. La suite local (892/892), TypeScript,
-build de cliente y Worker, y recorrido Playwright/Edge aprobaron antes del
-último ajuste; la GitHub Action #188 de este HEAD está en ejecución al momento
-de esta actualización. El Site privado v109 no contiene estos últimos cambios.
-Estas comprobaciones no sustituyen aceptación manual con sesión ni garantizan
-error cero.
+quitar/volver a seleccionar “Otro banco”. Sobre ese código pasaron localmente
+892/892 pruebas, TypeScript, build de cliente y Worker, y recorrido
+Playwright/Edge. GitHub Actions **#189** terminó `success` para el HEAD
+documental `74b506e60fc8cf8ed5dd8341fe2fe629e9394ede`, incluyendo suite, build
+y paquete Sites. Este resultado sí valida el código funcional que contiene.
+El Site privado v109 no contiene estos últimos cambios. Las comprobaciones no
+sustituyen aceptación manual con sesión ni garantizan error cero.
+
+En esta PC, el benchmark Edge del árbol `74b506e` pasó 30 recorridos con 24
+perfiles/2.000 tareas y p95 502,98 ms; suite completa 892/892, build cliente y
+Worker, empaquetado Sites y recorrido de navegador también se repitieron. La
+evidencia y sus límites están en
+`docs/architecture/review-evidence/laboratory-performance-20261029.json`.
 
 La revalidación de permisos de Supabase DEV quedó registrada en el commit
 `b2911fc128092f73bdb61cdb2c43f0d2fe61c636`, sin cambiar el código

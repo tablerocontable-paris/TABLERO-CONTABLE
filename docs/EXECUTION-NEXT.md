@@ -1,4 +1,17 @@
-# Estado vigente de ejecución — 29/10/2026
+# Estado vigente de ejecución — 30/10/2026
+
+Revalidación actual: GitHub Actions **#189** `success` para el HEAD
+`74b506e60fc8cf8ed5dd8341fe2fe629e9394ede` (suite, build y paquete Sites).
+En esta PC, 892/892 pruebas en 88 archivos, TypeScript, cliente/Worker,
+paquete Sites y recorrido Playwright/Edge pasaron. El benchmark Edge 24/2.000
+completó 30 recorridos, p95 502,98 ms. Sigue pendiente la aceptación manual
+autenticada, la matriz unidad–tarea real y la corrección/verificación de
+Exposed schemas y permisos Auth DEV antes de activar servicio operativo.
+
+Benchmark Edge del árbol `74b506e`: 30 recorridos calientes, 24 perfiles y
+2.000 tareas; p95 **502,98 ms** (<1.000 ms), sin errores JavaScript ni llamadas
+a `/api`. Evidencia: `docs/architecture/review-evidence/laboratory-performance-20261029.json`.
+Es una prueba sintética local, no aceptación real.
 
 El onboarding local admite varias cuentas u otras combinaciones de parámetros
 bajo el mismo código canónico por unidad. Prueba del caso de dos cuentas de

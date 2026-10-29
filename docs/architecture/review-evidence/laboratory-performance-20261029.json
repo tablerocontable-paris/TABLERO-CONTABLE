@@ -1,0 +1,37 @@
+{
+  "scope": "Local laboratory navigation performance; synthetic fixture only",
+  "recordedAt": "2026-10-29T23:24:16.894Z",
+  "sourceTreeSha256": "81e25be328eadb1b3700472d8735013e4a67708b4c68425c9d7bd1775910324f",
+  "sourceCommit": "74b506e60fc8cf8ed5dd8341fe2fe629e9394ede",
+  "browser": "Microsoft Edge 156.0.4314.50",
+  "machine": {
+    "platform": "win32 10.0.26200",
+    "architecture": "x64",
+    "cpuModel": "Intel(R) Core(TM) i3-N305",
+    "cpuCount": 8,
+    "totalMemoryBytes": 8199290880
+  },
+  "dataset": {
+    "profiles": 24,
+    "tasks": 2000,
+    "employees": 21,
+    "companies": 4,
+    "teams": 2,
+    "owners": 23,
+    "month": "2026-10",
+    "fixtureValid": true
+  },
+  "method": "Two warm-up cycles followed by 10 hot cycles across analytics, tasks, and overview (30 samples). Each sample waits for route-specific content and two animation frames.",
+  "sampleCount": 30,
+  "p95RouteMs": 502.98,
+  "targetP95RouteMsExclusive": 1000,
+  "acceptance": "passed",
+  "javascriptErrors": [],
+  "operationalApiCalls": [],
+  "rawReport": "../../../outputs/performance-lab-2026-10-29T23-24-00-271Z-17272/navigation-benchmark.json",
+  "rawReportSha256": "3a14ed216de01a7cf4a98e0138797d3eacc784f20669d0605ad0ec6630461272",
+  "limitations": [
+    "Synthetic local data and this specific workstation/browser only.",
+    "Does not validate authenticated access, Supabase, the Site deployment, or actual user workflows."
+  ]
+}
