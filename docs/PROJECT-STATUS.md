@@ -10,6 +10,11 @@ El mismo Site `Grupo París · Tablero contable` está publicado como **v109**, 
 
 No hay certeza del 100% ni garantía de ausencia de errores. Restan aceptación de la UI interior con sesión, prueba del clon en la PC personal, homologación de tareas provisionales con los procedimientos reales y completar la revisión de exposición Data API / matriz Auth DEV antes de activar Auth/API/Supabase/hosting de producción.
 
+La guía `outputs/LEEME-PC-PERSONAL.md` fue corregida el 29/10 para reflejar
+GitHub `main`, catálogo V7, Site v109 y comandos vigentes; se quitaron las
+referencias contradictorias a v6/v105/v108 y pruebas antiguas. Sigue pendiente
+probar esos pasos en la PC personal.
+
 ## Corte Supabase DEV — verificado 29/10/2026
 
 Consulta read-only actual del 29/10/2026: `grupo-paris-dev` está `ACTIVE_HEALTHY`, PostgreSQL
@@ -31,6 +36,17 @@ no se interpretan automáticamente como vulnerabilidad ni como aprobación. La
 consulta de advisors del 29/10 volvió a informar 124 claves foráneas sin índice
 cubierto; es una alerta de rendimiento que debe contrastarse con consultas y
 carga reales antes de priorizar índices. La instancia sigue sin datos reales.
+
+Una auditoría PostgreSQL read-only complementaria confirmó 37 tablas `public`
+y 20 `app_private`, todas con RLS habilitado; no se observaron grants de tabla
+a `anon`, ni de tablas o funciones `SECURITY DEFINER` a `PUBLIC`/`anon`. El rol
+`authenticated` conserva SELECT sobre 28 tablas `public`, protegido por RLS;
+`api` tiene tres endpoints `SECURITY DEFINER` y `public` conserva 39 funciones
+con ese privilegio ejecutables por `authenticated`. El detalle y los límites
+están en
+[`SUPABASE-DEV-READONLY-ACCESS-AUDIT-20261029.md`](architecture/SUPABASE-DEV-READONLY-ACCESS-AUDIT-20261029.md).
+Esto no revela la lista Exposed schemas del Dashboard ni valida JWT/RLS con
+identidades Auth; esos gates siguen abiertos. No se modificaron migraciones.
 
 ## Corte anterior — v106 (histórico)
 

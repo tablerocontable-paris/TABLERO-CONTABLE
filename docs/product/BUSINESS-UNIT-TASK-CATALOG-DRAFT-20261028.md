@@ -254,3 +254,14 @@ su alcance, siglas o solapamientos: `supplier_invoice_load`,
 `supplier_payment_transfer_vn_vo_pda`, `cheque_operation_load`,
 `team_followup_review` y `gm_collection_register`. Siguen disponibles para
 registrar trabajo; no se inventan definiciones para habilitar gráficos.
+
+### Revisión de candidatas — 29/10/2026
+
+Una segunda revisión independiente de las fuentes del repositorio no encontró
+base suficiente para cambiar ninguna tarea provisional a comparable. Las tres
+candidatas requieren evidencia del procedimiento real: confirmar qué abarca
+VN y cuándo se considera hecha una carga; qué producto/línea identifica PSA y
+cuál es la unidad de medición del análisis de créditos; y qué variante/clase de
+reporte significa MO4. Además, falta confirmar en qué unidades se ejecuta cada
+flujo. Hasta resolverlo, las tres siguen provisionales junto con las otras 27;
+no se alteran códigos, nombres canónicos ni métricas históricas.

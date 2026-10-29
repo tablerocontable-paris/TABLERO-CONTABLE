@@ -7,9 +7,9 @@ El commit funcional `c28c365de14a8d7c099ca20cecc2e0ab01764a1d` está directament
 ### Siguiente bloque
 
 1. Cuando se pueda usar una sesión autorizada, aceptar la UI interior de v109 y completar recorridos manuales de permisos y responsive; Edge automatizado no sustituye esta aceptación.
-2. En la PC personal, clonar/actualizar `main` y ejecutar instalación, validaciones y recorrido local.
-3. Seguir homologando las 30 tareas provisionales con procedimientos, nombres y unidades reales; no ampliar el catálogo a partir de siglas o sucursales no confirmadas.
-4. Completar la revisión de esquemas Data API y la matriz de roles con identidades Supabase DEV. Mantener Auth operativo, `/api` y Supabase de producción desactivados hasta aceptar el laboratorio.
+2. En la PC personal, seguir `outputs/LEEME-PC-PERSONAL.md`, clonar/actualizar `main` y ejecutar instalación, validaciones y recorrido local.
+3. Mantener las 30 tareas provisionales fuera de comparación. La reauditoría del 29/10 no encontró una candidata que pueda habilitarse con evidencia documental suficiente; VN, PSA y MO4 aún requieren confirmar proceso y alcance. El borrador del catálogo registra qué debe aclararse.
+4. Revisar en Dashboard la lista efectiva de esquemas Exposed de Data API y completar matriz de permisos con identidades Auth DEV. La auditoría read-only de grants está en `docs/architecture/SUPABASE-DEV-READONLY-ACCESS-AUDIT-20261029.md`; no sustituye estas pruebas. Mantener Auth operativo, `/api` y Supabase de producción desactivados hasta aceptar el laboratorio.
 
 El preflight no demuestra ausencia total de errores ni certeza del 100%. No tocar el scratch protegido `tests/review/m2-2c-legacy-task-control-replay-races.block`.
 
