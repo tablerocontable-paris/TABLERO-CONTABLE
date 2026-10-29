@@ -1,4 +1,12 @@
-# Estado vigente de ejecución — 30/10/2026
+# Estado vigente de ejecución — 29/10/2026
+
+GitHub Actions **#191** terminó `success` para `0b9c479`; pasó suite,
+TypeScript/build y paquete Sites. Se agregaron a la ficha cinco tareas con
+diez pares tarea–unidad que aparecen explícitamente en los alias, siempre
+como candidatos pendientes de confirmación y sin cambiar el comportamiento.
+La actualización es documental y no requiere publicar otra versión del Site.
+Después de publicarla en `main`, verificar el workflow de ese commit y mantener
+la guía de la PC personal sincronizada.
 
 Revalidación actual: GitHub Actions **#189** `success` para el HEAD
 `74b506e60fc8cf8ed5dd8341fe2fe629e9394ede` (suite, build y paquete Sites).

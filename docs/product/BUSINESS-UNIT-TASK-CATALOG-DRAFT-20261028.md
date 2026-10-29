@@ -76,6 +76,31 @@ unidades. La matriz sólo se incorporará cuando el proceso real confirme la
 presencia, alcance y unidad de medida para cada combinación. No deducirla de
 empresa legal, siglas parciales o títulos de capturas.
 
+### Menciones explícitas para revisar (no son asignaciones aprobadas)
+
+Algunas variantes ya normalizadas en el catálogo contienen el nombre de una
+unidad o una sigla definida inequívocamente junto a una tarea. Se conservan
+como **candidatas observadas** para facilitar la homologación; no habilitan
+por sí solas la tarea en el onboarding, no prueban que el circuito siga vigente
+y no deben usarse aún para comparar resultados. El texto de origen está en
+[`parisTaskCatalog.ts`](../../src/domain/parisTaskCatalog.ts) y en la tabla de
+variantes de este borrador.
+
+| Código de tarea | Unidad candidata | Evidencia textual guardada en el catálogo | Estado |
+|---|---|---|---|
+| `gpar_bank_reconciliation` | PARIS AUTOS | “Conciliación Banco Francés – PA” (`PA` se expande aquí porque el borrador la define explícitamente como PARIS AUTOS). | Ratificar presencia y alcance |
+| `parts_invoice_load` | PARIS CARS | “Carga facturas repuestos Paris Cars suc 3” y “... suc 81”. | Ratificar presencia y sucursales vigentes |
+| `salary_accounting_entry` | PARIS AUTOS; PARIS TRAC | “Asiento sueldos PA” y “Asiento sueldos PT”; el borrador define esas siglas en este contexto. | Ratificar presencia y alcance en cada unidad |
+| `vat_accounting_entry` | DORAL; PARIS AUTOS; PARIS CARS; PARIS TRAC | “Asiento IVA Doral/PA/PC/PT”; `PA`, `PC` y `PT` se expanden según la definición explícita del borrador. | Ratificar presencia y alcance en cada unidad |
+| `coupon_settlement` | PARIS CARS; PARIS AUTOS | “Cancelación cupones MP Paris Cars” y “... Paris Autos”. | Ratificar que se refiere a esta tarea y aclarar qué significa “cancelación” |
+
+Estas cinco tareas suman diez pares tarea–unidad observados. Las menciones
+permiten preparar una confirmación puntual, pero no completan la relación para
+las otras tareas ni prueban equivalencia de medición. `PV` no se expande a
+POSTVENTA porque el propio material lo deja pendiente. La lista aprobada sólo
+debe incorporar un par después de confirmar proceso, responsables/traspasos,
+parámetros y unidad de medida.
+
 ## Tareas canónicas observadas
 
 Los códigos debajo son las claves estables de la implementación del catálogo

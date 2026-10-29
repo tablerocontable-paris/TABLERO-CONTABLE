@@ -1,6 +1,21 @@
-# Estado vigente — actualización 30/10/2026
+# Estado vigente — actualización 29/10/2026
 
-## Revalidación posterior al onboarding multicuenta — 30/10/2026
+## CI y matriz de menciones explícitas — 29/10/2026
+
+GitHub Actions **#191** terminó `success` para el commit documental
+`0b9c479617ff015fb54808aedeb6ba4d3bc627cb`; pasó `npm ci`, suite completa,
+build TypeScript/cliente/Worker y empaquetado Sites. La fuente no cambió y no
+requirió desplegar otra versión del Site.
+
+La ficha del catálogo ahora separa diez pares tarea–unidad mencionados
+explícitamente en los alias de cinco tareas como **candidatos por evidencia**,
+pendientes de ratificación. No se habilitaron pares nuevos ni se activaron
+comparaciones. `PV` sigue sin expandirse; no se completó la matriz real.
+Detalle y confirmaciones rápidas:
+[`BUSINESS-UNIT-TASK-CATALOG-DRAFT-20261028.md`](product/BUSINESS-UNIT-TASK-CATALOG-DRAFT-20261028.md) y
+[`BUSINESS-UNIT-TASK-NORMALIZATION-QUESTIONNAIRE-20261029.md`](product/BUSINESS-UNIT-TASK-NORMALIZATION-QUESTIONNAIRE-20261029.md).
+
+## Revalidación posterior al onboarding multicuenta — 29/10/2026
 
 GitHub Actions **#189** terminó `success` para `74b506e60fc8cf8ed5dd8341fe2fe629e9394ede`
 (suite completa, build y paquete Sites). Sobre el árbol actual se repitieron

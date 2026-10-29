@@ -40,6 +40,25 @@ unidad de negocio, término expandido, etapa, volumen ni equivalencia.
 
 ## Preguntas pendientes por tarea
 
+### Confirmaciones rápidas de unidad observada
+
+El catálogo contiene estas menciones explícitas. Son candidatas, no una matriz
+aprobada. Para acelerar la validación, cada par puede responderse como
+**Confirmar**, **Corregir** (indicar unidad correcta) o **No se usa**. Aun si se
+confirma el par, las preguntas de alcance y medición de abajo siguen aplicando
+antes de habilitar comparaciones.
+
+| Código | Par candidato observado | Confirmación |
+|---|---|---|
+| `gpar_bank_reconciliation` | PARIS AUTOS | Pendiente |
+| `parts_invoice_load` | PARIS CARS | Pendiente |
+| `salary_accounting_entry` | PARIS AUTOS; PARIS TRAC | Pendiente por unidad |
+| `vat_accounting_entry` | DORAL; PARIS AUTOS; PARIS CARS; PARIS TRAC | Pendiente por unidad |
+| `coupon_settlement` | PARIS CARS; PARIS AUTOS | Pendiente por unidad y alcance |
+
+No hay pares candidatos registrados todavía para las otras tareas. Eso significa
+“sin evidencia textual directa en la ficha”, no “la unidad no realiza la tarea”.
+
 ### Facturas, inventario y compras
 
 - [ ] **`supplier_invoice_load` — Carga de facturas de proveedores.** ¿La carga

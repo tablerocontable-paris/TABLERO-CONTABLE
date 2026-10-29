@@ -1,6 +1,6 @@
 # Continuar Grupo París desde tu PC personal
 
-Actualizado: 30/10/2026
+Actualizado: 29/10/2026
 
 Repositorio privado: [tablerocontable-paris/TABLERO-CONTABLE](https://github.com/tablerocontable-paris/TABLERO-CONTABLE)
 
@@ -29,6 +29,13 @@ privado se publicó como **v110** desde la fuente Sites
 `d65a2a1d906fe1b13dee5bf94a2c70b9684cbe88`; el despliegue pasó y la audiencia
 sigue owner-only, con cero visitantes externos. Falta la aceptación manual de
 la interfaz interior con sesión. Estas comprobaciones no garantizan error cero.
+
+Actions **#191** también terminó `success` para el siguiente corte documental
+`0b9c479617ff015fb54808aedeb6ba4d3bc627cb` (suite, build y paquete Sites).
+La ficha de homologación ahora muestra diez pares tarea–unidad candidatos
+extraídos de menciones explícitas; siguen pendientes de ratificación y no
+habilitan comparaciones. Para comenzar desde esta PC, cloná el repositorio o
+actualizá el clon existente con `git pull --ff-only origin main`.
 
 En esta PC, el benchmark Edge del árbol `74b506e` pasó 30 recorridos con 24
 perfiles/2.000 tareas y p95 502,98 ms; suite completa 892/892, build cliente y
