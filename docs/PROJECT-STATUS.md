@@ -2,6 +2,12 @@
 
 ## Revisión de continuidad — 29/10/2026, posterior a `35e90a3`
 
+Refresco read-only de Supabase Advisors a las 22:17 UTC: se mantienen los
+conteos previamente auditados (29 RLS sin policy, 39 RPC `SECURITY DEFINER`
+para `authenticated`, 124 FK sin índice cubriente, 8 avisos de initplan y 12
+índices no usados). No se modificaron DDL, permisos ni datos; detalle y límites
+en `docs/architecture/SUPABASE-DEV-READONLY-ACCESS-AUDIT-20261029.md`.
+
 La prueba documental del cuestionario V7 está en `main` como
 `5fe0cb66eee6af58149faf7d09dcd2efb0d6030d`: comprueba que los 30 códigos
 provisionales del catálogo coincidan exactamente con los 30 ítems de la ficha

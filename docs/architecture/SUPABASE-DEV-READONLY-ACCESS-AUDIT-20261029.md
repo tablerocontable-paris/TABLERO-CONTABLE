@@ -106,3 +106,16 @@ migraciones, Dashboard, Auth ni datos.
 La evidencia REST de Exposed schemas, el resultado exacto y el próximo paso
 están en
 [`SUPABASE-DEV-EXPOSED-SCHEMAS-REST-CHECK-20261029.md`](SUPABASE-DEV-EXPOSED-SCHEMAS-REST-CHECK-20261029.md).
+
+## Refresco de advisors — 29/10/2026 22:17 UTC
+
+Se volvió a consultar Advisors sin cambiar base, configuración ni migraciones.
+Los conteos permanecen iguales: seguridad, 29 tablas con RLS sin policies
+(INFO) y 39 funciones `SECURITY DEFINER` ejecutables por `authenticated`
+(WARN); rendimiento, 124 claves foráneas sin índice cubriente (INFO), 8
+policies con reevaluación de funciones de auth (WARN) y 12 índices sin uso
+observado (INFO). La repetición confirma que no hubo variación en estos
+contadores entre 21:52 y 22:17 UTC; no demuestra que cada aviso sea explotable
+ni que su configuración sea óptima. No se hicieron cambios correctivos porque
+requieren evaluar contratos de funciones, consultas reales y carga antes de
+revocar privilegios o agregar/quitar índices.

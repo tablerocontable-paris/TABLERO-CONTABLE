@@ -5,6 +5,11 @@ no devolvió estados de checks en el conector disponible; el resultado de CI
 para ese SHA queda **sin verificar**. Los checks exitosos documentados para
 `35e90a3` no se deben atribuir al commit posterior `2888f90`.
 
+Supabase Advisors se reconsultó en modo lectura a las 22:17 UTC y conservó
+los conteos del informe de acceso. No se aplicaron correcciones de esquema;
+revisar el detalle actualizado en
+`docs/architecture/SUPABASE-DEV-READONLY-ACCESS-AUDIT-20261029.md`.
+
 ## Revisión posterior — 29/10/2026
 
 En `5fe0cb6` se añadió una prueba que fija la paridad entre los 30 códigos
