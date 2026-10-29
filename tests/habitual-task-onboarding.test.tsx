@@ -138,6 +138,11 @@ describe("inducción de tareas habituales", () => {
     fireEvent.change(screen.getByLabelText("banco · obligatorio"), { target: { value: "unverified" } });
     expect((screen.getByRole("textbox", { name: "Nombre del banco · pendiente de normalizar · obligatorio" }) as HTMLInputElement).required).toBe(true);
     expect(saved.habitualTaskProposals).toHaveLength(2);
+    const selectedUnit = within(canonicalRow).getByRole("button", { name: /PARIS AUTOS: quitar una selección/ });
+    expect(selectedUnit.getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(selectedUnit);
+    expect(saved.habitualTaskProposals).toHaveLength(1);
+    expect(within(canonicalRow).getByRole("button", { name: /PARIS AUTOS: agregar/ }).getAttribute("aria-pressed")).toBe("false");
   });
 
   it("allows the same canonical task and bank for separate accounts within one business unit", () => {

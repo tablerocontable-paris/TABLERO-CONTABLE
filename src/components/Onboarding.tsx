@@ -101,7 +101,12 @@ export default function Onboarding({
   const parisTaskCatalog = isParisFirstLogin ? selectableParisTasks() : [];
   const parisTasksUnderReview = isParisFirstLogin ? PARIS_TASK_CATALOG.filter((task) => task.comparisonEligible === false) : [];
   const parisTaskDrafts = (draft.habitualTaskProposals || []).filter((proposal) => !!proposal.taskCode);
-  const parisTaskDraftsFor = (taskCode: string, businessUnitCode: string, bankCode?: string) => parisTaskDrafts.filter((proposal) => proposal.taskCode === taskCode && proposal.businessUnitCode === businessUnitCode && (proposal.taskParameters?.banco || undefined) === bankCode);
+  const parisTaskDraftsFor = (taskCode: string, businessUnitCode: string, bankCode?: string) => parisTaskDrafts.filter((proposal) => {
+    const matchesBank = bankCode === undefined
+      ? !proposal.taskParameters?.banco || proposal.taskParameters.banco === "unverified"
+      : proposal.taskParameters?.banco === bankCode;
+    return proposal.taskCode === taskCode && proposal.businessUnitCode === businessUnitCode && matchesBank;
+  });
   const parisTaskDraftFor = (taskCode: string, businessUnitCode: string, bankCode?: string) => parisTaskDraftsFor(taskCode, businessUnitCode, bankCode)[0];
   const parisTaskParameterIssues = parisTaskDrafts.flatMap((proposal) => {
     const taskCode = proposal.taskCode!;
