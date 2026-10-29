@@ -39,7 +39,7 @@ Repositorio activo `work/site`, remoto privado
 **Tablero Contable**. Consultar `docs/PROJECT-STATUS.md`,
 `docs/EXECUTION-NEXT.md` y `outputs/LEEME-PC-PERSONAL.md` antes de continuar.
 
-## Catálogo de tareas y primera experiencia
+## Catálogo de tareas y primera experiencia — corte histórico anterior a v105
 
 Este apartado conserva detalles del corte GitHub anterior a la publicación
 Sites v105. Toda mención debajo a que V6 no está desplegado o que el Site sigue

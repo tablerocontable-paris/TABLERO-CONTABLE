@@ -35,7 +35,9 @@ traslado del proyecto.
   Consultá `docs/PROJECT-STATUS.md` y `docs/EXECUTION-NEXT.md` para el estado
   actualizado. El despliegue no activa Auth operativo, `/api` ni Supabase de
   producción.
-- Los últimos commits de continuidad son `66b4d4a` y `77bbae7`. El estado inicial de la PC de trabajo conserva
+- Los commits `66b4d4a` y `77bbae7` son cortes documentales anteriores. El
+  estado actual está en `a0dd803` (incluye el registro de publicación v105).
+  El estado inicial de la PC de trabajo conserva
   un único scratch local protegido sin versionar; no forma parte del clon ni
   impide continuar desde `main`.
 - El código no se entrega en ZIP: cloná el repositorio para conservar historia
