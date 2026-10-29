@@ -4,7 +4,7 @@
 
 El corte actual agrega validación de parámetros obligatorios al alta de tareas del catálogo: no permite avanzar el onboarding si falta un dato parametrizado (por ejemplo, la cuenta bancaria). No se inventan parámetros ni se cambia la semántica del catálogo. Gemelo sigue siendo una consulta local explicable de datos autorizados, sin notas personales, mutaciones, cronómetros, IA externa, ARCA ni llamadas a `/api`.
 
-El commit `ccc5785a156617fecb79ed0a42055f4b65afaa6d` está en GitHub `main`, sin Pull Request. Para ese árbol pasaron **888/888 pruebas en 88 archivos**, TypeScript, builds de cliente y Worker, Playwright/Edge en escritorio y móvil, y benchmark de navegación caliente **30/30**, p95 **644,84 ms** con 24 perfiles y 2.000 tareas. El hook de commit pasó 235/235. GitHub Actions #161 fue cancelado al subir el registro documental; Actions **#162 pasó** para el commit documental siguiente, cuyo árbol incluye este mismo código y los documentos. La suite no demuestra ausencia absoluta de errores ni sustituye la aceptación de la interfaz publicada con sesión autenticada.
+El commit funcional `ccc5785a156617fecb79ed0a42055f4b65afaa6d` está en GitHub `main`, sin Pull Request. Para ese árbol pasaron **888/888 pruebas en 88 archivos**, TypeScript, builds de cliente y Worker, Playwright/Edge en escritorio y móvil, y benchmark de navegación caliente **30/30**, p95 **644,84 ms** con 24 perfiles y 2.000 tareas. El hook de commit pasó 235/235. El HEAD documental vigente es `76ddf7637c3d038109e361413b870814bca32569`; GitHub Actions **#164 pasó** (suite, build y paquete Sites). Esto valida CI para ese commit, no la ausencia absoluta de errores ni sustituye la aceptación de la interfaz publicada con sesión autenticada.
 
 El mismo Site `Grupo París · Tablero contable` está publicado como **v108**, desde la fuente `97eb08b28bac48489e24321866b4834051ee5587`; el árbol de esa fuente (`6ecb68ee3e1667f564134c7c18f4ab492c64582e`) coincidía con GitHub `main` al publicar. Sites confirmó versión activa, acceso **privado owner-only**, un usuario permitido y cero visitantes. La UI interior autenticada y el clon en la PC personal todavía requieren aceptación. No se activaron usuarios reales, API operativa ni producción.
 
@@ -12,7 +12,7 @@ No hay certeza del 100% ni garantía de ausencia de errores. Restan aceptación 
 
 ## Corte Supabase DEV — verificado 29/10/2026
 
-Consulta read-only actual: `grupo-paris-dev` está `ACTIVE_HEALTHY`, PostgreSQL
+Consulta read-only actual del 29/10/2026: `grupo-paris-dev` está `ACTIVE_HEALTHY`, PostgreSQL
 17.11 y registra 18 migraciones (001–016). Los runs históricos prueban que
 001–014 se aplicaron en orden; luego 015 y 016 se aplicaron por separado. El
 run #4 no demuestra una migración fallida: intentó repetir `baseline_001_014`
@@ -27,7 +27,10 @@ sólo de verificación read-only. Antes de datos reales faltan confirmar en
 Dashboard los esquemas de Data API y terminar la matriz con identidades Auth de
 DEV. Los advisors informan 39 RPC `SECURITY DEFINER` ejecutables por
 `authenticated` y 29 tablas con RLS sin policy; requieren revisión por contrato,
-no se interpretan automáticamente como vulnerabilidad ni como aprobación.
+no se interpretan automáticamente como vulnerabilidad ni como aprobación. La
+consulta de advisors del 29/10 volvió a informar 124 claves foráneas sin índice
+cubierto; es una alerta de rendimiento que debe contrastarse con consultas y
+carga reales antes de priorizar índices.
 
 ## Corte anterior — v106 (histórico)
 

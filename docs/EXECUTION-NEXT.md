@@ -2,7 +2,7 @@
 
 ## Corte de código actual — IVA / Gemelo
 
-Commit `ccc5785a156617fecb79ed0a42055f4b65afaa6d` está directamente en GitHub `main` (sin PR). El onboarding valida los parámetros obligatorios de tareas canónicas antes de permitir avanzar. Para el corte pasaron 888/888 pruebas, TypeScript, build cliente y Worker, Playwright/Edge escritorio y móvil, benchmark 30/30 con p95 644,84 ms (24 perfiles, 2.000 tareas) y hook 235/235. Actions #161 fue cancelado al entrar el commit documental siguiente; Actions #162 pasó tests, build y paquete Sites para ese commit, que conserva el mismo código vigente. El mismo Site privado está en v108; fuente Sites `97eb08b28bac48489e24321866b4834051ee5587`, árbol `6ecb68ee3e1667f564134c7c18f4ab492c64582e`, coincidente con GitHub `main` al publicar. Audiencia owner-only, un usuario permitido, cero visitantes.
+El corte funcional `ccc5785a156617fecb79ed0a42055f4b65afaa6d` está directamente en GitHub `main` (sin PR); el HEAD documental actual es `76ddf7637c3d038109e361413b870814bca32569`. El onboarding valida los parámetros obligatorios de tareas canónicas antes de permitir avanzar. Para el corte pasaron 888/888 pruebas, TypeScript, build cliente y Worker, Playwright/Edge escritorio y móvil, benchmark 30/30 con p95 644,84 ms (24 perfiles, 2.000 tareas) y hook 235/235. GitHub Actions **#164 pasó** para el HEAD documental (tests, build y paquete Sites). El mismo Site privado está en v108; fuente Sites `97eb08b28bac48489e24321866b4834051ee5587`, árbol `6ecb68ee3e1667f564134c7c18f4ab492c64582e`, coincidente con GitHub `main` al publicar. La v108 no se volvió a publicar con el commit documental; conserva audiencia owner-only, un usuario permitido y cero visitantes.
 
 ### Siguiente bloque
 
@@ -16,7 +16,7 @@ El preflight no demuestra ausencia total de errores ni certeza del 100%. No toca
 
 El proyecto sigue activo y las 18 migraciones 001–016 están registradas. 001–014 se aplicaron correctamente; un reintento posterior eligió por error el baseline completo y el guard lo detuvo antes de escribir. SQL016 corrige el defecto funcional de membresía revocada detectado en SQL011. Mantener el workflow actual read-only; antes de datos reales completar la revisión de exposición Data API y la matriz de permisos con Auth DEV. No editar ni reejecutar migraciones históricas.
 
-GitHub Actions #163 pasó tests, build y validación del paquete Sites para el commit `f8b37c28a285809ea75e8be191f689a28bfa288f`. Esto verifica CI del corte documental, no la UI autenticada ni el Site con usuarios operativos.
+GitHub Actions #164 se verificó directamente en GitHub: resultado `success` para `76ddf7637c3d038109e361413b870814bca32569`, sin Pull Request asociado. Esto verifica CI de ese corte documental, no la UI autenticada ni el Site con usuarios operativos.
 
 ## Corte anterior — reclasificación histórica, Site v106 (histórico)
 
