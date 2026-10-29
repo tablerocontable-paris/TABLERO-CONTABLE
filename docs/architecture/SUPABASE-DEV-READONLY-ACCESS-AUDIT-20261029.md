@@ -137,3 +137,17 @@ tiempo de ejecución. Siguen pendientes pruebas con JWT Auth DEV por cada rol,
 incluidos intentos fuera de ámbito, lectura de notas privadas y revocación de
 membresía; tampoco se probó GraphQL. No revocar grants sólo por el aviso del
 Advisor: primero comparar cada firma con su contrato y pruebas.
+
+## Cotejo de SQL014 con DEV — 29/10/2026
+
+El comentario de cabecera del archivo local SQL014 todavía dice que la
+migración “remains local”. Se contrastó con el estado real: DEV registra la
+versión `202610150014` con nombre `operational_api`; el guard local fija la
+huella aceptada y pasó el comando `node scripts/supabase-dev-migration-guard.mjs verify-files . verify_current`.
+Una consulta SQL read-only comparó las definiciones
+alojadas y locales de `public.can_access_instance(uuid)`,
+`public.can_read_private_block_note(uuid)` y
+`public.read_coordinated_task_for_manager(uuid)`; coincidieron, con
+`search_path` vacío. El comentario antiguo no representa el estado aplicado.
+No se alteró ni reejecutó SQL014. Es un cotejo puntual, no una comparación
+integral de los 39 cuerpos alojados ni una prueba Auth/JWT.

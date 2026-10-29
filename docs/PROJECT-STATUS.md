@@ -1,9 +1,9 @@
 # Estado vigente — actualización 29/10/2026
 
-## Revisión de continuidad — 29/10/2026, posterior a `4e4fea0`
+## Revisión de continuidad — 29/10/2026, posterior a `91f9505`
 
-GitHub Actions **#182** terminó `success` para el HEAD documental
-`4e4fea0bfe99737a8f427c22092ed7e6be892146` (suite, build y paquete Sites).
+GitHub Actions **#183** terminó `success` para el HEAD documental
+`91f9505a4a92193206908de7b5ed44314e129829` (suite, build y paquete Sites).
 El árbol local está sincronizado con `origin/main`; el único untracked es el
 scratch protegido.
 
@@ -46,6 +46,16 @@ funciones observadas fijan `search_path`; esto no certifica todas las funciones
 ni su comportamiento en ejecución. Falta verificar con JWT Auth DEV cada rol,
 incluidas notas privadas y revocaciones; no se concluye que las 39 funciones
 sean vulnerables ni que estén aprobadas por esta revisión.
+
+Se cotejó la salvedad del comentario inicial de SQL014 (“remains local”) con
+DEV: `schema_migrations` registra `202610150014` como `operational_api`, el
+verificador local conserva la huella aprobada y `verify_current` pasó. Una
+consulta read-only confirmó que las definiciones alojadas de
+`can_access_instance`, `can_read_private_block_note` y
+`read_coordinated_task_for_manager` coinciden con el código auditado. El
+comentario histórico de la migración no describe el estado actual; no se editó
+SQL014 ni se volvió a aplicar. Esta comparación puntual no sustituye pruebas
+con JWT para las 39 funciones ni la matriz Auth.
 
 Los commits `bce6859`, `0e7af5e`, `2f93da1` y `35e90a3` sólo actualizan
 evidencia/continuidad; no cambian código funcional ni requieren publicar otra

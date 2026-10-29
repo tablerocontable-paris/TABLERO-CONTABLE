@@ -38,8 +38,8 @@ prueba de paridad entre el catálogo V7 y su ficha de homologación. La suite
 local pasó 891/891 pruebas en 88 archivos; Actions #177 pasó suite, build y
 paquete Sites para `35e90a3c1eea5b1ef58abd9060a04cf9314bf406`.
 
-Actions **#182** terminó `success` para el corte documental
-`4e4fea0bfe99737a8f427c22092ed7e6be892146` (suite, build y paquete Sites).
+Actions **#183** terminó `success` para el corte documental
+`91f9505a4a92193206908de7b5ed44314e129829` (suite, build y paquete Sites).
 
 Revisión SQL read-only: las tablas `public`/`app_private` no dan privilegios
 efectivos de tabla a `anon`, pero `public` sigue expuesto y conserva RPC
