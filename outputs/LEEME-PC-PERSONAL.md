@@ -87,6 +87,9 @@ ni en el respaldo.
 
 - El catálogo contiene 55 tareas canónicas y siete unidades de negocio. Hay 25
   tareas comparables y 30 provisionales; no se deben homologar por intuición.
+- La ficha para homologar esas 30 tareas está en
+  `docs/product/BUSINESS-UNIT-TASK-NORMALIZATION-QUESTIONNAIRE-20261029.md`;
+  reúne preguntas y campos de evidencia sin fijar respuestas por inferencia.
 - La conciliación distingue Banco Francés y Banco Nación. En carga de facturas
   de repuestos, sucursales 3 y 81 son opciones observadas; otras quedan
   pendientes de homologación.

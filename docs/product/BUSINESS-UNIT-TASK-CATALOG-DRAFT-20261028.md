@@ -265,3 +265,8 @@ cuál es la unidad de medición del análisis de créditos; y qué variante/clas
 reporte significa MO4. Además, falta confirmar en qué unidades se ejecuta cada
 flujo. Hasta resolverlo, las tres siguen provisionales junto con las otras 27;
 no se alteran códigos, nombres canónicos ni métricas históricas.
+
+Para reunir esas respuestas sin inferir valores, se preparó la ficha
+[`BUSINESS-UNIT-TASK-NORMALIZATION-QUESTIONNAIRE-20261029.md`](BUSINESS-UNIT-TASK-NORMALIZATION-QUESTIONNAIRE-20261029.md),
+con una pregunta por cada una de las 30 tareas provisionales y campos comunes
+para unidades, alcance, medida, parámetros, solapamientos y respaldo.

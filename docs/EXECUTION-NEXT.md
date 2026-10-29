@@ -11,6 +11,12 @@ El commit funcional `c28c365de14a8d7c099ca20cecc2e0ab01764a1d` está directament
 3. Mantener las 30 tareas provisionales fuera de comparación. La reauditoría del 29/10 no encontró una candidata que pueda habilitarse con evidencia documental suficiente; VN, PSA y MO4 aún requieren confirmar proceso y alcance. El borrador del catálogo registra qué debe aclararse.
 4. Revisar en Dashboard la lista efectiva de esquemas Exposed de Data API y completar matriz de permisos con identidades Auth DEV. La auditoría read-only de grants está en `docs/architecture/SUPABASE-DEV-READONLY-ACCESS-AUDIT-20261029.md`; no sustituye estas pruebas. Mantener Auth operativo, `/api` y Supabase de producción desactivados hasta aceptar el laboratorio.
 
+Como preparación funcional para el catálogo, la ficha
+`docs/product/BUSINESS-UNIT-TASK-NORMALIZATION-QUESTIONNAIRE-20261029.md`
+contiene preguntas para homologar las 30 tareas provisionales. No habilita
+comparaciones: se requiere responder con evidencia del proceso y luego revisar
+la versión del catálogo.
+
 El preflight no demuestra ausencia total de errores ni certeza del 100%. No tocar el scratch protegido `tests/review/m2-2c-legacy-task-control-replay-races.block`.
 
 La revalidación documental de ACL quedó publicada directamente en `main` como
