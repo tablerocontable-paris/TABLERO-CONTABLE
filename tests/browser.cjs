@@ -129,6 +129,8 @@ fs.mkdirSync(output, { recursive: true });
     await bankTask.getByRole("button", { name: /PARIS AUTOS/ }).click();
     await bankTask.getByLabel("banco · fijado por selección").waitFor();
     await bankTask.getByLabel("cuenta · obligatorio").fill("Cuenta QA");
+    await bankTask.getByRole("button", { name: "Agregar otra cuenta" }).click();
+    await bankTask.getByLabel("cuenta · obligatorio").nth(1).fill("Cuenta secundaria QA");
     const invoiceTask = page.locator(".paris-task-catalog-item").filter({ hasText: /^Carga de facturas de proveedores · Provisional/ });
     await invoiceTask.getByRole("button", { name: /PARIS AUTOS/ }).click();
     await page.getByRole("button", { name: "Continuar", exact: true }).click();
@@ -144,10 +146,13 @@ fs.mkdirSync(output, { recursive: true });
     const onboardingState = await page.evaluate(() => JSON.parse(localStorage.getItem("paris-state-lab")));
     const qaProfileId = onboardingState.profiles.find((profile) => profile.name === "Empleado QA")?.id;
     const qaProposals = onboardingState.habitualTaskProposals.filter((proposal) => proposal.ownerId === qaProfileId);
-    if (qaProposals.length !== 4 || new Set(qaProposals.map((proposal) => `${proposal.taskCode}:${proposal.companyId}`)).size !== 4)
-      throw Error(`onboarding must create four distinct pending proposals (two tasks x two companies), got ${JSON.stringify(qaProposals.map(({ taskCode, companyId }) => ({ taskCode, companyId })))}`);
+    const proposalKeys = qaProposals.map((proposal) => `${proposal.taskCode}:${proposal.companyId}:${JSON.stringify(proposal.taskParameters || {})}`);
+    if (qaProposals.length !== 6 || new Set(proposalKeys).size !== 6)
+      throw Error(`onboarding must create six distinct pending proposals (three selections x two companies), got ${JSON.stringify(qaProposals.map(({ taskCode, companyId, taskParameters }) => ({ taskCode, companyId, taskParameters })))}`);
     const bankProposals = qaProposals.filter((proposal) => proposal.taskCode === "gpar_bank_reconciliation");
-    if (bankProposals.length !== 2 || bankProposals.some((proposal) => proposal.taskParameters?.banco !== "nacion" || proposal.taskParameters?.cuenta !== "Cuenta QA"))
+    const bankAccountCounts = new Map();
+    for (const proposal of bankProposals) bankAccountCounts.set(proposal.taskParameters?.cuenta, (bankAccountCounts.get(proposal.taskParameters?.cuenta) || 0) + 1);
+    if (bankProposals.length !== 4 || bankProposals.some((proposal) => proposal.taskParameters?.banco !== "nacion") || bankAccountCounts.get("Cuenta QA") !== 2 || bankAccountCounts.get("Cuenta secundaria QA") !== 2)
       throw Error("bank proposals lost their canonical bank/account parameters");
     if (onboardingState.tasks.length !== 73 || onboardingState.assignments.length !== 73)
       throw Error("onboarding proposals must not create task instances or assignments before approval");

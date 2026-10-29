@@ -115,6 +115,8 @@ ni en el respaldo.
 - Se puede agregar la misma tarea canónica más de una vez dentro de una unidad
   para identificar cuentas u otras combinaciones distintas; por ejemplo, dos
   cuentas bancarias. Cada selección conserva parámetros separados.
+- Este recorrido se comprobó en Edge y quedó en `tests/browser.cjs`; no produjo
+  errores JavaScript ni llamadas a `/api`.
 - La ficha para homologar esas 30 tareas está en
   `docs/product/BUSINESS-UNIT-TASK-NORMALIZATION-QUESTIONNAIRE-20261029.md`;
   reúne preguntas y campos de evidencia sin fijar respuestas por inferencia.

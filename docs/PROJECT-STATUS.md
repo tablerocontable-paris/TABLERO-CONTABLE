@@ -7,9 +7,11 @@ parámetros para la misma tarea canónica y unidad de negocio (por ejemplo, dos
 cuentas del Banco Francés para conciliación). Cada selección conserva el mismo
 código de tarea y versión, con un ID independiente y los parámetros propios;
 no crea nombres alternativos. Se agregó una regresión del recorrido. Validación
-local: **892/892 pruebas en 88 archivos**, TypeScript, build cliente y Worker
-aprobados. Esto mejora el relevamiento ficticio; no confirma qué tareas
-corresponden a cada unidad ni activa onboarding remoto.
+local: **892/892 pruebas en 88 archivos**, TypeScript, build cliente y Worker;
+el recorrido Playwright/Edge también pasó incluyendo dos cuentas en el
+onboarding, sin errores JS ni llamadas a `/api`. Esto mejora el relevamiento
+ficticio; no confirma qué tareas corresponden a cada unidad ni activa onboarding
+remoto.
 
 ## Revisión de continuidad — 29/10/2026, posterior a `91f9505`
 
