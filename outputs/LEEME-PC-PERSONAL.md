@@ -1,5 +1,12 @@
 # Continuar el proyecto desde tu PC personal
 
+**Actualización local 29/10/2026:** quedó implementada la reclasificación
+explícita de propuestas históricas al reenviarlas a jefatura, conservando las
+revisiones antiguas. Pasaron localmente 884/884 pruebas, TypeScript, builds
+cliente/Worker, paquete Sites y Playwright en Edge. Este cambio todavía no está
+en GitHub ni en el Site; no hagas `git pull` esperando encontrarlo hasta que
+se confirme en `main`.
+
 **Actualizado el 29/10/2026:** V6 está en GitHub `main` y desplegado como Site
 privado v105 en el mismo proyecto. GitHub Actions #153 pasó para el SHA
 `05e3e52a8088779668baba1af0ea3324060885d4`. En la PC de trabajo pasaron

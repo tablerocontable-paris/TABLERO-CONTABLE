@@ -2,11 +2,13 @@ import { useState, type FormEvent } from "react";
 import { Panel, Empty } from "./ui";
 import StepListEditor, { validateSteps } from "./StepListEditor";
 import ScheduleEditor from "./ScheduleEditor";
-import { formatParisTaskParameterValue, getParisTask, parisTaskParameterKey, PARIS_BUSINESS_UNITS } from "../domain/parisTaskCatalog";
+import { formatParisTaskParameterValue, getParisTask, isParisTaskComparisonEligible, parisTaskParameterKey, PARIS_BUSINESS_UNITS, PARIS_TASK_CATALOG_VERSION, selectableParisTasks, type ParisBusinessUnitCode } from "../domain/parisTaskCatalog";
 import ParisTaskParameterFields from "./ParisTaskParameterFields";
 import {
   approveHabitualTaskProposals,
+  canClassifyLegacyParisProposal,
   hasConsistentParisProposalClassification,
+  hasOnlyUnclassifiedParisHistory,
   groupHabitualTaskProposals,
   pendingHabitualTaskProposals,
   proposalsForProfile,
@@ -76,7 +78,7 @@ function ProposalGroupCard({ group, suggestedMatch, state, actor, month, commit,
         <small>{first.kind === "operativa" ? `Actividad · ${first.unit}` : "Entregable con controles"}</small>
       </div>
       {suggestedMatch && <p className="habitual-proposal-hint">La coincidencia sólo orienta la revisión. No se fusionaron nombres, empresas ni asignaciones.</p>}
-      {requiresCanonicalSelection && <p className="notice-banner" role="note">Esta propuesta conserva un historial sin clasificación completa del catálogo Grupo París y no se puede activar. Mantenela pendiente; para generar trabajo, enviá una propuesta nueva seleccionando tarea, unidad de negocio y parámetros obligatorios. El historial anterior se conserva.</p>}
+      {requiresCanonicalSelection && <p className="notice-banner" role="note">Esta propuesta no se puede activar hasta completar una revisión explícita del catálogo París. {group.every(hasOnlyUnclassifiedParisHistory) ? "Pedí correcciones: el titular podrá elegir tarea, unidad y parámetros en una nueva revisión; las anteriores quedarán conservadas como históricas sin clasificar." : "El historial contiene datos de clasificación parciales o contradictorios. No los vamos a inferir ni sobrescribir; conservá el registro y creá una propuesta nueva desde el catálogo."}</p>}
       <div className="habitual-proposal-members">
         {group.map((proposal) => (
           <section className="habitual-proposal-member" key={proposal.id}>
@@ -174,11 +176,31 @@ function MyProposalCard({ proposal, state, actor, month, commit, notify }: {
   const [target, setTarget] = useState(proposal.target);
   const [schedule, setSchedule] = useState(proposal.schedule);
   const [steps, setSteps] = useState(proposal.steps);
+  const [taskCode, setTaskCode] = useState(proposal.taskCode || "");
+  const [businessUnitCode, setBusinessUnitCode] = useState<ParisBusinessUnitCode | "">(proposal.businessUnitCode || "");
+  const needsParisClassification = canClassifyLegacyParisProposal(proposal);
+  const historicalConflict = proposal.status === "changes_requested" && !hasConsistentParisProposalClassification(proposal) && !needsParisClassification;
+  const taskCatalogVersion = proposal.taskCode ? proposal.taskCatalogVersion || PARIS_TASK_CATALOG_VERSION : PARIS_TASK_CATALOG_VERSION;
+  const selectedTask = taskCode ? getParisTask(taskCode, taskCatalogVersion) : undefined;
   const template = proposal.templateId ? state.templates.find((row) => row.id === proposal.templateId) : null;
   function resubmit(event: FormEvent) {
     event.preventDefault();
     try {
-      const next = resubmitHabitualTaskProposal(state, actor, proposal.id, { title, process, description, kind, unit, target: kind === "operativa" ? 0 : target, schedule, steps, taskCode: proposal.taskCode, taskCatalogVersion: proposal.taskCatalogVersion, businessUnitCode: proposal.businessUnitCode, taskParameters });
+      const resolvedKind = selectedTask ? selectedTask.kind === "operational" ? "operativa" : "resultado" : kind;
+      const next = resubmitHabitualTaskProposal(state, actor, proposal.id, {
+        title: selectedTask?.label || title,
+        process,
+        description,
+        kind: resolvedKind,
+        unit: selectedTask ? selectedTask.unit || "" : unit,
+        target: resolvedKind === "operativa" ? 0 : target,
+        schedule,
+        steps,
+        taskCode: taskCode || undefined,
+        taskCatalogVersion: taskCode ? taskCatalogVersion : undefined,
+        businessUnitCode: businessUnitCode || undefined,
+        ...(taskCode ? { taskParameters } : {}),
+      });
       if (commit(next, "Reenvió propuesta habitual corregida", proposal.id)) notify("La propuesta volvió a la bandeja de revisión de jefatura.");
     } catch (error) { notify((error as Error).message); }
   }
@@ -192,16 +214,34 @@ function MyProposalCard({ proposal, state, actor, month, commit, notify }: {
       <small>Regla: {proposal.schedule.frequency} · {proposal.kind === "operativa" ? `cantidad ${proposal.unit} · sin cuota` : "meta no aplica"} · revisión {proposal.revision}</small>
       {proposal.status === "changes_requested" && <div className="habitual-proposal-requested-change"><b>Corrección solicitada</b><p>{proposal.managerNote}</p></div>}
       {proposal.status === "approved" && template && <p className="habitual-proposal-approved">Estándar confirmado: {template.title} · versión {proposal.templateVersion}</p>}
+      {historicalConflict && <p className="notice-banner" role="note">El historial contiene una clasificación parcial o distinta. No cambies ni completes datos antiguos por inferencia; para proponer una clasificación nueva, creá otra propuesta desde el catálogo.</p>}
       {proposal.status === "changes_requested" && (
-        <form className="habitual-proposal-resubmit" onSubmit={resubmit}>
-          <label>Nombre de la tarea<input required maxLength={120} value={title} readOnly={!!proposal.taskCode} onChange={(event) => setTitle(event.target.value)} /></label>
-          <label>Banco o proceso<input maxLength={160} value={process} onChange={(event) => setProcess(event.target.value)} /></label>
+        !historicalConflict && <form className="habitual-proposal-resubmit" onSubmit={resubmit}>
+          {needsParisClassification && <fieldset className="paris-task-classification-resolution">
+            <legend>Elegí la clasificación para la nueva revisión</legend>
+            <p>El título y las revisiones anteriores se conservan. La tarea estándar sólo se aplica a esta nueva revisión.</p>
+            <label>Tarea del catálogo París<select required aria-label="Tarea del catálogo París" value={taskCode} onChange={(event) => { setTaskCode(event.target.value); setTaskParameters({}); if (event.target.value === "gpar_bank_reconciliation") setProcess(""); }}>
+              <option value="">Seleccioná una tarea estándar</option>
+              {selectableParisTasks().map((task) => <option value={task.code} key={task.code}>{task.group} · {task.label}{isParisTaskComparisonEligible(task.code, PARIS_TASK_CATALOG_VERSION) ? "" : " · Provisional"}</option>)}
+            </select></label>
+            <label>Unidad de negocio<select required aria-label="Unidad de negocio" value={businessUnitCode} onChange={(event) => setBusinessUnitCode(event.target.value as ParisBusinessUnitCode | "")}>
+              <option value="">Seleccioná una unidad</option>
+              {PARIS_BUSINESS_UNITS.map((unitOption) => <option key={unitOption.code} value={unitOption.code}>{unitOption.label}</option>)}
+            </select></label>
+            {selectedTask && <>
+              <p>Nombre canónico: <b>{selectedTask.label}</b> · {selectedTask.kind === "operational" ? `Operativa por ${selectedTask.unit}` : "Entregable"}</p>
+              {!isParisTaskComparisonEligible(selectedTask.code, PARIS_TASK_CATALOG_VERSION) && <p className="catalogue-rate-note">Esta tarea es provisional: se podrá registrar, pero no se comparará entre unidades hasta homologarla.</p>}
+              <ParisTaskParameterFields taskCode={selectedTask.code} version={PARIS_TASK_CATALOG_VERSION} values={taskParameters} onChange={setTaskParameters} />
+            </>}
+          </fieldset>}
+          <label>{selectedTask ? "Nombre canónico" : "Título de la propuesta"}<input required maxLength={120} value={selectedTask?.label || title} readOnly={!!proposal.taskCode || needsParisClassification} onChange={(event) => setTitle(event.target.value)} /></label>
+          {!(selectedTask?.parameters.includes("banco")) && <label>Proceso complementario<input maxLength={160} value={process} onChange={(event) => setProcess(event.target.value)} /></label>}
           {proposal.taskCode && proposal.taskCatalogVersion && <fieldset className="paris-task-parameters"><legend>Parámetros de la tarea estándar</legend><ParisTaskParameterFields taskCode={proposal.taskCode} version={proposal.taskCatalogVersion} values={taskParameters} onChange={setTaskParameters} /></fieldset>}
           <label>Descripción<textarea required maxLength={1000} rows={2} value={description} onChange={(event) => setDescription(event.target.value)} /></label>
-          <div className="form-grid">
+          {!selectedTask && <div className="form-grid">
             <label>Tipo<select value={kind} onChange={(event) => setKind(event.target.value as Template["kind"])}><option value="resultado">Entregable</option><option value="operativa">Actividad con cantidad</option></select></label>
             {kind === "operativa" && <label>Unidad<input required maxLength={40} value={unit} onChange={(event) => setUnit(event.target.value)} /></label>}
-          </div>
+          </div>}
           <label>Frecuencia y vencimiento</label>
           <ScheduleEditor value={schedule} month={month} onChange={setSchedule} />
           <label>Controles o pasos</label>

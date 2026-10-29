@@ -3188,6 +3188,11 @@ input[readonly] { background: var(--surface-muted, #f5f6f8); color: var(--text, 
 .paris-task-parameter-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.65rem; }
 .paris-task-parameter-fields label { display: grid; gap: 0.3rem; color: var(--text-muted); font-size: 0.82rem; }
 .paris-task-parameter-fields input { min-width: 0; }
+.paris-task-classification-resolution { display: grid; gap: 10px; min-width: 0; margin: 0; padding: 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
+.paris-task-classification-resolution legend { padding: 0 5px; font-weight: 650; }
+.paris-task-classification-resolution > p { margin: 0; color: var(--text-muted); font-size: 12px; line-height: 1.45; }
+.paris-task-classification-resolution > label { display: grid; gap: 5px; color: var(--text-muted); font-size: 11px; }
+.paris-task-classification-resolution select { width: 100%; min-width: 0; }
 .paris-proposal-parameters { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.35rem 0.8rem; margin: 0.5rem 0; }
 .paris-proposal-parameters div { display: flex; gap: 0.35rem; }
 .paris-proposal-parameters dt { color: var(--text-muted); }

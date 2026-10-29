@@ -153,6 +153,45 @@ fs.mkdirSync(output, { recursive: true });
       throw Error("onboarding proposals must not create task instances or assignments before approval");
     await selectProfile(page, "Vista de usuario", "Vista de prueba · actor simulado", "e0");
     await page.locator('[data-nav="tasks"]').click();
+    // A historical proposal with no catalogue fields must remain untouched until
+    // the owner explicitly classifies a new revision from the canonical catalogue.
+    await page.evaluate(() => {
+      const key = "paris-state-lab";
+      const state = JSON.parse(localStorage.getItem(key));
+      const source = state.habitualTaskProposals.find((proposal) => proposal.taskCode === "gpar_bank_reconciliation");
+      if (!source) throw Error("canonical QA proposal missing for legacy replay");
+      const legacy = structuredClone(source);
+      legacy.id = "browser-legacy-proposal";
+      legacy.ownerId = "e0";
+      legacy.companyId = "c1";
+      legacy.title = "Conciliación Banco Nación";
+      legacy.originalTitle = "Conciliación Banco Nación";
+      legacy.process = "Banco Nación";
+      legacy.status = "changes_requested";
+      legacy.managerNote = "Elegí la tarea y unidad del catálogo París.";
+      legacy.revision = 1;
+      for (const field of ["taskCode", "taskCatalogVersion", "businessUnitCode", "taskParameters"]) delete legacy[field];
+      legacy.submissions = [structuredClone(legacy.submissions[0])];
+      legacy.submissions[0].revision = 1;
+      for (const field of ["taskCode", "taskCatalogVersion", "businessUnitCode", "taskParameters"]) delete legacy.submissions[0][field];
+      state.habitualTaskProposals.push(legacy);
+      localStorage.setItem(key, JSON.stringify(state));
+    });
+    await page.reload();
+    await page.locator('[data-nav="day"]').click();
+    const legacyProposalCard = page.locator(".my-habitual-proposal").filter({ has: page.locator("h3").filter({ hasText: /^Conciliación Banco Nación$/ }) });
+    await legacyProposalCard.waitFor();
+    await legacyProposalCard.getByRole("combobox", { name: "Tarea del catálogo París" }).selectOption("gpar_bank_reconciliation");
+    await legacyProposalCard.getByRole("combobox", { name: "Unidad de negocio" }).selectOption("doral");
+    await legacyProposalCard.getByRole("combobox", { name: "banco · obligatorio" }).selectOption("frances");
+    await legacyProposalCard.getByRole("textbox", { name: "cuenta · obligatorio" }).fill("Cuenta QA");
+    await legacyProposalCard.getByRole("button", { name: "Reenviar para revisión" }).click();
+    const reclassifiedLegacy = await page.evaluate(() => JSON.parse(localStorage.getItem("paris-state-lab")).habitualTaskProposals.find((proposal) => proposal.id === "browser-legacy-proposal"));
+    if (reclassifiedLegacy.revision !== 2 || reclassifiedLegacy.taskCode !== "gpar_bank_reconciliation" || reclassifiedLegacy.businessUnitCode !== "doral" || reclassifiedLegacy.taskParameters?.banco !== "frances" || reclassifiedLegacy.submissions.length !== 2 || reclassifiedLegacy.submissions[0].taskCode !== undefined || reclassifiedLegacy.originalTitle !== "Conciliación Banco Nación")
+      throw Error(`legacy proposal classification did not preserve its unknown history: ${JSON.stringify(reclassifiedLegacy)}`);
+    if (reclassifiedLegacy.assignments?.length || (await page.evaluate(() => JSON.parse(localStorage.getItem("paris-state-lab")).tasks.length)) !== 73)
+      throw Error("reclassifying a proposal must not materialize work before approval");
+    await page.locator('[data-nav="tasks"]').click();
     const checklistTaskId = await page.evaluate(() => {
       const state = JSON.parse(localStorage.getItem("paris-state-lab"));
       const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Argentina/Buenos_Aires", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
@@ -484,7 +523,7 @@ fs.mkdirSync(output, { recursive: true });
     if (errors.length) throw Error(errors.join("\n"));
     if (apiRequests.length) throw Error(`isolated lab requested API routes: ${apiRequests.join(", ")}`);
     console.log(
-      "PASS induction, resume, canonical pending proposals, company isolation, auto-checklist, activity, analysis grouping, complete monthly closure, write lock, canonical task classification, one-off deadline, timers, absences, isolated lab, due reminders and persisted read receipt, system/light/dark themes, mobile. No JS errors or API requests.",
+      "PASS induction, resume, canonical pending proposals, historical proposal reclassification, company isolation, auto-checklist, activity, analysis grouping, complete monthly closure, write lock, canonical task classification, one-off deadline, timers, absences, isolated lab, due reminders and persisted read receipt, system/light/dark themes, mobile. No JS errors or API requests.",
     );
   } finally {
     if (browser) await browser.close();

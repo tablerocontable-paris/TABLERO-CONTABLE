@@ -40,12 +40,34 @@ export function hasConsistentParisProposalClassification(proposal: HabitualTaskP
       !isParisBusinessUnitCode(proposal.businessUnitCode || "") ||
       !hasRequiredParisTaskParameters(proposal.taskCode, proposal.taskParameters || {}, proposal.taskCatalogVersion)) return false;
   const parameters = JSON.stringify(Object.entries(proposal.taskParameters || {}).sort(([left], [right]) => left.localeCompare(right)));
-  return (proposal.submissions || []).every((submission) =>
-    submission.taskCode === proposal.taskCode &&
-    submission.taskCatalogVersion === proposal.taskCatalogVersion &&
-    submission.businessUnitCode === proposal.businessUnitCode &&
-    JSON.stringify(Object.entries(submission.taskParameters || {}).sort(([left], [right]) => left.localeCompare(right))) === parameters,
-  );
+  const submissions = proposal.submissions || [];
+  if (!submissions.length || submissions.at(-1)?.revision !== proposal.revision) return false;
+  let sawClassifiedRevision = false;
+  return submissions.every((submission, index) => {
+    const hasAnyParisClassification = submission.taskCode !== undefined || submission.taskCatalogVersion !== undefined ||
+      submission.businessUnitCode !== undefined || submission.taskParameters !== undefined;
+    // Revisions that predate the canonical catalogue stay historical and unknown.
+    // Only a later, explicit owner resubmission can classify the active proposal.
+    if (!hasAnyParisClassification) return !sawClassifiedRevision && index < submissions.length - 1;
+    sawClassifiedRevision = true;
+    return submission.taskCode === proposal.taskCode &&
+      submission.taskCatalogVersion === proposal.taskCatalogVersion &&
+      submission.businessUnitCode === proposal.businessUnitCode &&
+      JSON.stringify(Object.entries(submission.taskParameters || {}).sort(([left], [right]) => left.localeCompare(right))) === parameters;
+  });
+}
+
+/** True only when every saved revision is wholly unclassified; no title is used to guess a task. */
+export function hasOnlyUnclassifiedParisHistory(proposal: HabitualTaskProposal): boolean {
+  return proposal.taskCode === undefined && proposal.taskCatalogVersion === undefined && proposal.businessUnitCode === undefined && proposal.taskParameters === undefined &&
+    (proposal.submissions || []).length > 0 &&
+    proposal.submissions.every((submission) => submission.taskCode === undefined && submission.taskCatalogVersion === undefined &&
+      submission.businessUnitCode === undefined && submission.taskParameters === undefined);
+}
+
+/** True only when the owner may add an explicit classification in a new revision. */
+export function canClassifyLegacyParisProposal(proposal: HabitualTaskProposal): boolean {
+  return proposal.status === "changes_requested" && !proposal.taskCode && hasOnlyUnclassifiedParisHistory(proposal);
 }
 
 export type ProposalGroup = {
@@ -189,6 +211,12 @@ function requireManager(state: State, actor: Profile, proposals: HabitualTaskPro
   }
 }
 
+function hasAnyParisProposalClassification(proposal: HabitualTaskProposal): boolean {
+  return proposal.taskCode !== undefined || proposal.taskCatalogVersion !== undefined || proposal.businessUnitCode !== undefined || proposal.taskParameters !== undefined ||
+    (proposal.submissions || []).some((submission) => submission.taskCode !== undefined || submission.taskCatalogVersion !== undefined ||
+      submission.businessUnitCode !== undefined || submission.taskParameters !== undefined);
+}
+
 export function requestHabitualProposalChanges(
   state: State,
   actor: Profile,
@@ -224,6 +252,10 @@ export function resubmitHabitualTaskProposal(
   const currentActor = state.profiles.find((profile) => profile.id === actor.id);
   if (!currentActor?.active || proposal.ownerId !== currentActor.id) throw Error("Sólo quien presentó la propuesta puede corregirla.");
   if (!currentActor.companyIds.includes(proposal.companyId)) throw Error("La empresa de esta propuesta ya no está asignada a tu perfil.");
+  if (proposal.taskCode && !hasConsistentParisProposalClassification(proposal))
+    throw Error("El historial contiene una clasificación parcial o distinta; creá una propuesta nueva desde el catálogo en vez de alterar esta revisión.");
+  if (!proposal.taskCode && input.taskCode && !hasOnlyUnclassifiedParisHistory(proposal))
+    throw Error("No se puede agregar una clasificación nueva porque el historial contiene datos París parciales o contradictorios.");
   const clean = cleanProposal(input, true);
   const suppliedNeutral = classification(input);
   if ((input.neutralConceptCode !== undefined || input.taxonomyVersion !== undefined) &&
@@ -234,13 +266,14 @@ export function resubmitHabitualTaskProposal(
   const neutral = classification({ ...proposal, starterId: proposal.starterId });
   const changed = proposal.title !== clean.title || proposal.process !== clean.process || proposal.description !== clean.description ||
     proposal.kind !== input.kind || proposal.unit !== clean.unit || proposal.target !== input.target ||
+    proposal.taskCode !== input.taskCode || proposal.taskCatalogVersion !== input.taskCatalogVersion || proposal.businessUnitCode !== input.businessUnitCode ||
     JSON.stringify(proposal.taskParameters || {}) !== JSON.stringify(clean.taskParameters || {}) ||
     JSON.stringify(proposal.schedule) !== JSON.stringify(input.schedule) || JSON.stringify(proposal.steps) !== JSON.stringify(clean.steps);
   if (!changed) throw Error("Hacé al menos el cambio solicitado antes de reenviar.");
   const revision = proposal.revision + 1;
   const submission = {
     revision, ...(proposal.starterId ? { starterId: proposal.starterId } : {}), title: clean.title, process: clean.process, description: clean.description,
-    ...(proposal.taskCode ? { taskCode: proposal.taskCode, taskCatalogVersion: proposal.taskCatalogVersion, businessUnitCode: proposal.businessUnitCode, ...(clean.taskParameters ? { taskParameters: clean.taskParameters } : {}) } : {}),
+    ...(input.taskCode ? { taskCode: input.taskCode, taskCatalogVersion: input.taskCatalogVersion, businessUnitCode: input.businessUnitCode, ...(clean.taskParameters ? { taskParameters: clean.taskParameters } : {}) } : {}),
     kind: input.kind, unit: clean.unit, target: input.target,
     schedule: structuredClone(input.schedule), steps: clean.steps, ...neutral, submittedAt: now,
   };
@@ -272,9 +305,8 @@ export function approveHabitualTaskProposals(
   requireManager(state, actor, selected);
   if (options.requireParisTaskClassification && selected.some((proposal) => !hasConsistentParisProposalClassification(proposal)))
     throw Error("La propuesta necesita una tarea, versión de catálogo, unidad de negocio y parámetros válidos antes de generar asignaciones.");
-  if (selected.some((proposal) => (proposal.taskCode && (proposal.submissions || []).some((submission) => !submission.taskCode)) || (!proposal.taskCode && (proposal.businessUnitCode || proposal.taskCatalogVersion !== undefined ||
-      (proposal.submissions || []).some((submission) => submission.businessUnitCode || submission.taskCatalogVersion !== undefined)))))
-    throw Error("La propuesta todavía no está vinculada a una tarea del catálogo Grupo París. Conservá la revisión histórica y pedí que se vuelva a seleccionar desde el catálogo antes de activarla.");
+  if (selected.some((proposal) => hasAnyParisProposalClassification(proposal) && !hasConsistentParisProposalClassification(proposal)))
+    throw Error("La propuesta necesita una última revisión con tarea, versión de catálogo, unidad de negocio y parámetros válidos. Las revisiones anteriores no clasificadas se conservan como históricas.");
   if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) throw Error("El período de asignación no es válido.");
   if (new Set(selected.map((row) => row.kind)).size !== 1 ||
       new Set(selected.map((row) => row.kind === "operativa" ? normalizeWords(row.unit) : "")).size !== 1 ||

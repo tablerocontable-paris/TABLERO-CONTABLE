@@ -4,8 +4,8 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { seed } from "../src/data/repository";
 import { currentMonth, materialize, type State } from "../src/domain/model";
 import { defaultSchedule } from "../src/domain/schedule";
-import { submitHabitualTaskProposal } from "../src/domain/habitualTaskProposals";
-import { HabitualTaskProposalInbox } from "../src/components/HabitualTaskProposals";
+import { requestHabitualProposalChanges, submitHabitualTaskProposal } from "../src/domain/habitualTaskProposals";
+import { HabitualTaskProposalInbox, MyHabitualTaskProposals } from "../src/components/HabitualTaskProposals";
 import NotificationCenter from "../src/components/NotificationCenter";
 import { pendingParameterizations } from "../src/domain/parameterization";
 import { PARIS_TASK_CATALOG_VERSION, selectableParisTasks } from "../src/domain/parisTaskCatalog";
@@ -42,13 +42,24 @@ function pendingProposals(canonical = false) {
 }
 
 describe("interfaz de propuestas de tareas habituales", () => {
-  it("oculta controles de activación cuando la revisión actual está mezclada con historial sin código", () => {
+  it("mantiene bloqueada una revisión si el historial anterior contiene una clasificación parcial", () => {
     const base = pendingProposals();
     const original = base.habitualTaskProposals![0]!;
-    const paris = { ...original, taskCode: "gpar_bank_reconciliation", taskCatalogVersion: PARIS_TASK_CATALOG_VERSION, businessUnitCode: "paris_autos" as const, submissions: [{ ...original.submissions[0]!, revision: 1 }, { ...original.submissions[0]!, revision: 2, taskCode: "gpar_bank_reconciliation", taskCatalogVersion: PARIS_TASK_CATALOG_VERSION, businessUnitCode: "paris_autos" as const }], revision: 2 };
+    const paris = {
+      ...original,
+      taskCode: "gpar_bank_reconciliation",
+      taskCatalogVersion: PARIS_TASK_CATALOG_VERSION,
+      businessUnitCode: "paris_autos" as const,
+      taskParameters: { banco: "nacion", cuenta: "Principal" },
+      revision: 2,
+      submissions: [
+        { ...original.submissions[0]!, revision: 1, taskCode: "gpar_bank_reconciliation", taskCatalogVersion: PARIS_TASK_CATALOG_VERSION },
+        { ...original.submissions[0]!, revision: 2, taskCode: "gpar_bank_reconciliation", taskCatalogVersion: PARIS_TASK_CATALOG_VERSION, businessUnitCode: "paris_autos" as const, taskParameters: { banco: "nacion", cuenta: "Principal" } },
+      ],
+    };
     const state = { ...base, habitualTaskProposals: [paris] };
     render(<HabitualTaskProposalInbox state={state} actor={state.profiles.find((profile) => profile.id === "boss")!} month={currentMonth()} commit={() => true} notify={() => {}} />);
-    expect(screen.getByText(/conserva un historial sin clasificación completa del catálogo Grupo París/i)).toBeTruthy();
+    expect(screen.getByRole("note").textContent).toMatch(/historial contiene datos de clasificación parciales/i);
     expect(screen.queryByRole("button", { name: /Vincular y activar/ })).toBeNull();
     expect(screen.queryByText(/Crear un estándar para/)).toBeNull();
     expect(screen.getAllByText(/Solicitar correcciones/).length).toBeGreaterThan(0);
@@ -58,10 +69,41 @@ describe("interfaz de propuestas de tareas habituales", () => {
     const state = pendingProposals();
     const manager = state.profiles.find((profile) => profile.id === "boss")!;
     render(<HabitualTaskProposalInbox state={state} actor={manager} month={currentMonth()} commit={() => true} notify={() => {}} />);
-    expect(screen.getByText(/conserva un historial sin clasificación completa del catálogo Grupo París/i)).toBeTruthy();
+    expect(screen.getByText(/completar una revisión explícita del catálogo París/i)).toBeTruthy();
+    expect(screen.getByText(/el titular podrá elegir tarea, unidad y parámetros en una nueva revisión/i)).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Vincular y activar/ })).toBeNull();
     expect(screen.queryByText(/Crear un estándar para/)).toBeNull();
     expect(screen.getAllByText(/Solicitar correcciones/).length).toBeGreaterThan(0);
+  });
+
+  it("permite al titular clasificar una propuesta antigua al reenviarla desde el catálogo", () => {
+    let state = pendingProposals();
+    const manager = state.profiles.find((profile) => profile.id === "boss")!;
+    const employee = state.profiles.find((profile) => profile.id === "e0")!;
+    state = requestHabitualProposalChanges(state, manager, "proposal-c1", "Elegí tarea y unidad del catálogo París.", "2026-10-08T12:00:00.000Z");
+    const notify = vi.fn();
+    let committed: State | undefined;
+    render(<MyHabitualTaskProposals
+      state={state}
+      actor={employee}
+      month={currentMonth()}
+      commit={(next) => { committed = next; return true; }}
+      notify={notify}
+    />);
+
+    fireEvent.change(screen.getByRole("combobox", { name: "Tarea del catálogo París" }), { target: { value: "gpar_bank_reconciliation" } });
+    fireEvent.change(screen.getByRole("combobox", { name: "Unidad de negocio" }), { target: { value: "doral" } });
+    fireEvent.change(screen.getByRole("combobox", { name: "banco · obligatorio" }), { target: { value: "frances" } });
+    fireEvent.change(screen.getByRole("textbox", { name: "cuenta · obligatorio" }), { target: { value: "Cuenta principal" } });
+    fireEvent.click(screen.getByRole("button", { name: "Reenviar para revisión" }));
+
+    const updated = committed?.habitualTaskProposals?.find((proposal) => proposal.id === "proposal-c1");
+    expect(updated).toMatchObject({ status: "pending", revision: 2, taskCode: "gpar_bank_reconciliation", businessUnitCode: "doral", taskParameters: { banco: "frances", cuenta: "Cuenta principal" } });
+    expect(updated?.originalTitle).toBe("Conciliación Banco Nación");
+    expect(updated?.submissions).toHaveLength(2);
+    expect(updated?.submissions[0]).not.toHaveProperty("taskCode");
+    expect(updated?.submissions[1]).toMatchObject({ revision: 2, title: "Conciliación bancaria", taskCode: "gpar_bank_reconciliation", businessUnitCode: "doral" });
+    expect(notify).toHaveBeenCalledWith("La propuesta volvió a la bandeja de revisión de jefatura.");
   });
 
   it("permite activar propuestas canónicas conservando la asignación por persona y empresa", () => {

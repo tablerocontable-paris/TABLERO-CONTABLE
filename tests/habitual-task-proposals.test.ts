@@ -6,6 +6,7 @@ import { defaultSchedule } from "../src/domain/schedule";
 import { NEUTRAL_STARTER_SUGGESTIONS } from "../src/domain/neutralStarterCatalog";
 import {
   approveHabitualTaskProposals,
+  hasConsistentParisProposalClassification,
   groupHabitualTaskProposals,
   requestHabitualProposalChanges,
   resubmitHabitualTaskProposal,
@@ -45,7 +46,7 @@ describe("propuestas de tareas habituales del laboratorio", () => {
     const before = mixed.habitualTaskProposals;
     expect(() => approveHabitualTaskProposals(mixed, manager, ["proposal-a", "proposal-paris"], {
       kind: "create", template: { title: "Conciliación libre", sector: "Tesorería", description: "Revisar movimientos y dejar diferencias documentadas.", kind: "resultado", unit: "", weight: 1, target: 0, steps: ["Comparar movimientos"] },
-    }, currentMonth(), fixedNow)).toThrow(/mezcla tipos|no está vinculada a una tarea del catálogo Grupo París/i);
+    }, currentMonth(), fixedNow)).toThrow(/mezcla tipos|última revisión con tarea/i);
     expect(mixed.habitualTaskProposals).toEqual(before);
     expect(mixed.assignments).toEqual(state.assignments);
   });
@@ -159,6 +160,103 @@ describe("propuestas de tareas habituales del laboratorio", () => {
     expect(state.habitualTaskProposals?.[0]).toMatchObject({ status: "pending", revision: 2, originalTitle: "Conciliación bancaria", title: "Conciliación Banco Nación por cuenta" });
     expect(state.habitualTaskProposals?.[0].submissions).toHaveLength(2);
     expect(state.habitualTaskProposals?.[0].history.map((entry) => entry.action)).toEqual(["submitted", "changes_requested", "resubmitted"]);
+  });
+
+  it("clasifica una propuesta antigua sólo en una nueva revisión explícita y conserva los envíos anteriores", () => {
+    let state = seed();
+    state.assignments = [];
+    state.tasks = [];
+    const employee = state.profiles.find((profile) => profile.id === "e0")!;
+    const manager = state.profiles.find((profile) => profile.id === "boss")!;
+    state = submitHabitualTaskProposal(state, employee, proposalInput({ title: "Conciliación bancaria", process: "" }), fixedNow);
+    const original = structuredClone(state.habitualTaskProposals![0]!);
+    state = requestHabitualProposalChanges(state, manager, "proposal-a", "Elegí la tarea y unidad del catálogo París.", fixedNow);
+    state = resubmitHabitualTaskProposal(state, employee, "proposal-a", proposalInput({
+      title: "Conciliación bancaria", process: "", taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 6,
+      businessUnitCode: "paris_autos", taskParameters: { banco: "frances", cuenta: "Cuenta principal" },
+    }), "2026-10-08T12:00:00.000Z");
+
+    const classified = state.habitualTaskProposals![0]!;
+    expect(classified).toMatchObject({
+      originalTitle: original.originalTitle,
+      title: "Conciliación bancaria",
+      revision: 2,
+      taskCode: "gpar_bank_reconciliation",
+      taskCatalogVersion: 6,
+      businessUnitCode: "paris_autos",
+      taskParameters: { banco: "frances", cuenta: "Cuenta principal" },
+    });
+    expect(classified.submissions).toHaveLength(2);
+    expect(classified.submissions[0]).toEqual(original.submissions[0]);
+    expect(classified.submissions[0]).not.toHaveProperty("taskCode");
+    expect(classified.submissions[1]).toMatchObject({ revision: 2, taskCode: "gpar_bank_reconciliation", businessUnitCode: "paris_autos" });
+    expect(hasConsistentParisProposalClassification(classified)).toBe(true);
+
+    state = approveHabitualTaskProposals(state, manager, ["proposal-a"], { kind: "create", template: {
+      title: "Conciliación bancaria", sector: "Tesorería", description: "Comparar movimientos y documentar diferencias de cada cuenta.",
+      kind: "resultado", unit: "", weight: 5, target: 0, steps: ["Comparar extracto y movimientos del período"],
+    } }, currentMonth(), fixedNow, undefined, { requireParisTaskClassification: true });
+    expect(state.assignments[0]).toMatchObject({
+      taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 6,
+      businessUnitCode: "paris_autos", taskParameters: { banco: "frances", cuenta: "Cuenta principal" },
+    });
+    expect(state.habitualTaskProposals![0]!.submissions[0]).toEqual(original.submissions[0]);
+  });
+
+  it("mantiene bloqueada la revisión nueva si un envío anterior tenía clasificación parcial", () => {
+    let state = seed();
+    const employee = state.profiles.find((profile) => profile.id === "e0")!;
+    const manager = state.profiles.find((profile) => profile.id === "boss")!;
+    state = submitHabitualTaskProposal(state, employee, proposalInput(), fixedNow);
+    state = requestHabitualProposalChanges(state, manager, "proposal-a", "Elegí la tarea y unidad del catálogo París.", fixedNow);
+    state = resubmitHabitualTaskProposal(state, employee, "proposal-a", proposalInput({
+      title: "Conciliación bancaria", process: "", taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 6,
+      businessUnitCode: "paris_autos", taskParameters: { banco: "frances", cuenta: "Cuenta principal" },
+    }), "2026-10-08T12:00:00.000Z");
+    const proposal = state.habitualTaskProposals![0]!;
+    const partial = { ...proposal.submissions[0]!, taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 6 };
+    const inconsistent = { ...state, habitualTaskProposals: [{ ...proposal, submissions: [partial, proposal.submissions[1]!] }] };
+
+    expect(hasConsistentParisProposalClassification(inconsistent.habitualTaskProposals![0]!)).toBe(false);
+    expect(() => approveHabitualTaskProposals(inconsistent, manager, ["proposal-a"], { kind: "create", template: {
+      title: "Conciliación bancaria", sector: "Tesorería", description: "Comparar movimientos y documentar diferencias de cada cuenta.",
+      kind: "resultado", unit: "", weight: 5, target: 0, steps: ["Comparar extracto y movimientos del período"],
+    } }, currentMonth(), fixedNow)).toThrow(/última revisión con tarea/i);
+    expect(inconsistent.assignments).toEqual(state.assignments);
+
+    const changesRequested = requestHabitualProposalChanges(inconsistent, manager, "proposal-a", "Crear una propuesta nueva desde el catálogo.", fixedNow);
+    expect(() => resubmitHabitualTaskProposal(changesRequested, employee, "proposal-a", proposalInput({
+      title: "Conciliación bancaria", process: "", description: "Aclarar el procedimiento para comparar movimientos.",
+      taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 6,
+      businessUnitCode: "paris_autos", taskParameters: { banco: "frances", cuenta: "Cuenta principal" },
+    }), "2026-10-09T12:00:00.000Z")).toThrow(/clasificación parcial o distinta/i);
+  });
+
+  it("sólo admite revisiones históricas sin clasificar antes de la primera revisión canónica", () => {
+    let state = seed();
+    const employee = state.profiles.find((profile) => profile.id === "e0")!;
+    const manager = state.profiles.find((profile) => profile.id === "boss")!;
+    state = submitHabitualTaskProposal(state, employee, proposalInput({
+      title: "Conciliación bancaria", process: "", taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 6,
+      businessUnitCode: "paris_autos", taskParameters: { banco: "frances", cuenta: "Cuenta principal" },
+    }), fixedNow);
+    state = requestHabitualProposalChanges(state, manager, "proposal-a", "Aclarar el alcance de la cuenta.", fixedNow);
+    state = resubmitHabitualTaskProposal(state, employee, "proposal-a", proposalInput({
+      title: "Conciliación bancaria", process: "", description: "Comparar movimientos y documentar el saldo conciliado.",
+      taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 6,
+      businessUnitCode: "paris_autos", taskParameters: { banco: "frances", cuenta: "Cuenta principal" },
+    }), "2026-10-08T12:00:00.000Z");
+    const proposal = state.habitualTaskProposals![0]!;
+    const legacyRevision = { ...proposal.submissions[1]! };
+    delete legacyRevision.taskCode;
+    delete legacyRevision.taskCatalogVersion;
+    delete legacyRevision.businessUnitCode;
+    delete legacyRevision.taskParameters;
+    const outOfOrder = {
+      ...state,
+      habitualTaskProposals: [{ ...proposal, revision: 3, submissions: [proposal.submissions[0]!, legacyRevision, { ...proposal.submissions[1]!, revision: 3 }] }],
+    };
+    expect(hasConsistentParisProposalClassification(outOfOrder.habitualTaskProposals![0]!)).toBe(false);
   });
 
   it("rechaza reenviar una propuesta si la empresa fue revocada y no altera su historial", () => {

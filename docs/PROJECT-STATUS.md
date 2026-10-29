@@ -1,5 +1,25 @@
 # Estado vigente — actualización 29/10/2026
 
+## Trabajo local pendiente de publicación — reclasificación histórica
+
+El titular puede clasificar una propuesta antigua sólo al reenviarla en una
+nueva revisión y elegir tarea, unidad y parámetros explícitamente. Se conservan
+las revisiones no clasificadas; cualquier historial previo parcialmente
+clasificado o contradictorio queda bloqueado y se debe reemplazar por una
+propuesta nueva. Revisión independiente sin hallazgo claro. La suite completa
+pasó **884/884 pruebas en 87 archivos**; también pasaron TypeScript, builds de
+cliente y Worker, empaquetado Sites y recorrido Playwright/Edge ampliado. No se
+observaron errores JS ni solicitudes a `/api`. El paquete de validación fue
+1.698.130 bytes. Persisten avisos conocidos de bundle principal (>500 kB) y
+comentarios de Zod.
+
+Este corte sigue **sólo local**: falta commit/push directo a `main`, comprobar
+GitHub Actions y actualizar el mismo Site privado. El despliegue vigente sigue
+siendo v105. No se validó la UI interna con una sesión autenticada; la revisión
+de código y las pruebas no equivalen a aceptación real ni a certeza de error
+cero. El scratch protegido `tests/review/m2-2c-legacy-task-control-replay-races.block`
+permanece sin tocar.
+
 ## Despliegue actual — Site privado v105
 
 El catálogo V6 ya se publicó en el mismo Site existente, versión **105**,
