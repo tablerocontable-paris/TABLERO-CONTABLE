@@ -64,6 +64,18 @@ confirmación.
   revisar la semántica. Los códigos neutral-v2 existentes son contratos
   históricos y no se renumeran.
 
+### Límite actual de la relación tarea–unidad
+
+El onboarding del laboratorio ya permite seleccionar una o varias de las siete
+unidades y asociarles tareas canónicas. **Todavía no restringe qué tareas están
+permitidas en cada unidad**: no existe una matriz `taskCode`–`businessUnitCode`
+confirmada en las fuentes disponibles. Por eso, esa selección sirve para
+relevar trabajo habitual con datos ficticios; no debe interpretarse como una
+asignación final ni como autorización para comparar cualquier tarea entre
+unidades. La matriz sólo se incorporará cuando el proceso real confirme la
+presencia, alcance y unidad de medida para cada combinación. No deducirla de
+empresa legal, siglas parciales o títulos de capturas.
+
 ## Tareas canónicas observadas
 
 Los códigos debajo son las claves estables de la implementación del catálogo

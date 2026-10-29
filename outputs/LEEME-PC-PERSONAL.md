@@ -108,6 +108,10 @@ ni en el respaldo.
 
 - El catálogo contiene 55 tareas canónicas y siete unidades de negocio. Hay 25
   tareas comparables y 30 provisionales; no se deben homologar por intuición.
+- El onboarding del laboratorio permite elegir unidades y tareas canónicas,
+  pero todavía no limita cada tarea a una matriz unidad–tarea confirmada. Es un
+  relevamiento ficticio, no la configuración operativa final. No completar esa
+  matriz desde capturas o siglas ambiguas.
 - La ficha para homologar esas 30 tareas está en
   `docs/product/BUSINESS-UNIT-TASK-NORMALIZATION-QUESTIONNAIRE-20261029.md`;
   reúne preguntas y campos de evidencia sin fijar respuestas por inferencia.
