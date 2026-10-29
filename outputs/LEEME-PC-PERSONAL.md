@@ -4,10 +4,11 @@
 añade el centro operativo local IVA/Gemelo y está en GitHub `main`, sin Pull
 Request. Pasaron 886/886 pruebas en 88 archivos, TypeScript, builds cliente y
 Worker, Playwright/Edge y hook pre-commit. Los últimos cambios de prueba también
-pasaron en pruebas focales y Edge. GitHub todavía no informa checks de este
-SHA. El Site privado permanece en v106: el Gemelo aún no se publicó porque hay
-que reconciliar y validar su historia fuente separada. No se verificó la UI
-interna con sesión autorizada ni la PC personal; esto no es certeza del 100%.
+pasaron en pruebas focales y Edge. GitHub Actions #158 pasó. El Gemelo ya está
+publicado en el mismo Site privado como v107; Sites confirmó el despliegue y la
+audiencia continúa owner-only. La fuente Sites `b68e3ab` conserva su historia y
+su árbol coincide con GitHub `main`. No se verificó la UI interna con sesión
+autorizada ni la PC personal; esto no es certeza del 100%.
 
 En la PC personal, iniciar sesión en GitHub con la cuenta que tiene acceso y
 actualizar el clon con `git pull --ff-only origin main`. Después seguir los
