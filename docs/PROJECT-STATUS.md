@@ -1,5 +1,37 @@
 # Estado vigente — actualización 29/10/2026
 
+## Corte de código — IVA / Gemelo en GitHub `main`
+
+Se añadió el módulo **Gemelo** como centro operativo de consulta local para el
+laboratorio: busca tareas y obligaciones visibles, explica próximos pasos y
+prioriza trabajo habilitado. La proyección de datos entrega al módulo sólo
+tareas y obligaciones ya autorizadas; no incluye anotaciones personales ni el
+estado completo. El flujo no ejecuta tareas, no inicia cronómetros y no llama
+a IA externa, ARCA ni `/api`.
+
+El commit `b269c3e2cf8f3f02f54587a26d02d54c0244d280` está en GitHub `main`, sin
+Pull Request. La suite completa vigente pasó **886/886 pruebas en 88 archivos**;
+también pasaron TypeScript, build de cliente, build del Worker, recorrido
+Playwright en Edge para escritorio/móvil y hook pre-commit (234/234). Después
+de la suite completa se reforzó la búsqueda canónica y el escenario de
+navegador; las pruebas focales y el recorrido Edge volvieron a pasar. GitHub
+todavía no informa checks asociados a este SHA. La ejecución local no verifica
+la UI interna publicada con sesión autenticada.
+
+El Site existente `Grupo París · Tablero contable` continúa **privado, owner-only
+y en v106**; el Gemelo de este commit no está desplegado allí. El repositorio
+fuente de Sites tiene historia separada y debe integrarse/verificarse antes de
+publicar; no reutilizar el SHA de GitHub como SHA de Sites sin crear y comprobar
+el commit fuente correspondiente. Sigue prohibido habilitar usuarios reales,
+API operativa o producción.
+
+No hay certeza del 100% ni garantía de ausencia de errores. Quedan pendientes
+la publicación segura del Gemelo en el mismo Site, aceptación interna con
+sesión, clon y pruebas en la PC personal, homologación de tareas reales con el
+usuario y la integración posterior de Auth/API/Supabase/hosting.
+
+## Corte anterior — v106 (histórico)
+
 ## Corte vigente — reclasificación histórica publicada en v106
 
 El titular puede clasificar una propuesta antigua sólo al reenviarla en una

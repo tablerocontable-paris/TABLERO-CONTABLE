@@ -1,5 +1,18 @@
 # Continuar el proyecto desde tu PC personal
 
+**Corte actual 29/10/2026:** el commit `b269c3e2cf8f3f02f54587a26d02d54c0244d280`
+añade el centro operativo local IVA/Gemelo y está en GitHub `main`, sin Pull
+Request. Pasaron 886/886 pruebas en 88 archivos, TypeScript, builds cliente y
+Worker, Playwright/Edge y hook pre-commit. Los últimos cambios de prueba también
+pasaron en pruebas focales y Edge. GitHub todavía no informa checks de este
+SHA. El Site privado permanece en v106: el Gemelo aún no se publicó porque hay
+que reconciliar y validar su historia fuente separada. No se verificó la UI
+interna con sesión autorizada ni la PC personal; esto no es certeza del 100%.
+
+En la PC personal, iniciar sesión en GitHub con la cuenta que tiene acceso y
+actualizar el clon con `git pull --ff-only origin main`. Después seguir los
+pasos de preparación de entorno de esta guía; no usar ZIP como copia de trabajo.
+
 **Actualización 29/10/2026:** se implementó y desplegó como Site privado v106
 la reclasificación
 explícita de propuestas históricas al reenviarlas a jefatura, conservando las

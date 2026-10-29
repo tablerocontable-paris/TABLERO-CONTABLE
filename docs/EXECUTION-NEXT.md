@@ -1,5 +1,37 @@
 # Estado vigente de ejecución — 29/10/2026
 
+## Corte de código actual — IVA / Gemelo
+
+Commit `b269c3e2cf8f3f02f54587a26d02d54c0244d280` está directamente en
+GitHub `main` (sin PR). Gemelo ofrece búsqueda local y priorización explicable
+de tareas/obligaciones visibles; recibe una proyección sin notas personales,
+no muta el estado y no llama a `/api` ni a servicios externos.
+
+Validación del corte: suite completa **886/886 pruebas en 88 archivos**,
+TypeScript, build cliente, build Worker, paquete de Sites, recorrido
+Playwright/Edge y hook automático 234/234 aprobados. Los cambios de prueba
+posteriores a la suite completa pasaron por pruebas focales y Edge. GitHub
+Combined Status aún devuelve cero checks para este SHA. El Site privado está
+confirmado en v106, así que este corte de código aún no está publicado en Sites.
+
+### Siguiente bloque
+
+1. Reconciliar la historia fuente separada de Sites con el commit GitHub y
+   comprobar igualdad del árbol/artefacto antes de publicar el Gemelo en el
+   mismo Site privado. No desplegar si esa correspondencia no queda probada.
+2. Revisar el despliegue v107 y probar la UI interna con sesión autorizada;
+   la sesión anónima sólo acredita la puerta de acceso.
+3. En la PC personal, clonar/actualizar `main` y ejecutar instalación,
+   validaciones y recorrido local. Luego continuar la homologación de tareas
+   con los nombres y unidades reales que proporcione el usuario.
+4. Mantener Auth operativo, `/api` y Supabase de producción desactivados hasta
+   que se acepte el laboratorio y se completen los controles de privacidad.
+
+El preflight no demuestra ausencia total de errores. No tocar el scratch
+protegido `tests/review/m2-2c-legacy-task-control-replay-races.block`.
+
+## Corte anterior — reclasificación histórica, Site v106 (histórico)
+
 ## Cambio vigente — reclasificación de propuestas históricas, Site v106
 
 La reclasificación explícita se implementó en una nueva revisión del titular,
