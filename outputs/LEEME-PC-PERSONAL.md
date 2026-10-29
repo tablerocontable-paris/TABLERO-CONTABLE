@@ -1,14 +1,6 @@
 # Continuar el proyecto desde tu PC personal
 
-**Corte actual 29/10/2026:** el commit `b269c3e2cf8f3f02f54587a26d02d54c0244d280`
-añade el centro operativo local IVA/Gemelo y está en GitHub `main`, sin Pull
-Request. Pasaron 886/886 pruebas en 88 archivos, TypeScript, builds cliente y
-Worker, Playwright/Edge y hook pre-commit. Los últimos cambios de prueba también
-pasaron en pruebas focales y Edge. GitHub Actions #158 pasó. El Gemelo ya está
-publicado en el mismo Site privado como v107; Sites confirmó el despliegue y la
-audiencia continúa owner-only. La fuente Sites `b68e3ab` conserva su historia y
-su árbol coincide con GitHub `main`. No se verificó la UI interna con sesión
-autorizada ni la PC personal; esto no es certeza del 100%.
+**Corte actual 29/10/2026:** el commit `ccc5785a156617fecb79ed0a42055f4b65afaa6d` está en GitHub `main`, sin Pull Request, y valida campos requeridos del catálogo durante el onboarding. Pasaron 888/888 pruebas en 88 archivos, TypeScript, builds cliente y Worker, Playwright/Edge y benchmark 30/30 (p95 644,84 ms); Actions #161 seguía en curso al corte. El mismo Site privado está en v108, owner-only. La UI interior con sesión autorizada y la PC personal todavía no se aceptaron. Esto no acredita certeza del 100%.
 
 En la PC personal, iniciar sesión en GitHub con la cuenta que tiene acceso y
 actualizar el clon con `git pull --ff-only origin main`. Después seguir los

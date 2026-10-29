@@ -2,37 +2,13 @@
 
 ## Corte de código — IVA / Gemelo en GitHub `main`
 
-Se añadió el módulo **Gemelo** como centro operativo de consulta local para el
-laboratorio: busca tareas y obligaciones visibles, explica próximos pasos y
-prioriza trabajo habilitado. La proyección de datos entrega al módulo sólo
-tareas y obligaciones ya autorizadas; no incluye anotaciones personales ni el
-estado completo. El flujo no ejecuta tareas, no inicia cronómetros y no llama
-a IA externa, ARCA ni `/api`.
+El corte actual agrega validación de parámetros obligatorios al alta de tareas del catálogo: no permite avanzar el onboarding si falta un dato parametrizado (por ejemplo, la cuenta bancaria). No se inventan parámetros ni se cambia la semántica del catálogo. Gemelo sigue siendo una consulta local explicable de datos autorizados, sin notas personales, mutaciones, cronómetros, IA externa, ARCA ni llamadas a `/api`.
 
-El commit `b269c3e2cf8f3f02f54587a26d02d54c0244d280` está en GitHub `main`, sin
-Pull Request; GitHub Actions **#158 pasó** para ese SHA. La suite completa
-vigente pasó **886/886 pruebas en 88 archivos**;
-también pasaron TypeScript, build de cliente, build del Worker, recorrido
-Playwright en Edge para escritorio/móvil y hook pre-commit (234/234). Después
-de la suite completa se reforzó la búsqueda canónica y el escenario de
-navegador; las pruebas focales y el recorrido Edge volvieron a pasar. El
-registro documental posterior pasó su hook con 234/234 pruebas; Actions #159
-estaba en curso al redactar esta actualización. La ejecución local no verifica
-la UI interna publicada con sesión autenticada.
+El commit `ccc5785a156617fecb79ed0a42055f4b65afaa6d` está en GitHub `main`, sin Pull Request. Para ese árbol pasaron **888/888 pruebas en 88 archivos**, TypeScript, builds de cliente y Worker, Playwright/Edge en escritorio y móvil, y benchmark de navegación caliente **30/30**, p95 **644,84 ms** con 24 perfiles y 2.000 tareas. El hook de commit pasó 235/235. GitHub Actions **#161 sigue en curso** al corte; no se cuenta como aprobado. La suite no demuestra ausencia absoluta de errores ni sustituye la aceptación de la interfaz publicada con sesión autenticada.
 
-El Site existente `Grupo París · Tablero contable` está desplegado como **v107**
-con Gemelo en el mismo proyecto. El commit fuente Sites
-`b68e3abc1fa0397a2fd16b4e0120560ca5e3db87` conserva la historia de origen y su
-árbol `624b5899abb0aaf92fc38710b2c465971dff51e6` coincide exactamente con el
-árbol de GitHub `main` al publicar. Sites confirmó despliegue exitoso; el Site
-sigue **privado, owner-only**, con un usuario permitido y cero visitantes
-externos. Sigue desactivada la operación con usuarios reales, API operativa y
-producción.
+El mismo Site `Grupo París · Tablero contable` está publicado como **v108**, desde la fuente `97eb08b28bac48489e24321866b4834051ee5587`; el árbol de esa fuente (`6ecb68ee3e1667f564134c7c18f4ab492c64582e`) coincidía con GitHub `main` al publicar. Sites confirmó versión activa, acceso **privado owner-only**, un usuario permitido y cero visitantes. La UI interior autenticada y el clon en la PC personal todavía requieren aceptación. No se activaron usuarios reales, API operativa ni producción.
 
-No hay certeza del 100% ni garantía de ausencia de errores. Quedan pendientes
-la aceptación de la UI interna con sesión, clon y pruebas en la PC personal,
-homologación de tareas reales con el usuario y la integración posterior de
-Auth/API/Supabase/hosting.
+No hay certeza del 100% ni garantía de ausencia de errores. Restan aceptación con sesión, uso del clon en PC personal y homologación de tareas provisionales con criterios reales antes de activar Auth/API/Supabase/hosting de producción.
 
 ## Corte anterior — v106 (histórico)
 

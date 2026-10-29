@@ -2,35 +2,15 @@
 
 ## Corte de código actual — IVA / Gemelo
 
-Commit `b269c3e2cf8f3f02f54587a26d02d54c0244d280` está directamente en
-GitHub `main` (sin PR). Gemelo ofrece búsqueda local y priorización explicable
-de tareas/obligaciones visibles; recibe una proyección sin notas personales,
-no muta el estado y no llama a `/api` ni a servicios externos.
-
-Validación del corte: GitHub Actions **#158 pasó**; suite completa
-**886/886 pruebas en 88 archivos**,
-TypeScript, build cliente, build Worker, paquete de Sites, recorrido
-Playwright/Edge y hook automático 234/234 aprobados. Los cambios de prueba
-posteriores a la suite completa pasaron por pruebas focales y Edge. GitHub
-Combined Status inicial no exponía los checks, pero Actions #158 ya confirma el
-push validado. El Site privado **v107** ya contiene Gemelo; Sites confirmó el
-despliegue desde la fuente `b68e3abc1fa0397a2fd16b4e0120560ca5e3db87`, cuyo
-árbol coincide exactamente con GitHub `main` (`624b5899abb0aaf92fc38710b2c465971dff51e6`).
-El commit documental `de445fb` pasó su hook 234/234 y Actions #159 estaba en
-curso al redactar esta actualización.
+Commit `ccc5785a156617fecb79ed0a42055f4b65afaa6d` está directamente en GitHub `main` (sin PR). El onboarding valida los parámetros obligatorios de tareas canónicas antes de permitir avanzar. Para el corte pasaron 888/888 pruebas, TypeScript, build cliente y Worker, Playwright/Edge escritorio y móvil, benchmark 30/30 con p95 644,84 ms (24 perfiles, 2.000 tareas) y hook 235/235. Actions #161 seguía en curso al actualizar este documento. El mismo Site privado está en v108; fuente Sites `97eb08b28bac48489e24321866b4834051ee5587`, árbol `6ecb68ee3e1667f564134c7c18f4ab492c64582e`, coincidente con GitHub `main` al publicar. Audiencia owner-only, un usuario permitido, cero visitantes.
 
 ### Siguiente bloque
 
-1. Revisar v107 y probar la UI interna con sesión autorizada;
-   la sesión anónima sólo acredita la puerta de acceso.
-2. En la PC personal, clonar/actualizar `main` y ejecutar instalación,
-   validaciones y recorrido local. Luego continuar la homologación de tareas
-   con los nombres y unidades reales que proporcione el usuario.
-3. Mantener Auth operativo, `/api` y Supabase de producción desactivados hasta
-   que se acepte el laboratorio y se completen los controles de privacidad.
+1. Revisar v108 y probar la UI interna con sesión autorizada; la sesión anónima sólo acredita la puerta de acceso.
+2. En la PC personal, clonar/actualizar `main` y ejecutar instalación, validaciones y recorrido local. Luego continuar la homologación de tareas con los nombres y unidades reales que proporcione el usuario.
+3. Mantener Auth operativo, `/api` y Supabase de producción desactivados hasta que se acepte el laboratorio y se completen los controles de privacidad.
 
-El preflight no demuestra ausencia total de errores. No tocar el scratch
-protegido `tests/review/m2-2c-legacy-task-control-replay-races.block`.
+El preflight no demuestra ausencia total de errores ni certeza del 100%. No tocar el scratch protegido `tests/review/m2-2c-legacy-task-control-replay-races.block`.
 
 ## Corte anterior — reclasificación histórica, Site v106 (histórico)
 
