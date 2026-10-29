@@ -76,7 +76,9 @@ la lista Exposed schemas:
 
 - `public` tiene 37 tablas y `app_private`, 20; todas tienen RLS. `anon` no
   tiene privilegios efectivos `SELECT`, `INSERT`, `UPDATE` ni `DELETE` en esas
-  tablas.
+  tablas. `authenticated` tiene `SELECT` en 28 tablas `public`, sin privilegio
+  directo `INSERT`, `UPDATE` o `DELETE` en las 57 tablas; las lecturas quedan
+  sujetas a RLS.
 - `api` contiene 12 funciones, las 12 `SECURITY DEFINER`; sólo tres son
   ejecutables por `authenticated`, ninguna por `anon`, y todas tienen
   `search_path` fijado.
