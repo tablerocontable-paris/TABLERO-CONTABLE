@@ -1,6 +1,6 @@
 # Continuar Grupo París desde tu PC personal
 
-Actualizado: 29/10/2026
+Actualizado: 30/10/2026
 
 Repositorio privado: [tablerocontable-paris/TABLERO-CONTABLE](https://github.com/tablerocontable-paris/TABLERO-CONTABLE)
 
@@ -15,12 +15,15 @@ laboratorio privado, con perfiles/datos ficticios y acceso únicamente de la
 cuenta propietaria. No se habilitaron usuarios reales, Auth operativo, `/api`
 operativa ni Supabase de producción.
 
-El último corte funcional registrado es el catálogo V7, commit
-`c28c365de14a8d7c099ca20cecc2e0ab01764a1d`. La versión 109 del mismo Site usa
-el árbol de ese corte funcional. Pasaron 890/890 pruebas, TypeScript, compilaciones de cliente
-y Worker, recorrido Playwright/Edge en escritorio y móvil y GitHub Actions
-#167. Estas comprobaciones no sustituyen la aceptación manual con sesión ni
-garantizan error cero.
+El HEAD de código en GitHub `main` es
+`8d950075f555507fccf64922680e91bd244a274c`. Incluye el catálogo V7, selección
+de varias cuentas por tarea canónica en onboarding y la corrección para poder
+quitar/volver a seleccionar “Otro banco”. La suite local (892/892), TypeScript,
+build de cliente y Worker, y recorrido Playwright/Edge aprobaron antes del
+último ajuste; la GitHub Action #188 de este HEAD está en ejecución al momento
+de esta actualización. El Site privado v109 no contiene estos últimos cambios.
+Estas comprobaciones no sustituyen aceptación manual con sesión ni garantizan
+error cero.
 
 La revalidación de permisos de Supabase DEV quedó registrada en el commit
 `b2911fc128092f73bdb61cdb2c43f0d2fe61c636`, sin cambiar el código
