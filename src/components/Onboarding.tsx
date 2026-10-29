@@ -8,7 +8,7 @@ import {
 } from "../domain/schedule";
 import { id } from "../domain/model";
 import { NEUTRAL_STARTER_CATALOG, NEUTRAL_STARTER_GROUP_DESCRIPTIONS, NEUTRAL_STARTER_SUGGESTIONS } from "../domain/neutralStarterCatalog";
-import { PARIS_BUSINESS_UNITS, PARIS_TASK_CATALOG, PARIS_TASK_CATALOG_VERSION, getParisTaskSelectionPreset, selectableParisTasks, type ParisBusinessUnitCode, type ParisTaskDefinition, type ParisTaskSelectionPreset } from "../domain/parisTaskCatalog";
+import { PARIS_BUSINESS_UNITS, PARIS_TASK_CATALOG, PARIS_TASK_CATALOG_VERSION, getParisTask, getParisTaskSelectionPreset, parisTaskParameterKey, validateRequiredParisTaskParameters, selectableParisTasks, type ParisBusinessUnitCode, type ParisTaskDefinition, type ParisTaskSelectionPreset } from "../domain/parisTaskCatalog";
 import ParisTaskParameterFields from "./ParisTaskParameterFields";
 import StepListEditor, { parseSteps, validateSteps } from "./StepListEditor";
 import {
@@ -102,6 +102,16 @@ export default function Onboarding({
   const parisTasksUnderReview = isParisFirstLogin ? PARIS_TASK_CATALOG.filter((task) => task.comparisonEligible === false) : [];
   const parisTaskDrafts = (draft.habitualTaskProposals || []).filter((proposal) => !!proposal.taskCode);
   const parisTaskDraftFor = (taskCode: string, businessUnitCode: string, bankCode?: string) => parisTaskDrafts.find((proposal) => proposal.taskCode === taskCode && proposal.businessUnitCode === businessUnitCode && (proposal.taskParameters?.banco || undefined) === bankCode);
+  const parisTaskParameterIssues = parisTaskDrafts.flatMap((proposal) => {
+    const taskCode = proposal.taskCode!;
+    const version = proposal.taskCatalogVersion || PARIS_TASK_CATALOG_VERSION;
+    const task = getParisTask(taskCode, version);
+    const validation = validateRequiredParisTaskParameters(taskCode, proposal.taskParameters || {}, version);
+    if (validation.valid) return [];
+    const missingLabels = validation.missingKeys.map((key) => task?.parameters.find((label) => parisTaskParameterKey(label) === key) || key.replaceAll("_", " "));
+    const unitLabel = PARIS_BUSINESS_UNITS.find((unit) => unit.code === proposal.businessUnitCode)?.label || "Unidad sin identificar";
+    return [{ title: task?.label || proposal.title, unitLabel, missingLabels, invalid: validation.invalid }];
+  });
   const availableTemplates = [...state.templates.filter((template) => !isParisFirstLogin || !!template.taskCode), ...starterCatalog];
   const chosen = availableTemplates.filter((t) => draft.selectedTemplateIds.includes(t.id));
   const custom = isParisFirstLogin ? [] : [
@@ -201,7 +211,7 @@ export default function Onboarding({
       : draft.step === 1
         ? draft.selectedCompanyIds.length > 0 && (!(laboratory && !remote && profile.role !== "jefe") || (draft.selectedBusinessUnitCodes?.length || 0) > 0)
         : draft.step === 2
-          ? profile.role === "jefe" || (isParisFirstLogin ? parisTaskDrafts.length > 0 : (effectiveAll.length > 0 || proposals.length > 0) && !customStepError)
+          ? profile.role === "jefe" || (isParisFirstLogin ? parisTaskDrafts.length > 0 && parisTaskParameterIssues.length === 0 : (effectiveAll.length > 0 || proposals.length > 0) && !customStepError)
           : draft.step === 3
             ? validSchedules
             : true;
@@ -439,6 +449,9 @@ export default function Onboarding({
                   </article>)}
                 </div>
                 {parisTaskDrafts.length > 0 && <p className="paris-task-selection-count">{parisTaskDrafts.length} selección{parisTaskDrafts.length === 1 ? "" : "es"} estándar para revisión</p>}
+                {parisTaskParameterIssues.length > 0 && <p className="notice-banner" role="status" aria-live="polite">
+                  {parisTaskParameterIssues.map((issue) => `${issue.title} · ${issue.unitLabel}: ${issue.invalid ? "revisá los datos ingresados" : `completá ${issue.missingLabels.join(", ")}`}`).join(". ")}.
+                </p>}
               </section>}
               {!isParisFirstLogin && <div className="catalog-options">
                 {[...state.templates]

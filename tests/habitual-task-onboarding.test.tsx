@@ -92,6 +92,28 @@ describe("inducción de tareas habituales", () => {
     expect(screen.queryByLabelText("Nombre editable")).toBeNull();
   });
 
+  it("blocks the next onboarding step until required canonical task parameters are complete", () => {
+    const state = seed();
+    const initial: Draft = { ...draft(2), selectedTemplateIds: [], selectedBusinessUnitCodes: ["paris_autos"], habitualTaskProposals: [] };
+    function Harness() {
+      const [current, setCurrent] = useState(initial);
+      return <Onboarding state={state} month="2026-10" profile={state.profiles.find((profile) => profile.id === "e0")!} draft={current} update={setCurrent} finish={() => {}} pause={() => {}} laboratory />;
+    }
+    render(<Harness />);
+    fireEvent.change(screen.getByLabelText("Buscar tarea estándar"), { target: { value: "Conciliación Banco Francés" } });
+    const bankRow = document.querySelector<HTMLElement>(".paris-task-catalog-item")!;
+    fireEvent.click(within(bankRow).getByRole("button", { name: /PARIS AUTOS/ }));
+
+    const next = screen.getByRole("button", { name: /^Continuar/ }) as HTMLButtonElement;
+    expect(next.disabled).toBe(true);
+    expect(screen.getByRole("status").textContent).toContain("Conciliación bancaria · PARIS AUTOS: completá cuenta.");
+
+    fireEvent.change(screen.getByLabelText("cuenta · obligatorio"), { target: { value: "Cuenta principal" } });
+    expect(next.disabled).toBe(false);
+    fireEvent.click(next);
+    expect(document.querySelector(".induction-top")?.textContent).toContain("PASO 4 DE 6");
+  });
+
   it("offers a separate canonical bank option and flags unlisted bank names", () => {
     const state = seed();
     const initial: Draft = { ...draft(2), selectedTemplateIds: [], selectedBusinessUnitCodes: ["paris_autos"], habitualTaskProposals: [] };

@@ -15,6 +15,7 @@ import {
   hasRequiredParisTaskParameters,
   isParisTaskParameterSet,
   isParisTaskParameterComparisonEligible,
+  validateRequiredParisTaskParameters,
   normalizeParisTaskParameters,
   selectableParisTasks,
 } from "../src/domain/parisTaskCatalog";
@@ -111,6 +112,21 @@ describe("catálogo de tareas de Grupo París", () => {
     expect(getParisTask("customer_collections", 5)?.comparisonEligible).toBe(true);
     expect(PARIS_TASK_CATALOG.filter((task) => task.comparisonEligible !== false)).toHaveLength(25);
     expect(PARIS_TASK_CATALOG.filter((task) => task.comparisonEligible === false)).toHaveLength(30);
+  });
+
+  it("explica los parámetros obligatorios que faltan sin cambiar la elegibilidad histórica", () => {
+    expect(validateRequiredParisTaskParameters("gpar_bank_reconciliation", { banco: "frances" }, 6)).toEqual({
+      valid: false, missingKeys: ["cuenta"], invalid: false,
+    });
+    expect(validateRequiredParisTaskParameters("gpar_bank_reconciliation", { banco: "unverified" }, 6)).toEqual({
+      valid: false, missingKeys: ["cuenta", "banco_no_catalogado"], invalid: false,
+    });
+    expect(validateRequiredParisTaskParameters("gpar_bank_reconciliation", { banco: "unverified", cuenta: "Cuenta 1", banco_no_catalogado: "Banco X" }, 6)).toEqual({
+      valid: true, missingKeys: [], invalid: false,
+    });
+    expect(validateRequiredParisTaskParameters("gpar_bank_reconciliation", { banco: "frances", cuenta: "Cuenta 1", banco_no_catalogado: "Banco X" }, 6)).toEqual({
+      valid: false, missingKeys: [], invalid: true,
+    });
   });
 
   it("mantiene los criterios de comparación en paridad con las 55 filas del borrador", () => {

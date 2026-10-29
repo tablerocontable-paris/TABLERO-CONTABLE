@@ -258,8 +258,12 @@ export function isParisTaskParameterSet(code: string, value: unknown, version: n
   return true;
 }
 
-export function hasRequiredParisTaskParameters(code: string, value: unknown, version: number = PARIS_TASK_CATALOG_VERSION): boolean {
-  if (!isParisTaskParameterSet(code, value, version)) return false;
+export function validateRequiredParisTaskParameters(code: string, value: unknown, version: number = PARIS_TASK_CATALOG_VERSION): {
+  valid: boolean;
+  missingKeys: string[];
+  invalid: boolean;
+} {
+  if (!isParisTaskParameterSet(code, value, version)) return { valid: false, missingKeys: [], invalid: true };
   const parameters = value as Record<string, string>;
   const task = getParisTask(code, version)!;
   const required = [...requiredParisTaskParameterKeys(code, version)];
@@ -268,10 +272,15 @@ export function hasRequiredParisTaskParameters(code: string, value: unknown, ver
     if (selected === "unverified") {
       const detailKey = parisTaskParameterKey("banco no catalogado");
       required.push(detailKey);
-    } else if (parameters[parisTaskParameterKey("banco no catalogado")]) return false;
-    if (selected !== undefined && !choices.some((choice) => choice.code === selected)) return false;
+    } else if (parameters[parisTaskParameterKey("banco no catalogado")]) return { valid: false, missingKeys: [], invalid: true };
+    if (selected !== undefined && !choices.some((choice) => choice.code === selected)) return { valid: false, missingKeys: [], invalid: true };
   }
-  return required.every((key) => (parameters[key] || "").trim().length > 0);
+  const missingKeys = [...new Set(required)].filter((key) => !(parameters[key] || "").trim());
+  return { valid: missingKeys.length === 0, missingKeys, invalid: false };
+}
+
+export function hasRequiredParisTaskParameters(code: string, value: unknown, version: number = PARIS_TASK_CATALOG_VERSION): boolean {
+  return validateRequiredParisTaskParameters(code, value, version).valid;
 }
 
 export function requiredParisTaskParameterKeys(code: string, version: number = PARIS_TASK_CATALOG_VERSION): ReadonlySet<string> {
