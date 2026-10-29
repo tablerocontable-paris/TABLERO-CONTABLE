@@ -9,6 +9,7 @@ import {
   PARIS_TASK_CATALOG_V3,
   PARIS_TASK_CATALOG_V4,
   PARIS_TASK_CATALOG_V5,
+  PARIS_TASK_CATALOG_V6,
   PARIS_TASK_CATALOG_VERSION,
   getParisTask,
   getParisTaskSelectionPreset,
@@ -40,7 +41,7 @@ describe("catálogo de tareas de Grupo París", () => {
   });
 
   it("versiona las tareas nuevas y conserva las lecturas históricas v1 a v4", () => {
-    expect(PARIS_TASK_CATALOG_VERSION).toBe(6);
+    expect(PARIS_TASK_CATALOG_VERSION).toBe(7);
     expect(PARIS_TASK_CATALOG_V2).toHaveLength(PARIS_TASK_CATALOG_V1.length + 5);
     expect(PARIS_TASK_CATALOG).toHaveLength(PARIS_TASK_CATALOG_V2.length);
     expect(getParisTask("procedure_follow_up", 1)).toBeUndefined();
@@ -103,6 +104,31 @@ describe("catálogo de tareas de Grupo París", () => {
     expect(isParisTaskParameterComparisonEligible("gpar_bank_reconciliation", {}, 6)).toBe(false);
     expect(isParisTaskParameterComparisonEligible("gpar_bank_reconciliation", { banco: "unverified" }, 6)).toBe(false);
     expect(isParisTaskParameterComparisonEligible("gpar_bank_reconciliation", { banco: "Banco Francés" }, 5)).toBe(true);
+  });
+
+  it("versiona sucursales observadas para facturas de repuestos sin alterar v6", () => {
+    expect(getParisTask("parts_invoice_load", 6)).toEqual(PARIS_TASK_CATALOG_V6.find((task) => task.code === "parts_invoice_load"));
+    expect(getParisTask("parts_invoice_load", 6)?.parameterChoices).toBeUndefined();
+    expect(getParisTask("parts_invoice_load", 7)?.parameterChoices?.sucursal?.map((choice) => choice.code)).toEqual([
+      "3", "81", "unverified",
+    ]);
+    expect(normalizeParisTaskParameters("parts_invoice_load", { sucursal: "suc 3" }, 7)).toEqual({ sucursal: "3" });
+    expect(normalizeParisTaskParameters("parts_invoice_load", { sucursal: "Sucursal 81" }, 7)).toEqual({ sucursal: "81" });
+    expect(isParisTaskParameterSet("parts_invoice_load", { sucursal: "otra" }, 7)).toBe(false);
+    expect(isParisTaskParameterSet("parts_invoice_load", { sucursal: "unverified", sucursal_no_catalogada: "Sucursal 4" }, 7)).toBe(true);
+    expect(validateRequiredParisTaskParameters("parts_invoice_load", {}, 7)).toEqual({
+      valid: false, missingKeys: ["sucursal"], invalid: false,
+    });
+    expect(validateRequiredParisTaskParameters("parts_invoice_load", { sucursal: "unverified" }, 7)).toEqual({
+      valid: false, missingKeys: ["sucursal_no_catalogada"], invalid: false,
+    });
+    expect(validateRequiredParisTaskParameters("parts_invoice_load", { sucursal: "81", sucursal_no_catalogada: "Sucursal 4" }, 7)).toEqual({
+      valid: false, missingKeys: [], invalid: true,
+    });
+    expect(isParisTaskParameterComparisonEligible("parts_invoice_load", { sucursal: "3" }, 7)).toBe(true);
+    expect(isParisTaskParameterComparisonEligible("parts_invoice_load", { sucursal: "unverified", sucursal_no_catalogada: "Sucursal 4" }, 7)).toBe(false);
+    expect(isParisTaskParameterComparisonEligible("parts_invoice_load", undefined, 7)).toBe(false);
+    expect(PARIS_TASK_CATALOG_V6).toHaveLength(PARIS_TASK_CATALOG_V5.length);
   });
 
   it("corrige elegibilidad sin alterar el snapshot histórico v4", () => {

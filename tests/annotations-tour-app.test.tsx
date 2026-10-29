@@ -126,14 +126,14 @@ describe("anotaciones y recorrido integrados", () => {
     expect(saved.assignments.at(-1)).toMatchObject({
       title: "Conciliación bancaria",
       taskCode: "gpar_bank_reconciliation",
-      taskCatalogVersion: 6,
+      taskCatalogVersion: 7,
       businessUnitCode: "paris_autos",
       taskParameters: { banco: "frances", cuenta: "Cuenta principal" },
     });
     expect(saved.tasks.at(-1)).toMatchObject({
       title: "Conciliación bancaria",
       taskCode: "gpar_bank_reconciliation",
-      taskCatalogVersion: 6,
+      taskCatalogVersion: 7,
       businessUnitCode: "paris_autos",
       taskParameters: { banco: "frances", cuenta: "Cuenta principal" },
     });

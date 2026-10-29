@@ -85,7 +85,7 @@ describe("inducción de tareas habituales", () => {
     fireEvent.change(screen.getByLabelText("cuenta · obligatorio"), { target: { value: "Cuenta principal" } });
     expect(saved.habitualTaskProposals).toHaveLength(1);
     expect(saved.habitualTaskProposals?.[0]).toMatchObject({
-      taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 6, businessUnitCode: "paris_autos",
+      taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 7, businessUnitCode: "paris_autos",
       taskParameters: { banco: "frances", cuenta: "Cuenta principal" },
       title: "Conciliación bancaria", kind: "resultado",
     });
@@ -136,7 +136,7 @@ describe("inducción de tareas habituales", () => {
       .find((row) => row.textContent?.includes("Conciliación bancaria"))!;
     fireEvent.click(within(canonicalRow).getByRole("button", { name: /PARIS AUTOS/ }));
     fireEvent.change(screen.getByLabelText("banco · obligatorio"), { target: { value: "unverified" } });
-    expect((screen.getByRole("textbox", { name: "banco no catalogado · obligatorio" }) as HTMLInputElement).required).toBe(true);
+    expect((screen.getByRole("textbox", { name: "Nombre del banco · pendiente de normalizar · obligatorio" }) as HTMLInputElement).required).toBe(true);
     expect(saved.habitualTaskProposals).toHaveLength(2);
   });
 
@@ -154,9 +154,43 @@ describe("inducción de tareas habituales", () => {
     expect(row.textContent).toContain("Provisional");
     fireEvent.click(within(row).getByRole("button", { name: /PARIS AUTOS/ }));
     expect(saved.habitualTaskProposals?.[0]).toMatchObject({
-      taskCode: "invoice_load_other", taskCatalogVersion: 6, businessUnitCode: "paris_autos",
+      taskCode: "invoice_load_other", taskCatalogVersion: 7, businessUnitCode: "paris_autos",
     });
     expect((screen.getByLabelText("tipo específico · obligatorio") as HTMLInputElement).required).toBe(true);
+  });
+
+  it("offers canonical branch choices and flags branches outside the observed sample", () => {
+    const state = seed();
+    const initial: Draft = { ...draft(2), selectedTemplateIds: [], selectedBusinessUnitCodes: ["paris_cars"], habitualTaskProposals: [] };
+    let saved = initial;
+    function Harness() {
+      const [current, setCurrent] = useState(initial);
+      return <Onboarding state={state} month="2026-10" profile={state.profiles.find((profile) => profile.id === "e0")!} draft={current} update={(next) => { saved = next; setCurrent(next); }} finish={() => {}} pause={() => {}} laboratory />;
+    }
+    render(<Harness />);
+    fireEvent.change(screen.getByLabelText("Buscar tarea estándar"), { target: { value: "Carga de facturas de repuestos" } });
+    const row = document.querySelector<HTMLElement>(".paris-task-catalog-item")!;
+    fireEvent.click(within(row).getByRole("button", { name: /PARIS CARS/ }));
+    const branch = screen.getByLabelText("sucursal · obligatorio") as HTMLSelectElement;
+    const next = screen.getByRole("button", { name: /^Continuar/ }) as HTMLButtonElement;
+    expect(next.disabled).toBe(true);
+    expect(Array.from(branch.options).map((option) => option.textContent)).toEqual([
+      "Seleccioná una opción", "Sucursal 3", "Sucursal 81", "Otra sucursal · pendiente de normalizar",
+    ]);
+    fireEvent.change(branch, { target: { value: "81" } });
+    expect(next.disabled).toBe(false);
+    expect(saved.habitualTaskProposals?.[0]).toMatchObject({
+      taskCode: "parts_invoice_load", taskCatalogVersion: 7, businessUnitCode: "paris_cars",
+      taskParameters: { sucursal: "81" },
+    });
+    fireEvent.change(branch, { target: { value: "unverified" } });
+    const otherBranch = screen.getByRole("textbox", { name: "Nombre o número de sucursal · pendiente de normalizar · obligatorio" }) as HTMLInputElement;
+    expect(otherBranch.required).toBe(true);
+    expect(next.disabled).toBe(true);
+    fireEvent.change(otherBranch, { target: { value: "Sucursal 4" } });
+    expect(next.disabled).toBe(false);
+    expect(saved.habitualTaskProposals?.[0]?.taskParameters).toEqual({ sucursal: "unverified", sucursal_no_catalogada: "Sucursal 4" });
+    expect(screen.getByPlaceholderText("Se mantendrá fuera de comparaciones hasta normalizarlo")).toBeTruthy();
   });
 
   it("permite continuar con una sugerencia válida aunque quede abierto un formulario habitual incompleto", async () => {

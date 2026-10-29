@@ -1,6 +1,6 @@
 /** Organization-specific selection catalog. This does not replace neutral v2. */
-export const PARIS_TASK_CATALOG_VERSION = 6 as const;
-export type ParisTaskCatalogVersion = 1 | 2 | 3 | 4 | 5 | typeof PARIS_TASK_CATALOG_VERSION;
+export const PARIS_TASK_CATALOG_VERSION = 7 as const;
+export type ParisTaskCatalogVersion = 1 | 2 | 3 | 4 | 5 | 6 | typeof PARIS_TASK_CATALOG_VERSION;
 
 export const PARIS_BUSINESS_UNITS = [
   { code: "paris_autos", label: "PARIS AUTOS" },
@@ -23,6 +23,8 @@ export interface ParisTaskDefinition {
   parameters: readonly string[];
   /** Versioned, controlled values for fields whose vocabulary is known. */
   parameterChoices?: Readonly<Record<string, readonly ParisTaskParameterChoice[]>>;
+  /** Extra input required when a controlled field is marked unverified. */
+  unverifiedParameterDetails?: Readonly<Record<string, { parameter: string; label: string }>>;
   /** Search phrases that select a canonical task plus known parameter values. */
   selectionPresets?: readonly ParisTaskSelectionPreset[];
   /** Fields required to distinguish this work in cross-unit reporting. */
@@ -146,7 +148,7 @@ const bankChoices: readonly ParisTaskParameterChoice[] = [
 ];
 
 /** Version 6 stores known banks as canonical codes and flags unlisted banks. */
-export const PARIS_TASK_CATALOG: readonly ParisTaskDefinition[] = PARIS_TASK_CATALOG_V5.map((task) => task.code === "gpar_bank_reconciliation"
+export const PARIS_TASK_CATALOG_V6: readonly ParisTaskDefinition[] = PARIS_TASK_CATALOG_V5.map((task) => task.code === "gpar_bank_reconciliation"
   ? {
       ...task,
       parameters: [...task.parameters, "banco no catalogado"],
@@ -158,12 +160,43 @@ export const PARIS_TASK_CATALOG: readonly ParisTaskDefinition[] = PARIS_TASK_CAT
     }
   : task);
 
+const branchChoices: readonly ParisTaskParameterChoice[] = [
+  { code: "3", label: "Sucursal 3", aliases: ["3", "sucursal 3", "suc 3"] },
+  { code: "81", label: "Sucursal 81", aliases: ["81", "sucursal 81", "suc 81"] },
+  { code: "unverified", label: "Otra sucursal · pendiente de normalizar", aliases: [] },
+];
+
+/** Version 7 controls observed parts branches without treating them as exhaustive. */
+export const PARIS_TASK_CATALOG: readonly ParisTaskDefinition[] = PARIS_TASK_CATALOG_V6.map((task) => {
+  if (task.code === "gpar_bank_reconciliation") {
+    return {
+      ...task,
+      unverifiedParameterDetails: {
+        banco: { parameter: "banco no catalogado", label: "Nombre del banco · pendiente de normalizar" },
+      },
+    };
+  }
+  if (task.code === "parts_invoice_load") {
+    return {
+      ...task,
+      parameters: [...task.parameters, "sucursal no catalogada"],
+      requiredParameters: ["sucursal"],
+      parameterChoices: { sucursal: branchChoices },
+      unverifiedParameterDetails: {
+        sucursal: { parameter: "sucursal no catalogada", label: "Nombre o número de sucursal · pendiente de normalizar" },
+      },
+    };
+  }
+  return task;
+});
+
 const catalogsByVersion = new Map<ParisTaskCatalogVersion, readonly ParisTaskDefinition[]>([
   [1, PARIS_TASK_CATALOG_V1],
   [2, PARIS_TASK_CATALOG_V2],
   [3, PARIS_TASK_CATALOG_V3],
   [4, PARIS_TASK_CATALOG_V4],
   [5, PARIS_TASK_CATALOG_V5],
+  [6, PARIS_TASK_CATALOG_V6],
   [PARIS_TASK_CATALOG_VERSION, PARIS_TASK_CATALOG],
 ]);
 
@@ -199,6 +232,16 @@ export function getParisTaskParameterChoices(code: string, parameterKey: string,
   const task = getParisTask(code, version);
   const choices = task?.parameterChoices?.[parameterKey];
   return choices ? [...choices] : [];
+}
+
+export function getParisTaskUnverifiedParameterDetails(code: string, version: number = PARIS_TASK_CATALOG_VERSION): Readonly<Record<string, { parameter: string; label: string }>> {
+  const task = getParisTask(code, version);
+  if (task?.unverifiedParameterDetails) return task.unverifiedParameterDetails;
+  // Preserve the v6 bank fallback contract without changing the frozen snapshot.
+  if (code === "gpar_bank_reconciliation" && version === 6) {
+    return { banco: { parameter: "banco no catalogado", label: "Nombre del banco · pendiente de normalizar" } };
+  }
+  return {};
 }
 
 export function getParisTaskSelectionPreset(code: string, query: string, version: number = PARIS_TASK_CATALOG_VERSION): ParisTaskSelectionPreset | undefined {
@@ -267,12 +310,15 @@ export function validateRequiredParisTaskParameters(code: string, value: unknown
   const parameters = value as Record<string, string>;
   const task = getParisTask(code, version)!;
   const required = [...requiredParisTaskParameterKeys(code, version)];
+  const unverifiedDetails = getParisTaskUnverifiedParameterDetails(code, version);
   for (const [key, choices] of Object.entries(task.parameterChoices || {})) {
     const selected = parameters[key];
+    const detail = unverifiedDetails[key];
+    const detailKey = detail ? parisTaskParameterKey(detail.parameter) : undefined;
     if (selected === "unverified") {
-      const detailKey = parisTaskParameterKey("banco no catalogado");
+      if (!detailKey) return { valid: false, missingKeys: [], invalid: true };
       required.push(detailKey);
-    } else if (parameters[parisTaskParameterKey("banco no catalogado")]) return { valid: false, missingKeys: [], invalid: true };
+    } else if (detailKey && parameters[detailKey]) return { valid: false, missingKeys: [], invalid: true };
     if (selected !== undefined && !choices.some((choice) => choice.code === selected)) return { valid: false, missingKeys: [], invalid: true };
   }
   const missingKeys = [...new Set(required)].filter((key) => !(parameters[key] || "").trim());

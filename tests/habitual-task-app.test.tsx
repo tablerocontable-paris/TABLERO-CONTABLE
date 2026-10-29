@@ -50,7 +50,7 @@ describe("integración de propuestas en la inducción", () => {
     fireEvent.click(within(bankRow as HTMLElement).getByRole("button", { name: /PARIS AUTOS/ }));
     expect(updateTask).toHaveBeenLastCalledWith(expect.objectContaining({
       habitualTaskProposals: [expect.objectContaining({
-        taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 6,
+        taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 7,
         businessUnitCode: "paris_autos", title: "Conciliación bancaria",
       })],
     }));
