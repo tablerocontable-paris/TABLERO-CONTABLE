@@ -2,13 +2,14 @@
 
 ## Corte de código actual — IVA / Gemelo
 
-El corte funcional `ccc5785a156617fecb79ed0a42055f4b65afaa6d` está directamente en GitHub `main` (sin PR). El onboarding valida los parámetros obligatorios de tareas canónicas antes de permitir avanzar. Para el corte pasaron 888/888 pruebas, TypeScript, build cliente y Worker, Playwright/Edge escritorio y móvil, benchmark 30/30 con p95 644,84 ms (24 perfiles, 2.000 tareas) y hook 235/235. La actualización documental `4d9d8c820c4a882cdaa71e950d7ea0ff15840a8d` pasó hook local 235/235 y GitHub Actions **#165** (suite, build y paquete Sites). El mismo Site privado está en v108; fuente Sites `97eb08b28bac48489e24321866b4834051ee5587`, árbol `6ecb68ee3e1667f564134c7c18f4ab492c64582e`, coincidente con GitHub `main` al publicar. La v108 no se volvió a publicar con commits documentales; conserva audiencia owner-only, un usuario permitido y cero visitantes.
+El commit funcional `c28c365de14a8d7c099ca20cecc2e0ab01764a1d` está directamente en GitHub `main` (sin PR). El catálogo París V7 añade sucursales 3/81 a carga de facturas de repuestos, exige un detalle para las demás y las excluye de comparación hasta homologarlas; V1–V6 siguen congeladas. Pasaron localmente 890/890 pruebas, TypeScript, build cliente y Worker, Playwright/Edge en escritorio y móvil, y hook 236/236. GitHub Actions **#167** terminó `success` para ese SHA. El mismo Site privado está en v109; fuente Sites `0e004e951192b95e52552b6444b759a344b8ad7b`, árbol `1d4eb82585015f76fec91705bd4432f72d313c8c`, idéntico al árbol de GitHub `main` en c28c365. El despliegue terminó `succeeded`; audiencia personalizada sólo propietaria, cero visitantes externos.
 
 ### Siguiente bloque
 
-1. Revisar v108 y probar la UI interna con sesión autorizada; la sesión anónima sólo acredita la puerta de acceso.
-2. En la PC personal, clonar/actualizar `main` y ejecutar instalación, validaciones y recorrido local. Luego continuar la homologación de tareas con los nombres y unidades reales que proporcione el usuario.
-3. Mantener Auth operativo, `/api` y Supabase de producción desactivados hasta que se acepte el laboratorio y se completen los controles de privacidad.
+1. Cuando se pueda usar una sesión autorizada, aceptar la UI interior de v109 y completar recorridos manuales de permisos y responsive; Edge automatizado no sustituye esta aceptación.
+2. En la PC personal, clonar/actualizar `main` y ejecutar instalación, validaciones y recorrido local.
+3. Seguir homologando las 30 tareas provisionales con procedimientos, nombres y unidades reales; no ampliar el catálogo a partir de siglas o sucursales no confirmadas.
+4. Completar la revisión de esquemas Data API y la matriz de roles con identidades Supabase DEV. Mantener Auth operativo, `/api` y Supabase de producción desactivados hasta aceptar el laboratorio.
 
 El preflight no demuestra ausencia total de errores ni certeza del 100%. No tocar el scratch protegido `tests/review/m2-2c-legacy-task-control-replay-races.block`.
 
