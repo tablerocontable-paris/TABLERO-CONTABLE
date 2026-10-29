@@ -13,6 +13,12 @@ El commit funcional `c28c365de14a8d7c099ca20cecc2e0ab01764a1d` está directament
 
 El preflight no demuestra ausencia total de errores ni certeza del 100%. No tocar el scratch protegido `tests/review/m2-2c-legacy-task-control-replay-races.block`.
 
+La revalidación documental de ACL quedó publicada directamente en `main` como
+`b2911fc128092f73bdb61cdb2c43f0d2fe61c636`; GitHub Actions #170 terminó
+`success` para suite, build y paquete Sites. La guía para la PC personal
+registra ese corte y remite a la auditoría read-only de accesos DEV. Ese cambio
+no modificó el código funcional ni requirió desplegar el Site.
+
 ### Estado Supabase DEV revisado el 29/10/2026
 
 El proyecto sigue activo y las 18 migraciones 001–016 están registradas. 001–014 se aplicaron correctamente; un reintento posterior eligió por error el baseline completo y el guard lo detuvo antes de escribir. SQL016 corrige el defecto funcional de membresía revocada detectado en SQL011. Mantener el workflow actual read-only; antes de datos reales completar la revisión de exposición Data API y la matriz de permisos con Auth DEV. No editar ni reejecutar migraciones históricas.

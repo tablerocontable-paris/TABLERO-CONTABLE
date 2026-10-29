@@ -22,6 +22,13 @@ y Worker, recorrido Playwright/Edge en escritorio y móvil y GitHub Actions
 #167. Estas comprobaciones no sustituyen la aceptación manual con sesión ni
 garantizan error cero.
 
+La revalidación de permisos de Supabase DEV quedó registrada en el commit
+`b2911fc128092f73bdb61cdb2c43f0d2fe61c636`, sin cambiar el código
+funcional ni requerir publicar otra versión del Site. Su hook local pasó
+236/236 y GitHub Actions #170 terminó en `success` (suite, build y paquete
+Sites). La revisión mantiene pendientes la exposición efectiva de Data API y
+las pruebas con sesiones Auth DEV.
+
 ## Clonar el repositorio
 
 1. En la PC personal, iniciá sesión en GitHub con la cuenta
@@ -88,6 +95,8 @@ ni en el respaldo.
 - Antes de activar usuarios reales, completar la revisión de esquemas Data API
   y la matriz de permisos con identidades Auth de Supabase DEV. Mantener Auth
   operativo, `/api` y producción desactivados hasta esa aceptación.
+- La consulta de permisos y sus límites están documentados en
+  `docs/architecture/SUPABASE-DEV-READONLY-ACCESS-AUDIT-20261029.md`.
 
 Para continuar el desarrollo, pedile a Codex que lea `AGENTS.md`,
 `docs/PROJECT-STATUS.md`, `docs/EXECUTION-NEXT.md` y esta guía, y que verifique

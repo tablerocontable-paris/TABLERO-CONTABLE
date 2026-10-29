@@ -15,6 +15,11 @@ GitHub `main`, catálogo V7, Site v109 y comandos vigentes; se quitaron las
 referencias contradictorias a v6/v105/v108 y pruebas antiguas. Sigue pendiente
 probar esos pasos en la PC personal.
 
+La revalidación documental de ACL quedó publicada en `main` como `b2911fc` y
+GitHub Actions #170 terminó en `success` para suite, build y paquete Sites. El
+mismo estado está resumido en la guía de PC personal; no requiere un nuevo
+despliegue.
+
 ## Corte Supabase DEV — verificado 29/10/2026
 
 Consulta read-only actual del 29/10/2026: `grupo-paris-dev` está `ACTIVE_HEALTHY`, PostgreSQL
