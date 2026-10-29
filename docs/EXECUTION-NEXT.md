@@ -1,16 +1,18 @@
 # Estado vigente de ejecución — 29/10/2026
 
-## Cambio local pendiente — reclasificación de propuestas históricas
+## Cambio vigente — reclasificación de propuestas históricas, Site v106
 
 La reclasificación explícita se implementó en una nueva revisión del titular,
 con historial antiguo inmutable y guardas contra clasificaciones parciales o
 contradictorias. Validado localmente con **884/884 pruebas en 87 archivos**,
 TypeScript, builds cliente/Worker, paquete Sites y recorrido Playwright/Edge;
-sin errores JS ni llamadas a `/api`. Falta commit/push directo a GitHub `main`,
-verificar Actions y desplegar al mismo Site privado (hoy v105). No stagear ni
-inspeccionar `tests/review/m2-2c-legacy-task-control-replay-races.block`.
+sin errores JS ni llamadas a `/api`. Commit `dd2b8a1fa7f45dc502da7befe47044aa851ff62c`
+en GitHub `main`, Actions #156 verde y el mismo Site privado desplegado como
+v106 desde fuente `ed7d08e009fe9d16db10ca1f1cab8806b62d35b0`. Audiencia
+owner-only. No stagear ni inspeccionar
+`tests/review/m2-2c-legacy-task-control-replay-races.block`.
 
-## Corte actual — Site privado v105
+## Corte anterior — Site privado v105
 
 El catálogo V6 está desplegado en el Site privado existente: versión **105**,
 proyecto `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85`, fuente Sites

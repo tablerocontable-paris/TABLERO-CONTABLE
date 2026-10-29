@@ -1,6 +1,6 @@
 # Estado vigente — actualización 29/10/2026
 
-## Trabajo local pendiente de publicación — reclasificación histórica
+## Corte vigente — reclasificación histórica publicada en v106
 
 El titular puede clasificar una propuesta antigua sólo al reenviarla en una
 nueva revisión y elegir tarea, unidad y parámetros explícitamente. Se conservan
@@ -13,14 +13,16 @@ observaron errores JS ni solicitudes a `/api`. El paquete de validación fue
 1.698.130 bytes. Persisten avisos conocidos de bundle principal (>500 kB) y
 comentarios de Zod.
 
-Este corte sigue **sólo local**: falta commit/push directo a `main`, comprobar
-GitHub Actions y actualizar el mismo Site privado. El despliegue vigente sigue
-siendo v105. No se validó la UI interna con una sesión autenticada; la revisión
-de código y las pruebas no equivalen a aceptación real ni a certeza de error
-cero. El scratch protegido `tests/review/m2-2c-legacy-task-control-replay-races.block`
-permanece sin tocar.
+Commit `dd2b8a1fa7f45dc502da7befe47044aa851ff62c` está directamente en GitHub
+`main` (sin PR); Actions #156 pasó suite, build y paquete. El mismo Site privado
+está en v106, desde el merge de fuente
+`ed7d08e009fe9d16db10ca1f1cab8806b62d35b0`; continúa con acceso sólo del
+propietario y cero visitantes externos. No se validó la UI interna con una
+sesión autenticada; la revisión y las pruebas no equivalen a aceptación real ni
+a certeza de error cero. El scratch protegido
+`tests/review/m2-2c-legacy-task-control-replay-races.block` permanece intacto.
 
-## Despliegue actual — Site privado v105
+## Despliegue anterior — Site privado v105
 
 El catálogo V6 ya se publicó en el mismo Site existente, versión **105**,
 proyecto `appgprj_6abd71ec7bfc81918c0f3fce5b6a7f85`, fuente Sites

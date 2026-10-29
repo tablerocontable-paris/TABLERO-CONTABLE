@@ -1,13 +1,14 @@
 # Continuar el proyecto desde tu PC personal
 
-**Actualización local 29/10/2026:** quedó implementada la reclasificación
+**Actualización 29/10/2026:** se implementó y desplegó como Site privado v106
+la reclasificación
 explícita de propuestas históricas al reenviarlas a jefatura, conservando las
-revisiones antiguas. Pasaron localmente 884/884 pruebas, TypeScript, builds
-cliente/Worker, paquete Sites y Playwright en Edge. Este cambio todavía no está
-en GitHub ni en el Site; no hagas `git pull` esperando encontrarlo hasta que
-se confirme en `main`.
+revisiones antiguas. Pasaron 884/884 pruebas, TypeScript, builds cliente/Worker,
+paquete Sites y Playwright en Edge. Commit `dd2b8a1` está en GitHub `main`, sin
+Pull Request; Actions #156 pasó. El despliegue mantiene audiencia privada y
+propietario único.
 
-**Actualizado el 29/10/2026:** V6 está en GitHub `main` y desplegado como Site
+**Corte anterior, actualizado el 29/10/2026:** V6 estaba en GitHub `main` y desplegado como Site
 privado v105 en el mismo proyecto. GitHub Actions #153 pasó para el SHA
 `05e3e52a8088779668baba1af0ea3324060885d4`. En la PC de trabajo pasaron
 880/880 pruebas, TypeScript, build cliente, Worker y paquete Sites usando

@@ -1,6 +1,6 @@
 # Continuidad y estado actual del proyecto — actualizado 29/10/2026
 
-## Trabajo local pendiente de publicación — 29/10/2026
+## Corte vigente — reclasificación histórica publicada 29/10/2026
 
 Se implementó un flujo para que una propuesta histórica totalmente sin
 clasificación se complete sólo mediante una selección explícita de tarea,
@@ -10,12 +10,15 @@ historiales con datos parciales o contradictorios siguen bloqueados y no se
 infieren nombres. En esta PC pasaron 884/884 pruebas en 87 archivos,
 TypeScript, build cliente, Worker, paquete Sites y Playwright/Edge. El recorrido
 de navegador cubre la nueva reclasificación sin materializar trabajo antes de
-aprobación. Persisten los avisos conocidos de tamaño del bundle y comentarios
-de Zod. Cambios aún no confirmados, enviados a GitHub ni desplegados; el Site
-sigue en v105 hasta completar esos pasos. No modificar ni stagear el scratch
-protegido `tests/review/m2-2c-legacy-task-control-replay-races.block`.
+aprobación. GitHub Actions #156 pasó suite, build y paquete para el commit de
+código `dd2b8a1fa7f45dc502da7befe47044aa851ff62c`. Se desplegó en el mismo Site
+privado como v106 desde el merge de fuente
+`ed7d08e009fe9d16db10ca1f1cab8806b62d35b0`; continúa propietario único y cero
+visitantes externos. Persisten los avisos conocidos de tamaño del bundle y
+comentarios de Zod. No modificar ni stagear el scratch protegido
+`tests/review/m2-2c-legacy-task-control-replay-races.block`.
 
-## Corte actual — 29/10/2026
+## Corte anterior — Site privado v105
 
 El corte funcional V6 sigue en GitHub `main`. Se desplegó en el **mismo Site
 privado** como versión **105**, con fuente Sites
