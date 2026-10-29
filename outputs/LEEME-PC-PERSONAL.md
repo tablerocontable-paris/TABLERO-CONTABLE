@@ -38,6 +38,11 @@ prueba de paridad entre el catálogo V7 y su ficha de homologación. La suite
 local pasó 891/891 pruebas en 88 archivos; Actions #177 pasó suite, build y
 paquete Sites para `35e90a3c1eea5b1ef58abd9060a04cf9314bf406`.
 
+El commit documental posterior `2888f90250a6cc0191d6b5ab4603a19f543a5509`
+registra otra sonda REST. El conector GitHub no devolvió estados de Actions
+para este SHA, por lo que su CI no está verificado aquí; no extrapolar el éxito
+de #177 a este commit.
+
 Revisión SQL read-only: las tablas `public`/`app_private` no dan privilegios
 efectivos de tabla a `anon`, pero `public` sigue expuesto y conserva RPC
 `SECURITY DEFINER` ejecutables por `authenticated`. El objetivo de DEV es

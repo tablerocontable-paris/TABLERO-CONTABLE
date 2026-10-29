@@ -1,5 +1,10 @@
 # Estado vigente de ejecución — 29/10/2026
 
+La consulta GitHub Actions del HEAD documental `2888f90250a6cc0191d6b5ab4603a19f543a5509`
+no devolvió estados de checks en el conector disponible; el resultado de CI
+para ese SHA queda **sin verificar**. Los checks exitosos documentados para
+`35e90a3` no se deben atribuir al commit posterior `2888f90`.
+
 ## Revisión posterior — 29/10/2026
 
 En `5fe0cb6` se añadió una prueba que fija la paridad entre los 30 códigos
