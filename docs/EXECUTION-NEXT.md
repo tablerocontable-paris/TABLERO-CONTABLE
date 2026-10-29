@@ -1,9 +1,8 @@
 # Estado vigente de ejecución — 29/10/2026
 
-GitHub Actions **#180** terminó `success` para `7f057b45cc61834573c4e367539d1302e82103d9`
-(suite, build y paquete Sites). Actions #178 (`2888f90`) y #179 (`d1839d5`)
-fueron cancelados por pushes posteriores; no se cuentan como exitosos. El
-commit validado #180 es documental y no requiere nueva publicación del Site.
+GitHub Actions **#181** terminó `success` para el HEAD documental
+`c5dd7ab43382bb95aff5947189d6afa2b47138a6` (suite, build y paquete Sites).
+Este corte es documental y no requiere nueva publicación del Site.
 
 Supabase Advisors se reconsultó en modo lectura a las 22:17 UTC y conservó
 los conteos del informe de acceso. No se aplicaron correcciones de esquema;

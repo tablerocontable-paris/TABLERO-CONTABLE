@@ -1,12 +1,11 @@
 # Estado vigente — actualización 29/10/2026
 
-## Revisión de continuidad — 29/10/2026, posterior a `7f057b4`
+## Revisión de continuidad — 29/10/2026, posterior a `c5dd7ab`
 
-GitHub Actions **#180** terminó `success` para el HEAD documental
-`7f057b45cc61834573c4e367539d1302e82103d9` (suite, build y paquete Sites).
-Actions #179 para `d1839d5` y #178 para `2888f90` quedaron cancelados por
-pushes posteriores; no se cuentan como validaciones aprobadas. El árbol local
-está sincronizado con `origin/main`; el único untracked es el scratch protegido.
+GitHub Actions **#181** terminó `success` para el HEAD documental
+`c5dd7ab43382bb95aff5947189d6afa2b47138a6` (suite, build y paquete Sites).
+El árbol local está sincronizado con `origin/main`; el único untracked es el
+scratch protegido.
 
 Refresco read-only de Supabase Advisors a las 22:17 UTC: se mantienen los
 conteos previamente auditados (29 RLS sin policy, 39 RPC `SECURITY DEFINER`
