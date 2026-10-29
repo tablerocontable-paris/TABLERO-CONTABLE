@@ -201,6 +201,24 @@ describe("catálogo de tareas de Grupo París", () => {
     expect(findParisTaskAlias("Carga de otras facturas")?.requiredParameters).toContain("tipo específico");
   });
 
+  it("mantiene la ficha de homologación alineada con las 30 tareas V7 provisionales", () => {
+    const questionnaire = readFileSync(new URL(
+      "../docs/product/BUSINESS-UNIT-TASK-NORMALIZATION-QUESTIONNAIRE-20261029.md",
+      import.meta.url,
+    ), "utf8");
+    const listedCodes = questionnaire.split(/\r?\n/)
+      .filter((line) => line.startsWith("- [ ] **"))
+      .map((line) => line.split("`")[1] ?? "");
+    const provisionalCodes = PARIS_TASK_CATALOG
+      .filter((task) => task.comparisonEligible === false)
+      .map((task) => task.code)
+      .sort();
+
+    expect(listedCodes).toHaveLength(30);
+    expect(new Set(listedCodes).size).toBe(listedCodes.length);
+    expect(listedCodes.sort()).toEqual(provisionalCodes);
+  });
+
   it("registra con código propio los procesos provisionales sin fusionar aliases", () => {
     expect(findParisTaskAlias("Carga de pagos PDA")?.code).toBe("dealer_credits_payment_load");
     expect(findParisTaskAlias("Carga de pagos PDA")?.state).toBe("selectable");
