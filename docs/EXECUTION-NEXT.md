@@ -1,5 +1,13 @@
 # Estado vigente de ejecución — 29/10/2026
 
+El onboarding local admite varias cuentas u otras combinaciones de parámetros
+bajo el mismo código canónico por unidad. Prueba del caso de dos cuentas de
+Banco Francés; suite completa 892/892, TypeScript, build cliente y Worker
+aprobados en esta PC. No cambia la matriz unidad–tarea, que sigue sin confirmar.
+El cambio se publica junto con esta actualización documental, directamente en
+`main`; comprobar el workflow posterior al push antes de considerarlo validado
+en GitHub.
+
 GitHub Actions **#183** terminó `success` para el HEAD documental
 `91f9505a4a92193206908de7b5ed44314e129829` (suite, build y paquete Sites).
 Este corte es documental y no requiere nueva publicación del Site.

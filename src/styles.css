@@ -3219,11 +3219,13 @@ header .notification-trigger span { position: absolute; top: -6px; right: -6px; 
 .paris-task-catalog-item > div:first-child { display: grid; gap: 4px; }
 .paris-task-catalog-item small { color: var(--muted, #667085); }
 .paris-task-unit-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.paris-task-unit-selection { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 4px; }
 .paris-task-unit-actions button { border: 1px solid var(--line, #d9e0e8); border-radius: 999px; padding: 6px 10px; background: var(--surface, #fff); color: var(--text, #252a31); cursor: pointer; }
 .paris-task-unit-actions button.selected { background: var(--ink, #252a31); color: #fff; }
+.paris-task-unit-actions button.paris-task-add-variant { padding: 3px 8px; border-color: transparent; color: var(--muted, #667085); font-size: 0.78rem; text-decoration: underline; }
 .paris-task-selection-count { font-weight: 600; margin-bottom: 0 !important; }
 input[readonly] { background: var(--surface-muted, #f5f6f8); color: var(--text, #252a31); }
-@media (max-width: 720px) { .paris-task-catalog-item { align-items: flex-start; flex-direction: column; } .paris-task-unit-actions { justify-content: flex-start; } }
+@media (max-width: 720px) { .paris-task-catalog-item { align-items: flex-start; flex-direction: column; } .paris-task-unit-actions { justify-content: flex-start; } .paris-task-unit-selection { align-items: flex-start; } }
 @media (max-width: 620px) { .starter-suggestion-group > summary, .starter-suggestion-detail > summary { align-items: flex-start; flex-direction: column; } }
 .paris-task-parameters {
   flex: 1 0 100%;

@@ -140,6 +140,33 @@ describe("inducción de tareas habituales", () => {
     expect(saved.habitualTaskProposals).toHaveLength(2);
   });
 
+  it("allows the same canonical task and bank for separate accounts within one business unit", () => {
+    const state = seed();
+    const initial: Draft = { ...draft(2), selectedTemplateIds: [], selectedBusinessUnitCodes: ["paris_autos"], habitualTaskProposals: [] };
+    let saved = initial;
+    function Harness() {
+      const [current, setCurrent] = useState(initial);
+      return <Onboarding state={state} month="2026-10" profile={state.profiles.find((profile) => profile.id === "e0")!} draft={current} update={(next) => { saved = next; setCurrent(next); }} finish={() => {}} pause={() => {}} laboratory />;
+    }
+    render(<Harness />);
+    fireEvent.change(screen.getByLabelText("Buscar tarea estándar"), { target: { value: "Conciliación Banco Francés" } });
+    const row = document.querySelector<HTMLElement>(".paris-task-catalog-item")!;
+    fireEvent.click(within(row).getByRole("button", { name: /PARIS AUTOS: agregar/ }));
+    fireEvent.change(screen.getByLabelText("cuenta · obligatorio"), { target: { value: "Cuenta principal" } });
+    fireEvent.click(within(row).getByRole("button", { name: "Agregar otra cuenta" }));
+
+    const accounts = screen.getAllByLabelText("cuenta · obligatorio") as HTMLInputElement[];
+    expect(accounts).toHaveLength(2);
+    fireEvent.change(accounts[1]!, { target: { value: "Cuenta secundaria" } });
+    expect(saved.habitualTaskProposals).toHaveLength(2);
+    expect(new Set(saved.habitualTaskProposals?.map((proposal) => proposal.id)).size).toBe(2);
+    expect(saved.habitualTaskProposals).toEqual(expect.arrayContaining([
+      expect.objectContaining({ taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 7, businessUnitCode: "paris_autos", taskParameters: { banco: "frances", cuenta: "Cuenta principal" } }),
+      expect.objectContaining({ taskCode: "gpar_bank_reconciliation", taskCatalogVersion: 7, businessUnitCode: "paris_autos", taskParameters: { banco: "frances", cuenta: "Cuenta secundaria" } }),
+    ]));
+    expect((screen.getByRole("button", { name: /^Continuar/ }) as HTMLButtonElement).disabled).toBe(false);
+  });
+
   it("allows a provisional observed task while requiring its subtype for later comparison", () => {
     const state = seed();
     const initial: Draft = { ...draft(2), selectedTemplateIds: [], selectedBusinessUnitCodes: ["paris_autos"], habitualTaskProposals: [] };

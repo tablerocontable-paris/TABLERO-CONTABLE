@@ -101,7 +101,8 @@ export default function Onboarding({
   const parisTaskCatalog = isParisFirstLogin ? selectableParisTasks() : [];
   const parisTasksUnderReview = isParisFirstLogin ? PARIS_TASK_CATALOG.filter((task) => task.comparisonEligible === false) : [];
   const parisTaskDrafts = (draft.habitualTaskProposals || []).filter((proposal) => !!proposal.taskCode);
-  const parisTaskDraftFor = (taskCode: string, businessUnitCode: string, bankCode?: string) => parisTaskDrafts.find((proposal) => proposal.taskCode === taskCode && proposal.businessUnitCode === businessUnitCode && (proposal.taskParameters?.banco || undefined) === bankCode);
+  const parisTaskDraftsFor = (taskCode: string, businessUnitCode: string, bankCode?: string) => parisTaskDrafts.filter((proposal) => proposal.taskCode === taskCode && proposal.businessUnitCode === businessUnitCode && (proposal.taskParameters?.banco || undefined) === bankCode);
+  const parisTaskDraftFor = (taskCode: string, businessUnitCode: string, bankCode?: string) => parisTaskDraftsFor(taskCode, businessUnitCode, bankCode)[0];
   const parisTaskParameterIssues = parisTaskDrafts.flatMap((proposal) => {
     const taskCode = proposal.taskCode!;
     const version = proposal.taskCatalogVersion || PARIS_TASK_CATALOG_VERSION;
@@ -216,17 +217,17 @@ export default function Onboarding({
             ? validSchedules
             : true;
   const patch = (v: Partial<Draft>) => update({ ...draft, ...v });
-  const selectParisTask = (task: ParisTaskDefinition, businessUnitCode: ParisBusinessUnitCode, preset?: ReturnType<typeof getParisTaskSelectionPreset>) => {
-    const exists = parisTaskDraftFor(task.code, businessUnitCode, preset?.parameters.banco);
-    if (exists) {
-      patch({ habitualTaskProposals: (draft.habitualTaskProposals || []).filter((proposal) => proposal.id !== exists.id) });
-      return;
-    }
+  const addParisTaskDraft = (task: ParisTaskDefinition, businessUnitCode: ParisBusinessUnitCode, preset?: ReturnType<typeof getParisTaskSelectionPreset>) => {
     const selectedUnits = draft.selectedBusinessUnitCodes || [];
     if (!selectedUnits.includes(businessUnitCode)) return;
+    const baseId = `paris-task:${task.code}:${businessUnitCode}:${profile.id}${preset?.parameters.banco ? `:${preset.parameters.banco}` : ""}`;
+    const existingIds = new Set((draft.habitualTaskProposals || []).map((proposal) => proposal.id));
+    let id = baseId;
+    let suffix = 2;
+    while (existingIds.has(id)) id = `${baseId}:${suffix++}`;
     const kind = task.kind === "operational" ? "operativa" as const : "resultado" as const;
     patch({ habitualTaskProposals: [...(draft.habitualTaskProposals || []), {
-      id: `paris-task:${task.code}:${businessUnitCode}:${profile.id}${preset?.parameters.banco ? `:${preset.parameters.banco}` : ""}`,
+      id,
       taskCode: task.code,
       taskCatalogVersion: PARIS_TASK_CATALOG_VERSION,
       businessUnitCode,
@@ -239,6 +240,14 @@ export default function Onboarding({
       steps: ["Confirmar procedimiento y controles con jefatura."],
       companyIds: [...draft.selectedCompanyIds],
     }] });
+  };
+  const selectParisTask = (task: ParisTaskDefinition, businessUnitCode: ParisBusinessUnitCode, preset?: ReturnType<typeof getParisTaskSelectionPreset>) => {
+    const exists = parisTaskDraftFor(task.code, businessUnitCode, preset?.parameters.banco);
+    if (exists) {
+      patch({ habitualTaskProposals: (draft.habitualTaskProposals || []).filter((proposal) => proposal.id !== exists.id) });
+      return;
+    }
+    addParisTaskDraft(task, businessUnitCode, preset);
   };
   const clearDraftReferences = (key: string) => ({
     schedules: withoutKey(draft.schedules, key),
@@ -439,8 +448,12 @@ export default function Onboarding({
                     <div><b>{preset?.label || task.label}{task.comparisonEligible === false && <small className="paris-task-provisional-badge"> · Provisional</small>}</b><small>{preset ? `Tarea normalizada: ${task.label} · ${preset.parameters.banco === "frances" ? "Banco Francés" : "Banco Nación"}` : `${task.kind === "operational" ? `Actividad · ${task.unit}` : "Entregable con controles"} · ${task.parameters.join(" · ")}`}{task.comparisonEligible === false ? " · Comparación entre unidades pendiente" : ""}</small></div>
                     <div className="paris-task-unit-actions">{(draft.selectedBusinessUnitCodes || []).map((unitCode) => {
                       const unit = PARIS_BUSINESS_UNITS.find((entry) => entry.code === unitCode)!;
-                      const selected = parisTaskDraftFor(task.code, unitCode, preset?.parameters.banco);
-                      return <button type="button" key={unitCode} aria-pressed={!!selected} className={selected ? "selected" : ""} onClick={() => selectParisTask(task, unitCode, preset)}>{selected ? "✓ " : "+ "}{unit.label}</button>;
+                      const selections = parisTaskDraftsFor(task.code, unitCode, preset?.parameters.banco);
+                      const selected = selections.length > 0;
+                      return <span className="paris-task-unit-selection" key={unitCode}>
+                        <button type="button" aria-label={selected ? `${unit.label}: quitar una selección de ${preset?.label || task.label}${selections.length > 1 ? ` (${selections.length} combinaciones)` : ""}` : `${unit.label}: agregar ${preset?.label || task.label}`} aria-pressed={selected} className={selected ? "selected" : ""} onClick={() => selectParisTask(task, unitCode, preset)}>{selected ? `✓${selections.length > 1 ? ` ${selections.length}` : ""} ` : "+ "}{unit.label}</button>
+                        {selected && task.parameters.length > 0 && <button type="button" className="paris-task-add-variant" onClick={() => addParisTaskDraft(task, unitCode, preset)}>{task.code === "gpar_bank_reconciliation" ? "Agregar otra cuenta" : "Agregar otra combinación"}</button>}
+                      </span>;
                     })}</div>
                     {parisTaskDrafts.filter((proposal) => proposal.taskCode === task.code && (preset ? proposal.taskParameters?.banco === preset.parameters.banco : !proposal.taskParameters?.banco || proposal.taskParameters.banco === "unverified")).map((proposal) => <fieldset className="paris-task-parameters" key={proposal.id}>
                       <legend>{PARIS_BUSINESS_UNITS.find((unit) => unit.code === proposal.businessUnitCode)?.label} · datos para identificar el trabajo</legend>

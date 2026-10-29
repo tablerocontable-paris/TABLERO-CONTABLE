@@ -1,5 +1,16 @@
 # Estado vigente — actualización 29/10/2026
 
+## Selección de más de una cuenta por tarea — 29/10/2026
+
+El onboarding del laboratorio ahora permite agregar más de una combinación de
+parámetros para la misma tarea canónica y unidad de negocio (por ejemplo, dos
+cuentas del Banco Francés para conciliación). Cada selección conserva el mismo
+código de tarea y versión, con un ID independiente y los parámetros propios;
+no crea nombres alternativos. Se agregó una regresión del recorrido. Validación
+local: **892/892 pruebas en 88 archivos**, TypeScript, build cliente y Worker
+aprobados. Esto mejora el relevamiento ficticio; no confirma qué tareas
+corresponden a cada unidad ni activa onboarding remoto.
+
 ## Revisión de continuidad — 29/10/2026, posterior a `91f9505`
 
 GitHub Actions **#183** terminó `success` para el HEAD documental
