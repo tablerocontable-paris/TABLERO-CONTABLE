@@ -1,9 +1,9 @@
 # Estado vigente de ejecución — 29/10/2026
 
-La consulta GitHub Actions del HEAD documental `2888f90250a6cc0191d6b5ab4603a19f543a5509`
-no devolvió estados de checks en el conector disponible; el resultado de CI
-para ese SHA queda **sin verificar**. Los checks exitosos documentados para
-`35e90a3` no se deben atribuir al commit posterior `2888f90`.
+GitHub Actions **#180** terminó `success` para `7f057b45cc61834573c4e367539d1302e82103d9`
+(suite, build y paquete Sites). Actions #178 (`2888f90`) y #179 (`d1839d5`)
+fueron cancelados por pushes posteriores; no se cuentan como exitosos. El
+commit validado #180 es documental y no requiere nueva publicación del Site.
 
 Supabase Advisors se reconsultó en modo lectura a las 22:17 UTC y conservó
 los conteos del informe de acceso. No se aplicaron correcciones de esquema;

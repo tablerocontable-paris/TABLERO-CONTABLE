@@ -119,3 +119,21 @@ contadores entre 21:52 y 22:17 UTC; no demuestra que cada aviso sea explotable
 ni que su configuración sea óptima. No se hicieron cambios correctivos porque
 requieren evaluar contratos de funciones, consultas reales y carga antes de
 revocar privilegios o agregar/quitar índices.
+
+## Revisión estática complementaria de rutas sensibles — 29/10/2026
+
+Una revisión de sólo lectura de las migraciones 001–016 encontró que las rutas
+revisadas comprueban organización, rol y membresía vigente: consulta de tareas
+(`202610150014_operational_api.sql:3350–3355`), lectura de sesiones y actividad
+por autor o supervisor dentro de ámbito (`:3369–3386`), cierres/reportes por
+organización, titular y empresas del snapshot (`:3388–3405`) y notas privadas
+por autor, jefe o encargado con membresía actual (`:3411–3427`). SQL016 vuelve
+a comprobar el ámbito vigente al consultar tareas de encargado
+(`202610260016_manager_task_revocation.sql:3–26`). Las funciones observadas
+fijan `search_path=''`.
+
+Esto no certifica toda la superficie de las 39 funciones ni sus resultados en
+tiempo de ejecución. Siguen pendientes pruebas con JWT Auth DEV por cada rol,
+incluidos intentos fuera de ámbito, lectura de notas privadas y revocación de
+membresía; tampoco se probó GraphQL. No revocar grants sólo por el aviso del
+Advisor: primero comparar cada firma con su contrato y pruebas.

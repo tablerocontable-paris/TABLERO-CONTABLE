@@ -1,6 +1,12 @@
 # Estado vigente — actualización 29/10/2026
 
-## Revisión de continuidad — 29/10/2026, posterior a `35e90a3`
+## Revisión de continuidad — 29/10/2026, posterior a `7f057b4`
+
+GitHub Actions **#180** terminó `success` para el HEAD documental
+`7f057b45cc61834573c4e367539d1302e82103d9` (suite, build y paquete Sites).
+Actions #179 para `d1839d5` y #178 para `2888f90` quedaron cancelados por
+pushes posteriores; no se cuentan como validaciones aprobadas. El árbol local
+está sincronizado con `origin/main`; el único untracked es el scratch protegido.
 
 Refresco read-only de Supabase Advisors a las 22:17 UTC: se mantienen los
 conteos previamente auditados (29 RLS sin policy, 39 RPC `SECURITY DEFINER`
@@ -32,6 +38,15 @@ y `app_private` da permisos efectivos de tabla a `anon`; todas tienen RLS.
 `api` tiene tres. `anon` sólo tiene EXECUTE PostgreSQL sobre dos funciones de
 trigger no elevadas, que no se invocaron. Detalle:
 [`SUPABASE-DEV-READONLY-ACCESS-AUDIT-20261029.md`](architecture/SUPABASE-DEV-READONLY-ACCESS-AUDIT-20261029.md).
+
+La revisión estática adicional de las funciones `SECURITY DEFINER` encontró
+guardas de organización, membresía activa, rol y autoría en las rutas revisadas
+de tareas, sesiones, actividad, cierres/reportes y notas. SQL016 vuelve a
+comprobar el ámbito vigente en la lectura de tareas de encargado. Las
+funciones observadas fijan `search_path`; esto no certifica todas las funciones
+ni su comportamiento en ejecución. Falta verificar con JWT Auth DEV cada rol,
+incluidas notas privadas y revocaciones; no se concluye que las 39 funciones
+sean vulnerables ni que estén aprobadas por esta revisión.
 
 Los commits `bce6859`, `0e7af5e`, `2f93da1` y `35e90a3` sólo actualizan
 evidencia/continuidad; no cambian código funcional ni requieren publicar otra
