@@ -8,6 +8,17 @@ La actualización es documental y no requiere publicar otra versión del Site.
 Después de publicarla en `main`, verificar el workflow de ese commit y mantener
 la guía de la PC personal sincronizada.
 
+Actions **#192** terminó `success` para `9a563fe` (suite, build y paquete
+Sites). El corte documental en curso incorpora el refresh read-only de
+Supabase DEV de las 23:58 UTC; al publicarlo, verificar su workflow.
+
+Supabase DEV se releyó en modo read-only a las 23:58 UTC: activo, saludable,
+16 migraciones 001–016 y Advisors sin variación relevante (29, 39, 124, 8 y
+12). La exposición REST no se volvió a probar: la evidencia de las 22:10 UTC
+mantiene `public, graphql_public` expuestos y `api`/`app_private` rechazados.
+No activar Auth ni datos reales hasta modificar esa configuración y completar
+la prueba con JWT por rol.
+
 Revalidación actual: GitHub Actions **#189** `success` para el HEAD
 `74b506e60fc8cf8ed5dd8341fe2fe629e9394ede` (suite, build y paquete Sites).
 En esta PC, 892/892 pruebas en 88 archivos, TypeScript, cliente/Worker,

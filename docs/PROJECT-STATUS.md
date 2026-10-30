@@ -7,6 +7,11 @@ GitHub Actions **#191** terminó `success` para el commit documental
 build TypeScript/cliente/Worker y empaquetado Sites. La fuente no cambió y no
 requirió desplegar otra versión del Site.
 
+Actions **#192** terminó `success` para el commit
+`9a563fe089380132e8483188ca09ff5e0d656878`, con suite, build y paquete Sites
+aprobados. El corte añadió las candidatas de unidad observadas, sin modificar
+código ni desplegar el Site.
+
 La ficha del catálogo ahora separa diez pares tarea–unidad mencionados
 explícitamente en los alias de cinco tareas como **candidatos por evidencia**,
 pendientes de ratificación. No se habilitaron pares nuevos ni se activaron
@@ -14,6 +19,15 @@ comparaciones. `PV` sigue sin expandirse; no se completó la matriz real.
 Detalle y confirmaciones rápidas:
 [`BUSINESS-UNIT-TASK-CATALOG-DRAFT-20261028.md`](product/BUSINESS-UNIT-TASK-CATALOG-DRAFT-20261028.md) y
 [`BUSINESS-UNIT-TASK-NORMALIZATION-QUESTIONNAIRE-20261029.md`](product/BUSINESS-UNIT-TASK-NORMALIZATION-QUESTIONNAIRE-20261029.md).
+
+Refresco read-only de Supabase DEV (23:58 UTC): proyecto activo y saludable;
+16 migraciones (001–016). Advisors: 29 RLS sin policies, 39 funciones
+`SECURITY DEFINER` ejecutables por `authenticated`, 124 FK sin índice, 8
+avisos de initplan y 12 índices no usados. Se corrigió en el informe el conteo
+inicial inconsistente de migraciones. No se reconsultó Exposed schemas: su
+última sonda guardada sigue mostrando `public, graphql_public` expuestos y
+`api`/`app_private` rechazados; sigue pendiente corregirlo en el Dashboard y
+revalidar antes de activar Auth.
 
 ## Revalidación posterior al onboarding multicuenta — 29/10/2026
 

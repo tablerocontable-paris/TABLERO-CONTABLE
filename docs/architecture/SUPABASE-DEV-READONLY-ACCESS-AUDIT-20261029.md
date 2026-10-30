@@ -8,9 +8,29 @@ tablas, grants PostgreSQL y advisors de seguridad/rendimiento. Se ejecutaron
 sólo lecturas. No se aplicaron SQL, migraciones, cambios de Dashboard ni Auth.
 La consulta de catálogos se hizo contra PostgreSQL 17.11 en `sa-east-1`.
 
+## Refresco read-only de proyecto, migraciones y Advisors — 29/10/2026 23:58 UTC
+
+Una consulta nueva confirmó que `grupo-paris-dev` sigue `ACTIVE_HEALTHY` en
+`sa-east-1`, con PostgreSQL 17.11. La lista actual devuelve **16 migraciones**,
+versiones `001–016` (corrijo el conteo “18” de la nota inicial, que no coincidía
+con el inventario enumerado).
+
+Advisors se refrescó a las 23:58:47 UTC y mantiene estos conteos:
+
+- Seguridad: 29 tablas con RLS sin policies (INFO) y 39 funciones
+  `SECURITY DEFINER` ejecutables por `authenticated` (WARN).
+- Rendimiento: 124 claves foráneas sin índice cubriente (INFO), 8 policies con
+  reevaluación de funciones Auth (WARN) y 12 índices sin uso observado (INFO).
+
+El refresh sólo volvió a leer proyecto, migraciones y Advisors; no repitió la
+consulta SQL de grants/RLS ni la sonda REST de **Exposed schemas**. Los avisos
+no prueban por sí solos una vulnerabilidad. No se cambió la base. Hasta repetir
+la sonda y completar la matriz con JWT Auth DEV, se mantiene el bloqueo de Auth
+operativo y de datos reales.
+
 ## Hallazgos observados
 
-- El proyecto está `ACTIVE_HEALTHY` y registra 18 migraciones, versiones
+- El proyecto está `ACTIVE_HEALTHY` y registra 16 migraciones, versiones
   001–016. El inventario reporta cero filas en las tablas de negocio revisadas.
 - `public` tiene 37 tablas y `app_private`, 20. Todas tienen RLS habilitado;
   ninguna tiene `FORCE ROW LEVEL SECURITY`.

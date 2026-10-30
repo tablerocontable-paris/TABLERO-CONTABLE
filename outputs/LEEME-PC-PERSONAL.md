@@ -23,19 +23,26 @@ quitar/volver a seleccionar “Otro banco”. Sobre ese código pasaron localmen
 Playwright/Edge. GitHub Actions **#189** terminó `success` para el HEAD
 documental `74b506e60fc8cf8ed5dd8341fe2fe629e9394ede`, incluyendo suite, build
 y paquete Sites. Este resultado sí valida el código funcional que contiene.
-GitHub `main` ahora está en `90f40a6101a18fc7d950e88d01392eabfc523ca8` y
-Actions **#190** terminó `success` para ese corte documental. El mismo Site
+El corte documental `90f40a6101a18fc7d950e88d01392eabfc523ca8` pasó Actions
+**#190**. En ese corte, el mismo Site
 privado se publicó como **v110** desde la fuente Sites
 `d65a2a1d906fe1b13dee5bf94a2c70b9684cbe88`; el despliegue pasó y la audiencia
 sigue owner-only, con cero visitantes externos. Falta la aceptación manual de
 la interfaz interior con sesión. Estas comprobaciones no garantizan error cero.
 
-Actions **#191** también terminó `success` para el siguiente corte documental
-`0b9c479617ff015fb54808aedeb6ba4d3bc627cb` (suite, build y paquete Sites).
-La ficha de homologación ahora muestra diez pares tarea–unidad candidatos
-extraídos de menciones explícitas; siguen pendientes de ratificación y no
-habilitan comparaciones. Para comenzar desde esta PC, cloná el repositorio o
-actualizá el clon existente con `git pull --ff-only origin main`.
+Actions **#192** terminó `success` para el commit
+`9a563fe089380132e8483188ca09ff5e0d656878` (suite, build y paquete Sites). La
+ficha de homologación muestra diez pares tarea–unidad candidatos extraídos de
+menciones explícitas; siguen pendientes de ratificación y no habilitan
+comparaciones.
+
+Supabase DEV se releyó en modo read-only a las 23:58 UTC: está activo,
+saludable y registra 16 migraciones (001–016). Advisors mantiene 29 RLS sin
+policies, 39 funciones `SECURITY DEFINER` ejecutables por `authenticated`,
+124 FK sin índice cubriente, 8 avisos de initplan y 12 índices no usados.
+La exposición de esquemas sigue sin revalidarse desde la sonda de las 22:10
+UTC; no activar Auth ni datos reales. Para comenzar desde esta PC, cloná el
+repositorio o actualizá el clon existente con `git pull --ff-only origin main`.
 
 En esta PC, el benchmark Edge del árbol `74b506e` pasó 30 recorridos con 24
 perfiles/2.000 tareas y p95 502,98 ms; suite completa 892/892, build cliente y
