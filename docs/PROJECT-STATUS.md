@@ -1,5 +1,32 @@
 # Estado vigente — actualización 29/10/2026
 
+## Revisión continua de autorización operativa — 29/10/2026
+
+La respuesta no es 100%: al revisar la ruta de escritura de movimientos se
+confirmó que SQL014 permitía que un superior con acceso de consulta registrara
+actividad en una operativa ajena. El registro conservaba su usuario como autor,
+pero no verificaba que fuera responsable, participante autorizado o cobertura
+vigente. El contrato M2-2A exige esa separación y también deja en revisión las
+operativas conjuntas históricas.
+
+Se preparó la migración local aditiva SQL017 para validar el ejecutor después
+de los bloqueos y durante reintentos; también rechaza escribir en tareas
+operativas conjuntas antiguas. No se alteraron migraciones aplicadas ni se
+modificó Supabase DEV. Regresiones aisladas: **17/17** en tres archivos,
+incluyendo migración 016→017 y ACL, rechazo a encargado lector, aceptación del responsable, bloqueo de
+responsabilidad conjunta histórica y replay tras revocar membresía. Falta la
+aceptación Sol del hash exacto antes de habilitar cualquier aplicación a DEV.
+La CLI Supabase no está instalada en esta PC; por eso se siguió la convención
+local de nombres de migración y se dejó la aplicación remota bloqueada.
+Suite completa local: **898/898 pruebas en 89 archivos**. TypeScript, build del cliente y Worker pasaron; el build
+conserva los avisos de anotaciones Zod y bundle principal mayor a 500 kB.
+
+La hipótesis previa del auditor sobre replay sin autorización fue un falso
+positivo: el cuerpo local de SQL014 revalida identidad, membresía y ámbito
+antes de devolver el recibo. La prueba añadida confirma que la revocación
+rechaza el replay sin cambiar el movimiento, recibo, revisión ni auditoría.
+Esto no sustituye el cotejo de todas las RPC live/local ni la matriz JWT real.
+
 ## Continuidad — 29/10/2026 21:24 ART
 
 GitHub Actions **#195** terminó `success` para `983a9bc889ae8071fdea21e5cb4e63e40e3703b1`.

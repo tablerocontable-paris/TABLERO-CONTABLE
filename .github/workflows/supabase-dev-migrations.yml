@@ -102,4 +102,4 @@ jobs:
           cli="$RUNNER_TEMP/supabase-cli/supabase"
           "$cli" --workdir "$SUPABASE_STAGE_ROOT" migration list --db-url "$SUPABASE_DEV_DB_URL" --output-format json > "$RUNNER_TEMP/migration-list.json"
           node scripts/supabase-dev-migration-guard.mjs history . verify_current "$RUNNER_TEMP/migration-list.json" before
-          echo 'Las 18 migraciones están verificadas. Workflow de sólo lectura: no ejecuta dry-run, db push ni SQL.'
+          echo 'Las 19 migraciones están verificadas. Workflow de sólo lectura: no ejecuta dry-run, db push ni SQL.'

@@ -1,4 +1,4 @@
-export type MigrationPhase = "verify_current" | "baseline_001_014" | "apply_015" | "apply_016";
+export type MigrationPhase = "verify_current" | "baseline_001_014" | "apply_015" | "apply_016" | "apply_017";
 export const MIGRATIONS: ReadonlyArray<readonly [string, string]>;
 export const BASELINE_COUNT: number;
 export function verifyMigrationFiles(root: string): Promise<void>;
@@ -7,3 +7,4 @@ export function validateHistory(payload: unknown, phase: MigrationPhase, state?:
 export function validateDryRun(text: string, phase: MigrationPhase): string[];
 export function verifySql015ReviewAcceptance(root: string): Promise<void>;
 export function verifySql016ReviewAcceptance(root: string): Promise<void>;
+export function verifySql017ReviewAcceptance(root: string): Promise<void>;

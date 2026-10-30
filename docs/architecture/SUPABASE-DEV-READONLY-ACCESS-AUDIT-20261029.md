@@ -1,5 +1,41 @@
 # Auditoría read-only de accesos de Supabase DEV — 29/10/2026
 
+## Hallazgo de escritura de actividad y corrección local — 29/10/2026
+
+La ruta de `public.record_activity_once` delega en
+`public._coordination_record_activity`. En SQL014, el primer registro
+comprobaba `can_access_instance` y `_can_access_instance_at`, ambos controles
+de visibilidad que también admiten superiores autorizados. No exigía el helper
+de ejecución `app_private.api_task_actor_can_execute`; por eso un encargado
+lector podía atribuirse movimientos en operativas ajenas. El contrato M2-2A
+prohíbe esa confusión y requiere además bloquear escrituras en operativas
+conjuntas históricas.
+
+La migración propuesta `202610290017_activity_executor_authorization.sql`
+añade la comprobación de ejecutor tras adquirir bloqueos y vuelve a validar en
+replays. Rechaza tareas conjuntas con
+`GP_JOINT_OPERATION_REQUIRES_REVIEW`. Pruebas PGlite focalizadas en tres
+archivos: **17/17 aprobadas**; incluyen upgrade 016→017 y ACL, encargado lector
+denegado, responsable y cobertura permitidos, cobertura cancelada denegada,
+fixture histórico conjunto denegado y replay tras revocación. La suite completa
+pasó **898/898 pruebas en 89 archivos**.
+SQL017 no se aplicó a DEV ni se modificaron Auth o configuración. Su aplicación
+requiere una aceptación Sol separada del SHA-256 final y validación con la CLI
+oficial; esta PC no tiene Supabase CLI, por eso aún no se produjo el dry-run ni
+el cotejo de la aplicación remota.
+
+Un revisor independiente planteó que el replay SQL014 devolvía recibos sin
+reautorizar. El cotejo del cuerpo encontró que sí revalida actor activo, rol,
+organización, membresía y ámbito antes de devolver el ID. La nueva regresión
+confirma que retirar la membresía hace fallar el replay sin alterar movimiento,
+recibo, revisión o auditoría. Se registra como hipótesis refutada, no como
+hallazgo confirmado.
+
+Este hallazgo nuevo demuestra por qué el inventario de ACL/search_path no
+certifica la semántica de los cuerpos. Las 39 funciones ejecutables por
+`authenticated` siguen pendientes de cotejo completo live/local y pruebas con
+JWT reales; por tanto, no hay certeza integral del 100%.
+
 ## Consulta ACL puntual — 29/10/2026 21:21 ART
 
 Consulta SQL de sólo lectura ejecutada en `grupo-paris-dev` a las 00:21 UTC

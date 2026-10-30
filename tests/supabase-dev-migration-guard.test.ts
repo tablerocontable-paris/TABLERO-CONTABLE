@@ -10,6 +10,7 @@ import {
   validateHistory,
   verifySql015ReviewAcceptance,
   verifySql016ReviewAcceptance,
+  verifySql017ReviewAcceptance,
 } from "../scripts/supabase-dev-migration-guard.mjs";
 
 const temporaryRoots: string[] = [];
@@ -29,7 +30,7 @@ const rows = (localCount: number, remoteCount: number) => Array.from({ length: l
 
 describe("Supabase DEV migration guard", () => {
   it("verifies the full installed history without allowing a write stage", () => {
-    expect(validateHistory({ migrations: rows(MIGRATIONS.length, MIGRATIONS.length) }, "verify_current")).toEqual({ local: 18, remote: 18 });
+    expect(validateHistory({ migrations: rows(MIGRATIONS.length, MIGRATIONS.length) }, "verify_current")).toEqual({ local: 19, remote: 19 });
     expect(() => validateHistory({ migrations: rows(MIGRATIONS.length, MIGRATIONS.length - 1) }, "verify_current")).toThrow();
     expect(validateDryRun("No migrations to apply.", "verify_current")).toEqual([]);
   });
@@ -43,6 +44,9 @@ describe("Supabase DEV migration guard", () => {
     expect(validateHistory({ migrations: rows(18, 17) }, "apply_016")).toEqual({ local: 18, remote: 17 });
     expect(() => validateHistory({ migrations: rows(18, 16) }, "apply_016")).toThrow();
     expect(() => validateHistory({ migrations: rows(18, 18) }, "apply_016")).toThrow();
+    expect(validateHistory({ migrations: rows(19, 18) }, "apply_017")).toEqual({ local: 19, remote: 18 });
+    expect(() => validateHistory({ migrations: rows(19, 17) }, "apply_017")).toThrow();
+    expect(() => validateHistory({ migrations: rows(19, 19) }, "apply_017")).toThrow();
   });
 
   it("requires the exact pending version list for each dry-run", () => {
@@ -53,6 +57,7 @@ describe("Supabase DEV migration guard", () => {
     expect(validateDryRun(cliOutput(baselineFiles), "baseline_001_014")).toEqual(baseline);
     expect(validateDryRun(cliOutput([MIGRATIONS[BASELINE_COUNT][0]]), "apply_015")).toEqual([v015]);
     expect(validateDryRun(cliOutput([MIGRATIONS[BASELINE_COUNT + 1][0]]), "apply_016")).toEqual([MIGRATIONS[BASELINE_COUNT + 1][0].slice(0, 12)]);
+    expect(validateDryRun(cliOutput([MIGRATIONS[BASELINE_COUNT + 2][0]]), "apply_017")).toEqual([MIGRATIONS[BASELINE_COUNT + 2][0].slice(0, 12)]);
     expect(() => validateDryRun(cliOutput([...baselineFiles, MIGRATIONS[BASELINE_COUNT][0]]), "baseline_001_014")).toThrow();
     expect(() => validateDryRun(cliOutput([MIGRATIONS[0][0]]), "baseline_001_014")).toThrow();
     expect(() => validateDryRun(cliOutput([...baselineFiles, baselineFiles[0]]), "baseline_001_014")).toThrow();
@@ -85,6 +90,17 @@ describe("Supabase DEV migration guard", () => {
     expect(staged).not.toContain("202610260016_manager_task_revocation.sql");
   });
 
+  it("stages apply_017 with SQL016 but no later migration", async () => {
+    const temp = await mkdtemp(path.join(os.tmpdir(), "supabase-dev-stage-017-test-"));
+    temporaryRoots.push(temp);
+    const root = path.resolve(process.cwd());
+    const stage = path.join(temp, "apply-017");
+    await createStage(root, stage, "apply_017");
+    const staged = (await readdir(path.join(stage, "supabase", "migrations"))).sort();
+    expect(staged).toHaveLength(19);
+    expect(staged.at(-1)).toBe("202610290017_activity_executor_authorization.sql");
+  });
+
   it("requires a separate Sol code/hash acceptance and rejects the contract acceptance or a wrong hash", async () => {
     const temp = await mkdtemp(path.join(os.tmpdir(), "supabase-015-acceptance-test-"));
     temporaryRoots.push(temp);
@@ -115,5 +131,19 @@ describe("Supabase DEV migration guard", () => {
     await expect(verifySql016ReviewAcceptance(temp)).rejects.toThrow("sigue deshabilitada");
     await writeFile(file, `Dictamen: **apto para aplicar SQL016 en grupo-paris-dev**\nSQL016 SHA-256: \`${expected}\`\n`);
     await expect(verifySql016ReviewAcceptance(temp)).resolves.toBeUndefined();
+  });
+
+  it("keeps SQL017 disabled without Sol acceptance for its exact hash", async () => {
+    const temp = await mkdtemp(path.join(os.tmpdir(), "supabase-017-acceptance-test-"));
+    temporaryRoots.push(temp);
+    const architecture = path.join(temp, "docs", "architecture");
+    await mkdir(architecture, { recursive: true });
+    await expect(verifySql017ReviewAcceptance(temp)).rejects.toThrow("sigue deshabilitada");
+    const file = path.join(architecture, "REMOTE-WORKSPACE-017-CODE-SOL-ACCEPTANCE-20261029.md");
+    const expected = MIGRATIONS[BASELINE_COUNT + 2][1];
+    await writeFile(file, `Dictamen: **apto para aplicar SQL017 en grupo-paris-dev**\nSQL017 SHA-256: \`${"0".repeat(64)}\`\n`);
+    await expect(verifySql017ReviewAcceptance(temp)).rejects.toThrow("sigue deshabilitada");
+    await writeFile(file, `Dictamen: **apto para aplicar SQL017 en grupo-paris-dev**\nSQL017 SHA-256: \`${expected}\`\n`);
+    await expect(verifySql017ReviewAcceptance(temp)).resolves.toBeUndefined();
   });
 });

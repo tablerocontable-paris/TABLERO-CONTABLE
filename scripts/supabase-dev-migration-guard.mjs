@@ -25,11 +25,19 @@ export const MIGRATIONS = [
   ["202610150014_operational_api.sql", "6CAF7C6285BC43F651EA9D1CCE845C8AB5428F643F62ECEB88B50FFDE84127D7"],
   ["202610230015_workspace_page.sql", "CC49480D1317F1B44CD29F245508F9C8FB0B0894FE4E66C1B22F8E00D36B33F2"],
   ["202610260016_manager_task_revocation.sql", "F7E76313AD4132626034C5C9D38F1C70AFB140BB3E2CE3615FE89071945ED8F3"],
+  ["202610290017_activity_executor_authorization.sql", "B41666E1AC41EC019673C61787AC89F2265BD018F617295C1395E80C93B31770"],
 ];
 
 export const BASELINE_COUNT = 16;
-const phaseNames = new Set(["verify_current", "baseline_001_014", "apply_015", "apply_016"]);
+const phaseNames = new Set(["verify_current", "baseline_001_014", "apply_015", "apply_016", "apply_017"]);
 const versions = MIGRATIONS.map(([filename]) => filename.slice(0, 12));
+
+function migrationCount(phase) {
+  return phase === "baseline_001_014" ? BASELINE_COUNT
+    : phase === "apply_015" ? BASELINE_COUNT + 1
+      : phase === "apply_016" ? BASELINE_COUNT + 2
+        : MIGRATIONS.length;
+}
 
 function assertPhase(phase) {
   if (!phaseNames.has(phase)) throw new Error("Etapa de migración inválida.");
@@ -40,7 +48,7 @@ export async function verifyMigrationFiles(root) {
   const actualNames = (await readdir(directory)).filter((name) => name.endsWith(".sql")).sort();
   const expectedNames = MIGRATIONS.map(([name]) => name).sort();
   if (JSON.stringify(actualNames) !== JSON.stringify(expectedNames)) {
-    throw new Error("El conjunto local de migraciones no coincide exactamente con las 18 registradas.");
+    throw new Error(`El conjunto local de migraciones no coincide exactamente con las ${MIGRATIONS.length} registradas.`);
   }
   for (const [filename, expected] of MIGRATIONS) {
     if (!/^[A-F0-9]{64}$/.test(expected)) throw new Error(`Falta fijar el hash aprobado para ${filename}.`);
@@ -57,7 +65,7 @@ export async function createStage(root, stageRoot, phase) {
   await mkdir(stageRoot, { recursive: false });
   const migrationsDir = path.join(stageRoot, "supabase", "migrations");
   await mkdir(migrationsDir, { recursive: true });
-  const count = phase === "baseline_001_014" ? BASELINE_COUNT : phase === "apply_015" ? BASELINE_COUNT + 1 : MIGRATIONS.length;
+  const count = migrationCount(phase);
   for (const [filename] of MIGRATIONS.slice(0, count)) {
     await copyFile(path.join(root, "supabase", "migrations", filename), path.join(migrationsDir, filename));
   }
@@ -80,7 +88,7 @@ export function validateHistory(payload, phase, state = "before") {
     if (row.local) local.push(row.local);
     if (row.remote) remote.push(row.remote);
   }
-  const targetCount = phase === "baseline_001_014" ? BASELINE_COUNT : phase === "apply_015" ? BASELINE_COUNT + 1 : MIGRATIONS.length;
+  const targetCount = migrationCount(phase);
   const localExpected = versions.slice(0, targetCount);
   let remoteExpected;
   if (phase === "verify_current" || state === "after") remoteExpected = localExpected;
@@ -93,7 +101,7 @@ export function validateHistory(payload, phase, state = "before") {
 
 export function validateDryRun(text, phase) {
   assertPhase(phase);
-  const expected = phase === "verify_current" ? [] : phase === "baseline_001_014" ? versions.slice(0, BASELINE_COUNT) : [versions[phase === "apply_015" ? BASELINE_COUNT : BASELINE_COUNT + 1]];
+  const expected = phase === "verify_current" ? [] : phase === "baseline_001_014" ? versions.slice(0, BASELINE_COUNT) : [versions[migrationCount(phase) - 1]];
   // Supabase CLI prints full filenames (`202609300001_foundation.sql`). A
   // word boundary after the version does not match there because `_` is a
   // word character; extract versions only when they prefix a migration file.
@@ -133,13 +141,25 @@ export async function verifySql016ReviewAcceptance(root) {
   }
 }
 
+export async function verifySql017ReviewAcceptance(root) {
+  const expectedHash = MIGRATIONS[BASELINE_COUNT + 2][1];
+  if (!/^[A-F0-9]{64}$/.test(expectedHash)) throw new Error("SQL017 no tiene hash exacto aceptado para DEV.");
+  const file = path.join(root, "docs", "architecture", "REMOTE-WORKSPACE-017-CODE-SOL-ACCEPTANCE-20261029.md");
+  let acceptance;
+  try { acceptance = await readFile(file, "utf8"); } catch { throw new Error("SQL017 sigue deshabilitada: falta aceptación Sol del hash exacto."); }
+  if (!acceptance.includes("Dictamen: **apto para aplicar SQL017 en grupo-paris-dev**")
+      || !acceptance.includes(`SQL017 SHA-256: \`${expectedHash}\``)) {
+    throw new Error("SQL017 sigue deshabilitada: falta aceptación Sol del hash exacto.");
+  }
+}
+
 async function main() {
   const [command, rootArg, phase, fileArg, state = "before"] = process.argv.slice(2);
   const root = path.resolve(rootArg ?? ".");
   assertPhase(phase);
   if (command === "verify-files") {
     await verifyMigrationFiles(root);
-    console.log("Hashes verificados para las migraciones registradas; SQL014, SQL015 y SQL016 permanecen fijadas.");
+    console.log("Hashes verificados para las migraciones registradas; SQL014–SQL017 permanecen fijadas.");
     return;
   }
   if (command === "verify-acceptance") {
@@ -149,6 +169,9 @@ async function main() {
     } else if (phase === "apply_016") {
       await verifySql016ReviewAcceptance(root);
       console.log("Aceptación Sol coincide con el hash exacto de SQL016.");
+    } else if (phase === "apply_017") {
+      await verifySql017ReviewAcceptance(root);
+      console.log("Aceptación Sol coincide con el hash exacto de SQL017.");
     } else throw new Error("La etapa base no requiere aceptación de código.");
     return;
   }

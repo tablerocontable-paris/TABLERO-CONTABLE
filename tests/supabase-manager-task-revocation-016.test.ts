@@ -60,6 +60,46 @@ describe("Supabase manager task read revocation migration 016", () => {
     } finally { await lab.db.close(); }
   }, 30_000);
 
+  it("reauthorizes an operational activity receipt replay after company membership is revoked", async () => {
+    const lab = new AccountingLab();
+    try {
+      await lab.init(stages.m017);
+      const task = await lab.task({ owner: ids.owner, kind: "operativa" });
+      const operationId = lab.next();
+      const record = () => lab.first(
+        "select public.record_activity_once($1,$2::date,3,'Lote de prueba',$3) entry_id",
+        [task, lab.day, operationId],
+      );
+
+      await lab.actor(ids.owner, "aal1", "authenticated");
+      const first = await record();
+      expect(first.entry_id).toBeTruthy();
+
+      await lab.actor(ids.boss, "aal2", "authenticated");
+      await lab.first("select api.command_v1($1::jsonb) result", [JSON.stringify({
+        contractVersion: 1,
+        operationId: lab.next(),
+        kind: "companyMembership.setActive",
+        expectedRevisions: { [`membership:${ids.company}:${ids.owner}`]: "0" },
+        payload: { companyId: ids.company, profileId: ids.owner, active: false, reason: "Revocación para replay de actividad" },
+      })]);
+
+      const state = () => lab.first(`select jsonb_build_object(
+        'activityCount',(select count(*) from activity_entries where instance_id=$1),
+        'receiptCount',(select count(*) from task_mutation_receipts where actor_id=$2 and operation_id=$3),
+        'taskRevision',(select state_revision from task_instances where id=$1),
+        'activityAuditCount',(select count(*) from audit_events where actor_id=$2 and action='activity.created' and entity_id=$4)
+      ) value`, [task, ids.owner, operationId, first.entry_id]).then((row) => row.value);
+      await lab.admin();
+      const beforeReplay = await state();
+
+      await lab.actor(ids.owner, "aal1", "authenticated");
+      await expect(record()).rejects.toThrow();
+      await lab.admin();
+      expect(await state()).toEqual(beforeReplay);
+    } finally { await lab.db.close(); }
+  }, 30_000);
+
   it("keeps manager scope, organization boundaries, active actor checks, private notes and DTO v3 intact", async () => {
     const lab = new AccountingLab();
     try {

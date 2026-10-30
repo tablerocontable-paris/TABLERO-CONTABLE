@@ -1,5 +1,26 @@
 # Estado vigente de ejecución — 29/10/2026
 
+## Siguiente gate: revisar SQL017 antes de DEV
+
+Se halló y corrigió en código local una brecha en el registro de movimientos:
+el permiso de consulta de un superior no debe habilitar escritura. SQL017
+revalida responsable/participante/cobertura con fecha de trabajo y deja
+bloqueadas para escritura las operativas conjuntas históricas. Incluye
+revalidación durante replay. Pruebas focalizadas: **17/17** aprobadas. Suite
+completa local: **898/898 pruebas en 89 archivos**.
+
+No aplicar SQL017 a `grupo-paris-dev` aún. Primero revisar el SQL final y
+aceptar su SHA-256 en un artefacto Sol independiente; el guard de migraciones
+rechaza la fase `apply_017` sin esa aceptación exacta. La CLI Supabase no está
+disponible en esta máquina, por lo que todavía faltan `migration list`, dry-run
+y prueba de aplicación aislada con la versión oficial antes de considerar el
+cambio listo para DEV. Después corresponde aplicar sólo con el gate y verificar
+el estado resultante.
+
+La certeza global sigue **por debajo del 100%**: falta cotejo de los 39 cuerpos
+RPC live/local, pruebas JWT reales por rol/ámbito, exposición de esquemas,
+aceptación autenticada de interfaz y homologación del catálogo tarea–unidad.
+
 ## Continuidad verificada — 29/10/2026 21:24 ART
 
 HEAD local y `origin/main`: `983a9bc889ae8071fdea21e5cb4e63e40e3703b1`.
