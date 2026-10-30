@@ -78,35 +78,36 @@ empresa legal, siglas parciales o títulos de capturas.
 
 ### Menciones explícitas para revisar (no son asignaciones aprobadas)
 
-Algunas variantes ya normalizadas en el catálogo contienen el nombre de una
-unidad o una sigla definida inequívocamente junto a una tarea. Se conservan
-como **candidatas observadas** para facilitar la homologación; no habilitan
-por sí solas la tarea en el onboarding, no prueban que el circuito siga vigente
-y no deben usarse aún para comparar resultados. El texto de origen está en
+Algunas variantes ya normalizadas contienen el nombre completo de una unidad
+junto a una tarea. Se conservan como **candidatas observadas**; no habilitan la
+tarea en el onboarding, no prueban que el circuito siga vigente y no permiten
+comparar resultados por sí solas. El texto de origen está en
 [`parisTaskCatalog.ts`](../../src/domain/parisTaskCatalog.ts) y en la tabla de
 variantes de este borrador.
 
 | Código de tarea | Unidad candidata | Evidencia textual guardada en el catálogo | Estado |
 |---|---|---|---|
-| `gpar_bank_reconciliation` | PARIS AUTOS | “Conciliación Banco Francés – PA” (`PA` se expande aquí porque el borrador la define explícitamente como PARIS AUTOS). | Ratificar presencia y alcance |
 | `parts_invoice_load` | PARIS CARS | “Carga facturas repuestos Paris Cars suc 3” y “... suc 81”. | Ratificar presencia y sucursales vigentes |
-| `salary_accounting_entry` | PARIS AUTOS; PARIS TRAC | “Asiento sueldos PA” y “Asiento sueldos PT”; el borrador define esas siglas en este contexto. | Ratificar presencia y alcance en cada unidad |
-| `vat_accounting_entry` | DORAL; PARIS AUTOS; PARIS CARS; PARIS TRAC | “Asiento IVA Doral/PA/PC/PT”; `PA`, `PC` y `PT` se expanden según la definición explícita del borrador. | Ratificar presencia y alcance en cada unidad |
+| `vat_accounting_entry` | DORAL | “Asiento IVA Doral”. Las otras variantes de esta tarea contienen siglas sin expandir. | Ratificar presencia y alcance |
 | `coupon_settlement` | PARIS CARS; PARIS AUTOS | “Cancelación cupones MP Paris Cars” y “... Paris Autos”. | Ratificar que se refiere a esta tarea y aclarar qué significa “cancelación” |
 
-Estas cinco tareas suman diez pares tarea–unidad observados. Las menciones
-permiten preparar una confirmación puntual, pero no completan la relación para
-las otras tareas ni prueban equivalencia de medición. `PV` no se expande a
-POSTVENTA porque el propio material lo deja pendiente. La lista aprobada sólo
-debe incorporar un par después de confirmar proceso, responsables/traspasos,
-parámetros y unidad de medida.
+Son cuatro pares con el nombre de la unidad escrito completo. Las siglas se
+mantienen aparte y no se expanden sólo por coincidir con iniciales de una unidad:
 
-La búsqueda de siglas en el código también encontró el alias literal
-“carga factura VN PA” en `new_vehicle_invoice_load`. Se conserva como pista
-ambigua, fuera de los diez pares: `PA` no aparece allí junto al nombre completo
-PARIS AUTOS y el mismo alias tampoco aclara el significado de `VN`. No usar
-esta sigla para filtrar el onboarding hasta confirmar ambos términos y el
-alcance de la tarea.
+| Código de tarea | Texto sin expandir | Confirmación pendiente |
+|---|---|---|
+| `gpar_bank_reconciliation` | “Conciliación Banco Francés PA” | Confirmar si `PA` significa PARIS AUTOS en este registro. |
+| `salary_accounting_entry` | “Asiento sueldos PA”; “Asiento sueldos PT” | Confirmar cada sigla en el contexto de esta tarea. |
+| `vat_accounting_entry` | “Asiento IVA PA/PC/PT” | Confirmar cada sigla; sólo “Doral” está escrito completo. |
+| `new_vehicle_invoice_load` | “Carga factura VN PA” | Confirmar `VN` y `PA` en este flujo. |
+| `vehicle_cash_collection` | “Cobro en caja VN/VO/PDA/PV” | Aclarar si son unidades, sectores o tipos de operación. |
+
+Los cuatro pares escritos con nombre completo y las cinco filas de siglas son
+pistas parciales para revisar, no una matriz aprobada. No encontrar el nombre
+completo de las otras unidades en estos alias no significa que no realicen la
+tarea. La lista aprobada sólo debe
+incorporar un par después de confirmar proceso, responsables/traspasos,
+parámetros y unidad de medida. `PV` no se expande a POSTVENTA sin confirmación.
 
 ## Tareas canónicas observadas
 

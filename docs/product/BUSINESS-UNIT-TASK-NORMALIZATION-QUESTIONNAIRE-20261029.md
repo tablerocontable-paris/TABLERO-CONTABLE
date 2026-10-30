@@ -42,25 +42,31 @@ unidad de negocio, término expandido, etapa, volumen ni equivalencia.
 
 ### Confirmaciones rápidas de unidad observada
 
-El catálogo contiene estas menciones explícitas. Son candidatas, no una matriz
-aprobada. Para acelerar la validación, cada par puede responderse como
+El catálogo contiene cuatro pares cuyo alias escribe completo el nombre de la
+unidad, y varias siglas aún sin expandir. Los pares son candidatos, no una
+matriz aprobada. Para acelerar la validación, cada par puede responderse como
 **Confirmar**, **Corregir** (indicar unidad correcta) o **No se usa**. Aun si se
 confirma el par, las preguntas de alcance y medición de abajo siguen aplicando
 antes de habilitar comparaciones.
 
 | Código | Par candidato observado | Confirmación |
 |---|---|---|
-| `gpar_bank_reconciliation` | PARIS AUTOS | Pendiente |
 | `parts_invoice_load` | PARIS CARS | Pendiente |
-| `salary_accounting_entry` | PARIS AUTOS; PARIS TRAC | Pendiente por unidad |
-| `vat_accounting_entry` | DORAL; PARIS AUTOS; PARIS CARS; PARIS TRAC | Pendiente por unidad |
+| `vat_accounting_entry` | DORAL | Pendiente |
 | `coupon_settlement` | PARIS CARS; PARIS AUTOS | Pendiente por unidad y alcance |
 
-No hay pares candidatos expandidos registrados todavía para las otras tareas.
-Eso significa “sin evidencia textual directa suficiente”, no “la unidad no
-realiza la tarea”. Hay una pista ambigua que no cuenta como par confirmado:
-`new_vehicle_invoice_load` tiene el alias “carga factura VN PA”; confirmar qué
-significan `VN` y `PA` en ese flujo antes de asociarla a una unidad.
+Estas siglas no se expanden por iniciales: confirmar su significado para cada
+tarea. No implican que la unidad correspondiente realice el proceso. La falta
+de un nombre de unidad en estos alias tampoco prueba que el equipo no realice
+esa tarea.
+
+| Código | Alias/sigla observada | Confirmación pendiente |
+|---|---|---|
+| `gpar_bank_reconciliation` | “Conciliación Banco Francés PA” | ¿`PA` significa PARIS AUTOS en este contexto? |
+| `salary_accounting_entry` | “Asiento sueldos PA/PT” | Confirmar por separado `PA` y `PT`. |
+| `vat_accounting_entry` | “Asiento IVA PA/PC/PT” | Confirmar por separado `PA`, `PC` y `PT`; “Doral” ya está escrito completo. |
+| `new_vehicle_invoice_load` | “Carga factura VN PA” | Confirmar `VN` y `PA` en este flujo. |
+| `vehicle_cash_collection` | “Cobro en caja VN/VO/PDA/PV” | Aclarar si refiere a unidades, sectores o tipos de operación. |
 
 ### Facturas, inventario y compras
 
@@ -69,9 +75,9 @@ significan `VN` y `PA` en ese flujo antes de asociarla a una unidad.
   ¿Qué unidad de medida común sirve (facturas, comprobantes u otra)? Indicar
   portales/proveedores como parámetros y separar la tarea si los pasos cambian.
 - [ ] **`new_vehicle_invoice_load` — Carga de facturas de vehículos nuevos.**
-  ¿“VN” significa vehículos nuevos y “PA” PARIS AUTOS en el alias “carga
-  factura VN PA”? Confirmar ambos términos para este flujo. ¿Qué distingue esta
-  carga de recibir/registrar la factura al ingresar un 0 km? Definir inicio,
+  ¿Qué significan “VN” y “PA” en el alias “carga factura VN PA” para este
+  flujo? Confirmar ambos términos. ¿Qué distingue esta carga de
+  recibir/registrar la factura al ingresar un 0 km? Definir inicio,
   fin, unidad de conteo, marcas y sucursales usadas.
 - [ ] **`service_invoice_load` — Carga de facturas de proveedores de servicios.**
   ¿Qué significa “conjunta con caja”: coordinación entre dos responsables,
