@@ -15,7 +15,7 @@ const hashFile=p=>hashBytes(readFileSync(p));
 const rel=p=>relative(root,p).replaceAll('\\','/');
 const json=p=>JSON.parse(readFileSync(p,'utf8'));
 const head=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
-const sqlFiles=readdirSync(join(root,'supabase/migrations')).filter(p=>/^\d{12}.*\.sql$/u.test(p)).sort();
+const sqlFiles=readdirSync(join(root,'supabase/migrations')).filter(p=>/^\d{12,14}_.*\.sql$/u.test(p)).sort();
 const migrations=sqlFiles.map(file=>{
   const path=`supabase/migrations/${file}`;
   const blob=execFileSync('git',['cat-file','blob',`${head}:${path}`],{cwd:root});

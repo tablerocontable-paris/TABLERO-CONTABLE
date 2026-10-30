@@ -23,8 +23,8 @@ afterEach(async () => {
 });
 
 const rows = (localCount: number, remoteCount: number) => Array.from({ length: localCount }, (_, index) => ({
-  local: MIGRATIONS[index][0].slice(0, 12),
-  remote: index < remoteCount ? MIGRATIONS[index][0].slice(0, 12) : "",
+  local: MIGRATIONS[index][0].slice(0, MIGRATIONS[index][0].indexOf("_")),
+  remote: index < remoteCount ? MIGRATIONS[index][0].slice(0, MIGRATIONS[index][0].indexOf("_")) : "",
   time: "",
 }));
 
@@ -51,13 +51,13 @@ describe("Supabase DEV migration guard", () => {
 
   it("requires the exact pending version list for each dry-run", () => {
     const baselineFiles = MIGRATIONS.slice(0, BASELINE_COUNT).map(([name]) => name);
-    const baseline = baselineFiles.map((name) => name.slice(0, 12));
-    const v015 = MIGRATIONS[BASELINE_COUNT][0].slice(0, 12);
+    const baseline = baselineFiles.map((name) => name.slice(0, name.indexOf("_")));
+    const v015 = MIGRATIONS[BASELINE_COUNT][0].slice(0, MIGRATIONS[BASELINE_COUNT][0].indexOf("_"));
     const cliOutput = (files: string[]) => `Would push these migrations:\n${files.map((file) => ` • ${file}`).join("\n")}\nFinished supabase db push.`;
     expect(validateDryRun(cliOutput(baselineFiles), "baseline_001_014")).toEqual(baseline);
     expect(validateDryRun(cliOutput([MIGRATIONS[BASELINE_COUNT][0]]), "apply_015")).toEqual([v015]);
-    expect(validateDryRun(cliOutput([MIGRATIONS[BASELINE_COUNT + 1][0]]), "apply_016")).toEqual([MIGRATIONS[BASELINE_COUNT + 1][0].slice(0, 12)]);
-    expect(validateDryRun(cliOutput([MIGRATIONS[BASELINE_COUNT + 2][0]]), "apply_017")).toEqual([MIGRATIONS[BASELINE_COUNT + 2][0].slice(0, 12)]);
+    expect(validateDryRun(cliOutput([MIGRATIONS[BASELINE_COUNT + 1][0]]), "apply_016")).toEqual([MIGRATIONS[BASELINE_COUNT + 1][0].slice(0, MIGRATIONS[BASELINE_COUNT + 1][0].indexOf("_"))]);
+    expect(validateDryRun(cliOutput([MIGRATIONS[BASELINE_COUNT + 2][0]]), "apply_017")).toEqual([MIGRATIONS[BASELINE_COUNT + 2][0].slice(0, MIGRATIONS[BASELINE_COUNT + 2][0].indexOf("_"))]);
     expect(() => validateDryRun(cliOutput([...baselineFiles, MIGRATIONS[BASELINE_COUNT][0]]), "baseline_001_014")).toThrow();
     expect(() => validateDryRun(cliOutput([MIGRATIONS[0][0]]), "baseline_001_014")).toThrow();
     expect(() => validateDryRun(cliOutput([...baselineFiles, baselineFiles[0]]), "baseline_001_014")).toThrow();
@@ -98,7 +98,7 @@ describe("Supabase DEV migration guard", () => {
     await createStage(root, stage, "apply_017");
     const staged = (await readdir(path.join(stage, "supabase", "migrations"))).sort();
     expect(staged).toHaveLength(19);
-    expect(staged.at(-1)).toBe("202610290017_activity_executor_authorization.sql");
+    expect(staged.at(-1)).toBe("20261030012651_activity_executor_authorization.sql");
   });
 
   it("requires a separate Sol code/hash acceptance and rejects the contract acceptance or a wrong hash", async () => {

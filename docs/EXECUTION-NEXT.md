@@ -1,6 +1,6 @@
-# Estado vigente de ejecución — 29/10/2026
+# Estado vigente de ejecución — 30/10/2026
 
-## Siguiente gate: revisar SQL017 antes de DEV
+## Estado actual — SQL017 aplicada en DEV; continuar auditoría
 
 Se halló y corrigió en código local una brecha en el registro de movimientos:
 el permiso de consulta de un superior no debe habilitar escritura. SQL017
@@ -9,16 +9,16 @@ bloqueadas para escritura las operativas conjuntas históricas. Incluye
 revalidación durante replay. Pruebas focalizadas: **17/17** aprobadas. Suite
 completa local: **898/898 pruebas en 89 archivos**.
 
-No aplicar SQL017 a `grupo-paris-dev` aún. Primero revisar el SQL final y
-aceptar su SHA-256 en un artefacto Sol independiente; el guard de migraciones
-rechaza la fase `apply_017` sin esa aceptación exacta. La CLI Supabase no está
-disponible en esta máquina, por lo que todavía faltan `migration list`, dry-run
-y prueba de aplicación aislada con la versión oficial antes de considerar el
-cambio listo para DEV. Después corresponde aplicar sólo con el gate y verificar
-el estado resultante.
+La revisión independiente aceptó el hash exacto SQL017 y se aplicó sólo a
+`grupo-paris-dev`. El historial posterior contiene 19 migraciones; Supabase
+asignó a SQL017 la versión `20261030012651`, que ya coincide con el nombre
+local. Consulta SQL read-only confirmó la definición con ambas guardas,
+`EXECUTE` al wrapper para `authenticated`, sin `EXECUTE` para `anon` y helper
+interno no ejecutable por `authenticated`. El preflight anterior de Actions que
+falló no es evidencia de fallo de esta aplicación.
 
-La certeza global sigue **por debajo del 100%**: falta cotejo de los 39 cuerpos
-RPC live/local, pruebas JWT reales por rol/ámbito, exposición de esquemas,
+La certeza global sigue **por debajo del 100%**: faltan pruebas JWT reales por
+rol/ámbito, exposición de esquemas, cotejo completo de RPC live/local,
 aceptación autenticada de interfaz y homologación del catálogo tarea–unidad.
 
 ## Continuidad verificada — 29/10/2026 21:24 ART

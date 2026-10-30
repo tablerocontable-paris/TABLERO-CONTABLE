@@ -24,7 +24,7 @@ export const stages = {
   m014: "202610150014_operational_api.sql",
   m015: "202610230015_workspace_page.sql",
   m016: "202610260016_manager_task_revocation.sql",
-  m017: "202610290017_activity_executor_authorization.sql",
+  m017: "20261030012651_activity_executor_authorization.sql",
 };
 export const uid = (n: number) =>
   `00000000-0000-0000-0000-${String(n).padStart(12, "0")}`;

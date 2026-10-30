@@ -1,6 +1,6 @@
 # Continuar Grupo París desde tu PC personal
 
-Actualizado: 29/10/2026
+Actualizado: 30/10/2026
 
 ## Último corte registrado — 29/10/2026 21:24 ART
 
@@ -19,6 +19,18 @@ Quedan pendientes Exposed schemas (última sonda: `public, graphql_public`),
 pruebas con JWT de cada perfil, revisión integral de RPC, aceptación autenticada
 de interfaz y homologación de tarea–unidad con evidencia del proceso. No hay
 certeza del 100%; mantener laboratorio privado y datos ficticios.
+
+## Supabase DEV — actualización 30/10/2026
+
+SQL017 (`activity_executor_authorization`) se aplicó únicamente a
+`grupo-paris-dev`. El proyecto registra ahora 19 migraciones; Supabase asignó
+la versión `20261030012651`, alineada con el archivo local. La definición
+remota conserva las ACL esperadas: el usuario `authenticated` puede llamar al
+wrapper público, `anon` no, y el helper interno no es ejecutable por
+`authenticated`. Esto todavía no prueba el comportamiento de autorización con
+JWT reales ni habilita Auth operativo, producción o datos reales. El commit de
+continuidad actualiza esta guía junto con `docs/PROJECT-STATUS.md` y
+`docs/EXECUTION-NEXT.md`.
 
 Repositorio privado: [tablerocontable-paris/TABLERO-CONTABLE](https://github.com/tablerocontable-paris/TABLERO-CONTABLE)
 

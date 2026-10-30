@@ -25,12 +25,12 @@ export const MIGRATIONS = [
   ["202610150014_operational_api.sql", "6CAF7C6285BC43F651EA9D1CCE845C8AB5428F643F62ECEB88B50FFDE84127D7"],
   ["202610230015_workspace_page.sql", "CC49480D1317F1B44CD29F245508F9C8FB0B0894FE4E66C1B22F8E00D36B33F2"],
   ["202610260016_manager_task_revocation.sql", "F7E76313AD4132626034C5C9D38F1C70AFB140BB3E2CE3615FE89071945ED8F3"],
-  ["202610290017_activity_executor_authorization.sql", "B41666E1AC41EC019673C61787AC89F2265BD018F617295C1395E80C93B31770"],
+  ["20261030012651_activity_executor_authorization.sql", "B41666E1AC41EC019673C61787AC89F2265BD018F617295C1395E80C93B31770"],
 ];
 
 export const BASELINE_COUNT = 16;
 const phaseNames = new Set(["verify_current", "baseline_001_014", "apply_015", "apply_016", "apply_017"]);
-const versions = MIGRATIONS.map(([filename]) => filename.slice(0, 12));
+const versions = MIGRATIONS.map(([filename]) => filename.slice(0, filename.indexOf("_")));
 
 function migrationCount(phase) {
   return phase === "baseline_001_014" ? BASELINE_COUNT
@@ -105,7 +105,7 @@ export function validateDryRun(text, phase) {
   // Supabase CLI prints full filenames (`202609300001_foundation.sql`). A
   // word boundary after the version does not match there because `_` is a
   // word character; extract versions only when they prefix a migration file.
-  const actual = [...text.matchAll(/(?:^|\s)(\d{12})_[a-z0-9_-]+\.sql(?=$|\s)/gim)].map((match) => match[1]);
+  const actual = [...text.matchAll(/(?:^|\s)(\d{12,14})_[a-z0-9_-]+\.sql(?=$|\s)/gim)].map((match) => match[1]);
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
     throw new Error(`El dry-run no demuestra exactamente ${expected.length === 1 ? phase.slice(-3) : "001–014"} como pendientes.`);
   }

@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { AccountingLab, ids, stages } from "./helpers/accounting-lab";
 
-const sql017 = readFileSync(new URL("../supabase/migrations/202610290017_activity_executor_authorization.sql", import.meta.url), "utf8");
+const sql017 = readFileSync(new URL("../supabase/migrations/20261030012651_activity_executor_authorization.sql", import.meta.url), "utf8");
 
 describe("Supabase activity executor authorization migration 017", () => {
   it("upgrades from 016 without changing public and internal execute permissions", async () => {

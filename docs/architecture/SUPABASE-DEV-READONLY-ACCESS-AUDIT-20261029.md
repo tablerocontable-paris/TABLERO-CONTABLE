@@ -1,6 +1,6 @@
 # Auditoría read-only de accesos de Supabase DEV — 29/10/2026
 
-## Hallazgo de escritura de actividad y corrección local — 29/10/2026
+## Hallazgo de escritura de actividad y corrección aplicada en DEV — 30/10/2026
 
 La ruta de `public.record_activity_once` delega en
 `public._coordination_record_activity`. En SQL014, el primer registro
@@ -11,18 +11,21 @@ lector podía atribuirse movimientos en operativas ajenas. El contrato M2-2A
 prohíbe esa confusión y requiere además bloquear escrituras en operativas
 conjuntas históricas.
 
-La migración propuesta `202610290017_activity_executor_authorization.sql`
-añade la comprobación de ejecutor tras adquirir bloqueos y vuelve a validar en
+La migración `20261030012651_activity_executor_authorization.sql`
+añadió la comprobación de ejecutor tras adquirir bloqueos y vuelve a validar en
 replays. Rechaza tareas conjuntas con
 `GP_JOINT_OPERATION_REQUIRES_REVIEW`. Pruebas PGlite focalizadas en tres
 archivos: **17/17 aprobadas**; incluyen upgrade 016→017 y ACL, encargado lector
 denegado, responsable y cobertura permitidos, cobertura cancelada denegada,
 fixture histórico conjunto denegado y replay tras revocación. La suite completa
 pasó **898/898 pruebas en 89 archivos**.
-SQL017 no se aplicó a DEV ni se modificaron Auth o configuración. Su aplicación
-requiere una aceptación Sol separada del SHA-256 final y validación con la CLI
-oficial; esta PC no tiene Supabase CLI, por eso aún no se produjo el dry-run ni
-el cotejo de la aplicación remota.
+SQL017 fue aceptada para DEV con el SHA-256 final y aplicada sólo a
+`grupo-paris-dev`. Supabase asignó la versión remota `20261030012651`; el
+archivo local se alineó con ese identificador para permitir reconciliar la
+lista. La lectura SQL posterior confirmó la definición instalada con ambas
+guardas, acceso de `authenticated` al wrapper, sin acceso de `anon` y sin
+acceso de `authenticated` al helper interno. Esta verificación es de definición
+y ACL, no un recorrido con JWT real.
 
 Un revisor independiente planteó que el replay SQL014 devolvía recibos sin
 reautorizar. El cotejo del cuerpo encontró que sí revalida actor activo, rol,
@@ -115,9 +118,9 @@ La consulta de catálogos se hizo contra PostgreSQL 17.11 en `sa-east-1`.
 ## Refresco read-only de proyecto, migraciones y Advisors — 29/10/2026 23:58 UTC
 
 Una consulta nueva confirmó que `grupo-paris-dev` sigue `ACTIVE_HEALTHY` en
-`sa-east-1`, con PostgreSQL 17.11. La lista actual devuelve **16 migraciones**,
-versiones `001–016` (corrijo el conteo “18” de la nota inicial, que no coincidía
-con el inventario enumerado).
+`sa-east-1`, con PostgreSQL 17.11. En ese momento la lista devolvía **18
+migraciones**, versiones `001–016`; esta sección es histórica y no incluye
+SQL017, aplicada después.
 
 Advisors se refrescó a las 23:58:47 UTC y mantiene estos conteos:
 
@@ -134,8 +137,9 @@ operativo y de datos reales.
 
 ## Hallazgos observados
 
-- El proyecto está `ACTIVE_HEALTHY` y registra 16 migraciones, versiones
-  001–016. El inventario reporta cero filas en las tablas de negocio revisadas.
+- En el refresco fechado arriba, el proyecto estaba `ACTIVE_HEALTHY` y
+  registraba 18 migraciones hasta 016. El inventario reportó cero filas en las
+  tablas de negocio revisadas.
 - `public` tiene 37 tablas y `app_private`, 20. Todas tienen RLS habilitado;
   ninguna tiene `FORCE ROW LEVEL SECURITY`.
 - El rol `authenticated` tiene `SELECT` sobre 28 tablas de `public`. Las

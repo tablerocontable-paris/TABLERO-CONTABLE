@@ -1,6 +1,6 @@
-# Estado vigente — actualización 29/10/2026
+# Estado vigente — actualización 30/10/2026
 
-## Revisión continua de autorización operativa — 29/10/2026
+## Revisión continua de autorización operativa — 30/10/2026
 
 La respuesta no es 100%: al revisar la ruta de escritura de movimientos se
 confirmó que SQL014 permitía que un superior con acceso de consulta registrara
@@ -9,18 +9,19 @@ pero no verificaba que fuera responsable, participante autorizado o cobertura
 vigente. El contrato M2-2A exige esa separación y también deja en revisión las
 operativas conjuntas históricas.
 
-Se preparó la migración local aditiva SQL017 para validar el ejecutor después
-de los bloqueos y durante reintentos; también rechaza escribir en tareas
-operativas conjuntas antiguas. No se alteraron migraciones aplicadas ni se
-modificó Supabase DEV. Regresiones aisladas: **17/17** en tres archivos,
-incluyendo migración 016→017 y ACL, rechazo a encargado lector, aceptación del responsable, bloqueo de
-responsabilidad conjunta histórica y replay tras revocar membresía. Falta la
-aceptación Sol del hash exacto antes de habilitar cualquier aplicación a DEV.
-La CLI Supabase no está instalada en esta PC; por eso se siguió la convención
-local de nombres de migración y se dejó la aplicación remota bloqueada.
-Suite completa local: **898/898 pruebas en 89 archivos**. TypeScript, build del cliente y Worker pasaron; el build
-conserva los avisos de anotaciones Zod y bundle principal mayor a 500 kB.
-
+La migración aditiva SQL017 valida el ejecutor después de los bloqueos y durante
+reintentos; también rechaza escribir en tareas operativas conjuntas antiguas.
+La aceptación Sol del hash exacto quedó registrada y SQL017 se aplicó sólo a
+DEV. Supabase la registró con versión `20261030012651`; se alineó el nombre del
+archivo local con el historial remoto para preservar la reconciliación.
+Regresiones aisladas: **17/17** en tres archivos, incluyendo migración 016→017
+y ACL, rechazo a encargado lector, aceptación del responsable, bloqueo de
+responsabilidad conjunta histórica y replay tras revocar membresía.
+Suite completa local previa al renombre: **898/898 pruebas en 89 archivos**.
+Tras alinear la versión, las 17 regresiones enfocadas volvieron a pasar en
+ejecuciones aisladas. TypeScript, build del cliente y Worker pasaron en el
+corte 426aaf; GitHub CI debe validar los cambios de reconciliación actuales.
+El build conserva avisos de anotaciones Zod y bundle principal mayor a 500 kB.
 La hipótesis previa del auditor sobre replay sin autorización fue un falso
 positivo: el cuerpo local de SQL014 revalida identidad, membresía y ámbito
 antes de devolver el recibo. La prueba añadida confirma que la revocación
@@ -54,10 +55,11 @@ otra entidad y los superiores de ámbito sí pueden leerlos. Aceptar que son
 operativos (no personales) o revisar su ACL antes de Auth operativo; detalle y
 líneas en la auditoría Supabase.
 
-No hay certeza del 100% ni aceptación integrada: faltan recorrido manual
-autenticado, pruebas de matriz JWT por perfil y ámbito, revisión completa de
-RPC, homologación tarea–unidad basada en evidencia del proceso y aceptación de
-interfaz con sesión. El alcance continúa como laboratorio privado y ficticio.
+No hay certeza del 100% ni aceptación integrada: SQL017 ya está aplicada y se
+verificaron definición y ACL en DEV, pero faltan pruebas JWT reales por
+perfil/ámbito, revisión completa de RPC, exposición de esquemas, homologación
+tarea–unidad basada en evidencia del proceso y aceptación de interfaz con
+sesión. El alcance continúa como laboratorio privado y ficticio.
 
 ## CI y matriz de menciones explícitas — 29/10/2026
 
@@ -82,7 +84,7 @@ Detalle y confirmaciones rápidas:
 [`BUSINESS-UNIT-TASK-NORMALIZATION-QUESTIONNAIRE-20261029.md`](product/BUSINESS-UNIT-TASK-NORMALIZATION-QUESTIONNAIRE-20261029.md).
 
 Refresco read-only de Supabase DEV (23:58 UTC): proyecto activo y saludable;
-16 migraciones (001–016). Advisors: 29 RLS sin policies, 39 funciones
+18 migraciones (001–016). Advisors: 29 RLS sin policies, 39 funciones
 `SECURITY DEFINER` ejecutables por `authenticated`, 124 FK sin índice, 8
 avisos de initplan y 12 índices no usados. Se corrigió en el informe el conteo
 inicial inconsistente de migraciones. No se reconsultó Exposed schemas: su
@@ -220,8 +222,8 @@ despliegue.
 
 ## Corte Supabase DEV — verificado 29/10/2026
 
-Consulta read-only actual del 29/10/2026: `grupo-paris-dev` está `ACTIVE_HEALTHY`, PostgreSQL
-17.11 y registra 18 migraciones (001–016). Los runs históricos prueban que
+Consulta read-only del 29/10/2026: `grupo-paris-dev` estaba `ACTIVE_HEALTHY`, PostgreSQL
+17.11 y registraba 18 migraciones (001–016). Los runs históricos prueban que
 001–014 se aplicaron en orden; luego 015 y 016 se aplicaron por separado. El
 run #4 no demuestra una migración fallida: intentó repetir `baseline_001_014`
 cuando el remoto ya tenía 18 versiones, y el guard lo frenó antes del dry-run y
