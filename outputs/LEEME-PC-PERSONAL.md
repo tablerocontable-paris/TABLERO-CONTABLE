@@ -34,7 +34,8 @@ Actions **#192** terminó `success` para el commit
 `9a563fe089380132e8483188ca09ff5e0d656878` (suite, build y paquete Sites). La
 ficha de homologación muestra diez pares tarea–unidad candidatos extraídos de
 menciones explícitas; siguen pendientes de ratificación y no habilitan
-comparaciones.
+comparaciones. El alias “carga factura VN PA” queda aparte como pista
+ambigua, sin expandir `PA` ni `VN`.
 
 Supabase DEV se releyó en modo read-only a las 23:58 UTC: está activo,
 saludable y registra 16 migraciones (001–016). Advisors mantiene 29 RLS sin

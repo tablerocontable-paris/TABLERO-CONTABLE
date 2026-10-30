@@ -15,7 +15,9 @@ código ni desplegar el Site.
 La ficha del catálogo ahora separa diez pares tarea–unidad mencionados
 explícitamente en los alias de cinco tareas como **candidatos por evidencia**,
 pendientes de ratificación. No se habilitaron pares nuevos ni se activaron
-comparaciones. `PV` sigue sin expandirse; no se completó la matriz real.
+comparaciones. `PV` sigue sin expandirse; `new_vehicle_invoice_load` conserva
+la pista ambigua “carga factura VN PA” sin expandir. No se completó la matriz
+real.
 Detalle y confirmaciones rápidas:
 [`BUSINESS-UNIT-TASK-CATALOG-DRAFT-20261028.md`](product/BUSINESS-UNIT-TASK-CATALOG-DRAFT-20261028.md) y
 [`BUSINESS-UNIT-TASK-NORMALIZATION-QUESTIONNAIRE-20261029.md`](product/BUSINESS-UNIT-TASK-NORMALIZATION-QUESTIONNAIRE-20261029.md).

@@ -4,6 +4,8 @@ GitHub Actions **#191** terminó `success` para `0b9c479`; pasó suite,
 TypeScript/build y paquete Sites. Se agregaron a la ficha cinco tareas con
 diez pares tarea–unidad que aparecen explícitamente en los alias, siempre
 como candidatos pendientes de confirmación y sin cambiar el comportamiento.
+También quedó identificada, sin expandir, la pista “carga factura VN PA” en
+`new_vehicle_invoice_load`.
 La actualización es documental y no requiere publicar otra versión del Site.
 Después de publicarla en `main`, verificar el workflow de ese commit y mantener
 la guía de la PC personal sincronizada.

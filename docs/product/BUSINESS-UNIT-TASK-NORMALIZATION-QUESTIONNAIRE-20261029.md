@@ -56,8 +56,11 @@ antes de habilitar comparaciones.
 | `vat_accounting_entry` | DORAL; PARIS AUTOS; PARIS CARS; PARIS TRAC | Pendiente por unidad |
 | `coupon_settlement` | PARIS CARS; PARIS AUTOS | Pendiente por unidad y alcance |
 
-No hay pares candidatos registrados todavía para las otras tareas. Eso significa
-“sin evidencia textual directa en la ficha”, no “la unidad no realiza la tarea”.
+No hay pares candidatos expandidos registrados todavía para las otras tareas.
+Eso significa “sin evidencia textual directa suficiente”, no “la unidad no
+realiza la tarea”. Hay una pista ambigua que no cuenta como par confirmado:
+`new_vehicle_invoice_load` tiene el alias “carga factura VN PA”; confirmar qué
+significan `VN` y `PA` en ese flujo antes de asociarla a una unidad.
 
 ### Facturas, inventario y compras
 
@@ -66,7 +69,8 @@ No hay pares candidatos registrados todavía para las otras tareas. Eso signific
   ¿Qué unidad de medida común sirve (facturas, comprobantes u otra)? Indicar
   portales/proveedores como parámetros y separar la tarea si los pasos cambian.
 - [ ] **`new_vehicle_invoice_load` — Carga de facturas de vehículos nuevos.**
-  ¿“VN” significa vehículos nuevos en el uso del equipo? ¿Qué distingue esta
+  ¿“VN” significa vehículos nuevos y “PA” PARIS AUTOS en el alias “carga
+  factura VN PA”? Confirmar ambos términos para este flujo. ¿Qué distingue esta
   carga de recibir/registrar la factura al ingresar un 0 km? Definir inicio,
   fin, unidad de conteo, marcas y sucursales usadas.
 - [ ] **`service_invoice_load` — Carga de facturas de proveedores de servicios.**

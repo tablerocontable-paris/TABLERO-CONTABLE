@@ -101,6 +101,13 @@ POSTVENTA porque el propio material lo deja pendiente. La lista aprobada sólo
 debe incorporar un par después de confirmar proceso, responsables/traspasos,
 parámetros y unidad de medida.
 
+La búsqueda de siglas en el código también encontró el alias literal
+“carga factura VN PA” en `new_vehicle_invoice_load`. Se conserva como pista
+ambigua, fuera de los diez pares: `PA` no aparece allí junto al nombre completo
+PARIS AUTOS y el mismo alias tampoco aclara el significado de `VN`. No usar
+esta sigla para filtrar el onboarding hasta confirmar ambos términos y el
+alcance de la tarea.
+
 ## Tareas canónicas observadas
 
 Los códigos debajo son las claves estables de la implementación del catálogo
