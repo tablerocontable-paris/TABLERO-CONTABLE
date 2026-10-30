@@ -1,5 +1,30 @@
 # Estado vigente — actualización 29/10/2026
 
+## Continuidad — 29/10/2026 21:24 ART
+
+GitHub Actions **#195** terminó `success` para `983a9bc889ae8071fdea21e5cb4e63e40e3703b1`.
+El árbol local sigue en ese commit y tiene ahora sólo cambios documentales
+pendientes; el scratch untracked protegido no se modificó. El siguiente push
+debe validarse con su propio workflow.
+
+Consulta SQL read-only de Supabase DEV a las 21:21 ART: 88 funciones
+`SECURITY DEFINER` en `public`; 39 ejecutables por `authenticated`, cero por
+`anon`, y las 39 tienen `search_path` fijado. Es una comprobación de ACL y
+configuración, no de semántica de autorización. La lista expuesta sigue con la
+última evidencia guardada del 29/10 22:10 UTC: `public, graphql_public`; falta
+retirarlo en Dashboard y volver a probar. Informe:
+[`SUPABASE-DEV-READONLY-ACCESS-AUDIT-20261029.md`](architecture/SUPABASE-DEV-READONLY-ACCESS-AUDIT-20261029.md).
+
+Revisión estática adicional: para las 39 firmas expuestas se localizaron
+referencias en migraciones locales, pero no se cotejaron los cuerpos live contra
+el SQL local ni se probaron todas con JWT. Los tests de repositorio cubren sólo
+rutas seleccionadas y fixtures aisladas.
+
+No hay certeza del 100% ni aceptación integrada: faltan recorrido manual
+autenticado, pruebas de matriz JWT por perfil y ámbito, revisión completa de
+RPC, homologación tarea–unidad basada en evidencia del proceso y aceptación de
+interfaz con sesión. El alcance continúa como laboratorio privado y ficticio.
+
 ## CI y matriz de menciones explícitas — 29/10/2026
 
 GitHub Actions **#191** terminó `success` para el commit documental

@@ -1,5 +1,26 @@
 # Estado vigente de ejecución — 29/10/2026
 
+## Continuidad verificada — 29/10/2026 21:24 ART
+
+HEAD local y `origin/main`: `983a9bc889ae8071fdea21e5cb4e63e40e3703b1`.
+Actions **#195** pasó para ese SHA; el corte documental local actual aún no se
+publicó y necesitará su propia validación.
+
+Supabase DEV: la consulta ACL de las 21:21 ART confirma 39 de 88 funciones
+`SECURITY DEFINER` de `public` ejecutables por `authenticated`, ninguna por
+`anon`; las 39 tienen `search_path` configurado. No revisa autorización de
+cuerpos. No activar Auth operativo, `/api` ni datos reales hasta completar la
+revisión de RPC, corregir/verificar **Exposed schemas** y ejecutar pruebas JWT
+por rol. La última sonda guardada muestra `public, graphql_public` expuestos.
+Las 39 firmas expuestas existen en el historial SQL local, pero falta el
+cotejo de cada cuerpo live/local y su prueba autenticada.
+
+Pendiente para aceptación: interfaz autenticada manual, matriz de perfiles y
+ámbitos, privacidad de notas, catálogo homologado por evidencia, y confirmar el
+sitio en los recorridos del usuario. Estos pendientes impiden afirmar certeza
+total; seguir avanzando con auditorías locales/documentales mientras no se
+requiera intervención del Dashboard o cuentas de prueba.
+
 GitHub Actions **#191** terminó `success` para `0b9c479`; pasó suite,
 TypeScript/build y paquete Sites. Se agregaron a la ficha cuatro pares con el
 nombre completo de la unidad, pendientes de confirmación, y se separaron las

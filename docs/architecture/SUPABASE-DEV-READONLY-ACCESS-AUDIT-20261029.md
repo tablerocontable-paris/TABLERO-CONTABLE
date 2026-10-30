@@ -1,5 +1,47 @@
 # Auditoría read-only de accesos de Supabase DEV — 29/10/2026
 
+## Consulta ACL puntual — 29/10/2026 21:21 ART
+
+Consulta SQL de sólo lectura ejecutada en `grupo-paris-dev` a las 00:21 UTC
+(21:21 ART): `public` contiene 88 funciones `SECURITY DEFINER`; 39 permiten
+`EXECUTE` efectivo a `authenticated`, cero a `anon`, y las 39 ejecutables por
+`authenticated` tienen `search_path` configurado. La consulta no examinó los
+cuerpos ni probó autorización por rol; por lo tanto, no certifica que esas RPC
+sean seguras en ejecución. Tampoco volvió a comprobar la lista **Exposed
+schemas** del Dashboard ni la matriz JWT.
+
+El resultado coincide con el conteo anterior de Advisor/ACL. No se modificaron
+permisos, datos, Dashboard, Auth ni migraciones. Mantener pendiente la revisión
+función por función y la validación de sesión antes de activar uso operativo.
+
+## Revisión estática acotada de RPC — 29/10/2026
+
+La revisión del repositorio encontró controles estáticos en algunas rutas
+sensibles: `can_access_instance` y lectura de membresías/cierres en SQL014
+(líneas 3350–3398); SQL016 vuelve a validar identidad, organización, rol de
+jefatura/encargado y membresía vigente en la lectura de tareas para encargados
+(líneas 3–26). Las pruebas de SQL016 cubren revocación, aislamiento entre
+organizaciones, perfil inactivo y DTO sin notas personales
+(`tests/supabase-manager-task-revocation-016.test.ts:22–132`). Otras pruebas
+de coordinación cubren alcance de coberturas y privacidad de notas.
+
+Esto es una revisión parcial del código fuente y pruebas aisladas del
+repositorio; no es un cotejo completo de los 39 cuerpos instalados en DEV y no
+demuestra el comportamiento de PostgREST con JWT reales. No se encontró una
+vulnerabilidad confirmada en esta porción, pero las 39 funciones aún necesitan
+inventario firma por firma, cotejo local–desplegado y pruebas por rol/ámbito.
+Mantener esa validación, junto con Exposed schemas, como gate antes de activar
+Auth operativo o datos reales.
+
+El inventario live volvió a listar 39 firmas exactas en `public`, todas con
+`SECURITY DEFINER`, propietario `postgres`, `search_path=''` y `EXECUTE` para
+`authenticated`; `anon` no tiene ese permiso en estas funciones. Se encontraron
+referencias locales para las 39 firmas en el historial SQL, pero no se cotejó
+el hash/cuerpo desplegado contra la definición local de cada una. La lista se
+trata como superficie a auditar, no como evidencia de que las 39 estén
+aprobadas. La prueba local revisa fixtures/migraciones aisladas y no ejecuta
+estas firmas con JWT contra DEV.
+
 ## Alcance y evidencia
 
 Se inspeccionó el proyecto `grupo-paris-dev` (`kynqjfhqujnjojcmurwf`) mediante

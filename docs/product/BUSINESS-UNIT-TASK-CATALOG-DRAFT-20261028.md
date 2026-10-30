@@ -215,17 +215,18 @@ Publicado directamente en `main` como `cd84168`; continuidad actualizada en
 `54e8b4d`. Suite 880/880, builds y revisión Playwright local aprobados; Actions
 #150 pasó para `54e8b4d`. No se desplegó al Site, que sigue en v104.
 
-El catálogo Grupo París versión 6 ya está conectado en el laboratorio local:
-primer ingreso, propuestas, aprobación, asignaciones, tareas materializadas y
-analítica. La unidad (`businessUnitCode`) se conserva separada de la empresa
-legal (`companyId`); nombres y códigos no son editables por quien registra el
-trabajo. Banco y cuenta se solicitan aparte para conciliaciones. Las operativas
-se miden por movimientos sin cuotas artificiales. Esta es la compatibilidad
-V6; V7 añade la sucursal controlada de facturas de repuestos descrita debajo.
+El catálogo Grupo París versión 7 es la vigente y está conectada en el
+laboratorio local: primer ingreso, propuestas, aprobación, asignaciones, tareas
+materializadas y analítica. La unidad (`businessUnitCode`) se conserva separada
+de la empresa legal (`companyId`); nombres y códigos no son editables por quien
+registra el trabajo. Banco y cuenta se solicitan aparte para conciliaciones.
+Las operativas se miden por movimientos sin cuotas artificiales. V6 introdujo
+la dimensión bancaria; V7 añade la sucursal controlada de facturas de repuestos
+descrita debajo.
 
-Las versiones 1 (50 tareas), 2 (55 tareas), 3 (55 tareas), 4 (55 tareas) y 5
-(55 tareas) se conservan para leer propuestas y trabajo ya guardado. La versión 6 ofrece las 55
-tareas en el primer ingreso; 25 están habilitadas para comparar y 30 siguen
+Las versiones 1 (50 tareas), 2–7 (55 tareas cada una) se conservan para leer
+propuestas y trabajo ya guardado. La versión 7 ofrece las 55 tareas en el
+primer ingreso; 25 están habilitadas para comparar y 30 siguen
 provisionales, separadas por código y excluidas de comparaciones entre unidades.
 V4 eliminó el parámetro
 libre `unidad` de registración contable de sueldos e IVA porque la unidad ya se

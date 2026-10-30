@@ -2,6 +2,24 @@
 
 Actualizado: 29/10/2026
 
+## Último corte registrado — 29/10/2026 21:24 ART
+
+`main` está en `983a9bc889ae8071fdea21e5cb4e63e40e3703b1`; Actions #195 pasó.
+El árbol local tiene cambios documentales aún no publicados. La consulta
+read-only de Supabase DEV encontró 39/88
+funciones `SECURITY DEFINER` de `public` ejecutables por `authenticated`, 0 por
+`anon`, con `search_path` en las 39 expuestas a `authenticated`. Esto no valida
+sus cuerpos ni la matriz real de permisos.
+
+Las 39 firmas se encontraron en las migraciones locales, pero falta comparar
+cada definición desplegada y probarla con JWT; la revisión actual de cuerpos
+es parcial.
+
+Quedan pendientes Exposed schemas (última sonda: `public, graphql_public`),
+pruebas con JWT de cada perfil, revisión integral de RPC, aceptación autenticada
+de interfaz y homologación de tarea–unidad con evidencia del proceso. No hay
+certeza del 100%; mantener laboratorio privado y datos ficticios.
+
 Repositorio privado: [tablerocontable-paris/TABLERO-CONTABLE](https://github.com/tablerocontable-paris/TABLERO-CONTABLE)
 
 Rama de trabajo: `main` (GitHub es la fuente actual; `git pull` trae el último commit)
