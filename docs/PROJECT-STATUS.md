@@ -20,6 +20,13 @@ referencias en migraciones locales, pero no se cotejaron los cuerpos live contra
 el SQL local ni se probaron todas con JWT. Los tests de repositorio cubren sólo
 rutas seleccionadas y fixtures aisladas.
 
+Privacidad revalidada en código: las anotaciones personales de la proyección
+remota se filtran por titular, y Gemelo no recibe anotaciones; hay pruebas
+explícitas para ambos límites. Los comentarios de bloqueo ligados a tareas son
+otra entidad y los superiores de ámbito sí pueden leerlos. Aceptar que son
+operativos (no personales) o revisar su ACL antes de Auth operativo; detalle y
+líneas en la auditoría Supabase.
+
 No hay certeza del 100% ni aceptación integrada: faltan recorrido manual
 autenticado, pruebas de matriz JWT por perfil y ámbito, revisión completa de
 RPC, homologación tarea–unidad basada en evidencia del proceso y aceptación de

@@ -33,6 +33,32 @@ inventario firma por firma, cotejo local–desplegado y pruebas por rol/ámbito.
 Mantener esa validación, junto con Exposed schemas, como gate antes de activar
 Auth operativo o datos reales.
 
+## Separación entre anotaciones y comentarios operativos — 29/10/2026
+
+En el Site, `projectState` entrega sólo las anotaciones cuyo `ownerId` coincide
+con el actor (`src/server/site-policy.ts:166`). La prueba
+`tests/site-operational.test.ts:170–195` verifica que la jefatura recibe una
+lista vacía y que guardar la proyección no borra la anotación original. Gemelo
+recibe tareas y obligaciones, no anotaciones (`src/domain/gemelo.ts:31–32`);
+`tests/gemelo.test.tsx:46–63` verifica que ni el título ni el contenido privado
+aparezcan en el contexto o UI del superior.
+
+Hay otra entidad separada: `task_private_block_notes` contiene comentarios de
+bloqueo asociados a una tarea. SQL009 permite leerlos al autor, a jefatura y al
+encargado del autor si conserva membresía de la empresa
+(`supabase/migrations/202610020009_private_block_notes.sql:63–85`); SQL014
+revalida la membresía vigente (`:3411–3430`). Estos comentarios tampoco salen
+en el DTO compartido de tarea para encargado; los tests SQL011/016 lo comprueban
+(`tests/coordination-activation-011.test.ts:114–125`,
+`tests/supabase-manager-task-revocation-016.test.ts:63–102`).
+
+**Límite funcional pendiente de aceptación:** esta evidencia protege las
+anotaciones personales, pero los comentarios de bloqueo son visibles a sus
+superiores dentro del ámbito de tarea. La interfaz/contrato debe dejar claro que
+ese campo es operativo y no es un bloc personal; si el usuario espera que
+tampoco esos comentarios sean visibles al superior, habrá que cambiar RLS y su
+contrato antes de habilitar Auth operativo.
+
 El inventario live volvió a listar 39 firmas exactas en `public`, todas con
 `SECURITY DEFINER`, propietario `postgres`, `search_path=''` y `EXECUTE` para
 `authenticated`; `anon` no tiene ese permiso en estas funciones. Se encontraron

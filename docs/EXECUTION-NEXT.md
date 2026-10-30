@@ -15,6 +15,12 @@ por rol. La última sonda guardada muestra `public, graphql_public` expuestos.
 Las 39 firmas expuestas existen en el historial SQL local, pero falta el
 cotejo de cada cuerpo live/local y su prueba autenticada.
 
+Control de privacidad: Anotaciones y Gemelo excluyen el texto personal de
+terceros en pruebas locales. Los comentarios de bloqueo de tarea son distintos
+y actualmente legibles por superior autorizado con membresía vigente. Antes de
+Auth operativo, dejar claro que ese campo es operativo o ajustar la política si
+la expectativa es privacidad frente al superior también para esos comentarios.
+
 Pendiente para aceptación: interfaz autenticada manual, matriz de perfiles y
 ámbitos, privacidad de notas, catálogo homologado por evidencia, y confirmar el
 sitio en los recorridos del usuario. Estos pendientes impiden afirmar certeza
