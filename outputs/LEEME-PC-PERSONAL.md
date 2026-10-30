@@ -28,9 +28,11 @@ la versión `20261030012651`, alineada con el archivo local. La definición
 remota conserva las ACL esperadas: el usuario `authenticated` puede llamar al
 wrapper público, `anon` no, y el helper interno no es ejecutable por
 `authenticated`. Esto todavía no prueba el comportamiento de autorización con
-JWT reales ni habilita Auth operativo, producción o datos reales. El commit de
-continuidad actualiza esta guía junto con `docs/PROJECT-STATUS.md` y
-`docs/EXECUTION-NEXT.md`.
+JWT reales ni habilita Auth operativo, producción o datos reales. El commit
+`e65e0f13bfe0092eb3e614ed6f803dfb067b4901` de `main` alinea la migración y el
+guard. GitHub Actions #199 terminó `success` para la suite, build y paquete
+Sites de ese commit. Para llevarlo a la PC personal, ejecutar
+`git pull --ff-only origin main`.
 
 Repositorio privado: [tablerocontable-paris/TABLERO-CONTABLE](https://github.com/tablerocontable-paris/TABLERO-CONTABLE)
 

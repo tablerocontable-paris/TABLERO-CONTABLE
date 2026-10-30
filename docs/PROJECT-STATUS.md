@@ -19,8 +19,10 @@ y ACL, rechazo a encargado lector, aceptación del responsable, bloqueo de
 responsabilidad conjunta histórica y replay tras revocar membresía.
 Suite completa local previa al renombre: **898/898 pruebas en 89 archivos**.
 Tras alinear la versión, las 17 regresiones enfocadas volvieron a pasar en
-ejecuciones aisladas. TypeScript, build del cliente y Worker pasaron en el
-corte 426aaf; GitHub CI debe validar los cambios de reconciliación actuales.
+ejecuciones aisladas. TypeScript y el guard local pasaron. GitHub Actions #199
+terminó `success` para `e65e0f13bfe0092eb3e614ed6f803dfb067b4901`, incluyendo
+suite completa, build y paquete Sites. El corte 426aaf también había pasado
+Actions #198 antes del ajuste de versión.
 El build conserva avisos de anotaciones Zod y bundle principal mayor a 500 kB.
 La hipótesis previa del auditor sobre replay sin autorización fue un falso
 positivo: el cuerpo local de SQL014 revalida identidad, membresía y ámbito
