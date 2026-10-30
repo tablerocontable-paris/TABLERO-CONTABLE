@@ -28,7 +28,11 @@ La hipótesis previa del auditor sobre replay sin autorización fue un falso
 positivo: el cuerpo local de SQL014 revalida identidad, membresía y ámbito
 antes de devolver el recibo. La prueba añadida confirma que la revocación
 rechaza el replay sin cambiar el movimiento, recibo, revisión ni auditoría.
-Esto no sustituye el cotejo de todas las RPC live/local ni la matriz JWT real.
+El 30/10 se cotejaron por SHA-256 las 39 RPC `SECURITY DEFINER` ejecutables
+por `authenticated`: 39/39 firmas presentes en ambos lados, sin diferencias
+en `pg_get_functiondef` tras normalizar CRLF/CR; el catálogo local se reconstruyó
+con las 19 migraciones aplicadas en PGlite. Esto no prueba autorización en
+runtime, JWT/PostgREST ni Exposed schemas. Sigue pendiente la matriz JWT real.
 
 ## Continuidad — 29/10/2026 21:24 ART
 

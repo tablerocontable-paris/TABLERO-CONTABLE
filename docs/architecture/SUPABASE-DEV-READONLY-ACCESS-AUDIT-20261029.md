@@ -35,9 +35,14 @@ recibo, revisión o auditoría. Se registra como hipótesis refutada, no como
 hallazgo confirmado.
 
 Este hallazgo nuevo demuestra por qué el inventario de ACL/search_path no
-certifica la semántica de los cuerpos. Las 39 funciones ejecutables por
-`authenticated` siguen pendientes de cotejo completo live/local y pruebas con
-JWT reales; por tanto, no hay certeza integral del 100%.
+certifica la semántica de los cuerpos. El 30/10 se cotejaron las 39 funciones
+`SECURITY DEFINER` ejecutables por `authenticated`: SHA-256 de la definición
+completa `pg_get_functiondef` en DEV contra el catálogo reconstruido al aplicar
+las 19 migraciones locales con PGlite, normalizando CRLF/CR a LF. Resultado:
+39 remotas, 39 locales, sin firmas faltantes/sobrantes ni hashes distintos.
+Esto acredita paridad de definiciones SQL, no comportamiento con JWT/PostgREST
+ni acceso efectivo según Exposed schemas. Por tanto, no hay certeza integral
+del 100%.
 
 ## Consulta ACL puntual — 29/10/2026 21:21 ART
 

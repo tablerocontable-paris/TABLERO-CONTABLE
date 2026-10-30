@@ -17,9 +17,14 @@ local. Consulta SQL read-only confirmó la definición con ambas guardas,
 interno no ejecutable por `authenticated`. El preflight anterior de Actions que
 falló no es evidencia de fallo de esta aplicación.
 
+El 30/10 se cotejaron por SHA-256 las 39 RPC `SECURITY DEFINER` accesibles a
+`authenticated`: 39/39 firmas, sin diferencias con el catálogo de las 19
+migraciones locales reconstruido en PGlite (normalización CRLF/CR). Esto
+acredita igualdad de definiciones, no ejecución con JWT ni acceso vía Data API.
+
 La certeza global sigue **por debajo del 100%**: faltan pruebas JWT reales por
-rol/ámbito, exposición de esquemas, cotejo completo de RPC live/local,
-aceptación autenticada de interfaz y homologación del catálogo tarea–unidad.
+rol/ámbito, verificación de Exposed schemas, aceptación autenticada de interfaz
+y homologación del catálogo tarea–unidad.
 
 ## Continuidad verificada — 29/10/2026 21:24 ART
 
